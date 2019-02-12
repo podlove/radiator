@@ -117,6 +117,11 @@ defmodule Radiator.Directory do
     Repo.all(Episode)
   end
 
+  def list_episodes(%Podcast{} = podcast) do
+    Repo.preload(podcast, :episodes)
+    |> Map.get(:episodes)
+  end
+
   @doc """
   Gets a single episode.
 
@@ -138,16 +143,17 @@ defmodule Radiator.Directory do
 
   ## Examples
 
-      iex> create_episode(%{field: value})
+      iex> create_episode(%Podcast{}, %{field: value})
       {:ok, %Episode{}}
 
-      iex> create_episode(%{field: bad_value})
+      iex> create_episode(%Podcast{}, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_episode(attrs \\ %{}) do
+  def create_episode(%Podcast{} = podcast, attrs \\ %{}) do
     %Episode{}
     |> Episode.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:podcast, podcast)
     |> Repo.insert()
   end
 
