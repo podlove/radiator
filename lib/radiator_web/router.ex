@@ -23,7 +23,8 @@ defmodule RadiatorWeb.Router do
   scope "/api", RadiatorWeb do
     pipe_through :api
 
-    resources "/podcasts", PodcastController, except: [:new, :edit]
-    resources "/episodes", EpisodeController, except: [:new, :edit]
+    resources "/podcasts", PodcastController, except: [:new, :edit] do
+      resources "/episodes", EpisodeController, except: [:new, :edit]
+    end
   end
 end

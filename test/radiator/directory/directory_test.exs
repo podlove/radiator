@@ -160,26 +160,31 @@ defmodule Radiator.DirectoryTest do
     }
 
     def episode_fixture(attrs \\ %{}) do
-      {:ok, episode} =
+      episode_attrs =
         attrs
         |> Enum.into(@valid_attrs)
-        |> Directory.create_episode()
 
-      episode
+      podcast = podcast_fixture()
+
+      {:ok, episode} = Directory.create_episode(podcast, episode_attrs)
+
+      Repo.preload(episode, :podcast)
     end
 
     test "list_episodes/0 returns all episodes" do
       episode = episode_fixture()
-      assert Directory.list_episodes() == [episode]
+      assert Directory.list_episodes() |> Repo.preload(:podcast) == [episode]
     end
 
     test "get_episode!/1 returns the episode with given id" do
       episode = episode_fixture()
-      assert Directory.get_episode!(episode.id) == episode
+      assert Directory.get_episode!(episode.id) |> Repo.preload(:podcast) == episode
     end
 
     test "create_episode/1 with valid data creates a episode" do
-      assert {:ok, %Episode{} = episode} = Directory.create_episode(@valid_attrs)
+      assert {:ok, %Episode{} = episode} =
+               Directory.create_episode(podcast_fixture(), @valid_attrs)
+
       assert episode.content == "some content"
       assert episode.description == "some description"
       assert episode.duration == "some duration"
@@ -195,7 +200,8 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "create_episode/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Directory.create_episode(@invalid_attrs)
+      podcast = podcast_fixture()
+      assert {:error, %Ecto.Changeset{}} = Directory.create_episode(podcast, @invalid_attrs)
     end
 
     test "update_episode/2 with valid data updates the episode" do
@@ -218,7 +224,7 @@ defmodule Radiator.DirectoryTest do
     test "update_episode/2 with invalid data returns error changeset" do
       episode = episode_fixture()
       assert {:error, %Ecto.Changeset{}} = Directory.update_episode(episode, @invalid_attrs)
-      assert episode == Directory.get_episode!(episode.id)
+      assert episode == Directory.get_episode!(episode.id) |> Repo.preload(:podcast)
     end
 
     test "delete_episode/1 deletes the episode" do

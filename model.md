@@ -44,7 +44,7 @@ Apple Podcasts Connect
 
 ## Phoenix Generator Commands
 
-```
+```bash
 mix phx.gen.json Directory Podcast podcasts \
   title:string \
   subtitle:string \
@@ -58,7 +58,7 @@ mix phx.gen.json Directory Podcast podcasts \
   last_built_at:utc_datetime
 ```
 
-```
+```bash
 mix phx.gen.json Directory Episode episodes \
   podcast_id:references:podcasts \
   title:string \
@@ -73,6 +73,20 @@ mix phx.gen.json Directory Episode episodes \
   guid:string \
   number:integer \
   published_at:utc_datetime
+```
+
+## API Usage Examples
+
+Create a Podcast
+
+```bash
+curl -sH "Content-Type: application/json" -X POST -d '{"podcast":{"title": "Ep001"}}' http://localhost:4000/api/podcasts
+```
+
+Create an Episode
+
+```bash
+curl -sH "Content-Type: application/json" -X POST -d '{"episode":{"title": "Ep001"}}' http://localhost:4000/api/podcasts/1/episodes
 ```
 
 ## Notes
