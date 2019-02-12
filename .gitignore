@@ -40,3 +40,9 @@ npm-debug.log
 # secrets files as long as you replace their contents by environment
 # variables.
 /config/*.secret.exs
+
+# local VS Code configs
+.vscode
+
+# local Elixir Language Server cache
+.elixir_ls
