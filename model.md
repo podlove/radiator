@@ -45,7 +45,7 @@ Apple Podcasts Connect
 ## Phoenix Generator Commands
 
 ```
-mix phx.gen.context Directory Podcast podcasts \
+mix phx.gen.json Directory Podcast podcasts \
   title:string \
   subtitle:string \
   description:string \
@@ -59,7 +59,8 @@ mix phx.gen.context Directory Podcast podcasts \
 ```
 
 ```
-mix phx.gen.context Directory Episode episodes \
+mix phx.gen.json Directory Episode episodes \
+  podcast_id:references:podcasts \
   title:string \
   subtitle:string \
   description:string \
@@ -72,20 +73,6 @@ mix phx.gen.context Directory Episode episodes \
   guid:string \
   number:integer \
   published_at:utc_datetime
-```
-
-```
-mix phx.gen.json Directory Podcast podcasts \
-  title:string \
-  subtitle:string \
-  description:string \
-  image:string \
-  author:string \
-  owner_name:string \
-  owner_email:string \
-  language:string \
-  published_at:utc_datetime \
-  last_built_at:utc_datetime --no-context --no-schema
 ```
 
 ## Notes

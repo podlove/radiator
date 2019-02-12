@@ -20,7 +20,10 @@ defmodule RadiatorWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", RadiatorWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", RadiatorWeb do
+    pipe_through :api
+
+    resources "/podcasts", PodcastController, except: [:new, :edit]
+    resources "/episodes", EpisodeController, except: [:new, :edit]
+  end
 end
