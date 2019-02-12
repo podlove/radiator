@@ -45,7 +45,7 @@ Apple Podcasts Connect
 ## Phoenix Generator Commands
 
 ```
-mix phx.gen.context Podcast Show shows \
+mix phx.gen.context Directory Podcast podcasts \
   title:string \
   subtitle:string \
   description:string \
@@ -59,7 +59,7 @@ mix phx.gen.context Podcast Show shows \
 ```
 
 ```
-mix phx.gen.context Podcast Episode episodes \
+mix phx.gen.context Directory Episode episodes \
   title:string \
   subtitle:string \
   description:string \
@@ -73,6 +73,24 @@ mix phx.gen.context Podcast Episode episodes \
   number:integer \
   published_at:utc_datetime
 ```
+
+```
+mix phx.gen.json Directory Podcast podcasts \
+  title:string \
+  subtitle:string \
+  description:string \
+  image:string \
+  author:string \
+  owner_name:string \
+  owner_email:string \
+  language:string \
+  published_at:utc_datetime \
+  last_built_at:utc_datetime --no-context --no-schema
+```
+
+## Notes
+
+- We set out to use "Show" as the generic term for podcasts. However, that is confusing in Phoenix as "show" is used by convention in controller/view contexts (referring to rendering a single entry of a list). Which is why I go back to "Podcast" for now.
 
 ## Reference
 
