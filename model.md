@@ -1,6 +1,6 @@
 ## Show / Podcast
 
-RSS
+### RSS
 
 - title (RSS requirement)
 - description (RSS requirement, up to 4000 characters according to Apple Podcasts Connect)
@@ -11,7 +11,7 @@ RSS
 - image
 - language ([ISO 639], e.g. `en-us`)
 
-Apple Podcasts Connect
+### Apple Podcasts Connect
 
 - itunes:image
 - itunes:subtitle
@@ -22,7 +22,7 @@ Apple Podcasts Connect
 
 ## Episode
 
-RSS
+### RSS
 
 - title (RSS requirement, one of title or description)
 - description (RSS requirement, one of title or description, up to 4000 characters according to Apple Podcasts Connect)
@@ -31,7 +31,7 @@ RSS
 - enclosure (required, contains URL, length, type, e.g. `<enclosure url="http://example.com/p/e001.mp3" length="5650889" type="audio/mpeg"/>`)
 - pubDate (generated, [RFC 822][rfc822])
 
-Apple Podcasts Connect
+### Apple Podcasts Connect
 
 - itunes:image
 - content:encoded
@@ -75,21 +75,83 @@ mix phx.gen.json Directory Episode episodes \
   published_at:utc_datetime
 ```
 
-## API Usage Examples
+## API Usage Examples
 
-Create a Podcast
+### Create a Podcast
 
 ```bash
 curl -sH "Content-Type: application/json" -X POST -d '{"podcast":{"title": "Ep001"}}' http://localhost:4000/api/podcasts
 ```
 
-Create an Episode
+### Create an Episode
 
 ```bash
 curl -sH "Content-Type: application/json" -X POST -d '{"episode":{"title": "Ep001"}}' http://localhost:4000/api/podcasts/1/episodes
 ```
 
-## Notes
+## How would a hal+json document look like
+
+### Podcast
+
+```json
+{
+  "_links": {
+    "self": { "href": "/podcasts/1" },
+  },
+  "id": 1,
+  ...
+  "title": "My Podcast"
+}
+```
+
+### Podcast List
+
+```json
+{
+  "_links": {
+    "self": { "href": "/podcasts" },
+    "next": { "href": "/podcasts?page=2" },
+    "curies": [{ "name": "rad", "href": "https://podlove.org/radiator/docs/rels/{rel}", "templated": true }]
+  },
+  "_embedded": {
+    "rad:podcasts": [
+      {
+        "_links": {
+          "self": { "href": "/podcasts/1" },
+        },
+        "id": 1,
+        ...
+        "title": "My Podcast"
+      }      
+    ]
+  }
+}
+```
+
+### Episode
+
+```json
+{
+  "_links": {
+    "self": { "href": "/podcasts/1/episodes/2" },
+    "curies": [{ "name": "rad", "href": "https://podlove.org/radiator/docs/rels/{rel}", "templated": true }]
+  },
+  "_embedded": {
+    "rad:podcast": {
+      "_links": {
+        "self": { "href": "/podcasts/1" },
+      },
+      ...
+      "title": "My Podcast"
+    }
+  },
+  "id": 2,
+  ...
+  "title": "Episode 001"
+}
+```
+
+## Notes
 
 - We set out to use "Show" as the generic term for podcasts. However, that is confusing in Phoenix as "show" is used by convention in controller/view contexts (referring to rendering a single entry of a list). Which is why I go back to "Podcast" for now.
 
