@@ -164,5 +164,5 @@ curl -sH "Content-Type: application/json" -X POST -d '{"episode":{"title": "Ep00
 [rfc822]: http://asg.web.cmu.edu/rfc/rfc822.html
 [apple podcasts]: https://help.apple.com/itc/podcasts_connect/#/itcb54353390
 [rss2]: https://cyber.harvard.edu/rss/rss.html
-[rfc5005]: ]https://tools.ietf.org/html/rfc5005#section-3
+[rfc5005]: https://tools.ietf.org/html/rfc5005#section-3
 [ISO 639]: http://www.loc.gov/standards/iso639-2/php/code_list.php
