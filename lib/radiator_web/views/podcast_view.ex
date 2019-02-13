@@ -1,10 +1,18 @@
 defmodule RadiatorWeb.PodcastView do
   use RadiatorWeb, :view
   alias RadiatorWeb.PodcastView
-  alias HAL.{Document, Link}
+  alias HAL.{Document, Link, Embed}
 
   def render("index.json", assigns = %{podcasts: podcasts}) do
-    render_many(podcasts, PodcastView, "podcast.json", assigns)
+    %Document{}
+    |> Document.add_link(%Link{
+      rel: "self",
+      href: Routes.podcast_path(assigns.conn, :index)
+    })
+    |> Document.add_embed(%Embed{
+      resource: "rad:podcast",
+      embed: render_many(podcasts, PodcastView, "podcast.json", assigns)
+    })
   end
 
   def render("show.json", assigns) do

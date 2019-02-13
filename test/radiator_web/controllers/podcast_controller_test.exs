@@ -51,9 +51,22 @@ defmodule RadiatorWeb.PodcastControllerTest do
   end
 
   describe "index" do
+    test "lists all podcasts (empty)", %{conn: conn} do
+      index_path = Routes.podcast_path(conn, :index)
+      conn = get(conn, index_path)
+      assert %{"_links" => %{"self" => %{"href" => index_path}}} = json_response(conn, 200)
+    end
+
     test "lists all podcasts", %{conn: conn} do
-      conn = get(conn, Routes.podcast_path(conn, :index))
-      assert json_response(conn, 200) == []
+      podcast = fixture(:podcast)
+      podcast_id = podcast.id
+      index_path = Routes.podcast_path(conn, :index)
+      conn = get(conn, index_path)
+
+      assert %{
+               "_links" => %{"self" => %{"href" => index_path}},
+               "_embedded" => %{"rad:podcast" => [%{"id" => ^podcast_id}]}
+             } = json_response(conn, 200)
     end
   end
 
