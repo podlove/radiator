@@ -27,6 +27,10 @@ defmodule RadiatorWeb.EpisodeView do
       rel: "self",
       href: Routes.podcast_episode_path(conn, :show, episode.podcast_id, episode)
     })
+    |> Document.add_link(%Link{
+      rel: "rad:podcast",
+      href: Routes.podcast_path(assigns.conn, :show, episode.podcast_id)
+    })
     |> Document.add_properties(%{
       id: episode.id,
       title: episode.title,

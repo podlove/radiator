@@ -128,6 +128,19 @@ defmodule RadiatorWeb.EpisodeControllerTest do
 
       assert json_response(conn, 422)["errors"] != %{}
     end
+
+    test "links to podcast", %{conn: conn} do
+      podcast = fixture(:podcast)
+
+      conn =
+        post(conn, Routes.podcast_episode_path(conn, :create, podcast.id), episode: @create_attrs)
+
+      podcast_path = Routes.podcast_path(conn, :show, podcast.id)
+
+      assert %{
+               "_links" => %{"rad:podcast" => %{"href" => ^podcast_path}}
+             } = json_response(conn, 201)
+    end
   end
 
   describe "update episode" do
