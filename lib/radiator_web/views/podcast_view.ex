@@ -4,11 +4,11 @@ defmodule RadiatorWeb.PodcastView do
   alias HAL.{Document, Link}
 
   def render("index.json", assigns = %{podcasts: podcasts}) do
-    %{data: render_many(podcasts, PodcastView, "podcast.json", assigns)}
+    render_many(podcasts, PodcastView, "podcast.json", assigns)
   end
 
   def render("show.json", assigns) do
-    %{data: render(PodcastView, "podcast.json", assigns)}
+    render(PodcastView, "podcast.json", assigns)
   end
 
   def render("podcast.json", assigns = %{podcast: podcast}) do

@@ -28,7 +28,18 @@ defmodule RadiatorWeb.PodcastControllerTest do
     subtitle: "some updated subtitle",
     title: "some updated title"
   }
-  @invalid_attrs %{author: nil, description: nil, image: nil, language: nil, last_built_at: nil, owner_email: nil, owner_name: nil, published_at: nil, subtitle: nil, title: nil}
+  @invalid_attrs %{
+    author: nil,
+    description: nil,
+    image: nil,
+    language: nil,
+    last_built_at: nil,
+    owner_email: nil,
+    owner_name: nil,
+    published_at: nil,
+    subtitle: nil,
+    title: nil
+  }
 
   def fixture(:podcast) do
     {:ok, podcast} = Directory.create_podcast(@create_attrs)
@@ -42,19 +53,19 @@ defmodule RadiatorWeb.PodcastControllerTest do
   describe "index" do
     test "lists all podcasts", %{conn: conn} do
       conn = get(conn, Routes.podcast_path(conn, :index))
-      assert json_response(conn, 200)["data"] == []
+      assert json_response(conn, 200) == []
     end
   end
 
   describe "create podcast" do
     test "renders podcast when data is valid", %{conn: conn} do
       conn = post(conn, Routes.podcast_path(conn, :create), podcast: @create_attrs)
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+      assert %{"id" => id} = json_response(conn, 201)
 
       conn = get(conn, Routes.podcast_path(conn, :show, id))
 
       assert %{
-               "id" => id,
+               "id" => ^id,
                "author" => "some author",
                "description" => "some description",
                "image" => "some image",
@@ -65,7 +76,7 @@ defmodule RadiatorWeb.PodcastControllerTest do
                "published_at" => "2010-04-17T14:00:00Z",
                "subtitle" => "some subtitle",
                "title" => "some title"
-             } = json_response(conn, 200)["data"]
+             } = json_response(conn, 200)
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -79,7 +90,7 @@ defmodule RadiatorWeb.PodcastControllerTest do
 
     test "renders podcast when data is valid", %{conn: conn, podcast: %Podcast{id: id} = podcast} do
       conn = put(conn, Routes.podcast_path(conn, :update, podcast), podcast: @update_attrs)
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+      assert %{"id" => ^id} = json_response(conn, 200)
 
       conn = get(conn, Routes.podcast_path(conn, :show, id))
 
@@ -95,7 +106,7 @@ defmodule RadiatorWeb.PodcastControllerTest do
                "published_at" => "2011-05-18T15:01:01Z",
                "subtitle" => "some updated subtitle",
                "title" => "some updated title"
-             } = json_response(conn, 200)["data"]
+             } = json_response(conn, 200)
     end
 
     test "renders errors when data is invalid", %{conn: conn, podcast: podcast} do
