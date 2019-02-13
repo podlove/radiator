@@ -65,7 +65,7 @@ defmodule RadiatorWeb.EpisodeControllerTest do
     test "lists all episodes", %{conn: conn} do
       podcast = fixture(:podcast)
       conn = get(conn, Routes.podcast_episode_path(conn, :index, podcast.id))
-      assert json_response(conn, 200)["data"] == []
+      assert json_response(conn, 200) == []
     end
   end
 
@@ -76,12 +76,16 @@ defmodule RadiatorWeb.EpisodeControllerTest do
       conn =
         post(conn, Routes.podcast_episode_path(conn, :create, podcast.id), episode: @create_attrs)
 
-      assert %{"id" => id} = json_response(conn, 201)["data"]
+      assert %{"id" => id} = json_response(conn, 201)
 
       podcast = fixture(:podcast)
-      conn = get(conn, Routes.podcast_episode_path(conn, :show, podcast.id, id))
+      episode_url = Routes.podcast_episode_path(conn, :show, podcast.id, id)
+      conn = get(conn, episode_url)
 
       assert %{
+               "_links" => %{
+                 "self" => %{"href" => episode_url}
+               },
                "id" => id,
                "content" => "some content",
                "description" => "some description",
@@ -95,7 +99,7 @@ defmodule RadiatorWeb.EpisodeControllerTest do
                "published_at" => "2010-04-17T14:00:00Z",
                "subtitle" => "some subtitle",
                "title" => "some title"
-             } = json_response(conn, 200)["data"]
+             } = json_response(conn, 200)
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -117,7 +121,7 @@ defmodule RadiatorWeb.EpisodeControllerTest do
           episode: @update_attrs
         )
 
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+      assert %{"id" => ^id} = json_response(conn, 200)
 
       podcast = fixture(:podcast)
       conn = get(conn, Routes.podcast_episode_path(conn, :show, podcast.id, id))
@@ -136,7 +140,7 @@ defmodule RadiatorWeb.EpisodeControllerTest do
                "published_at" => "2011-05-18T15:01:01Z",
                "subtitle" => "some updated subtitle",
                "title" => "some updated title"
-             } = json_response(conn, 200)["data"]
+             } = json_response(conn, 200)
     end
 
     test "renders errors when data is invalid", %{conn: conn, episode: episode} do

@@ -6,9 +6,11 @@ defmodule RadiatorWeb.EpisodeController do
 
   action_fallback RadiatorWeb.FallbackController
 
-  def index(conn, _params) do
-    episodes = Directory.list_episodes()
-    render(conn, "index.json", episodes: episodes)
+  def index(conn, %{"podcast_id" => podcast_id}) do
+    with %Podcast{} = podcast <- Directory.get_podcast!(podcast_id),
+         episodes <- Directory.list_episodes(podcast) do
+      render(conn, "index.json", episodes: episodes)
+    end
   end
 
   def create(conn, %{"podcast_id" => podcast_id, "episode" => episode_params}) do
