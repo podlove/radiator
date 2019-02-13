@@ -96,6 +96,17 @@ defmodule RadiatorWeb.PodcastControllerTest do
       conn = post(conn, Routes.podcast_path(conn, :create), podcast: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
+
+    test "links to episodes", %{conn: conn} do
+      conn = post(conn, Routes.podcast_path(conn, :create), podcast: @create_attrs)
+      assert %{"id" => id} = json_response(conn, 201)
+
+      index_path = Routes.podcast_episode_path(conn, :index, id)
+
+      assert %{
+               "_links" => %{"rad:episodes" => %{"href" => ^index_path}}
+             } = json_response(conn, 201)
+    end
   end
 
   describe "update podcast" do
