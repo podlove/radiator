@@ -78,15 +78,20 @@ defmodule RadiatorWeb.EpisodeControllerTest do
 
       assert %{"id" => id} = json_response(conn, 201)
 
-      podcast = fixture(:podcast)
-      episode_url = Routes.podcast_episode_path(conn, :show, podcast.id, id)
+      podcast_id = podcast.id
+      episode_url = Routes.podcast_episode_path(conn, :show, podcast_id, id)
       conn = get(conn, episode_url)
 
       assert %{
                "_links" => %{
-                 "self" => %{"href" => episode_url}
+                 "self" => %{"href" => ^episode_url}
                },
-               "id" => id,
+               "_embedded" => %{
+                 "rad:podcast" => %{
+                   "id" => ^podcast_id
+                 }
+               },
+               "id" => ^id,
                "content" => "some content",
                "description" => "some description",
                "duration" => "some duration",
@@ -123,11 +128,10 @@ defmodule RadiatorWeb.EpisodeControllerTest do
 
       assert %{"id" => ^id} = json_response(conn, 200)
 
-      podcast = fixture(:podcast)
-      conn = get(conn, Routes.podcast_episode_path(conn, :show, podcast.id, id))
+      conn = get(conn, Routes.podcast_episode_path(conn, :show, episode.podcast.id, id))
 
       assert %{
-               "id" => id,
+               "id" => ^id,
                "content" => "some updated content",
                "description" => "some updated description",
                "duration" => "some updated duration",

@@ -136,7 +136,7 @@ defmodule Radiator.Directory do
       ** (Ecto.NoResultsError)
 
   """
-  def get_episode!(id), do: Repo.get!(Episode, id)
+  def get_episode!(id), do: Repo.get!(Episode, id) |> Repo.preload(:podcast)
 
   @doc """
   Creates a episode.
