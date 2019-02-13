@@ -1,5 +1,7 @@
 # Radiator Spark
 
+[![Build Status](https://travis-ci.org/podlove/radiator-spark.svg?branch=master)](https://travis-ci.org/podlove/radiator-spark)
+
 Quick project to get started and give the planned architecture a test drive.
 
 ## Show / Podcast
