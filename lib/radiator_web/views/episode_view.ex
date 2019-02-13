@@ -3,9 +3,18 @@ defmodule RadiatorWeb.EpisodeView do
   alias RadiatorWeb.{EpisodeView, PodcastView}
 
   alias HAL.{Document, Link, Embed}
+  alias Radiator.Directory.Podcast
 
-  def render("index.json", assigns = %{episodes: episodes}) do
-    render_many(episodes, EpisodeView, "episode.json", assigns)
+  def render("index.json", assigns = %{podcast: podcast, episodes: episodes}) do
+    %Document{}
+    |> Document.add_link(%Link{
+      rel: "self",
+      href: Routes.podcast_episode_path(assigns.conn, :index, podcast.id)
+    })
+    |> Document.add_embed(%Embed{
+      resource: "rad:episode",
+      embed: render_many(episodes, EpisodeView, "episode.json", assigns)
+    })
   end
 
   def render("show.json", assigns) do
@@ -17,10 +26,6 @@ defmodule RadiatorWeb.EpisodeView do
     |> Document.add_link(%Link{
       rel: "self",
       href: Routes.podcast_episode_path(conn, :show, episode.podcast_id, episode)
-    })
-    |> Document.add_embed(%Embed{
-      resource: "rad:podcast",
-      embed: render_one(episode.podcast, PodcastView, "podcast.json", assigns)
     })
     |> Document.add_properties(%{
       id: episode.id,
@@ -37,5 +42,15 @@ defmodule RadiatorWeb.EpisodeView do
       number: episode.number,
       published_at: episode.published_at
     })
+    |> maybe_embed_podcast(episode.podcast, assigns)
   end
+
+  defp maybe_embed_podcast(document, %Podcast{} = podcast, assigns) do
+    Document.add_embed(document, %Embed{
+      resource: "rad:podcast",
+      embed: render_one(podcast, PodcastView, "podcast.json", assigns)
+    })
+  end
+
+  defp maybe_embed_podcast(document, _, _), do: document
 end

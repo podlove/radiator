@@ -9,7 +9,7 @@ defmodule RadiatorWeb.EpisodeController do
   def index(conn, %{"podcast_id" => podcast_id}) do
     with %Podcast{} = podcast <- Directory.get_podcast!(podcast_id),
          episodes <- Directory.list_episodes(podcast) do
-      render(conn, "index.json", episodes: episodes)
+      render(conn, "index.json", podcast: podcast, episodes: episodes)
     end
   end
 
