@@ -24,7 +24,9 @@ defmodule RadiatorWeb.Router do
     pipe_through :api
 
     resources "/podcasts", PodcastController, except: [:new, :edit] do
-      resources "/episodes", EpisodeController, except: [:new, :edit]
+      resources "/episodes", EpisodeController, except: [:new, :edit] do
+        post "/upload/:filename", UploadController, :create
+      end
     end
   end
 end

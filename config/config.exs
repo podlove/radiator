@@ -17,6 +17,11 @@ config :radiator, RadiatorWeb.Endpoint,
   render_errors: [view: RadiatorWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Radiator.PubSub, adapter: Phoenix.PubSub.PG2]
 
+config :radiator,
+  storage_bucket: "radiator",
+  # ~/code/minio-presign-server
+  storage_presign_endpoint: "http://localhost:8080/presignedUrl"
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
