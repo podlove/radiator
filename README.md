@@ -157,6 +157,54 @@ curl -sH "Content-Type: application/json" -X POST -d '{"episode":{"title": "Ep00
 }
 ```
 
+## Storage
+
+- [Minio](https://minio.io/), S3 compatible object storage
+- compatible with [ExAws](https://hexdocs.pm/ex_aws/ExAws.html), an Elixir client for AWS services
+
+### Implemented
+
+- run Minio server via homebrew:
+
+```bash
+brew install minio/stable/minio
+minio server /data
+```
+
+- API Endpoint: URL Presigning + Upload
+- Access/Download file through Phoenix endpoint
+
+### Upload Example (fish shell script)
+
+```bash
+set podcast_id 3
+set episode_id 5
+set filepath "/local/path/to/episode001.mp3"
+
+set filename (string split -n -r -m1 / $filepath | tail -n 1)
+
+# PUT $storage_url uploads file
+# GET $storage_url downloads file
+set storage_url "http://localhost:4000/api/podcasts/$podcast_id/episodes/$episode_id/upload/$filename"
+
+# get presigned url
+set presigned_url (curl -s -X POST $storage_url | jq -r .upload_url)
+
+set curl_date (date -R)
+
+echo "=== upload file ==="
+echo ""
+curl -i -X PUT -T "$filepath" \
+    -H "Date: $curl_date" \
+    -H "Content-Type: application/octet-stream" \
+    $presigned_url
+
+echo "=== test access the file ==="
+echo ""
+curl -I $storage_url
+```
+
+
 ## Notes
 
 - We set out to use "Show" as the generic term for podcasts. However, that is confusing in Phoenix as "show" is used by convention in controller/view contexts (referring to rendering a single entry of a list). Which is why I go back to "Podcast" for now.
