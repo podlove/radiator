@@ -4,7 +4,7 @@ set filepath "/Users/ericteubert/Downloads/amazon-icon.svg"
 
 set filename (string split -n -r -m1 / $filepath | tail -n 1)
 
-# PUT $storage_url uploads file
+# POST $storage_url generates presigned upload URL
 # GET $storage_url downloads file
 set storage_url "http://localhost:4000/api/podcasts/$podcast_id/episodes/$episode_id/upload/$filename"
 
