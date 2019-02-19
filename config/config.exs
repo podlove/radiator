@@ -20,7 +20,21 @@ config :radiator, RadiatorWeb.Endpoint,
 config :radiator,
   storage_bucket: "radiator",
   # ~/code/minio-presign-server
+  # see https://github.com/akappen/s3_direct_upload, I think they implemented presigning in elixir
   storage_presign_endpoint: "http://localhost:8080/presignedUrl"
+
+config :ex_aws,
+  access_key_id: "IEKAZMUY3KX32CRJPE9R",
+  secret_access_key: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN"
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "localhost",
+  port: 9000
+
+config :ex_aws, :hackney_opts,
+  follow_redirect: true,
+  recv_timeout: 30_000
 
 # Configures Elixir's Logger
 config :logger, :console,

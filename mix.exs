@@ -44,7 +44,13 @@ defmodule Radiator.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:hal, "~> 1.1"},
-      {:httpoison, "~> 1.5"}
+      {:httpoison, "~> 1.5"},
+      {:ex_aws, "~> 2.1"},
+      {:ex_aws_s3, "~> 2.0"},
+      # for ex_aws
+      {:hackney, "~> 1.15"},
+      # for ex_aws
+      {:sweet_xml, "~> 0.6.5"}
     ]
   end
 
