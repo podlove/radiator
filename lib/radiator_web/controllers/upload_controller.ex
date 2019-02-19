@@ -5,16 +5,17 @@ defmodule RadiatorWeb.UploadController do
 
   def create(conn, %{"filename" => filename, "episode_id" => _episode_id}) do
     bucket = Application.get_env(:radiator, :storage_bucket)
-    presign_endpoint = Application.get_env(:radiator, :storage_presign_endpoint)
 
-    # fixme: don't override existing uploads with same name
-    # - prefix with episode id
-    # - or prefix with a short uuid
-    upload_url =
-      presign_endpoint
-      |> set_url_params(%{"name" => filename, "bucket" => bucket})
-      |> HTTPoison.get!()
-      |> Map.get(:body)
+    {:ok, upload_url} =
+      ExAws.S3.presigned_url(
+        ExAws.Config.new(:s3, Application.get_env(:ex_aws, :s3)),
+        :put,
+        bucket,
+        filename
+      )
+
+    # i could already put the file name into the episode enclosure field here;
+    # although it would be a bit premature in case upload fails
 
     json(conn, %{"upload_url" => upload_url})
   end
