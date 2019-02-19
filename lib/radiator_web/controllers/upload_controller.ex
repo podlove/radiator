@@ -34,11 +34,4 @@ defmodule RadiatorWeb.UploadController do
     |> put_resp_content_type(content_type)
     |> send_resp(200, body)
   end
-
-  defp set_url_params(url, params) when is_binary(url) and is_map(params) do
-    url
-    |> URI.parse()
-    |> Map.put(:query, URI.encode_query(params))
-    |> URI.to_string()
-  end
 end
