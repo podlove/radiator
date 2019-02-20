@@ -89,3 +89,7 @@
     }
   }
 }
+
+.help-block {
+  @apply block text-red-dark mx-4 mt-2;
+}

@@ -21,6 +21,12 @@ defmodule RadiatorWeb.Router do
     get "/podcasts/create", PageController, :sketch_podcasts_create
   end
 
+  scope "/admin", RadiatorWeb.Admin, as: :admin do
+    pipe_through :browser
+
+    resources "/podcasts", PodcastController
+  end
+
   # Other scopes may use custom stacks.
   scope "/api/v1", RadiatorWeb.Api, as: :api do
     pipe_through :api

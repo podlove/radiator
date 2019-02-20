@@ -1,0 +1,33 @@
+defmodule RadiatorWeb.Admin.PodcastController do
+  use RadiatorWeb, :controller
+
+  alias Radiator.Directory
+  alias Radiator.Directory.Podcast
+
+  def index(conn, _params) do
+    podcasts = Directory.list_podcasts()
+    render(conn, "index.html", podcasts: podcasts)
+  end
+
+  def new(conn, _params) do
+    changeset = Directory.change_podcast(%Podcast{})
+    render(conn, "new.html", changeset: changeset)
+  end
+
+  def create(conn, %{"podcast" => podcast_params}) do
+    case Directory.create_podcast(podcast_params) do
+      {:ok, podcast} ->
+        conn
+        |> put_flash(:info, "podcast created successfully.")
+        |> redirect(to: Routes.admin_podcast_path(conn, :show, podcast))
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        render(conn, "new.html", changeset: changeset)
+    end
+  end
+
+  def show(conn, %{"id" => id}) do
+    podcast = Directory.get_podcast!(id)
+    render(conn, "show.html", podcast: podcast)
+  end
+end

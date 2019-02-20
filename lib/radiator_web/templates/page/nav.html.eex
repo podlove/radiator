@@ -8,10 +8,10 @@
     </span>
     <ul class="flex flex-row items-center h-full list-reset text-lg font-thin">
       <li class="nav-link active">
-        <a href="">Podcast</a>
+        <%= link "Network", to: Routes.admin_podcast_path(@conn, :index) %>
       </li>
       <li class="nav-link">
-        <a href="">Episodes</a>
+        <a href="">Podcast</a>
       </li>
     </ul>
   </div>
