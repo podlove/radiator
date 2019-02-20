@@ -8,7 +8,7 @@ use Mix.Config
 # with webpack to recompile .js and .css sources.
 config :radiator, RadiatorWeb.Endpoint,
   http: [port: 4000],
-  debug_errors: false,
+  debug_errors: true,
   code_reloader: true,
   check_origin: false,
   watchers: [

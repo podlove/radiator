@@ -1,3 +1,91 @@
 /* This file is for your main application css. */
 
-@import "./phoenix.css";
+@tailwind preflight;
+@tailwind components;
+
+/**
+ * Here you would add any of your custom component classes; stuff that you'd
+ * want loaded *before* the utilities so that the utilities could still
+ * override them.
+ *
+ * Example:
+ *
+ * .btn { ... }
+ * .form-input { ... }
+ *
+ * Or if using a preprocessor or `postcss-import`:
+ *
+ * @import "components/buttons";
+ * @import "components/forms";
+ */
+
+/**
+ * This injects all of Tailwind's utility classes, generated based on your
+ * config file.
+ *
+ * If using `postcss-import`, use this import instead:
+ *
+ * @import "tailwindcss/utilities";
+ */
+@tailwind utilities;
+
+/**
+ * Here you would add any custom utilities you need that don't come out of the
+ * box with Tailwind.
+ *
+ * Example :
+ *
+ * .bg-pattern-graph-paper { ... }
+ * .skew-45 { ... }
+ *
+ * Or if using a preprocessor or `postcss-import`:
+ *
+ * @import "utilities/background-patterns";
+ * @import "utilities/skew-transforms";
+ */
+
+.primary {
+  fill: #bcdefa;
+}
+
+.secondary {
+  fill: #0D2B3E;
+}
+
+.input {
+  @apply bg-grey-lighter appearance-none border-2 border-grey-lighter rounded w-full py-2 px-4 text-grey-darker leading-tight;
+
+  &:focus {
+    @apply outline-none bg-white border-blue;
+  }
+}
+
+.btn {
+  @apply font-bold py-2 px-4 rounded;
+}
+
+.btn-blue {
+  @apply bg-blue text-white;
+}
+
+.btn-blue:hover {
+  @apply bg-blue-dark;
+}
+
+
+.nav-link {
+  @apply ml-5 h-full flex items-center;
+
+  a {
+    @apply text-grey-lighter no-underline;
+  }
+
+  &.active {
+    @apply border-b-4 border-grey-lighter;
+
+    a {
+      position: relative;
+      top: 2px;
+    }
+  }
+}

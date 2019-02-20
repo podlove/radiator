@@ -1,0 +1,18 @@
+<div class="flex">
+  <div class="w-full bg-blue h-1"></div>
+</div>
+<div class="flex mb-10 text-white">
+  <div class="w-full bg-grey-darkest h-16 flex items-center px-5">
+    <span class="text-2xl font-thin">
+      Radiator Spark 🔥
+    </span>
+    <ul class="flex flex-row items-center h-full list-reset text-lg font-thin">
+      <li class="nav-link active">
+        <a href="">Podcast</a>
+      </li>
+      <li class="nav-link">
+        <a href="">Episodes</a>
+      </li>
+    </ul>
+  </div>
+</div>
