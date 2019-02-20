@@ -1,10 +1,10 @@
-defmodule RadiatorWeb.EpisodeController do
+defmodule RadiatorWeb.Api.EpisodeController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
   alias Radiator.Directory.{Episode, Podcast}
 
-  action_fallback RadiatorWeb.FallbackController
+  action_fallback RadiatorWeb.Api.FallbackController
 
   def index(conn, %{"podcast_id" => podcast_id}) do
     with %Podcast{} = podcast <- Directory.get_podcast!(podcast_id),
@@ -20,7 +20,7 @@ defmodule RadiatorWeb.EpisodeController do
       |> put_status(:created)
       |> put_resp_header(
         "location",
-        Routes.podcast_episode_path(conn, :show, podcast_id, episode)
+        Routes.api_podcast_episode_path(conn, :show, podcast_id, episode)
       )
       |> render("show.json", episode: episode)
     end

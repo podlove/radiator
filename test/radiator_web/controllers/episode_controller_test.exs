@@ -64,7 +64,7 @@ defmodule RadiatorWeb.EpisodeControllerTest do
   describe "index" do
     test "lists all episodes (empty)", %{conn: conn} do
       podcast = fixture(:podcast)
-      index_path = Routes.podcast_episode_path(conn, :index, podcast.id)
+      index_path = Routes.api_podcast_episode_path(conn, :index, podcast.id)
       conn = get(conn, index_path)
       assert %{"_links" => %{"self" => %{"href" => index_path}}} = json_response(conn, 200)
     end
@@ -72,7 +72,7 @@ defmodule RadiatorWeb.EpisodeControllerTest do
     test "lists all episodes", %{conn: conn} do
       episode = fixture(:episode)
       episode_id = episode.id
-      index_path = Routes.podcast_episode_path(conn, :index, episode.podcast_id)
+      index_path = Routes.api_podcast_episode_path(conn, :index, episode.podcast_id)
       conn = get(conn, index_path)
 
       assert %{
@@ -87,12 +87,14 @@ defmodule RadiatorWeb.EpisodeControllerTest do
       podcast = fixture(:podcast)
 
       conn =
-        post(conn, Routes.podcast_episode_path(conn, :create, podcast.id), episode: @create_attrs)
+        post(conn, Routes.api_podcast_episode_path(conn, :create, podcast.id),
+          episode: @create_attrs
+        )
 
       assert %{"id" => id} = json_response(conn, 201)
 
       podcast_id = podcast.id
-      episode_url = Routes.podcast_episode_path(conn, :show, podcast_id, id)
+      episode_url = Routes.api_podcast_episode_path(conn, :show, podcast_id, id)
       conn = get(conn, episode_url)
 
       assert %{
@@ -124,7 +126,9 @@ defmodule RadiatorWeb.EpisodeControllerTest do
       podcast = fixture(:podcast)
 
       conn =
-        post(conn, Routes.podcast_episode_path(conn, :create, podcast.id), episode: @invalid_attrs)
+        post(conn, Routes.api_podcast_episode_path(conn, :create, podcast.id),
+          episode: @invalid_attrs
+        )
 
       assert json_response(conn, 422)["errors"] != %{}
     end
@@ -133,9 +137,11 @@ defmodule RadiatorWeb.EpisodeControllerTest do
       podcast = fixture(:podcast)
 
       conn =
-        post(conn, Routes.podcast_episode_path(conn, :create, podcast.id), episode: @create_attrs)
+        post(conn, Routes.api_podcast_episode_path(conn, :create, podcast.id),
+          episode: @create_attrs
+        )
 
-      podcast_path = Routes.podcast_path(conn, :show, podcast.id)
+      podcast_path = Routes.api_podcast_path(conn, :show, podcast.id)
 
       assert %{
                "_links" => %{"rad:podcast" => %{"href" => ^podcast_path}}
@@ -148,13 +154,13 @@ defmodule RadiatorWeb.EpisodeControllerTest do
 
     test "renders episode when data is valid", %{conn: conn, episode: %Episode{id: id} = episode} do
       conn =
-        put(conn, Routes.podcast_episode_path(conn, :update, episode.podcast.id, episode),
+        put(conn, Routes.api_podcast_episode_path(conn, :update, episode.podcast.id, episode),
           episode: @update_attrs
         )
 
       assert %{"id" => ^id} = json_response(conn, 200)
 
-      conn = get(conn, Routes.podcast_episode_path(conn, :show, episode.podcast.id, id))
+      conn = get(conn, Routes.api_podcast_episode_path(conn, :show, episode.podcast.id, id))
 
       assert %{
                "id" => ^id,
@@ -177,7 +183,7 @@ defmodule RadiatorWeb.EpisodeControllerTest do
       podcast = fixture(:podcast)
 
       conn =
-        put(conn, Routes.podcast_episode_path(conn, :update, podcast.id, episode),
+        put(conn, Routes.api_podcast_episode_path(conn, :update, podcast.id, episode),
           episode: @invalid_attrs
         )
 
@@ -189,12 +195,14 @@ defmodule RadiatorWeb.EpisodeControllerTest do
     setup [:create_episode]
 
     test "deletes chosen episode", %{conn: conn, episode: episode} do
-      conn = delete(conn, Routes.podcast_episode_path(conn, :delete, episode.podcast.id, episode))
+      conn =
+        delete(conn, Routes.api_podcast_episode_path(conn, :delete, episode.podcast.id, episode))
+
       assert response(conn, 204)
 
       assert_error_sent 404, fn ->
         podcast = fixture(:podcast)
-        get(conn, Routes.podcast_episode_path(conn, :show, podcast.id, episode))
+        get(conn, Routes.api_podcast_episode_path(conn, :show, podcast.id, episode))
       end
     end
   end

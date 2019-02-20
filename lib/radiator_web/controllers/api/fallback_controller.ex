@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.FallbackController do
+defmodule RadiatorWeb.Api.FallbackController do
   @moduledoc """
   Translates controller action results into valid `Plug.Conn` responses.
 

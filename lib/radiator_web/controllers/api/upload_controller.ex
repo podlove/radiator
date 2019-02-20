@@ -1,7 +1,7 @@
-defmodule RadiatorWeb.UploadController do
+defmodule RadiatorWeb.Api.UploadController do
   use RadiatorWeb, :controller
 
-  action_fallback RadiatorWeb.FallbackController
+  action_fallback RadiatorWeb.Api.FallbackController
 
   def create(conn, %{"filename" => filename, "episode_id" => _episode_id}) do
     bucket = Application.get_env(:radiator, :storage_bucket)

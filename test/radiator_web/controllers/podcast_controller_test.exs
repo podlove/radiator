@@ -52,7 +52,7 @@ defmodule RadiatorWeb.PodcastControllerTest do
 
   describe "index" do
     test "lists all podcasts (empty)", %{conn: conn} do
-      index_path = Routes.podcast_path(conn, :index)
+      index_path = Routes.api_podcast_path(conn, :index)
       conn = get(conn, index_path)
       assert %{"_links" => %{"self" => %{"href" => index_path}}} = json_response(conn, 200)
     end
@@ -60,7 +60,7 @@ defmodule RadiatorWeb.PodcastControllerTest do
     test "lists all podcasts", %{conn: conn} do
       podcast = fixture(:podcast)
       podcast_id = podcast.id
-      index_path = Routes.podcast_path(conn, :index)
+      index_path = Routes.api_podcast_path(conn, :index)
       conn = get(conn, index_path)
 
       assert %{
@@ -72,10 +72,10 @@ defmodule RadiatorWeb.PodcastControllerTest do
 
   describe "create podcast" do
     test "renders podcast when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.podcast_path(conn, :create), podcast: @create_attrs)
+      conn = post(conn, Routes.api_podcast_path(conn, :create), podcast: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)
 
-      conn = get(conn, Routes.podcast_path(conn, :show, id))
+      conn = get(conn, Routes.api_podcast_path(conn, :show, id))
 
       assert %{
                "id" => ^id,
@@ -93,15 +93,15 @@ defmodule RadiatorWeb.PodcastControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.podcast_path(conn, :create), podcast: @invalid_attrs)
+      conn = post(conn, Routes.api_podcast_path(conn, :create), podcast: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
 
     test "links to episodes", %{conn: conn} do
-      conn = post(conn, Routes.podcast_path(conn, :create), podcast: @create_attrs)
+      conn = post(conn, Routes.api_podcast_path(conn, :create), podcast: @create_attrs)
       assert %{"id" => id} = json_response(conn, 201)
 
-      index_path = Routes.podcast_episode_path(conn, :index, id)
+      index_path = Routes.api_podcast_episode_path(conn, :index, id)
 
       assert %{
                "_links" => %{"rad:episodes" => %{"href" => ^index_path}}
@@ -113,10 +113,10 @@ defmodule RadiatorWeb.PodcastControllerTest do
     setup [:create_podcast]
 
     test "renders podcast when data is valid", %{conn: conn, podcast: %Podcast{id: id} = podcast} do
-      conn = put(conn, Routes.podcast_path(conn, :update, podcast), podcast: @update_attrs)
+      conn = put(conn, Routes.api_podcast_path(conn, :update, podcast), podcast: @update_attrs)
       assert %{"id" => ^id} = json_response(conn, 200)
 
-      conn = get(conn, Routes.podcast_path(conn, :show, id))
+      conn = get(conn, Routes.api_podcast_path(conn, :show, id))
 
       assert %{
                "id" => id,
@@ -134,7 +134,7 @@ defmodule RadiatorWeb.PodcastControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn, podcast: podcast} do
-      conn = put(conn, Routes.podcast_path(conn, :update, podcast), podcast: @invalid_attrs)
+      conn = put(conn, Routes.api_podcast_path(conn, :update, podcast), podcast: @invalid_attrs)
       assert json_response(conn, 422)["errors"] != %{}
     end
   end
@@ -143,11 +143,11 @@ defmodule RadiatorWeb.PodcastControllerTest do
     setup [:create_podcast]
 
     test "deletes chosen podcast", %{conn: conn, podcast: podcast} do
-      conn = delete(conn, Routes.podcast_path(conn, :delete, podcast))
+      conn = delete(conn, Routes.api_podcast_path(conn, :delete, podcast))
       assert response(conn, 204)
 
       assert_error_sent 404, fn ->
-        get(conn, Routes.podcast_path(conn, :show, podcast))
+        get(conn, Routes.api_podcast_path(conn, :show, podcast))
       end
     end
   end
