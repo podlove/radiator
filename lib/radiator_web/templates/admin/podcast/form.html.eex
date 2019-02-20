@@ -22,6 +22,6 @@
       <%= error_tag f, :description %>
     </div>
 
-    <%= submit "Create Podcast", class: "btn btn-blue" %>
+    <%= submit @button_text, class: "btn btn-blue" %>
 <% end %>
 </div>

@@ -1,0 +1,10 @@
+<%= render RadiatorWeb.PageView, "nav.html", assigns %>
+
+<div class="container mx-auto mb-6">
+    <div class="mb-6">
+      <h1 class="mb-1 text-blue-darkest">Edit your Podcast</h1>
+      <span class="text-grey-dark font-normal text-lg">Changes can take a moment until they are visible on third party platforms.</span>
+    </div>
+
+    <%= render "form.html", Map.merge(assigns, %{action: Routes.admin_podcast_path(@conn, :update, @podcast), button_text: "Update Podcast"}) %>
+</div>

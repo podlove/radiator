@@ -1,8 +1,17 @@
 <%= render RadiatorWeb.PageView, "nav.html", assigns %>
 
 <div class="container mx-auto mb-6">
-  <div class="mb-6">
-    <h1 class="mb-1 text-blue-darkest"><%= @podcast.title %></h1>
-    <span class="text-grey-dark font-normal text-lg"><%= @podcast.subtitle %></span>
+  <div class="mb-6 flex w-full justify-between">
+    <div>
+      <h1 class="mb-1 text-blue-darkest"><%= @podcast.title %></h1>
+      <span class="text-grey-dark font-normal text-lg"><%= @podcast.subtitle %></span>
+    </div>
+    <div>
+      <%= link to: Routes.admin_podcast_path(@conn, :edit, @podcast), class: "no-underline text-blue" do %>
+        <div class="shadow bg-white hover:bg-white-dark text-blue py-2 px-4 rounded-full">
+          edit
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>
