@@ -8,7 +8,7 @@ defmodule Radiator.Directory.Episode do
     field :content, :string
     field :description, :string
     field :duration, :string
-    field :enclosure_length, :string
+    field :enclosure_length, :integer
     field :enclosure_type, :string
     field :enclosure_url, :string
     field :guid, :string

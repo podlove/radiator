@@ -1,15 +1,12 @@
-set podcast_id 3
-set episode_id 5
-set filepath "/Users/ericteubert/Downloads/amazon-icon.svg"
+set filepath "/Users/ericteubert/Downloads/teensy.dmg"
 
 set filename (string split -n -r -m1 / $filepath | tail -n 1)
 
-# POST $storage_url generates presigned upload URL
-# GET $storage_url downloads file
-set storage_url "http://localhost:4000/api/podcasts/$podcast_id/episodes/$episode_id/upload/$filename"
+set get_upload_url "http://localhost:4000/api/v1/upload/?filename=$filename"
+set access_url "http://localhost:4000/api/v1/files/$filename"
 
 # get presigned url
-set presigned_url (curl -s -X POST $storage_url | jq -r .upload_url)
+set presigned_url (curl -s -X POST $get_upload_url | jq -r .upload_url)
 
 set curl_date (date -R)
 
@@ -22,4 +19,4 @@ curl -i -X PUT -T "$filepath" \
 
 echo "=== test access the file ==="
 echo ""
-curl -I $storage_url
+curl -s $access_url | jq
