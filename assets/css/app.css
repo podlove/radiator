@@ -61,7 +61,7 @@
 }
 
 .btn {
-  @apply font-bold py-2 px-4 rounded;
+  @apply no-underline font-bold py-2 px-4 rounded;
 }
 
 .btn-blue {
@@ -70,6 +70,14 @@
 
 .btn-blue:hover {
   @apply bg-blue-dark;
+}
+
+.pill {
+  @apply shadow bg-white text-blue py-2 px-4 rounded-full;
+
+  &:hover {
+    @apply text-blue-darker;
+  }
 }
 
 .nav-cheveron {
