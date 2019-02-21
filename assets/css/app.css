@@ -72,15 +72,19 @@
   @apply bg-blue-dark;
 }
 
+.nav-cheveron {
+  @apply mx-1 h-full flex items-center;
+}
 
 .nav-link {
-  @apply ml-5 h-full flex items-center;
+  @apply mx-1 h-full flex items-center;
 
   a {
     @apply text-grey-lighter no-underline;
   }
 
-  &.active {
+  &.active,
+  &:hover {
     @apply border-b-4 border-grey-lighter;
 
     a {
