@@ -6,11 +6,15 @@
       <h1 class="mb-1 text-blue-darkest">
         <%= @episode.title %>
       </h1>
-      <span class="text-grey-dark font-normal text-lg">
-        <%= @episode.subtitle %></span>
+      <div class="max-w-md text-grey-dark font-normal text-lg mb-2">
+        <%= @episode.subtitle %>
+      </div>
+      <div class="max-w-md text-black font-normal">
+        <%= @episode.description %>
+      </div>
     </div>
     <div>
-      <%= link to: Routes.admin_episode_path(@conn, :edit, @episode), class: "no-underline text-blue" do %>
+      <%= link to: Routes.admin_podcast_episode_path(@conn, :edit, @episode.podcast, @episode), class: "no-underline text-blue" do %>
       <div class="shadow bg-white hover:bg-white-dark text-blue py-2 px-4 rounded-full">
         edit
       </div>

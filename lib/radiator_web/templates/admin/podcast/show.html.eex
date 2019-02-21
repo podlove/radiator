@@ -21,7 +21,7 @@
       </div>
 
       <div class="flex w-full h-12 justify-end mb-2">
-        <%= link to: Routes.admin_episode_path(@conn, :new), class: "btn btn-blue inline-flex items-center" do %>
+        <%= link to: Routes.admin_podcast_episode_path(@conn, :new, @podcast), class: "btn btn-blue inline-flex items-center" do %>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 mr-2 icon-add"><path fill="white" d="M17 11a1 1 0 0 1 0 2h-4v4a1 1 0 0 1-2 0v-4H7a1 1 0 0 1 0-2h4V7a1 1 0 0 1 2 0v4h4z"></path></svg>
           <span>Create Episode</span>
         <% end %>
@@ -32,7 +32,7 @@
 
 
   <%= for episode <- @episodes do %>
-    <%= link to: Routes.admin_episode_path(@conn, :show, episode), class: "block no-underline bg-white text-gray shadow p-6 mb-1 hover:bg-blue-lightest" do %>
+    <%= link to: Routes.admin_podcast_episode_path(@conn, :show, @podcast, episode), class: "block no-underline bg-white text-gray shadow p-6 mb-1 hover:bg-blue-lightest" do %>
       <div class="flex">
         <%= if episode.image do %>
           <img src="<%= episode.image %>" class="w-24 h-24 mr-6">

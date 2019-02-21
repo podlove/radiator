@@ -24,8 +24,9 @@ defmodule RadiatorWeb.Router do
   scope "/admin", RadiatorWeb.Admin, as: :admin do
     pipe_through :browser
 
-    resources "/podcasts", PodcastController
-    resources "/episodes", EpisodeController
+    resources "/podcasts", PodcastController do
+      resources "/episodes", EpisodeController
+    end
   end
 
   # Other scopes may use custom stacks.

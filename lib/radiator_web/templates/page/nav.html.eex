@@ -35,7 +35,7 @@
         </svg>
       </li>
       <li class="nav-link">
-        <%= link @episode.title, to: Routes.admin_episode_path(@conn, :show, @episode) %>
+        <%= link @episode.title, to: Routes.admin_podcast_episode_path(@conn, :show, @episode.podcast, @episode) %>
       </li>
       <% end %>
     </ul>
