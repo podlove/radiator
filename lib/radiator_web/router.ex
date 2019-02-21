@@ -25,6 +25,7 @@ defmodule RadiatorWeb.Router do
     pipe_through :browser
 
     resources "/podcasts", PodcastController
+    resources "/episodes", EpisodeController
   end
 
   # Other scopes may use custom stacks.

@@ -28,7 +28,9 @@ defmodule RadiatorWeb.Admin.PodcastController do
 
   def show(conn, %{"id" => id}) do
     podcast = Directory.get_podcast!(id)
-    render(conn, "show.html", podcast: podcast)
+    episodes = Directory.list_episodes(podcast)
+
+    render(conn, "show.html", podcast: podcast, episodes: episodes)
   end
 
   def edit(conn, %{"id" => id}) do
