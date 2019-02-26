@@ -1,4 +1,4 @@
-<div class="bg-white text-gray shadow p-6">
+<div class="card">
 <%= form_for @changeset, @action, fn f -> %>
   <%= if @changeset.action do %>
     <div class="mb-4 bg-orange-lightest border-l-4 border-orange text-orange-dark p-4" role="alert">

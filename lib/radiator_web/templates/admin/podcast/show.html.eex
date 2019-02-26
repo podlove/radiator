@@ -32,7 +32,7 @@
 
 
   <%= for episode <- @episodes do %>
-    <%= link to: Routes.admin_podcast_episode_path(@conn, :show, @podcast, episode), class: "block no-underline bg-white text-gray shadow p-6 mb-1 hover:bg-blue-lightest" do %>
+    <%= link to: Routes.admin_podcast_episode_path(@conn, :show, @podcast, episode), class: "block no-underline card mb-1 hover:bg-blue-lightest" do %>
       <div class="flex">
         <%= if episode.image do %>
           <img src="<%= episode.image %>" class="w-24 h-24 mr-6">

@@ -52,6 +52,10 @@
   fill: #0D2B3E;
 }
 
+.card {
+  @apply bg-white shadow p-6;
+}
+
 .input {
   @apply bg-grey-lighter appearance-none border-2 border-grey-lighter rounded w-full py-2 px-4 text-grey-darker leading-tight;
 

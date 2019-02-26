@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
+  alias Radiator.Storage
   alias Radiator.Directory.Episode
 
   plug :assign_podcast when action in [:new, :create]
@@ -17,6 +18,18 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   def create(conn, %{"episode" => episode_params}) do
     podcast = conn.assigns[:podcast]
+
+    episode_params =
+      case process_upload(conn, episode_params) do
+        {:ok, enclosure_url, enclosure_type, enclosure_size} ->
+          episode_params
+          |> Map.put("enclosure_url", enclosure_url)
+          |> Map.put("enclosure_type", enclosure_type)
+          |> Map.put("enclosure_length", enclosure_size)
+
+        _ ->
+          episode_params
+      end
 
     case Directory.create_episode(podcast, episode_params) do
       {:ok, episode} ->
@@ -45,6 +58,18 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   def update(conn, %{"id" => id, "episode" => episode_params}) do
     episode = Directory.get_episode!(id)
 
+    episode_params =
+      case process_upload(conn, episode_params) do
+        {:ok, enclosure_url, enclosure_type, enclosure_size} ->
+          episode_params
+          |> Map.put("enclosure_url", enclosure_url)
+          |> Map.put("enclosure_type", enclosure_type)
+          |> Map.put("enclosure_length", enclosure_size)
+
+        _ ->
+          episode_params
+      end
+
     case Directory.update_episode(episode, episode_params) do
       {:ok, episode} ->
         conn
@@ -53,6 +78,21 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", episode: episode, changeset: changeset)
+    end
+  end
+
+  def process_upload(conn, params) do
+    import SweetXml
+
+    if upload = params["enclosure"] do
+      {:ok, %File.Stat{size: size}} = File.stat(upload.path)
+      %{body: xml} = Storage.upload_file(upload.path, upload.filename, upload.content_type)
+
+      file_key = xml |> xpath(~x"//Key/text()"s)
+      enclosure_url = Routes.api_download_url(conn, :show, file_key)
+      {:ok, enclosure_url, upload.content_type, size}
+    else
+      :noupload
     end
   end
 end

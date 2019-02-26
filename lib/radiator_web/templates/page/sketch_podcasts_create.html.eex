@@ -6,7 +6,7 @@
       <span class="text-grey-dark font-normal text-lg">Just one form away from your big moment.</span>
     </div>
 
-     <div class="bg-white text-gray shadow p-6">
+     <div class="card">
           <input
             type="text"
             class="font-bold input mb-6"

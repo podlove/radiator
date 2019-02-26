@@ -120,7 +120,7 @@ defmodule Radiator.DirectoryTest do
       content: "some content",
       description: "some description",
       duration: "some duration",
-      enclosure_length: "some enclosure_length",
+      enclosure_length: 123,
       enclosure_type: "some enclosure_type",
       enclosure_url: "some enclosure_url",
       guid: "some guid",
@@ -134,7 +134,7 @@ defmodule Radiator.DirectoryTest do
       content: "some updated content",
       description: "some updated description",
       duration: "some updated duration",
-      enclosure_length: "some updated enclosure_length",
+      enclosure_length: 345,
       enclosure_type: "some updated enclosure_type",
       enclosure_url: "some updated enclosure_url",
       guid: "some updated guid",
@@ -188,7 +188,7 @@ defmodule Radiator.DirectoryTest do
       assert episode.content == "some content"
       assert episode.description == "some description"
       assert episode.duration == "some duration"
-      assert episode.enclosure_length == "some enclosure_length"
+      assert episode.enclosure_length == 123
       assert episode.enclosure_type == "some enclosure_type"
       assert episode.enclosure_url == "some enclosure_url"
       assert episode.guid == "some guid"
@@ -210,7 +210,7 @@ defmodule Radiator.DirectoryTest do
       assert episode.content == "some updated content"
       assert episode.description == "some updated description"
       assert episode.duration == "some updated duration"
-      assert episode.enclosure_length == "some updated enclosure_length"
+      assert episode.enclosure_length == 345
       assert episode.enclosure_type == "some updated enclosure_type"
       assert episode.enclosure_url == "some updated enclosure_url"
       assert episode.guid == "some updated guid"

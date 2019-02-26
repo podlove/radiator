@@ -21,4 +21,14 @@
       <% end %>
     </div>
   </div>
+
+  <%= if @episode.enclosure_url do %>
+    <div class="card max-w-sm flex justify-between items-center">
+      <audio src="<%= @episode.enclosure_url %>" type="<%= @episode.enclosure_type %>" controls></audio>
+      <div class="text-grey-darkest">
+        <%= @episode.enclosure_length |> format_bytes() %>
+      </div>
+    </div>
+  <% end %>
+
 </div>
