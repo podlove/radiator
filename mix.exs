@@ -50,7 +50,13 @@ defmodule Radiator.MixProject do
       # for ex_aws
       {:hackney, "~> 1.15"},
       # for ex_aws
-      {:sweet_xml, "~> 0.6.5"}
+      {:sweet_xml, "~> 0.6.5"},
+      # for feed import
+      {:metalove, "~> 0.2"},
+      {:xml_builder, "~> 2.0", override: true},
+      # for documentation
+      {:earmark, "~> 1.2", only: :dev},
+      {:ex_doc, "~> 0.19", only: :dev}
     ]
   end
 
