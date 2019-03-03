@@ -5,6 +5,18 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+let PurgecssPlugin = require("purgecss-webpack-plugin");
+
+// Custom PurgeCSS extractor for Tailwind that allows special characters in
+// class names.
+//
+// https://github.com/FullHuman/purgecss#extractor
+class TailwindExtractor {
+  static extract(content) {
+    return content.match(/[A-Za-z0-9-_:\/]+/g) || [];
+  }
+}
+
 module.exports = (env, options) => ({
   optimization: {
     minimizer: [
@@ -33,9 +45,13 @@ module.exports = (env, options) => ({
       },
       {
         test: /\.css$/,
-        exclude: /node_modules/,
         use: [{
             loader: 'style-loader',
+          }, {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: path.resolve(__dirname, '../priv/static/css')
+            }
           },
           {
             loader: 'css-loader',
@@ -53,6 +69,15 @@ module.exports = (env, options) => ({
   plugins: [
     new MiniCssExtractPlugin({
       filename: '../css/app.css'
+    }),
+    new PurgecssPlugin({
+      paths: glob.sync(
+        '../lib/radiator_web/@(templates|views)/**/*.@(html.eex|ex)'
+      ),
+      extractors: [{
+        extractor: TailwindExtractor,
+        extensions: ["html", "vue", "eex", "ex"]
+      }]
     }),
     new CopyWebpackPlugin([{
       from: 'static/',
