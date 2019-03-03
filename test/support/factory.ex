@@ -8,4 +8,13 @@ defmodule Radiator.Factory do
       title: title
     }
   end
+
+  def episode_factory do
+    title = sequence(:title, &"Episode ##{&1}")
+
+    %Radiator.Directory.Episode{
+      podcast: build(:podcast),
+      title: title
+    }
+  end
 end
