@@ -20,6 +20,8 @@
     "optimize-css-assets-webpack-plugin": "^4.0.0",
     "postcss-loader": "^3.0.0",
     "precss": "^4.0.0",
+    "purgecss": "^1.1.0",
+    "purgecss-webpack-plugin": "^1.4.0",
     "style-loader": "^0.23.1",
     "tailwindcss": "^0.7.4",
     "uglifyjs-webpack-plugin": "^1.2.4",
