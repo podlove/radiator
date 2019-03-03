@@ -42,5 +42,17 @@ defmodule Radiator.Directory.Episode do
       :podcast_id
     ])
     |> validate_required([:title])
+    |> set_guid_if_missing()
   end
+
+  def regenerate_guid(changeset) do
+    put_change(changeset, :guid, UUID.uuid4())
+  end
+
+  defp set_guid_if_missing(changeset) do
+    maybe_regenerate_guid(changeset, get_field(changeset, :guid))
+  end
+
+  defp maybe_regenerate_guid(changeset, nil), do: regenerate_guid(changeset)
+  defp maybe_regenerate_guid(changeset, _), do: changeset
 end

@@ -15,6 +15,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
     |> add(subtitle(episode))
     |> add(description(episode))
     |> add(enclosure(episode))
+    |> add(guid(episode))
     |> Enum.reverse()
   end
 
@@ -43,5 +44,9 @@ defmodule Radiator.Feed.EpisodeBuilder do
       type: episode.enclosure_type,
       length: episode.enclosure_length
     })
+  end
+
+  defp guid(%Episode{guid: guid}) do
+    element(:guid, %{isPermaLink: "false"}, guid)
   end
 end
