@@ -51,7 +51,9 @@ defmodule Radiator.MixProject do
       {:hackney, "~> 1.15"},
       # for ex_aws
       {:sweet_xml, "~> 0.6.5"},
-      {:xml_builder, "~> 2.1", override: true}
+      {:xml_builder, "~> 2.1", override: true},
+      {:ex_machina, "~> 2.3", only: :test},
+      {:elixir_uuid, "~> 1.2"}
     ]
   end
 

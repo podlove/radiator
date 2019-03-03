@@ -175,6 +175,13 @@ defmodule Radiator.Directory do
     |> Repo.update()
   end
 
+  def regenerate_episode_guid(episode) do
+    episode
+    |> change_episode()
+    |> Episode.regenerate_guid()
+    |> Repo.update()
+  end
+
   @doc """
   Deletes a Episode.
 
