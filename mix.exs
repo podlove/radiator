@@ -53,7 +53,10 @@ defmodule Radiator.MixProject do
       {:sweet_xml, "~> 0.6.5"},
       {:xml_builder, "~> 2.1", override: true},
       {:ex_machina, "~> 2.3", only: :test},
-      {:elixir_uuid, "~> 1.2"}
+      {:elixir_uuid, "~> 1.2"},
+      {:absinthe_plug, "~> 1.4"},
+      {:poison, "~> 3.0"},
+      {:timex, "~> 3.5"}
     ]
   end
 

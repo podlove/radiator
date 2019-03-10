@@ -36,6 +36,7 @@ defmodule Radiator.Directory do
 
   """
   def get_podcast!(id), do: Repo.get!(Podcast, id)
+  def get_podcast(id), do: Repo.get(Podcast, id)
 
   @doc """
   Creates a podcast.

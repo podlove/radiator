@@ -41,4 +41,7 @@ defmodule RadiatorWeb.Router do
       resources "/episodes", EpisodeController, except: [:new, :edit]
     end
   end
+
+  forward "/graphql", Absinthe.Plug, schema: RadiatorWeb.Schema
+  forward "/graphiql", Absinthe.Plug.GraphiQL, schema: RadiatorWeb.Schema
 end
