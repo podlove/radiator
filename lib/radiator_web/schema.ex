@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Schema do
   use Absinthe.Schema
 
   import_types RadiatorWeb.Schema.DirectoryTypes
+  import_types RadiatorWeb.Schema.StorageTypes
 
   alias RadiatorWeb.Resolvers
 
@@ -64,6 +65,12 @@ defmodule RadiatorWeb.Schema do
       arg :id, non_null(:id)
 
       resolve &Resolvers.Directory.delete_podcast/3
+    end
+
+    field :create_upload, :upload do
+      arg :filename, non_null(:string)
+
+      resolve &Resolvers.Storage.create_upload/3
     end
   end
 end
