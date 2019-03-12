@@ -38,6 +38,17 @@ defmodule RadiatorWeb.Resolvers.Directory do
     end
   end
 
+  def is_published(%Podcast{published_at: nil}, _, _) do
+    {:ok, false}
+  end
+
+  def is_published(%Podcast{published_at: date}, _, _) do
+    case DateTime.compare(date, DateTime.utc_now()) do
+      :lt -> {:ok, true}
+      _ -> {:ok, false}
+    end
+  end
+
   def find_episode(_parent, %{id: id}, _resolution) do
     {:ok, Directory.get_episode!(id)}
   end

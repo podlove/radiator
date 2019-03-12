@@ -17,6 +17,10 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :published_at, :datetime
     field :subtitle, :string
 
+    field :is_published, :boolean do
+      resolve &Resolvers.Directory.is_published/3
+    end
+
     field :episodes, list_of(:episode) do
       resolve &Resolvers.Directory.list_episodes/3
     end
