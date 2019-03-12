@@ -138,6 +138,7 @@ defmodule Radiator.Directory do
 
   """
   def get_episode!(id), do: Repo.get!(Episode, id) |> Repo.preload(:podcast)
+  def get_episode(id), do: Repo.get(Episode, id) |> Repo.preload(:podcast)
 
   @doc """
   Creates a episode.

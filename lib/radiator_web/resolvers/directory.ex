@@ -80,4 +80,25 @@ defmodule RadiatorWeb.Resolvers.Directory do
   def list_episodes(%Podcast{} = podcast, _args, _resolution) do
     {:ok, Directory.list_episodes(podcast)}
   end
+
+  def create_episode(_parent, args = %{podcast_id: podcast_id}, _resolution) do
+    case Directory.get_podcast(podcast_id) do
+      nil -> {:error, "Podcast ID #{podcast_id} not found"}
+      podcast -> Directory.create_episode(podcast, args)
+    end
+  end
+
+  def update_episode(_parent, args = %{id: id}, _resolution) do
+    case Directory.get_episode(id) do
+      nil -> {:error, "Episode ID #{id} not found"}
+      episode -> Directory.update_episode(episode, args)
+    end
+  end
+
+  def delete_episode(_parent, %{id: id}, _resolution) do
+    case Directory.get_episode(id) do
+      nil -> {:error, "episode ID #{id} not found"}
+      episode -> Directory.delete_episode(episode)
+    end
+  end
 end

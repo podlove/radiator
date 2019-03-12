@@ -28,6 +28,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
 
   @desc "An episode in a podcast"
   object :episode do
+    field :id, :id
     field :content, :string
     field :description, :string
     field :duration, :string

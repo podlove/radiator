@@ -92,5 +92,38 @@ defmodule RadiatorWeb.Schema do
 
       resolve &Resolvers.Storage.create_upload/3
     end
+
+    @desc "Create an episode"
+    field :create_episode, type: :episode do
+      arg :podcast_id, non_null(:integer)
+      arg :title, non_null(:string)
+      arg :subtitle, :string
+      arg :description, :string
+      arg :content, :string
+      arg :image, :string
+      arg :number, :integer
+
+      resolve &Resolvers.Directory.create_episode/3
+    end
+
+    @desc "Update an episode"
+    field :update_episode, type: :episode do
+      arg :id, non_null(:id)
+      arg :title, :string
+      arg :subtitle, :string
+      arg :description, :string
+      arg :content, :string
+      arg :image, :string
+      arg :number, :integer
+
+      resolve &Resolvers.Directory.update_episode/3
+    end
+
+    @desc "Delete an episode"
+    field :delete_episode, type: :episode do
+      arg :id, non_null(:id)
+
+      resolve &Resolvers.Directory.delete_episode/3
+    end
   end
 end
