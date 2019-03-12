@@ -1,5 +1,6 @@
 defmodule RadiatorWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :radiator
+  use Absinthe.Phoenix.Endpoint
 
   socket "/socket", RadiatorWeb.UserSocket,
     websocket: true,
@@ -27,7 +28,7 @@ defmodule RadiatorWeb.Endpoint do
   plug Plug.Logger
 
   plug Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json],
+    parsers: [:urlencoded, :multipart, :json, Absinthe.Plug.Parser],
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
 

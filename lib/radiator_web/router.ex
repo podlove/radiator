@@ -11,6 +11,7 @@ defmodule RadiatorWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug CORSPlug
   end
 
   scope "/", RadiatorWeb do
@@ -42,6 +43,10 @@ defmodule RadiatorWeb.Router do
     end
   end
 
-  forward "/graphql", Absinthe.Plug, schema: RadiatorWeb.Schema
-  forward "/graphiql", Absinthe.Plug.GraphiQL, schema: RadiatorWeb.Schema
+  scope "/" do
+    pipe_through :api
+
+    forward "/graphql", Absinthe.Plug, schema: RadiatorWeb.Schema
+    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: RadiatorWeb.Schema
+  end
 end
