@@ -31,6 +31,30 @@ defmodule RadiatorWeb.Resolvers.Directory do
     end
   end
 
+  def publish_podcast(_parent, %{id: id}, _res) do
+    case Directory.get_podcast(id) do
+      nil ->
+        {:error, "Podcast ID #{id} not found"}
+
+      podcast ->
+        Directory.update_podcast(podcast, %{
+          published_at: DateTime.utc_now()
+        })
+    end
+  end
+
+  def depublish_podcast(_parent, %{id: id}, _res) do
+    case Directory.get_podcast(id) do
+      nil ->
+        {:error, "Podcast ID #{id} not found"}
+
+      podcast ->
+        Directory.update_podcast(podcast, %{
+          published_at: nil
+        })
+    end
+  end
+
   def delete_podcast(_parent, %{id: id}, _resolution) do
     case Directory.get_podcast(id) do
       nil -> {:error, "Podcast ID #{id} not found"}

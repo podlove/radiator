@@ -45,8 +45,25 @@ defmodule RadiatorWeb.Schema do
       arg :subtitle, :string
       arg :description, :string
       arg :image, :string
+      arg :language, :string
+      arg :owner_email, :string
+      arg :owner_name, :string
 
       resolve &Resolvers.Directory.create_podcast/3
+    end
+
+    @desc "Publish podcast"
+    field :publish_podcast, type: :podcast do
+      arg :id, non_null(:id)
+
+      resolve &Resolvers.Directory.publish_podcast/3
+    end
+
+    @desc "Depublish podcast"
+    field :depublish_podcast, type: :podcast do
+      arg :id, non_null(:id)
+
+      resolve &Resolvers.Directory.depublish_podcast/3
     end
 
     @desc "Update a podcast"
@@ -56,6 +73,9 @@ defmodule RadiatorWeb.Schema do
       arg :subtitle, :string
       arg :description, :string
       arg :image, :string
+      arg :language, :string
+      arg :owner_email, :string
+      arg :owner_name, :string
 
       resolve &Resolvers.Directory.update_podcast/3
     end
