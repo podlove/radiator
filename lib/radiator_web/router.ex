@@ -17,8 +17,8 @@ defmodule RadiatorWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
-    get "/podcasts", PageController, :sketch_podcasts
-    get "/podcasts/create", PageController, :sketch_podcasts_create
+
+    get "/feed/:podcast_id", FeedController, :show
   end
 
   scope "/admin", RadiatorWeb.Admin, as: :admin do

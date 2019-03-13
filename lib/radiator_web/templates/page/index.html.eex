@@ -1,11 +1,13 @@
 <div class="container mx-auto mt-8">
-<div class="max-w-sm rounded overflow-hidden shadow-lg">
-  <div class="px-6 py-4">
-    <div class="font-bold text-xl mb-2">Sketches</div>
-    <ul class="">
-      <li><%= link("/podcasts", to: "/podcasts", class: "no-underline text-blue") %></li>
-      <li><%= link("/podcasts/create", to: "/podcasts/create", class: "no-underline text-blue") %></li>
-    </ul>
+
+  <div class="max-w-sm rounded overflow-hidden shadow-lg mb-8">
+    <div class="px-6 py-4">
+      <div class="font-bold text-xl mb-2">Admin Pages</div>
+      <ul class="">
+        <li><%= link("List Podcasts", to: "/admin/podcasts", class: "no-underline text-blue") %></li>
+        <li><%= link("Add new Podcast", to: "/admin/podcasts/new", class: "no-underline text-blue") %></li>
+      </ul>
+    </div>
   </div>
-</div>
+
 </div>
