@@ -20,6 +20,8 @@ defmodule Mix.Tasks.Radiator.Import do
     end
   end
 
+  require Logger
+
   @impl true
   @doc false
   def run(argv) do
@@ -27,13 +29,22 @@ defmodule Mix.Tasks.Radiator.Import do
       {opts, [url]} ->
         opts = Map.new(opts)
 
+        unless opts[:debug], do: Logger.configure(level: :info)
+
         with_services do
-          podcast = Metalove.get_podcast(url)
+          metalove_podcast = Metalove.get_podcast(url)
+
+          Logger.info("Fetching feed from #{metalove_podcast.main_feed_url}")
 
           feed =
-            Metalove.PodcastFeed.get_by_feed_url_await_all_pages(podcast.main_feed_url, 120_000)
+            Metalove.PodcastFeed.get_by_feed_url_await_all_pages(
+              metalove_podcast.main_feed_url,
+              120_000
+            )
 
           if opts[:debug], do: IO.inspect(feed, pretty: true)
+
+          Logger.info("Found #{length(feed.episodes)} episodes")
 
           {:ok, podcast} =
             Directory.create_podcast(%{
@@ -63,6 +74,13 @@ defmodule Mix.Tasks.Radiator.Import do
               # enclosure_length: episode.enclosure.size
             })
           end)
+          |> Enum.count(fn
+            {:ok, _} -> true
+            _ -> false
+          end)
+          |> case do
+            count -> Logger.info(~s/Created #{count} episodes in "#{podcast.title}"/)
+          end
         end
 
       _ ->
