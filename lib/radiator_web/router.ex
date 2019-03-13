@@ -31,7 +31,7 @@ defmodule RadiatorWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  scope "/api/v1", RadiatorWeb.Api, as: :api do
+  scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
     pipe_through :api
 
     resources "/upload", UploadController, only: [:create]
@@ -43,7 +43,7 @@ defmodule RadiatorWeb.Router do
     end
   end
 
-  scope "/" do
+  scope "/api" do
     pipe_through :api
 
     forward "/graphql", Absinthe.Plug, schema: RadiatorWeb.Schema
