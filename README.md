@@ -1,222 +1,78 @@
-# Radiator Spark
+# Radiator Spark 🔥
+
+Radiator is the 100% open source podcast hosting project for the next century of the internet.
 
 [![Build Status](https://travis-ci.org/podlove/radiator-spark.svg?branch=master)](https://travis-ci.org/podlove/radiator-spark)
 
-Quick project to get started and give the planned architecture a test drive.
+## Status
 
-## Show / Podcast
+We are still in an exploration phase. Technically the foundation for hosting a podcast with a valid RSS feed is there but it's very simplistic and missing features left and right. Using this in production is not recommended yet as breaking changes will occur without prior notice.
 
-### RSS
+## Built With
 
-- title (RSS requirement)
-- description (RSS requirement, up to 4000 characters according to Apple Podcasts Connect)
-- link (RSS requirement, dynamically generated)
-- pubDate (generated, [RFC 822][rfc822])
-- lastBuildDate (generated, [RFC 822][rfc822])
-- generator (hardcoded)
-- image
-- language ([ISO 639], e.g. `en-us`)
+- [Phoenix Framework][phoenix] &mdash; the backend API (currently both GraphQL and REST endpoints) and (currently) admin interface
+- [PostgreSQL][pgsql] &mdash; main data store
+- [Minio][minio] &mdash; private cloud storage for audio and image files
+- [Vue.js][vuejs] &mdash; JavaScript framework
 
-### Apple Podcasts Connect
+## Development
 
-- itunes:image
-- itunes:subtitle
-- itunes:summary (identical to description)
-- itunes:author
-- itunes:owner (nested itunes:email, itunes:name)
-- itunes:type (hardcoded, `episodic`)
+```shell
+git clone https://github.com/podlove/radiator-spark.git
+cd radiator-spark
 
-## Episode
+# start postgres
+# start minio
+# set minio access and secret in config/config.exs `config :ex_aws` 
+#  (you see them at minio startup in the console)
 
-### RSS
-
-- title (RSS requirement, one of title or description)
-- description (RSS requirement, one of title or description, up to 4000 characters according to Apple Podcasts Connect)
-- link (dynamically generated)
-- guid (important, internal)
-- enclosure (required, contains URL, length, type, e.g. `<enclosure url="http://example.com/p/e001.mp3" length="5650889" type="audio/mpeg"/>`)
-- pubDate (generated, [RFC 822][rfc822])
-
-### Apple Podcasts Connect
-
-- itunes:image
-- content:encoded
-- itunes:subtitle
-- itunes:summary (identical to description)
-- itunes:title
-- itunes:duration (`HH:MM:SS`)
-- itunes:episode (episode number)
-- itunes:episodeType (hardcoded, `full`)
-
-## Phoenix Generator Commands
-
-```bash
-mix phx.gen.json Directory Podcast podcasts \
-  title:string \
-  subtitle:string \
-  description:string \
-  image:string \
-  author:string \
-  owner_name:string \
-  owner_email:string \
-  language:string \
-  published_at:utc_datetime \
-  last_built_at:utc_datetime
+mix deps.get
+mix ecto.create
+mix ecto.migrate
+cd assets && npm install
+cd ..
+mix phx.server
 ```
 
-```bash
-mix phx.gen.json Directory Episode episodes \
-  podcast_id:references:podcasts \
-  title:string \
-  subtitle:string \
-  description:string \
-  content:string \
-  image:string \
-  enclosure_url:string \
-  enclosure_length:string \
-  enclosure_type:string \
-  duration:string \
-  guid:string \
-  number:integer \
-  published_at:utc_datetime
-```
+## API
 
-## API Usage Examples
+At the moment both GraphQL and REST endpoints are available. The aim is to provide a full GraphQL api as primary target and some basic REST endpoints for quick usecases.
 
-### Create a Podcast
+### GraphQL
 
-```bash
-curl -sH "Content-Type: application/json" -X POST -d '{"podcast":{"title": "Ep001"}}' http://localhost:4000/api/podcasts
-```
+Entrypoint: `/api/graphql`
 
-### Create an Episode
+Open http://localhost:4000/api/graphiql for schema and documentation exploration.
 
-```bash
-curl -sH "Content-Type: application/json" -X POST -d '{"episode":{"title": "Ep001"}}' http://localhost:4000/api/podcasts/1/episodes
-```
+### REST
 
-## How would a hal+json document look like
+Follows [HAL][hal]+json specification.
 
-### Podcast
+Entrypoint: `/api/rest/v1`
 
-```json
-{
-  "_links": {
-    "self": { "href": "/podcasts/1" },
-  },
-  "id": 1,
-  ...
-  "title": "My Podcast"
-}
-```
+Some endpoints:
 
-### Podcast List
+- `/api/rest/v1/podcasts`
+- `/api/rest/v1/podcasts/:podcast_id`
+- `/api/rest/v1/podcasts/:podcast_id/episodes`
+- `/api/rest/v1/podcasts/:podcast_id/episodes/:episode_id`
+- `/api/rest/v1/files`
 
-```json
-{
-  "_links": {
-    "self": { "href": "/podcasts" },
-    "next": { "href": "/podcasts?page=2" },
-    "curies": [{ "name": "rad", "href": "https://podlove.org/radiator/docs/rels/{rel}", "templated": true }]
-  },
-  "_embedded": {
-    "rad:podcasts": [
-      {
-        "_links": {
-          "self": { "href": "/podcasts/1" },
-        },
-        "id": 1,
-        ...
-        "title": "My Podcast"
-      }      
-    ]
-  }
-}
-```
+## Admin Interface
 
-### Episode
+At `http://localhost:4000/admin/podcasts` you will find a simple admin interface to manage podcasts and episodes. There is no concept of users yet, so there is no registration, login or any kind of authentication.
 
-```json
-{
-  "_links": {
-    "self": { "href": "/podcasts/1/episodes/2" },
-    "curies": [{ "name": "rad", "href": "https://podlove.org/radiator/docs/rels/{rel}", "templated": true }]
-  },
-  "_embedded": {
-    "rad:podcast": {
-      "_links": {
-        "self": { "href": "/podcasts/1" },
-      },
-      ...
-      "title": "My Podcast"
-    }
-  },
-  "id": 2,
-  ...
-  "title": "Episode 001"
-}
-```
+<img alt="Network" src="https://user-images.githubusercontent.com/235918/54268328-40162d80-457b-11e9-9d95-5a085f34c5d7.png" width="720px">
 
-## Storage
+<img alt="Edit Podcast" src="https://user-images.githubusercontent.com/235918/54268396-60de8300-457b-11e9-9b1d-605d37fd4dce.png" width="720px">
 
-- [Minio](https://minio.io/), S3 compatible object storage
-- compatible with [ExAws](https://hexdocs.pm/ex_aws/ExAws.html), an Elixir client for AWS services
+## License
 
-### Implemented
+Radiator is [MIT Licensed][license].
 
-- run Minio server via homebrew:
-
-```bash
-brew install minio/stable/minio
-minio server /data
-```
-
-- API Endpoint: URL Presigning + Upload
-- Access/Download file through Phoenix endpoint
-
-### Upload Example (fish shell script)
-
-```bash
-set podcast_id 3
-set episode_id 5
-set filepath "/local/path/to/episode001.mp3"
-
-set filename (string split -n -r -m1 / $filepath | tail -n 1)
-
-# POST $storage_url generates presigned upload URL
-# GET $storage_url downloads file
-set storage_url "http://localhost:4000/api/podcasts/$podcast_id/episodes/$episode_id/upload/$filename"
-
-# get presigned url
-set presigned_url (curl -s -X POST $storage_url | jq -r .upload_url)
-
-set curl_date (date -R)
-
-echo "=== upload file ==="
-echo ""
-curl -i -X PUT -T "$filepath" \
-    -H "Date: $curl_date" \
-    -H "Content-Type: application/octet-stream" \
-    $presigned_url
-
-echo "=== test access the file ==="
-echo ""
-curl -I $storage_url
-```
-
-
-## Notes
-
-- We set out to use "Show" as the generic term for podcasts. However, that is confusing in Phoenix as "show" is used by convention in controller/view contexts (referring to rendering a single entry of a list). Which is why I go back to "Podcast" for now.
-
-## Reference
-
-- [RSS 2.0 Spec][rss2]
-- [Apple Podcasts Connect Spec][apple podcasts]
-- [Feed Paging (RFC5005)][rfc5005]
-
-[rfc822]: http://asg.web.cmu.edu/rfc/rfc822.html
-[apple podcasts]: https://help.apple.com/itc/podcasts_connect/#/itcb54353390
-[rss2]: https://cyber.harvard.edu/rss/rss.html
-[rfc5005]: https://tools.ietf.org/html/rfc5005#section-3
-[ISO 639]: http://www.loc.gov/standards/iso639-2/php/code_list.php
+[phoenix]: https://phoenixframework.org/
+[minio]: https://minio.io/
+[pgsql]: https://www.postgresql.org/
+[hal]: http://stateless.co/hal_specification.html
+[license]: https://github.com/podlove/radiator-spark/blob/master/LICENSE
+[vuejs]: https://vuejs.org/
