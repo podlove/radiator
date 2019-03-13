@@ -35,8 +35,6 @@ defmodule Mix.Tasks.Radiator.Import do
 
           if opts[:debug], do: IO.inspect(feed, pretty: true)
 
-          Radiator.Repo.start_link()
-
           {:ok, podcast} =
             Directory.create_podcast(%{
               title: feed.title,
@@ -86,7 +84,7 @@ defmodule Mix.Tasks.Radiator.Import do
   defp switch_to_string({name, val}), do: name <> "=" <> val
 
   @start_apps [:metalove, :postgrex, :ecto, :ecto_sql]
-  @repos Application.get_env(:my_app, :ecto_repos, [])
+  @repos Application.get_env(:radiator, :ecto_repos, [])
 
   defp start_services do
     Enum.each(@start_apps, &Application.ensure_all_started/1)
