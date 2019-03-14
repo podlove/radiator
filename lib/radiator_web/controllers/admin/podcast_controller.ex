@@ -5,7 +5,7 @@ defmodule RadiatorWeb.Admin.PodcastController do
   alias Radiator.Directory.Podcast
 
   def index(conn, _params) do
-    podcasts = Directory.list_podcasts()
+    podcasts = Directory.list_podcasts_with_episode_counts()
     render(conn, "index.html", podcasts: podcasts)
   end
 
