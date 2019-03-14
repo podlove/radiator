@@ -27,6 +27,8 @@ defmodule RadiatorWeb.Router do
     resources "/podcasts", PodcastController do
       resources "/episodes", EpisodeController
     end
+
+    resources "/import", PodcastImportController, only: [:new, :create]
   end
 
   # Other scopes may use custom stacks.
