@@ -1,0 +1,23 @@
+<%= render RadiatorWeb.PageView, "nav.html", assigns %>
+
+<div class="container mx-auto mb-6">
+    <div class="mb-6">
+      <h1 class="mb-1 text-blue-darkest">Import RSS Feed</h1>
+      <span class="text-grey-dark font-normal text-lg">Import your existing podcast to Podlove Radiator via RSS feed.</span>
+    </div>
+
+    <div class="card">
+      <form action="<%= Routes.admin_podcast_import_path(@conn, :create) %>" method="post">
+        <input type="hidden" name="_csrf_token" value="<%= Plug.CSRFProtection.get_csrf_token() %>">
+          <div class="mb-6">
+            <%= label :feed, :feed_url, class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" do %>
+              RSS Feed or Podcast Website
+            <% end %>
+            <%= text_input :feed, :feed_url, class: "input", placeholder: "https://www.example.com/feed.xml" %>
+          </div>
+
+          <%= submit "Import RSS Feed", class: "btn btn-blue" %>
+      </form>
+    </div>
+
+</div>
