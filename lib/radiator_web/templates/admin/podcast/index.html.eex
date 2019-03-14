@@ -12,7 +12,7 @@
         
         <div
           class="w-48 h-48 bg-cover shadow-inner"
-          style="background-image: url(https://freakshow.fm/wp-content/cache/podlove/04/662a9d4edcf77ea2abe3c74681f509/freak-show_500x500.jpg)"
+          style="background-image: url(<%= podcast.image %>)"
         ></div>
 
         <div class="p-3 h-32">
@@ -22,7 +22,7 @@
 
         <div class="flex items-center p-3 border-t border-grey border-solid text-xs text-grey-dark">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 mr-3 opacity-75 icon-collection"><rect width="20" height="12" x="2" y="10" class="primary" rx="2"></rect><path class="secondary" d="M20 8H4c0-1.1.9-2 2-2h12a2 2 0 0 1 2 2zm-2-4H6c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2z"></path></svg>
-          <span>3 Episodes</span>
+          <span><%= ngettext "One Episode", "%{count} Episodes", podcast.episode_count %></span>
         </div>
 
         <div class="flex items-center p-3 pt-0 border-grey border-solid text-xs text-grey-dark">

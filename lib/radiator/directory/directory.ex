@@ -21,6 +21,12 @@ defmodule Radiator.Directory do
     Repo.all(Podcast)
   end
 
+  def list_podcasts_with_episode_counts do
+    from(p in Podcast)
+    |> Podcast.preload_episode_counts()
+    |> Repo.all()
+  end
+
   @doc """
   Gets a single podcast.
 
