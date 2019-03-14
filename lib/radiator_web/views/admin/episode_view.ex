@@ -3,6 +3,10 @@ defmodule RadiatorWeb.Admin.EpisodeView do
 
   def format_bytes(number, precision \\ 2)
 
+  def format_bytes(nil, _) do
+    "? Bytes"
+  end
+
   def format_bytes(number, _precision) when number < 1_024 do
     "#{number} Bytes"
   end
