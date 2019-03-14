@@ -30,8 +30,28 @@
     </div>
 </div>
 
+  <h2 class="text-grey-darker mb-2">Drafts</h2>
 
-  <%= for episode <- @episodes do %>
+  <%= for episode <- @draft_episodes do %>
+    <%= link to: Routes.admin_podcast_episode_path(@conn, :show, @podcast, episode), class: "block no-underline card mb-1 hover:bg-blue-lightest" do %>
+      <div class="flex">
+        <%= if episode.image do %>
+          <img src="<%= episode.image %>" class="w-24 h-24 mr-6">
+        <% end %>
+        <div>
+          <%= if episode.number do %>
+            <div class="text-grey-darker text-sm uppercase tracking-wide mb-2">Episode <%= episode.number %></div>
+          <% end %>
+          <div class="font-bold text-black"><%= episode.title %></div>
+          <div class="text-grey-darker text-sm mb-2"><%= episode.subtitle %></div>        
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <h2 class="text-grey-darker mb-2">Published</h2>
+
+  <%= for episode <- @published_episodes do %>
     <%= link to: Routes.admin_podcast_episode_path(@conn, :show, @podcast, episode), class: "block no-underline card mb-1 hover:bg-blue-lightest" do %>
       <div class="flex">
         <%= if episode.image do %>
@@ -52,4 +72,5 @@
       </div>
     <% end %>
   <% end %>
+
 </div>
