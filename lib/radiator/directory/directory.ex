@@ -123,9 +123,11 @@ defmodule Radiator.Directory do
     Repo.all(Episode)
   end
 
-  def list_episodes(%Podcast{} = podcast) do
-    Repo.preload(podcast, :episodes)
-    |> Map.get(:episodes)
+  def list_episodes(%Podcast{} = podcast, params \\ %{}) do
+    from(e in Episode)
+    |> Episode.filter_by_podcast(podcast)
+    |> Episode.order_by(params)
+    |> Repo.all()
   end
 
   @doc """
