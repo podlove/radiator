@@ -57,11 +57,45 @@ defmodule Radiator.Directory.Episode do
   defp maybe_regenerate_guid(changeset, nil), do: regenerate_guid(changeset)
   defp maybe_regenerate_guid(changeset, _), do: changeset
 
+  def filter_by_published(query, %{"published" => true}) do
+    from(e in query, where: e.published_at <= fragment("NOW()"))
+  end
+
+  def filter_by_published(query, %{"published" => false}) do
+    from(e in query, where: e.published_at > fragment("NOW()") or is_nil(e.published_at))
+  end
+
+  def filter_by_published(query, %{"published" => :any}) do
+    query
+  end
+
+  def filter_by_published(query, _) do
+    filter_by_published(query, %{"published" => true})
+  end
+
   def filter_by_podcast(query, %Podcast{} = podcast) do
     from(e in query, where: e.podcast_id == ^podcast.id)
   end
 
-  def order_by(query, _) do
-    from(e in query, order_by: [desc: e.published_at])
+  def order_by(query, %{"order_by" => order_by, "order" => order}) do
+    from(p in query, order_by: ^_order_by_params(order_by, order))
+  end
+
+  def order_by(query, %{"order_by" => order_by}) do
+    __MODULE__.order_by(query, %{"order_by" => order_by, "order" => :asc})
+  end
+
+  def order_by(query, %{"order" => order}) do
+    __MODULE__.order_by(query, %{"order_by" => "title", "order" => order})
+  end
+
+  def order_by(query, _), do: from(e in query, order_by: [desc: e.published_at])
+
+  defp _order_by_params(order_by, :asc) do
+    [asc: order_by]
+  end
+
+  defp _order_by_params(order_by, :desc) do
+    [desc: order_by]
   end
 end

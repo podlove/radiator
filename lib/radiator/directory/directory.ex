@@ -125,6 +125,7 @@ defmodule Radiator.Directory do
 
   def list_episodes(%Podcast{} = podcast, params \\ %{}) do
     from(e in Episode)
+    |> Episode.filter_by_published(params)
     |> Episode.filter_by_podcast(podcast)
     |> Episode.order_by(params)
     |> Repo.all()
