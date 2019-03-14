@@ -2,6 +2,7 @@ defmodule Radiator.Directory.Episode do
   use Ecto.Schema
   import Ecto.Changeset
 
+  import Ecto.Query, warn: false
   alias Radiator.Directory.Podcast
 
   schema "episodes" do
@@ -55,4 +56,12 @@ defmodule Radiator.Directory.Episode do
 
   defp maybe_regenerate_guid(changeset, nil), do: regenerate_guid(changeset)
   defp maybe_regenerate_guid(changeset, _), do: changeset
+
+  def filter_by_podcast(query, %Podcast{} = podcast) do
+    from(e in query, where: e.podcast_id == ^podcast.id)
+  end
+
+  def order_by(query, _) do
+    from(e in query, order_by: [desc: e.published_at])
+  end
 end
