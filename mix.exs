@@ -56,6 +56,11 @@ defmodule Radiator.MixProject do
       {:xml_builder, "~> 2.1", override: true},
       {:ex_machina, "~> 2.3", only: :test},
       {:elixir_uuid, "~> 1.2"},
+      {:absinthe_plug, "~> 1.4"},
+      {:absinthe_phoenix, "~> 1.4.0"},
+      {:poison, "~> 3.0"},
+      {:timex, "~> 3.5"},
+      {:cors_plug, "~> 2.0"},
       # for documentation
       {:earmark, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.19", only: :dev}
