@@ -60,7 +60,7 @@ defmodule Radiator.MixProject do
       {:absinthe_phoenix, "~> 1.4.0"},
       {:poison, "~> 3.0"},
       {:timex, "~> 3.5"},
-      {:cors_plug, "~> 2.0"}
+      {:cors_plug, "~> 2.0"},
       # for documentation
       {:earmark, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.19", only: :dev}
