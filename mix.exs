@@ -51,6 +51,8 @@ defmodule Radiator.MixProject do
       {:hackney, "~> 1.15"},
       # for ex_aws
       {:sweet_xml, "~> 0.6.5"},
+      # for feed import
+      {:metalove, "~> 0.2"},
       {:xml_builder, "~> 2.1", override: true},
       {:ex_machina, "~> 2.3", only: :test},
       {:elixir_uuid, "~> 1.2"},
@@ -59,6 +61,9 @@ defmodule Radiator.MixProject do
       {:poison, "~> 3.0"},
       {:timex, "~> 3.5"},
       {:cors_plug, "~> 2.0"}
+      # for documentation
+      {:earmark, "~> 1.2", only: :dev},
+      {:ex_doc, "~> 0.19", only: :dev}
     ]
   end
 

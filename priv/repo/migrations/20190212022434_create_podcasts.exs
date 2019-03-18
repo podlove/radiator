@@ -16,6 +16,5 @@ defmodule Radiator.Repo.Migrations.CreatePodcasts do
 
       timestamps()
     end
-
   end
 end
