@@ -73,3 +73,11 @@ config :radiator, Radiator.Repo,
   database: "radiator_dev",
   hostname: "localhost",
   pool_size: 10
+
+# Configure your database
+config :radiator, Radiator.Auth.Repo,
+  username: "postgres",
+  password: "postgres",
+  database: "radiator_auth_dev",
+  hostname: "localhost",
+  pool_size: 10

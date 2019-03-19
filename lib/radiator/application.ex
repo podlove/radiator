@@ -8,8 +8,9 @@ defmodule Radiator.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      # Start the Ecto repository
+      # Start the Ecto repositories
       Radiator.Repo,
+      Radiator.Auth.Repo,
       # Start the endpoint when the application starts
       RadiatorWeb.Endpoint
       # Starts a worker by calling: Radiator.Worker.start_link(arg)
