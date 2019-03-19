@@ -89,7 +89,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
       %{body: xml} = Storage.upload_file(upload.path, upload.filename, upload.content_type)
 
       file_key = xml |> xpath(~x"//Key/text()"s)
-      enclosure_url = Routes.api_download_url(conn, :show, file_key)
+      enclosure_url = Storage.file_url(file_key)
       {:ok, enclosure_url, upload.content_type, size}
     else
       :noupload

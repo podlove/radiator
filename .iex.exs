@@ -32,6 +32,6 @@ import Ecto.Query, warn: false
 
 alias RadiatorWeb.Router.Helpers, as: Routes
 
-alias Radiator.{Directory, Repo}
+alias Radiator.{Directory, Repo, Storage}
 alias Radiator.Directory.{Episode, Podcast}
 alias Radiator.Feed.Builder

@@ -72,6 +72,27 @@ defmodule Radiator.Storage do
     {:ok, key}
   end
 
+  @doc """
+  Full storage URL for a given file name
+  """
+  def file_url(filename) do
+    url_base()
+    |> URI.parse()
+    |> Map.put(:path, "/#{bucket()}/#{filename}")
+    |> URI.to_string()
+  end
+
+  @doc """
+  Base storage URL
+  """
+  def url_base() do
+    [scheme: scheme, host: host, port: port] = Application.fetch_env!(:ex_aws, :s3)
+    scheme = String.replace(scheme, "://", "")
+
+    struct(URI, scheme: scheme, host: host, port: port)
+    |> URI.to_string()
+  end
+
   defp bucket do
     Application.get_env(:radiator, :storage_bucket)
   end
