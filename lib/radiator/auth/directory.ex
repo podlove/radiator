@@ -6,11 +6,29 @@ defmodule Radiator.Auth.Directory do
   alias Radiator.Auth.Repo
   alias Radiator.Auth.User
 
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user(id), do: Repo.get!(User, id)
 
-  def get_user_by_email!(email), do: Repo.get_by(User, email: email)
+  def get_user_by_email(email), do: Repo.get_by(User, email: email)
 
-  def get_user_by_user_name!(user_name), do: Repo.get_by(User, user_name: user_name)
+  def get_user_by_name(name), do: Repo.get_by(User, name: name)
+
+  def get_user_by_credentials(name_or_email, password) do
+    case get_user_by_name(name_or_email) || get_user_by_email(name_or_email) do
+      nil ->
+        nil
+
+      user ->
+        if password_encrypt(password) == user.pass do
+          user
+        else
+          nil
+        end
+    end
+  end
+
+  def password_encrypt(binary) do
+    binary
+  end
 
   def create_user(attrs \\ %{}) do
     %User{}

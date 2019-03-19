@@ -33,7 +33,7 @@ defmodule Radiator.Auth.User do
     plain_password = get_change(changeset, :plain_password)
 
     if plain_password do
-      encrypted_password = plain_password
+      encrypted_password = Radiator.Auth.Directory.password_encrypt(plain_password)
       put_change(changeset, :pass, encrypted_password)
     else
       changeset

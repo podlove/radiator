@@ -17,6 +17,10 @@ config :radiator, RadiatorWeb.Endpoint,
   render_errors: [view: RadiatorWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Radiator.PubSub, adapter: Phoenix.PubSub.PG2]
 
+config :radiator, Radiator.Auth.Guardian,
+  issuer: "radiator",
+  secret_key: "dev-only;I1B6O0dEt9sBw6531zH/vDHKEDTY64ohsPxLw5jvLtKaphKofVC/NM5nzkbyD4HW"
+
 config :radiator,
   storage_bucket: "radiator"
 

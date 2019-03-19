@@ -1,0 +1,12 @@
+<%= render RadiatorWeb.PageView, "nav.html", assigns %>
+
+<div class="container mx-auto mb-6 max-w-sm">
+    <div class="mb-6">
+      <h1 class="mb-1 text-blue-darkest">Login</h1>
+    </div>
+
+    <%= render "form.html", Map.merge(assigns, %{
+      action: Routes.login_path(@conn, :login), 
+      button_text: "Login"})
+      %>
+</div>

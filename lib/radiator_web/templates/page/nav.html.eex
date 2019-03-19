@@ -40,6 +40,12 @@
       <% end %>
     </ul>
 
+    <span class="font-thin ml-auto nav-link" style="margin-left:auto">
+      <%= case Guardian.Plug.current_resource(@conn) do %>
+        <% %Radiator.Auth.User{ name: name } -> %> <%= link "#{name} (logout)", to: Routes.login_path(@conn, :logout) %>
+        <% _ -> %> <%= link "login", to: Routes.login_path(@conn, :login_form) %>
+      <% end %>      
+    </span>
 
   </div>
 </div>
