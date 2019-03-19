@@ -5,7 +5,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   alias Radiator.Storage
   alias Radiator.Directory.Episode
 
-  plug :assign_podcast when action in [:new, :create]
+  plug :assign_podcast when action in [:new, :create, :update]
 
   defp assign_podcast(conn, _) do
     assign(conn, :podcast, Directory.get_podcast!(conn.params["podcast_id"]))
@@ -20,7 +20,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
     podcast = conn.assigns[:podcast]
 
     episode_params =
-      case process_upload(conn, episode_params) do
+      case process_upload(conn, podcast, episode_params) do
         {:ok, enclosure_url, enclosure_type, enclosure_size} ->
           episode_params
           |> Map.put("enclosure_url", enclosure_url)
@@ -59,7 +59,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
     episode = Directory.get_episode!(id)
 
     episode_params =
-      case process_upload(conn, episode_params) do
+      case process_upload(conn, conn.assigns[:podcast], episode_params) do
         {:ok, enclosure_url, enclosure_type, enclosure_size} ->
           episode_params
           |> Map.put("enclosure_url", enclosure_url)
@@ -81,15 +81,13 @@ defmodule RadiatorWeb.Admin.EpisodeController do
     end
   end
 
-  def process_upload(conn, params) do
-    import SweetXml
-
+  def process_upload(_conn, podcast, params) do
     if upload = params["enclosure"] do
       {:ok, %File.Stat{size: size}} = File.stat(upload.path)
-      %{body: xml} = Storage.upload_file(upload.path, upload.filename, upload.content_type)
+      path = Storage.file_path(podcast, upload.filename)
+      Storage.upload_file(upload.path, path, upload.content_type)
 
-      file_key = xml |> xpath(~x"//Key/text()"s)
-      enclosure_url = Storage.file_url(file_key)
+      enclosure_url = Storage.file_url(podcast, upload.filename)
       {:ok, enclosure_url, upload.content_type, size}
     else
       :noupload
