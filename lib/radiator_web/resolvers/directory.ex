@@ -91,7 +91,7 @@ defmodule RadiatorWeb.Resolvers.Directory do
     end
   end
 
-  def update_episode(_parent, args = %{id: id, episode: args}, _resolution) do
+  def update_episode(_parent, %{id: id, episode: args}, _resolution) do
     case Directory.get_episode(id) do
       nil -> {:error, "Episode ID #{id} not found"}
       episode -> Directory.update_episode(episode, args)
