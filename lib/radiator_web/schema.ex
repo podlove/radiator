@@ -1,16 +1,11 @@
 defmodule RadiatorWeb.Schema do
   use Absinthe.Schema
 
+  import_types Absinthe.Type.Custom
   import_types RadiatorWeb.Schema.DirectoryTypes
   import_types RadiatorWeb.Schema.StorageTypes
 
   alias RadiatorWeb.Resolvers
-
-  scalar :datetime do
-    description "Date & Time (in ISO8601 Extended format)"
-    parse &Timex.parse!(&1, "{ISO:Extended}")
-    serialize &Timex.format!(&1, "{ISO:Extended}")
-  end
 
   query do
     @desc "Get all podcasts"
@@ -41,13 +36,7 @@ defmodule RadiatorWeb.Schema do
   mutation do
     @desc "Create a podcast"
     field :create_podcast, type: :podcast do
-      arg :title, non_null(:string)
-      arg :subtitle, :string
-      arg :description, :string
-      arg :image, :string
-      arg :language, :string
-      arg :owner_email, :string
-      arg :owner_name, :string
+      arg :podcast, non_null(:podcast_input)
 
       resolve &Resolvers.Directory.create_podcast/3
     end
@@ -69,13 +58,7 @@ defmodule RadiatorWeb.Schema do
     @desc "Update a podcast"
     field :update_podcast, type: :podcast do
       arg :id, non_null(:id)
-      arg :title, :string
-      arg :subtitle, :string
-      arg :description, :string
-      arg :image, :string
-      arg :language, :string
-      arg :owner_email, :string
-      arg :owner_name, :string
+      arg :podcast, non_null(:podcast_input)
 
       resolve &Resolvers.Directory.update_podcast/3
     end
@@ -95,13 +78,8 @@ defmodule RadiatorWeb.Schema do
 
     @desc "Create an episode"
     field :create_episode, type: :episode do
-      arg :podcast_id, non_null(:integer)
-      arg :title, non_null(:string)
-      arg :subtitle, :string
-      arg :description, :string
-      arg :content, :string
-      arg :image, :string
-      arg :number, :integer
+      arg :podcast_id, non_null(:id)
+      arg :episode, non_null(:episode_input)
 
       resolve &Resolvers.Directory.create_episode/3
     end
@@ -109,12 +87,7 @@ defmodule RadiatorWeb.Schema do
     @desc "Update an episode"
     field :update_episode, type: :episode do
       arg :id, non_null(:id)
-      arg :title, :string
-      arg :subtitle, :string
-      arg :description, :string
-      arg :content, :string
-      arg :image, :string
-      arg :number, :integer
+      arg :episode, non_null(:episode_input)
 
       resolve &Resolvers.Directory.update_episode/3
     end
