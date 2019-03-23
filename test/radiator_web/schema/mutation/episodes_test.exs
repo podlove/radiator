@@ -106,16 +106,7 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.EpisodesTest do
         query: @update_query,
         variables: %{"episode" => %{title: ""}, "id" => episode.id}
 
-    # TODO we need a way to manage changeset errors
-    # id = Integer.to_string(episode.id)
-
-    # assert %{
-    #          "data" => %{
-    #            "updateEpisode" => %{
-    #              "title" => "Aldebaran",
-    #              "id" => ^id
-    #            }
-    #          }
-    #        } = json_response(conn, 200)
+    assert %{"errors" => [%{"message" => msg}]} = json_response(conn, 200)
+    assert msg == "title can't be blank"
   end
 end

@@ -34,6 +34,7 @@ defmodule RadiatorWeb.Schema do
       arg :podcast, non_null(:podcast_input)
 
       resolve &Resolvers.Directory.create_podcast/3
+      middleware RadiatorWeb.ChangesetMiddleware
     end
 
     @desc "Publish podcast"
@@ -56,6 +57,7 @@ defmodule RadiatorWeb.Schema do
       arg :podcast, non_null(:podcast_input)
 
       resolve &Resolvers.Directory.update_podcast/3
+      middleware RadiatorWeb.ChangesetMiddleware
     end
 
     @desc "Delete a podcast"
@@ -77,6 +79,7 @@ defmodule RadiatorWeb.Schema do
       arg :episode, non_null(:episode_input)
 
       resolve &Resolvers.Directory.create_episode/3
+      middleware RadiatorWeb.ChangesetMiddleware
     end
 
     @desc "Update an episode"
@@ -85,6 +88,7 @@ defmodule RadiatorWeb.Schema do
       arg :episode, non_null(:episode_input)
 
       resolve &Resolvers.Directory.update_episode/3
+      middleware RadiatorWeb.ChangesetMiddleware
     end
 
     @desc "Delete an episode"
