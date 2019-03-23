@@ -38,7 +38,6 @@ defmodule RadiatorWeb.Router do
 
     resources "/upload", UploadController, only: [:create]
     resources "/files", FileController, only: [:index, :show]
-    resources "/download", DownloadController, only: [:show]
 
     resources "/podcasts", PodcastController, except: [:new, :edit] do
       resources "/episodes", EpisodeController, except: [:new, :edit]
