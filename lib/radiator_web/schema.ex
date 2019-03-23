@@ -26,11 +26,6 @@ defmodule RadiatorWeb.Schema do
 
       resolve &Resolvers.Directory.find_episode/3
     end
-
-    @desc "Get all episodes"
-    field :episodes, list_of(:episode) do
-      resolve &Resolvers.Directory.list_episodes/3
-    end
   end
 
   mutation do
