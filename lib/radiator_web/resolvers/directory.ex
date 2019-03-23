@@ -74,7 +74,10 @@ defmodule RadiatorWeb.Resolvers.Directory do
   end
 
   def find_episode(_parent, %{id: id}, _resolution) do
-    {:ok, Directory.get_episode!(id)}
+    case Directory.get_episode(id) do
+      nil -> {:error, "Episode ID #{id} not found"}
+      episode -> {:ok, episode}
+    end
   end
 
   def list_episodes(%Podcast{} = podcast, _args, _resolution) do
