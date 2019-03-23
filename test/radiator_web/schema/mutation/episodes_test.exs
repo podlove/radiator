@@ -109,4 +109,44 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.EpisodesTest do
     assert %{"errors" => [%{"message" => msg}]} = json_response(conn, 200)
     assert msg == "title can't be blank"
   end
+
+  @delete_query """
+  mutation ($id: ID!) {
+    deleteEpisode(id: $id) {
+      id
+      title
+    }
+  }
+  """
+
+  test "deleteEpisode deletes a episode", %{conn: conn} do
+    episode = insert(:episode)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @delete_query,
+        variables: %{"id" => episode.id}
+
+    title = episode.title
+    id = Integer.to_string(episode.id)
+
+    assert %{
+             "data" => %{
+               "deleteEpisode" => %{
+                 "title" => ^title,
+                 "id" => ^id
+               }
+             }
+           } = json_response(conn, 200)
+  end
+
+  test "deleteEpisode returns an error for non-existing id", %{conn: conn} do
+    conn =
+      post conn, "/api/graphql",
+        query: @delete_query,
+        variables: %{"id" => -1}
+
+    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
+    assert message == "episode ID -1 not found"
+  end
 end

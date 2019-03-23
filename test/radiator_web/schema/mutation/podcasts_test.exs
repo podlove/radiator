@@ -89,4 +89,124 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
     assert %{"errors" => [%{"message" => msg}]} = json_response(conn, 200)
     assert msg == "title can't be blank"
   end
+
+  @publish_query """
+  mutation ($id: ID!) {
+    publishPodcast(id: $id) {
+      id
+      publishedAt
+    }
+  }
+  """
+
+  test "publishPodcast publishes a podcast", %{conn: conn} do
+    podcast = insert(:podcast, published_at: nil)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @publish_query,
+        variables: %{"id" => podcast.id}
+
+    id = Integer.to_string(podcast.id)
+
+    assert %{
+             "data" => %{
+               "publishPodcast" => %{
+                 "id" => ^id,
+                 "publishedAt" => published
+               }
+             }
+           } = json_response(conn, 200)
+
+    refute is_nil(published)
+  end
+
+  test "publishPodcast returns errors on wrong id", %{conn: conn} do
+    conn =
+      post conn, "/api/graphql",
+        query: @publish_query,
+        variables: %{"id" => -1}
+
+    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
+    assert message == "Podcast ID -1 not found"
+  end
+
+  @depublish_query """
+  mutation ($id: ID!) {
+    depublishPodcast(id: $id) {
+      id
+      publishedAt
+    }
+  }
+  """
+
+  test "depublishPodcast depublishes a podcast", %{conn: conn} do
+    podcast = insert(:podcast, published_at: DateTime.utc_now())
+
+    conn =
+      post conn, "/api/graphql",
+        query: @depublish_query,
+        variables: %{"id" => podcast.id}
+
+    id = Integer.to_string(podcast.id)
+
+    assert %{
+             "data" => %{
+               "depublishPodcast" => %{
+                 "id" => ^id,
+                 "publishedAt" => nil
+               }
+             }
+           } = json_response(conn, 200)
+  end
+
+  test "depublishPodcast returns errors on wrong id", %{conn: conn} do
+    conn =
+      post conn, "/api/graphql",
+        query: @depublish_query,
+        variables: %{"id" => -1}
+
+    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
+    assert message == "Podcast ID -1 not found"
+  end
+
+  @delete_query """
+  mutation ($id: ID!) {
+    deletePodcast(id: $id) {
+      id
+      title
+    }
+  }
+  """
+
+  test "deletePodcast deletes a podcast", %{conn: conn} do
+    podcast = insert(:podcast)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @delete_query,
+        variables: %{"id" => podcast.id}
+
+    title = podcast.title
+    id = Integer.to_string(podcast.id)
+
+    assert %{
+             "data" => %{
+               "deletePodcast" => %{
+                 "title" => ^title,
+                 "id" => ^id
+               }
+             }
+           } = json_response(conn, 200)
+  end
+
+  test "deletePodcast returns an error for non-existing id", %{conn: conn} do
+    conn =
+      post conn, "/api/graphql",
+        query: @delete_query,
+        variables: %{"id" => -1}
+
+    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
+    assert message == "Podcast ID -1 not found"
+  end
 end
