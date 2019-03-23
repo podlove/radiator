@@ -28,7 +28,7 @@ defmodule RadiatorWeb.Endpoint do
   plug Plug.Logger
 
   plug Plug.Parsers,
-    parsers: [:urlencoded, :multipart, :json, Absinthe.Plug.Parser],
+    parsers: [:urlencoded, {:multipart, length: 200_000_000}, :json, Absinthe.Plug.Parser],
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
 

@@ -17,14 +17,37 @@ We are still in an exploration phase. Technically the foundation for hosting a p
 
 ## Development
 
+**Minio Setup**
+
+- [Install minio][minio-setup]
+- [Install minio client][minio-client-setup]
+- start minio and take note of the AccessKey and SecretKey in the startup notice (for example manually `minio server ./data`)
+- configure minio client:
+
+```shell
+mc config host add radiator http://127.0.0.1:9000 <AccessKey> <SecretKey>
+```
+
+- setup minio:
+
+```shell
+mc mb radiator/radiator
+mc policy public radiator/radiator
+```
+
+**Phoenix Setup**
+
 ```shell
 git clone https://github.com/podlove/radiator-spark.git
 cd radiator-spark
 
 # start postgres
-# start minio
-# set minio access and secret in config/config.exs `config :ex_aws` 
-#  (you see them at minio startup in the console)
+
+# set minio access keys in config/config.exs
+#   config :ex_aws,
+#     access_key_id: "<AccessKey>",
+#     secret_access_key: "<SecretKey>",
+#     json_codec: Jason
 
 mix deps.get
 mix ecto.create
@@ -72,6 +95,8 @@ Radiator is [MIT Licensed][license].
 
 [phoenix]: https://phoenixframework.org/
 [minio]: https://minio.io/
+[minio-setup]: https://docs.minio.io/docs/minio-quickstart-guide.html
+[minio-client-setup]: https://docs.minio.io/docs/minio-client-quickstart-guide.html
 [pgsql]: https://www.postgresql.org/
 [hal]: http://stateless.co/hal_specification.html
 [license]: https://github.com/podlove/radiator-spark/blob/master/LICENSE
