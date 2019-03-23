@@ -1,16 +1,11 @@
 defmodule RadiatorWeb.Schema do
   use Absinthe.Schema
 
+  import_types Absinthe.Type.Custom
   import_types RadiatorWeb.Schema.DirectoryTypes
   import_types RadiatorWeb.Schema.StorageTypes
 
   alias RadiatorWeb.Resolvers
-
-  scalar :datetime do
-    description "Date & Time (in ISO8601 Extended format)"
-    parse &Timex.parse!(&1, "{ISO:Extended}")
-    serialize &Timex.format!(&1, "{ISO:Extended}")
-  end
 
   query do
     @desc "Get all podcasts"
