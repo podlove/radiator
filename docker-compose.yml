@@ -1,0 +1,33 @@
+version: "3"
+services:
+  minio:
+    image: minio/minio
+    ports:
+      - 9000:9000
+    environment:
+      # These are the default keys as you would find them in config/config.exs
+      - MINIO_ACCESS_KEY=IEKAZMUY3KX32CRJPE9R
+      - MINIO_SECRET_KEY=tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
+    volumes:
+      - minio_data:/data
+      - minio_config:/root/.minio
+    command: minio server /data
+  db:
+    image: postgres
+    volumes:
+      - psql_db:/var/lib/postgresql
+  radiator:
+    build: .
+    ports:
+      - 4000:4000
+    depends_on:
+      - db
+      - minio
+    environment:
+      - POSTGRES_HOST=db
+      - MINIO_HOST=minio
+
+volumes:
+  minio_data:
+  minio_config:
+  psql_db:
