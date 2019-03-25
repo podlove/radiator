@@ -5,7 +5,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
 
   @desc "A podcast"
   object :podcast do
-    field :id, :id
+    field :id, non_null(:id)
     field :title, :string
     field :author, :string
     field :description, :string
@@ -39,7 +39,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
 
   @desc "An episode in a podcast"
   object :episode do
-    field :id, :id
+    field :id, non_null(:id)
     field :content, :string
     field :description, :string
     field :duration, :string
