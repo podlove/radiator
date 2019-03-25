@@ -27,7 +27,7 @@ config :ex_aws,
 
 config :ex_aws, :s3,
   scheme: "http://",
-  host: "localhost",
+  host: System.get_env("MINIO_HOST") || "localhost",
   port: 9000
 
 config :ex_aws, :hackney_opts,
