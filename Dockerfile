@@ -32,7 +32,8 @@ WORKDIR /app/assets
 RUN npm install
 WORKDIR /app
 
-# copy the Elixir projects into it
+# copy the Elixir projects into it and compile what's there
 COPY . /app
+RUN mix compile
 
 ENTRYPOINT [ "/bin/bash", "entrypoint.sh" ]
