@@ -7,6 +7,7 @@ defmodule Radiator.Storage do
   """
 
   alias ExAws.S3
+  alias Radiator.Directory.Podcast
 
   def list_files() do
     {:ok, %{status_code: 200, body: %{contents: contents}, headers: _headers}} =
@@ -70,6 +71,31 @@ defmodule Radiator.Storage do
     {:ok, _} = S3.delete_object(bucket(), key) |> ExAws.request()
 
     {:ok, key}
+  end
+
+  @doc """
+  Full storage URL for a given file name
+  """
+  def file_url(%Podcast{} = podcast, filename) do
+    url_base() <> file_path(podcast, filename)
+  end
+
+  @doc """
+  File path relative to bucket.
+  """
+  def file_path(%Podcast{} = podcast, filename) do
+    "/p#{podcast.id}/#{filename}"
+  end
+
+  @doc """
+  Base storage URL, including bucket.
+  """
+  def url_base() do
+    [scheme: scheme, host: host, port: port] = Application.fetch_env!(:ex_aws, :s3)
+    scheme = String.replace(scheme, "://", "")
+
+    struct(URI, scheme: scheme, host: host, port: port, path: "/#{bucket()}")
+    |> URI.to_string()
   end
 
   defp bucket do

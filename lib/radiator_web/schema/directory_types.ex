@@ -5,7 +5,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
 
   @desc "A podcast"
   object :podcast do
-    field :id, :id
+    field :id, non_null(:id)
     field :title, :string
     field :author, :string
     field :description, :string
@@ -26,9 +26,20 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     end
   end
 
+  @desc "The input for a podcast"
+  input_object :podcast_input do
+    field :title, non_null(:string)
+    field :subtitle, :string
+    field :description, :string
+    field :image, :string
+    field :language, :string
+    field :owner_email, :string
+    field :owner_name, :string
+  end
+
   @desc "An episode in a podcast"
   object :episode do
-    field :id, :id
+    field :id, non_null(:id)
     field :content, :string
     field :description, :string
     field :duration, :string
@@ -45,5 +56,15 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :podcast, :podcast do
       resolve &Resolvers.Directory.find_podcast/3
     end
+  end
+
+  @desc "The input for an episode in a podcast"
+  input_object :episode_input do
+    field :title, non_null(:string)
+    field :subtitle, :string
+    field :description, :string
+    field :content, :string
+    field :image, :string
+    field :number, :integer
   end
 end
