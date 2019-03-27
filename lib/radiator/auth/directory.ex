@@ -18,16 +18,14 @@ defmodule Radiator.Auth.Directory do
         nil
 
       user ->
-        if password_encrypt(password) == user.pass do
-          user
-        else
-          nil
+        case Argon2.check_pass(user, password) do
+          {:ok, _} ->
+            user
+
+          _ ->
+            nil
         end
     end
-  end
-
-  def password_encrypt(binary) do
-    binary
   end
 
   def create_user(attrs \\ %{}) do

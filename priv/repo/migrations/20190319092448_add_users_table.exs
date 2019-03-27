@@ -6,7 +6,7 @@ defmodule Radiator.Auth.Repo.Migrations.AddUsersTable do
       add :name, :string
       add :email, :string
       add :display_name, :string
-      add :pass, :string
+      add :password_hash, :binary
 
       timestamps()
     end
