@@ -8,7 +8,7 @@
 use Mix.Config
 
 config :radiator,
-  ecto_repos: [Radiator.Repo, Radiator.Auth.Repo]
+  ecto_repos: [Radiator.Repo]
 
 # Configures the endpoint
 config :radiator, RadiatorWeb.Endpoint,

@@ -5,7 +5,7 @@ defmodule Radiator.Auth.User do
   import Ecto.Changeset
   import Ecto.Query, warn: false
 
-  schema "users" do
+  schema "auth_users" do
     field :name, :string
     field :email, :string
     field :display_name, :string

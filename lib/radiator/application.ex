@@ -10,7 +10,6 @@ defmodule Radiator.Application do
     children = [
       # Start the Ecto repositories
       Radiator.Repo,
-      Radiator.Auth.Repo,
       # Start the endpoint when the application starts
       RadiatorWeb.Endpoint
       # Starts a worker by calling: Radiator.Worker.start_link(arg)

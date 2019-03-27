@@ -3,7 +3,7 @@ defmodule Radiator.Auth.Directory do
   The Account Directory Context
   """
 
-  alias Radiator.Auth.Repo
+  alias Radiator.Repo
   alias Radiator.Auth.User
 
   def get_user(id), do: Repo.get!(User, id)
