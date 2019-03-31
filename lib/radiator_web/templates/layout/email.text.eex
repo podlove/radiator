@@ -1,0 +1,4 @@
+<%= render @view_module, @view_template, assigns %>
+
+Yours,
+    Radiator-Spark Team
