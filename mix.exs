@@ -20,7 +20,7 @@ defmodule Radiator.MixProject do
   def application do
     [
       mod: {Radiator.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :bamboo, :bamboo_smtp]
     ]
   end
 
@@ -61,8 +61,11 @@ defmodule Radiator.MixProject do
       {:poison, "~> 3.0"},
       {:timex, "~> 3.5"},
       {:cors_plug, "~> 2.0"},
+      # authentication
       {:guardian, "~> 1.2"},
       {:argon2_elixir, "~> 2.0"},
+      # mail
+      {:bamboo_smtp, "~> 1.6"},
       # for documentation
       {:earmark, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.19", only: :dev}
