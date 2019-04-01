@@ -12,7 +12,7 @@ defmodule RadiatorWeb.LoginController do
          ) do
       nil ->
         conn
-        |> put_flash(:error, "Wrong Username/Password. #{inspect(params)}")
+        |> put_flash(:error, "Wrong Username/Password.")
         |> render("login_form.html", Map.take(params, [:name_or_email]))
 
       valid_user ->
