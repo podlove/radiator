@@ -21,6 +21,7 @@ defmodule RadiatorWeb.Router do
     plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
     plug Guardian.Plug.EnsureAuthenticated
     plug Guardian.Plug.LoadResource
+    plug RadiatorWeb.Plug.EnsureUserValidity
   end
 
   pipeline :api do
@@ -35,8 +36,12 @@ defmodule RadiatorWeb.Router do
 
     get "/feed/:podcast_id", FeedController, :show
 
+    get "/login/request_verification/:token", LoginController, :resend_verification_mail
+    get "/login/verify_email/:token", LoginController, :verify_email
+
     get "/login", LoginController, :login_form
     post "/login", LoginController, :login
+
     get "/logout", LoginController, :logout
   end
 

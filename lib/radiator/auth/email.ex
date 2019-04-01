@@ -4,15 +4,27 @@ defmodule Radiator.Auth.Email do
   alias Radiator.Auth.Config
   alias Radiator.Auth.User
 
-  def welcome_email(%User{} = user) do
+  def welcome_email(%User{} = user, confirmation_url) do
     email_base()
     |> subject(mail_subject("Welcome to Radiator-Spark!"))
     |> assign(:username, user.name)
     |> assign(
       :confirmation_url,
-      "https://radiator-spark.local/user/verify?tkn=123123145asdfoaijnewpoinav-asdf"
+      confirmation_url
     )
     |> render("welcome.text")
+    |> to(user.email)
+  end
+
+  def email_verification_email(%User{} = user, confirmation_url) do
+    email_base()
+    |> subject(mail_subject("Please verifiy your email address."))
+    |> assign(:username, user.name)
+    |> assign(
+      :confirmation_url,
+      confirmation_url
+    )
+    |> render("email_verification_email.text")
     |> to(user.email)
   end
 

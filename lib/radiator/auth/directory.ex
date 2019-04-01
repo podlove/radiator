@@ -40,5 +40,10 @@ defmodule Radiator.Auth.Directory do
     |> Repo.update()
   end
 
+  def activate_user(%User{} = user) do
+    get_user_by_email(user.email)
+    |> update_user(%{status: :active})
+  end
+
   def change_user(%User{} = user), do: User.changeset(user, %{})
 end

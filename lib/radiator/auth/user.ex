@@ -1,3 +1,33 @@
+defmodule Radiator.Auth.Ecto.UserStatusType do
+  @behaviour Ecto.Type
+
+  @status_values [:unverified, :active, :suspended]
+
+  def allowed_values do
+    @status_values
+  end
+
+  def type, do: :binary
+
+  def cast(binary) when is_binary(binary), do: cast(String.to_existing_atom(binary))
+
+  def cast(atom) when is_atom(atom) do
+    if atom in @status_values do
+      {:ok, atom}
+    else
+      :error
+    end
+  end
+
+  def load(data) when is_binary(data) do
+    {:ok, String.to_existing_atom(data)}
+  end
+
+  def dump(atom) when is_atom(atom) do
+    {:ok, Atom.to_string(atom)}
+  end
+end
+
 defmodule Radiator.Auth.User do
   alias Radiator.Auth.User
 
@@ -11,6 +41,8 @@ defmodule Radiator.Auth.User do
     field :display_name, :string
     field :password_hash, :binary
     field :password, :string, virtual: true
+    field :status, Radiator.Auth.Ecto.UserStatusType, default: :unverified
+    # unverified, active, suspended
 
     timestamps()
   end
@@ -18,7 +50,7 @@ defmodule Radiator.Auth.User do
   @doc false
   def changeset(%User{} = user, attrs) do
     user
-    |> cast(attrs, [:name, :email, :display_name, :password, :password_hash])
+    |> cast(attrs, [:name, :email, :display_name, :password, :password_hash, :status])
     |> unique_constraint(:name)
     |> unique_constraint(:email)
     |> validate_format(:name, ~r/^[^\s ]+$/)
@@ -42,5 +74,42 @@ defmodule Radiator.Auth.User do
 
   def check_password(%User{} = user, password) do
     Argon2.check_pass(user, password)
+  end
+
+  @request_email_salt "34ercft gpaojrt[we"
+  @email_verification_salt "q3480haspodfinp0284;a"
+
+  def email_verification_request_token(%User{} = user) do
+    Phoenix.Token.sign(RadiatorWeb.Endpoint, @request_email_salt, user.name)
+  end
+
+  def validate_email_verification_request_token(token) do
+    Phoenix.Token.verify(RadiatorWeb.Endpoint, @request_email_salt, token, max_age: 60 * 5)
+  end
+
+  @spec email_verification_token(Radiator.Auth.User.t()) :: any()
+  def email_verification_token(%User{} = user) do
+    Phoenix.Token.sign(
+      RadiatorWeb.Endpoint,
+      @email_verification_salt,
+      "#{user.name} #{user.email}"
+    )
+  end
+
+  def validate_email_verification_token(token) do
+    case Phoenix.Token.verify(RadiatorWeb.Endpoint, @email_verification_salt, token,
+           max_age: 60 * 60 * 48
+         ) do
+      {:ok, binary} ->
+        [name, email] = :binary.split(binary, " ")
+
+        case Radiator.Auth.Directory.get_user_by_email(email) do
+          %User{name: ^name} = user -> {:ok, user}
+          _ -> {:error, :invalid}
+        end
+
+      result ->
+        result
+    end
   end
 end
