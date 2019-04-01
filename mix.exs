@@ -1,16 +1,21 @@
 defmodule Radiator.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       app: :radiator,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      # Docs
+      name: "Radiator",
+      docs: docs()
     ]
   end
 
@@ -83,6 +88,17 @@ defmodule Radiator.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate", "test"]
+    ]
+  end
+
+  defp docs do
+    [
+      main: "Radiator",
+      source_ref: "v#{@version}",
+      logo: "guides/images/podlove-radiator-logo.svg",
+      extras: [
+        "guides/Users and Permissions.md"
+      ]
     ]
   end
 end
