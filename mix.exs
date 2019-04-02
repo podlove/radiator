@@ -63,7 +63,8 @@ defmodule Radiator.MixProject do
       {:cors_plug, "~> 2.0"},
       # for documentation
       {:earmark, "~> 1.2", only: :dev},
-      {:ex_doc, "~> 0.19", only: :dev}
+      {:ex_doc, "~> 0.19", only: :dev},
+      {:chapters, "~> 0.1.0"}
     ]
   end
 

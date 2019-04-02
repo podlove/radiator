@@ -1,6 +1,7 @@
 defmodule RadiatorWeb.Resolvers.Directory do
   alias Radiator.Directory
   alias Radiator.Directory.{Episode, Podcast}
+  alias Radiator.EpisodeMeta
 
   def list_podcasts(_parent, _args, _resolution) do
     {:ok, Directory.list_podcasts()}
@@ -102,6 +103,17 @@ defmodule RadiatorWeb.Resolvers.Directory do
     case Directory.get_episode(id) do
       nil -> {:error, "episode ID #{id} not found"}
       episode -> Directory.delete_episode(episode)
+    end
+  end
+
+  def list_chapters(%Episode{} = episode, _args, _resolution) do
+    {:ok, EpisodeMeta.list_chapters(episode)}
+  end
+
+  def set_episode_chapters(_parent, %{id: id, chapters: chapters, type: type}, _resolution) do
+    case Directory.get_episode(id) do
+      nil -> {:error, "Episode ID #{id} not found"}
+      episode -> EpisodeMeta.set_chapters(episode, chapters, String.to_existing_atom(type))
     end
   end
 end

@@ -4,6 +4,7 @@ defmodule Radiator.Directory.Episode do
 
   import Ecto.Query, warn: false
   alias Radiator.Directory.Podcast
+  alias Radiator.EpisodeMeta.Chapter
 
   schema "episodes" do
     field :content, :string
@@ -20,6 +21,7 @@ defmodule Radiator.Directory.Episode do
     field :title, :string
 
     belongs_to :podcast, Podcast
+    has_many :chapters, Chapter
 
     timestamps()
   end

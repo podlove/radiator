@@ -56,6 +56,10 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :podcast, :podcast do
       resolve &Resolvers.Directory.find_podcast/3
     end
+
+    field :chapters, list_of(:chapter) do
+      resolve &Resolvers.Directory.list_chapters/3
+    end
   end
 
   @desc "The input for an episode in a podcast"

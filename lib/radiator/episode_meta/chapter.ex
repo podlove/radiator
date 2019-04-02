@@ -1,4 +1,4 @@
-defmodule Radiator.Directory.Episode.Chapter do
+defmodule Radiator.EpisodeMeta.Chapter do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -9,8 +9,8 @@ defmodule Radiator.Directory.Episode.Chapter do
   schema "chapters" do
     field :time, :integer
     field :title, :string
-    field :link_url, :string
-    field :image_url, :string
+    field :url, :string
+    field :image, :string
 
     belongs_to :episode, Episode
   end
@@ -21,8 +21,8 @@ defmodule Radiator.Directory.Episode.Chapter do
     |> cast(attrs, [
       :time,
       :title,
-      :link_url,
-      :image_url
+      :url,
+      :image
     ])
   end
 end

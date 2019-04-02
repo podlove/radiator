@@ -149,4 +149,55 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.EpisodesTest do
     assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
     assert message == "episode ID -1 not found"
   end
+
+  @set_chapters_query """
+  mutation ($id: ID!, $chapters: String!, $type: String!) {
+    setChapters(id: $id, chapters: $chapters, type: $type) {
+      chapters {
+        time
+        title
+        url
+      }
+    }
+  }
+  """
+
+  test "setChapters sets chapters for episode", %{conn: conn} do
+    episode = insert(:episode)
+
+    chapters = ~S"""
+    00:00:01.234 Intro <http://example.com>
+    00:12:34.000 About us
+    01:02:03.000 Later
+    """
+
+    conn =
+      post conn, "/api/graphql",
+        query: @set_chapters_query,
+        variables: %{"chapters" => chapters, "id" => episode.id, "type" => "mp4chaps"}
+
+    assert %{
+             "data" => %{
+               "setChapters" => %{
+                 "chapters" => [
+                   %{
+                     "time" => 1234,
+                     "title" => "Intro",
+                     "url" => "http://example.com"
+                   },
+                   %{
+                     "time" => 754_000,
+                     "title" => "About us",
+                     "url" => nil
+                   },
+                   %{
+                     "time" => 3_723_000,
+                     "title" => "Later",
+                     "url" => nil
+                   }
+                 ]
+               }
+             }
+           } = json_response(conn, 200)
+  end
 end

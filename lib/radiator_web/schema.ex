@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Schema do
   use Absinthe.Schema
 
   import_types Absinthe.Type.Custom
+  import_types RadiatorWeb.Schema.Directory.EpisodeTypes
   import_types RadiatorWeb.Schema.DirectoryTypes
   import_types RadiatorWeb.Schema.StorageTypes
 
@@ -96,6 +97,15 @@ defmodule RadiatorWeb.Schema do
       arg :id, non_null(:id)
 
       resolve &Resolvers.Directory.delete_episode/3
+    end
+
+    @desc "Set chapters for an episode"
+    field :set_chapters, type: :episode do
+      arg :id, non_null(:id)
+      arg :chapters, non_null(:string)
+      arg :type, non_null(:string)
+
+      resolve &Resolvers.Directory.set_episode_chapters/3
     end
   end
 end
