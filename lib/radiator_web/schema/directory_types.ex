@@ -58,7 +58,9 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     end
 
     field :chapters, list_of(:chapter) do
-      resolve &Resolvers.Directory.list_chapters/3
+      arg :order, type: :sort_order, default_value: :asc
+
+      resolve &Resolvers.Directory.chapters_for_episode/3
     end
   end
 

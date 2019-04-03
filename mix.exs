@@ -64,7 +64,8 @@ defmodule Radiator.MixProject do
       # for documentation
       {:earmark, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.19", only: :dev},
-      {:chapters, "~> 0.1.0"}
+      {:chapters, "~> 0.1.0"},
+      {:dataloader, "~> 1.0"}
     ]
   end
 

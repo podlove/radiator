@@ -1,4 +1,6 @@
 defmodule RadiatorWeb.Resolvers.Directory do
+  import Absinthe.Resolution.Helpers, only: [on_load: 2]
+
   alias Radiator.Directory
   alias Radiator.Directory.{Episode, Podcast}
   alias Radiator.EpisodeMeta
@@ -108,6 +110,15 @@ defmodule RadiatorWeb.Resolvers.Directory do
 
   def list_chapters(%Episode{} = episode, _args, _resolution) do
     {:ok, EpisodeMeta.list_chapters(episode)}
+  end
+
+  def chapters_for_episode(%Episode{} = episode, args, %{context: %{loader: loader}}) do
+    loader
+    |> Dataloader.load(EpisodeMeta, {:chapters, args}, episode)
+    |> on_load(fn loader ->
+      chapters = Dataloader.get(loader, EpisodeMeta, {:chapters, args}, episode)
+      {:ok, chapters}
+    end)
   end
 
   def set_episode_chapters(_parent, %{id: id, chapters: chapters, type: type}, _resolution) do

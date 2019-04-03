@@ -1,6 +1,26 @@
 defmodule RadiatorWeb.Schema do
   use Absinthe.Schema
 
+  def plugins do
+    [Absinthe.Middleware.Dataloader | Absinthe.Plugin.defaults()]
+  end
+
+  def dataloader() do
+    alias Radiator.EpisodeMeta
+
+    Dataloader.new()
+    |> Dataloader.add_source(EpisodeMeta, EpisodeMeta.data())
+  end
+
+  def context(ctx) do
+    Map.put(ctx, :loader, dataloader())
+  end
+
+  enum :sort_order do
+    value :asc
+    value :desc
+  end
+
   import_types Absinthe.Type.Custom
   import_types RadiatorWeb.Schema.Directory.EpisodeTypes
   import_types RadiatorWeb.Schema.DirectoryTypes
