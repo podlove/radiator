@@ -83,10 +83,6 @@ defmodule RadiatorWeb.Resolvers.Directory do
     end
   end
 
-  def list_episodes(%Podcast{} = podcast, _args, _resolution) do
-    {:ok, Directory.list_episodes(podcast)}
-  end
-
   def create_episode(_parent, %{podcast_id: podcast_id, episode: args}, _resolution) do
     case Directory.get_podcast(podcast_id) do
       nil -> {:error, "Podcast ID #{podcast_id} not found"}
@@ -110,15 +106,6 @@ defmodule RadiatorWeb.Resolvers.Directory do
 
   def list_chapters(%Episode{} = episode, _args, _resolution) do
     {:ok, EpisodeMeta.list_chapters(episode)}
-  end
-
-  def chapters_for_episode(%Episode{} = episode, args, %{context: %{loader: loader}}) do
-    loader
-    |> Dataloader.load(EpisodeMeta, {:chapters, args}, episode)
-    |> on_load(fn loader ->
-      chapters = Dataloader.get(loader, EpisodeMeta, {:chapters, args}, episode)
-      {:ok, chapters}
-    end)
   end
 
   def set_episode_chapters(_parent, %{id: id, chapters: chapters, type: type}, _resolution) do

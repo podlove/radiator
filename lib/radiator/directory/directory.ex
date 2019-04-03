@@ -4,9 +4,29 @@ defmodule Radiator.Directory do
   """
 
   import Ecto.Query, warn: false
-  alias Radiator.Repo
 
+  alias Radiator.Repo
   alias Radiator.Directory.Podcast
+  alias Radiator.Directory.Episode
+
+  def data() do
+    Dataloader.Ecto.new(Repo, query: &query/2)
+  end
+
+  def query(Episode, args) do
+    episodes_query(args)
+  end
+
+  def query(queryable, _) do
+    queryable
+  end
+
+  defp episodes_query(args) do
+    Enum.reduce(args, Episode, fn
+      {:published, published}, query ->
+        Episode.filter_by_published(query, %{"published" => published})
+    end)
+  end
 
   @doc """
   Returns the list of podcasts.
@@ -108,8 +128,6 @@ defmodule Radiator.Directory do
   def change_podcast(%Podcast{} = podcast) do
     Podcast.changeset(podcast, %{})
   end
-
-  alias Radiator.Directory.Episode
 
   @doc """
   Returns the list of episodes.

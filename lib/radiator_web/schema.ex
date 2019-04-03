@@ -7,9 +7,11 @@ defmodule RadiatorWeb.Schema do
 
   def dataloader() do
     alias Radiator.EpisodeMeta
+    alias Radiator.Directory
 
     Dataloader.new()
     |> Dataloader.add_source(EpisodeMeta, EpisodeMeta.data())
+    |> Dataloader.add_source(Directory, Directory.data())
   end
 
   def context(ctx) do
@@ -19,6 +21,12 @@ defmodule RadiatorWeb.Schema do
   enum :sort_order do
     value :asc
     value :desc
+  end
+
+  enum :published do
+    value true
+    value false
+    value :any
   end
 
   import_types Absinthe.Type.Custom
