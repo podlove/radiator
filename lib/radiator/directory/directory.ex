@@ -21,13 +21,6 @@ defmodule Radiator.Directory do
     queryable
   end
 
-  defp episodes_query(args) do
-    Enum.reduce(args, Episode, fn
-      {:published, published}, query ->
-        Episode.filter_by_published(query, %{"published" => published})
-    end)
-  end
-
   @doc """
   Returns the list of podcasts.
 
@@ -129,24 +122,16 @@ defmodule Radiator.Directory do
     Podcast.changeset(podcast, %{})
   end
 
-  @doc """
-  Returns the list of episodes.
-
-  ## Examples
-
-      iex> list_episodes()
-      [%Episode{}, ...]
-
-  """
-  def list_episodes do
-    Repo.all(Episode)
+  defp episodes_query(args) when is_map(args) do
+    Radiator.Directory.EpisodeQuery.build(args)
   end
 
-  def list_episodes(%Podcast{} = podcast, params \\ %{}) do
-    from(e in Episode)
-    |> Episode.filter_by_published(params)
-    |> Episode.filter_by_podcast(podcast)
-    |> Episode.order_by(params)
+  def list_episodes do
+    list_episodes(%{})
+  end
+
+  def list_episodes(args) do
+    episodes_query(args)
     |> Repo.all()
   end
 

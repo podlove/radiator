@@ -25,6 +25,8 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
 
     field :episodes, list_of(:episode) do
       arg :published, type: :published, default_value: :any
+      arg :page, type: :integer, default_value: 1
+      arg :items_per_page, type: :integer, default_value: 10
 
       resolve dataloader(Radiator.Directory, :episodes)
     end
