@@ -27,7 +27,7 @@ defmodule RadiatorWeb.Api.EpisodeController do
   end
 
   def show(conn, %{"id" => id}) do
-    episode = Directory.get_episode!(id)
+    episode = Directory.get_episode!(id) |> Radiator.Repo.preload(:chapters)
     render(conn, "show.json", episode: episode)
   end
 
