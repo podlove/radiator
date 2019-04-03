@@ -1,6 +1,4 @@
 defmodule RadiatorWeb.Resolvers.Directory do
-  import Absinthe.Resolution.Helpers, only: [on_load: 2]
-
   alias Radiator.Directory
   alias Radiator.Directory.{Episode, Podcast}
   alias Radiator.EpisodeMeta
