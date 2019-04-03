@@ -16,6 +16,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
     |> add(description(episode))
     |> add(enclosure(episode))
     |> add(guid(episode))
+    |> add(chapters(episode))
     |> Enum.reverse()
   end
 
@@ -49,4 +50,28 @@ defmodule Radiator.Feed.EpisodeBuilder do
   defp guid(%Episode{guid: guid}) do
     element(:guid, %{isPermaLink: "false"}, guid)
   end
+
+  defp chapters(%Episode{chapters: chapters}) when length(chapters) > 0 do
+    element(
+      :"psc:chapters",
+      %{"version" => 1.2},
+      Enum.map(chapters, fn chapter ->
+        element(
+          :"psc:chapter",
+          %{
+            start:
+              Map.get(chapter, :time) |> Chapters.Formatters.Normalplaytime.Formatter.format(),
+            title: Map.get(chapter, :title)
+          }
+          |> maybe_put(:href, Map.get(chapter, :url))
+          |> maybe_put(:image, Map.get(chapter, :image))
+        )
+      end)
+    )
+  end
+
+  defp chapters(_), do: nil
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
 end
