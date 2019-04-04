@@ -1,12 +1,17 @@
-<%= render RadiatorWeb.PageView, "nav.html", assigns %>
-
-<div class="container mx-auto mb-6 max-w-sm">
+<div class="card">
+<%= form_for @conn, @action, [multipart: true], fn f -> %>
+ 
     <div class="mb-6">
-      <h1 class="mb-1 text-blue-darkest">Login</h1>
+      <%= label f, "Username", class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>     
+      <%= text_input f, :name_or_email, class: "input", placeholder: "Username/Email" %>
+      <%= error_tag f, :name_or_email %>
+    </div>
+    <div class="mb-6">
+      <%= label f, "Password", class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>
+      <%= password_input f, :password, class: "input", placeholder: "" %>
+      <%= error_tag f, :password %>
     </div>
 
-    <%= render "form.html", Map.merge(assigns, %{
-      action: Routes.login_path(@conn, :login), 
-      button_text: "Login"})
-      %>
+    <%= submit @button_text, class: "btn btn-blue" %>
+<% end %>
 </div>

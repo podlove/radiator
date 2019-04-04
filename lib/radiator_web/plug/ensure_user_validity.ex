@@ -19,7 +19,7 @@ defmodule RadiatorWeb.Plug.EnsureUserValidity do
         |> Phoenix.Controller.put_flash(
           :info,
           [
-            "Account needs verification. (",
+            "Account email needs verification. (",
             link("resend verification email",
               to:
                 Routes.login_path(
@@ -31,13 +31,13 @@ defmodule RadiatorWeb.Plug.EnsureUserValidity do
             ")"
           ]
         )
-        |> Phoenix.Controller.redirect(to: Routes.login_path(conn, :login_form))
+        |> Phoenix.Controller.redirect(to: Routes.login_path(conn, :index))
         |> Plug.Conn.halt()
 
       %Radiator.Auth.User{status: :suspended} = user ->
         conn
         |> Phoenix.Controller.put_flash(:error, "Account #{user.name} is suspended.")
-        |> Phoenix.Controller.redirect(to: Routes.login_path(conn, :login_form))
+        |> Phoenix.Controller.redirect(to: Routes.login_path(conn, :index))
         |> Plug.Conn.halt()
     end
   end
