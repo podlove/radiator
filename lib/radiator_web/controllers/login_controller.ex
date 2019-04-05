@@ -4,7 +4,7 @@ defmodule RadiatorWeb.LoginController do
   alias Radiator.Auth
 
   def index(conn, _params) do
-    render(conn, "index.html", user_changeset: Auth.Directory.change_user(%Auth.User{}))
+    render(conn, "index.html", user_changeset: Auth.Register.change_user(%Auth.User{}))
   end
 
   def login_form(conn, _params) do
@@ -16,7 +16,7 @@ defmodule RadiatorWeb.LoginController do
   end
 
   def login(conn, params) do
-    case Auth.Directory.get_user_by_credentials(
+    case Auth.Register.get_user_by_credentials(
            params["name_or_email"],
            params["password"]
          ) do
@@ -38,10 +38,10 @@ defmodule RadiatorWeb.LoginController do
       user_map["password"] != user_map["password_repeat"] ->
         conn
         |> put_flash(:error, "Passwords don't match.")
-        |> render("signup.html", changeset: Auth.Directory.change_user(%Auth.User{}, user_map))
+        |> render("signup.html", changeset: Auth.Register.change_user(%Auth.User{}, user_map))
 
       true ->
-        case Auth.Directory.create_user(user_map) do
+        case Auth.Register.create_user(user_map) do
           {:ok, user} ->
             user
             |> Auth.Email.welcome_email(email_configuration_url(conn, user))
@@ -92,7 +92,7 @@ defmodule RadiatorWeb.LoginController do
   def resend_verification_mail(conn, params) do
     case Auth.User.validate_email_verification_request_token(params["token"]) do
       {:ok, name} ->
-        user = Auth.Directory.get_user_by_name(name)
+        user = Auth.Register.get_user_by_name(name)
 
         user
         |> Auth.Email.email_verification_email(email_configuration_url(conn, user))
@@ -116,7 +116,7 @@ defmodule RadiatorWeb.LoginController do
       {:ok, user} ->
         case user.status do
           :unverified ->
-            case Auth.Directory.activate_user(user) do
+            case Auth.Register.activate_user(user) do
               {:ok, user} ->
                 conn
                 |> put_flash(:info, "Email verified.")

@@ -23,7 +23,7 @@ defmodule Radiator.Auth.Guardian do
     # found in the `"sub"` key. In `above subject_for_token/2` we returned
     # the resource id so here we'll rely on that to look it up.
     id = claims["sub"]
-    resource = Radiator.Auth.Directory.get_user_by_name(id)
+    resource = Radiator.Auth.Register.get_user_by_name(id)
     {:ok, resource}
   end
 

@@ -103,7 +103,7 @@ defmodule Radiator.Auth.User do
       {:ok, binary} ->
         [name, email] = :binary.split(binary, " ")
 
-        case Radiator.Auth.Directory.get_user_by_email(email) do
+        case Radiator.Auth.Register.get_user_by_email(email) do
           %User{name: ^name} = user -> {:ok, user}
           _ -> {:error, :invalid}
         end

@@ -1,6 +1,6 @@
-defmodule Radiator.Auth.Directory do
+defmodule Radiator.Auth.Register do
   @moduledoc """
-  The Account Directory Context
+  The Authentication Register Context, giving access to  `Auth.Users` and related data
   """
 
   alias Radiator.Repo

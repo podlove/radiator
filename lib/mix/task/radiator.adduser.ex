@@ -33,7 +33,7 @@ defmodule Mix.Tasks.Radiator.AddUser do
         unless opts[:debug], do: Logger.configure(level: :info)
 
         with_services do
-          case Auth.Directory.create_user(%{
+          case Auth.Register.create_user(%{
                  name: name,
                  email: email,
                  password: password
