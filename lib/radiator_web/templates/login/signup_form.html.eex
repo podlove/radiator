@@ -1,5 +1,5 @@
 <div class="card">
-<%= form_for @changeset, @action, [multipart: true], fn f -> %>
+<%= form_for @changeset, @action, fn f -> %>
  
     <div class="mb-6">
       <%= label f, "Username", class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>     
