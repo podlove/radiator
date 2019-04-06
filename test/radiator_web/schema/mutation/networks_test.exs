@@ -50,4 +50,45 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
 
     assert msg =~ ~r/Argument "network" has invalid value \$network/
   end
+
+  @update_query """
+  mutation ($id: ID!, $network: NetworkInput!) {
+    updateNetwork(id: $id, network: $network) {
+      id
+      title
+    }
+  }
+  """
+
+  test "updateNetwork updates a network", %{conn: conn} do
+    network = insert(:network)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @update_query,
+        variables: %{"network" => %{title: "Meta meta!"}, "id" => network.id}
+
+    id = Integer.to_string(network.id)
+
+    assert %{
+             "data" => %{
+               "updateNetwork" => %{
+                 "title" => "Meta meta!",
+                 "id" => ^id
+               }
+             }
+           } = json_response(conn, 200)
+  end
+
+  test "updateNetwork returns errors on missing values", %{conn: conn} do
+    network = insert(:network)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @update_query,
+        variables: %{"network" => %{title: ""}, "id" => network.id}
+
+    assert %{"errors" => [%{"message" => msg}]} = json_response(conn, 200)
+    assert msg == "title can't be blank"
+  end
 end

@@ -17,6 +17,13 @@ defmodule RadiatorWeb.Resolvers.Directory do
     Directory.create_network(args)
   end
 
+  def update_network(_parent, %{id: id, network: args}, _resolution) do
+    case Directory.get_network(id) do
+      nil -> {:error, "Network ID #{id} not found"}
+      network -> Directory.update_network(network, args)
+    end
+  end
+
   def list_podcasts(%Network{id: id}, _args, _resolution) do
     case Directory.get_network(id) do
       nil -> {:error, "Network ID #{id} not found"}
