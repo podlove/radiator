@@ -10,15 +10,11 @@ defmodule Radiator.Directory do
   alias Radiator.Directory.Podcast
   alias Radiator.Directory.Network
 
-  @doc """
-  Returns the list of podcasts.
+  def list_podcasts(%Network{id: id}) do
+    from(p in Podcast, where: p.network_id == ^id)
+    |> Repo.all()
+  end
 
-  ## Examples
-
-      iex> list_podcasts()
-      [%Podcast{}, ...]
-
-  """
   def list_podcasts do
     Repo.all(Podcast)
   end
@@ -250,6 +246,7 @@ defmodule Radiator.Directory do
 
   """
   def get_network!(id), do: Repo.get!(Network, id)
+  def get_network(id), do: Repo.get(Network, id)
 
   @doc """
   Creates a network.

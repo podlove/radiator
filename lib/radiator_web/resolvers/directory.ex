@@ -1,6 +1,13 @@
 defmodule RadiatorWeb.Resolvers.Directory do
   alias Radiator.Directory
-  alias Radiator.Directory.{Episode, Podcast}
+  alias Radiator.Directory.{Episode, Podcast, Network}
+
+  def list_podcasts(%Network{id: id}, _args, _resolution) do
+    case Directory.get_network(id) do
+      nil -> {:error, "Network ID #{id} not found"}
+      network -> {:ok, Directory.list_podcasts(network)}
+    end
+  end
 
   def list_podcasts(_parent, _args, _resolution) do
     {:ok, Directory.list_podcasts()}

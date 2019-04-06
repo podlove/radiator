@@ -3,6 +3,17 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
 
   alias RadiatorWeb.Resolvers
 
+  @desc "A network"
+  object :network do
+    field :id, non_null(:id)
+    field :title, :string
+    field :image, :string
+
+    field :podcasts, list_of(:podcast) do
+      resolve &Resolvers.Directory.list_podcasts/3
+    end
+  end
+
   @desc "A podcast"
   object :podcast do
     field :id, non_null(:id)
