@@ -106,4 +106,65 @@ defmodule Radiator.DirectoryTest do
       assert %Ecto.Changeset{} = Directory.change_episode(episode)
     end
   end
+
+  describe "networks" do
+    alias Radiator.Directory.Network
+
+    @valid_attrs %{image: "some image", title: "some title"}
+    @update_attrs %{image: "some updated image", title: "some updated title"}
+    @invalid_attrs %{image: nil, title: nil}
+
+    def network_fixture(attrs \\ %{}) do
+      {:ok, network} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Directory.create_network()
+
+      network
+    end
+
+    test "list_networks/0 returns all networks" do
+      network = network_fixture()
+      assert Directory.list_networks() == [network]
+    end
+
+    test "get_network!/1 returns the network with given id" do
+      network = network_fixture()
+      assert Directory.get_network!(network.id) == network
+    end
+
+    test "create_network/1 with valid data creates a network" do
+      assert {:ok, %Network{} = network} = Directory.create_network(@valid_attrs)
+      assert network.image == "some image"
+      assert network.title == "some title"
+    end
+
+    test "create_network/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Directory.create_network(@invalid_attrs)
+    end
+
+    test "update_network/2 with valid data updates the network" do
+      network = network_fixture()
+      assert {:ok, %Network{} = network} = Directory.update_network(network, @update_attrs)
+      assert network.image == "some updated image"
+      assert network.title == "some updated title"
+    end
+
+    test "update_network/2 with invalid data returns error changeset" do
+      network = network_fixture()
+      assert {:error, %Ecto.Changeset{}} = Directory.update_network(network, @invalid_attrs)
+      assert network == Directory.get_network!(network.id)
+    end
+
+    test "delete_network/1 deletes the network" do
+      network = network_fixture()
+      assert {:ok, %Network{}} = Directory.delete_network(network)
+      assert_raise Ecto.NoResultsError, fn -> Directory.get_network!(network.id) end
+    end
+
+    test "change_network/1 returns a network changeset" do
+      network = network_fixture()
+      assert %Ecto.Changeset{} = Directory.change_network(network)
+    end
+  end
 end
