@@ -33,6 +33,11 @@ defmodule RadiatorWeb.Schema do
 
       resolve &Resolvers.Directory.find_network/3
     end
+
+    @desc "Get all networks"
+    field :networks, list_of(:network) do
+      resolve &Resolvers.Directory.list_networks/3
+    end
   end
 
   mutation do

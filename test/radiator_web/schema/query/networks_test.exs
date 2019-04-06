@@ -68,4 +68,30 @@ defmodule RadiatorWeb.Schema.Query.NetworksTest do
              }
            }
   end
+
+  @list_query """
+    {
+      networks {
+        id
+        title
+      }
+    }
+  """
+
+  test "networks returns list of networks", %{conn: conn} do
+    network = insert(:network)
+
+    conn = get conn, "/api/graphql", query: @list_query
+
+    assert json_response(conn, 200) == %{
+             "data" => %{
+               "networks" => [
+                 %{
+                   "id" => Integer.to_string(network.id),
+                   "title" => network.title
+                 }
+               ]
+             }
+           }
+  end
 end
