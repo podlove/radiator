@@ -14,6 +14,12 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     end
   end
 
+  @desc "The input for a network"
+  input_object :network_input do
+    field :title, non_null(:string)
+    field :image, :string
+  end
+
   @desc "A podcast"
   object :podcast do
     field :id, non_null(:id)

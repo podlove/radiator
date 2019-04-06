@@ -41,6 +41,14 @@ defmodule RadiatorWeb.Schema do
   end
 
   mutation do
+    @desc "Create a network"
+    field :create_network, type: :network do
+      arg :network, non_null(:network_input)
+
+      resolve &Resolvers.Directory.create_network/3
+      middleware RadiatorWeb.ChangesetMiddleware
+    end
+
     @desc "Create a podcast"
     field :create_podcast, type: :podcast do
       arg :podcast, non_null(:podcast_input)
