@@ -1,0 +1,17 @@
+<div class="card">
+<%= form_for @conn, @action, fn f -> %>
+ 
+    <div class="mb-6">
+      <%= label f, "Username", class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>     
+      <%= text_input f, :name_or_email, class: "input", placeholder: "Username/Email" %>
+      <%= error_tag f, :name_or_email %>
+    </div>
+    <div class="mb-6">
+      <%= label f, "Password", class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>
+      <%= password_input f, :password, class: "input", placeholder: "" %>
+      <%= error_tag f, :password %>
+    </div>
+
+    <%= submit @button_text, class: "btn btn-blue" %>
+<% end %>
+</div>

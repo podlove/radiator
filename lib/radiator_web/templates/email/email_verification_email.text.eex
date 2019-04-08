@@ -1,0 +1,8 @@
+Hi there, <%= @username %>!
+
+To confirm your email address, simply click on the link below or paste it into the url field of your favorite browser:
+
+<%= @confirmation_url %>
+
+
+If you did not ask for this email, you can safely ignore it.
