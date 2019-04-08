@@ -23,7 +23,7 @@ defmodule Radiator.EpisodeMeta do
 
   defp chapters_query(args) do
     Enum.reduce(args, Chapter, fn
-      {:order, order}, query -> query |> order_by({^order, :time})
+      {:order, order}, query -> query |> order_by({^order, :start})
     end)
   end
 
@@ -31,7 +31,7 @@ defmodule Radiator.EpisodeMeta do
     from(
       c in Chapter,
       where: c.episode_id == ^episode.id,
-      order_by: [asc: c.time]
+      order_by: [asc: c.start]
     )
     |> Repo.all()
   end
@@ -54,9 +54,9 @@ defmodule Radiator.EpisodeMeta do
     chapters
     |> Enum.each(fn chapter ->
       create_chapter(episode, %{
-        time: chapter.time,
+        start: chapter.time,
         title: chapter.title,
-        url: chapter.url,
+        link: chapter.url,
         image: chapter.image
       })
     end)

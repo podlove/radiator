@@ -51,9 +51,9 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
       if episode.chapters do
         Enum.each(episode.chapters, fn chapter ->
           attrs = %{
-            time: parse_chapter_time(chapter.start),
+            start: parse_chapter_time(chapter.start),
             title: chapter.title,
-            url: Map.get(chapter, :href),
+            link: Map.get(chapter, :href),
             image: Map.get(chapter, :image)
           }
 

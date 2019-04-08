@@ -3,9 +3,9 @@ defmodule RadiatorWeb.Schema.Directory.EpisodeTypes do
 
   @desc "A chapter in an episode"
   object :chapter do
-    field :time, :integer
+    field :start, :integer
     field :title, :string
-    field :url, :string
+    field :link, :string
     field :image, :string
   end
 end

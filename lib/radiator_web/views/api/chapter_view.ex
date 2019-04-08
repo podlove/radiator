@@ -3,10 +3,10 @@ defmodule RadiatorWeb.Api.ChapterView do
 
   def render("chapter.json", %{chapter: chapter}) do
     %{
-      start: Map.get(chapter, :time) |> Chapters.Formatters.Normalplaytime.Formatter.format(),
+      start: Map.get(chapter, :start) |> Chapters.Formatters.Normalplaytime.Formatter.format(),
       title: Map.get(chapter, :title)
     }
-    |> maybe_put(:href, Map.get(chapter, :url))
+    |> maybe_put(:href, Map.get(chapter, :link))
     |> maybe_put(:image, Map.get(chapter, :image))
   end
 

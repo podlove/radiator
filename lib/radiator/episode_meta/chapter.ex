@@ -7,9 +7,9 @@ defmodule Radiator.EpisodeMeta.Chapter do
   alias Radiator.Directory.Episode
 
   schema "chapters" do
-    field :time, :integer
+    field :start, :integer
     field :title, :string
-    field :url, :string
+    field :link, :string
     field :image, :string
 
     belongs_to :episode, Episode
@@ -19,9 +19,9 @@ defmodule Radiator.EpisodeMeta.Chapter do
   def changeset(chapter, attrs) do
     chapter
     |> cast(attrs, [
-      :time,
+      :start,
       :title,
-      :url,
+      :link,
       :image
     ])
   end

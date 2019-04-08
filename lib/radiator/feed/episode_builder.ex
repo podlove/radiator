@@ -60,10 +60,10 @@ defmodule Radiator.Feed.EpisodeBuilder do
           :"psc:chapter",
           %{
             start:
-              Map.get(chapter, :time) |> Chapters.Formatters.Normalplaytime.Formatter.format(),
+              Map.get(chapter, :start) |> Chapters.Formatters.Normalplaytime.Formatter.format(),
             title: Map.get(chapter, :title)
           }
-          |> maybe_put(:href, Map.get(chapter, :url))
+          |> maybe_put(:href, Map.get(chapter, :link))
           |> maybe_put(:image, Map.get(chapter, :image))
         )
       end)

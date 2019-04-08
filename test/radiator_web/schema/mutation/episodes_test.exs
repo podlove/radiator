@@ -154,9 +154,9 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.EpisodesTest do
   mutation ($id: ID!, $chapters: String!, $type: String!) {
     setChapters(id: $id, chapters: $chapters, type: $type) {
       chapters {
-        time
+        start
         title
-        url
+        link
       }
     }
   }
@@ -181,19 +181,19 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.EpisodesTest do
                "setChapters" => %{
                  "chapters" => [
                    %{
-                     "time" => 1234,
+                     "start" => 1234,
                      "title" => "Intro",
-                     "url" => "http://example.com"
+                     "link" => "http://example.com"
                    },
                    %{
-                     "time" => 754_000,
+                     "start" => 754_000,
                      "title" => "About us",
-                     "url" => nil
+                     "link" => nil
                    },
                    %{
-                     "time" => 3_723_000,
+                     "start" => 3_723_000,
                      "title" => "Later",
-                     "url" => nil
+                     "link" => nil
                    }
                  ]
                }
