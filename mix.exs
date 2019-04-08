@@ -93,10 +93,11 @@ defmodule Radiator.MixProject do
 
   defp docs do
     [
-      main: "Radiator",
+      main: "readme",
       source_ref: "v#{@version}",
       logo: "guides/images/podlove-radiator-logo.svg",
       extras: [
+        "README.md",
         "guides/Users and Permissions.md"
       ]
     ]
