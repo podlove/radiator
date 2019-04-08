@@ -8,7 +8,7 @@ defmodule RadiatorWeb.Api.EpisodeController do
 
   def index(conn, %{"podcast_id" => podcast_id}) do
     with %Podcast{} = podcast <- Directory.get_podcast!(podcast_id),
-         episodes <- Directory.list_episodes(podcast) do
+         episodes <- Directory.list_episodes(%{podcast: podcast}) do
       render(conn, "index.json", podcast: podcast, episodes: episodes)
     end
   end
@@ -27,7 +27,7 @@ defmodule RadiatorWeb.Api.EpisodeController do
   end
 
   def show(conn, %{"id" => id}) do
-    episode = Directory.get_episode!(id)
+    episode = Directory.get_episode!(id) |> Radiator.Repo.preload(:chapters)
     render(conn, "show.json", episode: episode)
   end
 

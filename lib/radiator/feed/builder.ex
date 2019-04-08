@@ -49,7 +49,8 @@ defmodule Radiator.Feed.Builder do
       version: "2.0",
       "xmlns:atom": "http://www.w3.org/2005/Atom",
       "xmlns:itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd",
-      "xmlns:content": "http://purl.org/rss/1.0/modules/content/"
+      "xmlns:content": "http://purl.org/rss/1.0/modules/content/",
+      "xmlns:psc": "http://podlove.org/simple-chapters"
     }
   end
 end

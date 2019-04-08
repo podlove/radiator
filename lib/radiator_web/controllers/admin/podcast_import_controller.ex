@@ -32,22 +32,43 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
     feed.episodes
     |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
     |> Enum.map(fn episode ->
-      Directory.create_episode(podcast, %{
-        guid: episode.guid,
-        title: episode.title,
-        subtitle: episode.subtitle,
-        description: episode.description,
-        content: episode.content_encoded,
-        published_at: episode.pub_date,
-        number: episode.episode,
-        image: episode.image_url,
-        duration: episode.duration,
-        enclosure_url: episode.enclosure.url,
-        enclosure_type: episode.enclosure.type
-        # enclosure_length: episode.enclosure.size
-      })
+      {:ok, new_episode} =
+        Directory.create_episode(podcast, %{
+          guid: episode.guid,
+          title: episode.title,
+          subtitle: episode.subtitle,
+          description: episode.description,
+          content: episode.content_encoded,
+          published_at: episode.pub_date,
+          number: episode.episode,
+          image: episode.image_url,
+          duration: episode.duration,
+          enclosure_url: episode.enclosure.url,
+          enclosure_type: episode.enclosure.type,
+          enclosure_length: episode.enclosure.size
+        })
+
+      if episode.chapters do
+        Enum.each(episode.chapters, fn chapter ->
+          attrs = %{
+            start: parse_chapter_time(chapter.start),
+            title: chapter.title,
+            link: Map.get(chapter, :href),
+            image: Map.get(chapter, :image)
+          }
+
+          Radiator.EpisodeMeta.create_chapter(new_episode, attrs)
+        end)
+      end
+
+      new_episode
     end)
 
     redirect(conn, to: Routes.admin_podcast_path(conn, :show, podcast))
+  end
+
+  defp parse_chapter_time(time) when is_binary(time) do
+    {:ok, parsed, _, _, _, _} = Chapters.Parsers.Normalplaytime.Parser.parse(time)
+    Chapters.Parsers.Normalplaytime.Parser.total_ms(parsed)
   end
 end
