@@ -1,6 +1,8 @@
 defmodule RadiatorWeb.Schema.DirectoryTypes do
   use Absinthe.Schema.Notation
 
+  import Absinthe.Resolution.Helpers
+
   alias RadiatorWeb.Resolvers
 
   @desc "A network"
@@ -39,7 +41,11 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     end
 
     field :episodes, list_of(:episode) do
-      resolve &Resolvers.Directory.list_episodes/3
+      arg :published, type: :published, default_value: :any
+      arg :page, type: :integer, default_value: 1
+      arg :items_per_page, type: :integer, default_value: 10
+
+      resolve dataloader(Radiator.Directory, :episodes)
     end
   end
 
@@ -72,6 +78,12 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
 
     field :podcast, :podcast do
       resolve &Resolvers.Directory.find_podcast/3
+    end
+
+    field :chapters, list_of(:chapter) do
+      arg :order, type: :sort_order, default_value: :asc
+
+      resolve dataloader(Radiator.EpisodeMeta, :chapters)
     end
   end
 

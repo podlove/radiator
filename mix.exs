@@ -73,7 +73,9 @@ defmodule Radiator.MixProject do
       {:bamboo_smtp, "~> 1.6"},
       # for documentation
       {:earmark, "~> 1.2", only: :dev},
-      {:ex_doc, "~> 0.19", only: :dev}
+      {:ex_doc, "~> 0.19", only: :dev},
+      {:chapters, "~> 0.1.0"},
+      {:dataloader, "~> 1.0"}
     ]
   end
 
@@ -93,10 +95,11 @@ defmodule Radiator.MixProject do
 
   defp docs do
     [
-      main: "Radiator",
+      main: "readme",
       source_ref: "v#{@version}",
       logo: "guides/images/podlove-radiator-logo.svg",
       extras: [
+        "README.md",
         "guides/Users and Permissions.md"
       ]
     ]
