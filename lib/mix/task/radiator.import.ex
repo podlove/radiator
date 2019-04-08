@@ -4,7 +4,15 @@ defmodule Mix.Tasks.Radiator.Import do
   @shortdoc "Import a public rss feed into radiator."
 
   @moduledoc """
-  Ingest a public rss feed into radiator.
+  Ingest a public rss podcast feed into radiator.
+
+      mix radiator.import -p fanboys.fm
+
+  ## Options
+
+    * `--preview/-p` - only preview what is going to be imported.
+    * `--debug/-d` - turn on debug logging.
+
   """
 
   @switches [debug: :boolean, preview: :boolean]
@@ -12,7 +20,7 @@ defmodule Mix.Tasks.Radiator.Import do
 
   alias Radiator.Directory
 
-  defmacro with_services(_opts \\ [], do: block) do
+  defmacrop with_services(_opts \\ [], do: block) do
     quote do
       start_services()
       unquote(block)
@@ -46,40 +54,42 @@ defmodule Mix.Tasks.Radiator.Import do
 
           Logger.info("Found #{length(feed.episodes)} episodes")
 
-          {:ok, podcast} =
-            Directory.create_podcast(%{
-              title: feed.title,
-              subtitle: feed.subtitle,
-              author: feed.author,
-              description: feed.description,
-              image: feed.image_url,
-              language: feed.language
-            })
+          unless opts[:preview] do
+            {:ok, podcast} =
+              Directory.create_podcast(%{
+                title: feed.title,
+                subtitle: feed.subtitle,
+                author: feed.author,
+                description: feed.description,
+                image: feed.image_url,
+                language: feed.language
+              })
 
-          feed.episodes
-          |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
-          |> Enum.map(fn episode ->
-            Directory.create_episode(podcast, %{
-              guid: episode.guid,
-              title: episode.title,
-              subtitle: episode.subtitle,
-              description: episode.description,
-              content: episode.content_encoded,
-              published_at: episode.pub_date,
-              number: episode.episode,
-              image: episode.image_url,
-              duration: episode.duration,
-              enclosure_url: episode.enclosure.url,
-              enclosure_type: episode.enclosure.type
-              # enclosure_length: episode.enclosure.size
-            })
-          end)
-          |> Enum.count(fn
-            {:ok, _} -> true
-            _ -> false
-          end)
-          |> case do
-            count -> Logger.info(~s/Created #{count} episodes in "#{podcast.title}"/)
+            feed.episodes
+            |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
+            |> Enum.map(fn episode ->
+              Directory.create_episode(podcast, %{
+                guid: episode.guid,
+                title: episode.title,
+                subtitle: episode.subtitle,
+                description: episode.description,
+                content: episode.content_encoded,
+                published_at: episode.pub_date,
+                number: episode.episode,
+                image: episode.image_url,
+                duration: episode.duration,
+                enclosure_url: episode.enclosure.url,
+                enclosure_type: episode.enclosure.type
+                # enclosure_length: episode.enclosure.size
+              })
+            end)
+            |> Enum.count(fn
+              {:ok, _} -> true
+              _ -> false
+            end)
+            |> case do
+              count -> Logger.info(~s/Created #{count} episodes in "#{podcast.title}"/)
+            end
           end
         end
 

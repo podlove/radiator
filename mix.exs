@@ -1,16 +1,21 @@
 defmodule Radiator.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       app: :radiator,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      # Docs
+      name: "Radiator",
+      docs: docs()
     ]
   end
 
@@ -20,7 +25,7 @@ defmodule Radiator.MixProject do
   def application do
     [
       mod: {Radiator.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :bamboo, :bamboo_smtp]
     ]
   end
 
@@ -61,9 +66,16 @@ defmodule Radiator.MixProject do
       {:poison, "~> 3.0"},
       {:timex, "~> 3.5"},
       {:cors_plug, "~> 2.0"},
+      # authentication
+      {:guardian, "~> 1.2"},
+      {:argon2_elixir, "~> 2.0"},
+      # mail
+      {:bamboo_smtp, "~> 1.6"},
       # for documentation
       {:earmark, "~> 1.2", only: :dev},
-      {:ex_doc, "~> 0.19", only: :dev}
+      {:ex_doc, "~> 0.19", only: :dev},
+      {:chapters, "~> 0.1.0"},
+      {:dataloader, "~> 1.0"}
     ]
   end
 
@@ -78,6 +90,18 @@ defmodule Radiator.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate", "test"]
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      source_ref: "v#{@version}",
+      logo: "guides/images/podlove-radiator-logo.svg",
+      extras: [
+        "README.md",
+        "guides/Users and Permissions.md"
+      ]
     ]
   end
 end

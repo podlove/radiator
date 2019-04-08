@@ -17,8 +17,37 @@ config :radiator, RadiatorWeb.Endpoint,
   render_errors: [view: RadiatorWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Radiator.PubSub, adapter: Phoenix.PubSub.PG2]
 
+config :radiator, Radiator.Auth.Guardian,
+  issuer: "radiator",
+  secret_key: "dev-only;I1B6O0dEt9sBw6531zH/vDHKEDTY64ohsPxLw5jvLtKaphKofVC/NM5nzkbyD4HW"
+
 config :radiator,
   storage_bucket: "radiator"
+
+config :radiator, :auth,
+  email_from_name: "Radiator-Spark-Instance",
+  email_from_email: "do_not_reply@radiator-spark.local"
+
+config :radiator, Radiator.Mailer,
+  adapter: Bamboo.SMTPAdapter,
+  server: "smtp.domain",
+  hostname: "your.domain",
+  port: 1025,
+  # or {:system, "SMTP_USERNAME"}
+  username: "your.name@your.domain",
+  # or {:system, "SMTP_PASSWORD"}
+  password: "pa55word",
+  # can be `:always` or `:never`
+  tls: :if_available,
+  # or {":system", ALLOWED_TLS_VERSIONS"} w/ comma seprated values (e.g. "tlsv1.1,tlsv1.2")
+  allowed_tls_versions: [:tlsv1, :"tlsv1.1", :"tlsv1.2"],
+  # can be `true`
+  ssl: false,
+  retries: 1,
+  # can be `true`
+  no_mx_lookups: false,
+  # can be `always`. If your smtp relay requires authentication set it to `always`.
+  auth: :if_available
 
 config :ex_aws,
   access_key_id: "IEKAZMUY3KX32CRJPE9R",
