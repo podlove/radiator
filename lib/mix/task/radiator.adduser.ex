@@ -8,10 +8,15 @@ defmodule Mix.Tasks.Radiator.AddUser do
 
       mix radiator.adduser username email password
 
+  ## Options
+
+    * `-a/--activate` - activates the newly created user so no more email verification is necessary.
+    * `-d/--debug` - output more information for debugging.
+
   """
 
-  @switches [debug: :boolean]
-  @aliases [d: :debug]
+  @switches [debug: :boolean, activate: :boolean]
+  @aliases [d: :debug, a: :activate]
 
   alias Radiator.Auth
 
@@ -48,6 +53,16 @@ defmodule Mix.Tasks.Radiator.AddUser do
                 :bright,
                 "#{user.id}"
               ])
+
+              if opts[:activate] do
+                case Auth.Register.activate_user(user) do
+                  {:ok, user} ->
+                    Mix.Shell.IO.info(["Activated user ", :bright, "#{name} <#{email}>"])
+
+                  _ ->
+                    Mix.Shell.IO.error(["error: ", :reset, "could not activate user"])
+                end
+              end
 
             {:error, changeset} ->
               Mix.Shell.IO.error(["error: ", :reset, "Failed to create #{name} <#{email}>"])
