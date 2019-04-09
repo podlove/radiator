@@ -9,3 +9,18 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+alias Radiator.Directory
+alias Radiator.Auth.Register
+
+Directory.create_network(%{
+  title: "ACME"
+})
+
+Register.create_user(%{
+  name: "admin",
+  email: "admin@example.com",
+  display_name: "admin",
+  password: "password",
+  status: :active
+})
