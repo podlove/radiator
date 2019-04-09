@@ -50,8 +50,11 @@ defmodule RadiatorWeb.Resolvers.Directory do
     end
   end
 
-  def create_podcast(_parent, %{podcast: args}, _resolution) do
-    Directory.create_podcast(args)
+  def create_podcast(_parent, %{podcast: args, network_id: network_id}, _resolution) do
+    case Directory.get_network(network_id) do
+      nil -> {:error, "Valid network must be provided, ID #{network_id} not found"}
+      network -> Directory.create_podcast(network, args)
+    end
   end
 
   def update_podcast(_parent, %{id: id, podcast: args}, _resolution) do

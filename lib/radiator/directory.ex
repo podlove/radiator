@@ -59,16 +59,17 @@ defmodule Radiator.Directory do
 
   ## Examples
 
-      iex> create_podcast(%{field: value})
+      iex> create_podcast(network, %{field: value})
       {:ok, %Podcast{}}
 
-      iex> create_podcast(%{field: bad_value})
+      iex> create_podcast(network, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_podcast(attrs \\ %{}) do
+  def create_podcast(%Network{} = network, attrs \\ %{}) do
     %Podcast{}
     |> Podcast.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:network, network)
     |> Repo.insert()
   end
 

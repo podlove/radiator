@@ -90,6 +90,7 @@ defmodule RadiatorWeb.Schema do
     @desc "Create a podcast"
     field :create_podcast, type: :podcast do
       arg :podcast, non_null(:podcast_input)
+      arg :network_id, non_null(:integer)
 
       resolve &Resolvers.Directory.create_podcast/3
       middleware RadiatorWeb.ChangesetMiddleware

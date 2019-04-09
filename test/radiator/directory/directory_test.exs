@@ -19,12 +19,17 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "create_podcast/1 with valid data creates a podcast" do
-      assert {:ok, %Podcast{} = podcast} = Directory.create_podcast(%{title: "some title"})
+      network = insert(:network)
+
+      assert {:ok, %Podcast{} = podcast} =
+               Directory.create_podcast(network, %{title: "some title"})
+
       assert podcast.title == "some title"
     end
 
     test "create_podcast/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Directory.create_podcast(%{title: nil})
+      network = insert(:network)
+      assert {:error, %Ecto.Changeset{}} = Directory.create_podcast(network, %{title: nil})
     end
 
     test "update_podcast/2 with valid data updates the podcast" do

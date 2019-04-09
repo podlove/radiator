@@ -4,8 +4,8 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
   import Radiator.Factory
 
   @create_query """
-  mutation ($podcast: PodcastInput!) {
-    createPodcast(podcast: $podcast) {
+  mutation ($network_id: Int, $podcast: PodcastInput!) {
+    createPodcast(network_id: $network_id, podcast: $podcast) {
       id
       title
     }
@@ -13,12 +13,13 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
   """
 
   test "createPodcast creates a podcast", %{conn: conn} do
+    network = insert(:network)
     podcast = params_for(:podcast)
 
     conn =
       post conn, "/api/graphql",
         query: @create_query,
-        variables: %{"podcast" => podcast}
+        variables: %{"podcast" => podcast, "network_id" => network.id}
 
     title = podcast[:title]
 
@@ -35,10 +36,12 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
   end
 
   test "createPodcast returns errors when missing data", %{conn: conn} do
+    network = insert(:network)
+
     conn =
       post conn, "/api/graphql",
         query: @create_query,
-        variables: %{"podcast" => %{}}
+        variables: %{"podcast" => %{}, "network_id" => network.id}
 
     assert %{
              "errors" => [
