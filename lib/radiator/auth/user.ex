@@ -17,6 +17,21 @@ defmodule Radiator.Auth.User do
     timestamps()
   end
 
+  @doc """
+  this is the upper bound of reserved `user_id`s. All regular users need to have an id above this.
+  """
+  def max_reserved_user_id, do: 10
+
+  def reserved_user(:public) do
+    %User{
+      id: 1,
+      name: "public",
+      display_name: "Public",
+      email: "public@public.local",
+      password_hash: "thoushaltnotpass"
+    }
+  end
+
   @doc false
   def changeset(%User{} = user, attrs) do
     user

@@ -13,11 +13,10 @@ defmodule Radiator.Auth.Register do
   def get_user_by_name(name), do: Repo.get_by(User, name: name)
 
   def get_user_by_credentials(name_or_email, password) do
-    case get_user_by_name(name_or_email) || get_user_by_email(name_or_email) do
-      nil ->
-        nil
+    max_id = User.max_reserved_user_id()
 
-      user ->
+    case get_user_by_name(name_or_email) || get_user_by_email(name_or_email) do
+      user = %User{id: user_id} when user_id > max_id ->
         case Argon2.check_pass(user, password) do
           {:ok, _} ->
             user
@@ -25,6 +24,9 @@ defmodule Radiator.Auth.Register do
           _ ->
             nil
         end
+
+      _ ->
+        nil
     end
   end
 
