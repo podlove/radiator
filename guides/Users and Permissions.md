@@ -8,7 +8,7 @@ Users are managed in the `Radiator.Auth.*` submodules. We have a minimal `Radiat
 
 Other (internal and external) parts of Radiator must use a relation to a `Radiator.Auth.User` to drive their authorization and permission model.
 
-Schemas related to authentication should have a `auth_` table prefix, schemas related to permissions should have a `_permissions` table suffix.
+Schemas related to authentication should have a `auth_` table prefix, schemas related to permissions should have a `_perm` table suffix.
 
 
 ## Authorization and Permissions

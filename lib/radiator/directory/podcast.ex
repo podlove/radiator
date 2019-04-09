@@ -21,6 +21,8 @@ defmodule Radiator.Directory.Podcast do
 
     has_many(:episodes, Episode)
 
+    has_many(:podcast_permissions, Radiator.Directory.PodcastPermission)
+
     timestamps()
   end
 
