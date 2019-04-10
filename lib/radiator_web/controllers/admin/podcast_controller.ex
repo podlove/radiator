@@ -5,7 +5,7 @@ defmodule RadiatorWeb.Admin.PodcastController do
   alias Radiator.Directory.Podcast
 
   def index(conn, _params) do
-    podcasts = Directory.list_podcasts_with_episode_counts()
+    podcasts = Directory.list_podcasts_with_episode_counts(conn.assigns.current_network)
     render(conn, "index.html", podcasts: podcasts)
   end
 
@@ -15,11 +15,13 @@ defmodule RadiatorWeb.Admin.PodcastController do
   end
 
   def create(conn, %{"podcast" => podcast_params}) do
-    case Directory.create_podcast(podcast_params) do
+    case Directory.create_podcast(conn.assigns.current_network, podcast_params) do
       {:ok, podcast} ->
         conn
         |> put_flash(:info, "podcast created successfully.")
-        |> redirect(to: Routes.admin_podcast_path(conn, :show, podcast))
+        |> redirect(
+          to: Routes.admin_network_podcast_path(conn, :show, podcast.network_id, podcast)
+        )
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
@@ -63,7 +65,9 @@ defmodule RadiatorWeb.Admin.PodcastController do
       {:ok, podcast} ->
         conn
         |> put_flash(:info, "podcast updated successfully.")
-        |> redirect(to: Routes.admin_podcast_path(conn, :show, podcast))
+        |> redirect(
+          to: Routes.admin_network_podcast_path(conn, :show, podcast.network_id, podcast)
+        )
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", podcast: podcast, changeset: changeset)

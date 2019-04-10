@@ -31,8 +31,8 @@ defmodule Radiator.Directory do
     Repo.all(Podcast)
   end
 
-  def list_podcasts_with_episode_counts do
-    from(p in Podcast)
+  def list_podcasts_with_episode_counts(%Network{id: id}) do
+    from(p in Podcast, where: p.network_id == ^id)
     |> Podcast.preload_episode_counts()
     |> Repo.all()
   end
@@ -252,6 +252,16 @@ defmodule Radiator.Directory do
   """
   def get_network!(id), do: Repo.get!(Network, id)
   def get_network(id), do: Repo.get(Network, id)
+
+  @doc """
+  Get the first network.
+
+  Only temporary until users can be assigned to networks.
+  Once this is possible, remove this function.
+  """
+  def get_any_network do
+    from(n in Network, limit: 1) |> Repo.one!()
+  end
 
   @doc """
   Creates a network.

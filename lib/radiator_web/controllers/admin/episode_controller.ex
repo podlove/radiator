@@ -35,7 +35,16 @@ defmodule RadiatorWeb.Admin.EpisodeController do
       {:ok, episode} ->
         conn
         |> put_flash(:info, "episode created successfully.")
-        |> redirect(to: Routes.admin_podcast_episode_path(conn, :show, podcast, episode))
+        |> redirect(
+          to:
+            Routes.admin_network_podcast_episode_path(
+              conn,
+              :show,
+              podcast.network_id,
+              podcast,
+              episode
+            )
+        )
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
@@ -74,7 +83,16 @@ defmodule RadiatorWeb.Admin.EpisodeController do
       {:ok, episode} ->
         conn
         |> put_flash(:info, "episode updated successfully.")
-        |> redirect(to: Routes.admin_podcast_episode_path(conn, :show, episode.podcast, episode))
+        |> redirect(
+          to:
+            Routes.admin_network_podcast_episode_path(
+              conn,
+              :show,
+              episode.podcast.network_id,
+              episode.podcast,
+              episode
+            )
+        )
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", episode: episode, changeset: changeset)
