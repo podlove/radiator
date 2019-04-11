@@ -21,7 +21,7 @@ defmodule Radiator.Feed.PodcastBuilder do
     |> add(element(:title, podcast.title))
     |> add(subtitle(podcast))
     |> add(description(podcast))
-    |> add(element(:generator, "Podlove Radiator vSpark"))
+    |> add(element(:generator, "Podlove Radiator"))
     |> add(self_reference(feed_data))
     # |> add(last_build_date())
     |> Enum.reverse()

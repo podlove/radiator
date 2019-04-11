@@ -6,7 +6,7 @@ defmodule Radiator.Auth.Email do
 
   def welcome_email(%User{} = user, confirmation_url) do
     email_base()
-    |> subject(mail_subject("Welcome to Radiator-Spark!"))
+    |> subject(mail_subject("Welcome to Radiator!"))
     |> assign(:username, user.name)
     |> assign(
       :confirmation_url,
