@@ -57,7 +57,7 @@ defmodule Mix.Tasks.Radiator.AddUser do
               if opts[:activate] do
                 case Auth.Register.activate_user(user) do
                   {:ok, user} ->
-                    Mix.Shell.IO.info(["Activated user ", :bright, "#{name} <#{email}>"])
+                    Mix.Shell.IO.info(["Activated user ", :bright, "#{user.name} <#{user.email}>"])
 
                   _ ->
                     Mix.Shell.IO.error(["error: ", :reset, "could not activate user"])
