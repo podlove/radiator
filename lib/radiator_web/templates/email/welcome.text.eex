@@ -1,6 +1,6 @@
 Hi there, <%= @username %>!
 
-Welcome to Radiator-Spark!
+Welcome to Radiator!
 
 To activate your account and confirm your email address, simply click on the link below or paste it into the url field of your favorite browser:
 

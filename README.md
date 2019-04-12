@@ -1,8 +1,8 @@
-# Radiator Spark 🔥
+# Radiator 🔥
 
 Radiator is the 100% open source podcast hosting project for the next century of the internet.
 
-[![Build Status](https://travis-ci.org/podlove/radiator-spark.svg?branch=master)](https://travis-ci.org/podlove/radiator-spark)
+[![Build Status](https://travis-ci.org/podlove/radiator.svg?branch=master)](https://travis-ci.org/podlove/radiator)
 
 ## Status
 
@@ -38,8 +38,8 @@ mc policy public radiator/radiator
 **Phoenix Setup**
 
 ```shell
-git clone https://github.com/podlove/radiator-spark.git
-cd radiator-spark
+git clone https://github.com/podlove/radiator.git
+cd radiator
 
 # start postgres
 
@@ -99,5 +99,5 @@ Radiator is [MIT Licensed][license].
 [minio-client-setup]: https://docs.minio.io/docs/minio-client-quickstart-guide.html
 [pgsql]: https://www.postgresql.org/
 [hal]: http://stateless.co/hal_specification.html
-[license]: https://github.com/podlove/radiator-spark/blob/master/LICENSE
+[license]: https://github.com/podlove/radiator/blob/master/LICENSE
 [vuejs]: https://vuejs.org/

@@ -10,6 +10,11 @@
         <div class="flex">
           <h1 class="mb-1 text-blue-darkest mr-4">
             <%= @podcast.title %>
+            <span class="text-grey-dark font-normal text-lg">
+              <%= link to: Routes.feed_path(@conn, :show, @podcast), class: "no-underline text-blue" do %>
+                RSS Feed
+              <% end %>   
+            </span>
           </h1>
           <%= link to: Routes.admin_podcast_path(@conn, :edit, @podcast), class: "no-underline text-blue" do %>
           <div class="pill">edit</div>

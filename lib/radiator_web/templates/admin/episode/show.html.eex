@@ -31,4 +31,13 @@
     </div>
   <% end %>
 
+  <%= if @episode.chapters do %>
+    <div class="card max-w-sm flex flex-col mt-8">
+      <span class="text-grey-darker font-normal text-lg mb-4">Chapters</span>
+      <%= for chapter <- @episode.chapters do %>
+        <div><%= chapter.title %></div>
+      <% end %>
+    </div>
+  <% end %>
+
 </div>
