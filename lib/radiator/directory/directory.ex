@@ -5,9 +5,11 @@ defmodule Radiator.Directory do
 
   import Ecto.Query, warn: false
 
+  alias __MODULE__
   alias Radiator.Repo
-  alias Radiator.Directory.Podcast
-  alias Radiator.Directory.Episode
+  alias Directory.{Podcast, PodcastPermission}
+  alias Directory.{Episode, EpisodePermission}
+  alias Radiator.Auth
 
   def data() do
     Dataloader.Ecto.new(Repo, query: &query/2)
@@ -69,7 +71,7 @@ defmodule Radiator.Directory do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_podcast(attrs \\ %{}) do
+  def create_podcast(attrs) do
     %Podcast{}
     |> Podcast.changeset(attrs)
     |> Repo.insert()
@@ -223,5 +225,46 @@ defmodule Radiator.Directory do
   """
   def change_episode(%Episode{} = episode) do
     Episode.changeset(episode, %{})
+  end
+
+  ## Permission manipulation
+
+  def remove_permission(user = %Auth.User{}, %Episode{} = episode) do
+    case Repo.get_by(EpisodePermission, user_id: user.id, episode_id: episode.id) do
+      nil ->
+        nil
+
+      perm ->
+        Repo.delete(perm)
+        # hide the implementation detail for now
+        |> case do
+          {:ok, _perm} -> :ok
+          _ -> nil
+        end
+    end
+  end
+
+  def set_permission(user, entity, permission)
+
+  def set_permission(user = %Auth.User{}, %Episode{} = episode, permission)
+      when is_atom(permission) do
+    (Repo.get_by(EpisodePermission, user_id: user.id, episode_id: episode.id) ||
+       %EpisodePermission{user_id: user.id, episode_id: episode.id})
+    |> EpisodePermission.changeset(%{permission: permission})
+    |> Repo.insert_or_update()
+    |> case do
+      # hide the implementation detail for now
+      {:ok, _perm} -> :ok
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  def get_permission(user, entity)
+
+  def get_permission(user = %Auth.User{}, %Episode{} = episode) do
+    case Repo.get_by(EpisodePermission, user_id: user.id, episode_id: episode.id) do
+      nil -> nil
+      perm -> perm.permission
+    end
   end
 end

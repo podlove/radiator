@@ -18,6 +18,6 @@ defmodule Radiator.Directory.PodcastPermission do
     perm
     |> cast(params, [:user_id, :podcast_id, :permission])
     |> validate_required([:user_id, :podcast_id, :permission])
-    |> unique_constraint(:permission, name: :podcasts_perm_user_id_podcast_id_permission_index)
+    |> unique_constraint(:permission, name: :podcasts_perm_user_id_podcast_id_index)
   end
 end

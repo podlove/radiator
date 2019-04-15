@@ -2,8 +2,9 @@ defmodule Radiator.Perm.Ecto.PermissionType do
   alias Ecto.Type
   @behaviour Type
 
-  @allowed_values [:readonly, :edit, :manage]
+  @allowed_values [:readonly, :edit, :manage, :own]
 
+  @spec allowed_values() :: [:edit | :manage | :own | :readonly, ...]
   def allowed_values do
     @allowed_values
   end
@@ -31,5 +32,22 @@ defmodule Radiator.Perm.Ecto.PermissionType do
   @impl Type
   def dump(atom) when is_atom(atom) do
     {:ok, Atom.to_string(atom)}
+  end
+
+  def compare(perm1, perm2) when is_atom(perm1) and is_atom(perm2) do
+    case {to_index(perm1), to_index(perm2)} do
+      {first, second} when first > second -> :gt
+      {first, second} when first < second -> :lt
+      _ -> :eq
+    end
+  end
+
+  def to_index(value) do
+    @allowed_values
+    |> Enum.find_index(&(value == &1))
+    |> case do
+      index when is_integer(index) -> index + 1
+      _ -> 0
+    end
   end
 end

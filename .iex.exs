@@ -35,3 +35,6 @@ alias RadiatorWeb.Router.Helpers, as: Routes
 alias Radiator.{Directory, Repo, Storage}
 alias Radiator.Directory.{Episode, Podcast}
 alias Radiator.Feed.Builder
+
+alias Radiator.Perm.Ecto.PermissionType
+alias Radiator.Auth
