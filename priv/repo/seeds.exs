@@ -13,14 +13,16 @@
 alias Radiator.Directory
 alias Radiator.Auth.Register
 
-Directory.create_network(%{
-  title: "ACME"
-})
+if Mix.env() != :test do
+  Directory.create_network(%{
+    title: "ACME"
+  })
 
-Register.create_user(%{
-  name: "admin",
-  email: "admin@example.com",
-  display_name: "admin",
-  password: "password",
-  status: :active
-})
+  Register.create_user(%{
+    name: "admin",
+    email: "admin@example.com",
+    display_name: "admin",
+    password: "password",
+    status: :active
+  })
+end
