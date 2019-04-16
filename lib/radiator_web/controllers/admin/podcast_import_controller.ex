@@ -64,7 +64,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
       new_episode
     end)
 
-    redirect(conn, to: Routes.admin_podcast_path(conn, :show, podcast))
+    redirect(conn, to: Routes.admin_network_podcast_path(conn, :show, podcast.network_id, podcast))
   end
 
   defp parse_chapter_time(time) when is_binary(time) do

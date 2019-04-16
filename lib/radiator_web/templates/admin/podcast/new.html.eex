@@ -6,5 +6,5 @@
       <span class="text-grey-dark font-normal text-lg">Just one form away from your big moment.</span>
     </div>
 
-    <%= render "form.html", Map.merge(assigns, %{action: Routes.admin_podcast_path(@conn, :create), button_text: "Create Podcast"}) %>
+    <%= render "form.html", Map.merge(assigns, %{action: Routes.admin_network_podcast_path(@conn, :create, @current_network), button_text: "Create Podcast"}) %>
 </div>

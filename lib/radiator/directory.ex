@@ -5,9 +5,10 @@ defmodule Radiator.Directory do
 
   import Ecto.Query, warn: false
 
-  alias Radiator.Repo
-  alias Radiator.Directory.Podcast
   alias Radiator.Directory.Episode
+  alias Radiator.Directory.Podcast
+  alias Radiator.Directory.Network
+  alias Radiator.Repo
 
   def data() do
     Dataloader.Ecto.new(Repo, query: &query/2)
@@ -21,21 +22,17 @@ defmodule Radiator.Directory do
     queryable
   end
 
-  @doc """
-  Returns the list of podcasts.
+  def list_podcasts(%Network{id: id}) do
+    from(p in Podcast, where: p.network_id == ^id)
+    |> Repo.all()
+  end
 
-  ## Examples
-
-      iex> list_podcasts()
-      [%Podcast{}, ...]
-
-  """
   def list_podcasts do
     Repo.all(Podcast)
   end
 
-  def list_podcasts_with_episode_counts do
-    from(p in Podcast)
+  def list_podcasts_with_episode_counts(%Network{id: id}) do
+    from(p in Podcast, where: p.network_id == ^id)
     |> Podcast.preload_episode_counts()
     |> Repo.all()
   end
@@ -62,16 +59,17 @@ defmodule Radiator.Directory do
 
   ## Examples
 
-      iex> create_podcast(%{field: value})
+      iex> create_podcast(network, %{field: value})
       {:ok, %Podcast{}}
 
-      iex> create_podcast(%{field: bad_value})
+      iex> create_podcast(network, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_podcast(attrs \\ %{}) do
+  def create_podcast(%Network{} = network, attrs \\ %{}) do
     %Podcast{}
     |> Podcast.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:network, network)
     |> Repo.insert()
   end
 
@@ -223,5 +221,110 @@ defmodule Radiator.Directory do
   """
   def change_episode(%Episode{} = episode) do
     Episode.changeset(episode, %{})
+  end
+
+  @doc """
+  Returns the list of networks.
+
+  ## Examples
+
+      iex> list_networks()
+      [%Network{}, ...]
+
+  """
+  def list_networks do
+    Repo.all(Network)
+  end
+
+  @doc """
+  Gets a single network.
+
+  Raises `Ecto.NoResultsError` if the Network does not exist.
+
+  ## Examples
+
+      iex> get_network!(123)
+      %Network{}
+
+      iex> get_network!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_network!(id), do: Repo.get!(Network, id)
+  def get_network(id), do: Repo.get(Network, id)
+
+  @doc """
+  Get the first network.
+
+  Only temporary until users can be assigned to networks.
+  Once this is possible, remove this function.
+  """
+  def get_any_network do
+    from(n in Network, limit: 1) |> Repo.one!()
+  end
+
+  @doc """
+  Creates a network.
+
+  ## Examples
+
+      iex> create_network(%{field: value})
+      {:ok, %Network{}}
+
+      iex> create_network(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_network(attrs \\ %{}) do
+    %Network{}
+    |> Network.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a network.
+
+  ## Examples
+
+      iex> update_network(network, %{field: new_value})
+      {:ok, %Network{}}
+
+      iex> update_network(network, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_network(%Network{} = network, attrs) do
+    network
+    |> Network.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Network.
+
+  ## Examples
+
+      iex> delete_network(network)
+      {:ok, %Network{}}
+
+      iex> delete_network(network)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_network(%Network{} = network) do
+    Repo.delete(network)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking network changes.
+
+  ## Examples
+
+      iex> change_network(network)
+      %Ecto.Changeset{source: %Network{}}
+
+  """
+  def change_network(%Network{} = network) do
+    Network.changeset(network, %{})
   end
 end

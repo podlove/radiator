@@ -1,7 +1,36 @@
 defmodule RadiatorWeb.Resolvers.Directory do
   alias Radiator.Directory
-  alias Radiator.Directory.{Episode, Podcast}
+  alias Radiator.Directory.{Episode, Podcast, Network}
   alias Radiator.EpisodeMeta
+
+  def list_networks(_parent, _args, _resolution) do
+    {:ok, Directory.list_networks()}
+  end
+
+  def find_network(_parent, %{id: id}, _resolution) do
+    case Directory.get_network(id) do
+      nil -> {:error, "Network ID #{id} not found"}
+      network -> {:ok, network}
+    end
+  end
+
+  def create_network(_parent, %{network: args}, _resolution) do
+    Directory.create_network(args)
+  end
+
+  def update_network(_parent, %{id: id, network: args}, _resolution) do
+    case Directory.get_network(id) do
+      nil -> {:error, "Network ID #{id} not found"}
+      network -> Directory.update_network(network, args)
+    end
+  end
+
+  def list_podcasts(%Network{id: id}, _args, _resolution) do
+    case Directory.get_network(id) do
+      nil -> {:error, "Network ID #{id} not found"}
+      network -> {:ok, Directory.list_podcasts(network)}
+    end
+  end
 
   def list_podcasts(_parent, _args, _resolution) do
     {:ok, Directory.list_podcasts()}
@@ -21,8 +50,11 @@ defmodule RadiatorWeb.Resolvers.Directory do
     end
   end
 
-  def create_podcast(_parent, %{podcast: args}, _resolution) do
-    Directory.create_podcast(args)
+  def create_podcast(_parent, %{podcast: args, network_id: network_id}, _resolution) do
+    case Directory.get_network(network_id) do
+      nil -> {:error, "Valid network must be provided, ID #{network_id} not found"}
+      network -> Directory.create_podcast(network, args)
+    end
   end
 
   def update_podcast(_parent, %{id: id, podcast: args}, _resolution) do

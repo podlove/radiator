@@ -55,12 +55,42 @@ defmodule RadiatorWeb.Schema do
 
       resolve &Resolvers.Directory.find_episode/3
     end
+
+    @desc "Get one network"
+    field :network, :network do
+      arg :id, non_null(:id)
+
+      resolve &Resolvers.Directory.find_network/3
+    end
+
+    @desc "Get all networks"
+    field :networks, list_of(:network) do
+      resolve &Resolvers.Directory.list_networks/3
+    end
   end
 
   mutation do
+    @desc "Create a network"
+    field :create_network, type: :network do
+      arg :network, non_null(:network_input)
+
+      resolve &Resolvers.Directory.create_network/3
+      middleware RadiatorWeb.ChangesetMiddleware
+    end
+
+    @desc "Update a network"
+    field :update_network, type: :network do
+      arg :id, non_null(:id)
+      arg :network, non_null(:network_input)
+
+      resolve &Resolvers.Directory.update_network/3
+      middleware RadiatorWeb.ChangesetMiddleware
+    end
+
     @desc "Create a podcast"
     field :create_podcast, type: :podcast do
       arg :podcast, non_null(:podcast_input)
+      arg :network_id, non_null(:integer)
 
       resolve &Resolvers.Directory.create_podcast/3
       middleware RadiatorWeb.ChangesetMiddleware
