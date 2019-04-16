@@ -1,5 +1,3 @@
-<%= render RadiatorWeb.PageView, "nav.html", assigns %>
-
 <div class="container mx-auto mb-6">
     <div class="mb-6">
       <h1 class="mb-1 text-blue-darkest">Start your Podcast</h1>
