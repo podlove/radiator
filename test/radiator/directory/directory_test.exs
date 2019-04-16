@@ -81,7 +81,7 @@ defmodule Radiator.DirectoryTest do
 
     test "create_episode/1 with valid data creates a episode" do
       assert {:ok, %Episode{} = episode} =
-               Editor.Owner.create_episode(insert(:podcast), @valid_attrs)
+               Editor.Manager.create_episode(insert(:podcast), @valid_attrs)
 
       assert episode.title == "some title"
     end
@@ -89,7 +89,7 @@ defmodule Radiator.DirectoryTest do
     test "create_episode/1 with invalid data returns error changeset" do
       podcast = insert(:podcast)
 
-      assert {:error, %Ecto.Changeset{}} = Editor.Owner.create_episode(podcast, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Editor.Manager.create_episode(podcast, @invalid_attrs)
     end
 
     test "update_episode/2 with valid data updates the episode" do

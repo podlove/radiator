@@ -1,0 +1,43 @@
+<%= render RadiatorWeb.PageView, "nav.html", assigns %>
+
+<div class="container mx-auto mb-6">
+    <div class="mb-6">
+      <h1 class="mb-1 text-blue-darkest">Hi, Happy Podcasting!</h1>
+      <span class="text-grey-dark font-normal text-lg">Let's spark some joy and enlightenment, shall we?</span>
+    </div>
+
+    <div class="flex justify-center md:justify-start flex-wrap">
+      <%= for network <- @networks do %>
+      <a href="<%= Routes.admin_network_podcast_path(@conn, :index, network.id) %>" class="no-underline text-black w-48 bg-white rounded flex flex-col shadow mr-8 mb-8">
+        
+        <div
+          class="w-48 h-48 bg-cover shadow-inner"
+          style="background-image: url(<%= network.image %>)"
+        ></div>
+
+        <div class="p-3 h-32">
+          <h1 class="text-base mb-1"><%= network.title %></h1>
+        </div>
+
+      </a>        
+      <% end %>
+
+      <a href="<%= Routes.admin_network_path(@conn, :new) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-blue-lightest">
+        
+        <div class="w-48 h-48 flex flex-col justify-center items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 mb-4 icon-add-circle"><circle cx="12" cy="12" r="10" class="primary"></circle><path class="secondary" d="M13 11h4a1 1 0 0 1 0 2h-4v4a1 1 0 0 1-2 0v-4H7a1 1 0 0 1 0-2h4V7a1 1 0 0 1 2 0v4z"></path></svg>
+          <h1 class="text-base">Start new Network</h1>
+        </div>
+
+        <div class="p-3 h-32 text-xs text-grey-dark text-center">
+          <p class="mb-2">
+            New idea for world domination?
+          </p>
+        </div>
+
+      </a>
+
+      </a>
+
+    </div>
+</div>

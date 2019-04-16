@@ -16,6 +16,15 @@ defmodule Radiator.Directory.Editor.Owner do
   alias Radiator.Auth
 
   @doc """
+  Temporary user for api stuff (just the most recent one) - until authentication on api level is done
+  """
+  @spec api_user_shim() :: Radiator.Auth.User.t()
+  def api_user_shim() do
+    Repo.all(Auth.User)
+    |> List.last()
+  end
+
+  @doc """
   Creates a network.
 
   ## Examples
@@ -89,47 +98,6 @@ defmodule Radiator.Directory.Editor.Owner do
   """
   def change_network(%Network{} = network) do
     Network.changeset(network, %{})
-  end
-
-  @doc """
-  Creates a podcast.
-
-  Makes the creator the sole owner.
-
-  ## Examples
-
-      iex> create_podcast(current_user, %Network{} = network, %{field: value})
-      {:ok, %Podcast{}}
-
-      iex> create_podcast(current_user, %Network{} = network, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-
-  def create_podcast(%Network{} = network, attrs) do
-    %Podcast{}
-    |> Podcast.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:network, network)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Creates a episode.
-
-  ## Examples
-
-      iex> create_episode(%Podcast{}, %{field: value})
-      {:ok, %Episode{}}
-
-      iex> create_episode(%Podcast{}, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_episode(%Podcast{} = podcast, attrs \\ %{}) do
-    %Episode{}
-    |> Episode.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:podcast, podcast)
-    |> Repo.insert()
   end
 
   ## Permission manipulation

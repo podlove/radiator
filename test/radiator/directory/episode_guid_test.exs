@@ -2,14 +2,15 @@ defmodule Radiator.GuidTest do
   use Radiator.DataCase
 
   alias Radiator.Directory
-  alias Radiator.Directory.Episode
+  alias Directory.Episode
+  alias Directory.Editor
 
   import Radiator.Factory
 
   describe "episodes" do
     test "generate a guid on create" do
       podcast = insert(:podcast, %{})
-      {:ok, episode} = Directory.Editor.Owner.create_episode(podcast, %{title: "foo"})
+      {:ok, episode} = Editor.Manager.create_episode(podcast, %{title: "foo"})
 
       assert is_binary(episode.guid)
       assert String.length(episode.guid) > 0
@@ -19,7 +20,7 @@ defmodule Radiator.GuidTest do
       podcast = insert(:podcast, %{})
 
       {:ok, episode} =
-        Directory.Editor.Owner.create_episode(podcast, %{title: "foo", guid: "provided"})
+        Directory.Editor.Manager.create_episode(podcast, %{title: "foo", guid: "provided"})
 
       assert episode.guid == "provided"
     end
@@ -28,14 +29,14 @@ defmodule Radiator.GuidTest do
       podcast = insert(:podcast, %{})
 
       {:ok, episode = %Episode{guid: original_guid}} =
-        Directory.Editor.Owner.create_episode(podcast, %{title: "foo"})
+        Editor.Manager.create_episode(podcast, %{title: "foo"})
 
-      {:ok, episode} = Directory.update_episode(episode, %{title: "bar"})
+      {:ok, episode} = Editor.Manager.update_episode(episode, %{title: "bar"})
 
       # unchanged after update
       assert episode.guid == original_guid
 
-      {:ok, episode} = Directory.regenerate_episode_guid(episode)
+      {:ok, episode} = Editor.Manager.regenerate_episode_guid(episode)
 
       # changed after regenerate
       assert episode.guid != original_guid

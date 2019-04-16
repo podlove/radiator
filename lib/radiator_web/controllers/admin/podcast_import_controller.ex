@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
+  alias Directory.Editor
 
   def new(conn, _params) do
     render(conn, "new.html")
@@ -11,6 +12,8 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
   # - needs error handling
   # - should be done async with waiting animation (progress?) and notice/redirect when done
   def create(conn, %{"feed" => %{"feed_url" => url}}) do
+    network = conn.assigns.current_network
+
     metalove_podcast = Metalove.get_podcast(url)
 
     feed =
@@ -20,7 +23,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
       )
 
     {:ok, podcast} =
-      Directory.create_podcast(%{
+      Editor.Manager.create_podcast(network, %{
         title: feed.title,
         subtitle: feed.subtitle,
         author: feed.author,
@@ -33,7 +36,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
     |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
     |> Enum.map(fn episode ->
       {:ok, new_episode} =
-        Directory.create_episode(podcast, %{
+        Editor.Manager.create_episode(podcast, %{
           guid: episode.guid,
           title: episode.title,
           subtitle: episode.subtitle,
