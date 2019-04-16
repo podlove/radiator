@@ -5,8 +5,50 @@ defmodule Radiator.Directory.Editor.Manager do
   import Ecto.Query, warn: false
 
   alias Radiator.Repo
-  alias Radiator.Directory.{Podcast}
-  alias Radiator.Directory.{Episode}
+  alias Radiator.Directory
+
+  alias Directory.{Network, Podcast, Episode}
+
+  @doc """
+  Creates a podcast.
+
+  Makes the creator the sole owner.
+
+  ## Examples
+
+      iex> create_podcast(current_user, %Network{} = network, %{field: value})
+      {:ok, %Podcast{}}
+
+      iex> create_podcast(current_user, %Network{} = network, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+
+  def create_podcast(%Network{} = network, attrs) do
+    %Podcast{}
+    |> Podcast.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:network, network)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Creates a episode.
+
+  ## Examples
+
+      iex> create_episode(%Podcast{}, %{field: value})
+      {:ok, %Episode{}}
+
+      iex> create_episode(%Podcast{}, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_episode(%Podcast{} = podcast, attrs \\ %{}) do
+    %Episode{}
+    |> Episode.changeset(attrs)
+    |> Ecto.Changeset.put_assoc(:podcast, podcast)
+    |> Repo.insert()
+  end
 
   @doc """
   Deletes a Episode.
