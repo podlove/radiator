@@ -11,8 +11,10 @@ defmodule RadiatorWeb.Api.PodcastController do
     render(conn, "index.json", podcasts: podcasts)
   end
 
-  def create(conn, %{"podcast" => podcast_params}) do
-    with {:ok, %Podcast{} = podcast} <- Directory.create_podcast(podcast_params) do
+  def create(conn, %{"podcast" => podcast_params, "network_id" => network_id}) do
+    network = Directory.get_network(network_id)
+
+    with {:ok, %Podcast{} = podcast} <- Directory.create_podcast(network, podcast_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.api_podcast_path(conn, :show, podcast))

@@ -1,6 +1,8 @@
 defmodule RadiatorWeb.EpisodeControllerTest do
   use RadiatorWeb.ConnCase
 
+  import Radiator.Factory
+
   alias Radiator.Directory
   alias Radiator.Directory.Episode
 
@@ -48,7 +50,8 @@ defmodule RadiatorWeb.EpisodeControllerTest do
   }
 
   def fixture(:podcast) do
-    {:ok, podcast} = Directory.create_podcast(%{title: "Example Podcast"})
+    network = insert(:network)
+    {:ok, podcast} = Directory.create_podcast(network, %{title: "Example Podcast"})
     podcast
   end
 

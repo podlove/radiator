@@ -22,6 +22,7 @@ defmodule RadiatorWeb.Router do
     plug Guardian.Plug.EnsureAuthenticated
     plug Guardian.Plug.LoadResource
     plug RadiatorWeb.Plug.EnsureUserValidity
+    plug RadiatorWeb.Plug.AssignCurrentNetwork
   end
 
   pipeline :api do
@@ -55,8 +56,10 @@ defmodule RadiatorWeb.Router do
 
     pipe_through :authenticated_browser
 
-    resources "/podcasts", PodcastController do
-      resources "/episodes", EpisodeController
+    resources "/networks", NetworkController do
+      resources "/podcasts", PodcastController do
+        resources "/episodes", EpisodeController
+      end
     end
 
     resources "/import", PodcastImportController, only: [:new, :create]

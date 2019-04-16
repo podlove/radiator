@@ -8,7 +8,7 @@
 
     <div class="flex justify-center md:justify-start flex-wrap">
       <%= for podcast <- @podcasts do %>
-      <a href="<%= Routes.admin_podcast_path(@conn, :show, podcast) %>" class="no-underline text-black w-48 bg-white rounded flex flex-col shadow mr-8 mb-8">
+      <a href="<%= Routes.admin_network_podcast_path(@conn, :show, podcast.network_id, podcast) %>" class="no-underline text-black w-48 bg-white rounded flex flex-col shadow mr-8 mb-8">
         
         <div
           class="w-48 h-48 bg-cover shadow-inner"
@@ -33,7 +33,7 @@
       </a>        
       <% end %>
 
-      <a href="<%= Routes.admin_podcast_path(@conn, :new) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-blue-lightest">
+      <a href="<%= Routes.admin_network_podcast_path(@conn, :new, @current_network) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-blue-lightest">
         
         <div class="w-48 h-48 flex flex-col justify-center items-center">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 mb-4 icon-add-circle"><circle cx="12" cy="12" r="10" class="primary"></circle><path class="secondary" d="M13 11h4a1 1 0 0 1 0 2h-4v4a1 1 0 0 1-2 0v-4H7a1 1 0 0 1 0-2h4V7a1 1 0 0 1 2 0v4z"></path></svg>

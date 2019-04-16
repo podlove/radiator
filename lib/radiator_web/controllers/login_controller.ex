@@ -61,11 +61,13 @@ defmodule RadiatorWeb.LoginController do
     end
   end
 
+  # FIXME Radiator.Directory.get_any_network must be replaced with "any network the user owns"
+  #       and handle the case that there is no network yet
   defp sign_in_valid_user(conn, user, message) do
     path =
       case get_session(conn, :on_login) do
         {path, _query} -> path
-        _ -> Routes.admin_podcast_path(conn, :index)
+        _ -> Routes.admin_network_podcast_path(conn, :index, Radiator.Directory.get_any_network())
       end
 
     conn
@@ -125,7 +127,9 @@ defmodule RadiatorWeb.LoginController do
 
           _ ->
             conn
-            |> redirect(to: Routes.admin_podcast_path(conn, :index))
+            |> redirect(
+              to: Routes.admin_network_podcast_path(conn, :index, conn.assigns.current_network)
+            )
         end
 
       _ ->

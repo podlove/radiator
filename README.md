@@ -57,6 +57,17 @@ cd ..
 mix phx.server
 ```
 
+Seed database with data for development:
+
+```shell
+mix run priv/repo/seeds.exs
+``` 
+
+Creates:
+
+- "ACME" network
+- user "admin" with password "password"
+
 ## API
 
 At the moment both GraphQL and REST endpoints are available. The aim is to provide a full GraphQL api as primary target and some basic REST endpoints for quick usecases.

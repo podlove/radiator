@@ -6,5 +6,5 @@
       <span class="text-grey-dark font-normal text-lg">Changes can take a moment until they are visible on third party platforms.</span>
     </div>
 
-    <%= render "form.html", Map.merge(assigns, %{action: Routes.admin_podcast_episode_path(@conn, :update, @episode.podcast, @episode), button_text: "Update Episode"}) %>
+    <%= render "form.html", Map.merge(assigns, %{action: Routes.admin_network_podcast_episode_path(@conn, :update, @episode.podcast.network_id, @episode.podcast, @episode), button_text: "Update Episode"}) %>
 </div>

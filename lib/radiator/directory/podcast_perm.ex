@@ -14,10 +14,11 @@ defmodule Radiator.Directory.PodcastPermission do
     timestamps()
   end
 
-  def changeset(perm, params \\ {}) do
+  def changeset(perm, params) when is_map(params) do
     perm
-    |> cast(params, [:user_id, :podcast_id, :permission])
-    |> validate_required([:user_id, :podcast_id, :permission])
-    |> unique_constraint(:permission, name: :podcasts_perm_user_id_podcast_id_index)
+    |> cast(params, [:permission])
+    |> validate_required([:permission])
+    |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:podcast_id)
   end
 end

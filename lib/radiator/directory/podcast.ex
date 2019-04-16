@@ -3,7 +3,7 @@ defmodule Radiator.Directory.Podcast do
   import Ecto.Changeset
   import Ecto.Query, warn: false
 
-  alias Radiator.Directory.{Episode, Podcast}
+  alias Radiator.Directory.{Episode, Podcast, Network}
 
   schema "podcasts" do
     field :author, :string
@@ -19,7 +19,8 @@ defmodule Radiator.Directory.Podcast do
 
     field :episode_count, :integer, virtual: true
 
-    has_many(:episodes, Episode)
+    belongs_to :network, Network
+    has_many :episodes, Episode
 
     has_many(:podcast_permissions, Radiator.Directory.PodcastPermission)
 

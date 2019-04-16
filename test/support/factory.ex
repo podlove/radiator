@@ -1,6 +1,14 @@
 defmodule Radiator.Factory do
   use ExMachina.Ecto, repo: Radiator.Repo
 
+  def network_factory do
+    title = sequence(:title, &"Network ##{&1}")
+
+    %Radiator.Directory.Network{
+      title: title
+    }
+  end
+
   def podcast_factory do
     title = sequence(:title, &"My Podcast ##{&1}")
 

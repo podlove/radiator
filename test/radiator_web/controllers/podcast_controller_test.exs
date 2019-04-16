@@ -1,6 +1,8 @@
 defmodule RadiatorWeb.PodcastControllerTest do
   use RadiatorWeb.ConnCase
 
+  import Radiator.Factory
+
   alias Radiator.Directory
   alias Radiator.Directory.Podcast
 
@@ -42,7 +44,9 @@ defmodule RadiatorWeb.PodcastControllerTest do
   }
 
   def fixture(:podcast) do
-    {:ok, podcast} = Directory.create_podcast(@create_attrs)
+    network = insert(:network)
+
+    {:ok, podcast} = Directory.create_podcast(network, @create_attrs)
     podcast
   end
 
@@ -72,7 +76,14 @@ defmodule RadiatorWeb.PodcastControllerTest do
 
   describe "create podcast" do
     test "renders podcast when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.api_podcast_path(conn, :create), podcast: @create_attrs)
+      network = insert(:network)
+
+      conn =
+        post(conn, Routes.api_podcast_path(conn, :create),
+          podcast: @create_attrs,
+          network_id: network.id
+        )
+
       assert %{"id" => id} = json_response(conn, 201)
 
       conn = get(conn, Routes.api_podcast_path(conn, :show, id))
@@ -93,12 +104,26 @@ defmodule RadiatorWeb.PodcastControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.api_podcast_path(conn, :create), podcast: @invalid_attrs)
+      network = insert(:network)
+
+      conn =
+        post(conn, Routes.api_podcast_path(conn, :create),
+          network_id: network.id,
+          podcast: @invalid_attrs
+        )
+
       assert json_response(conn, 422)["errors"] != %{}
     end
 
     test "links to episodes", %{conn: conn} do
-      conn = post(conn, Routes.api_podcast_path(conn, :create), podcast: @create_attrs)
+      network = insert(:network)
+
+      conn =
+        post(conn, Routes.api_podcast_path(conn, :create),
+          network_id: network.id,
+          podcast: @create_attrs
+        )
+
       assert %{"id" => id} = json_response(conn, 201)
 
       index_path = Routes.api_podcast_episode_path(conn, :index, id)
