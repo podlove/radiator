@@ -9,7 +9,7 @@ defmodule Radiator.GuidTest do
   describe "episodes" do
     test "generate a guid on create" do
       podcast = insert(:podcast, %{})
-      {:ok, episode} = Directory.create_episode(podcast, %{title: "foo"})
+      {:ok, episode} = Directory.Editor.Owner.create_episode(podcast, %{title: "foo"})
 
       assert is_binary(episode.guid)
       assert String.length(episode.guid) > 0
@@ -17,7 +17,9 @@ defmodule Radiator.GuidTest do
 
     test "generate no guid on create if it is provided" do
       podcast = insert(:podcast, %{})
-      {:ok, episode} = Directory.create_episode(podcast, %{title: "foo", guid: "provided"})
+
+      {:ok, episode} =
+        Directory.Editor.Owner.create_episode(podcast, %{title: "foo", guid: "provided"})
 
       assert episode.guid == "provided"
     end
@@ -26,7 +28,7 @@ defmodule Radiator.GuidTest do
       podcast = insert(:podcast, %{})
 
       {:ok, episode = %Episode{guid: original_guid}} =
-        Directory.create_episode(podcast, %{title: "foo"})
+        Directory.Editor.Owner.create_episode(podcast, %{title: "foo"})
 
       {:ok, episode} = Directory.update_episode(episode, %{title: "bar"})
 

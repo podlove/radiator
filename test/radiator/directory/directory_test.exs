@@ -19,12 +19,19 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "create_podcast/1 with valid data creates a podcast" do
-      assert {:ok, %Podcast{} = podcast} = Directory.create_podcast(%{title: "some title"})
+      user = Radiator.TestEntries.user()
+
+      assert {:ok, %{podcast: %Podcast{} = podcast}} =
+               Directory.Editor.Owner.create_podcast(user, %{title: "some title"})
+
       assert podcast.title == "some title"
     end
 
     test "create_podcast/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Directory.create_podcast(%{title: nil})
+      user = Radiator.TestEntries.user()
+
+      assert {:error, :podcast, %Ecto.Changeset{}, _} =
+               Directory.Editor.Owner.create_podcast(user, %{title: nil})
     end
 
     test "update_podcast/2 with valid data updates the podcast" do
@@ -38,7 +45,10 @@ defmodule Radiator.DirectoryTest do
 
     test "update_podcast/2 with invalid data returns error changeset" do
       podcast = insert(:podcast)
-      assert {:error, %Ecto.Changeset{}} = Directory.update_podcast(podcast, %{title: nil})
+
+      assert {:error, %Ecto.Changeset{}} =
+               Directory.Editor.Manager.update_podcast(podcast, %{title: nil})
+
       assert podcast == Directory.get_podcast!(podcast.id)
     end
 
@@ -73,14 +83,16 @@ defmodule Radiator.DirectoryTest do
 
     test "create_episode/1 with valid data creates a episode" do
       assert {:ok, %Episode{} = episode} =
-               Directory.create_episode(insert(:podcast), @valid_attrs)
+               Directory.Editor.Owner.create_episode(insert(:podcast), @valid_attrs)
 
       assert episode.title == "some title"
     end
 
     test "create_episode/1 with invalid data returns error changeset" do
       podcast = insert(:podcast)
-      assert {:error, %Ecto.Changeset{}} = Directory.create_episode(podcast, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Directory.Editor.Owner.create_episode(podcast, @invalid_attrs)
     end
 
     test "update_episode/2 with valid data updates the episode" do

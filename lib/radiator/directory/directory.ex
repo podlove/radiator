@@ -1,15 +1,14 @@
 defmodule Radiator.Directory do
   @moduledoc """
-  The Directory context.
+  The Directory context supplying published information.
   """
 
   import Ecto.Query, warn: false
 
   alias __MODULE__
   alias Radiator.Repo
-  alias Directory.{Podcast, PodcastPermission}
-  alias Directory.{Episode, EpisodePermission}
-  alias Radiator.Auth
+  alias Directory.Podcast
+  alias Directory.Episode
 
   def data() do
     Dataloader.Ecto.new(Repo, query: &query/2)
@@ -59,23 +58,37 @@ defmodule Radiator.Directory do
   def get_podcast!(id), do: Repo.get!(Podcast, id)
   def get_podcast(id), do: Repo.get(Podcast, id)
 
+  defp episodes_query(args) when is_map(args) do
+    Radiator.Directory.EpisodeQuery.build(args)
+  end
+
+  def list_episodes do
+    list_episodes(%{})
+  end
+
+  def list_episodes(args) do
+    episodes_query(args)
+    |> Repo.all()
+  end
+
   @doc """
-  Creates a podcast.
+  Gets a single episode.
+
+  Raises `Ecto.NoResultsError` if the Episode does not exist.
 
   ## Examples
 
-      iex> create_podcast(%{field: value})
-      {:ok, %Podcast{}}
+      iex> get_episode!(123)
+      %Episode{}
 
-      iex> create_podcast(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+      iex> get_episode!(456)
+      ** (Ecto.NoResultsError)
 
   """
-  def create_podcast(attrs) do
-    %Podcast{}
-    |> Podcast.changeset(attrs)
-    |> Repo.insert()
-  end
+  def get_episode!(id), do: Repo.get!(Episode, id) |> Repo.preload(:podcast)
+  def get_episode(id), do: Repo.get(Episode, id) |> Repo.preload(:podcast)
+
+  ## Todo: Needs to move to `Editor` context
 
   @doc """
   Updates a podcast.
@@ -122,55 +135,6 @@ defmodule Radiator.Directory do
   """
   def change_podcast(%Podcast{} = podcast) do
     Podcast.changeset(podcast, %{})
-  end
-
-  defp episodes_query(args) when is_map(args) do
-    Radiator.Directory.EpisodeQuery.build(args)
-  end
-
-  def list_episodes do
-    list_episodes(%{})
-  end
-
-  def list_episodes(args) do
-    episodes_query(args)
-    |> Repo.all()
-  end
-
-  @doc """
-  Gets a single episode.
-
-  Raises `Ecto.NoResultsError` if the Episode does not exist.
-
-  ## Examples
-
-      iex> get_episode!(123)
-      %Episode{}
-
-      iex> get_episode!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_episode!(id), do: Repo.get!(Episode, id) |> Repo.preload(:podcast)
-  def get_episode(id), do: Repo.get(Episode, id) |> Repo.preload(:podcast)
-
-  @doc """
-  Creates a episode.
-
-  ## Examples
-
-      iex> create_episode(%Podcast{}, %{field: value})
-      {:ok, %Episode{}}
-
-      iex> create_episode(%Podcast{}, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_episode(%Podcast{} = podcast, attrs \\ %{}) do
-    %Episode{}
-    |> Episode.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:podcast, podcast)
-    |> Repo.insert()
   end
 
   @doc """
@@ -225,46 +189,5 @@ defmodule Radiator.Directory do
   """
   def change_episode(%Episode{} = episode) do
     Episode.changeset(episode, %{})
-  end
-
-  ## Permission manipulation
-
-  def remove_permission(user = %Auth.User{}, %Episode{} = episode) do
-    case Repo.get_by(EpisodePermission, user_id: user.id, episode_id: episode.id) do
-      nil ->
-        nil
-
-      perm ->
-        Repo.delete(perm)
-        # hide the implementation detail for now
-        |> case do
-          {:ok, _perm} -> :ok
-          _ -> nil
-        end
-    end
-  end
-
-  def set_permission(user, entity, permission)
-
-  def set_permission(user = %Auth.User{}, %Episode{} = episode, permission)
-      when is_atom(permission) do
-    (Repo.get_by(EpisodePermission, user_id: user.id, episode_id: episode.id) ||
-       %EpisodePermission{user_id: user.id, episode_id: episode.id})
-    |> EpisodePermission.changeset(%{permission: permission})
-    |> Repo.insert_or_update()
-    |> case do
-      # hide the implementation detail for now
-      {:ok, _perm} -> :ok
-      {:error, changeset} -> {:error, changeset}
-    end
-  end
-
-  def get_permission(user, entity)
-
-  def get_permission(user = %Auth.User{}, %Episode{} = episode) do
-    case Repo.get_by(EpisodePermission, user_id: user.id, episode_id: episode.id) do
-      nil -> nil
-      perm -> perm.permission
-    end
   end
 end
