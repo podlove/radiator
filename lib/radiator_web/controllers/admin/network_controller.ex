@@ -24,7 +24,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
         |> put_flash(:info, "Network created successfully.")
         |> redirect(to: Routes.admin_network_path(conn, :show, network.id))
 
-      {:error, %Ecto.Changeset{} = changeset} ->
+      {:error, :network, %Ecto.Changeset{} = changeset, _} ->
         render(conn, "new.html", changeset: changeset)
     end
   end

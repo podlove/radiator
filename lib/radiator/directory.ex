@@ -122,6 +122,4 @@ defmodule Radiator.Directory do
   def get_any_network do
     from(n in Network, limit: 1) |> Repo.one!()
   end
-
-  ## Todo: Needs to move to `Editor` context
 end
