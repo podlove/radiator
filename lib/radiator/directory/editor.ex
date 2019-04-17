@@ -1,6 +1,6 @@
 defmodule Radiator.Directory.Editor do
   @moduledoc """
-  The Editor context for modifying data.
+  The Editor context for querying and modifying data as an authorized user.
   """
 
   import Ecto.Query, warn: false
@@ -10,19 +10,83 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.Repo
   alias Radiator.Directory.{Network, Podcast, Episode}
 
+  alias Radiator.Directory.Editor
   alias Radiator.Directory.Editor.EditorHelpers
 
   alias Radiator.Perm.Ecto.PermissionType
+
+  @not_authorized {:error, :not_authorized}
+
+  @doc """
+  Returns a list of networks the actor has at least `:readonly` permissions on.
+
+  ## Examples
+
+      iex> list_networks(me)
+      [%Network{}, ...]
+
+  """
 
   def list_networks(actor = %Auth.User{}) do
     query =
       from n in Network,
         join: p in "networks_perm",
         where: n.id == p.subject_id,
-        where: p.user_id == ^actor.id
+        where: p.user_id == ^actor.id,
+        order_by: n.title
 
     query
     |> Repo.all()
+  end
+
+  @doc """
+  Creates a network.
+
+  ## Examples
+
+      iex> create_network(me, %{title: "My First Network"})
+      {:ok, %Network{}}
+
+      iex> create_network(me, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+
+  def create_network(actor = %Auth.User{}, attrs) do
+    case Editor.Owner.create_network(actor, attrs) do
+      {:ok, %{network: network}} -> network
+      {:error, :network, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  @doc """
+  Creates a network.
+
+  ## Examples
+
+      iex> update_network(me, network, %{title: "Professionals United"})
+      {:ok, %Network{}}
+
+      iex> update_network(me, network, %{title: nil})
+      {:error, %Ecto.Changeset{}}
+
+      iex> update_network(me, readonly_network, %{title: "Hostile Takeover 1"})
+      {:error, :not_authorized}
+  """
+  def update_network(actor = %Auth.User{}, network = %Network{}, attrs) do
+    if has_permission(actor, network, :own) do
+      Editor.Owner.update_network(network, attrs)
+    else
+      @not_authorized
+    end
+  end
+
+  def create_podcast(actor = %Auth.User{}, network = %Network{}, attrs) do
+    if has_permission(actor, network, :manage) do
+      Editor.Manager.create_podcast(network, attrs)
+    else
+      @not_authorized
+    end
   end
 
   # Permission
