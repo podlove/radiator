@@ -30,14 +30,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
   end
 
   def show(conn, %{"id" => id}) do
-    network = Directory.get_network!(id)
-
-    podcasts = Directory.list_podcasts(network)
-
-    render(conn, "show.html",
-      network: network,
-      podcasts: podcasts
-    )
+    redirect(conn, to: Routes.admin_network_podcast_path(conn, :index, id))
   end
 
   def edit(conn, %{"id" => id}) do
