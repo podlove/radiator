@@ -8,12 +8,10 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.Auth
 
   alias Radiator.Repo
-  alias Radiator.Directory
   alias Radiator.Directory.{Network, Podcast, Episode}
 
   alias Radiator.Directory.Editor.EditorHelpers
 
-  alias Radiator.Perm.Permission
   alias Radiator.Perm.Ecto.PermissionType
 
   def list_networks(actor = %Auth.User{}) do
@@ -30,22 +28,22 @@ defmodule Radiator.Directory.Editor do
   # Permission
 
   def get_permission(user = %Auth.User{}, subject = %Network{}),
-    do: get_permission_p(user, subject)
+    do: do_get_permission(user, subject)
 
   def get_permission(user = %Auth.User{}, subject = %Podcast{}),
-    do: get_permission_p(user, subject)
+    do: do_get_permission(user, subject)
 
   def get_permission(user = %Auth.User{}, subject = %Episode{}),
-    do: get_permission_p(user, subject)
+    do: do_get_permission(user, subject)
 
-  defp get_permission_p(user, subject) do
-    case EditorHelpers.get_permission_p(user, subject) do
+  defp do_get_permission(user, subject) do
+    case EditorHelpers.get_permission(user, subject) do
       nil -> nil
       perm -> perm.permission
     end
   end
 
-  def has_permission(user, nil, _), do: false
+  def has_permission(_user, nil, _permission), do: false
 
   def has_permission(user, subject, permission) do
     case PermissionType.compare(get_permission(user, subject), permission) do

@@ -9,7 +9,7 @@ defmodule Radiator.Directory.Editor.Owner do
   alias Radiator.Repo
 
   alias Radiator.Directory
-  alias Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.{Network, Podcast, Episode}
 
   alias Radiator.Auth
   alias Radiator.Perm.Permission
@@ -19,7 +19,6 @@ defmodule Radiator.Directory.Editor.Owner do
   @doc """
   Temporary user for api stuff (just the most recent one) - until authentication on api level is done
   """
-  @spec api_user_shim() :: Radiator.Auth.User.t()
   def api_user_shim() do
     Repo.all(Auth.User)
     |> List.last()
@@ -103,7 +102,7 @@ defmodule Radiator.Directory.Editor.Owner do
   ## Permission manipulation
 
   def remove_permission(user = %Auth.User{}, subject) do
-    case EditorHelpers.get_permission_p(user, subject) do
+    case EditorHelpers.get_permission(user, subject) do
       nil ->
         nil
 
@@ -117,24 +116,16 @@ defmodule Radiator.Directory.Editor.Owner do
     end
   end
 
-  @spec set_permission(
-          Radiator.Auth.User.t(),
-          %{
-            __struct__:
-              Radiator.Directory.Episode | Radiator.Directory.Network | Radiator.Directory.Podcast
-          },
-          atom()
-        ) :: :ok | {:error, any()}
   def set_permission(user = %Auth.User{}, podcast = %Podcast{}, permission),
-    do: set_permission_p(user, podcast, permission)
+    do: do_set_permission(user, podcast, permission)
 
   def set_permission(user = %Auth.User{}, network = %Network{}, permission),
-    do: set_permission_p(user, network, permission)
+    do: do_set_permission(user, network, permission)
 
   def set_permission(user = %Auth.User{}, episode = %Episode{}, permission),
-    do: set_permission_p(user, episode, permission)
+    do: do_set_permission(user, episode, permission)
 
-  defp set_permission_p(user = %Auth.User{}, subject, permission)
+  defp do_set_permission(user = %Auth.User{}, subject, permission)
        when is_atom(permission) do
     query =
       from perm in Ecto.assoc(subject, :permissions),
