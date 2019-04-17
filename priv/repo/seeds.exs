@@ -10,19 +10,20 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias Radiator.Directory
 alias Radiator.Auth.Register
+alias Radiator.Directory.Editor
 
 if Mix.env() != :test do
-  Directory.create_network(%{
-    title: "ACME"
-  })
+  {:ok, user} =
+    Register.create_user(%{
+      name: "admin",
+      email: "admin@example.com",
+      display_name: "admin",
+      password: "password",
+      status: :active
+    })
 
-  Register.create_user(%{
-    name: "admin",
-    email: "admin@example.com",
-    display_name: "admin",
-    password: "password",
-    status: :active
+  Editor.Owner.create_network(user, %{
+    title: "ACME"
   })
 end
