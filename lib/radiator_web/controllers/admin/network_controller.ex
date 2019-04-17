@@ -6,7 +6,9 @@ defmodule RadiatorWeb.Admin.NetworkController do
   alias Directory.Editor
 
   def index(conn, _params) do
-    networks = Directory.list_networks()
+    me = conn.assigns.authenticated_user
+
+    networks = Editor.list_networks(me)
     render(conn, "index.html", networks: networks)
   end
 

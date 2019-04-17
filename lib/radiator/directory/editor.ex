@@ -9,11 +9,22 @@ defmodule Radiator.Directory.Editor do
 
   alias Radiator.Repo
   alias Radiator.Directory
-  alias Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.{Network, Podcast, Episode}
 
-  alias Directory.Editor.EditorHelpers
+  alias Radiator.Directory.Editor.EditorHelpers
 
-  def list_networks do
+  alias Radiator.Perm.Permission
+  alias Radiator.Perm.Ecto.PermissionType
+
+  def list_networks(actor = %Auth.User{}) do
+    query =
+      from n in Network,
+        join: p in "networks_perm",
+        where: n.id == p.subject_id,
+        where: p.user_id == ^actor.id
+
+    query
+    |> Repo.all()
   end
 
   # Permission
@@ -32,5 +43,40 @@ defmodule Radiator.Directory.Editor do
       nil -> nil
       perm -> perm.permission
     end
+  end
+
+  def has_permission(user, nil, _), do: false
+
+  def has_permission(user, subject, permission) do
+    case PermissionType.compare(get_permission(user, subject), permission) do
+      :lt ->
+        case parent(subject) do
+          nil ->
+            false
+
+          parent ->
+            has_permission(user, parent, permission)
+        end
+
+      # greater or equal is fine
+      _ ->
+        true
+    end
+  end
+
+  defp parent(subject = %Episode{}) do
+    subject
+    |> Ecto.assoc(:podcast)
+    |> Repo.one!()
+  end
+
+  defp parent(subject = %Podcast{}) do
+    subject
+    |> Ecto.assoc(:podcast)
+    |> Repo.one!()
+  end
+
+  defp parent(_) do
+    nil
   end
 end

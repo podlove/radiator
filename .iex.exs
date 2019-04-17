@@ -36,5 +36,7 @@ alias Radiator.{Directory, Repo, Storage}
 alias Directory.{Episode, Podcast, Network, Editor}
 alias Radiator.Feed.Builder
 
-alias Radiator.Perm.Ecto.PermissionType
 alias Radiator.Auth
+
+alias Radiator.Perm.Ecto.PermissionType
+alias Radiator.Perm.Permission
