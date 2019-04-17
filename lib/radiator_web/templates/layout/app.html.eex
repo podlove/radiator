@@ -9,6 +9,8 @@
   </head>
   <body class="bg-grey-lighter antialiased">
 
+    <%= render RadiatorWeb.PageView, "nav.html", assigns %>
+
     <%= if get_flash(@conn, :info) do %>
       <div class="bg-yellow-lighter border-l-4 border-yellow-light text-yellow-darkest px-4 py-3 my-1 mx-2">
         <div class="flex">
