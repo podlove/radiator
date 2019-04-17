@@ -9,28 +9,26 @@ defmodule Radiator.Directory.Editor do
 
   alias Radiator.Repo
   alias Radiator.Directory
-  alias Directory.{Network, NetworkPermission}
-  alias Directory.{Podcast, PodcastPermission}
-  alias Directory.{Episode, EpisodePermission}
+  alias Directory.{Network, Podcast, Episode}
 
-  def get_permission(user, entity)
+  alias Directory.Editor.EditorHelpers
 
-  def get_permission(user = %Auth.User{}, episode = %Episode{}) do
-    case Repo.get_by(EpisodePermission, user_id: user.id, episode_id: episode.id) do
-      nil -> nil
-      perm -> perm.permission
-    end
+  def list_networks do
   end
 
-  def get_permission(user = %Auth.User{}, subject = %Podcast{}) do
-    case Repo.get_by(PodcastPermission, user_id: user.id, podcast_id: subject.id) do
-      nil -> nil
-      perm -> perm.permission
-    end
-  end
+  # Permission
 
-  def get_permission(user = %Auth.User{}, subject = %Network{}) do
-    case Repo.get_by(NetworkPermission, user_id: user.id, network_id: subject.id) do
+  def get_permission(user = %Auth.User{}, subject = %Network{}),
+    do: get_permission_p(user, subject)
+
+  def get_permission(user = %Auth.User{}, subject = %Podcast{}),
+    do: get_permission_p(user, subject)
+
+  def get_permission(user = %Auth.User{}, subject = %Episode{}),
+    do: get_permission_p(user, subject)
+
+  defp get_permission_p(user, subject) do
+    case EditorHelpers.get_permission_p(user, subject) do
       nil -> nil
       perm -> perm.permission
     end

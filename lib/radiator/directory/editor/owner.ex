@@ -9,11 +9,12 @@ defmodule Radiator.Directory.Editor.Owner do
   alias Radiator.Repo
 
   alias Radiator.Directory
-  alias Directory.{Network, NetworkPermission}
-  alias Directory.{Podcast, PodcastPermission}
-  alias Directory.{Episode, EpisodePermission}
+  alias Directory.{Network, Podcast, Episode}
 
   alias Radiator.Auth
+  alias Radiator.Perm.Permission
+
+  alias Directory.Editor.EditorHelpers
 
   @doc """
   Temporary user for api stuff (just the most recent one) - until authentication on api level is done
@@ -44,11 +45,10 @@ defmodule Radiator.Directory.Editor.Owner do
 
     Multi.new()
     |> Multi.insert(:network, network)
-    |> Multi.insert(:network_perm, fn %{network: network} ->
-      %NetworkPermission{}
-      |> NetworkPermission.changeset(%{permission: :own})
+    |> Multi.insert(:permission, fn %{network: network} ->
+      Ecto.build_assoc(network, :permissions)
+      |> Permission.changeset(%{permission: :own})
       |> Ecto.Changeset.put_assoc(:user, actor)
-      |> Ecto.Changeset.put_assoc(:network, network)
     end)
     |> Repo.transaction()
   end
@@ -102,8 +102,8 @@ defmodule Radiator.Directory.Editor.Owner do
 
   ## Permission manipulation
 
-  def remove_permission(user = %Auth.User{}, episode = %Episode{}) do
-    case Repo.get_by(EpisodePermission, user_id: user.id, episode_id: episode.id) do
+  def remove_permission(user = %Auth.User{}, subject) do
+    case EditorHelpers.get_permission_p(user, subject) do
       nil ->
         nil
 
@@ -117,42 +117,38 @@ defmodule Radiator.Directory.Editor.Owner do
     end
   end
 
-  def set_permission(user, entity, permission)
+  @spec set_permission(
+          Radiator.Auth.User.t(),
+          %{
+            __struct__:
+              Radiator.Directory.Episode | Radiator.Directory.Network | Radiator.Directory.Podcast
+          },
+          atom()
+        ) :: :ok | {:error, any()}
+  def set_permission(user = %Auth.User{}, podcast = %Podcast{}, permission),
+    do: set_permission_p(user, podcast, permission)
 
-  # Todo: terribly redundant, either make a macro or have a better idea
+  def set_permission(user = %Auth.User{}, network = %Network{}, permission),
+    do: set_permission_p(user, network, permission)
 
-  def set_permission(user = %Auth.User{}, subject = %Network{}, permission)
-      when is_atom(permission) do
-    case Repo.get_by(NetworkPermission, user_id: user.id, network_id: subject.id) do
-      nil -> %NetworkPermission{user_id: user.id, network_id: subject.id}
-      permission -> permission
+  def set_permission(user = %Auth.User{}, episode = %Episode{}, permission),
+    do: set_permission_p(user, episode, permission)
+
+  defp set_permission_p(user = %Auth.User{}, subject, permission)
+       when is_atom(permission) do
+    query =
+      from perm in Ecto.assoc(subject, :permissions),
+        where: perm.user_id == ^user.id
+
+    Repo.one(query)
+    |> case do
+      nil ->
+        Ecto.build_assoc(subject, :permissions, %{user_id: user.id})
+
+      permission ->
+        permission
     end
-    |> NetworkPermission.changeset(%{permission: permission})
-    |> set_permission_shared()
-  end
-
-  def set_permission(user = %Auth.User{}, subject = %Podcast{}, permission)
-      when is_atom(permission) do
-    case Repo.get_by(PodcastPermission, user_id: user.id, podcast_id: subject.id) do
-      nil -> %PodcastPermission{user_id: user.id, podcast_id: subject.id}
-      permission -> permission
-    end
-    |> PodcastPermission.changeset(%{permission: permission})
-    |> set_permission_shared()
-  end
-
-  def set_permission(user = %Auth.User{}, subject = %Episode{}, permission)
-      when is_atom(permission) do
-    case Repo.get_by(EpisodePermission, user_id: user.id, episode_id: subject.id) do
-      nil -> %EpisodePermission{user_id: user.id, episode_id: subject.id}
-      permission -> permission
-    end
-    |> EpisodePermission.changeset(%{permission: permission})
-    |> set_permission_shared()
-  end
-
-  defp set_permission_shared(changeset) do
-    changeset
+    |> Permission.changeset(%{permission: permission})
     |> Repo.insert_or_update()
     |> case do
       # hide the implementation detail for now
