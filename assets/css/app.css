@@ -84,7 +84,7 @@
   }
 }
 
-.nav-cheveron {
+.nav-chevron {
   @apply mx-1 h-full flex items-center;
 }
 

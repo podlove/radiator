@@ -8,18 +8,8 @@
   <% end %>
 
     <div class="mb-6">
-      <%= text_input f, :title, class: "input font-bold", placeholder: "Podcast Title" %>
+      <%= text_input f, :title, class: "input font-bold", placeholder: "Network Title" %>
       <%= error_tag f, :title %>
-    </div>
-    <div class="mb-6">
-      <%= label f, :subtitle, class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>
-      <%= text_input f, :subtitle, class: "input", placeholder: "One-liner to grab the listener's attention" %>
-      <%= error_tag f, :subtitle %>
-    </div>
-    <div class="mb-6">
-      <%= label f, :description, class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>
-      <%= textarea f, :description, rows: 3, class: "input", placeholder: "One-liner to grab the listener's attention" %>
-      <%= error_tag f, :description %>
     </div>
 
     <%= submit @button_text, class: "btn btn-blue" %>
