@@ -53,7 +53,8 @@ config :arc,
   # or Arc.Storage.Local
   storage: Arc.Storage.S3,
   # if using Amazon S3
-  bucket: "radiator"
+  bucket: "radiator",
+  asset_host: "http://localhost:9000/radiator"
 
 config :ex_aws,
   access_key_id: "IEKAZMUY3KX32CRJPE9R",
