@@ -50,6 +50,7 @@ defmodule Radiator.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:hal, "~> 1.1"},
       {:httpoison, "~> 1.5"},
+      {:arc, "~> 0.11"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
       # for ex_aws

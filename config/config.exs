@@ -49,6 +49,12 @@ config :radiator, Radiator.Mailer,
   # can be `always`. If your smtp relay requires authentication set it to `always`.
   auth: :if_available
 
+config :arc,
+  # or Arc.Storage.Local
+  storage: Arc.Storage.S3,
+  # if using Amazon S3
+  bucket: "radiator"
+
 config :ex_aws,
   access_key_id: "IEKAZMUY3KX32CRJPE9R",
   secret_access_key: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN",
