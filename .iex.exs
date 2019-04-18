@@ -51,7 +51,7 @@ changeset =
     }
   })
 
-Repo.update(changeset)
+{:ok, user} = Repo.update(changeset)
 
-Radiator.UserAvatar.url({user.avatar, user})
+Radiator.Media.UserAvatar.url({user.avatar, user})
 |> IO.inspect(pretty: true)

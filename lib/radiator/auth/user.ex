@@ -40,7 +40,7 @@ defmodule Radiator.Auth.User do
     field :name, :string
     field :email, :string
     field :display_name, :string
-    field :avatar, Radiator.UserAvatar.Type
+    field :avatar, Radiator.Media.UserAvatar.Type
     field :password_hash, :binary
     field :password, :string, virtual: true
     field :status, Radiator.Auth.Ecto.UserStatusType, default: :unverified

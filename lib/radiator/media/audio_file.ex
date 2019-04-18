@@ -1,4 +1,4 @@
-defmodule Radiator.AudioFile do
+defmodule Radiator.Media.AudioFile do
   use Arc.Definition
   use Arc.Ecto.Definition
 
