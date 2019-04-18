@@ -2,9 +2,10 @@ defmodule Radiator.Perm.Ecto.PermissionType do
   alias Ecto.Type
   @behaviour Type
 
-  @allowed_values [:readonly, :edit, :manage, :own]
+  use Radiator.Constants
 
-  @spec allowed_values() :: [:edit | :manage | :own | :readonly, ...]
+  @allowed_values @permission_values
+
   def allowed_values do
     @allowed_values
   end

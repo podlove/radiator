@@ -2,7 +2,9 @@ defmodule Radiator.Auth.Ecto.UserStatusType do
   alias Ecto.Type
   @behaviour Type
 
-  @allowed_values [:unverified, :active, :suspended]
+  use Radiator.Constants
+
+  @allowed_values @auth_user_status_values
 
   def allowed_values do
     @allowed_values

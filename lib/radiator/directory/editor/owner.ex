@@ -16,6 +16,8 @@ defmodule Radiator.Directory.Editor.Owner do
 
   alias Directory.Editor.EditorHelpers
 
+  use Radiator.Constants
+
   @doc """
   Temporary user for api stuff (just the most recent one) - until authentication on api level is done
   """
@@ -116,17 +118,12 @@ defmodule Radiator.Directory.Editor.Owner do
     end
   end
 
-  def set_permission(user = %Auth.User{}, podcast = %Podcast{}, permission),
-    do: do_set_permission(user, podcast, permission)
-
-  def set_permission(user = %Auth.User{}, network = %Network{}, permission),
-    do: do_set_permission(user, network, permission)
-
-  def set_permission(user = %Auth.User{}, episode = %Episode{}, permission),
-    do: do_set_permission(user, episode, permission)
+  def set_permission(user = %Auth.User{}, subject = %st{}, permission)
+      when st in [Podcast, Network, Episode] and is_permission(permission),
+      do: do_set_permission(user, subject, permission)
 
   defp do_set_permission(user = %Auth.User{}, subject, permission)
-       when is_atom(permission) do
+       when is_permission(permission) do
     query =
       from perm in Ecto.assoc(subject, :permissions),
         where: perm.user_id == ^user.id
