@@ -35,6 +35,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :owner_name, :string
     field :published_at, :datetime
     field :subtitle, :string
+    field :slug, :string
 
     field :is_published, :boolean do
       resolve &Resolvers.Directory.is_published/3

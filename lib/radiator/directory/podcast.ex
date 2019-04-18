@@ -16,6 +16,7 @@ defmodule Radiator.Directory.Podcast do
     field :published_at, :utc_datetime
     field :subtitle, :string
     field :title, :string
+    field :slug, :string
 
     field :episode_count, :integer, virtual: true
 
@@ -38,9 +39,11 @@ defmodule Radiator.Directory.Podcast do
       :owner_email,
       :language,
       :published_at,
-      :last_built_at
+      :last_built_at,
+      :slug
     ])
     |> validate_required([:title])
+    |> unique_constraint(:slug)
   end
 
   @doc """
