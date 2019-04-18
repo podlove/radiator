@@ -32,6 +32,7 @@ defmodule Radiator.Auth.User do
   alias Radiator.Auth.User
 
   use Ecto.Schema
+  use Arc.Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query, warn: false
 
@@ -39,6 +40,7 @@ defmodule Radiator.Auth.User do
     field :name, :string
     field :email, :string
     field :display_name, :string
+    field :avatar, Radiator.UserAvatar.Type
     field :password_hash, :binary
     field :password, :string, virtual: true
     field :status, Radiator.Auth.Ecto.UserStatusType, default: :unverified
@@ -48,9 +50,10 @@ defmodule Radiator.Auth.User do
   end
 
   @doc false
-  def changeset(%User{} = user, attrs) do
+  def changeset(%User{} = user, attrs \\ :invalid) do
     user
     |> cast(attrs, [:name, :email, :display_name, :password, :password_hash, :status])
+    |> cast_attachments(attrs, [:avatar])
     |> unique_constraint(:name)
     |> unique_constraint(:email)
     |> validate_format(:name, ~r/^[^\s ]+$/)

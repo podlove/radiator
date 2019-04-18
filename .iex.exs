@@ -35,3 +35,23 @@ alias RadiatorWeb.Router.Helpers, as: Routes
 alias Radiator.{Directory, Repo, Storage}
 alias Radiator.Directory.{Episode, Podcast}
 alias Radiator.Feed.Builder
+
+alias Radiator.Auth.User
+
+## scratchpad
+
+user = User |> first |> Repo.one()
+
+changeset =
+  User.changeset(user, %{
+    "avatar" => %Plug.Upload{
+      content_type: "image/jpeg",
+      filename: "#{Ecto.UUID.generate()}.jpg",
+      path: "/Users/ericteubert/Downloads/avatar.jpg"
+    }
+  })
+
+Repo.update(changeset)
+
+Radiator.UserAvatar.url({user.avatar, user})
+|> IO.inspect(pretty: true)

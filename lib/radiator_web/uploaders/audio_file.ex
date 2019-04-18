@@ -1,5 +1,6 @@
 defmodule Radiator.AudioFile do
   use Arc.Definition
+  use Arc.Ecto.Definition
 
   def storage_dir(_version, {_file, episode}) do
     "network-#{episode.podcast.network.id}/podcast-#{episode.podcast.id}/episode-#{episode.id}/"
