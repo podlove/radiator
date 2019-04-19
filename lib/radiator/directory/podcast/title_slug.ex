@@ -4,8 +4,6 @@ defmodule Radiator.Directory.Podcast.TitleSlug do
 
   alias Radiator.Directory
 
-  require Logger
-
   def get_sources(changeset, _opts) do
     title = get_field(changeset, :title)
 
