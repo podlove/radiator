@@ -65,42 +65,28 @@ defmodule RadiatorWeb.Resolvers.Directory do
   end
 
   def publish_podcast(_parent, %{id: id}, _res) do
-    case Directory.get_podcast(id) do
-      nil ->
+    case Directory.publish_podcast(id) do
+      {:ok, podcast} ->
+        {:ok, podcast}
+
+      {:error, :not_found} ->
         {:error, "Podcast ID #{id} not found"}
 
-      %Podcast{slug: nil} = podcast ->
-        slug = Slugger.slugify_downcase(podcast.title)
-
-        attrs = %{
-          published_at: DateTime.utc_now(),
-          slug: slug
-        }
-
-        case Directory.update_podcast(podcast, attrs) do
-          {:ok, podcast} ->
-            {:ok, podcast}
-
-          {:error, %Ecto.Changeset{errors: [slug: {"has already been taken", _}]}} ->
-            {:error, "Slug #{slug} has already been taken"}
-        end
-
-      podcast ->
-        Directory.update_podcast(podcast, %{
-          published_at: DateTime.utc_now()
-        })
+      {:error, error} ->
+        {:error, error}
     end
   end
 
   def depublish_podcast(_parent, %{id: id}, _res) do
-    case Directory.get_podcast(id) do
-      nil ->
+    case Directory.depublish_podcast(id) do
+      {:ok, podcast} ->
+        {:ok, podcast}
+
+      {:error, :not_found} ->
         {:error, "Podcast ID #{id} not found"}
 
-      podcast ->
-        Directory.update_podcast(podcast, %{
-          published_at: nil
-        })
+      {:error, error} ->
+        {:error, error}
     end
   end
 

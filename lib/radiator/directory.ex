@@ -120,6 +120,75 @@ defmodule Radiator.Directory do
     Podcast.changeset(podcast, %{})
   end
 
+  @doc """
+  Publishes a single podcast by giving it a `published_at` date.
+
+  ## Examples
+
+      iex> publish_podcast(podcast_id)
+      {:ok, podcast}
+
+      iex> publish_podcast(non_existing_id)
+      {:error, :not_found}
+
+      iex> publish_podcast(id)
+      {:error, %Ecto.Changeset{}}
+  """
+  def publish_podcast(id) do
+    case get_podcast(id) do
+      nil ->
+        {:error, :not_found}
+
+      %Podcast{slug: nil} = podcast ->
+        slug = Slugger.slugify_downcase(podcast.title)
+
+        attrs = %{
+          published_at: DateTime.utc_now(),
+          slug: slug
+        }
+
+        case update_podcast(podcast, attrs) do
+          {:ok, podcast} ->
+            {:ok, podcast}
+
+          {:error, %Ecto.Changeset{errors: [slug: {"has already been taken", _}]}} ->
+            {:error, "Slug #{slug} has already been taken"}
+
+          {:error, error} ->
+            {:error, error}
+        end
+
+      podcast ->
+        update_podcast(podcast, %{
+          published_at: DateTime.utc_now()
+        })
+    end
+  end
+
+  @doc """
+  Depublishes a single podcast by removing it's `published_at` date.
+
+  ## Examples
+
+      iex> depublish_podcast(podcast_id)
+      {:ok, podcast}
+
+      iex> depublish_podcast(non_existing_id)
+      {:error, :not_found}
+
+      iex> depublish_podcast(id)
+      {:error, %Ecto.Changeset{}}
+  """
+  def depublish_podcast(id) do
+    case get_podcast(id) do
+      nil ->
+        {:error, :not_found}
+
+      %Podcast{} = podcast ->
+        update_podcast(podcast, %{published_at: nil})
+    end
+  end
+
   defp episodes_query(args) when is_map(args) do
     Radiator.Directory.EpisodeQuery.build(args)
   end

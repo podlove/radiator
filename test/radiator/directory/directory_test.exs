@@ -57,6 +57,34 @@ defmodule Radiator.DirectoryTest do
       podcast = insert(:podcast)
       assert %Ecto.Changeset{} = Directory.change_podcast(podcast)
     end
+
+    test "publish_podcast/1 sets a podcasts published_at date" do
+      podcast = insert(:podcast, published_at: nil)
+
+      assert {:ok, %Podcast{} = published_podcast} = Directory.publish_podcast(podcast.id)
+      assert published_podcast.published_at != nil
+      assert :gt == DateTime.compare(DateTime.utc_now(), published_podcast.published_at)
+    end
+
+    test "publish_podcast/1 returns error for non existing podcasts" do
+      podcast = insert(:podcast)
+      {:ok, _deleted_podcast} = Directory.delete_podcast(podcast)
+
+      assert {:error, :not_found} = Directory.publish_podcast(podcast.id)
+    end
+
+    test "depublish_podcast/1 removes a podcasts published_at date" do
+      podcast = insert(:podcast, published_at: DateTime.utc_now())
+
+      assert {:ok, %Podcast{published_at: nil}} = Directory.depublish_podcast(podcast.id)
+    end
+
+    test "depublish_podcast/1 returns error for non existing podcasts" do
+      podcast = insert(:podcast)
+      {:ok, _deleted_podcast} = Directory.delete_podcast(podcast)
+
+      assert {:error, :not_found} = Directory.depublish_podcast(podcast.id)
+    end
   end
 
   describe "episodes" do
