@@ -79,7 +79,7 @@ defmodule Radiator.DirectoryTest do
     test "publish_podcast/1 sets a podcasts published_at date" do
       podcast = insert(:podcast, published_at: nil)
 
-      assert {:ok, %Podcast{} = published_podcast} = Directory.publish_podcast(podcast.id)
+      assert {:ok, %Podcast{} = published_podcast} = Directory.publish_podcast(podcast)
       assert published_podcast.published_at != nil
       assert :gt == DateTime.compare(DateTime.utc_now(), published_podcast.published_at)
     end
@@ -87,7 +87,7 @@ defmodule Radiator.DirectoryTest do
     test "publish_podcast/1 generates a podcasts slug from it's title" do
       podcast = insert(:podcast, published_at: nil)
 
-      {:ok, published_podcast} = Directory.publish_podcast(podcast.id)
+      {:ok, published_podcast} = Directory.publish_podcast(podcast)
       assert is_binary(published_podcast.slug)
       assert String.length(published_podcast.slug) > 0
     end
@@ -95,49 +95,45 @@ defmodule Radiator.DirectoryTest do
     test "publish_podcast/1 generates sequential slugs" do
       {:ok, existing_podcast} =
         insert(:podcast)
-        |> Map.get(:id)
         |> Directory.publish_podcast()
 
       {:ok, published_podcast1} =
         insert(:podcast, title: existing_podcast.title)
-        |> Map.get(:id)
         |> Directory.publish_podcast()
 
       assert published_podcast1.slug == "#{existing_podcast.slug}-1"
 
       {:ok, published_podcast2} =
         insert(:podcast, title: existing_podcast.title)
-        |> Map.get(:id)
         |> Directory.publish_podcast()
 
       assert published_podcast2.slug == "#{existing_podcast.slug}-2"
 
       {:ok, published_podcast3} =
         insert(:podcast, title: existing_podcast.title)
-        |> Map.get(:id)
         |> Directory.publish_podcast()
 
       assert published_podcast3.slug == "#{existing_podcast.slug}-3"
     end
 
-    test "publish_podcast/1 returns error for non existing podcasts" do
+    test "publish_podcast/1 with invalid data returns error changeset" do
       podcast = insert(:podcast)
-      {:ok, _deleted_podcast} = Directory.delete_podcast(podcast)
-
-      assert {:error, :not_found} = Directory.publish_podcast(podcast.id)
+      assert {:error, %Ecto.Changeset{}} = Directory.publish_podcast(%{podcast | :title => nil})
+      assert %Podcast{published_at: nil} = Directory.get_podcast!(podcast.id)
     end
 
     test "depublish_podcast/1 removes a podcasts published_at date" do
       podcast = insert(:podcast, published_at: DateTime.utc_now())
 
-      assert {:ok, %Podcast{published_at: nil}} = Directory.depublish_podcast(podcast.id)
+      assert {:ok, %Podcast{published_at: nil}} = Directory.depublish_podcast(podcast)
     end
 
-    test "depublish_podcast/1 returns error for non existing podcasts" do
-      podcast = insert(:podcast)
-      {:ok, _deleted_podcast} = Directory.delete_podcast(podcast)
+    test "depublish_podcast/1 with invalid data returns error changeset" do
+      podcast = insert(:podcast, published_at: DateTime.utc_now())
+      published_at = podcast.published_at
 
-      assert {:error, :not_found} = Directory.depublish_podcast(podcast.id)
+      assert {:error, %Ecto.Changeset{}} = Directory.depublish_podcast(%{podcast | :title => nil})
+      assert %Podcast{published_at: ^published_at} = Directory.get_podcast!(podcast.id)
     end
   end
 

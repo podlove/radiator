@@ -135,23 +135,14 @@ defmodule Radiator.Directory do
 
   ## Examples
 
-      iex> publish_podcast(podcast_id)
-      {:ok, podcast}
+      iex> publish_podcast(podcast)
+      {:ok, %Podcast{}}
 
-      iex> publish_podcast(non_existing_id)
-      {:error, :not_found}
-
-      iex> publish_podcast(id)
+      iex> publish_podcast(bad_value)
       {:error, %Ecto.Changeset{}}
   """
-  def publish_podcast(id) do
-    case get_podcast(id) do
-      nil ->
-        {:error, :not_found}
-
-      podcast ->
-        update_podcast(podcast, %{published_at: DateTime.utc_now()})
-    end
+  def publish_podcast(%Podcast{} = podcast) do
+    update_podcast(podcast, %{published_at: DateTime.utc_now()})
   end
 
   @doc """
@@ -159,23 +150,14 @@ defmodule Radiator.Directory do
 
   ## Examples
 
-      iex> depublish_podcast(podcast_id)
-      {:ok, podcast}
+      iex> depublish_podcast(podcast)
+      {:ok, %Podcast{}}
 
-      iex> depublish_podcast(non_existing_id)
-      {:error, :not_found}
-
-      iex> depublish_podcast(id)
+      iex> depublish_podcast(bad_value)
       {:error, %Ecto.Changeset{}}
   """
-  def depublish_podcast(id) do
-    case get_podcast(id) do
-      nil ->
-        {:error, :not_found}
-
-      %Podcast{} = podcast ->
-        update_podcast(podcast, %{published_at: nil})
-    end
+  def depublish_podcast(%Podcast{} = podcast) do
+    update_podcast(podcast, %{published_at: nil})
   end
 
   defp episodes_query(args) when is_map(args) do
