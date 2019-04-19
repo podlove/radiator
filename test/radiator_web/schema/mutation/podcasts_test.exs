@@ -180,19 +180,6 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
     assert message == "Podcast ID -1 not found"
   end
 
-  test "publishPodcast returns errors on existing slug", %{conn: conn} do
-    _existing_podcast = insert(:podcast, slug: "existing-test-slug")
-    podcast = insert(:podcast, title: "Existing Test Slug")
-
-    conn =
-      post conn, "/api/graphql",
-        query: @publish_query,
-        variables: %{"id" => podcast.id}
-
-    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
-    assert message == "Slug existing-test-slug has already been taken"
-  end
-
   @depublish_query """
   mutation ($id: ID!) {
     depublishPodcast(id: $id) {

@@ -18,6 +18,11 @@ defmodule Radiator.DirectoryTest do
       assert Directory.get_podcast!(podcast.id) == podcast
     end
 
+    test "get_podcast_by_slug/1 returns the podcast with given slug" do
+      podcast = insert(:podcast, %{slug: "foo-bar-baz"})
+      assert Directory.get_podcast_by_slug(podcast.slug) == podcast
+    end
+
     test "create_podcast/1 with valid data creates a podcast" do
       network = insert(:network)
 
@@ -64,6 +69,42 @@ defmodule Radiator.DirectoryTest do
       assert {:ok, %Podcast{} = published_podcast} = Directory.publish_podcast(podcast.id)
       assert published_podcast.published_at != nil
       assert :gt == DateTime.compare(DateTime.utc_now(), published_podcast.published_at)
+    end
+
+    test "publish_podcast/1 generates a podcasts slug from it's title" do
+      podcast = insert(:podcast, published_at: nil)
+
+      {:ok, published_podcast} = Directory.publish_podcast(podcast.id)
+      assert is_binary(published_podcast.slug)
+      assert String.length(published_podcast.slug) > 0
+    end
+
+    test "publish_podcast/1 generates sequential slugs" do
+      {:ok, existing_podcast} =
+        insert(:podcast)
+        |> Map.get(:id)
+        |> Directory.publish_podcast()
+
+      {:ok, published_podcast1} =
+        insert(:podcast, title: existing_podcast.title)
+        |> Map.get(:id)
+        |> Directory.publish_podcast()
+
+      assert published_podcast1.slug == "#{existing_podcast.slug}-1"
+
+      {:ok, published_podcast2} =
+        insert(:podcast, title: existing_podcast.title)
+        |> Map.get(:id)
+        |> Directory.publish_podcast()
+
+      assert published_podcast2.slug == "#{existing_podcast.slug}-2"
+
+      {:ok, published_podcast3} =
+        insert(:podcast, title: existing_podcast.title)
+        |> Map.get(:id)
+        |> Directory.publish_podcast()
+
+      assert published_podcast3.slug == "#{existing_podcast.slug}-3"
     end
 
     test "publish_podcast/1 returns error for non existing podcasts" do

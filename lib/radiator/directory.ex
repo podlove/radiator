@@ -55,6 +55,16 @@ defmodule Radiator.Directory do
   def get_podcast(id), do: Repo.get(Podcast, id)
 
   @doc """
+  Gets a single podcast by it's slug.
+
+  ## Examples
+
+      iex> get_podcast_by_slug(slug)
+      {:ok, %Podcast{}}
+  """
+  def get_podcast_by_slug(slug), do: Repo.get_by(Podcast, %{slug: slug})
+
+  @doc """
   Creates a podcast.
 
   ## Examples
@@ -139,29 +149,8 @@ defmodule Radiator.Directory do
       nil ->
         {:error, :not_found}
 
-      %Podcast{slug: nil} = podcast ->
-        slug = Slugger.slugify_downcase(podcast.title)
-
-        attrs = %{
-          published_at: DateTime.utc_now(),
-          slug: slug
-        }
-
-        case update_podcast(podcast, attrs) do
-          {:ok, podcast} ->
-            {:ok, podcast}
-
-          {:error, %Ecto.Changeset{errors: [slug: {"has already been taken", _}]}} ->
-            {:error, "Slug #{slug} has already been taken"}
-
-          {:error, error} ->
-            {:error, error}
-        end
-
       podcast ->
-        update_podcast(podcast, %{
-          published_at: DateTime.utc_now()
-        })
+        update_podcast(podcast, %{published_at: DateTime.utc_now()})
     end
   end
 

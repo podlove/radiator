@@ -52,7 +52,7 @@ defmodule Radiator.MixProject do
       {:httpoison, "~> 1.5"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
-      {:slugger, "~> 0.3"},
+      {:ecto_autoslug_field, "~> 1.0"},
       # for ex_aws
       {:hackney, "~> 1.15"},
       {:sweet_xml, "~> 0.6.5"},

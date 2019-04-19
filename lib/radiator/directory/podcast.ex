@@ -4,6 +4,7 @@ defmodule Radiator.Directory.Podcast do
   import Ecto.Query, warn: false
 
   alias Radiator.Directory.{Episode, Podcast, Network}
+  alias Radiator.Directory.Podcast.TitleSlug
 
   schema "podcasts" do
     field :author, :string
@@ -16,7 +17,7 @@ defmodule Radiator.Directory.Podcast do
     field :published_at, :utc_datetime
     field :subtitle, :string
     field :title, :string
-    field :slug, :string
+    field :slug, TitleSlug.Type
 
     field :episode_count, :integer, virtual: true
 
@@ -43,7 +44,8 @@ defmodule Radiator.Directory.Podcast do
       :slug
     ])
     |> validate_required([:title])
-    |> unique_constraint(:slug)
+    |> TitleSlug.maybe_generate_slug()
+    |> TitleSlug.unique_constraint()
   end
 
   @doc """
