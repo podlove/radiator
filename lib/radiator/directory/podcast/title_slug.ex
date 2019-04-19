@@ -5,21 +5,21 @@ defmodule Radiator.Directory.Podcast.TitleSlug do
   alias Radiator.Directory
 
   def get_sources(changeset, _opts) do
-    title = get_field(changeset, :title)
-
-    [title]
-  end
-
-  def build_slug(sources, changeset) do
     case get_change(changeset, :published_at) do
       nil ->
         nil
 
       _published_at ->
-        sources
-        |> super(changeset)
-        |> build_sequential()
+        title = get_field(changeset, :title)
+
+        [title]
     end
+  end
+
+  def build_slug(sources, changeset) do
+    sources
+    |> super(changeset)
+    |> build_sequential()
   end
 
   defp build_sequential(base_slug, sequence_number \\ 0) do
