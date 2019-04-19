@@ -13,10 +13,13 @@ defmodule Radiator.Repo.Migrations.CreatePodcasts do
       add :language, :string
       add :published_at, :utc_datetime
       add :last_built_at, :utc_datetime
+      add :slug, :string
 
       add :network_id, references(:networks, on_delete: :nothing)
 
       timestamps()
     end
+
+    create unique_index(:podcasts, [:slug])
   end
 end
