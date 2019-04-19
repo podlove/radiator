@@ -19,7 +19,7 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "get_podcast_by_slug/1 returns the podcast with given slug" do
-      podcast = insert(:podcast, %{slug: "foo-bar-baz"})
+      podcast = insert(:podcast, slug: "foo-bar-baz")
       assert Directory.get_podcast_by_slug(podcast.slug) == podcast
     end
 
@@ -44,6 +44,19 @@ defmodule Radiator.DirectoryTest do
                Directory.update_podcast(podcast, %{subtitle: "some updated subtitle"})
 
       assert podcast.subtitle == "some updated subtitle"
+    end
+
+    test "update_podcast/2 doesn't generate slug when published_at is not set" do
+      podcast = insert(:podcast)
+
+      {:ok, updated_podcast} = Directory.update_podcast(podcast, %{title: "some updated title"})
+
+      assert updated_podcast.slug == nil
+
+      {:ok, published_podcast} =
+        Directory.update_podcast(updated_podcast, %{published_at: DateTime.utc_now()})
+
+      assert String.length(published_podcast.slug) > 0
     end
 
     test "update_podcast/2 with invalid data returns error changeset" do
