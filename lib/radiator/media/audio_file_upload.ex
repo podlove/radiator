@@ -23,7 +23,7 @@ defmodule Radiator.Media.AudioFileUpload do
   """
   alias Ecto.Multi
   alias Radiator.Repo
-  alias Radiator.Directory.Audio
+  alias Radiator.Media.Audio
 
   @spec upload(Plug.Upload.t()) :: {:ok, Radiator.Media.AudioFile.t()} | {:error, atom()}
   def upload(upload = %Plug.Upload{}) do

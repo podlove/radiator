@@ -1,4 +1,4 @@
-defmodule Radiator.Directory.Audio do
+defmodule Radiator.Media.Audio do
   use Ecto.Schema
   use Arc.Ecto.Schema
 

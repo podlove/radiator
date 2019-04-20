@@ -33,7 +33,8 @@ import Ecto.Query, warn: false
 alias RadiatorWeb.Router.Helpers, as: Routes
 
 alias Radiator.{Directory, Repo, Storage}
-alias Radiator.Directory.{Audio, Episode, Podcast}
+alias Radiator.Directory.{Episode, Podcast}
+alias Radiator.Media.Audio
 alias Radiator.Feed.Builder
 
 alias Radiator.Auth.User
@@ -41,8 +42,6 @@ alias Radiator.Auth.User
 ## scratchpad
 
 defmodule Scratchpad do
-  alias Ecto.Multi
-
   def demo_user_avatar do
     user = User |> first |> Repo.one()
 
