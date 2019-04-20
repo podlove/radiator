@@ -68,6 +68,17 @@ Creates:
 - "ACME" network
 - user "admin" with password "password"
 
+## ⚠️ Migrations during development ⚠️
+
+During the early stages of development we _edit_ existing migrations to keep them readable instead of adding new ones as you would expect in a live system. 
+
+So whenever you pull an update that changed a migration, you need to:
+
+```shell
+mix ecto.reset
+env MIX_ENV=test mix ecto.reset
+```
+
 ## API
 
 At the moment both GraphQL and REST endpoints are available. The aim is to provide a full GraphQL api as primary target and some basic REST endpoints for quick usecases.
