@@ -33,28 +33,34 @@ import Ecto.Query, warn: false
 alias RadiatorWeb.Router.Helpers, as: Routes
 
 alias Radiator.{Directory, Repo, Storage}
-alias Radiator.Directory.{Episode, Podcast}
+alias Radiator.Directory.{Audio, Episode, Podcast}
 alias Radiator.Feed.Builder
 
 alias Radiator.Auth.User
 
 ## scratchpad
 
-user = User |> first |> Repo.one()
+defmodule Scratchpad do
+  alias Ecto.Multi
 
-changeset =
-  User.changeset(user, %{
-    "avatar" => %Plug.Upload{
-      content_type: "image/jpeg",
-      filename: "#{Ecto.UUID.generate()}.jpg",
-      path: "/Users/ericteubert/Downloads/avatar.jpg"
-    }
-  })
+  def demo_user_avatar do
+    user = User |> first |> Repo.one()
 
-{:ok, user} = Repo.update(changeset)
+    changeset =
+      User.changeset(user, %{
+        "avatar" => %Plug.Upload{
+          content_type: "image/jpeg",
+          filename: "#{Ecto.UUID.generate()}.jpg",
+          path: "/Users/ericteubert/Downloads/avatar.jpg"
+        }
+      })
 
-Radiator.Media.UserAvatar.url({user.avatar, user})
-|> IO.inspect(pretty: true)
+    {:ok, user} = Repo.update(changeset)
 
-Radiator.Media.UserAvatar.url({user.avatar, user}, :icon)
-|> IO.inspect(pretty: true)
+    Radiator.Media.UserAvatar.url({user.avatar, user})
+    |> IO.inspect(pretty: true)
+
+    Radiator.Media.UserAvatar.url({user.avatar, user}, :icon)
+    |> IO.inspect(pretty: true)
+  end
+end
