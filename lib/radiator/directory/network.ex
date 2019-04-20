@@ -10,6 +10,10 @@ defmodule Radiator.Directory.Network do
 
     has_many :podcasts, Podcast
 
+    has_many :attachments,
+             {"network_attachments", Radiator.Media.Attachment},
+             foreign_key: :subject_id
+
     timestamps()
   end
 

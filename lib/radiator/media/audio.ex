@@ -4,7 +4,7 @@ defmodule Radiator.Media.Audio do
 
   import Ecto.Changeset
 
-  schema "audio" do
+  schema "audios" do
     field :file, Radiator.Media.AudioFile.Type
     field :title, :string
 

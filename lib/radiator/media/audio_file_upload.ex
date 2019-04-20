@@ -1,6 +1,6 @@
 defmodule Radiator.Media.AudioFileUpload do
   @moduledoc """
-  Upload AudioFile files.
+  Upload AudioFile files and attach them to either an episode or network.
 
   Usually you want to create an audio object at the same time as
   attaching the upload. This needs to happen in two steps (create,
@@ -18,15 +18,51 @@ defmodule Radiator.Media.AudioFileUpload do
     ...>   filename: "ls013-ultraschall.mp3",
     ...>   path: "/tmp/ls013-ultraschall.mp3"
     ...> }
-    iex> {:ok, audio} = Radiator.Media.AudioFileUpload.upload(upload)
+    iex> {:ok, audio, attachment} = Radiator.Media.AudioFileUpload.upload(upload, episode)
 
   """
   alias Ecto.Multi
   alias Radiator.Repo
   alias Radiator.Media.Audio
+  alias Radiator.Directory.{Episode, Network}
+
+  def upload(upload = %Plug.Upload{}, network = %Network{}) do
+    {:ok, audio} = upload(upload)
+
+    attach_to_network(network, audio)
+    |> case do
+      {:ok, attachment} -> {:ok, audio, attachment}
+      _ -> {:error, :failed}
+    end
+  end
+
+  def upload(upload = %Plug.Upload{}, episode = %Episode{}) do
+    {:ok, audio} = upload(upload)
+
+    attach_to_episode(episode, audio)
+    |> case do
+      {:ok, attachment} -> {:ok, audio, attachment}
+      _ -> {:error, :failed}
+    end
+  end
+
+  # TODO move to Raditor.Directory.Editor.attach_audio_to_network/2 or something
+  def attach_to_network(network = %Network{}, audio = %Audio{}) do
+    network
+    |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
+    |> Radiator.Media.Attachment.changeset(%{})
+    |> Repo.insert_or_update()
+  end
+
+  def attach_to_episode(episode = %Episode{}, audio = %Audio{}) do
+    episode
+    |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
+    |> Radiator.Media.Attachment.changeset(%{})
+    |> Repo.insert_or_update()
+  end
 
   @spec upload(Plug.Upload.t()) :: {:ok, Radiator.Media.AudioFile.t()} | {:error, atom()}
-  def upload(upload = %Plug.Upload{}) do
+  defp upload(upload = %Plug.Upload{}) do
     Multi.new()
     |> Multi.insert(:create_audio, create_audio_changeset())
     |> Multi.update(:audio, add_audio_file_changeset(upload))

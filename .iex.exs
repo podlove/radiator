@@ -33,7 +33,8 @@ import Ecto.Query, warn: false
 alias RadiatorWeb.Router.Helpers, as: Routes
 
 alias Radiator.{Directory, Repo, Storage}
-alias Radiator.Directory.{Episode, Podcast}
+alias Radiator.Directory.{Episode, Podcast, Network}
+alias Radiator.Media
 alias Radiator.Media.Audio
 alias Radiator.Feed.Builder
 
@@ -63,3 +64,18 @@ defmodule Scratchpad do
     |> IO.inspect(pretty: true)
   end
 end
+
+upload = %Plug.Upload{
+  content_type: "audio/mpeg",
+  filename: "ls013-ultraschall.mp3",
+  path: "/Users/ericteubert/Downloads/ls013-ultraschall.mp3"
+}
+
+network = Radiator.Directory.Network |> Repo.one()
+{:ok, audio} = Media.AudioFileUpload.upload(upload)
+
+{:ok, attachment} =
+  network
+  |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
+  |> Media.Attachment.changeset(%{})
+  |> Repo.insert_or_update()

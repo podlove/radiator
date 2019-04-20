@@ -23,6 +23,10 @@ defmodule Radiator.Directory.Episode do
     belongs_to :podcast, Podcast
     has_many :chapters, Chapter
 
+    has_many :attachments,
+             {"episode_attachments", Radiator.Media.Attachment},
+             foreign_key: :subject_id
+
     timestamps()
   end
 
