@@ -55,3 +55,6 @@ changeset =
 
 Radiator.Media.UserAvatar.url({user.avatar, user})
 |> IO.inspect(pretty: true)
+
+Radiator.Media.UserAvatar.url({user.avatar, user}, :icon)
+|> IO.inspect(pretty: true)
