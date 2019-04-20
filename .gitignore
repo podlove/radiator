@@ -46,3 +46,6 @@ npm-debug.log
 
 # local Elixir Language Server cache
 .elixir_ls
+
+.DS_Store
+
