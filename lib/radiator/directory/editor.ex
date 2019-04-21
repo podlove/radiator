@@ -16,6 +16,7 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.Perm.Ecto.PermissionType
 
   @not_authorized {:error, :not_authorized}
+  @not_found {:error, :not_found}
 
   @doc """
   Returns a list of networks the actor has at least `:readonly` permissions on.
@@ -37,6 +38,35 @@ defmodule Radiator.Directory.Editor do
 
     query
     |> Repo.all()
+  end
+
+  @doc """
+  Gets a single network.
+
+  ## Examples
+
+      iex> get_network(me, 123)
+      %Network{}
+
+      iex> get_network(unauthorized_me, 123)
+      {:error, :not_authorized}
+
+      iex> get_network(oblivious_me, 999_998)
+      {:error, :not_found}
+
+  """
+  def get_network(actor = %Auth.User{}, id) do
+    case Repo.get(Network, id) do
+      nil ->
+        @not_found
+
+      network = %Network{} ->
+        if has_permission(actor, network, :readonly) do
+          network
+        else
+          @not_authorized
+        end
+    end
   end
 
   @doc """

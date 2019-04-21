@@ -36,23 +36,48 @@ defmodule RadiatorWeb.Admin.NetworkController do
   end
 
   def edit(conn, %{"id" => id}) do
-    network = Directory.get_network!(id)
-    changeset = Editor.Owner.change_network(network)
+    conn
+    |> get_me()
+    |> Editor.get_network(id)
+    |> case do
+      network = %Network{} ->
+        changeset = Editor.Owner.change_network(network)
 
-    render(conn, "edit.html", network: network, changeset: changeset)
+        render(conn, "edit.html", network: network, changeset: changeset)
+
+      {:error, _} ->
+        conn
+        |> redirect(to: Routes.admin_network_path(conn, :index))
+    end
   end
 
   def update(conn, %{"id" => id, "network" => network_params}) do
-    network = Directory.get_network!(id)
+    me = get_me(conn)
 
-    case Editor.Owner.update_network(network, network_params) do
-      {:ok, network} ->
+    me
+    |> Editor.get_network(id)
+    |> case do
+      network = %Network{} ->
+        case Editor.update_network(me, network, network_params) do
+          {:ok, network} ->
+            conn
+            |> put_flash(:info, "network updated successfully.")
+            |> redirect(to: Routes.admin_network_path(conn, :index))
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, "edit.html", network: network, changeset: changeset)
+
+          other ->
+            other
+        end
+    end
+    |> case do
+      {:error, _} ->
         conn
-        |> put_flash(:info, "network updated successfully.")
-        |> redirect(to: Routes.admin_network_path(conn, :show, network))
+        |> redirect(to: Routes.admin_network_path(conn, :index))
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, "edit.html", network: network, changeset: changeset)
+      other ->
+        other
     end
   end
 end

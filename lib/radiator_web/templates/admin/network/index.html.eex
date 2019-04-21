@@ -6,6 +6,7 @@
 
     <div class="flex justify-center md:justify-start flex-wrap">
       <%= for network <- @networks do %>
+      <div class="w-48 flex flex-col mr-8 mb-10">
       <a href="<%= Routes.admin_network_podcast_path(@conn, :index, network.id) %>" class="no-underline text-black w-48 bg-white rounded flex flex-col shadow mr-8 mb-8">
         
         <div
@@ -16,10 +17,15 @@
         <div class="p-3 h-32">
           <h1 class="text-base mb-1"><%= network.title %></h1>
         </div>
-
-      </a>        
+      </a> 
+      <%= if has_edit_permission_for_network(@authenticated_user, network) do %>       
+        <%= link to: Routes.admin_network_path(@conn, :edit, network.id), class: "no-underline text-blue" do %>
+          <div class="pill">edit</div>
+        <% end %>
       <% end %>
-
+      </div>
+    <% end %>
+  
       <a href="<%= Routes.admin_network_path(@conn, :new) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-blue-lightest">
         
         <div class="w-48 h-48 flex flex-col justify-center items-center">
