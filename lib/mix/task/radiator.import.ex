@@ -19,6 +19,7 @@ defmodule Mix.Tasks.Radiator.Import do
   @aliases [d: :debug, p: :preview]
 
   alias Radiator.Directory
+  alias Directory.Editor
 
   defmacrop with_services(_opts \\ [], do: block) do
     quote do
@@ -56,19 +57,22 @@ defmodule Mix.Tasks.Radiator.Import do
 
           unless opts[:preview] do
             {:ok, podcast} =
-              Directory.create_podcast(%{
-                title: feed.title,
-                subtitle: feed.subtitle,
-                author: feed.author,
-                description: feed.description,
-                image: feed.image_url,
-                language: feed.language
-              })
+              Editor.Manager.create_podcast(
+                Directory.get_any_network(),
+                %{
+                  title: feed.title,
+                  subtitle: feed.subtitle,
+                  author: feed.author,
+                  description: feed.description,
+                  image: feed.image_url,
+                  language: feed.language
+                }
+              )
 
             feed.episodes
             |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
             |> Enum.map(fn episode ->
-              Directory.create_episode(podcast, %{
+              Editor.Manager.create_episode(podcast, %{
                 guid: episode.guid,
                 title: episode.title,
                 subtitle: episode.subtitle,

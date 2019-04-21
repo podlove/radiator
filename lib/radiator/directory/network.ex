@@ -14,6 +14,8 @@ defmodule Radiator.Directory.Network do
              {"network_attachments", Radiator.Media.Attachment},
              foreign_key: :subject_id
 
+    has_many :permissions, {"networks_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
+
     timestamps()
   end
 

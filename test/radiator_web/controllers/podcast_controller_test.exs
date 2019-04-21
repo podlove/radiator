@@ -4,7 +4,8 @@ defmodule RadiatorWeb.PodcastControllerTest do
   import Radiator.Factory
 
   alias Radiator.Directory
-  alias Radiator.Directory.Podcast
+  alias Directory.Podcast
+  alias Directory.Editor
 
   @create_attrs %{
     author: "some author",
@@ -46,7 +47,7 @@ defmodule RadiatorWeb.PodcastControllerTest do
   def fixture(:podcast) do
     network = insert(:network)
 
-    {:ok, podcast} = Directory.create_podcast(network, @create_attrs)
+    {:ok, podcast} = Editor.Manager.create_podcast(network, @create_attrs)
     podcast
   end
 

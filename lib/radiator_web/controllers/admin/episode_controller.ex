@@ -3,7 +3,8 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   alias Radiator.Directory
   alias Radiator.Storage
-  alias Radiator.Directory.Episode
+  alias Directory.Episode
+  alias Directory.Editor
 
   plug :assign_podcast when action in [:new, :create, :update]
 
@@ -12,7 +13,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   end
 
   def new(conn, _params) do
-    changeset = Directory.change_episode(%Episode{})
+    changeset = Editor.Manager.change_episode(%Episode{})
     render(conn, "new.html", changeset: changeset)
   end
 
@@ -31,7 +32,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
           episode_params
       end
 
-    case Directory.create_episode(podcast, episode_params) do
+    case Editor.Manager.create_episode(podcast, episode_params) do
       {:ok, episode} ->
         conn
         |> put_flash(:info, "episode created successfully.")
@@ -59,7 +60,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   def edit(conn, %{"id" => id}) do
     episode = Directory.get_episode!(id)
-    changeset = Directory.change_episode(episode)
+    changeset = Editor.Manager.change_episode(episode)
 
     render(conn, "edit.html", episode: episode, changeset: changeset)
   end
@@ -79,7 +80,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
           episode_params
       end
 
-    case Directory.update_episode(episode, episode_params) do
+    case Editor.Manager.update_episode(episode, episode_params) do
       {:ok, episode} ->
         conn
         |> put_flash(:info, "episode updated successfully.")

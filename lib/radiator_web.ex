@@ -23,6 +23,8 @@ defmodule RadiatorWeb do
 
       import Plug.Conn
       import RadiatorWeb.Gettext
+      import RadiatorWeb.Controllers.ControllerHelpers
+
       alias RadiatorWeb.Router.Helpers, as: Routes
     end
   end

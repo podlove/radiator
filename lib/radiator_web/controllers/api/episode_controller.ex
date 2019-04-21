@@ -2,7 +2,8 @@ defmodule RadiatorWeb.Api.EpisodeController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
-  alias Radiator.Directory.{Episode, Podcast}
+  alias Directory.{Episode, Podcast}
+  alias Directory.Editor
 
   action_fallback RadiatorWeb.Api.FallbackController
 
@@ -15,7 +16,7 @@ defmodule RadiatorWeb.Api.EpisodeController do
 
   def create(conn, %{"podcast_id" => podcast_id, "episode" => episode_params}) do
     with %Podcast{} = podcast <- Directory.get_podcast!(podcast_id),
-         {:ok, %Episode{} = episode} <- Directory.create_episode(podcast, episode_params) do
+         {:ok, %Episode{} = episode} <- Editor.Manager.create_episode(podcast, episode_params) do
       conn
       |> put_status(:created)
       |> put_resp_header(
@@ -34,7 +35,7 @@ defmodule RadiatorWeb.Api.EpisodeController do
   def update(conn, %{"id" => id, "episode" => episode_params}) do
     episode = Directory.get_episode!(id)
 
-    with {:ok, %Episode{} = episode} <- Directory.update_episode(episode, episode_params) do
+    with {:ok, %Episode{} = episode} <- Editor.Manager.update_episode(episode, episode_params) do
       render(conn, "show.json", episode: episode)
     end
   end
@@ -42,7 +43,7 @@ defmodule RadiatorWeb.Api.EpisodeController do
   def delete(conn, %{"id" => id}) do
     episode = Directory.get_episode!(id)
 
-    with {:ok, %Episode{}} <- Directory.delete_episode(episode) do
+    with {:ok, %Episode{}} <- Editor.Manager.delete_episode(episode) do
       send_resp(conn, :no_content, "")
     end
   end
