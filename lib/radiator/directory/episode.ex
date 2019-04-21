@@ -23,6 +23,8 @@ defmodule Radiator.Directory.Episode do
     belongs_to :podcast, Podcast
     has_many :chapters, Chapter
 
+    has_many :permissions, {"episodes_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
+
     timestamps()
   end
 

@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Plug.EnsureUserValidity do
   alias RadiatorWeb.Router.Helpers, as: Routes
 
   import Phoenix.HTML.Link
+  import Plug.Conn
 
   @behaviour Plug
 
@@ -11,8 +12,8 @@ defmodule RadiatorWeb.Plug.EnsureUserValidity do
   @impl Plug
   def call(conn, _opts) do
     case Guardian.Plug.current_resource(conn) do
-      %Radiator.Auth.User{status: :active} ->
-        conn
+      %Radiator.Auth.User{status: :active} = user ->
+        assign(conn, :authenticated_user, user)
 
       %Radiator.Auth.User{status: :unverified} = user ->
         conn

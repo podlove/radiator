@@ -15,7 +15,7 @@ defmodule Radiator.Repo.Migrations.CreateEpisodes do
       add :guid, :string
       add :number, :integer
       add :published_at, :utc_datetime
-      add :podcast_id, references(:podcasts, on_delete: :nothing)
+      add :podcast_id, references(:podcasts, on_delete: :delete_all)
 
       timestamps()
     end

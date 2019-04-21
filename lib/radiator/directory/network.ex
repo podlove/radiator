@@ -10,6 +10,8 @@ defmodule Radiator.Directory.Network do
 
     has_many :podcasts, Podcast
 
+    has_many :permissions, {"networks_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
+
     timestamps()
   end
 

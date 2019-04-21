@@ -5,7 +5,7 @@
     </div>
 
     <div class="card">
-      <form action="<%= Routes.admin_podcast_import_path(@conn, :create) %>" method="post">
+      <form action="<%= Routes.admin_network_podcast_import_path(@conn, :create, @current_network) %>" method="post">
         <input type="hidden" name="_csrf_token" value="<%= Plug.CSRFProtection.get_csrf_token() %>">
           <div class="mb-6">
             <%= label :feed, :feed_url, class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" do %>
