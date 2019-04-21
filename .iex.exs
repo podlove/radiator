@@ -78,10 +78,4 @@ upload = %Plug.Upload{
 }
 
 network = Radiator.Directory.Network |> Repo.one()
-{:ok, audio} = Media.AudioFileUpload.upload(upload)
-
-{:ok, attachment} =
-  network
-  |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
-  |> Media.Attachment.changeset(%{})
-  |> Repo.insert_or_update()
+{:ok, audio, attachment} = Media.AudioFileUpload.upload(upload, network)

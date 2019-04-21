@@ -25,11 +25,12 @@ defmodule Radiator.Media.AudioFileUpload do
   alias Radiator.Repo
   alias Radiator.Media.Audio
   alias Radiator.Directory.{Episode, Network}
+  alias Radiator.Directory.Editor
 
   def upload(upload = %Plug.Upload{}, network = %Network{}) do
     {:ok, audio} = upload(upload)
 
-    attach_to_network(network, audio)
+    Editor.attach_audio_to_network(network, audio)
     |> case do
       {:ok, attachment} -> {:ok, audio, attachment}
       _ -> {:error, :failed}
@@ -39,26 +40,11 @@ defmodule Radiator.Media.AudioFileUpload do
   def upload(upload = %Plug.Upload{}, episode = %Episode{}) do
     {:ok, audio} = upload(upload)
 
-    attach_to_episode(episode, audio)
+    Editor.attach_audio_to_episode(episode, audio)
     |> case do
       {:ok, attachment} -> {:ok, audio, attachment}
       _ -> {:error, :failed}
     end
-  end
-
-  # TODO move to Raditor.Directory.Editor.attach_audio_to_network/2 or something
-  def attach_to_network(network = %Network{}, audio = %Audio{}) do
-    network
-    |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
-    |> Radiator.Media.Attachment.changeset(%{})
-    |> Repo.insert_or_update()
-  end
-
-  def attach_to_episode(episode = %Episode{}, audio = %Audio{}) do
-    episode
-    |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
-    |> Radiator.Media.Attachment.changeset(%{})
-    |> Repo.insert_or_update()
   end
 
   @spec upload(Plug.Upload.t()) :: {:ok, Radiator.Media.AudioFile.t()} | {:error, atom()}
