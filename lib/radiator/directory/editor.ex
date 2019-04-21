@@ -84,7 +84,7 @@ defmodule Radiator.Directory.Editor do
 
   def create_network(actor = %Auth.User{}, attrs) do
     case Editor.Owner.create_network(actor, attrs) do
-      {:ok, %{network: network}} -> network
+      {:ok, %{network: network}} -> {:ok, network}
       {:error, :network, changeset, _} -> {:error, changeset}
     end
   end
