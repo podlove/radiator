@@ -20,5 +20,6 @@ defmodule RadiatorWeb.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :radiator
+  use Radiator.Constants
+  use Gettext, otp_app: @otp_app
 end
