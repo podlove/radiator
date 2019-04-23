@@ -4,6 +4,10 @@ defmodule Radiator.TestEntries do
   @testusername "TestUser1"
   @testuserpassword "Pass"
 
+  def user_password do
+    @testuserpassword
+  end
+
   def user do
     case Auth.Register.get_user_by_name(@testusername) do
       nil ->
