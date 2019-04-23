@@ -57,7 +57,7 @@ cd ..
 mix phx.server
 ```
 
-Seed database with data for development:
+Seed database with data for development (unless you did `mix ecto.reset`, it runs seeds automatically):
 
 ```shell
 mix run priv/repo/seeds.exs
