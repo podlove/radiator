@@ -2,7 +2,8 @@ defmodule RadiatorWeb.Api.PodcastController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
-  alias Radiator.Directory.Podcast
+  alias Directory.Podcast
+  alias Directory.Editor
 
   action_fallback RadiatorWeb.Api.FallbackController
 
@@ -14,7 +15,7 @@ defmodule RadiatorWeb.Api.PodcastController do
   def create(conn, %{"podcast" => podcast_params, "network_id" => network_id}) do
     network = Directory.get_network(network_id)
 
-    with {:ok, %Podcast{} = podcast} <- Directory.create_podcast(network, podcast_params) do
+    with {:ok, %Podcast{} = podcast} <- Editor.Manager.create_podcast(network, podcast_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.api_podcast_path(conn, :show, podcast))
@@ -30,7 +31,7 @@ defmodule RadiatorWeb.Api.PodcastController do
   def update(conn, %{"id" => id, "podcast" => podcast_params}) do
     podcast = Directory.get_podcast!(id)
 
-    with {:ok, %Podcast{} = podcast} <- Directory.update_podcast(podcast, podcast_params) do
+    with {:ok, %Podcast{} = podcast} <- Editor.Manager.update_podcast(podcast, podcast_params) do
       render(conn, "show.json", podcast: podcast)
     end
   end
@@ -38,7 +39,7 @@ defmodule RadiatorWeb.Api.PodcastController do
   def delete(conn, %{"id" => id}) do
     podcast = Directory.get_podcast!(id)
 
-    with {:ok, %Podcast{}} <- Directory.delete_podcast(podcast) do
+    with {:ok, %Podcast{}} <- Editor.Manager.delete_podcast(podcast) do
       send_resp(conn, :no_content, "")
     end
   end

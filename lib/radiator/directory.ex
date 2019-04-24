@@ -1,14 +1,13 @@
 defmodule Radiator.Directory do
   @moduledoc """
-  The Directory context.
+  The Directory context supplying published information.
   """
 
   import Ecto.Query, warn: false
 
-  alias Radiator.Directory.Episode
-  alias Radiator.Directory.Podcast
-  alias Radiator.Directory.Network
+  alias __MODULE__
   alias Radiator.Repo
+  alias Directory.{Network, Episode, Podcast}
 
   def data() do
     Dataloader.Ecto.new(Repo, query: &query/2)
@@ -20,6 +19,19 @@ defmodule Radiator.Directory do
 
   def query(queryable, _) do
     queryable
+  end
+
+  @doc """
+  Returns the list of networks.
+
+  ## Examples
+
+      iex> list_networks()
+      [%Network{}, ...]
+
+  """
+  def list_networks do
+    Repo.all(Network)
   end
 
   def list_podcasts(%Network{id: id}) do
@@ -64,102 +76,6 @@ defmodule Radiator.Directory do
   """
   def get_podcast_by_slug(slug), do: Repo.get_by(Podcast, %{slug: slug})
 
-  @doc """
-  Creates a podcast.
-
-  ## Examples
-
-      iex> create_podcast(network, %{field: value})
-      {:ok, %Podcast{}}
-
-      iex> create_podcast(network, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_podcast(%Network{} = network, attrs \\ %{}) do
-    %Podcast{}
-    |> Podcast.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:network, network)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a podcast.
-
-  ## Examples
-
-      iex> update_podcast(podcast, %{field: new_value})
-      {:ok, %Podcast{}}
-
-      iex> update_podcast(podcast, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_podcast(%Podcast{} = podcast, attrs) do
-    podcast
-    |> Podcast.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a Podcast.
-
-  ## Examples
-
-      iex> delete_podcast(podcast)
-      {:ok, %Podcast{}}
-
-      iex> delete_podcast(podcast)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_podcast(%Podcast{} = podcast) do
-    Repo.delete(podcast)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking podcast changes.
-
-  ## Examples
-
-      iex> change_podcast(podcast)
-      %Ecto.Changeset{source: %Podcast{}}
-
-  """
-  def change_podcast(%Podcast{} = podcast) do
-    Podcast.changeset(podcast, %{})
-  end
-
-  @doc """
-  Publishes a single podcast by giving it a `published_at` date.
-
-  ## Examples
-
-      iex> publish_podcast(podcast)
-      {:ok, %Podcast{}}
-
-      iex> publish_podcast(bad_value)
-      {:error, %Ecto.Changeset{}}
-  """
-  def publish_podcast(%Podcast{} = podcast) do
-    update_podcast(podcast, %{published_at: DateTime.utc_now()})
-  end
-
-  @doc """
-  Depublishes a single podcast by removing it's `published_at` date.
-
-  ## Examples
-
-      iex> depublish_podcast(podcast)
-      {:ok, %Podcast{}}
-
-      iex> depublish_podcast(bad_value)
-      {:error, %Ecto.Changeset{}}
-  """
-  def depublish_podcast(%Podcast{} = podcast) do
-    update_podcast(podcast, %{published_at: nil})
-  end
-
   defp episodes_query(args) when is_map(args) do
     Radiator.Directory.EpisodeQuery.build(args)
   end
@@ -191,92 +107,6 @@ defmodule Radiator.Directory do
   def get_episode(id), do: Repo.get(Episode, id) |> Repo.preload(:podcast)
 
   @doc """
-  Creates a episode.
-
-  ## Examples
-
-      iex> create_episode(%Podcast{}, %{field: value})
-      {:ok, %Episode{}}
-
-      iex> create_episode(%Podcast{}, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_episode(%Podcast{} = podcast, attrs \\ %{}) do
-    %Episode{}
-    |> Episode.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:podcast, podcast)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a episode.
-
-  ## Examples
-
-      iex> update_episode(episode, %{field: new_value})
-      {:ok, %Episode{}}
-
-      iex> update_episode(episode, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_episode(%Episode{} = episode, attrs) do
-    episode
-    |> Episode.changeset(attrs)
-    |> Repo.update()
-  end
-
-  def regenerate_episode_guid(episode) do
-    episode
-    |> change_episode()
-    |> Episode.regenerate_guid()
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a Episode.
-
-  ## Examples
-
-      iex> delete_episode(episode)
-      {:ok, %Episode{}}
-
-      iex> delete_episode(episode)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_episode(%Episode{} = episode) do
-    Repo.delete(episode)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking episode changes.
-
-  ## Examples
-
-      iex> change_episode(episode)
-      %Ecto.Changeset{source: %Episode{}}
-
-  """
-  def change_episode(%Episode{} = episode) do
-    Episode.changeset(episode, %{})
-  end
-
-  @doc """
-  Returns the list of networks.
-
-  ## Examples
-
-      iex> list_networks()
-      [%Network{}, ...]
-
-  """
-  def list_networks do
-    Repo.all(Network)
-  end
-
-  @doc """
   Gets a single network.
 
   Raises `Ecto.NoResultsError` if the Network does not exist.
@@ -301,70 +131,5 @@ defmodule Radiator.Directory do
   """
   def get_any_network do
     from(n in Network, limit: 1) |> Repo.one!()
-  end
-
-  @doc """
-  Creates a network.
-
-  ## Examples
-
-      iex> create_network(%{field: value})
-      {:ok, %Network{}}
-
-      iex> create_network(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_network(attrs \\ %{}) do
-    %Network{}
-    |> Network.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a network.
-
-  ## Examples
-
-      iex> update_network(network, %{field: new_value})
-      {:ok, %Network{}}
-
-      iex> update_network(network, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_network(%Network{} = network, attrs) do
-    network
-    |> Network.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a Network.
-
-  ## Examples
-
-      iex> delete_network(network)
-      {:ok, %Network{}}
-
-      iex> delete_network(network)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_network(%Network{} = network) do
-    Repo.delete(network)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking network changes.
-
-  ## Examples
-
-      iex> change_network(network)
-      %Ecto.Changeset{source: %Network{}}
-
-  """
-  def change_network(%Network{} = network) do
-    Network.changeset(network, %{})
   end
 end

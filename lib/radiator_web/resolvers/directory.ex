@@ -1,7 +1,9 @@
 defmodule RadiatorWeb.Resolvers.Directory do
   alias Radiator.Directory
-  alias Radiator.Directory.{Episode, Podcast, Network}
+  alias Directory.{Episode, Podcast, Network}
   alias Radiator.EpisodeMeta
+
+  alias Directory.Editor
 
   def list_networks(_parent, _args, _resolution) do
     {:ok, Directory.list_networks()}
@@ -15,13 +17,18 @@ defmodule RadiatorWeb.Resolvers.Directory do
   end
 
   def create_network(_parent, %{network: args}, _resolution) do
-    Directory.create_network(args)
+    user = Editor.Owner.api_user_shim()
+    # TODO: use the correct user once authentication is in place for graphql
+    case Editor.Owner.create_network(user, args) do
+      {:ok, %{network: network}} -> {:ok, network}
+      _ -> {:error, "Could not create network with #{args}"}
+    end
   end
 
   def update_network(_parent, %{id: id, network: args}, _resolution) do
     case Directory.get_network(id) do
       nil -> {:error, "Network ID #{id} not found"}
-      network -> Directory.update_network(network, args)
+      network -> Editor.Owner.update_network(network, args)
     end
   end
 
@@ -53,35 +60,42 @@ defmodule RadiatorWeb.Resolvers.Directory do
   def create_podcast(_parent, %{podcast: args, network_id: network_id}, _resolution) do
     case Directory.get_network(network_id) do
       nil -> {:error, "Valid network must be provided, ID #{network_id} not found"}
-      network -> Directory.create_podcast(network, args)
+      network -> Editor.Manager.create_podcast(network, args)
     end
   end
 
   def update_podcast(_parent, %{id: id, podcast: args}, _resolution) do
     case Directory.get_podcast(id) do
       nil -> {:error, "Podcast ID #{id} not found"}
-      podcast -> Directory.update_podcast(podcast, args)
+      podcast -> Editor.Manager.update_podcast(podcast, args)
     end
   end
 
   def publish_podcast(_parent, %{id: id}, _res) do
     case Directory.get_podcast(id) do
-      nil -> {:error, "Podcast ID #{id} not found"}
-      podcast -> Directory.publish_podcast(podcast)
+      nil ->
+        {:error, "Podcast ID #{id} not found"}
+
+      podcast ->
+        Editor.Manager.publish_podcast(podcast)
     end
   end
 
   def depublish_podcast(_parent, %{id: id}, _res) do
     case Directory.get_podcast(id) do
-      nil -> {:error, "Podcast ID #{id} not found"}
-      podcast -> Directory.depublish_podcast(podcast)
+      nil ->
+        {:error, "Podcast ID #{id} not found"}
+
+      podcast ->
+        Editor.Manager.depublish_podcast(podcast)
+
     end
   end
 
   def delete_podcast(_parent, %{id: id}, _resolution) do
     case Directory.get_podcast(id) do
       nil -> {:error, "Podcast ID #{id} not found"}
-      podcast -> Directory.delete_podcast(podcast)
+      podcast -> Editor.Manager.delete_podcast(podcast)
     end
   end
 
@@ -106,21 +120,21 @@ defmodule RadiatorWeb.Resolvers.Directory do
   def create_episode(_parent, %{podcast_id: podcast_id, episode: args}, _resolution) do
     case Directory.get_podcast(podcast_id) do
       nil -> {:error, "Podcast ID #{podcast_id} not found"}
-      podcast -> Directory.create_episode(podcast, args)
+      podcast -> Editor.Manager.create_episode(podcast, args)
     end
   end
 
   def update_episode(_parent, %{id: id, episode: args}, _resolution) do
     case Directory.get_episode(id) do
       nil -> {:error, "Episode ID #{id} not found"}
-      episode -> Directory.update_episode(episode, args)
+      episode -> Editor.Manager.update_episode(episode, args)
     end
   end
 
   def delete_episode(_parent, %{id: id}, _resolution) do
     case Directory.get_episode(id) do
       nil -> {:error, "episode ID #{id} not found"}
-      episode -> Directory.delete_episode(episode)
+      episode -> Editor.Manager.delete_episode(episode)
     end
   end
 

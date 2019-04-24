@@ -1,5 +1,6 @@
 defmodule RadiatorWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :radiator
+  use Radiator.Constants
+  use Phoenix.Endpoint, otp_app: @otp_app
   use Absinthe.Phoenix.Endpoint
 
   socket "/socket", RadiatorWeb.UserSocket,

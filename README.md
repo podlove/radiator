@@ -57,7 +57,7 @@ cd ..
 mix phx.server
 ```
 
-Seed database with data for development:
+Seed database with data for development (unless you did `mix ecto.reset`, it runs seeds automatically):
 
 ```shell
 mix run priv/repo/seeds.exs
@@ -67,6 +67,17 @@ Creates:
 
 - "ACME" network
 - user "admin" with password "password"
+
+## ⚠️ Migrations during development ⚠️
+
+During the early stages of development we _edit_ existing migrations to keep them readable instead of adding new ones as you would expect in a live system. 
+
+So whenever you pull an update that changed a migration, you need to:
+
+```shell
+mix ecto.reset
+env MIX_ENV=test mix ecto.reset
+```
 
 ## API
 
