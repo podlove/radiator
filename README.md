@@ -89,6 +89,20 @@ Entrypoint: `/api/graphql`
 
 Open http://localhost:4000/api/graphiql for schema and documentation exploration.
 
+For calls that need authentication, make sure to put the token gotten from a 
+
+```GraphQL
+mutation { 
+	authenticatedSession(
+		username_or_email: "admin", 
+		         password: "password" ) { 
+		token 
+	} 
+}
+```
+
+request into the `Authorization: Bearer <token>` header.
+
 ### REST
 
 Follows [HAL][hal]+json specification.

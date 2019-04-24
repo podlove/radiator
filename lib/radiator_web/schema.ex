@@ -72,14 +72,21 @@ defmodule RadiatorWeb.Schema do
   end
 
   mutation do
-    @desc "Request a authenticated session"
+    @desc "Request an authenticated session"
     field :authenticated_session, :session do
       arg :username_or_email, non_null(:string)
       arg :password, non_null(:string)
       resolve &Resolvers.Session.get_authenticated_session/3
     end
 
-    @desc "Create a network"
+    @desc "Prolong an authenticated session (Authenticated)"
+    field :prolong_session, :session do
+      middleware RadiatorWebMiddleware.RequireAuthentication
+
+      resolve &Resolvers.Session.prolong_authenticated_session/3
+    end
+
+    @desc "Create a network (Authenticated)"
     field :create_network, type: :network do
       arg :network, non_null(:network_input)
       middleware RadiatorWebMiddleware.RequireAuthentication

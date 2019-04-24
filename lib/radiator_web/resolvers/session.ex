@@ -18,4 +18,14 @@ defmodule RadiatorWeb.Resolvers.Session do
          }}
     end
   end
+
+  def prolong_authenticated_session(_parent, _params, %{context: %{authenticated_user: user}}) do
+    token = Radiator.Auth.Guardian.api_session_token(user)
+
+    {:ok,
+     %{
+       username: user.name,
+       token: token
+     }}
+  end
 end
