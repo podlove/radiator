@@ -72,9 +72,6 @@ mix phx.gen.json Directory Episode episodes \
   description:string \
   content:string \
   image:string \
-  enclosure_url:string \
-  enclosure_length:string \
-  enclosure_type:string \
   duration:string \
   guid:string \
   number:integer \

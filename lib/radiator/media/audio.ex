@@ -7,6 +7,8 @@ defmodule Radiator.Media.Audio do
   schema "audios" do
     field :file, Radiator.Media.AudioFile.Type
     field :title, :string
+    field :mime_type, :string
+    field :byte_length, :integer
 
     timestamps()
   end
@@ -14,7 +16,7 @@ defmodule Radiator.Media.Audio do
   @doc false
   def changeset(audio, attrs) do
     audio
-    |> cast(attrs, [:title])
+    |> cast(attrs, [:title, :mime_type, :byte_length])
     |> cast_attachments(attrs, [:file])
   end
 end

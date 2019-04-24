@@ -33,6 +33,7 @@ defmodule RadiatorWeb.Schema do
   import_types RadiatorWeb.Schema.Directory.EpisodeTypes
   import_types RadiatorWeb.Schema.DirectoryTypes
   import_types RadiatorWeb.Schema.StorageTypes
+  import_types RadiatorWeb.Schema.MediaTypes
 
   alias RadiatorWeb.Resolvers
 

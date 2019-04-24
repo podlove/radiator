@@ -40,7 +40,9 @@ defmodule Radiator.Media.AudioFileUpload do
   def upload(upload = %Plug.Upload{}, episode = %Episode{}) do
     {:ok, audio} = upload(upload)
 
-    Editor.attach_audio_to_episode(episode, audio)
+    episode
+    |> Editor.detach_all_audios_from_episode()
+    |> Editor.attach_audio_to_episode(audio)
     |> case do
       {:ok, attachment} -> {:ok, audio, attachment}
       _ -> {:error, :failed}
@@ -64,10 +66,15 @@ defmodule Radiator.Media.AudioFileUpload do
   end
 
   defp add_audio_file_changeset(upload) do
+    {:ok, %File.Stat{size: size}} = File.lstat(upload.path)
+    mime_type = MIME.from_path(upload.path)
+
     fn %{create_audio: audio} ->
       Audio.changeset(audio, %{
         "title" => upload.filename,
-        "file" => upload
+        "file" => upload,
+        "mime_type" => mime_type,
+        "byte_length" => size
       })
     end
   end

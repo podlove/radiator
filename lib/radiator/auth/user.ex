@@ -35,7 +35,7 @@ defmodule Radiator.Auth.User do
   end
 
   @doc false
-  def changeset(%User{} = user, attrs \\ :invalid) do
+  def changeset(%User{} = user, attrs) do
     user
     |> cast(attrs, [:name, :email, :display_name, :password, :password_hash, :status])
     |> cast_attachments(attrs, [:avatar])

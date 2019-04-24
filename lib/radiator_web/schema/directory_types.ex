@@ -66,9 +66,6 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :content, :string
     field :description, :string
     field :duration, :string
-    field :enclosure_length, :integer
-    field :enclosure_type, :string
-    field :enclosure_url, :string
     field :guid, :string
     field :image, :string
     field :number, :integer
@@ -78,6 +75,10 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
 
     field :podcast, :podcast do
       resolve &Resolvers.Directory.find_podcast/3
+    end
+
+    field :enclosure, :enclosure do
+      resolve &Resolvers.Directory.get_enclosure/3
     end
 
     field :chapters, list_of(:chapter) do

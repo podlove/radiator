@@ -1,8 +1,10 @@
 defmodule Radiator.Directory.Episode do
   use Ecto.Schema
-  import Ecto.Changeset
 
+  import Ecto.Changeset
   import Ecto.Query, warn: false
+
+  alias __MODULE__
   alias Radiator.Directory.Podcast
   alias Radiator.EpisodeMeta.Chapter
 
@@ -10,9 +12,6 @@ defmodule Radiator.Directory.Episode do
     field :content, :string
     field :description, :string
     field :duration, :string
-    field :enclosure_length, :integer
-    field :enclosure_type, :string
-    field :enclosure_url, :string
     field :guid, :string
     field :image, :string
     field :number, :integer
@@ -26,6 +25,8 @@ defmodule Radiator.Directory.Episode do
     has_many :attachments,
              {"episode_attachments", Radiator.Media.Attachment},
              foreign_key: :subject_id
+
+    has_one :enclosure, through: [:attachments, :audio]
 
     has_many :permissions, {"episodes_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
 
@@ -41,9 +42,6 @@ defmodule Radiator.Directory.Episode do
       :description,
       :content,
       :image,
-      :enclosure_url,
-      :enclosure_length,
-      :enclosure_type,
       :duration,
       :guid,
       :number,
@@ -52,6 +50,13 @@ defmodule Radiator.Directory.Episode do
     ])
     |> validate_required([:title])
     |> set_guid_if_missing()
+  end
+
+  @doc """
+  Convenience accessor for enclosure URL.
+  """
+  def enclosure_url(%Episode{enclosure: enclosure}) do
+    Radiator.Media.AudioFile.url({enclosure.file, enclosure})
   end
 
   def regenerate_guid(changeset) do

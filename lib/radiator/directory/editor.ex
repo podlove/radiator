@@ -191,4 +191,10 @@ defmodule Radiator.Directory.Editor do
     |> Media.Attachment.changeset(%{})
     |> Repo.insert_or_update()
   end
+
+  @spec detach_all_audios_from_episode(Episode.t()) :: Episode.t()
+  def detach_all_audios_from_episode(episode = %Episode{}) do
+    Ecto.assoc(episode, :attachments) |> Repo.delete_all()
+    episode
+  end
 end

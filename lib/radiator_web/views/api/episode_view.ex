@@ -3,7 +3,7 @@ defmodule RadiatorWeb.Api.EpisodeView do
   alias RadiatorWeb.Api.{ChapterView, EpisodeView, PodcastView}
 
   alias HAL.{Document, Link, Embed}
-  alias Radiator.Directory.Podcast
+  alias Radiator.Directory.{Episode, Podcast}
 
   def render("index.json", assigns = %{podcast: podcast, episodes: episodes}) do
     %Document{}
@@ -38,16 +38,23 @@ defmodule RadiatorWeb.Api.EpisodeView do
       description: episode.description,
       content: episode.content,
       image: episode.image,
-      enclosure_url: episode.enclosure_url,
-      enclosure_length: episode.enclosure_length,
-      enclosure_type: episode.enclosure_type,
       duration: episode.duration,
       guid: episode.guid,
       number: episode.number,
       published_at: episode.published_at
     })
+    |> maybe_embed_enclosure(episode, assigns)
     |> maybe_embed_podcast(episode.podcast, assigns)
     |> maybe_embed_chapters(episode.chapters, assigns)
+  end
+
+  def render("enclosure.json", %{episode: episode}) do
+    %Document{}
+    |> Document.add_properties(%{
+      url: Episode.enclosure_url(episode),
+      length: episode.enclosure.byte_length,
+      type: episode.enclosure.mime_type
+    })
   end
 
   defp maybe_embed_podcast(document, %Podcast{} = podcast, assigns) do
@@ -69,5 +76,22 @@ defmodule RadiatorWeb.Api.EpisodeView do
 
   defp maybe_embed_chapters(document, _, _) do
     document
+  end
+
+  defp maybe_embed_enclosure(document, episode, _assigns) do
+    if Ecto.assoc_loaded?(episode.enclosure) && episode.enclosure do
+      Document.add_embed(document, %Embed{
+        resource: "rad:enclosure",
+        embed:
+          %Document{}
+          |> Document.add_properties(%{
+            url: Episode.enclosure_url(episode),
+            length: episode.enclosure.byte_length,
+            type: episode.enclosure.mime_type
+          })
+      })
+    else
+      document
+    end
   end
 end
