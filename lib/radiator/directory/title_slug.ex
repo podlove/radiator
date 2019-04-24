@@ -1,4 +1,4 @@
-defmodule Radiator.Directory.Podcast.TitleSlug do
+defmodule Radiator.Directory.TitleSlug do
   use EctoAutoslugField.Slug, to: :slug
   import Ecto.Changeset
 
@@ -17,24 +17,30 @@ defmodule Radiator.Directory.Podcast.TitleSlug do
   end
 
   def build_slug(sources, changeset) do
+    lookup_fn =
+      case changeset.data do
+        %Directory.Podcast{} -> &Directory.get_podcast_by_slug/1
+        %Directory.Episode{} -> &Directory.get_episode_by_slug/1
+      end
+
     sources
     |> super(changeset)
-    |> build_sequential()
+    |> build_sequential(lookup_fn)
   end
 
-  defp build_sequential(base_slug, sequence_number \\ 0) do
+  defp build_sequential(base_slug, lookup_fn, sequence_number \\ 0) do
     potential_slug =
       case sequence_number do
         0 -> base_slug
         _ -> base_slug <> "-#{sequence_number}"
       end
 
-    case Directory.get_podcast_by_slug(potential_slug) do
+    case lookup_fn.(potential_slug) do
       nil ->
         potential_slug
 
-      _podcast ->
-        build_sequential(base_slug, sequence_number + 1)
+      _existing ->
+        build_sequential(base_slug, lookup_fn, sequence_number + 1)
     end
   end
 end

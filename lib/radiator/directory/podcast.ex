@@ -3,8 +3,7 @@ defmodule Radiator.Directory.Podcast do
   import Ecto.Changeset
   import Ecto.Query, warn: false
 
-  alias Radiator.Directory.{Episode, Podcast, Network}
-  alias Radiator.Directory.Podcast.TitleSlug
+  alias Radiator.Directory.{Episode, Podcast, Network, TitleSlug}
 
   schema "podcasts" do
     field :author, :string
