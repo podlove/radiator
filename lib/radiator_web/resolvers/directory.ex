@@ -88,7 +88,6 @@ defmodule RadiatorWeb.Resolvers.Directory do
 
       podcast ->
         Editor.Manager.depublish_podcast(podcast)
-
     end
   end
 
