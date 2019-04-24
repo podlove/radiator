@@ -76,6 +76,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :published_at, :datetime
     field :subtitle, :string
     field :title, :string
+    field :slug, :string
 
     field :podcast, :podcast do
       resolve &Resolvers.Directory.find_podcast/3

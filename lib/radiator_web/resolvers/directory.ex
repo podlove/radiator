@@ -130,6 +130,26 @@ defmodule RadiatorWeb.Resolvers.Directory do
     end
   end
 
+  def publish_episode(_parent, %{id: id}, _res) do
+    case Directory.get_episode(id) do
+      nil ->
+        {:error, "Episode ID #{id} not found"}
+
+      episode ->
+        Editor.Manager.publish_episode(episode)
+    end
+  end
+
+  def depublish_episode(_parent, %{id: id}, _res) do
+    case Directory.get_episode(id) do
+      nil ->
+        {:error, "Episode ID #{id} not found"}
+
+      episode ->
+        Editor.Manager.depublish_episode(episode)
+    end
+  end
+
   def delete_episode(_parent, %{id: id}, _resolution) do
     case Directory.get_episode(id) do
       nil -> {:error, "episode ID #{id} not found"}

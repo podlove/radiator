@@ -32,7 +32,7 @@ defmodule Radiator.Directory.Editor.Manager do
   end
 
   @doc """
-  Creates a episode.
+  Creates an episode.
 
   ## Examples
 
@@ -51,7 +51,7 @@ defmodule Radiator.Directory.Editor.Manager do
   end
 
   @doc """
-  Deletes a Episode.
+  Deletes an Episode.
 
   ## Examples
 
@@ -67,7 +67,7 @@ defmodule Radiator.Directory.Editor.Manager do
   end
 
   @doc """
-  Updates a episode.
+  Updates an Episode.
 
   ## Examples
 
@@ -102,6 +102,36 @@ defmodule Radiator.Directory.Editor.Manager do
   """
   def change_episode(%Episode{} = episode) do
     Episode.changeset(episode, %{})
+  end
+
+  @doc """
+  Publishes a single episode by giving it a `published_at` date.
+
+  ## Examples
+
+      iex> publish_episode(episode)
+      {:ok, %Episode{}}
+
+      iex> publish_episode(bad_value)
+      {:error, %Ecto.Changeset{}}
+  """
+  def publish_episode(%Episode{} = episode) do
+    update_episode(episode, %{published_at: DateTime.utc_now()})
+  end
+
+  @doc """
+  Depublishes a single episode by removing its `published_at` date.
+
+  ## Examples
+
+      iex> depublish_episode(episode)
+      {:ok, %Episode{}}
+
+      iex> depublish_episode(bad_value)
+      {:error, %Ecto.Changeset{}}
+  """
+  def depublish_episode(%Episode{} = episode) do
+    update_episode(episode, %{published_at: nil})
   end
 
   @doc """

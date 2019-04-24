@@ -20,7 +20,7 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "get_podcast_by_slug/1 returns the podcast with given slug" do
-      podcast = insert(:podcast, slug: "foo-bar-baz")
+      podcast = insert(:podcast, slug: "podcast-foo-bar-baz")
       assert Directory.get_podcast_by_slug(podcast.slug) == podcast
     end
 
@@ -51,7 +51,7 @@ defmodule Radiator.DirectoryTest do
       podcast = insert(:podcast)
 
       {:ok, updated_podcast} =
-        Editor.Manager.update_podcast(podcast, %{title: "some updated title"})
+        Editor.Manager.update_podcast(podcast, %{title: "some updated podcast title"})
 
       assert updated_podcast.slug == nil
 
@@ -80,7 +80,7 @@ defmodule Radiator.DirectoryTest do
       assert %Ecto.Changeset{} = Editor.Manager.change_podcast(podcast)
     end
 
-    test "publish_podcast/1 sets a podcasts published_at date" do
+    test "publish_podcast/1 sets a published_at date" do
       podcast = insert(:podcast, published_at: nil)
 
       assert {:ok, %Podcast{} = published_podcast} = Editor.Manager.publish_podcast(podcast)
@@ -88,7 +88,7 @@ defmodule Radiator.DirectoryTest do
       assert :gt == DateTime.compare(DateTime.utc_now(), published_podcast.published_at)
     end
 
-    test "publish_podcast/1 generates a podcasts slug from it's title" do
+    test "publish_podcast/1 generates a slug from title" do
       podcast = insert(:podcast, published_at: nil)
 
       {:ok, published_podcast} = Editor.Manager.publish_podcast(podcast)
@@ -163,7 +163,12 @@ defmodule Radiator.DirectoryTest do
       assert Directory.get_episode!(episode.id) |> Repo.preload(:podcast) == episode
     end
 
-    test "create_episode/1 with valid data creates a episode" do
+    test "get_episode_by_slug/1 returns the episode with given slug" do
+      episode = insert(:episode, slug: "episode-foo-bar-baz")
+      assert Directory.get_episode_by_slug(episode.slug) == episode
+    end
+
+    test "create_episode/1 with valid data creates an episode" do
       assert {:ok, %Episode{} = episode} =
                Editor.Manager.create_episode(insert(:podcast), @valid_attrs)
 
@@ -182,6 +187,20 @@ defmodule Radiator.DirectoryTest do
       assert episode.title == "some updated title"
     end
 
+    test "update_episode/2 doesn't generate slug when published_at is not set" do
+      episode = insert(:episode)
+
+      {:ok, updated_episode} =
+        Editor.Manager.update_episode(episode, %{title: "some updated episode title"})
+
+      assert updated_episode.slug == nil
+
+      {:ok, published_episode} =
+        Editor.Manager.update_episode(updated_episode, %{published_at: DateTime.utc_now()})
+
+      assert String.length(published_episode.slug) > 0
+    end
+
     test "update_episode/2 with invalid data returns error changeset" do
       episode = insert(:episode)
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.update_episode(episode, @invalid_attrs)
@@ -194,9 +213,74 @@ defmodule Radiator.DirectoryTest do
       assert_raise Ecto.NoResultsError, fn -> Directory.get_episode!(episode.id) end
     end
 
-    test "change_episode/1 returns a episode changeset" do
+    test "change_episode/1 returns an episode changeset" do
       episode = insert(:episode)
       assert %Ecto.Changeset{} = Editor.Manager.change_episode(episode)
+    end
+
+    test "publish_episode/1 sets a published_at date" do
+      episode = insert(:episode, published_at: nil)
+
+      assert {:ok, %Episode{} = published_episode} = Editor.Manager.publish_episode(episode)
+      assert published_episode.published_at != nil
+      assert :gt == DateTime.compare(DateTime.utc_now(), published_episode.published_at)
+    end
+
+    test "publish_episode/1 generates a slug from title" do
+      episode = insert(:episode, published_at: nil)
+
+      {:ok, published_episode} = Editor.Manager.publish_episode(episode)
+      assert is_binary(published_episode.slug)
+      assert String.length(published_episode.slug) > 0
+    end
+
+    test "publish_episode/1 generates sequential slugs" do
+      {:ok, existing_episode} =
+        insert(:episode)
+        |> Editor.Manager.publish_episode()
+
+      {:ok, published_episode1} =
+        insert(:episode, title: existing_episode.title)
+        |> Editor.Manager.publish_episode()
+
+      assert published_episode1.slug == "#{existing_episode.slug}-1"
+
+      {:ok, published_episode2} =
+        insert(:episode, title: existing_episode.title)
+        |> Editor.Manager.publish_episode()
+
+      assert published_episode2.slug == "#{existing_episode.slug}-2"
+
+      {:ok, published_episode3} =
+        insert(:episode, title: existing_episode.title)
+        |> Editor.Manager.publish_episode()
+
+      assert published_episode3.slug == "#{existing_episode.slug}-3"
+    end
+
+    test "publish_episode/1 with invalid data returns error changeset" do
+      episode = insert(:episode)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Editor.Manager.publish_episode(%{episode | :title => nil})
+
+      assert %Episode{published_at: nil} = Directory.get_episode!(episode.id)
+    end
+
+    test "depublish_episode/1 removes an episodes published_at date" do
+      episode = insert(:episode, published_at: DateTime.utc_now())
+
+      assert {:ok, %Episode{published_at: nil}} = Editor.Manager.depublish_episode(episode)
+    end
+
+    test "depublish_episode/1 with invalid data returns error changeset" do
+      episode = insert(:episode, published_at: DateTime.utc_now())
+      published_at = episode.published_at
+
+      assert {:error, %Ecto.Changeset{}} =
+               Editor.Manager.depublish_episode(%{episode | :title => nil})
+
+      assert %Episode{published_at: ^published_at} = Directory.get_episode!(episode.id)
     end
   end
 
