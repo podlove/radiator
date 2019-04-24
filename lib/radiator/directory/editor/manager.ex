@@ -167,7 +167,7 @@ defmodule Radiator.Directory.Editor.Manager do
   end
 
   @doc """
-  Depublishes a single podcast by removing it's `published_at` date.
+  Depublishes a single podcast by removing its `published_at` date.
 
   ## Examples
 

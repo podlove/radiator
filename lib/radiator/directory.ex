@@ -67,7 +67,7 @@ defmodule Radiator.Directory do
   def get_podcast(id), do: Repo.get(Podcast, id)
 
   @doc """
-  Gets a single podcast by it's slug.
+  Gets a single podcast by its slug.
 
   ## Examples
 
