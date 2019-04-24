@@ -1,6 +1,8 @@
 defmodule Radiator.TestEntries do
   alias Radiator.Auth
 
+  import Plug.Conn
+
   @testusername "TestUser1"
   @testuserpassword "Pass"
 
@@ -23,5 +25,13 @@ defmodule Radiator.TestEntries do
       user ->
         user
     end
+  end
+
+  def put_authenticated_user(conn, user \\ user()) do
+    conn
+    |> put_req_header(
+      "authorization",
+      "Bearer " <> Radiator.Auth.Guardian.api_session_token(user)
+    )
   end
 end

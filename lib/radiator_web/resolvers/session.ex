@@ -9,8 +9,7 @@ defmodule RadiatorWeb.Resolvers.Session do
         {:error, "Invalid credentials"}
 
       valid_user ->
-        {:ok, token, _tokeninfo} =
-          Radiator.Auth.Guardian.encode_and_sign(valid_user, %{}, ttl: {45, :minutes})
+        token = Radiator.Auth.Guardian.api_session_token(valid_user)
 
         {:ok,
          %{
