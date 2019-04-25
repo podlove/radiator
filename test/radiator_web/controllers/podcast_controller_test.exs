@@ -10,7 +10,6 @@ defmodule RadiatorWeb.PodcastControllerTest do
   @create_attrs %{
     author: "some author",
     description: "some description",
-    image: "some image",
     language: "some language",
     last_built_at: "2010-04-17T14:00:00Z",
     owner_email: "some owner_email",
@@ -22,7 +21,6 @@ defmodule RadiatorWeb.PodcastControllerTest do
   @update_attrs %{
     author: "some updated author",
     description: "some updated description",
-    image: "some updated image",
     language: "some updated language",
     last_built_at: "2011-05-18T15:01:01Z",
     owner_email: "some updated owner_email",
@@ -34,7 +32,6 @@ defmodule RadiatorWeb.PodcastControllerTest do
   @invalid_attrs %{
     author: nil,
     description: nil,
-    image: nil,
     language: nil,
     last_built_at: nil,
     owner_email: nil,
@@ -93,7 +90,6 @@ defmodule RadiatorWeb.PodcastControllerTest do
                "id" => ^id,
                "author" => "some author",
                "description" => "some description",
-               "image" => "some image",
                "language" => "some language",
                "last_built_at" => "2010-04-17T14:00:00Z",
                "owner_email" => "some owner_email",
@@ -148,7 +144,6 @@ defmodule RadiatorWeb.PodcastControllerTest do
                "id" => id,
                "author" => "some updated author",
                "description" => "some updated description",
-               "image" => "some updated image",
                "language" => "some updated language",
                "last_built_at" => "2011-05-18T15:01:01Z",
                "owner_email" => "some updated owner_email",
