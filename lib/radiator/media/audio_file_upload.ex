@@ -23,7 +23,7 @@ defmodule Radiator.Media.AudioFileUpload do
   """
   alias Ecto.Multi
   alias Radiator.Repo
-  alias Radiator.Media.Audio
+  alias Radiator.Media.AudioFile
   alias Radiator.Directory.{Episode, Network}
   alias Radiator.Directory.Editor
 
@@ -62,7 +62,7 @@ defmodule Radiator.Media.AudioFileUpload do
   end
 
   defp create_audio_changeset do
-    Audio.changeset(%Audio{}, %{})
+    AudioFile.changeset(%AudioFile{}, %{})
   end
 
   defp add_audio_file_changeset(upload) do
@@ -70,7 +70,7 @@ defmodule Radiator.Media.AudioFileUpload do
     mime_type = MIME.from_path(upload.path)
 
     fn %{create_audio: audio} ->
-      Audio.changeset(audio, %{
+      AudioFile.changeset(audio, %{
         "title" => upload.filename,
         "file" => upload,
         "mime_type" => mime_type,

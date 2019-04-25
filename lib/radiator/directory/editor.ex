@@ -174,18 +174,18 @@ defmodule Radiator.Directory.Editor do
     nil
   end
 
-  @spec attach_audio_to_network(Network.t(), Media.Audio.t()) ::
+  @spec attach_audio_to_network(Network.t(), Media.AudioFile.t()) ::
           {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
-  def attach_audio_to_network(network = %Network{}, audio = %Media.Audio{}) do
+  def attach_audio_to_network(network = %Network{}, audio = %Media.AudioFile{}) do
     network
     |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
     |> Media.Attachment.changeset(%{})
     |> Repo.insert_or_update()
   end
 
-  @spec attach_audio_to_episode(Episode.t(), Media.Audio.t()) ::
+  @spec attach_audio_to_episode(Episode.t(), Media.AudioFile.t()) ::
           {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
-  def attach_audio_to_episode(episode = %Episode{}, audio = %Media.Audio{}) do
+  def attach_audio_to_episode(episode = %Episode{}, audio = %Media.AudioFile{}) do
     episode
     |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
     |> Media.Attachment.changeset(%{})

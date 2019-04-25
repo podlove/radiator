@@ -3,11 +3,11 @@ defmodule Radiator.Media.Attachment do
 
   import Ecto.Changeset
 
-  alias Radiator.Media.Audio
+  alias Radiator.Media.AudioFile
 
   @primary_key false
   schema "abstract table: attachment" do
-    belongs_to :audio, Audio, primary_key: true
+    belongs_to :audio, AudioFile, primary_key: true
 
     field :subject_id, :integer, primary_key: true
 

@@ -36,7 +36,7 @@ alias Radiator.{Directory, Repo, Storage}
 alias Radiator.Directory.{Episode, Podcast, Network, Editor}
 
 alias Radiator.Media
-alias Radiator.Media.Audio
+alias Radiator.Media.AudioFile
 
 alias Radiator.Feed.Builder
 
