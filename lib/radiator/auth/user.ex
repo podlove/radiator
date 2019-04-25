@@ -1,10 +1,11 @@
 defmodule Radiator.Auth.User do
-  alias Radiator.Auth.User
-
   use Ecto.Schema
   use Arc.Ecto.Schema
+
   import Ecto.Changeset
   import Ecto.Query, warn: false
+
+  alias Radiator.Auth.User
 
   schema "auth_users" do
     field :name, :string

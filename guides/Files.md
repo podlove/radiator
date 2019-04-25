@@ -32,9 +32,21 @@ Images are referenced directly in the schemas they are used, as they are always 
 They are:
 
 - `Radiator.Auth.User` field `:avatar`
-- TODO: network cover
-- TODO: podcast cover
-- TODO: episode cover
+- `Radiator.Directory.Network` field `:image`
+- `Radiator.Directory.Podcast` field `:image`
+- `Radiator.Directory.Episode` field `:image`
+
+Available versions are `:original` and `:thumbnail` (256x256).
+
+```elixir
+alias Radiator.Media.PodcastImage
+
+# get podcast image URL
+PodcastImage.url({podcast.image, podcast})
+
+# get podcast image thumbnail URL
+PodcastImage.url({podcast.image, podcast}, :thumbnail)
+```
 
 [arc]: https://hex.pm/packages/arc
 [arc_ecto]: https://hex.pm/packages/arc_ecto

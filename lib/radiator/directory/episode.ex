@@ -1,5 +1,6 @@
 defmodule Radiator.Directory.Episode do
   use Ecto.Schema
+  use Arc.Ecto.Schema
 
   import Ecto.Changeset
   import Ecto.Query, warn: false
@@ -14,7 +15,7 @@ defmodule Radiator.Directory.Episode do
     field :description, :string
     field :duration, :string
     field :guid, :string
-    field :image, :string
+    field :image, Radiator.Media.EpisodeImage.Type
     field :number, :integer
     field :published_at, :utc_datetime
     field :subtitle, :string
@@ -50,13 +51,13 @@ defmodule Radiator.Directory.Episode do
       :subtitle,
       :description,
       :content,
-      :image,
       :duration,
       :guid,
       :number,
       :published_at,
       :podcast_id
     ])
+    |> cast_attachments(attrs, [:image])
     |> validate_required([:title])
     |> set_guid_if_missing()
   end

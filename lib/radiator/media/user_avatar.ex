@@ -2,7 +2,7 @@ defmodule Radiator.Media.UserAvatar do
   use Arc.Definition
   use Arc.Ecto.Definition
 
-  @versions [:original, :icon]
+  @versions [:original, :thumbnail]
 
   def filename(version, {_file, _user}) do
     "avatar_#{version}"
@@ -20,7 +20,7 @@ defmodule Radiator.Media.UserAvatar do
     "https://robohash.org/#{user.name}?size=200x200"
   end
 
-  def transform(:icon, _) do
-    {:convert, "-thumbnail 50x50^ -gravity center -extent 50x50 -format png", :png}
+  def transform(:thumbnail, _) do
+    {:convert, "-thumbnail 256x256^ -gravity center -extent 256x256 -format png", :png}
   end
 end
