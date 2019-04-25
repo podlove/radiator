@@ -19,7 +19,7 @@ defmodule RadiatorWeb.Plug.ValidateAPIUser do
 
   defp build_context(conn) do
     with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
-         {:ok, claims} <- Auth.Guardian.decode_and_verify(token),
+         {:ok, claims = %{"typ" => "api_session"}} <- Auth.Guardian.decode_and_verify(token),
          {:ok, valid_user} <- Auth.Guardian.resource_from_claims(claims) do
       %{authenticated_user: valid_user}
     else
