@@ -27,7 +27,7 @@ See `Radiator.Media.AudioFileUpload.upload/2` for details.
 
 ## Cover Images & User Avatars
 
-Images are referenced directly in the schemas they are used, as they are always 1:1 relationships.
+Images are referenced in the schemas they are used as they are 1:1 relationships.
 
 They are:
 
@@ -35,6 +35,8 @@ They are:
 - `Radiator.Directory.Network` field `:image`
 - `Radiator.Directory.Podcast` field `:image`
 - `Radiator.Directory.Episode` field `:image`
+
+### Access
 
 Available versions are `:original` and `:thumbnail` (256x256).
 
@@ -46,6 +48,18 @@ PodcastImage.url({podcast.image, podcast})
 
 # get podcast image thumbnail URL
 PodcastImage.url({podcast.image, podcast}, :thumbnail)
+```
+
+### Upload
+
+Via schema/arc_ecto:
+
+```elixir
+podcast 
+|> Podcast.changeset(%{
+  image: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+}) 
+|> Repo.update
 ```
 
 [arc]: https://hex.pm/packages/arc
