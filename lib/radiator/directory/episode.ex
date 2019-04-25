@@ -6,6 +6,7 @@ defmodule Radiator.Directory.Episode do
 
   alias __MODULE__
   alias Radiator.Directory.Podcast
+  alias Radiator.Media
   alias Radiator.EpisodeMeta.Chapter
 
   schema "episodes" do
@@ -23,9 +24,17 @@ defmodule Radiator.Directory.Episode do
     has_many :chapters, Chapter
 
     has_many :attachments,
-             {"episode_attachments", Radiator.Media.Attachment},
+             {"episode_attachments", Media.Attachment},
              foreign_key: :subject_id
 
+    many_to_many :audio_files,
+                 Media.AudioFile,
+                 join_through: "episode_attachments",
+                 join_keys: [subject_id: :id, audio_id: :id]
+
+    # RESEARCH needed
+    # Repo.preload(episode, :enclosure) works
+    # Ecto.assoc(episode, :enclosure) does not work
     has_one :enclosure, through: [:attachments, :audio]
 
     has_many :permissions, {"episodes_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
@@ -56,7 +65,7 @@ defmodule Radiator.Directory.Episode do
   Convenience accessor for enclosure URL.
   """
   def enclosure_url(%Episode{enclosure: enclosure}) do
-    Radiator.Media.AudioFile.url({enclosure.file, enclosure})
+    Media.AudioFile.url({enclosure.file, enclosure})
   end
 
   def regenerate_guid(changeset) do
