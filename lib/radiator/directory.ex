@@ -66,6 +66,16 @@ defmodule Radiator.Directory do
   def get_podcast!(id), do: Repo.get!(Podcast, id)
   def get_podcast(id), do: Repo.get(Podcast, id)
 
+  @doc """
+  Gets a single podcast by its slug.
+
+  ## Examples
+
+      iex> get_podcast_by_slug(slug)
+      {:ok, %Podcast{}}
+  """
+  def get_podcast_by_slug(slug), do: Repo.get_by(Podcast, %{slug: slug})
+
   defp episodes_query(args) when is_map(args) do
     Radiator.Directory.EpisodeQuery.build(args)
   end
@@ -97,6 +107,16 @@ defmodule Radiator.Directory do
   def get_episode(id), do: Repo.get(Episode, id) |> Repo.preload(:podcast)
 
   @doc """
+  Gets a single episode by its slug.
+
+  ## Examples
+
+      iex> get_episode_by_slug(slug)
+      {:ok, %Episode{}}
+  """
+  def get_episode_by_slug(slug), do: Repo.get_by(Episode, %{slug: slug}) |> Repo.preload(:podcast)
+
+  @doc """
   Gets a single network.
 
   Raises `Ecto.NoResultsError` if the Network does not exist.
@@ -112,6 +132,16 @@ defmodule Radiator.Directory do
   """
   def get_network!(id), do: Repo.get!(Network, id)
   def get_network(id), do: Repo.get(Network, id)
+
+  @doc """
+  Gets a single network by its slug.
+
+  ## Examples
+
+      iex> get_network_by_slug(slug)
+      {:ok, %Network{}}
+  """
+  def get_network_by_slug(slug), do: Repo.get_by(Network, %{slug: slug})
 
   @doc """
   Get the first network.

@@ -2,11 +2,12 @@ defmodule Radiator.Directory.Network do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Radiator.Directory.Podcast
+  alias Radiator.Directory.{Podcast, TitleSlug}
 
   schema "networks" do
     field :image, :string
     field :title, :string
+    field :slug, TitleSlug.Type
 
     has_many :podcasts, Podcast
 
@@ -20,5 +21,13 @@ defmodule Radiator.Directory.Network do
     network
     |> cast(attrs, [:title, :image])
     |> validate_required([:title])
+  end
+
+  @doc false
+  def creation_changeset(network, attrs) do
+    network
+    |> changeset(attrs)
+    |> TitleSlug.maybe_generate_slug()
+    |> TitleSlug.unique_constraint()
   end
 end

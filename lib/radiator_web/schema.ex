@@ -167,6 +167,20 @@ defmodule RadiatorWeb.Schema do
       middleware RadiatorWebMiddleware.TranslateChangeset
     end
 
+    @desc "Publish episode"
+    field :publish_episode, type: :episode do
+      arg :id, non_null(:id)
+
+      resolve &Resolvers.Directory.publish_episode/3
+    end
+
+    @desc "Depublish episode"
+    field :depublish_episode, type: :episode do
+      arg :id, non_null(:id)
+
+      resolve &Resolvers.Directory.depublish_episode/3
+    end
+
     @desc "Delete an episode"
     field :delete_episode, type: :episode do
       arg :id, non_null(:id)

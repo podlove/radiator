@@ -110,6 +110,132 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.EpisodesTest do
     assert msg == "title can't be blank"
   end
 
+  @publish_query """
+  mutation ($id: ID!) {
+    publishEpisode(id: $id) {
+      id
+      publishedAt
+      slug
+    }
+  }
+  """
+
+  test "publishEpisode publishes an episode", %{conn: conn} do
+    episode = insert(:episode, published_at: nil)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @publish_query,
+        variables: %{"id" => episode.id}
+
+    id = Integer.to_string(episode.id)
+
+    assert %{
+             "data" => %{
+               "publishEpisode" => %{
+                 "id" => ^id,
+                 "publishedAt" => published
+               }
+             }
+           } = json_response(conn, 200)
+
+    refute is_nil(published)
+  end
+
+  test "publishEpisode generates an episodes slug", %{conn: conn} do
+    episode = insert(:episode)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @publish_query,
+        variables: %{"id" => episode.id}
+
+    id = Integer.to_string(episode.id)
+
+    assert %{
+             "data" => %{
+               "publishEpisode" => %{
+                 "id" => ^id,
+                 "slug" => slug
+               }
+             }
+           } = json_response(conn, 200)
+
+    assert is_binary(slug)
+    assert String.length(slug) > 0
+  end
+
+  test "publishEpisode doesn't generate slug, if episode already has one", %{conn: conn} do
+    episode = insert(:episode, slug: "original-test-slug")
+
+    conn =
+      post conn, "/api/graphql",
+        query: @publish_query,
+        variables: %{"id" => episode.id}
+
+    id = Integer.to_string(episode.id)
+
+    assert %{
+             "data" => %{
+               "publishEpisode" => %{
+                 "id" => ^id,
+                 "slug" => slug
+               }
+             }
+           } = json_response(conn, 200)
+
+    assert "original-test-slug" == slug
+  end
+
+  test "publishEpisode returns errors on wrong id", %{conn: conn} do
+    conn =
+      post conn, "/api/graphql",
+        query: @publish_query,
+        variables: %{"id" => -1}
+
+    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
+    assert message == "Episode ID -1 not found"
+  end
+
+  @depublish_query """
+  mutation ($id: ID!) {
+    depublishEpisode(id: $id) {
+      id
+      publishedAt
+    }
+  }
+  """
+
+  test "depublishEpisode depublishes an episode", %{conn: conn} do
+    episode = insert(:episode, published_at: DateTime.utc_now())
+
+    conn =
+      post conn, "/api/graphql",
+        query: @depublish_query,
+        variables: %{"id" => episode.id}
+
+    id = Integer.to_string(episode.id)
+
+    assert %{
+             "data" => %{
+               "depublishEpisode" => %{
+                 "id" => ^id,
+                 "publishedAt" => nil
+               }
+             }
+           } = json_response(conn, 200)
+  end
+
+  test "depublishEpisode returns errors on wrong id", %{conn: conn} do
+    conn =
+      post conn, "/api/graphql",
+        query: @depublish_query,
+        variables: %{"id" => -1}
+
+    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
+    assert message == "Episode ID -1 not found"
+  end
+
   @delete_query """
   mutation ($id: ID!) {
     deleteEpisode(id: $id) {
@@ -119,7 +245,7 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.EpisodesTest do
   }
   """
 
-  test "deleteEpisode deletes a episode", %{conn: conn} do
+  test "deleteEpisode deletes an episode", %{conn: conn} do
     episode = insert(:episode)
 
     conn =

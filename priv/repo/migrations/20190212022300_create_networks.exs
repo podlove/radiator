@@ -5,8 +5,11 @@ defmodule Radiator.Repo.Migrations.CreateNetworks do
     create table(:networks) do
       add :title, :text
       add :image, :text
+      add :slug, :string
 
       timestamps()
     end
+
+    create unique_index(:networks, [:slug])
   end
 end
