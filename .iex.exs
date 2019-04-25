@@ -45,37 +45,3 @@ alias Radiator.Auth.User
 
 alias Radiator.Perm.Ecto.PermissionType
 alias Radiator.Perm.Permission
-
-## scratchpad
-
-defmodule Scratchpad do
-  def demo_user_avatar do
-    user = User |> first |> Repo.one()
-
-    changeset =
-      User.changeset(user, %{
-        "avatar" => %Plug.Upload{
-          content_type: "image/jpeg",
-          filename: "#{Ecto.UUID.generate()}.jpg",
-          path: "/Users/ericteubert/Downloads/avatar.jpg"
-        }
-      })
-
-    {:ok, user} = Repo.update(changeset)
-
-    Radiator.Media.UserAvatar.url({user.avatar, user})
-    |> IO.inspect(pretty: true)
-
-    Radiator.Media.UserAvatar.url({user.avatar, user}, :icon)
-    |> IO.inspect(pretty: true)
-  end
-end
-
-upload = %Plug.Upload{
-  content_type: "audio/mpeg",
-  filename: "ls013-ultraschall.mp3",
-  path: "/Users/ericteubert/Downloads/ls013-ultraschall.mp3"
-}
-
-network = Radiator.Directory.Network |> Repo.one()
-{:ok, audio, attachment} = Media.AudioFileUpload.upload(upload, network)
