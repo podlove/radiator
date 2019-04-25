@@ -13,19 +13,27 @@ defmodule Radiator.Media.AudioFileUpload do
 
   ## Examples
 
-    iex> upload = %Plug.Upload{
-    ...>   content_type: "audio/mpeg",
-    ...>   filename: "ls013-ultraschall.mp3",
-    ...>   path: "/tmp/ls013-ultraschall.mp3"
-    ...> }
-    iex> {:ok, audio, attachment} = Radiator.Media.AudioFileUpload.upload(upload, episode)
+      iex> upload = %Plug.Upload{
+      ...>   content_type: "audio/mpeg",
+      ...>   filename: "ls013-ultraschall.mp3",
+      ...>   path: "/tmp/ls013-ultraschall.mp3"
+      ...> }
+      iex> {:ok, audio, attachment} = Radiator.Media.AudioFileUpload.upload(upload, episode)
 
   """
   alias Ecto.Multi
   alias Radiator.Repo
   alias Radiator.Media.AudioFile
+  alias Radiator.Media.Attachment
   alias Radiator.Directory.{Episode, Network}
   alias Radiator.Directory.Editor
+
+  @doc """
+  Upload audio file and attach it to network or episode.
+  """
+  @spec upload(any(), Episode.t() | Network.t()) ::
+          {:ok, AudioFile.t(), Attachment.t()} | {:error, :failed}
+  def upload(upload, network_or_episode)
 
   def upload(upload = %Plug.Upload{}, network = %Network{}) do
     {:ok, audio} = upload(upload)

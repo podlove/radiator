@@ -103,7 +103,8 @@ defmodule Radiator.MixProject do
       logo: "guides/images/podlove-radiator-logo.svg",
       extras: [
         "README.md",
-        "guides/Users and Permissions.md"
+        "guides/Users and Permissions.md",
+        "guides/Files.md"
       ]
     ]
   end
