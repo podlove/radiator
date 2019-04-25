@@ -78,6 +78,10 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :title, :string
     field :slug, :string
 
+    field :is_published, :boolean do
+      resolve &Resolvers.Directory.is_published/3
+    end
+
     field :podcast, :podcast do
       resolve &Resolvers.Directory.find_podcast/3
     end
