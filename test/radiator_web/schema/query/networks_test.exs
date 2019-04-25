@@ -26,7 +26,7 @@ defmodule RadiatorWeb.Schema.Query.NetworksTest do
            }
   end
 
-  test "network returns an error when queried with a non-existant ID", %{conn: conn} do
+  test "network returns an error when queried with a non-existent ID", %{conn: conn} do
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => -1}
     assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
     assert message == "Network ID -1 not found"
