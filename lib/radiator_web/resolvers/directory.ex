@@ -98,16 +98,11 @@ defmodule RadiatorWeb.Resolvers.Directory do
     end
   end
 
-  def is_published(%Podcast{published_at: nil}, _, _) do
-    {:ok, false}
-  end
+  def is_published(%Podcast{published_at: nil}, _, _), do: {:ok, false}
+  def is_published(%Episode{published_at: nil}, _, _), do: {:ok, false}
 
-  def is_published(%Podcast{published_at: date}, _, _) do
-    case DateTime.compare(date, DateTime.utc_now()) do
-      :lt -> {:ok, true}
-      _ -> {:ok, false}
-    end
-  end
+  def is_published(%Podcast{published_at: date}, _, _), do: {:ok, before_utc_now?(date)}
+  def is_published(%Episode{published_at: date}, _, _), do: {:ok, before_utc_now?(date)}
 
   def find_episode(_parent, %{id: id}, _resolution) do
     case Directory.get_episode(id) do
@@ -165,6 +160,13 @@ defmodule RadiatorWeb.Resolvers.Directory do
     case Directory.get_episode(id) do
       nil -> {:error, "Episode ID #{id} not found"}
       episode -> EpisodeMeta.set_chapters(episode, chapters, String.to_existing_atom(type))
+    end
+  end
+
+  defp before_utc_now?(date) do
+    case DateTime.compare(date, DateTime.utc_now()) do
+      :lt -> true
+      _ -> false
     end
   end
 end
