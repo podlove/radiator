@@ -53,6 +53,8 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
   end
 
   test "createNetwork generates a slug from the title", %{conn: conn} do
+    conn = Radiator.TestEntries.put_authenticated_user(conn)
+
     network = params_for(:network)
 
     conn =
