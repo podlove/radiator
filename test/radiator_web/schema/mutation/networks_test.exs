@@ -14,6 +14,8 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
   """
 
   test "createNetwork creates a network", %{conn: conn} do
+    conn = Radiator.TestEntries.put_authenticated_user(conn)
+
     network = params_for(:network)
 
     conn =
@@ -33,6 +35,21 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
            } = json_response(conn, 200)
 
     refute is_nil(id)
+  end
+
+  test "createNetwork does not create a network when not authenticated", %{conn: conn} do
+    network = params_for(:network)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @create_query,
+        variables: %{"network" => network}
+
+    assert %{
+             "errors" => [first_error]
+           } = json_response(conn, 200)
+
+    refute is_nil(first_error)
   end
 
   test "createNetwork generates a slug from the title", %{conn: conn} do
