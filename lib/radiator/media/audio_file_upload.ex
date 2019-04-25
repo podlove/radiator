@@ -30,12 +30,14 @@ defmodule Radiator.Media.AudioFileUpload do
 
   @doc """
   Upload audio file and attach it to network or episode.
+
+  `upload` parameter can be anything that the arc `store` function accepts, see https://github.com/stavro/arc#basics
   """
   @spec upload(any(), Episode.t() | Network.t()) ::
           {:ok, AudioFile.t(), Attachment.t()} | {:error, :failed}
   def upload(upload, network_or_episode)
 
-  def upload(upload = %Plug.Upload{}, network = %Network{}) do
+  def upload(upload, network = %Network{}) do
     {:ok, audio} = upload(upload)
 
     Editor.attach_audio_to_network(network, audio)
@@ -45,7 +47,7 @@ defmodule Radiator.Media.AudioFileUpload do
     end
   end
 
-  def upload(upload = %Plug.Upload{}, episode = %Episode{}) do
+  def upload(upload, episode = %Episode{}) do
     {:ok, audio} = upload(upload)
 
     episode
@@ -58,7 +60,7 @@ defmodule Radiator.Media.AudioFileUpload do
   end
 
   @spec upload(Plug.Upload.t()) :: {:ok, Radiator.Media.AudioFile.t()} | {:error, atom()}
-  defp upload(upload = %Plug.Upload{}) do
+  defp upload(upload) do
     Multi.new()
     |> Multi.insert(:create_audio, create_audio_changeset())
     |> Multi.update(:audio, add_audio_file_changeset(upload))
