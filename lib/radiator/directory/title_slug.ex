@@ -3,7 +3,16 @@ defmodule Radiator.Directory.TitleSlug do
   import Ecto.Changeset
 
   alias Radiator.Directory
+  alias Radiator.Directory.{Episode, Network, Podcast}
 
+  # for Network Changesets just get the title
+  def get_sources(%Ecto.Changeset{data: %Network{}} = changeset, _opts) do
+    title = get_field(changeset, :title)
+
+    [title]
+  end
+
+  # for other Changesets only get the title when a `published_at` is set
   def get_sources(changeset, _opts) do
     case get_change(changeset, :published_at) do
       nil ->
@@ -19,8 +28,9 @@ defmodule Radiator.Directory.TitleSlug do
   def build_slug(sources, changeset) do
     lookup_fn =
       case changeset.data do
-        %Directory.Podcast{} -> &Directory.get_podcast_by_slug/1
-        %Directory.Episode{} -> &Directory.get_episode_by_slug/1
+        %Podcast{} -> &Directory.get_podcast_by_slug/1
+        %Episode{} -> &Directory.get_episode_by_slug/1
+        %Network{} -> &Directory.get_network_by_slug/1
       end
 
     sources

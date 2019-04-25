@@ -10,6 +10,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :id, non_null(:id)
     field :title, :string
     field :image, :string
+    field :slug, :string
 
     field :podcasts, list_of(:podcast) do
       resolve &Resolvers.Directory.list_podcasts/3

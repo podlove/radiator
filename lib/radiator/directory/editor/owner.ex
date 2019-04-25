@@ -42,7 +42,7 @@ defmodule Radiator.Directory.Editor.Owner do
   def create_network(actor = %Auth.User{}, attrs) when is_map(attrs) do
     network =
       %Network{}
-      |> Network.changeset(attrs)
+      |> Network.creation_changeset(attrs)
 
     Multi.new()
     |> Multi.insert(:network, network)

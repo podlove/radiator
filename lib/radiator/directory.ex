@@ -134,6 +134,16 @@ defmodule Radiator.Directory do
   def get_network(id), do: Repo.get(Network, id)
 
   @doc """
+  Gets a single network by its slug.
+
+  ## Examples
+
+      iex> get_network_by_slug(slug)
+      {:ok, %Network{}}
+  """
+  def get_network_by_slug(slug), do: Repo.get_by(Network, %{slug: slug})
+
+  @doc """
   Get the first network.
 
   Only temporary until users can be assigned to networks.

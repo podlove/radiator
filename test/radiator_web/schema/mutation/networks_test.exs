@@ -8,6 +8,7 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
     createNetwork(network: $network) {
       id
       title
+      slug
     }
   }
   """
@@ -34,6 +35,29 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
     refute is_nil(id)
   end
 
+  test "createNetwork generates a slug from the title", %{conn: conn} do
+    network = params_for(:network)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @create_query,
+        variables: %{"network" => network}
+
+    title = network.title
+
+    assert %{
+             "data" => %{
+               "createNetwork" => %{
+                 "title" => ^title,
+                 "slug" => slug
+               }
+             }
+           } = json_response(conn, 200)
+
+    refute is_nil(slug)
+    assert String.length(slug) > 0
+  end
+
   test "createNetwork returns error when missing data", %{conn: conn} do
     conn =
       post conn, "/api/graphql",
@@ -56,6 +80,7 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
     updateNetwork(id: $id, network: $network) {
       id
       title
+      slug
     }
   }
   """
@@ -75,6 +100,26 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
                "updateNetwork" => %{
                  "title" => "Meta meta!",
                  "id" => ^id
+               }
+             }
+           } = json_response(conn, 200)
+  end
+
+  test "updateNetwork doesn't update the slug when title changes", %{conn: conn} do
+    network = insert(:network)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @update_query,
+        variables: %{"network" => %{title: "Something New!"}, "id" => network.id}
+
+    slug = network.slug
+
+    assert %{
+             "data" => %{
+               "updateNetwork" => %{
+                 "title" => "Something New!",
+                 "slug" => ^slug
                }
              }
            } = json_response(conn, 200)

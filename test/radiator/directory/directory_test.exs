@@ -310,6 +310,11 @@ defmodule Radiator.DirectoryTest do
       assert Directory.get_network!(network.id) == network
     end
 
+    test "get_network_by_slug/1 returns the network with given slug" do
+      network = insert(:network, slug: "network-foo-bar-baz")
+      assert Directory.get_network_by_slug(network.slug) == network
+    end
+
     test "create_network/1 with valid data creates a network" do
       testuser = Radiator.TestEntries.user()
 
@@ -318,6 +323,15 @@ defmodule Radiator.DirectoryTest do
 
       assert network.image == "some image"
       assert network.title == "some title"
+    end
+
+    test "create_network/1 generates a slug from the new networks title" do
+      testuser = Radiator.TestEntries.user()
+
+      assert {:ok, %{network: %Network{} = network}} =
+               Editor.Owner.create_network(testuser, %{title: "Network Slug Test"})
+
+      assert network.slug == "network-slug-test"
     end
 
     test "create_network/1 with invalid data returns error changeset" do
