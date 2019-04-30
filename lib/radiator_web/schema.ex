@@ -30,6 +30,7 @@ defmodule RadiatorWeb.Schema do
   end
 
   import_types Absinthe.Type.Custom
+  import_types Absinthe.Plug.Types
   import_types RadiatorWeb.Schema.Directory.EpisodeTypes
   import_types RadiatorWeb.Schema.DirectoryTypes
   import_types RadiatorWeb.Schema.StorageTypes
@@ -127,10 +128,19 @@ defmodule RadiatorWeb.Schema do
       resolve &Resolvers.Directory.delete_podcast/3
     end
 
-    field :create_upload, :upload do
+    # todo: do we still need this?
+    field :create_upload, :rad_upload do
       arg :filename, non_null(:string)
 
       resolve &Resolvers.Storage.create_upload/3
+    end
+
+    @desc "Upload a single audio file to an episode"
+    field :upload_episode_audio, :string do
+      arg :episode_id, non_null(:integer)
+      arg :audio, :upload
+
+      resolve &Resolvers.Storage.upload_episode_audio/3
     end
 
     @desc "Create an episode"
