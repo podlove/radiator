@@ -16,3 +16,6 @@ config :radiator, Radiator.Repo,
   database: "radiator_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+# Speed up password hashing during test
+config :argon2_elixir, t_cost: 1, m_cost: 8
