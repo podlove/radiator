@@ -56,4 +56,39 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.UploadTest do
              }
            } = json_response(conn, 200)
   end
+
+  @upload_network_audio """
+  mutation ($network_id: ID!) {
+    uploadNetworkAudio(network_id: $network_id, audio: "myaudio") {
+      mimeType
+      byteLength
+      title
+    }
+  }
+  """
+
+  test "upload audio file to network", %{conn: conn} do
+    network = insert(:network)
+
+    upload = %Plug.Upload{
+      path: "test/fixtures/pling.mp3",
+      filename: "pling.mp3"
+    }
+
+    conn =
+      post conn, "/api/graphql",
+        query: @upload_network_audio,
+        myaudio: upload,
+        variables: %{"network_id" => network.id}
+
+    assert %{
+             "data" => %{
+               "uploadNetworkAudio" => %{
+                 "byteLength" => 8476,
+                 "mimeType" => "audio/mpeg",
+                 "title" => "pling.mp3"
+               }
+             }
+           } = json_response(conn, 200)
+  end
 end

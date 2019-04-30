@@ -143,6 +143,14 @@ defmodule RadiatorWeb.Schema do
       resolve &Resolvers.Storage.upload_episode_audio/3
     end
 
+    @desc "Upload a single audio file to a network"
+    field :upload_network_audio, type: :audio_file do
+      arg :network_id, non_null(:integer)
+      arg :audio, :upload
+
+      resolve &Resolvers.Storage.upload_episode_audio/3
+    end
+
     @desc "Create an episode"
     field :create_episode, type: :episode do
       arg :podcast_id, non_null(:id)

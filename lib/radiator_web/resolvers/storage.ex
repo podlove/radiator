@@ -20,4 +20,17 @@ defmodule RadiatorWeb.Resolvers.Storage do
         end
     end
   end
+
+  def upload_episode_audio(_parent, %{network_id: id, audio: audio}, _) do
+    case Directory.get_network(id) do
+      nil ->
+        {:error, "Network ID #{id} not found"}
+
+      network ->
+        case Media.AudioFileUpload.upload(audio, network) do
+          {:ok, audio, _attachment} -> {:ok, audio}
+          {:error, reason} -> {:error, "Upload to etwork ID #{id} failed: #{reason}"}
+        end
+    end
+  end
 end
