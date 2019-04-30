@@ -136,7 +136,7 @@ defmodule RadiatorWeb.Schema do
     end
 
     @desc "Upload a single audio file to an episode"
-    field :upload_episode_audio, :string do
+    field :upload_episode_audio, type: :audio_file do
       arg :episode_id, non_null(:integer)
       arg :audio, :upload
 

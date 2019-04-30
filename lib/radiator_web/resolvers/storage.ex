@@ -15,7 +15,7 @@ defmodule RadiatorWeb.Resolvers.Storage do
 
       episode ->
         case Media.AudioFileUpload.upload(audio, episode) do
-          {:ok, _audio, _attachment} -> {:ok, :uploaded}
+          {:ok, audio, _attachment} -> {:ok, audio}
           {:error, reason} -> {:error, "Upload to Episode ID #{id} failed: #{reason}"}
         end
     end
