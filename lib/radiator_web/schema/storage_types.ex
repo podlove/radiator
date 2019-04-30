@@ -9,7 +9,7 @@ defmodule RadiatorWeb.Schema.StorageTypes do
   @desc "Audio File"
   object :audio_file do
     field :mime_type, :string
-    field :byte_length, :string
+    field :byte_length, :integer
     field :title, :string
   end
 end

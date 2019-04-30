@@ -75,13 +75,14 @@ defmodule Radiator.Media.AudioFileUpload do
     AudioFile.changeset(%AudioFile{}, %{})
   end
 
-  defp add_audio_file_changeset(upload) do
-    {:ok, %File.Stat{size: size}} = File.lstat(upload.path)
-    mime_type = MIME.from_path(upload.path)
+  defp add_audio_file_changeset(upload = %Plug.Upload{path: path, filename: filename})
+       when is_binary(path) and is_binary(filename) do
+    {:ok, %File.Stat{size: size}} = File.lstat(path)
+    mime_type = MIME.from_path(path)
 
     fn %{create_audio: audio} ->
       AudioFile.changeset(audio, %{
-        "title" => upload.filename,
+        "title" => filename,
         "file" => upload,
         "mime_type" => mime_type,
         "byte_length" => size
