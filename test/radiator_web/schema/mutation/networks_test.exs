@@ -3,6 +3,9 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
 
   import Radiator.Factory
 
+  alias Radiator.Directory
+  alias Radiator.Media
+
   @create_query """
   mutation ($network: NetworkInput!) {
     createNetwork(network: $network) {
@@ -63,10 +66,19 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
   test "updateNetwork updates a network", %{conn: conn} do
     network = insert(:network)
 
+    upload = %Plug.Upload{
+      path: "test/fixtures/image.jpg",
+      filename: "image.jpg"
+    }
+
     conn =
       post conn, "/api/graphql",
         query: @update_query,
-        variables: %{"network" => %{title: "Meta meta!"}, "id" => network.id}
+        variables: %{
+          network: %{title: "Meta meta!", image: "myupload"},
+          id: network.id
+        },
+        myupload: upload
 
     id = Integer.to_string(network.id)
 
@@ -78,6 +90,9 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
                }
              }
            } = json_response(conn, 200)
+
+    network = Directory.get_network(id)
+    assert Media.NetworkImage.url({network.image, network})
   end
 
   test "updateNetwork returns errors on missing values", %{conn: conn} do
