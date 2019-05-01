@@ -6,6 +6,19 @@ Files are managed by [arc] with [arc_ecto].
 
 The `Radiator.Media.AudioFile` schema represents a single audio file. It is attached to either an episode or network via `Radiator.Media.Attachment`.
 
+    +---------+       +---------+
+    | Episode |       | Network |
+    +----+----+       +----+----+
+         | +------------+  |
+         +-> Attachment +<-+
+           +------+-----+
+                  |
+                  v
+            +-----+-----+
+            | AudioFile |
+            +-----------+
+
+
 ### Access
 
 Currently it can be assumed that each episode only has one audio attachment. For convenience, this is a dedicated association called `:enclosure`. You can preload it with `Repo.preload(episode, :enclosure)`.
