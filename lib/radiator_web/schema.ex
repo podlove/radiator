@@ -84,7 +84,6 @@ defmodule RadiatorWeb.Schema do
     field :update_network, type: :network do
       arg :id, non_null(:id)
       arg :network, non_null(:network_input)
-      arg :image, :upload
 
       resolve &Resolvers.Directory.update_network/3
       middleware RadiatorWeb.ChangesetMiddleware

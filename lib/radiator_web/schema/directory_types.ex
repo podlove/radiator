@@ -54,7 +54,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :title, non_null(:string)
     field :subtitle, :string
     field :description, :string
-    field :image, :string
+    field :image, :upload
     field :language, :string
     field :owner_email, :string
     field :owner_name, :string
