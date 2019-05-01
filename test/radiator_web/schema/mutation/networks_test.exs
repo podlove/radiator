@@ -3,9 +3,6 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
 
   import Radiator.Factory
 
-  alias Radiator.Directory
-  alias Radiator.Media
-
   @create_query """
   mutation ($network: NetworkInput!) {
     createNetwork(network: $network) {
@@ -59,6 +56,7 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
     updateNetwork(id: $id, network: $network) {
       id
       title
+      image
     }
   }
   """
@@ -86,13 +84,13 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
              "data" => %{
                "updateNetwork" => %{
                  "title" => "Meta meta!",
-                 "id" => ^id
+                 "id" => ^id,
+                 "image" => image
                }
              }
            } = json_response(conn, 200)
 
-    network = Directory.get_network(id)
-    assert Media.NetworkImage.url({network.image, network})
+    assert String.contains?(image, ".jpg")
   end
 
   test "updateNetwork returns errors on missing values", %{conn: conn} do

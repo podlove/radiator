@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Resolvers.Directory do
   alias Radiator.Directory
   alias Radiator.Directory.{Episode, Podcast, Network}
   alias Radiator.EpisodeMeta
+  alias Radiator.Media
 
   alias Directory.Editor
 
@@ -162,5 +163,13 @@ defmodule RadiatorWeb.Resolvers.Directory do
        type: episode.enclosure.mime_type,
        length: episode.enclosure.byte_length
      }}
+  end
+
+  def get_image_url(podcast = %Podcast{}, _, _) do
+    {:ok, Media.PodcastImage.url({podcast.image, podcast})}
+  end
+
+  def get_image_url(network = %Network{}, _, _) do
+    {:ok, Media.NetworkImage.url({network.image, network})}
   end
 end

@@ -9,7 +9,10 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
   object :network do
     field :id, non_null(:id)
     field :title, :string
-    field :image, :string
+
+    field :image, :string do
+      resolve &Resolvers.Directory.get_image_url/3
+    end
 
     field :podcasts, list_of(:podcast) do
       resolve &Resolvers.Directory.list_podcasts/3
@@ -28,7 +31,11 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :title, :string
     field :author, :string
     field :description, :string
-    field :image, :string
+
+    field :image, :string do
+      resolve &Resolvers.Directory.get_image_url/3
+    end
+
     field :language, :string
     field :last_built_at, :datetime
     field :owner_email, :string

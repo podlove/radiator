@@ -57,6 +57,7 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
     updatePodcast(id: $id, podcast: $podcast) {
       id
       title
+      image
     }
   }
   """
@@ -81,13 +82,13 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
              "data" => %{
                "updatePodcast" => %{
                  "title" => "Aldebaran",
-                 "id" => ^id
+                 "id" => ^id,
+                 "image" => image
                }
              }
            } = json_response(conn, 200)
 
-    podcast = Radiator.Directory.get_podcast(id)
-    assert Radiator.Media.PodcastImage.url({podcast.image, podcast})
+    assert String.contains?(image, ".jpg")
   end
 
   test "updatePodcast returns errors on missing values", %{conn: conn} do
