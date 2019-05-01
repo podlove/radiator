@@ -8,6 +8,7 @@ defmodule Radiator.Directory.Episode do
   alias __MODULE__
   alias Radiator.Directory.Podcast
   alias Radiator.Media
+  alias Radiator.Directory.{Podcast, TitleSlug}
   alias Radiator.EpisodeMeta.Chapter
 
   schema "episodes" do
@@ -20,6 +21,7 @@ defmodule Radiator.Directory.Episode do
     field :published_at, :utc_datetime
     field :subtitle, :string
     field :title, :string
+    field :slug, TitleSlug.Type
 
     belongs_to :podcast, Podcast
     has_many :chapters, Chapter
@@ -55,11 +57,14 @@ defmodule Radiator.Directory.Episode do
       :guid,
       :number,
       :published_at,
+      :slug,
       :podcast_id
     ])
     |> cast_attachments(attrs, [:image])
     |> validate_required([:title])
     |> set_guid_if_missing()
+    |> TitleSlug.maybe_generate_slug()
+    |> TitleSlug.unique_constraint()
   end
 
   @doc """

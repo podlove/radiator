@@ -57,7 +57,7 @@ cd ..
 mix phx.server
 ```
 
-Seed database with data for development:
+Seed database with data for development (unless you did `mix ecto.reset`, it runs seeds automatically):
 
 ```shell
 mix run priv/repo/seeds.exs
@@ -88,6 +88,20 @@ At the moment both GraphQL and REST endpoints are available. The aim is to provi
 Entrypoint: `/api/graphql`
 
 Open http://localhost:4000/api/graphiql for schema and documentation exploration.
+
+For calls that need authentication, make sure to put the token gotten from a 
+
+```GraphQL
+mutation { 
+	authenticatedSession(
+		username_or_email: "admin", 
+		         password: "password" ) { 
+		token 
+	} 
+}
+```
+
+request into the `Authorization: Bearer <token>` header.
 
 ### REST
 

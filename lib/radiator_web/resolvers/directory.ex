@@ -78,9 +78,7 @@ defmodule RadiatorWeb.Resolvers.Directory do
         {:error, "Podcast ID #{id} not found"}
 
       podcast ->
-        Editor.Manager.update_podcast(podcast, %{
-          published_at: DateTime.utc_now()
-        })
+        Editor.Manager.publish_podcast(podcast)
     end
   end
 
@@ -90,9 +88,7 @@ defmodule RadiatorWeb.Resolvers.Directory do
         {:error, "Podcast ID #{id} not found"}
 
       podcast ->
-        Editor.Manager.update_podcast(podcast, %{
-          published_at: nil
-        })
+        Editor.Manager.depublish_podcast(podcast)
     end
   end
 
@@ -103,16 +99,11 @@ defmodule RadiatorWeb.Resolvers.Directory do
     end
   end
 
-  def is_published(%Podcast{published_at: nil}, _, _) do
-    {:ok, false}
-  end
+  def is_published(%Podcast{published_at: nil}, _, _), do: {:ok, false}
+  def is_published(%Episode{published_at: nil}, _, _), do: {:ok, false}
 
-  def is_published(%Podcast{published_at: date}, _, _) do
-    case DateTime.compare(date, DateTime.utc_now()) do
-      :lt -> {:ok, true}
-      _ -> {:ok, false}
-    end
-  end
+  def is_published(%Podcast{published_at: date}, _, _), do: {:ok, before_utc_now?(date)}
+  def is_published(%Episode{published_at: date}, _, _), do: {:ok, before_utc_now?(date)}
 
   def find_episode(_parent, %{id: id}, _resolution) do
     case Directory.get_episode(id) do
@@ -132,6 +123,26 @@ defmodule RadiatorWeb.Resolvers.Directory do
     case Directory.get_episode(id) do
       nil -> {:error, "Episode ID #{id} not found"}
       episode -> Editor.Manager.update_episode(episode, args)
+    end
+  end
+
+  def publish_episode(_parent, %{id: id}, _res) do
+    case Directory.get_episode(id) do
+      nil ->
+        {:error, "Episode ID #{id} not found"}
+
+      episode ->
+        Editor.Manager.publish_episode(episode)
+    end
+  end
+
+  def depublish_episode(_parent, %{id: id}, _res) do
+    case Directory.get_episode(id) do
+      nil ->
+        {:error, "Episode ID #{id} not found"}
+
+      episode ->
+        Editor.Manager.depublish_episode(episode)
     end
   end
 
@@ -175,5 +186,12 @@ defmodule RadiatorWeb.Resolvers.Directory do
 
   def get_image_url(network = %Network{}, _, _) do
     {:ok, Media.NetworkImage.url({network.image, network})}
+  end
+
+  defp before_utc_now?(date) do
+    case DateTime.compare(date, DateTime.utc_now()) do
+      :lt -> true
+      _ -> false
+    end
   end
 end

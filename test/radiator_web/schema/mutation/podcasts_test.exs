@@ -108,6 +108,7 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
     publishPodcast(id: $id) {
       id
       publishedAt
+      slug
     }
   }
   """
@@ -132,6 +133,51 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
            } = json_response(conn, 200)
 
     refute is_nil(published)
+  end
+
+  test "publishPodcast generates a podcasts slug", %{conn: conn} do
+    podcast = insert(:podcast)
+
+    conn =
+      post conn, "/api/graphql",
+        query: @publish_query,
+        variables: %{"id" => podcast.id}
+
+    id = Integer.to_string(podcast.id)
+
+    assert %{
+             "data" => %{
+               "publishPodcast" => %{
+                 "id" => ^id,
+                 "slug" => slug
+               }
+             }
+           } = json_response(conn, 200)
+
+    assert is_binary(slug)
+    assert String.length(slug) > 0
+  end
+
+  test "publishPodcast doesn't generate slug, if podcast already has one", %{conn: conn} do
+    podcast = insert(:podcast, slug: "original-test-slug")
+
+    conn =
+      post conn, "/api/graphql",
+        query: @publish_query,
+        variables: %{"id" => podcast.id}
+
+    id = Integer.to_string(podcast.id)
+
+    assert %{
+             "data" => %{
+               "publishPodcast" => %{
+                 "id" => ^id,
+                 "slug" => slug
+               }
+             }
+           } = json_response(conn, 200)
+
+    assert "original-test-slug" == slug
   end
 
   test "publishPodcast returns errors on wrong id", %{conn: conn} do

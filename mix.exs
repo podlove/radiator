@@ -54,9 +54,9 @@ defmodule Radiator.MixProject do
       {:arc_ecto, "~> 0.11"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
+      {:ecto_autoslug_field, "~> 1.0"},
       # for ex_aws
       {:hackney, "~> 1.15"},
-      # for ex_aws
       {:sweet_xml, "~> 0.6.5"},
       # for feed import
       {:metalove, "~> 0.2"},

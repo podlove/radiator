@@ -12,11 +12,14 @@ defmodule Radiator.Repo.Migrations.CreateEpisodes do
       add :guid, :string
       add :number, :integer
       add :published_at, :utc_datetime
+      add :slug, :string
+
       add :podcast_id, references(:podcasts, on_delete: :delete_all)
 
       timestamps()
     end
 
     create index(:episodes, [:podcast_id])
+    create unique_index(:episodes, [:slug])
   end
 end

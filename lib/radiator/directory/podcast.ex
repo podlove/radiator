@@ -5,7 +5,7 @@ defmodule Radiator.Directory.Podcast do
   import Ecto.Changeset
   import Ecto.Query, warn: false
 
-  alias Radiator.Directory.{Episode, Podcast, Network}
+  alias Radiator.Directory.{Episode, Podcast, Network, TitleSlug}
 
   schema "podcasts" do
     field :author, :string
@@ -18,6 +18,7 @@ defmodule Radiator.Directory.Podcast do
     field :published_at, :utc_datetime
     field :subtitle, :string
     field :title, :string
+    field :slug, TitleSlug.Type
 
     field :episode_count, :integer, virtual: true
 
@@ -41,10 +42,13 @@ defmodule Radiator.Directory.Podcast do
       :owner_email,
       :language,
       :published_at,
-      :last_built_at
+      :last_built_at,
+      :slug
     ])
     |> cast_attachments(attrs, [:image])
     |> validate_required([:title])
+    |> TitleSlug.maybe_generate_slug()
+    |> TitleSlug.unique_constraint()
   end
 
   @doc """

@@ -35,8 +35,10 @@ defmodule RadiatorWeb.Schema do
   import_types RadiatorWeb.Schema.DirectoryTypes
   import_types RadiatorWeb.Schema.StorageTypes
   import_types RadiatorWeb.Schema.MediaTypes
+  import_types RadiatorWeb.Schema.UserTypes
 
   alias RadiatorWeb.Resolvers
+  alias RadiatorWeb.Schema.Middleware, as: RadiatorWebMiddleware
 
   query do
     @desc "Get all podcasts"
@@ -72,12 +74,27 @@ defmodule RadiatorWeb.Schema do
   end
 
   mutation do
-    @desc "Create a network"
+    @desc "Request an authenticated session"
+    field :authenticated_session, :session do
+      arg :username_or_email, non_null(:string)
+      arg :password, non_null(:string)
+      resolve &Resolvers.Session.get_authenticated_session/3
+    end
+
+    @desc "Prolong an authenticated session (Authenticated)"
+    field :prolong_session, :session do
+      middleware RadiatorWebMiddleware.RequireAuthentication
+
+      resolve &Resolvers.Session.prolong_authenticated_session/3
+    end
+
+    @desc "Create a network (Authenticated)"
     field :create_network, type: :network do
       arg :network, non_null(:network_input)
+      middleware RadiatorWebMiddleware.RequireAuthentication
 
-      resolve &Resolvers.Directory.create_network/3
-      middleware RadiatorWeb.ChangesetMiddleware
+      resolve &Resolvers.Editor.create_network/3
+      middleware RadiatorWebMiddleware.TranslateChangeset
     end
 
     @desc "Update a network"
@@ -86,7 +103,7 @@ defmodule RadiatorWeb.Schema do
       arg :network, non_null(:network_input)
 
       resolve &Resolvers.Directory.update_network/3
-      middleware RadiatorWeb.ChangesetMiddleware
+      middleware RadiatorWebMiddleware.TranslateChangeset
     end
 
     @desc "Create a podcast"
@@ -95,7 +112,7 @@ defmodule RadiatorWeb.Schema do
       arg :network_id, non_null(:integer)
 
       resolve &Resolvers.Directory.create_podcast/3
-      middleware RadiatorWeb.ChangesetMiddleware
+      middleware RadiatorWebMiddleware.TranslateChangeset
     end
 
     @desc "Publish podcast"
@@ -118,7 +135,7 @@ defmodule RadiatorWeb.Schema do
       arg :podcast, non_null(:podcast_input)
 
       resolve &Resolvers.Directory.update_podcast/3
-      middleware RadiatorWeb.ChangesetMiddleware
+      middleware RadiatorWebMiddleware.TranslateChangeset
     end
 
     @desc "Delete a podcast"
@@ -157,7 +174,7 @@ defmodule RadiatorWeb.Schema do
       arg :episode, non_null(:episode_input)
 
       resolve &Resolvers.Directory.create_episode/3
-      middleware RadiatorWeb.ChangesetMiddleware
+      middleware RadiatorWebMiddleware.TranslateChangeset
     end
 
     @desc "Update an episode"
@@ -166,7 +183,21 @@ defmodule RadiatorWeb.Schema do
       arg :episode, non_null(:episode_input)
 
       resolve &Resolvers.Directory.update_episode/3
-      middleware RadiatorWeb.ChangesetMiddleware
+      middleware RadiatorWebMiddleware.TranslateChangeset
+    end
+
+    @desc "Publish episode"
+    field :publish_episode, type: :episode do
+      arg :id, non_null(:id)
+
+      resolve &Resolvers.Directory.publish_episode/3
+    end
+
+    @desc "Depublish episode"
+    field :depublish_episode, type: :episode do
+      arg :id, non_null(:id)
+
+      resolve &Resolvers.Directory.depublish_episode/3
     end
 
     @desc "Delete an episode"
