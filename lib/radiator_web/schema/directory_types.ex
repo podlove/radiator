@@ -74,7 +74,11 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :description, :string
     field :duration, :string
     field :guid, :string
-    field :image, :string
+
+    field :image, :string do
+      resolve &Resolvers.Directory.get_image_url/3
+    end
+
     field :number, :integer
     field :published_at, :datetime
     field :subtitle, :string
@@ -101,7 +105,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :subtitle, :string
     field :description, :string
     field :content, :string
-    field :image, :string
+    field :image, :upload
     field :number, :integer
   end
 end

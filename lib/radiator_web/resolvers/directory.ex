@@ -165,6 +165,10 @@ defmodule RadiatorWeb.Resolvers.Directory do
      }}
   end
 
+  def get_image_url(episode = %Episode{}, _, _) do
+    {:ok, Media.EpisodeImage.url({episode.image, episode})}
+  end
+
   def get_image_url(podcast = %Podcast{}, _, _) do
     {:ok, Media.PodcastImage.url({podcast.image, podcast})}
   end
