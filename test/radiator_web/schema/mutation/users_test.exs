@@ -1,8 +1,6 @@
 defmodule RadiatorWeb.Schema.Mutation.UsersTest do
   use RadiatorWeb.ConnCase, async: true
 
-  import Radiator.Factory
-
   @request_session_query """
   mutation ($username: String!, $password: String!) {
     authenticatedSession(usernameOrEmail: $username, password: $password) {
