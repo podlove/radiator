@@ -62,11 +62,11 @@ podcast
 |> Repo.update
 ```
 
-### GraphQL
+## GraphQL
 
 Send POST request with content type `multipart/form-data`. Using curl, `-F` is key.
 
-#### Example: Upload episode audio with curl
+### Example: Upload episode audio with curl
 
 ```bash
 curl -X POST -F query='mutation { uploadEpisodeAudio(episode_id: 1, audio: "myupload") {mimeType byteLength title } }'  -F myupload=@test/fixtures/pling.mp3 localhost:4000/api/graphql
@@ -81,7 +81,7 @@ curl -X POST -F query='mutation { uploadEpisodeAudio(episode_id: 1, audio: "myup
 # }
 ```
 
-#### Example: Upload network image with curl
+### Example: Upload network image with curl
 
 ```bash
 curl -X POST -F query='mutation { updateNetwork(id: 1, network: {title: "updated title", image: "myupload"}) { id title image }}'  -F myupload=@test/fixtures/image.jpg localhost:4000/api/graphql
@@ -95,6 +95,8 @@ curl -X POST -F query='mutation { updateNetwork(id: 1, network: {title: "updated
 #   }
 # }
 ```
+
+Setting the image for podcasts and episodes works in the same way.
 
 [arc]: https://hex.pm/packages/arc
 [arc_ecto]: https://hex.pm/packages/arc_ecto
