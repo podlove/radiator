@@ -47,9 +47,6 @@ services:
   image: minio/minio
   ports:
   - 9000
-  volumes:
-  - name: data
-    path: /mnt/data
   environment:
     MINIO_ACCESS_KEY: "IEKAZMUY3KX32CRJPE9R"
     MINIO_SECRET_KEY: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN"
@@ -58,6 +55,3 @@ services:
 volumes:
 - name: mix
   temp: {}
-- name: data
-  host:
-    path: /mnt/data
