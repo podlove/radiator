@@ -57,8 +57,9 @@ config :arc,
   asset_host: System.get_env("STORAGE_ASSET_HOST") || "http://localhost:9000/radiator"
 
 config :ex_aws,
-  access_key_id: "IEKAZMUY3KX32CRJPE9R",
-  secret_access_key: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN",
+  access_key_id: System.get_env("STORAGE_ACCESS_KEY") || "IEKAZMUY3KX32CRJPE9R",
+  secret_access_key:
+    System.get_env("STORAGE_SECRET_KEY") || "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN",
   json_codec: Jason
 
 config :ex_aws, :s3,

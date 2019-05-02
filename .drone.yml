@@ -5,13 +5,13 @@ steps:
 - name: setup-minio
   image: minio/mc
   environment:
-    MINIO_ACCESS_KEY:
+    STORAGE_ACCESS_KEY:
       from_secret: minio_access_key
-    MINIO_SECRET_KEY: 
+    STORAGE_SECRET_KEY: 
       from_secret: minio_secret_key
   commands:
   - sleep 5
-  - mc config host add radiator http://minio:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
+  - mc config host add radiator http://minio:9000 $STORAGE_ACCESS_KEY $STORAGE_SECRET_KEY
   - mc mb radiator/radiator
   - mc policy public radiator/radiator
 
@@ -31,6 +31,10 @@ steps:
   - name: mix
     path: /root/.mix
   environment:
+    STORAGE_ACCESS_KEY:
+      from_secret: minio_access_key
+    STORAGE_SECRET_KEY: 
+      from_secret: minio_secret_key
     STORAGE_ASSET_HOST: "http://minio:9000/radiator"
     STORAGE_HOST: "minio"
     DB_HOST: "database"
@@ -51,9 +55,9 @@ services:
   ports:
   - 9000
   environment:
-    MINIO_ACCESS_KEY:
+    STORAGE_ACCESS_KEY:
       from_secret: minio_access_key
-    MINIO_SECRET_KEY: 
+    STORAGE_SECRET_KEY: 
       from_secret: minio_secret_key
   command: [ "server", "/data" ]
 
