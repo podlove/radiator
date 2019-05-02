@@ -14,7 +14,7 @@ config :radiator, Radiator.Repo,
   username: "postgres",
   password: "postgres",
   database: "radiator_test",
-  hostname: "localhost",
+  hostname: System.get_env("DB_HOST") || "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
 # Speed up password hashing during test
