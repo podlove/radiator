@@ -54,7 +54,10 @@ config :arc,
   storage: Arc.Storage.S3,
   # if using Amazon S3
   bucket: "radiator",
-  asset_host: "http://localhost:9000/radiator"
+  # same here, find a way to dynamically have both drone and local working
+  asset_host: "http://minio:9000/radiator"
+
+# asset_host: "http://localhost:9000/radiator"
 
 config :ex_aws,
   access_key_id: "IEKAZMUY3KX32CRJPE9R",
