@@ -8,6 +8,14 @@ steps:
   - sleep 15
   - psql -U postgres -d radiator_test -h database
 
+- name: setup-minio
+  image: minio/mc
+  commands:
+  - sleep 15
+  - config host add radiator minio IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
+  - mb radiator/radiator
+  - policy public radiator/radiator
+
 - name: install
   image: elixir:1.8
   volumes:
@@ -17,7 +25,6 @@ steps:
   - mix local.rebar --force
   - mix local.hex --force
   - mix deps.get
-  - mix compile
 
 - name: test
   image: elixir:1.8
