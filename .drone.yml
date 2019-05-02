@@ -2,7 +2,7 @@ kind: pipeline
 name: default
 
 steps:
-- name: setup
+- name: setup-database
   image: postgres:9-alpine
   commands:
   - sleep 15
@@ -17,6 +17,7 @@ steps:
   - mix local.rebar --force
   - mix local.hex --force
   - mix deps.get
+  - mix compile
 
 - name: test
   image: elixir:1.8
@@ -34,6 +35,13 @@ services:
   environment:
     POSTGRES_USER: postgres
     POSTGRES_DB: radiator_test
+    
+- name: minio
+  image: minio/minio
+  ports:
+  - 9000
+  entrypoint: [ minio ]
+  command: [ "server /data" ]
 
 volumes:
 - name: mix

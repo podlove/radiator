@@ -14,6 +14,7 @@ config :radiator, Radiator.Repo,
   username: "postgres",
   password: "postgres",
   database: "radiator_test",
+  # "localhost" on local, "database" on drone -- can I read this from an env?
   hostname: "database",
   pool: Ecto.Adapters.SQL.Sandbox
 
