@@ -2,12 +2,6 @@ kind: pipeline
 name: default
 
 steps:
-- name: setup-database
-  image: postgres:9-alpine
-  commands:
-  - sleep 10
-  - psql -U postgres -d radiator_test -h database
-
 - name: setup-minio
   image: minio/mc
   commands:
