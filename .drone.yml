@@ -12,9 +12,9 @@ steps:
   image: minio/mc
   commands:
   - sleep 15
-  - config host add radiator minio IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
-  - mb radiator/radiator
-  - policy public radiator/radiator
+  - mc config host add radiator minio IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
+  - mc mb radiator/radiator
+  - mc policy public radiator/radiator
 
 - name: install
   image: elixir:1.8
