@@ -1,9 +1,0 @@
-language: elixir
-elixir: 1.8
-
-script:
-  - mix format --check-formatted
-  - mix test
-
-notifications:
-  slack: podlove:4oqpvB2KNDYwHCOp0qRJMR7H
