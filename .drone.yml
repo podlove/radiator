@@ -5,14 +5,14 @@ steps:
 - name: setup-database
   image: postgres:9-alpine
   commands:
-  - sleep 5
+  - sleep 10
   - psql -U postgres -d radiator_test -h database
 
 - name: setup-minio
   image: minio/mc
   commands:
   - sleep 5
-  - mc config host add http://radiator:9000 minio IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
+  - mc config host add radiator http://minio:9000 IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
   - mc mb radiator/radiator
   - mc policy public radiator/radiator
 
