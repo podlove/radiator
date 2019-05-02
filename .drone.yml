@@ -11,7 +11,7 @@ steps:
       from_secret: minio_secret_key
   commands:
   - sleep 5
-  - mc config host add radiator http://minio:9000 ${STORAGE_ACCESS_KEY} ${STORAGE_SECRET_KEY}
+  - mc config host add radiator http://minio:9000 $STORAGE_ACCESS_KEY $STORAGE_SECRET_KEY
   - mc mb radiator/radiator
   - mc policy public radiator/radiator
 
