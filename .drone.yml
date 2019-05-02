@@ -35,12 +35,11 @@ services:
   environment:
     POSTGRES_USER: postgres
     POSTGRES_DB: radiator_test
-    
+
 - name: minio
   image: minio/minio
   ports:
   - 9000
-  entrypoint: [ minio ]
   command: [ "server /data" ]
 
 volumes:
