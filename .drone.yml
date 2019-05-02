@@ -2,10 +2,39 @@ kind: pipeline
 name: default
 
 steps:
-- name: test
+- name: setup
+  image: postgres:9-alpine
+  commands:
+  - sleep 15
+  - psql -U postgres -d radiator_test -h database
+
+- name: install
   image: elixir:1.8
+  volumes:
+  - name: mix
+    path: /root/.mix
   commands:
   - mix local.rebar --force
   - mix local.hex --force
   - mix deps.get
+
+- name: test
+  image: elixir:1.8
+  volumes:
+  - name: mix
+    path: /root/.mix
+  commands:
   - mix test
+
+services:
+- name: database
+  image: postgres:9-alpine
+  ports: 
+  - 5432
+  environment:
+    POSTGRES_USER: postgres
+    POSTGRES_DB: radiator_test
+
+volumes:
+- name: mix
+  temp: {}
