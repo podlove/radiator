@@ -31,6 +31,10 @@ steps:
   volumes:
   - name: mix
     path: /root/.mix
+  environment:
+    STORAGE_ASSET_HOST: "http://minio:9000/radiator"
+    STORAGE_HOST: "minio"
+    DB_HOST: "database"
   commands:
   - mix test
 

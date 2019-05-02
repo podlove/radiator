@@ -15,7 +15,7 @@ config :radiator, Radiator.Repo,
   password: "postgres",
   database: "radiator_test",
   # "localhost" on local, "database" on drone -- can I read this from an env?
-  hostname: "database",
+  hostname: System.get_env("DB_HOST") || "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
 # Speed up password hashing during test
