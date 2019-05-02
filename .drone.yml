@@ -4,9 +4,14 @@ name: default
 steps:
 - name: setup-minio
   image: minio/mc
+  environment:
+    MINIO_ACCESS_KEY:
+      from_secret: minio_access_key
+    MINIO_SECRET_KEY: 
+      from_secret: minio_secret_key
   commands:
   - sleep 5
-  - mc config host add radiator http://minio:9000 IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
+  - mc config host add radiator http://minio:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY
   - mc mb radiator/radiator
   - mc policy public radiator/radiator
 
@@ -46,8 +51,10 @@ services:
   ports:
   - 9000
   environment:
-    MINIO_ACCESS_KEY: "IEKAZMUY3KX32CRJPE9R"
-    MINIO_SECRET_KEY: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN"
+    MINIO_ACCESS_KEY:
+      from_secret: minio_access_key
+    MINIO_SECRET_KEY: 
+      from_secret: minio_secret_key
   command: [ "server", "/data" ]
 
 volumes:
