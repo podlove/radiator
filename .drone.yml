@@ -40,14 +40,8 @@ services:
   image: minio/minio
   ports:
   - 9000
-  command: [ "server", "/root/files" ]
-  volumes:
-  - name: files
-    path: /root/files
+  command: [ "server", "/data" ]
 
 volumes:
 - name: mix
   temp: {}
-- name: files
-  host:
-    path: /root/files
