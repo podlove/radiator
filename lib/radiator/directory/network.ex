@@ -1,8 +1,8 @@
 defmodule Radiator.Directory.Network do
   use Ecto.Schema
-  use Arc.Ecto.Schema
 
   import Ecto.Changeset
+  import Arc.Ecto.Changeset
 
   alias Radiator.Directory.{Podcast, TitleSlug}
 

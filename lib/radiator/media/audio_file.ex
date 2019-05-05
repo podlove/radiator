@@ -1,11 +1,11 @@
 defmodule Radiator.Media.AudioFile do
   use Ecto.Schema
-  use Arc.Ecto.Schema
 
   use Arc.Definition
   use Arc.Ecto.Definition
 
   import Ecto.Changeset
+  import Arc.Ecto.Changeset
 
   schema "audio_files" do
     field :file, Radiator.Media.AudioFile.Type

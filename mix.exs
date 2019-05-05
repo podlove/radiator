@@ -51,7 +51,7 @@ defmodule Radiator.MixProject do
       {:hal, "~> 1.1"},
       {:httpoison, "~> 1.5"},
       {:arc, "~> 0.11"},
-      {:arc_ecto, "~> 0.11"},
+      {:arc_ecto, github: "podlove/arc_ecto"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
       {:ecto_autoslug_field, "~> 1.0"},
