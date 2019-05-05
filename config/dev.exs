@@ -74,3 +74,6 @@ config :radiator, Radiator.Repo,
   database: "radiator_dev",
   hostname: "localhost",
   pool_size: 10
+
+config :radiator, Radiator.Mailer,
+  adapter: Radiator.Email.Console
