@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.Resolvers.Storage do
+defmodule RadiatorWeb.GraphQL.Resolvers.Storage do
   alias Radiator.Storage
   alias Radiator.Media
   alias Radiator.Directory

@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.Schema.Query.NetworksTest do
+defmodule RadiatorWeb.GraphQL.Schema.Query.NetworksTest do
   use RadiatorWeb.ConnCase, async: true
   import Radiator.Factory
 

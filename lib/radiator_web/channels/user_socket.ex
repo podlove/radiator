@@ -1,6 +1,6 @@
 defmodule RadiatorWeb.UserSocket do
   use Phoenix.Socket
-  use Absinthe.Phoenix.Socket, schema: RadiatorWeb.Schema
+  use Absinthe.Phoenix.Socket, schema: RadiatorWeb.GraphQL.Schema
 
   ## Channels
   # channel "room:*", RadiatorWeb.RoomChannel

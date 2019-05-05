@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.Resolvers.Session do
+defmodule RadiatorWeb.GraphQL.Resolvers.Session do
   def get_authenticated_session(
         _parent,
         %{username_or_email: username_or_email, password: password},

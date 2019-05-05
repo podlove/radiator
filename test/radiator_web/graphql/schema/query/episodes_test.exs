@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.EpisodeControllerTest.Schema.Query.EpisodesTest do
+defmodule RadiatorWeb.GraphQL.Schema.Query.EpisodesTest do
   use RadiatorWeb.ConnCase, async: true
   import Radiator.Factory
 
