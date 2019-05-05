@@ -1,9 +1,11 @@
 defmodule Radiator.Storage do
   @moduledoc """
-  The Storage context.
+  The Storage context providing.
 
-  Provides access to Object Storage (minio).
-  Can probably access S3 or any other S3 compatible API by changing configurstion.
+  Provides direct access to Object Storage (minio). The Radiator.Media API should
+  be preferred.
+
+  Can probably access S3 or any other S3 compatible API by changing configuration.
   """
 
   alias ExAws.S3
