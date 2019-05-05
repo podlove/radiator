@@ -1,5 +1,7 @@
 defmodule Radiator.Directory.Podcast do
   use Ecto.Schema
+  use Arc.Ecto.Schema
+
   import Ecto.Changeset
   import Ecto.Query, warn: false
 
@@ -8,7 +10,7 @@ defmodule Radiator.Directory.Podcast do
   schema "podcasts" do
     field :author, :string
     field :description, :string
-    field :image, :string
+    field :image, Radiator.Media.PodcastImage.Type
     field :language, :string
     field :last_built_at, :utc_datetime
     field :owner_email, :string
@@ -35,7 +37,6 @@ defmodule Radiator.Directory.Podcast do
       :title,
       :subtitle,
       :description,
-      :image,
       :author,
       :owner_name,
       :owner_email,
@@ -44,6 +45,7 @@ defmodule Radiator.Directory.Podcast do
       :last_built_at,
       :slug
     ])
+    |> cast_attachments(attrs, [:image])
     |> validate_required([:title])
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()

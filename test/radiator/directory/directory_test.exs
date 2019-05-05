@@ -287,9 +287,9 @@ defmodule Radiator.DirectoryTest do
   describe "networks" do
     alias Radiator.Directory.Network
 
-    @valid_attrs %{image: "some image", title: "some title"}
-    @update_attrs %{image: "some updated image", title: "some updated title"}
-    @invalid_attrs %{image: nil, title: nil}
+    @valid_attrs %{title: "some title"}
+    @update_attrs %{title: "some updated title"}
+    @invalid_attrs %{title: nil}
 
     def network_fixture(attrs \\ %{}) do
       testuser = Radiator.TestEntries.user()
@@ -321,7 +321,6 @@ defmodule Radiator.DirectoryTest do
       assert {:ok, %{network: %Network{} = network}} =
                Editor.Owner.create_network(testuser, @valid_attrs)
 
-      assert network.image == "some image"
       assert network.title == "some title"
     end
 
@@ -344,7 +343,6 @@ defmodule Radiator.DirectoryTest do
     test "update_network/2 with valid data updates the network" do
       network = network_fixture()
       assert {:ok, %Network{} = network} = Editor.Owner.update_network(network, @update_attrs)
-      assert network.image == "some updated image"
       assert network.title == "some updated title"
     end
 

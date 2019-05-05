@@ -50,6 +50,8 @@ defmodule Radiator.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:hal, "~> 1.1"},
       {:httpoison, "~> 1.5"},
+      {:arc, "~> 0.11"},
+      {:arc_ecto, "~> 0.11"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
       {:ecto_autoslug_field, "~> 1.0"},
@@ -75,7 +77,8 @@ defmodule Radiator.MixProject do
       {:earmark, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.19", only: :dev},
       {:chapters, "~> 0.1.0"},
-      {:dataloader, "~> 1.0"}
+      {:dataloader, "~> 1.0"},
+      {:mime, "~> 1.2"}
     ]
   end
 
@@ -100,7 +103,8 @@ defmodule Radiator.MixProject do
       logo: "guides/images/podlove-radiator-logo.svg",
       extras: [
         "README.md",
-        "guides/Users and Permissions.md"
+        "guides/Users and Permissions.md",
+        "guides/Files.md"
       ]
     ]
   end

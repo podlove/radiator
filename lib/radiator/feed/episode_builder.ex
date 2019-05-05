@@ -41,9 +41,9 @@ defmodule Radiator.Feed.EpisodeBuilder do
   # so either :ok or :error.
   defp enclosure(episode) do
     element(:enclosure, %{
-      url: episode.enclosure_url,
-      type: episode.enclosure_type,
-      length: episode.enclosure_length
+      url: Episode.enclosure_url(episode),
+      type: episode.enclosure.mime_type,
+      length: episode.enclosure.byte_length
     })
   end
 

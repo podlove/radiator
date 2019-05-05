@@ -9,8 +9,11 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
   object :network do
     field :id, non_null(:id)
     field :title, :string
-    field :image, :string
     field :slug, :string
+
+    field :image, :string do
+      resolve &Resolvers.Directory.get_image_url/3
+    end
 
     field :podcasts, list_of(:podcast) do
       resolve &Resolvers.Directory.list_podcasts/3
@@ -20,7 +23,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
   @desc "The input for a network"
   input_object :network_input do
     field :title, non_null(:string)
-    field :image, :string
+    field :image, :upload
   end
 
   @desc "A podcast"
@@ -29,7 +32,11 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :title, :string
     field :author, :string
     field :description, :string
-    field :image, :string
+
+    field :image, :string do
+      resolve &Resolvers.Directory.get_image_url/3
+    end
+
     field :language, :string
     field :last_built_at, :datetime
     field :owner_email, :string
@@ -56,7 +63,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :title, non_null(:string)
     field :subtitle, :string
     field :description, :string
-    field :image, :string
+    field :image, :upload
     field :language, :string
     field :owner_email, :string
     field :owner_name, :string
@@ -68,11 +75,12 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :content, :string
     field :description, :string
     field :duration, :string
-    field :enclosure_length, :integer
-    field :enclosure_type, :string
-    field :enclosure_url, :string
     field :guid, :string
-    field :image, :string
+
+    field :image, :string do
+      resolve &Resolvers.Directory.get_image_url/3
+    end
+
     field :number, :integer
     field :published_at, :datetime
     field :subtitle, :string
@@ -85,6 +93,10 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
 
     field :podcast, :podcast do
       resolve &Resolvers.Directory.find_podcast/3
+    end
+
+    field :enclosure, :enclosure do
+      resolve &Resolvers.Directory.get_enclosure/3
     end
 
     field :chapters, list_of(:chapter) do
@@ -100,7 +112,7 @@ defmodule RadiatorWeb.Schema.DirectoryTypes do
     field :subtitle, :string
     field :description, :string
     field :content, :string
-    field :image, :string
+    field :image, :upload
     field :number, :integer
   end
 end

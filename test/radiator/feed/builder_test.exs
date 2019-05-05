@@ -5,6 +5,7 @@ defmodule Radiator.BuilderTest do
   alias Radiator.Feed.{Builder, EpisodeBuilder, PodcastBuilder}
 
   import SweetXml
+  import Radiator.Factory
 
   defp data_fixture(data) do
     default = %{
@@ -41,12 +42,20 @@ defmodule Radiator.BuilderTest do
 
   describe "Radiator.Feed.Builder" do
     test "builds an RSS feed" do
+      enclosure = build(:enclosure)
+
       data =
         data_fixture(%{
           podcast: %Podcast{title: "Hello World"},
           episodes: [
-            %Episode{title: "Ep 001"},
-            %Episode{title: "Ep 002"}
+            %Episode{
+              title: "Ep 001",
+              enclosure: enclosure
+            },
+            %Episode{
+              title: "Ep 002",
+              enclosure: enclosure
+            }
           ]
         })
 
@@ -57,14 +66,16 @@ defmodule Radiator.BuilderTest do
     end
 
     test "pages feeds" do
+      enclosure = build(:enclosure)
+
       # todo: how to handle an empty feed/page with no episodes?
       data =
         data_fixture(%{
           podcast: %Podcast{title: "Hello World"},
           episodes: [
-            %Episode{title: "Ep 001"},
-            %Episode{title: "Ep 002"},
-            %Episode{title: "Ep 003"}
+            %Episode{title: "Ep 001", enclosure: enclosure},
+            %Episode{title: "Ep 002", enclosure: enclosure},
+            %Episode{title: "Ep 003", enclosure: enclosure}
           ]
         })
 
@@ -119,14 +130,14 @@ defmodule Radiator.BuilderTest do
 
   describe "Radiator.Feed.EpisodeBuilder" do
     test "builds an item" do
+      enclosure = build(:enclosure)
+
       rss =
         build_episode_xml(%{}, %Episode{
           title: "Ep 001",
           subtitle: "sub",
           description: "desc",
-          enclosure_url: "https://media.example.com/001.mp3",
-          enclosure_type: "audio/mpeg",
-          enclosure_length: 123
+          enclosure: enclosure
         })
 
       assert "Ep 001" == xpath(rss, ~x"//item/title/text()"s)
@@ -134,9 +145,9 @@ defmodule Radiator.BuilderTest do
       assert "desc" == xpath(rss, ~x"//item/description/text()"s)
 
       assert %{
-               url: "https://media.example.com/001.mp3",
-               type: "audio/mpeg",
-               length: 123
+               url: Radiator.Media.AudioFile.url({enclosure.file, enclosure}),
+               type: enclosure.mime_type,
+               length: enclosure.byte_length
              } ==
                xpath(rss, ~x"//item/enclosure",
                  url: ~x"./@url"s,

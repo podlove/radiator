@@ -8,9 +8,6 @@ defmodule Radiator.Repo.Migrations.CreateEpisodes do
       add :description, :string
       add :content, :string
       add :image, :string
-      add :enclosure_url, :string
-      add :enclosure_length, :integer
-      add :enclosure_type, :string
       add :duration, :string
       add :guid, :string
       add :number, :integer

@@ -1,7 +1,8 @@
 defmodule RadiatorWeb.Resolvers.Directory do
   alias Radiator.Directory
-  alias Directory.{Episode, Podcast, Network}
+  alias Radiator.Directory.{Episode, Podcast, Network}
   alias Radiator.EpisodeMeta
+  alias Radiator.Media
 
   alias Directory.Editor
 
@@ -161,6 +162,30 @@ defmodule RadiatorWeb.Resolvers.Directory do
       nil -> {:error, "Episode ID #{id} not found"}
       episode -> EpisodeMeta.set_chapters(episode, chapters, String.to_existing_atom(type))
     end
+  end
+
+  # PERF: use data loader
+  def get_enclosure(%Episode{} = episode, _args, _resolution) do
+    episode = Radiator.Repo.preload(episode, :enclosure)
+
+    {:ok,
+     %{
+       url: Episode.enclosure_url(episode),
+       type: episode.enclosure.mime_type,
+       length: episode.enclosure.byte_length
+     }}
+  end
+
+  def get_image_url(episode = %Episode{}, _, _) do
+    {:ok, Media.EpisodeImage.url({episode.image, episode})}
+  end
+
+  def get_image_url(podcast = %Podcast{}, _, _) do
+    {:ok, Media.PodcastImage.url({podcast.image, podcast})}
+  end
+
+  def get_image_url(network = %Network{}, _, _) do
+    {:ok, Media.NetworkImage.url({network.image, network})}
   end
 
   defp before_utc_now?(date) do

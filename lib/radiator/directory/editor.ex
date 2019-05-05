@@ -15,6 +15,8 @@ defmodule Radiator.Directory.Editor do
 
   alias Radiator.Perm.Ecto.PermissionType
 
+  alias Radiator.Media
+
   @not_authorized {:error, :not_authorized}
   @not_found {:error, :not_found}
 
@@ -170,5 +172,29 @@ defmodule Radiator.Directory.Editor do
 
   defp parent(_) do
     nil
+  end
+
+  @spec attach_audio_to_network(Network.t(), Media.AudioFile.t()) ::
+          {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
+  def attach_audio_to_network(network = %Network{}, audio = %Media.AudioFile{}) do
+    network
+    |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
+    |> Media.Attachment.changeset(%{})
+    |> Repo.insert_or_update()
+  end
+
+  @spec attach_audio_to_episode(Episode.t(), Media.AudioFile.t()) ::
+          {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
+  def attach_audio_to_episode(episode = %Episode{}, audio = %Media.AudioFile{}) do
+    episode
+    |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
+    |> Media.Attachment.changeset(%{})
+    |> Repo.insert_or_update()
+  end
+
+  @spec detach_all_audios_from_episode(Episode.t()) :: Episode.t()
+  def detach_all_audios_from_episode(episode = %Episode{}) do
+    Ecto.assoc(episode, :attachments) |> Repo.delete_all()
+    episode
   end
 end

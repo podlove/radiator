@@ -57,6 +57,7 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
     updatePodcast(id: $id, podcast: $podcast) {
       id
       title
+      image
     }
   }
   """
@@ -64,10 +65,16 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
   test "updatePodcast updates a podcast", %{conn: conn} do
     podcast = insert(:podcast)
 
+    upload = %Plug.Upload{
+      path: "test/fixtures/image.jpg",
+      filename: "image.jpg"
+    }
+
     conn =
       post conn, "/api/graphql",
         query: @update_query,
-        variables: %{"podcast" => %{title: "Aldebaran"}, "id" => podcast.id}
+        variables: %{"podcast" => %{title: "Aldebaran", image: "myupload"}, "id" => podcast.id},
+        myupload: upload
 
     id = Integer.to_string(podcast.id)
 
@@ -75,10 +82,13 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.PodcastsTest do
              "data" => %{
                "updatePodcast" => %{
                  "title" => "Aldebaran",
-                 "id" => ^id
+                 "id" => ^id,
+                 "image" => image
                }
              }
            } = json_response(conn, 200)
+
+    assert String.contains?(image, ".jpg")
   end
 
   test "updatePodcast returns errors on missing values", %{conn: conn} do

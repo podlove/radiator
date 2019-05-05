@@ -74,6 +74,7 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.EpisodesTest do
     updateEpisode(id: $id, episode: $episode) {
       id
       title
+      image
     }
   }
   """
@@ -81,10 +82,16 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.EpisodesTest do
   test "updateEpisode updates an episode", %{conn: conn} do
     episode = insert(:episode)
 
+    upload = %Plug.Upload{
+      path: "test/fixtures/image.jpg",
+      filename: "image.jpg"
+    }
+
     conn =
       post conn, "/api/graphql",
         query: @update_query,
-        variables: %{"episode" => %{title: "Aldebaran"}, "id" => episode.id}
+        variables: %{"episode" => %{title: "Aldebaran", image: "myupload"}, "id" => episode.id},
+        myupload: upload
 
     id = Integer.to_string(episode.id)
 
@@ -92,10 +99,13 @@ defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.EpisodesTest do
              "data" => %{
                "updateEpisode" => %{
                  "title" => "Aldebaran",
-                 "id" => ^id
+                 "id" => ^id,
+                 "image" => image
                }
              }
            } = json_response(conn, 200)
+
+    assert String.contains?(image, ".jpg")
   end
 
   test "updateEpisode returns an error when missing values", %{conn: conn} do

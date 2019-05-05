@@ -35,6 +35,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
     feed.episodes
     |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
     |> Enum.map(fn episode ->
+      # todo: create enclosure
       {:ok, new_episode} =
         Editor.Manager.create_episode(podcast, %{
           guid: episode.guid,
@@ -45,10 +46,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
           published_at: episode.pub_date,
           number: episode.episode,
           image: episode.image_url,
-          duration: episode.duration,
-          enclosure_url: episode.enclosure.url,
-          enclosure_type: episode.enclosure.type,
-          enclosure_length: episode.enclosure.size
+          duration: episode.duration
         })
 
       if episode.chapters do

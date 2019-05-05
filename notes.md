@@ -1,7 +1,5 @@
 # Radiator
 
-[![Build Status](https://travis-ci.org/podlove/radiator.svg?branch=master)](https://travis-ci.org/podlove/radiator)
-
 Quick project to get started and give the planned architecture a test drive.
 
 ## Show / Podcast
@@ -72,9 +70,6 @@ mix phx.gen.json Directory Episode episodes \
   description:string \
   content:string \
   image:string \
-  enclosure_url:string \
-  enclosure_length:string \
-  enclosure_type:string \
   duration:string \
   guid:string \
   number:integer \

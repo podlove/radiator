@@ -25,4 +25,12 @@ defmodule Radiator.Factory do
       title: title
     }
   end
+
+  def enclosure_factory do
+    %Radiator.Media.AudioFile{
+      file: %{file_name: "example.mp3", updated_at: ~N[2019-04-24 09:41:47]},
+      byte_length: 123,
+      mime_type: "audio/mpeg"
+    }
+  end
 end

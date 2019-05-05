@@ -26,9 +26,9 @@
       <%= file_input f, :enclosure, rows: 3, class: "input" %>
       <%= error_tag f, :enclosure %>
     </div>
-    <%= if assigns[:episode] && @episode.enclosure_url do %>
+    <%= if assigns[:episode] && Ecto.assoc_loaded?(@episode.enclosure) do %>
       <div class="mb-6">
-        <audio src="<%= @episode.enclosure_url %>" type="<%= @episode.enclosure_type %>" controls></audio>
+        <audio src="<%= Radiator.Directory.Episode.enclosure_url(@episode) %>" type="<%= @episode.enclosure.mime_type %>" controls></audio>
       </div>
     <% end %>
 

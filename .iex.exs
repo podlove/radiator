@@ -33,10 +33,15 @@ import Ecto.Query, warn: false
 alias RadiatorWeb.Router.Helpers, as: Routes
 
 alias Radiator.{Directory, Repo, Storage}
-alias Directory.{Episode, Podcast, Network, Editor}
+alias Radiator.Directory.{Episode, Podcast, Network, Editor}
+
+alias Radiator.Media
+alias Radiator.Media.AudioFile
+
 alias Radiator.Feed.Builder
 
 alias Radiator.Auth
+alias Radiator.Auth.User
 
 alias Radiator.Perm.Ecto.PermissionType
 alias Radiator.Perm.Permission

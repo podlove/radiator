@@ -8,7 +8,7 @@
         <%= @episode.subtitle %>
       </div>
       <div class="max-w-md text-black font-normal">
-        <%= @episode.description %>
+        <%= raw @episode.description %>
       </div>
     </div>
     <div>
@@ -20,11 +20,11 @@
     </div>
   </div>
 
-  <%= if @episode.enclosure_url do %>
+  <%= if assigns[:episode] && Ecto.assoc_loaded?(@episode.enclosure) do %>
     <div class="card max-w-sm flex justify-between items-center">
-      <audio src="<%= @episode.enclosure_url %>" type="<%= @episode.enclosure_type %>" controls></audio>
+      <audio src="<%= Radiator.Directory.Episode.enclosure_url(@episode) %>" type="<%= @episode.enclosure.mime_type %>" controls></audio>
       <div class="text-grey-darkest">
-        <%= @episode.enclosure_length |> format_bytes() %>
+        <%= @episode.enclosure.byte_length |> format_bytes() %>
       </div>
     </div>
   <% end %>

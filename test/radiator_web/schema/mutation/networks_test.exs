@@ -99,6 +99,7 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
     updateNetwork(id: $id, network: $network) {
       id
       title
+      image
       slug
     }
   }
@@ -107,10 +108,19 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
   test "updateNetwork updates a network", %{conn: conn} do
     network = insert(:network)
 
+    upload = %Plug.Upload{
+      path: "test/fixtures/image.jpg",
+      filename: "image.jpg"
+    }
+
     conn =
       post conn, "/api/graphql",
         query: @update_query,
-        variables: %{"network" => %{title: "Meta meta!"}, "id" => network.id}
+        variables: %{
+          network: %{title: "Meta meta!", image: "myupload"},
+          id: network.id
+        },
+        myupload: upload
 
     id = Integer.to_string(network.id)
 
@@ -118,10 +128,13 @@ defmodule RadiatorWeb.Schema.Mutation.NetworksTest do
              "data" => %{
                "updateNetwork" => %{
                  "title" => "Meta meta!",
-                 "id" => ^id
+                 "id" => ^id,
+                 "image" => image
                }
              }
            } = json_response(conn, 200)
+
+    assert String.contains?(image, ".jpg")
   end
 
   test "updateNetwork doesn't update the slug when title changes", %{conn: conn} do

@@ -2,7 +2,7 @@
 
 Radiator is the 100% open source podcast hosting project for the next century of the internet.
 
-[![Build Status](https://travis-ci.org/podlove/radiator.svg?branch=master)](https://travis-ci.org/podlove/radiator)
+[![Build Status](https://cloud.drone.io/api/badges/podlove/radiator/status.svg)](https://cloud.drone.io/podlove/radiator)
 
 ## Status
 
