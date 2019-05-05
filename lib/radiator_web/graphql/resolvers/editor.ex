@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.Resolvers.Editor do
+defmodule RadiatorWeb.GraphQL.Resolvers.Editor do
   alias Radiator.Directory.Editor
 
   def create_network(_parent, %{network: args}, %{context: %{authenticated_user: user}}) do

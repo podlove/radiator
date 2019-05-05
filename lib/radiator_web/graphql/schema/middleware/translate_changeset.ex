@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.Schema.Middleware.TranslateChangeset do
+defmodule RadiatorWeb.GraphQL.Schema.Middleware.TranslateChangeset do
   @behaviour Absinthe.Middleware
 
   def call(%Absinthe.Resolution{errors: errors} = resolution, _config)

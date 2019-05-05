@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.EpisodeControllerTest.Schema.Mutation.UploadTest do
+defmodule RadiatorWeb.GraphQL.Schema.Mutation.UploadTest do
   use RadiatorWeb.ConnCase, async: true
 
   import Radiator.Factory

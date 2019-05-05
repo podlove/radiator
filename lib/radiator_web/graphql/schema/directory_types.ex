@@ -1,9 +1,9 @@
-defmodule RadiatorWeb.Schema.DirectoryTypes do
+defmodule RadiatorWeb.GraphQL.Schema.DirectoryTypes do
   use Absinthe.Schema.Notation
 
   import Absinthe.Resolution.Helpers
 
-  alias RadiatorWeb.Resolvers
+  alias RadiatorWeb.GraphQL.Resolvers
 
   @desc "A network"
   object :network do

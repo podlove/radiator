@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.Schema.Mutation.UsersTest do
+defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
   use RadiatorWeb.ConnCase, async: true
 
   @request_session_query """

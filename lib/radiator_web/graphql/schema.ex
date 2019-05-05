@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.Schema do
+defmodule RadiatorWeb.GraphQL.Schema do
   use Absinthe.Schema
 
   def plugins do
@@ -31,14 +31,14 @@ defmodule RadiatorWeb.Schema do
 
   import_types Absinthe.Type.Custom
   import_types Absinthe.Plug.Types
-  import_types RadiatorWeb.Schema.Directory.EpisodeTypes
-  import_types RadiatorWeb.Schema.DirectoryTypes
-  import_types RadiatorWeb.Schema.StorageTypes
-  import_types RadiatorWeb.Schema.MediaTypes
-  import_types RadiatorWeb.Schema.UserTypes
+  import_types RadiatorWeb.GraphQL.Schema.Directory.EpisodeTypes
+  import_types RadiatorWeb.GraphQL.Schema.DirectoryTypes
+  import_types RadiatorWeb.GraphQL.Schema.StorageTypes
+  import_types RadiatorWeb.GraphQL.Schema.MediaTypes
+  import_types RadiatorWeb.GraphQL.Schema.UserTypes
 
-  alias RadiatorWeb.Resolvers
-  alias RadiatorWeb.Schema.Middleware, as: RadiatorWebMiddleware
+  alias RadiatorWeb.GraphQL.Resolvers
+  alias RadiatorWeb.GraphQL.Schema.Middleware, as: RadiatorWebMiddleware
 
   query do
     @desc "Get all podcasts"
