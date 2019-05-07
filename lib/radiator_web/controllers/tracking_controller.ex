@@ -5,8 +5,14 @@ defmodule RadiatorWeb.TrackingController do
   alias Radiator.Media.AudioFile
 
   def show(conn, %{"id" => id}) do
-    audio = Directory.get_audio_file(id)
+    case Directory.get_audio_file(id) do
+      {:ok, audio} ->
+        conn
+        |> put_status(301)
+        |> redirect(external: AudioFile.url({audio.file, audio}))
 
-    redirect(conn, external: AudioFile.url({audio.file, audio}))
+      {:error, _} ->
+        send_resp(conn, 404, "Not found")
+    end
   end
 end
