@@ -358,4 +358,34 @@ defmodule Radiator.DirectoryTest do
       assert_raise Ecto.NoResultsError, fn -> Directory.get_network!(network.id) end
     end
   end
+
+  describe "audio files" do
+    alias Radiator.Media.AudioFile
+
+    test "get_audio_file/1 returns audio file" do
+      episode = insert(:published_episode)
+      audio = create_episode_audio(episode)
+
+      assert {:ok, %AudioFile{file: %{file_name: "pling.mp3"}}} =
+               Directory.get_audio_file(audio.id)
+    end
+
+    test "get_audio_file/1 errors when accessing unpublished audio file" do
+      episode = insert(:unpublished_episode)
+      audio = create_episode_audio(episode)
+
+      assert {:error, :unpublished} = Directory.get_audio_file(audio.id)
+    end
+  end
+
+  def create_episode_audio(episode) do
+    upload = %Plug.Upload{
+      path: "test/fixtures/pling.mp3",
+      filename: "pling.mp3"
+    }
+
+    {:ok, audio, _} = Radiator.Media.AudioFileUpload.upload(upload, episode)
+
+    audio
+  end
 end

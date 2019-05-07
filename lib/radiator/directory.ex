@@ -154,10 +154,28 @@ defmodule Radiator.Directory do
     from(n in Network, limit: 1) |> Repo.one!()
   end
 
+  # todo: duplicated logic in lib/radiator_web/graphql/resolvers/directory.ex
+  # here's probably the better place for it
+  def is_published(%Podcast{published_at: nil}), do: false
+  def is_published(%Episode{published_at: nil}), do: false
+
+  def is_published(%Podcast{published_at: date}), do: before_utc_now?(date)
+  def is_published(%Episode{published_at: date}), do: before_utc_now?(date)
+
   def get_audio_file(id) do
-    Media.get_audio_file(id)
-    # TODO
-    # - fetch episode
-    # - ensure episode is published
+    audio = Media.get_audio_file(id) |> Repo.preload(:episode)
+
+    if is_published(audio.episode) do
+      {:ok, audio}
+    else
+      {:error, :unpublished}
+    end
+  end
+
+  defp before_utc_now?(date) do
+    case DateTime.compare(date, DateTime.utc_now()) do
+      :lt -> true
+      _ -> false
+    end
   end
 end

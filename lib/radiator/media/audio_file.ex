@@ -7,11 +7,19 @@ defmodule Radiator.Media.AudioFile do
   import Ecto.Changeset
   import Arc.Ecto.Changeset
 
+  alias Radiator.Media
+
   schema "audio_files" do
-    field :file, Radiator.Media.AudioFile.Type
+    field :file, Media.AudioFile.Type
     field :title, :string
     field :mime_type, :string
     field :byte_length, :integer
+
+    has_many :attachments,
+             {"episode_attachments", Media.EpisodeAttachment},
+             foreign_key: :audio_id
+
+    has_one :episode, through: [:attachments, :episode]
 
     timestamps()
   end
