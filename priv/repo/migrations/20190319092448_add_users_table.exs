@@ -13,8 +13,8 @@ defmodule Radiator.Repo.Migrations.AddUsersTable do
       timestamps()
     end
 
-    create unique_index(:auth_users, [:email])
-    create unique_index(:auth_users, [:name])
+    create index(:auth_users, ["(lower(email))"], unique: true)
+    create index(:auth_users, ["(lower(name))"], unique: true)
 
     # advance the users id by a random amount, but at least `User.max_reserved_user_id()`
     # so the first real user id will have a random id.
