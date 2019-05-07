@@ -8,9 +8,12 @@ defmodule Radiator.Email.Console do
   @behaviour Bamboo.Adapter
 
   def deliver(email, _config) do
-    from_name = email.from |> elem(0)
-    from_email = email.from |> elem(1)
-    Logger.info("Mail sent to #{from_name} <#{from_email}> with subject: '#{email.subject}'")
+    {from_name, from_email} = email.from
+    {to_name, to_email} = hd(email.to)
+
+    Logger.info(~s(Mail To: "#{to_name} <#{to_email}>"))
+    Logger.info(~s(Mail From: "#{from_name} <#{from_email}>"))
+    Logger.info(~s(Mail Subject: "#{email.subject}"))
     Logger.info(email.text_body)
   end
 
