@@ -34,6 +34,7 @@ defmodule RadiatorWeb.Endpoint do
     json_decoder: Phoenix.json_library()
 
   plug Plug.MethodOverride
+  plug Plug.MemorizeHead
   plug Plug.Head
 
   # The session will be stored in the cookie and signed,
