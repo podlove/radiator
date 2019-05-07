@@ -40,8 +40,8 @@ defmodule Radiator.Auth.User do
     user
     |> cast(attrs, [:name, :email, :display_name, :password, :password_hash, :status])
     |> cast_attachments(attrs, [:avatar])
-    |> unique_constraint(:name, name: :auth_users__lower_name_index)
-    |> unique_constraint(:email, name: :auth_users__lower_email_index)
+    |> unique_constraint(:name)
+    |> unique_constraint(:email)
     |> validate_format(:name, ~r/^[^\s ]+$/)
     |> validate_format(:email, ~r/^\S+@\S+$/)
     |> validate_length(:name, min: 2, max: 99)
