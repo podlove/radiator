@@ -40,8 +40,8 @@ defmodule Radiator.Auth.User do
     user
     |> cast(attrs, [:name, :email, :display_name, :password, :password_hash, :status])
     |> cast_attachments(attrs, [:avatar])
-    |> unique_constraint(:name)
-    |> unique_constraint(:email)
+    |> unique_constraint(:name, name: :auth_users__lower_name_index)
+    |> unique_constraint(:email, name: :auth_users__lower_email_index)
     |> validate_format(:name, ~r/^[^\s ]+$/)
     |> validate_format(:email, ~r/^\S+@\S+$/)
     |> validate_length(:name, min: 2, max: 99)
@@ -100,5 +100,19 @@ defmodule Radiator.Auth.User do
       result ->
         result
     end
+  end
+
+  def by_email_query(email) do
+    email_downcase = String.downcase(email)
+
+    from u in User,
+      where: fragment("lower(?)", u.email) == ^email_downcase
+  end
+
+  def by_name_query(name) do
+    name_downcase = String.downcase(name)
+
+    from u in User,
+      where: fragment("lower(?)", u.name) == ^name_downcase
   end
 end
