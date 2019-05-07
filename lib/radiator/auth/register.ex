@@ -8,9 +8,9 @@ defmodule Radiator.Auth.Register do
 
   def get_user(id), do: Repo.get!(User, id)
 
-  def get_user_by_email(email), do: Repo.get_by(User, email: email)
+  def get_user_by_email(email), do: email |> User.by_email_query() |> Repo.one()
 
-  def get_user_by_name(name), do: Repo.get_by(User, name: name)
+  def get_user_by_name(name), do: name |> User.by_name_query() |> Repo.one()
 
   def get_user_by_credentials(name_or_email, password) do
     max_id = User.max_reserved_user_id()
