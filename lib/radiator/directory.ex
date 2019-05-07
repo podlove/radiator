@@ -8,6 +8,7 @@ defmodule Radiator.Directory do
   alias __MODULE__
   alias Radiator.Repo
   alias Radiator.Media
+  alias Radiator.Media.AudioFile
   alias Directory.{Network, Episode, Podcast}
 
   def data() do
@@ -163,12 +164,13 @@ defmodule Radiator.Directory do
   def is_published(%Episode{published_at: date}), do: before_utc_now?(date)
 
   def get_audio_file(id) do
-    audio = Media.get_audio_file(id) |> Repo.preload(:episode)
-
-    if is_published(audio.episode) do
+    with {:get, audio = %AudioFile{}} <-
+           {:get, Media.get_audio_file(id) |> Repo.preload(:episode)},
+         {:published, published} when published <- {:published, is_published(audio.episode)} do
       {:ok, audio}
     else
-      {:error, :unpublished}
+      {:get, _} -> {:error, :not_found}
+      {:published, _} -> {:error, :unpublished}
     end
   end
 

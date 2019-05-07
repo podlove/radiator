@@ -376,6 +376,10 @@ defmodule Radiator.DirectoryTest do
 
       assert {:error, :unpublished} = Directory.get_audio_file(audio.id)
     end
+
+    test "get_audio_file/1 errors when accessing nonexisting audio file" do
+      assert {:error, :not_found} = Directory.get_audio_file(1)
+    end
   end
 
   def create_episode_audio(episode) do
