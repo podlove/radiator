@@ -7,6 +7,7 @@ defmodule Radiator.Directory do
 
   alias __MODULE__
   alias Radiator.Repo
+  alias Radiator.Media
   alias Directory.{Network, Episode, Podcast}
 
   def data() do
@@ -151,5 +152,12 @@ defmodule Radiator.Directory do
   """
   def get_any_network do
     from(n in Network, limit: 1) |> Repo.one!()
+  end
+
+  def get_audio_file(id) do
+    Media.get_audio_file(id)
+    # TODO
+    # - fetch episode
+    # - ensure episode is published
   end
 end

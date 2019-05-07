@@ -23,6 +23,14 @@ defmodule Radiator.Media.AudioFile do
     |> cast_attachments(attrs, [:file])
   end
 
+  def public_url(audio) do
+    tracking_url(audio)
+  end
+
+  def tracking_url(audio = %__MODULE__{}) do
+    RadiatorWeb.Router.Helpers.tracking_url(RadiatorWeb.Endpoint, :show, audio.id)
+  end
+
   # arc override
   def storage_dir(_version, {_file, audio}) do
     "audio/#{audio.id}"
