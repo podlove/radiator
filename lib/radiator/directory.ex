@@ -163,6 +163,7 @@ defmodule Radiator.Directory do
   def is_published(%Podcast{published_at: date}), do: before_utc_now?(date)
   def is_published(%Episode{published_at: date}), do: before_utc_now?(date)
 
+  # todo: missing verification that podcast (& network?) is published
   def get_audio_file(id) do
     with {:get, audio = %AudioFile{}} <-
            {:get, Media.get_audio_file(id) |> Repo.preload(:episode)},
