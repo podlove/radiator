@@ -6,6 +6,7 @@ defmodule RadiatorWeb.TrackingController do
 
   require Logger
 
+  # todo: "show" is not a suitable name for this, need to come up with a better name
   def show(conn, %{"id" => id}) do
     case Directory.get_audio_file(id) do
       {:ok, audio} ->
