@@ -66,6 +66,9 @@ defmodule Radiator.Tracking do
   Does the download request seem clean?
 
   Looks clean if it is not a bot and httprange is not "bytes=0-1" or "bytes=0-0".
+
+  todo: I think it would be cleaner to implement these checks
+        as custom changeset validations on Radiator.Tracking.Download
   """
   @spec download_looks_clean(boolean(), binary()) :: boolean()
   def download_looks_clean(bot?, http_range)
