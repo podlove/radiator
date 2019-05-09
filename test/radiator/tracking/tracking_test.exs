@@ -32,6 +32,7 @@ defmodule Radiator.TrackingTest do
       assert download.episode_id
       assert download.podcast_id
       assert download.network_id
+      assert download.file_id == file.id
     end
 
     test "track_download/1 discards bot requests" do

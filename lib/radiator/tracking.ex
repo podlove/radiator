@@ -58,6 +58,7 @@ defmodule Radiator.Tracking do
       |> Ecto.Changeset.put_assoc(:network, network)
       |> Ecto.Changeset.put_assoc(:podcast, podcast)
       |> Ecto.Changeset.put_assoc(:episode, episode)
+      |> Ecto.Changeset.put_assoc(:file, file)
       |> Repo.insert()
     else
       {:ok, :skipped_because_not_clean}
