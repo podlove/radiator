@@ -13,6 +13,7 @@ defmodule Radiator.Factory do
     title = sequence(:title, &"My Podcast ##{&1}")
 
     %Radiator.Directory.Podcast{
+      network: build(:network),
       title: title
     }
   end

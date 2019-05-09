@@ -11,17 +11,17 @@ defmodule Radiator.DirectoryTest do
 
     test "list_podcasts/0 returns all podcasts" do
       podcast = insert(:podcast)
-      assert Directory.list_podcasts() == [podcast]
+      assert Directory.list_podcasts() |> Repo.preload(:network) == [podcast]
     end
 
     test "get_podcast!/1 returns the podcast with given id" do
       podcast = insert(:podcast)
-      assert Directory.get_podcast!(podcast.id) == podcast
+      assert Directory.get_podcast!(podcast.id) |> Repo.preload(:network) == podcast
     end
 
     test "get_podcast_by_slug/1 returns the podcast with given slug" do
       podcast = insert(:podcast, slug: "podcast-foo-bar-baz")
-      assert Directory.get_podcast_by_slug(podcast.slug) == podcast
+      assert Directory.get_podcast_by_slug(podcast.slug) |> Repo.preload(:network) == podcast
     end
 
     test "create_podcast/1 with valid data creates a podcast" do
@@ -66,7 +66,7 @@ defmodule Radiator.DirectoryTest do
 
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.update_podcast(podcast, %{title: nil})
 
-      assert podcast == Directory.get_podcast!(podcast.id)
+      assert podcast == Directory.get_podcast!(podcast.id) |> Repo.preload(:network)
     end
 
     test "delete_podcast/1 deletes the podcast" do
@@ -155,17 +155,19 @@ defmodule Radiator.DirectoryTest do
 
     test "list_episodes/0 returns all episodes" do
       episode = insert(:episode)
-      assert Directory.list_episodes() |> Repo.preload(:podcast) == [episode]
+      assert Directory.list_episodes() |> Repo.preload(podcast: :network) == [episode]
     end
 
     test "get_episode!/1 returns the episode with given id" do
       episode = insert(:episode)
-      assert Directory.get_episode!(episode.id) |> Repo.preload(:podcast) == episode
+      assert Directory.get_episode!(episode.id) |> Repo.preload(podcast: :network) == episode
     end
 
     test "get_episode_by_slug/1 returns the episode with given slug" do
       episode = insert(:episode, slug: "episode-foo-bar-baz")
-      assert Directory.get_episode_by_slug(episode.slug) == episode
+
+      assert Directory.get_episode_by_slug(episode.slug) |> Repo.preload(podcast: :network) ==
+               episode
     end
 
     test "create_episode/1 with valid data creates an episode" do
@@ -204,7 +206,7 @@ defmodule Radiator.DirectoryTest do
     test "update_episode/2 with invalid data returns error changeset" do
       episode = insert(:episode)
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.update_episode(episode, @invalid_attrs)
-      assert episode == Directory.get_episode!(episode.id) |> Repo.preload(:podcast)
+      assert episode == Directory.get_episode!(episode.id) |> Repo.preload(podcast: :network)
     end
 
     test "delete_episode/1 deletes the episode" do
