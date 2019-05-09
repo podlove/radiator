@@ -19,10 +19,6 @@ defmodule RadiatorWeb.TrackingController do
     end
   end
 
-  # todo: too much logic in controller
-  # I don't want to pass conn down to the core but feel like I should
-  # just pass down all the raw data I need there and do all processing
-  # down there.
   defp track_download(conn = %Plug.Conn{private: %{is_head: true}}, _) do
     conn
   end
@@ -30,7 +26,7 @@ defmodule RadiatorWeb.TrackingController do
   defp track_download(conn, file = %AudioFile{}) do
     Radiator.Tracking.Server.track_download(
       file: file,
-      request_id: request_id(conn),
+      remote_ip: remote_ip(conn),
       user_agent: user_agent(conn),
       time: DateTime.utc_now(),
       http_range: http_range(conn)
@@ -45,7 +41,7 @@ defmodule RadiatorWeb.TrackingController do
     |> List.first()
     |> case do
       user_agent when is_binary(user_agent) and byte_size(user_agent) > 0 -> user_agent
-      _ -> "<blank>"
+      _ -> ""
     end
   end
 
@@ -57,15 +53,5 @@ defmodule RadiatorWeb.TrackingController do
     conn.remote_ip
     |> :inet_parse.ntoa()
     |> to_string()
-  end
-
-  defp request_id_plain(conn) do
-    remote_ip(conn) <> user_agent(conn)
-  end
-
-  defp request_id(conn) do
-    :crypto.hash(:sha256, request_id_plain(conn))
-    |> Base.encode64(padding: false)
-    |> String.slice(0..7)
   end
 end

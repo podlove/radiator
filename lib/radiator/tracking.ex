@@ -10,7 +10,7 @@ defmodule Radiator.Tracking do
 
   def track_download(
         file: file,
-        request_id: request_id,
+        remote_ip: remote_ip,
         user_agent: user_agent,
         time: time,
         http_range: http_range
@@ -23,7 +23,7 @@ defmodule Radiator.Tracking do
     # create download
     %Download{}
     |> Download.changeset(%{
-      request_id: request_id,
+      request_id: request_id(remote_ip, user_agent),
       accessed_at: time,
       clean: true,
       http_range: http_range,
@@ -33,6 +33,16 @@ defmodule Radiator.Tracking do
     |> Ecto.Changeset.put_assoc(:podcast, podcast)
     |> Ecto.Changeset.put_assoc(:episode, episode)
     |> Repo.insert()
+  end
+
+  defp request_id(remote_ip, user_agent) do
+    :crypto.hash(:sha256, request_id_plain(remote_ip, user_agent))
+    |> Base.encode64(padding: false)
+    |> String.slice(0..7)
+  end
+
+  defp request_id_plain(remote_ip, user_agent) do
+    remote_ip <> user_agent
   end
 
   @doc """
