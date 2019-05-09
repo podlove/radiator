@@ -20,8 +20,6 @@ defmodule Radiator.Tracking do
     podcast = episode.podcast
     network = podcast.network
 
-    # todo: http_range filtering
-
     user_agent =
       user_agent_string
       |> UAInspector.parse()
@@ -40,25 +38,41 @@ defmodule Radiator.Tracking do
           }
       end
 
-    %Download{}
-    |> Download.changeset(%{
-      request_id: request_id(remote_ip, user_agent_string),
-      accessed_at: time,
-      clean: true,
-      http_range: http_range,
-      user_agent: user_agent_string,
-      user_agent_bot: Map.get(user_agent, :bot),
-      user_agent_client_name: Map.get(user_agent, :client_name),
-      user_agent_client_type: Map.get(user_agent, :client_type),
-      user_agent_device_model: Map.get(user_agent, :device_model),
-      user_agent_device_type: Map.get(user_agent, :device_type),
-      user_agent_os_name: Map.get(user_agent, :os_name)
-    })
-    |> Ecto.Changeset.put_assoc(:network, network)
-    |> Ecto.Changeset.put_assoc(:podcast, podcast)
-    |> Ecto.Changeset.put_assoc(:episode, episode)
-    |> Repo.insert()
+    if download_looks_clean(Map.get(user_agent, :bot), http_range) do
+      %Download{}
+      |> Download.changeset(%{
+        request_id: request_id(remote_ip, user_agent_string),
+        accessed_at: time,
+        clean: true,
+        http_range: http_range,
+        user_agent: user_agent_string,
+        user_agent_bot: Map.get(user_agent, :bot),
+        user_agent_client_name: Map.get(user_agent, :client_name),
+        user_agent_client_type: Map.get(user_agent, :client_type),
+        user_agent_device_model: Map.get(user_agent, :device_model),
+        user_agent_device_type: Map.get(user_agent, :device_type),
+        user_agent_os_name: Map.get(user_agent, :os_name)
+      })
+      |> Ecto.Changeset.put_assoc(:network, network)
+      |> Ecto.Changeset.put_assoc(:podcast, podcast)
+      |> Ecto.Changeset.put_assoc(:episode, episode)
+      |> Repo.insert()
+    else
+      {:ok, :skipped_because_not_clean}
+    end
   end
+
+  @doc """
+  Does the download request seem clean?
+
+  Looks clean if it is not a bot and httprange is not "bytes=0-1" or "bytes=0-0".
+  """
+  @spec download_looks_clean(boolean(), binary()) :: boolean()
+  def download_looks_clean(bot?, http_range)
+  def download_looks_clean(true, _), do: false
+  def download_looks_clean(_, "bytes=0-1"), do: false
+  def download_looks_clean(_, "bytes=0-0"), do: false
+  def download_looks_clean(_, _), do: true
 
   defp to_ua_field(:unknown), do: nil
   defp to_ua_field(value) when is_binary(value), do: value
