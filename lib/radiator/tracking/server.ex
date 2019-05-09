@@ -1,4 +1,14 @@
 defmodule Radiator.Tracking.Server do
+  @doc """
+  Tracking Server
+
+  Tracking happens async in a separate process for two reasons:
+
+  1. If something in the tracking process fails, the user still gets
+     to her download.
+  2. Downloads are served faster because the user does not need to wait
+     for tracking processing to finish.
+  """
   use GenServer
 
   require Logger
