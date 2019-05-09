@@ -17,6 +17,8 @@ defmodule Radiator.Repo.Migrations.CreateDownloads do
       add :user_agent_device_type, :string
       add :user_agent_device_model, :string
 
+      add :hours_since_published, :integer
+
       add :network_id, references(:networks, on_delete: :nothing)
       add :podcast_id, references(:podcasts, on_delete: :nothing)
       add :episode_id, references(:episodes, on_delete: :nothing)

@@ -21,6 +21,8 @@ defmodule Radiator.Tracking.Download do
     field :user_agent_device_type, :string
     field :user_agent_os_name, :string
 
+    field :hours_since_published, :integer
+
     belongs_to :network, Network
     belongs_to :podcast, Podcast
     belongs_to :episode, Episode
@@ -43,7 +45,8 @@ defmodule Radiator.Tracking.Download do
       :user_agent_client_type,
       :user_agent_os_name,
       :user_agent_device_type,
-      :user_agent_device_model
+      :user_agent_device_model,
+      :hours_since_published
     ])
     |> validate_required([
       :request_id,

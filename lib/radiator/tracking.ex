@@ -6,6 +6,7 @@ defmodule Radiator.Tracking do
   require Logger
 
   alias Radiator.Repo
+  alias Radiator.Directory.Episode
   alias Radiator.Tracking.Download
 
   def track_download(
@@ -51,7 +52,8 @@ defmodule Radiator.Tracking do
         user_agent_client_type: Map.get(user_agent, :client_type),
         user_agent_device_model: Map.get(user_agent, :device_model),
         user_agent_device_type: Map.get(user_agent, :device_type),
-        user_agent_os_name: Map.get(user_agent, :os_name)
+        user_agent_os_name: Map.get(user_agent, :os_name),
+        hours_since_published: hours_since_published(episode, time)
       })
       |> Ecto.Changeset.put_assoc(:network, network)
       |> Ecto.Changeset.put_assoc(:podcast, podcast)
@@ -79,6 +81,10 @@ defmodule Radiator.Tracking do
 
   defp to_ua_field(:unknown), do: nil
   defp to_ua_field(value) when is_binary(value), do: value
+
+  defp hours_since_published(episode = %Episode{}, time = %DateTime{}) do
+    trunc(DateTime.diff(time, episode.published_at, :second) / 3600)
+  end
 
   defp request_id(remote_ip, user_agent) do
     :crypto.hash(:sha256, request_id_plain(remote_ip, user_agent))
