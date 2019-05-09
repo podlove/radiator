@@ -68,6 +68,12 @@ Creates:
 - "ACME" network
 - user "admin" with password "password"
 
+Download UserAgent database for tracking:
+
+```shell
+mix ua_inspector.download --force
+```
+
 ## ⚠️ Migrations during development ⚠️
 
 During the early stages of development we _edit_ existing migrations to keep them readable instead of adding new ones as you would expect in a live system. 

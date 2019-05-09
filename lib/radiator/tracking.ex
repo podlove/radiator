@@ -11,7 +11,7 @@ defmodule Radiator.Tracking do
   def track_download(
         file: file,
         remote_ip: remote_ip,
-        user_agent: user_agent,
+        user_agent: user_agent_string,
         time: time,
         http_range: http_range
       ) do
@@ -20,20 +20,48 @@ defmodule Radiator.Tracking do
     podcast = episode.podcast
     network = podcast.network
 
-    # create download
+    # todo: http_range filtering
+
+    user_agent =
+      user_agent_string
+      |> UAInspector.parse()
+      |> case do
+        %UAInspector.Result.Bot{name: bot_name} ->
+          %{bot: true, client_name: to_ua_field(bot_name)}
+
+        result = %UAInspector.Result{} ->
+          %{
+            bot: false,
+            client_name: to_ua_field(result.client.name),
+            client_type: to_ua_field(result.client.type),
+            device_model: to_ua_field(result.device.model),
+            device_type: to_ua_field(result.device.type),
+            os_name: to_ua_field(result.os.name)
+          }
+      end
+
     %Download{}
     |> Download.changeset(%{
-      request_id: request_id(remote_ip, user_agent),
+      request_id: request_id(remote_ip, user_agent_string),
       accessed_at: time,
       clean: true,
       http_range: http_range,
-      user_agent: user_agent
+      user_agent: user_agent_string,
+      user_agent_bot: Map.get(user_agent, :bot),
+      user_agent_client_name: Map.get(user_agent, :client_name),
+      user_agent_client_type: Map.get(user_agent, :client_type),
+      user_agent_device_model: Map.get(user_agent, :device_model),
+      user_agent_device_type: Map.get(user_agent, :device_type),
+      user_agent_os_name: Map.get(user_agent, :os_name)
     })
     |> Ecto.Changeset.put_assoc(:network, network)
     |> Ecto.Changeset.put_assoc(:podcast, podcast)
     |> Ecto.Changeset.put_assoc(:episode, episode)
     |> Repo.insert()
   end
+
+  defp to_ua_field(:unknown), do: nil
+  defp to_ua_field(value) when is_binary(value), do: value
 
   defp request_id(remote_ip, user_agent) do
     :crypto.hash(:sha256, request_id_plain(remote_ip, user_agent))
