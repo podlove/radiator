@@ -21,7 +21,7 @@ defmodule Radiator.Tracking.Server do
 
   @impl true
   def handle_cast({:track, data}, state) do
-    Tracking.process_access(data)
+    Tracking.track_download(data)
     {:noreply, state}
   end
 end

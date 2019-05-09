@@ -19,11 +19,15 @@ defmodule RadiatorWeb.TrackingController do
     end
   end
 
+  # todo: too much logic in controller
+  # I don't want to pass conn down to the core but feel like I should
+  # just pass down all the raw data I need there and do all processing
+  # down there.
   defp track_download(conn = %Plug.Conn{private: %{is_head: true}}, _) do
     conn
   end
 
-  defp track_download(conn, file) do
+  defp track_download(conn, file = %AudioFile{}) do
     Radiator.Tracking.Server.track_download(
       file: file,
       request_id: request_id(conn),
