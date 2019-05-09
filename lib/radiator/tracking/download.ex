@@ -13,6 +13,7 @@ defmodule Radiator.Tracking.Download do
     field :context, :string
 
     field :user_agent, :string
+    # todo: if i immediately discard bots, :user_agent_bot field is not required
     field :user_agent_bot, :boolean, default: false
     field :user_agent_client_name, :string
     field :user_agent_client_type, :string
