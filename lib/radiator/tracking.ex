@@ -47,12 +47,12 @@ defmodule Radiator.Tracking do
         clean: true,
         http_range: http_range,
         user_agent: user_agent_string,
-        user_agent_bot: Map.get(user_agent, :bot),
-        user_agent_client_name: Map.get(user_agent, :client_name),
-        user_agent_client_type: Map.get(user_agent, :client_type),
-        user_agent_device_model: Map.get(user_agent, :device_model),
-        user_agent_device_type: Map.get(user_agent, :device_type),
-        user_agent_os_name: Map.get(user_agent, :os_name),
+        bot: Map.get(user_agent, :bot),
+        client_name: Map.get(user_agent, :client_name),
+        client_type: Map.get(user_agent, :client_type),
+        device_model: Map.get(user_agent, :device_model),
+        device_type: Map.get(user_agent, :device_type),
+        os_name: Map.get(user_agent, :os_name),
         hours_since_published: hours_since_published(episode, time)
       })
       |> Ecto.Changeset.put_assoc(:network, network)

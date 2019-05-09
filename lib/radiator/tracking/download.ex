@@ -14,12 +14,12 @@ defmodule Radiator.Tracking.Download do
 
     field :user_agent, :string
     # todo: if i immediately discard bots, :user_agent_bot field is not required
-    field :user_agent_bot, :boolean, default: false
-    field :user_agent_client_name, :string
-    field :user_agent_client_type, :string
-    field :user_agent_device_model, :string
-    field :user_agent_device_type, :string
-    field :user_agent_os_name, :string
+    field :bot, :boolean, default: false
+    field :client_name, :string
+    field :client_type, :string
+    field :device_model, :string
+    field :device_type, :string
+    field :os_name, :string
 
     field :hours_since_published, :integer
 
@@ -40,12 +40,12 @@ defmodule Radiator.Tracking.Download do
       :httprange,
       :clean,
       :user_agent,
-      :user_agent_bot,
-      :user_agent_client_name,
-      :user_agent_client_type,
-      :user_agent_os_name,
-      :user_agent_device_type,
-      :user_agent_device_model,
+      :bot,
+      :client_name,
+      :client_type,
+      :os_name,
+      :device_type,
+      :device_model,
       :hours_since_published
     ])
     |> validate_required([

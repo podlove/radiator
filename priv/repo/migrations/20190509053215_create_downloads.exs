@@ -10,12 +10,12 @@ defmodule Radiator.Repo.Migrations.CreateDownloads do
       add :context, :string
 
       add :user_agent, :text
-      add :user_agent_bot, :boolean, default: false, null: false
-      add :user_agent_client_name, :string
-      add :user_agent_client_type, :string
-      add :user_agent_os_name, :string
-      add :user_agent_device_type, :string
-      add :user_agent_device_model, :string
+      add :bot, :boolean, default: false, null: false
+      add :client_name, :string
+      add :client_type, :string
+      add :os_name, :string
+      add :device_type, :string
+      add :device_model, :string
 
       add :hours_since_published, :integer
 
