@@ -78,7 +78,8 @@ defmodule Radiator.MixProject do
       {:ex_doc, "~> 0.19", only: :dev},
       {:chapters, "~> 0.1.0"},
       {:dataloader, "~> 1.0"},
-      {:mime, "~> 1.2"}
+      {:mime, "~> 1.2"},
+      {:remote_ip, "~> 0.1.4"}
     ]
   end
 
