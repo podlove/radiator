@@ -22,8 +22,8 @@ We are still in an exploration phase. Technically the foundation for hosting a p
 If you just want to take a look at the project, you can deploy a ready-to-run stack with [docker-compose](https://docs.docker.com/compose/):
 
 ```shell
-git clone https://github.com/podlove/radiator-spark
-cd radiator-spark
+git clone https://github.com/podlove/radiator
+cd radiator
 docker-compose up
 ```
 
