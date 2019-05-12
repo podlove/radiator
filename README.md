@@ -17,6 +17,16 @@ We are still in an exploration phase. Technically the foundation for hosting a p
 
 ## Development
 
+**Docker Deployment**
+
+If you just want to take a look at the project, you can deploy a ready-to-run stack with [docker-compose](https://docs.docker.com/compose/):
+
+```shell
+git clone https://github.com/podlove/radiator-spark
+cd radiator-spark
+docker-compose up
+```
+
 **Minio Setup**
 
 - [Install minio][minio-setup]
