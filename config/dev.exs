@@ -72,7 +72,7 @@ config :radiator, Radiator.Repo,
   username: "postgres",
   password: "postgres",
   database: "radiator_dev",
-  hostname: "localhost",
+  hostname: System.get_env("POSTGRES_HOST") || "localhost",
   pool_size: 10
 
 config :radiator, Radiator.Mailer,
