@@ -15,11 +15,15 @@ defmodule Radiator.Media.AudioFile do
     field :mime_type, :string
     field :byte_length, :integer
 
-    has_many :attachments,
+    has_many :episode_attachments,
              {"episode_attachments", Media.EpisodeAttachment},
              foreign_key: :audio_id
+    has_one :episode, through: [:episode_attachments, :episode]
 
-    has_one :episode, through: [:attachments, :episode]
+    has_many :network_attachments,
+             {"network_attachments", Media.NetworkAttachment},
+             foreign_key: :audio_id
+    has_one :network, through: [:network_attachments, :network]
 
     timestamps()
   end
