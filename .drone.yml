@@ -19,6 +19,7 @@ steps:
   - mix local.rebar --force
   - mix local.hex --force
   - mix deps.get
+  - mix ua_inspector.download --force
 
 - name: test
   image: elixir:1.8
