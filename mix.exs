@@ -13,6 +13,7 @@ defmodule Radiator.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      package: package(),
       # Docs
       name: "Radiator",
       docs: docs()
@@ -84,6 +85,14 @@ defmodule Radiator.MixProject do
     ]
   end
 
+  defp package do
+    [
+      maintainers: ["Eric Teubert", "Dominik Wagner"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/podlove/radiator"}
+    ]
+  end
+
   # Aliases are shortcuts or tasks specific to the current project.
   # For example, to create, migrate and run the seeds file at once:
   #
@@ -102,10 +111,12 @@ defmodule Radiator.MixProject do
     [
       main: "readme",
       source_ref: "v#{@version}",
+      source_url: "https://github.com/podlove/radiator",
       logo: "guides/images/podlove-radiator-logo.svg",
       extras: [
         "README.md",
         "guides/Users and Permissions.md",
+        "guides/Download Tracking.md",
         "guides/Files.md"
       ]
     ]
