@@ -1,15 +1,15 @@
-defmodule Radiator.Media.Attachment do
+defmodule Radiator.Media.NetworkAttachment do
   use Ecto.Schema
 
   import Ecto.Changeset
 
   alias Radiator.Media.AudioFile
+  alias Radiator.Directory.Network
 
   @primary_key false
-  schema "abstract table: attachment" do
+  schema "network_attachments" do
     belongs_to :audio, AudioFile, primary_key: true
-
-    field :subject_id, :integer, primary_key: true
+    belongs_to :network, Network, foreign_key: :subject_id
 
     timestamps()
   end
