@@ -155,8 +155,6 @@ defmodule Radiator.Directory do
     from(n in Network, limit: 1) |> Repo.one!()
   end
 
-  # todo: duplicated logic in lib/radiator_web/graphql/resolvers/directory.ex
-  # here's probably the better place for it
   def is_published(%Podcast{published_at: nil}), do: false
   def is_published(%Episode{published_at: nil}), do: false
 
