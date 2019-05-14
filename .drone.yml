@@ -19,7 +19,6 @@ steps:
   - mix local.rebar --force
   - mix local.hex --force
   - mix deps.get
-  - mix ua_inspector.download --force
 
 - name: test
   image: elixir:1.8
@@ -30,7 +29,9 @@ steps:
     STORAGE_ASSET_HOST: "http://minio:9000/radiator"
     STORAGE_HOST: "minio"
     DB_HOST: "database"
+    MIX_ENV: "test"
   commands:
+  - mix ua_inspector.download --force
   - mix test
 
 services:
