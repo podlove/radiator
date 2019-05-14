@@ -14,8 +14,6 @@ defmodule Radiator.Tracking.Download do
     field :context, :string
 
     field :user_agent, :string
-    # todo: if i immediately discard bots, :user_agent_bot field is not required
-    field :bot, :boolean, default: false
     field :client_name, :string
     field :client_type, :string
     field :device_model, :string
@@ -42,7 +40,6 @@ defmodule Radiator.Tracking.Download do
       :httprange,
       :clean,
       :user_agent,
-      :bot,
       :client_name,
       :client_type,
       :os_name,

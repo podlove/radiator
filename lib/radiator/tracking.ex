@@ -47,7 +47,6 @@ defmodule Radiator.Tracking do
         clean: true,
         http_range: http_range,
         user_agent: user_agent_string,
-        bot: Map.get(user_agent, :bot),
         client_name: Map.get(user_agent, :client_name),
         client_type: Map.get(user_agent, :client_type),
         device_model: Map.get(user_agent, :device_model),

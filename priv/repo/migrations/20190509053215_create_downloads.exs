@@ -10,7 +10,6 @@ defmodule Radiator.Repo.Migrations.CreateDownloads do
       add :context, :string
 
       add :user_agent, :text
-      add :bot, :boolean, default: false, null: false
       add :client_name, :string
       add :client_type, :string
       add :os_name, :string
