@@ -1,6 +1,6 @@
 defmodule Radiator.Storage do
   @moduledoc """
-  The Storage context providing.
+  The Storage context.
 
   Provides direct access to Object Storage (minio). The Radiator.Media API should
   be preferred.
