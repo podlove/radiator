@@ -19,6 +19,18 @@ defmodule Radiator.DirectoryTest do
       assert Directory.get_podcast!(podcast.id) |> Repo.preload(:network) == podcast
     end
 
+    test "get_episodes_count_for_podcast!/1 return the number of episodes" do
+      podcast = insert(:podcast)
+
+      assert Directory.get_episodes_count_for_podcast!(podcast.id) == 0
+
+      _episode1 = insert(:episode, podcast: podcast)
+      _episode2 = insert(:episode, podcast: podcast)
+      _episode3 = insert(:episode, podcast: podcast)
+
+      assert Directory.get_episodes_count_for_podcast!(podcast.id) == 3
+    end
+
     test "get_podcast_by_slug/1 returns the podcast with given slug" do
       podcast = insert(:podcast, slug: "podcast-foo-bar-baz")
       assert Directory.get_podcast_by_slug(podcast.slug) |> Repo.preload(:network) == podcast
