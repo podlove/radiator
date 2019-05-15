@@ -1,6 +1,12 @@
 /* This file is for your main application css. */
 
-@tailwind preflight;
+@tailwind base;
+
+html {
+  font-family: sans-serif;
+  line-height: 1.15;
+}
+
 @tailwind components;
 
 /**
@@ -57,10 +63,10 @@
 }
 
 .input {
-  @apply bg-grey-lighter appearance-none border-2 border-grey-lighter rounded w-full py-2 px-4 text-grey-darker leading-tight;
+  @apply bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight;
 
   &:focus {
-    @apply outline-none bg-white border-blue;
+    @apply outline-none bg-white border-blue-500;
   }
 }
 
@@ -69,18 +75,18 @@
 }
 
 .btn-blue {
-  @apply bg-blue text-white;
+  @apply bg-blue-500 text-white;
 }
 
 .btn-blue:hover {
-  @apply bg-blue-dark;
+  @apply bg-blue-600;
 }
 
 .pill {
-  @apply shadow bg-white text-blue py-2 px-4 rounded-full;
+  @apply shadow bg-white text-blue-500 py-2 px-4 rounded-full;
 
   &:hover {
-    @apply text-blue-darker;
+    @apply text-blue-700;
   }
 }
 
@@ -92,12 +98,12 @@
   @apply mx-1 h-full flex items-center;
 
   a {
-    @apply text-grey-lighter no-underline;
+    @apply text-gray-200 no-underline;
   }
 
   &.active,
   &:hover {
-    @apply border-b-4 border-grey-lighter;
+    @apply border-b-4 border-gray-200;
 
     a {
       position: relative;
@@ -107,5 +113,5 @@
 }
 
 .help-block {
-  @apply block text-red-dark mx-4 mt-2;
+  @apply block text-red-600 mx-4 mt-2;
 }
