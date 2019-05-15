@@ -34,6 +34,15 @@ steps:
   - mix ua_inspector.download --force
   - mix test
 
+- name: docker
+  image: plugins/docker
+  settings:
+    username: podloveradiator
+    password:
+      from_secret: docker_password
+    repo: podlove/radiator
+    tags: latest
+
 services:
 - name: database
   image: postgres:9-alpine
