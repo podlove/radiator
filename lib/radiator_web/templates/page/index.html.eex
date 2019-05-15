@@ -1,11 +1,32 @@
 <div class="container mx-auto mt-8">
 
-  <div class="max-w-sm rounded overflow-hidden shadow-lg mb-8">
-    <div class="px-6 py-4">
-      <div class="font-bold text-xl mb-2">Admin Pages</div>
-      <ul class="">
-        <li><%= link("Networks", to: Routes.admin_network_path(@conn, :index), class: "no-underline text-blue-500") %></li>
-      </ul>
+  <div class="max-w-lg rounded overflow-hidden shadow-lg mb-8 bg-white">
+    <div class="px-6 py-6">
+      <header class=" mb-8">
+        <h1 class="font-bold text-gray-700 text-2xl mb-1">Welcome to Podlove Radiator</h1>
+        <h2 class="text-xl text-teal-600 tracking-tighter">Podcast hosting for the next century of the internet.</h2>
+      </header>
+
+      <div class="mb-6">
+        <h3 class="font-bold text-lg mb-2">Get Started</h3>
+
+        <ul>
+          <li>
+            <a href="/login" class="text-blue-500">Login or Signup</a>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-bold text-lg mb-2">Get Involved</h3>
+
+        <ul>
+          <li>
+            <a href="https://github.com/podlove/radiator" class="text-blue-500">podlove/radiator on GitHub</a>
+          </li>
+        </ul>
+      </div>
+
     </div>
   </div>
 

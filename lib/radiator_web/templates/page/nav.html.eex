@@ -7,31 +7,33 @@
       Radiator 🔥
     </span>
     <ul class="flex flex-row items-center h-full text-lg font-thin ml-4">
-      <li class="nav-link">
-        <%= link "Networks", to: Routes.admin_network_path(@conn, :index) %>
-      </li>
-      <%= if assigns[:current_network] do %>
-        <%= render("nav_chevron.html") %>
+      <%= if Guardian.Plug.current_resource(@conn) do %>
         <li class="nav-link">
-          <%= link  @current_network.title , to: Routes.admin_network_podcast_path(@conn, :index, @current_network) %>
+          <%= link "Networks", to: Routes.admin_network_path(@conn, :index) %>
         </li>
-        <%= if assigns[:podcast] do %>
-        <%= render("nav_chevron.html") %>
-        <li class="nav-link">
-          <%= link @podcast.title, to: Routes.admin_network_podcast_path(@conn, :show, @podcast.network_id, @podcast) %>
-        </li>      
+        <%= if assigns[:current_network] do %>
+          <%= render("nav_chevron.html") %>
+          <li class="nav-link">
+            <%= link  @current_network.title , to: Routes.admin_network_podcast_path(@conn, :index, @current_network) %>
+          </li>
+          <%= if assigns[:podcast] do %>
+          <%= render("nav_chevron.html") %>
+          <li class="nav-link">
+            <%= link @podcast.title, to: Routes.admin_network_podcast_path(@conn, :show, @podcast.network_id, @podcast) %>
+          </li>      
+          <% end %>
+          <%= if assigns[:episode] do %>
+          <%= render("nav_chevron.html") %>
+          <li class="nav-link">
+            <%= link @episode.podcast.title, to: Routes.admin_network_podcast_path(@conn, :show, @episode.podcast.network_id, @episode.podcast) %>
+          </li>
+          <%= render("nav_chevron.html") %>
+          <li class="nav-link">
+            <%= link @episode.title, to: Routes.admin_network_podcast_episode_path(@conn, :show, @episode.podcast.network_id, @episode.podcast, @episode) %>
+          </li>
+          <% end %>        
         <% end %>
-        <%= if assigns[:episode] do %>
-        <%= render("nav_chevron.html") %>
-        <li class="nav-link">
-          <%= link @episode.podcast.title, to: Routes.admin_network_podcast_path(@conn, :show, @episode.podcast.network_id, @episode.podcast) %>
-        </li>
-        <%= render("nav_chevron.html") %>
-        <li class="nav-link">
-          <%= link @episode.title, to: Routes.admin_network_podcast_episode_path(@conn, :show, @episode.podcast.network_id, @episode.podcast, @episode) %>
-        </li>
-        <% end %>        
-      <% end %>
+      <% end %> 
     </ul>
 
     <span class="font-thin ml-auto nav-link" style="margin-left:auto">
