@@ -71,24 +71,14 @@ defmodule Radiator.Directory do
   @doc """
   Gets the number of episodes of the podcast with the given id.
 
-  Raises `Ecto.NoResultsError` if the Podcast does not exist.
-
   ## Examples
 
       iex> get_episodes_count_for_podcast!(123)
       3
-
-      iex> get_podcast!(456)
-      ** (Ecto.NoResultsError)
-
   """
   def get_episodes_count_for_podcast!(id) do
-    %Podcast{id: ^id, episode_count: episode_count} =
-      from(p in Podcast, where: p.id == ^id)
-      |> Podcast.preload_episode_counts()
-      |> Repo.one!()
-
-    episode_count
+    from(e in Episode, where: e.podcast_id == ^id)
+    |> Repo.aggregate(:count, :id)
   end
 
   @doc """
