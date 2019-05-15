@@ -183,4 +183,10 @@ defmodule RadiatorWeb.GraphQL.Resolvers.Directory do
   def get_image_url(network = %Network{}, _, _) do
     {:ok, Media.NetworkImage.url({network.image, network})}
   end
+
+  def get_episodes_count(%Podcast{id: podcast_id}, _, _) do
+    episodes_count = Directory.get_episodes_count_for_podcast!(podcast_id)
+
+    {:ok, episodes_count}
+  end
 end

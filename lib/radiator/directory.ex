@@ -69,6 +69,19 @@ defmodule Radiator.Directory do
   def get_podcast(id), do: Repo.get(Podcast, id)
 
   @doc """
+  Gets the number of episodes of the podcast with the given id.
+
+  ## Examples
+
+      iex> get_episodes_count_for_podcast!(123)
+      3
+  """
+  def get_episodes_count_for_podcast!(id) do
+    from(e in Episode, where: e.podcast_id == ^id)
+    |> Repo.aggregate(:count, :id)
+  end
+
+  @doc """
   Gets a single podcast by its slug.
 
   ## Examples

@@ -56,6 +56,10 @@ defmodule RadiatorWeb.GraphQL.Schema.DirectoryTypes do
 
       resolve dataloader(Radiator.Directory, :episodes)
     end
+
+    field :episodes_count, :integer do
+      resolve &Resolvers.Directory.get_episodes_count/3
+    end
   end
 
   @desc "The input for a podcast"

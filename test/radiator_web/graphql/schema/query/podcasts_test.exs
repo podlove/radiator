@@ -100,4 +100,66 @@ defmodule RadiatorWeb.GraphQL.Schema.Query.PodcastsTest do
              }
     end
   end
+
+  describe "episodes" do
+    @with_episodes_query """
+    query ($id: ID!) {
+      podcast(id: $id) {
+        id
+        episodes {
+          id
+          title
+        }
+      }
+    }
+    """
+
+    test "returns all episodes of a podcast", %{conn: conn} do
+      podcast = insert(:podcast)
+      episode = insert(:episode, podcast: podcast)
+
+      conn =
+        get conn, "/api/graphql", query: @with_episodes_query, variables: %{"id" => podcast.id}
+
+      assert json_response(conn, 200) == %{
+               "data" => %{
+                 "podcast" => %{
+                   "id" => Integer.to_string(podcast.id),
+                   "episodes" => [
+                     %{"id" => Integer.to_string(episode.id), "title" => episode.title}
+                   ]
+                 }
+               }
+             }
+    end
+  end
+
+  describe "episodes_count" do
+    @with_episodes_count_query """
+    query ($id: ID!) {
+      podcast(id: $id) {
+        id
+        episodesCount
+      }
+    }
+    """
+
+    test "returns the number of episodes associated to a podcast", %{conn: conn} do
+      podcast = insert(:podcast)
+      _episode1 = insert(:episode, podcast: podcast)
+      _episode2 = insert(:episode, podcast: podcast)
+      _episode3 = insert(:episode, podcast: podcast)
+
+      conn =
+        get conn, "/api/graphql",
+          query: @with_episodes_count_query,
+          variables: %{"id" => podcast.id}
+
+      assert json_response(conn, 200) == %{
+               "data" => %{
+                 "podcast" => %{"id" => Integer.to_string(podcast.id), "episodesCount" => 3}
+               }
+             }
+    end
+  end
 end
