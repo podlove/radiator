@@ -45,3 +45,16 @@ alias Radiator.Auth.User
 
 alias Radiator.Perm.Ecto.PermissionType
 alias Radiator.Perm.Permission
+
+defmodule H do
+  def create_episode_audio(episode) do
+    upload = %Plug.Upload{
+      path: "test/fixtures/pling.mp3",
+      filename: "pling.mp3"
+    }
+
+    {:ok, audio, _} = Media.AudioFileUpload.upload(upload, episode)
+
+    audio
+  end
+end

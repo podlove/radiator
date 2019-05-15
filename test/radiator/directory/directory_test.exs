@@ -11,17 +11,17 @@ defmodule Radiator.DirectoryTest do
 
     test "list_podcasts/0 returns all podcasts" do
       podcast = insert(:podcast)
-      assert Directory.list_podcasts() == [podcast]
+      assert Directory.list_podcasts() |> Repo.preload(:network) == [podcast]
     end
 
     test "get_podcast!/1 returns the podcast with given id" do
       podcast = insert(:podcast)
-      assert Directory.get_podcast!(podcast.id) == podcast
+      assert Directory.get_podcast!(podcast.id) |> Repo.preload(:network) == podcast
     end
 
     test "get_podcast_by_slug/1 returns the podcast with given slug" do
       podcast = insert(:podcast, slug: "podcast-foo-bar-baz")
-      assert Directory.get_podcast_by_slug(podcast.slug) == podcast
+      assert Directory.get_podcast_by_slug(podcast.slug) |> Repo.preload(:network) == podcast
     end
 
     test "create_podcast/1 with valid data creates a podcast" do
@@ -66,7 +66,7 @@ defmodule Radiator.DirectoryTest do
 
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.update_podcast(podcast, %{title: nil})
 
-      assert podcast == Directory.get_podcast!(podcast.id)
+      assert podcast == Directory.get_podcast!(podcast.id) |> Repo.preload(:network)
     end
 
     test "delete_podcast/1 deletes the podcast" do
@@ -155,17 +155,19 @@ defmodule Radiator.DirectoryTest do
 
     test "list_episodes/0 returns all episodes" do
       episode = insert(:episode)
-      assert Directory.list_episodes() |> Repo.preload(:podcast) == [episode]
+      assert Directory.list_episodes() |> Repo.preload(podcast: :network) == [episode]
     end
 
     test "get_episode!/1 returns the episode with given id" do
       episode = insert(:episode)
-      assert Directory.get_episode!(episode.id) |> Repo.preload(:podcast) == episode
+      assert Directory.get_episode!(episode.id) |> Repo.preload(podcast: :network) == episode
     end
 
     test "get_episode_by_slug/1 returns the episode with given slug" do
       episode = insert(:episode, slug: "episode-foo-bar-baz")
-      assert Directory.get_episode_by_slug(episode.slug) == episode
+
+      assert Directory.get_episode_by_slug(episode.slug) |> Repo.preload(podcast: :network) ==
+               episode
     end
 
     test "create_episode/1 with valid data creates an episode" do
@@ -204,7 +206,7 @@ defmodule Radiator.DirectoryTest do
     test "update_episode/2 with invalid data returns error changeset" do
       episode = insert(:episode)
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.update_episode(episode, @invalid_attrs)
-      assert episode == Directory.get_episode!(episode.id) |> Repo.preload(:podcast)
+      assert episode == Directory.get_episode!(episode.id) |> Repo.preload(podcast: :network)
     end
 
     test "delete_episode/1 deletes the episode" do
@@ -357,5 +359,39 @@ defmodule Radiator.DirectoryTest do
       assert {:ok, %Network{}} = Editor.Owner.delete_network(network)
       assert_raise Ecto.NoResultsError, fn -> Directory.get_network!(network.id) end
     end
+  end
+
+  describe "audio files" do
+    alias Radiator.Media.AudioFile
+
+    test "get_audio_file/1 returns audio file" do
+      episode = insert(:published_episode)
+      audio = create_episode_audio(episode)
+
+      assert {:ok, %AudioFile{file: %{file_name: "pling.mp3"}}} =
+               Directory.get_audio_file(audio.id)
+    end
+
+    test "get_audio_file/1 errors when accessing unpublished audio file" do
+      episode = insert(:unpublished_episode)
+      audio = create_episode_audio(episode)
+
+      assert {:error, :unpublished} = Directory.get_audio_file(audio.id)
+    end
+
+    test "get_audio_file/1 errors when accessing nonexisting audio file" do
+      assert {:error, :not_found} = Directory.get_audio_file(1)
+    end
+  end
+
+  def create_episode_audio(episode) do
+    upload = %Plug.Upload{
+      path: "test/fixtures/pling.mp3",
+      filename: "pling.mp3"
+    }
+
+    {:ok, audio, _} = Radiator.Media.AudioFileUpload.upload(upload, episode)
+
+    audio
   end
 end

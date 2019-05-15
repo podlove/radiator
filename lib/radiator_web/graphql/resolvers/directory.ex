@@ -99,12 +99,6 @@ defmodule RadiatorWeb.GraphQL.Resolvers.Directory do
     end
   end
 
-  def is_published(%Podcast{published_at: nil}, _, _), do: {:ok, false}
-  def is_published(%Episode{published_at: nil}, _, _), do: {:ok, false}
-
-  def is_published(%Podcast{published_at: date}, _, _), do: {:ok, before_utc_now?(date)}
-  def is_published(%Episode{published_at: date}, _, _), do: {:ok, before_utc_now?(date)}
-
   def find_episode(_parent, %{id: id}, _resolution) do
     case Directory.get_episode(id) do
       nil -> {:error, "Episode ID #{id} not found"}
@@ -153,6 +147,8 @@ defmodule RadiatorWeb.GraphQL.Resolvers.Directory do
     end
   end
 
+  def is_published(entity, _, _), do: {:ok, Directory.is_published(entity)}
+
   def list_chapters(%Episode{} = episode, _args, _resolution) do
     {:ok, EpisodeMeta.list_chapters(episode)}
   end
@@ -186,12 +182,5 @@ defmodule RadiatorWeb.GraphQL.Resolvers.Directory do
 
   def get_image_url(network = %Network{}, _, _) do
     {:ok, Media.NetworkImage.url({network.image, network})}
-  end
-
-  defp before_utc_now?(date) do
-    case DateTime.compare(date, DateTime.utc_now()) do
-      :lt -> true
-      _ -> false
-    end
   end
 end

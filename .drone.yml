@@ -29,7 +29,9 @@ steps:
     STORAGE_ASSET_HOST: "http://minio:9000/radiator"
     STORAGE_HOST: "minio"
     DB_HOST: "database"
+    MIX_ENV: "test"
   commands:
+  - mix ua_inspector.download --force
   - mix test
 
 services:

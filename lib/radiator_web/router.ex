@@ -66,6 +66,10 @@ defmodule RadiatorWeb.Router do
     end
   end
 
+  scope "/download", RadiatorWeb do
+    get "/audio/:id", TrackingController, :show
+  end
+
   # Other scopes may use custom stacks.
   scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
     pipe_through :api

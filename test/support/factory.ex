@@ -13,8 +13,27 @@ defmodule Radiator.Factory do
     title = sequence(:title, &"My Podcast ##{&1}")
 
     %Radiator.Directory.Podcast{
+      network: build(:network),
       title: title
     }
+  end
+
+  def unpublished_episode_factory do
+    struct!(
+      episode_factory(),
+      %{
+        published_at: DateTime.utc_now() |> DateTime.add(3600, :second)
+      }
+    )
+  end
+
+  def published_episode_factory do
+    struct!(
+      episode_factory(),
+      %{
+        published_at: DateTime.utc_now() |> DateTime.add(-3600, :second)
+      }
+    )
   end
 
   def episode_factory do

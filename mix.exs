@@ -13,6 +13,7 @@ defmodule Radiator.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      package: package(),
       # Docs
       name: "Radiator",
       docs: docs()
@@ -51,7 +52,7 @@ defmodule Radiator.MixProject do
       {:hal, "~> 1.1"},
       {:httpoison, "~> 1.5"},
       {:arc, "~> 0.11"},
-      {:arc_ecto, "~> 0.11"},
+      {:arc_ecto, github: "podlove/arc_ecto"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
       {:ecto_autoslug_field, "~> 1.0"},
@@ -78,7 +79,17 @@ defmodule Radiator.MixProject do
       {:ex_doc, "~> 0.19", only: :dev},
       {:chapters, "~> 0.1.0"},
       {:dataloader, "~> 1.0"},
-      {:mime, "~> 1.2"}
+      {:mime, "~> 1.2"},
+      {:remote_ip, "~> 0.1.4"},
+      {:ua_inspector, "~> 1.0"}
+    ]
+  end
+
+  defp package do
+    [
+      maintainers: ["Eric Teubert", "Dominik Wagner"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/podlove/radiator"}
     ]
   end
 
@@ -100,10 +111,12 @@ defmodule Radiator.MixProject do
     [
       main: "readme",
       source_ref: "v#{@version}",
+      source_url: "https://github.com/podlove/radiator",
       logo: "guides/images/podlove-radiator-logo.svg",
       extras: [
         "README.md",
         "guides/Users and Permissions.md",
+        "guides/Download Tracking.md",
         "guides/Files.md"
       ]
     ]
