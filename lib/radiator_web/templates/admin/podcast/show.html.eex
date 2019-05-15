@@ -1,4 +1,4 @@
-<div class="container mx-auto mb-6">
+<div class="container mx-auto mb-6 px-8">
 
   <div class="mb-6 flex w-full justify-between">
     
@@ -6,19 +6,19 @@
     
       <div class="w-3/4">
         <div class="flex">
-          <h1 class="mb-1 text-blue-darkest mr-4">
+          <h1 class="text-3xl font-bold mb-1 text-blue-900 mr-4">
             <%= @podcast.title %>
-            <span class="text-grey-dark font-normal text-lg">
-              <%= link to: Routes.feed_path(@conn, :show, @podcast), class: "no-underline text-blue" do %>
+            <span class="text-gray-600 font-normal text-lg">
+              <%= link to: Routes.feed_path(@conn, :show, @podcast), class: "no-underline text-blue-500" do %>
                 RSS Feed
               <% end %>   
             </span>
           </h1>
-          <%= link to: Routes.admin_network_podcast_path(@conn, :edit, @podcast.network_id, @podcast), class: "no-underline text-blue" do %>
+          <%= link to: Routes.admin_network_podcast_path(@conn, :edit, @podcast.network_id, @podcast), class: "no-underline text-blue-500" do %>
           <div class="pill">edit</div>
           <% end %>      
         </div>
-        <span class="text-grey-dark font-normal text-lg">
+        <span class="text-gray-600 font-normal text-lg">
           <%= @podcast.subtitle %>
         </span>
       </div>
@@ -33,41 +33,41 @@
     </div>
 </div>
 
-  <h2 class="text-grey-darker mb-2">Drafts</h2>
+  <h2 class="text-gray-700 mb-2">Drafts</h2>
 
   <%= for episode <- @draft_episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-blue-lightest" do %>
+    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-blue-100" do %>
       <div class="flex">
         <%= if episode.image do %>
           <img src="<%= episode.image %>" class="w-24 h-24 mr-6">
         <% end %>
         <div>
           <%= if episode.number do %>
-            <div class="text-grey-darker text-sm uppercase tracking-wide mb-2">Episode <%= episode.number %></div>
+            <div class="text-gray-700 text-sm uppercase tracking-wider mb-2">Episode <%= episode.number %></div>
           <% end %>
           <div class="font-bold text-black"><%= episode.title %></div>
-          <div class="text-grey-darker text-sm mb-2"><%= episode.subtitle %></div>        
+          <div class="text-gray-700 text-sm mb-2"><%= episode.subtitle %></div>        
         </div>
       </div>
     <% end %>
   <% end %>
 
-  <h2 class="text-grey-darker mb-2">Published</h2>
+  <h2 class="text-gray-700 mb-2">Published</h2>
 
   <%= for episode <- @published_episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-blue-lightest" do %>
+    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-blue-100" do %>
       <div class="flex">
         <%= if episode.image do %>
           <img src="<%= episode.image %>" class="w-24 h-24 mr-6">
         <% end %>
         <div>
           <%= if episode.number do %>
-            <div class="text-grey-darker text-sm uppercase tracking-wide mb-2">Episode <%= episode.number %></div>
+            <div class="text-gray-700 text-sm uppercase tracking-wider mb-2">Episode <%= episode.number %></div>
           <% end %>
           <div class="font-bold text-black"><%= episode.title %></div>
-          <div class="text-grey-darker text-sm mb-2"><%= episode.subtitle %></div>        
+          <div class="text-gray-700 text-sm mb-2"><%= episode.subtitle %></div>        
 
-          <div class="flex items-center border-grey border-solid text-xs text-grey-dark">
+          <div class="flex items-center border-gray-500 border-solid text-xs text-gray-600">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 mr-1 opacity-75 icon-trending-up"><path class="primary" d="M3.7 20.7a1 1 0 1 1-1.4-1.4l6-6a1 1 0 0 1 1.4 0l3.3 3.29 4.3-4.3a1 1 0 0 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0L9 15.4l-5.3 5.3z"></path><path class="secondary" d="M16.59 8l-2.3-2.3A1 1 0 0 1 15 4h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1.7.7L18 9.42l-4.3 4.3a1 1 0 0 1-1.4 0L9 10.4l-5.3 5.3a1 1 0 1 1-1.4-1.42l6-6a1 1 0 0 1 1.4 0l3.3 3.3L16.59 8z"></path></svg>
             <span>42.230 Downloads</span>
           </div>

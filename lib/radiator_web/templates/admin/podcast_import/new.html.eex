@@ -1,14 +1,14 @@
-<div class="container mx-auto mb-6">
+<div class="container mx-auto mb-6 px-8">
     <div class="mb-6">
-      <h1 class="mb-1 text-blue-darkest">Import RSS Feed</h1>
-      <span class="text-grey-dark font-normal text-lg">Import your existing podcast to Podlove Radiator via RSS feed.</span>
+      <h1 class="text-3xl font-bold mb-1 text-blue-900">Import RSS Feed</h1>
+      <span class="text-gray-600 font-normal text-lg">Import your existing podcast to Podlove Radiator via RSS feed.</span>
     </div>
 
     <div class="card">
       <form action="<%= Routes.admin_network_podcast_import_path(@conn, :create, @current_network) %>" method="post">
         <input type="hidden" name="_csrf_token" value="<%= Plug.CSRFProtection.get_csrf_token() %>">
           <div class="mb-6">
-            <%= label :feed, :feed_url, class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" do %>
+            <%= label :feed, :feed_url, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" do %>
               RSS Feed or Podcast Website
             <% end %>
             <%= text_input :feed, :feed_url, class: "input", placeholder: "https://www.example.com/feed.xml" %>

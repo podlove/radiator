@@ -1,10 +1,10 @@
-<div class="container mx-auto mb-6">
+<div class="container mx-auto mb-6 px-8">
   <div class="mb-6 flex w-full justify-between">
     <div>
-      <h1 class="mb-1 text-blue-darkest">
+      <h1 class="text-3xl font-bold mb-1 text-blue-900">
         <%= @episode.title %>
       </h1>
-      <div class="max-w-md text-grey-dark font-normal text-lg mb-2">
+      <div class="max-w-md text-gray-600 font-normal text-lg mb-2">
         <%= @episode.subtitle %>
       </div>
       <div class="max-w-md text-black font-normal">
@@ -12,8 +12,8 @@
       </div>
     </div>
     <div>
-      <%= link to: Routes.admin_network_podcast_episode_path(@conn, :edit, @episode.podcast.network_id, @episode.podcast, @episode), class: "no-underline text-blue" do %>
-      <div class="shadow bg-white hover:bg-white-dark text-blue py-2 px-4 rounded-full">
+      <%= link to: Routes.admin_network_podcast_episode_path(@conn, :edit, @episode.podcast.network_id, @episode.podcast, @episode), class: "no-underline text-blue-500" do %>
+      <div class="shadow bg-white text-blue-500 py-2 px-4 rounded-full">
         edit
       </div>
       <% end %>
@@ -23,7 +23,7 @@
   <%= if assigns[:episode] && Ecto.assoc_loaded?(@episode.enclosure) do %>
     <div class="card max-w-sm flex justify-between items-center">
       <audio src="<%= Radiator.Directory.Episode.enclosure_url(@episode) %>" type="<%= @episode.enclosure.mime_type %>" controls></audio>
-      <div class="text-grey-darkest">
+      <div class="text-gray-900">
         <%= @episode.enclosure.byte_length |> format_bytes() %>
       </div>
     </div>
@@ -31,7 +31,7 @@
 
   <%= if @episode.chapters do %>
     <div class="card max-w-sm flex flex-col mt-8">
-      <span class="text-grey-darker font-normal text-lg mb-4">Chapters</span>
+      <span class="text-gray-700 font-normal text-lg mb-4">Chapters</span>
       <%= for chapter <- @episode.chapters do %>
         <div><%= chapter.title %></div>
       <% end %>
