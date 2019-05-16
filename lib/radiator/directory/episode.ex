@@ -27,7 +27,7 @@ defmodule Radiator.Directory.Episode do
     has_many :chapters, Chapter
 
     has_many :attachments,
-             {"episode_attachments", Media.Attachment},
+             {"episode_attachments", Media.EpisodeAttachment},
              foreign_key: :subject_id
 
     many_to_many :audio_files,

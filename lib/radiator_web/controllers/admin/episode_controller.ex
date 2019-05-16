@@ -1,10 +1,13 @@
 defmodule RadiatorWeb.Admin.EpisodeController do
   use RadiatorWeb, :controller
 
+  require Logger
+
   alias Radiator.Directory
   alias Radiator.Storage
   alias Directory.Episode
   alias Directory.Editor
+  alias Radiator.Media.AudioFileUpload
 
   plug :assign_podcast when action in [:new, :create, :update]
 
@@ -20,20 +23,13 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   def create(conn, %{"episode" => episode_params}) do
     podcast = conn.assigns[:podcast]
 
-    episode_params =
-      case process_upload(conn, podcast, episode_params) do
-        {:ok, enclosure_url, enclosure_type, enclosure_size} ->
-          episode_params
-          |> Map.put("enclosure_url", enclosure_url)
-          |> Map.put("enclosure_type", enclosure_type)
-          |> Map.put("enclosure_length", enclosure_size)
-
-        _ ->
-          episode_params
-      end
-
     case Editor.Manager.create_episode(podcast, episode_params) do
       {:ok, episode} ->
+        if episode_params["enclosure"] do
+          {:ok, _audio, _attachment} =
+            AudioFileUpload.upload(episode_params["enclosure"], episode)
+        end
+
         conn
         |> put_flash(:info, "episode created successfully.")
         |> redirect(
@@ -68,17 +64,9 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   def update(conn, %{"id" => id, "episode" => episode_params}) do
     episode = Directory.get_episode!(id)
 
-    episode_params =
-      case process_upload(conn, conn.assigns[:podcast], episode_params) do
-        {:ok, enclosure_url, enclosure_type, enclosure_size} ->
-          episode_params
-          |> Map.put("enclosure_url", enclosure_url)
-          |> Map.put("enclosure_type", enclosure_type)
-          |> Map.put("enclosure_length", enclosure_size)
-
-        _ ->
-          episode_params
-      end
+    if episode_params["enclosure"] do
+      {:ok, _audio, _attachment} = AudioFileUpload.upload(episode_params["enclosure"], episode)
+    end
 
     case Editor.Manager.update_episode(episode, episode_params) do
       {:ok, episode} ->
