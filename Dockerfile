@@ -1,5 +1,7 @@
 FROM elixir:1.8.1
 
+ENV MIX_ENV=prod
+
 # Install hex package manager
 # By using --force, we don’t need to type “Y” to confirm the installation
 RUN mix local.hex --force && mix local.rebar --force
@@ -9,9 +11,9 @@ RUN mix local.hex --force && mix local.rebar --force
 # inotify-tools for phoenix
 # postgresql-client to connect with the remote db
 RUN apt-get update -yq \
-    && apt-get install curl gnupg -yq \
-    && curl -sL https://deb.nodesource.com/setup_10.x | bash \
-    && apt-get install nodejs inotify-tools postgresql-client -yq
+  && apt-get install curl gnupg -yq \
+  && curl -sL https://deb.nodesource.com/setup_10.x | bash \
+  && apt-get install nodejs inotify-tools postgresql-client -yq
 
 # Create the app directory
 RUN mkdir /app /app/assets
@@ -25,7 +27,7 @@ RUN echo $PWD
 # Get the Dependencies
 ## Elixir
 COPY mix.* /app/
-RUN mix deps.get
+RUN mix deps.get --only prod
 ## npm
 COPY assets/package*.json /app/assets/
 WORKDIR /app/assets
