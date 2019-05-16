@@ -1,0 +1,13 @@
+.git
+Dockerfile
+
+# Build artifacts
+_build
+deps
+*.ez
+
+# Crash dumps from Erlang VM
+erl_crash.dump
+
+# NPM dependencies added by asset pipeline
+assets/node_modules
