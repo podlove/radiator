@@ -13,6 +13,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
     []
     |> add(element(:title, episode.title))
     |> add(subtitle(episode))
+    |> add(summary(episode))
     |> add(description(episode))
     |> add(enclosure(episode))
     |> add(guid(episode))
@@ -24,6 +25,11 @@ defmodule Radiator.Feed.EpisodeBuilder do
     do: element("itunes:subtitle", subtitle)
 
   defp subtitle(_), do: nil
+
+  defp summary(%Episode{description: description}) when set?(description),
+    do: element("itunes:summary", description)
+
+  defp summary(_), do: nil
 
   defp description(%Episode{description: description}) when set?(description),
     do: element(:description, description)

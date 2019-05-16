@@ -8,7 +8,11 @@ defmodule RadiatorWeb.FeedController do
 
   def show(conn, %{"podcast_id" => id, "page" => page}) do
     podcast = Directory.get_podcast!(id)
-    episodes = Directory.list_episodes(%{podcast: podcast}) |> Radiator.Repo.preload(:chapters)
+
+    episodes =
+      Directory.list_episodes(%{podcast: podcast})
+      |> Radiator.Repo.preload([:chapters, :enclosure])
+
     page = String.to_integer(page)
 
     # I wonder where I could extract that to.
