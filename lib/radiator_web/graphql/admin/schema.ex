@@ -71,4 +71,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema do
       resolve &Resolvers.Editor.list_networks/3
     end
   end
+
+  mutation do
+    @desc "Prolong an authenticated session"
+    field :prolong_session, :session do
+      arg :username_or_email, non_null(:string)
+      resolve &Resolvers.Session.prolong_authenticated_session/3
+    end
+  end
 end
