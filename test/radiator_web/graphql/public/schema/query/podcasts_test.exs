@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.GraphQL.Schema.Query.PodcastsTest do
+defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
   use RadiatorWeb.ConnCase, async: true
 
   import Radiator.Factory
@@ -12,8 +12,10 @@ defmodule RadiatorWeb.GraphQL.Schema.Query.PodcastsTest do
   }
   """
 
-  test "podcasts returns a list of podcasts", %{conn: conn} do
+  test "podcasts returns a list of published podcasts", %{conn: conn} do
     podcasts = insert_list(3, :podcast)
+    _podcast = insert(:unpublished_podcast)
+
     conn = get conn, "/api/graphql", query: @list_query
 
     assert json_response(conn, 200) == %{
@@ -50,58 +52,12 @@ defmodule RadiatorWeb.GraphQL.Schema.Query.PodcastsTest do
     assert message == "Podcast ID -1 not found"
   end
 
-  @is_published_query """
-  query ($id: ID!) {
-    podcast(id: $id) {
-      id
-      isPublished
-    }
-  }
-  """
+  test "podcast returns an error if not published", %{conn: conn} do
+    podcast = insert(:unpublished_podcast)
+    conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => podcast.id}
 
-  describe "is_published" do
-    test "is false for an unpublished podcast", %{conn: conn} do
-      podcast = insert(:unpublished_podcast)
-
-      conn =
-        get conn, "/api/graphql", query: @is_published_query, variables: %{"id" => podcast.id}
-
-      assert json_response(conn, 200) == %{
-               "data" => %{
-                 "podcast" => %{"id" => Integer.to_string(podcast.id), "isPublished" => false}
-               }
-             }
-    end
-
-    test "is true for a published podcast", %{conn: conn} do
-      podcast = insert(:podcast, published_at: DateTime.utc_now())
-
-      conn =
-        get conn, "/api/graphql", query: @is_published_query, variables: %{"id" => podcast.id}
-
-      assert json_response(conn, 200) == %{
-               "data" => %{
-                 "podcast" => %{"id" => Integer.to_string(podcast.id), "isPublished" => true}
-               }
-             }
-    end
-
-    # two tests here:
-    # - no podcast found for public query
-    # - isPublished is false for authenticated query
-    test "is false for published_at dates in the future", %{conn: conn} do
-      in_one_hour = DateTime.utc_now() |> DateTime.add(3600)
-      podcast = insert(:podcast, published_at: in_one_hour)
-
-      conn =
-        get conn, "/api/graphql", query: @is_published_query, variables: %{"id" => podcast.id}
-
-      assert json_response(conn, 200) == %{
-               "data" => %{
-                 "podcast" => %{"id" => Integer.to_string(podcast.id), "isPublished" => false}
-               }
-             }
-    end
+    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
+    assert message == "Podcast ID #{podcast.id} not found"
   end
 
   describe "episodes" do
@@ -117,9 +73,10 @@ defmodule RadiatorWeb.GraphQL.Schema.Query.PodcastsTest do
     }
     """
 
-    test "returns all episodes of a podcast", %{conn: conn} do
+    test "returns all published episodes of a podcast", %{conn: conn} do
       podcast = insert(:podcast)
-      episode = insert(:episode, podcast: podcast)
+      episode = insert(:published_episode, podcast: podcast)
+      _episode = insert(:unpublished_episode, podcast: podcast)
 
       conn =
         get conn, "/api/graphql", query: @with_episodes_query, variables: %{"id" => podcast.id}
@@ -147,11 +104,11 @@ defmodule RadiatorWeb.GraphQL.Schema.Query.PodcastsTest do
     }
     """
 
-    test "returns the number of episodes associated to a podcast", %{conn: conn} do
+    test "returns the number of published episodes associated to a podcast", %{conn: conn} do
       podcast = insert(:podcast)
-      _episode1 = insert(:episode, podcast: podcast)
-      _episode2 = insert(:episode, podcast: podcast)
-      _episode3 = insert(:episode, podcast: podcast)
+      _episode1 = insert(:published_episode, podcast: podcast)
+      _episode2 = insert(:published_episode, podcast: podcast)
+      _episode3 = insert(:unpublished_episode, podcast: podcast)
 
       conn =
         get conn, "/api/graphql",
@@ -160,7 +117,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Query.PodcastsTest do
 
       assert json_response(conn, 200) == %{
                "data" => %{
-                 "podcast" => %{"id" => Integer.to_string(podcast.id), "episodesCount" => 3}
+                 "podcast" => %{"id" => Integer.to_string(podcast.id), "episodesCount" => 2}
                }
              }
     end

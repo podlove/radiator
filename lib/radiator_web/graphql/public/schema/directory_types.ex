@@ -1,9 +1,9 @@
-defmodule RadiatorWeb.GraphQL.Schema.DirectoryTypes do
+defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
   use Absinthe.Schema.Notation
 
   import Absinthe.Resolution.Helpers
 
-  alias RadiatorWeb.GraphQL.Resolvers
+  alias RadiatorWeb.GraphQL.Public.Resolvers
 
   @desc "A network"
   object :network do
@@ -18,12 +18,6 @@ defmodule RadiatorWeb.GraphQL.Schema.DirectoryTypes do
     field :podcasts, list_of(:podcast) do
       resolve &Resolvers.Directory.list_podcasts/3
     end
-  end
-
-  @desc "The input for a network"
-  input_object :network_input do
-    field :title, non_null(:string)
-    field :image, :upload
   end
 
   @desc "A podcast"
@@ -45,12 +39,7 @@ defmodule RadiatorWeb.GraphQL.Schema.DirectoryTypes do
     field :subtitle, :string
     field :slug, :string
 
-    field :is_published, :boolean do
-      resolve &Resolvers.Directory.is_published/3
-    end
-
     field :episodes, list_of(:episode) do
-      arg :published, type: :published, default_value: :any
       arg :page, type: :integer, default_value: 1
       arg :items_per_page, type: :integer, default_value: 10
 
@@ -60,17 +49,6 @@ defmodule RadiatorWeb.GraphQL.Schema.DirectoryTypes do
     field :episodes_count, :integer do
       resolve &Resolvers.Directory.get_episodes_count/3
     end
-  end
-
-  @desc "The input for a podcast"
-  input_object :podcast_input do
-    field :title, non_null(:string)
-    field :subtitle, :string
-    field :description, :string
-    field :image, :upload
-    field :language, :string
-    field :owner_email, :string
-    field :owner_name, :string
   end
 
   @desc "An episode in a podcast"
@@ -91,10 +69,6 @@ defmodule RadiatorWeb.GraphQL.Schema.DirectoryTypes do
     field :title, :string
     field :slug, :string
 
-    field :is_published, :boolean do
-      resolve &Resolvers.Directory.is_published/3
-    end
-
     field :podcast, :podcast do
       resolve &Resolvers.Directory.find_podcast/3
     end
@@ -108,15 +82,5 @@ defmodule RadiatorWeb.GraphQL.Schema.DirectoryTypes do
 
       resolve dataloader(Radiator.EpisodeMeta, :chapters)
     end
-  end
-
-  @desc "The input for an episode in a podcast"
-  input_object :episode_input do
-    field :title, non_null(:string)
-    field :subtitle, :string
-    field :description, :string
-    field :content, :string
-    field :image, :upload
-    field :number, :integer
   end
 end

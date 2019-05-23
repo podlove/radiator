@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.GraphQL.Resolvers.Session do
+defmodule RadiatorWeb.GraphQL.Public.Resolvers.Session do
   def get_authenticated_session(
         _parent,
         %{username_or_email: username_or_email, password: password},
@@ -17,15 +17,5 @@ defmodule RadiatorWeb.GraphQL.Resolvers.Session do
            token: token
          }}
     end
-  end
-
-  def prolong_authenticated_session(_parent, _params, %{context: %{authenticated_user: user}}) do
-    token = Radiator.Auth.Guardian.api_session_token(user)
-
-    {:ok,
-     %{
-       username: user.name,
-       token: token
-     }}
   end
 end

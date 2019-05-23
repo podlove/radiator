@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.GraphQL.Schema.Directory.EpisodeTypes do
+defmodule RadiatorWeb.GraphQL.Admin.Schema.Directory.EpisodeTypes do
   use Absinthe.Schema.Notation
 
   @desc "A chapter in an episode"

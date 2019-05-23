@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.GraphQL.Schema.StorageTypes do
+defmodule RadiatorWeb.GraphQL.Admin.Schema.StorageTypes do
   use Absinthe.Schema.Notation
 
   @desc "Intermediary object providing an URL to upload against"

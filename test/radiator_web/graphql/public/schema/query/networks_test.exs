@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.GraphQL.Schema.Query.NetworksTest do
+defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
   use RadiatorWeb.ConnCase, async: true
   import Radiator.Factory
 
@@ -44,10 +44,11 @@ defmodule RadiatorWeb.GraphQL.Schema.Query.NetworksTest do
   }
   """
 
-  test "network has embedded podcasts", %{conn: conn} do
+  test "network has embedded published podcasts", %{conn: conn} do
     network = insert(:network)
     podcast_1 = insert(:podcast, network: network)
     podcast_2 = insert(:podcast, network: network)
+    _podcast_3 = insert(:unpublished_podcast, network: network)
     insert(:podcast)
 
     conn =

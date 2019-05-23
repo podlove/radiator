@@ -13,6 +13,7 @@ defmodule Radiator.Directory do
   alias Radiator.Media.AudioFile
   alias Directory.{Network, Episode, Podcast}
   alias Radiator.Directory.PodcastQuery
+  alias Radiator.Directory.EpisodeQuery
 
   def data() do
     Dataloader.Ecto.new(Repo, query: &query/2)
@@ -70,6 +71,7 @@ defmodule Radiator.Directory do
 
   def list_podcasts(%Network{id: id}) do
     from(p in Podcast, where: p.network_id == ^id)
+    |> PodcastQuery.filter_by_published()
     |> Repo.all()
   end
 
@@ -81,6 +83,7 @@ defmodule Radiator.Directory do
 
   def list_podcasts_with_episode_counts(%Network{id: id}) do
     from(p in Podcast, where: p.network_id == ^id)
+    |> PodcastQuery.filter_by_published()
     |> Podcast.preload_episode_counts()
     |> Repo.all()
   end
@@ -121,6 +124,7 @@ defmodule Radiator.Directory do
   """
   def get_episodes_count_for_podcast!(id) do
     from(e in Episode, where: e.podcast_id == ^id)
+    |> EpisodeQuery.filter_by_published(true)
     |> Repo.aggregate(:count, :id)
   end
 
@@ -135,7 +139,9 @@ defmodule Radiator.Directory do
   def get_podcast_by_slug(slug), do: Repo.get_by(Podcast, %{slug: slug})
 
   defp episodes_query(args) when is_map(args) do
-    Radiator.Directory.EpisodeQuery.build(args)
+    args
+    |> Map.put(:published, true)
+    |> EpisodeQuery.build()
   end
 
   def list_episodes do
@@ -148,7 +154,7 @@ defmodule Radiator.Directory do
   end
 
   @doc """
-  Gets a single episode.
+  Gets a single published episode.
 
   Raises `Ecto.NoResultsError` if the Episode does not exist.
 
@@ -161,8 +167,19 @@ defmodule Radiator.Directory do
       ** (Ecto.NoResultsError)
 
   """
-  def get_episode!(id), do: Repo.get!(Episode, id) |> Repo.preload(:podcast)
-  def get_episode(id), do: Repo.get(Episode, id) |> Repo.preload(:podcast)
+  def get_episode!(id) do
+    Episode
+    |> EpisodeQuery.filter_by_published(true)
+    |> Repo.get!(id)
+    |> Repo.preload(:podcast)
+  end
+
+  def get_episode(id) do
+    Episode
+    |> EpisodeQuery.filter_by_published(true)
+    |> Repo.get(id)
+    |> Repo.preload(:podcast)
+  end
 
   @doc """
   Gets a single episode by its slug.

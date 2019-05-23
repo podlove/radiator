@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.GraphQL.Schema.UserTypes do
+defmodule RadiatorWeb.GraphQL.Admin.Schema.UserTypes do
   use Absinthe.Schema.Notation
 
   @desc "A user API session"

@@ -46,43 +46,45 @@ defmodule Radiator.Directory.EpisodeQuery do
     end)
   end
 
-  defp filter_by_podcast(query, %Podcast{} = podcast) do
+  def filter_by_podcast(query, %Podcast{} = podcast) do
     from(e in query, where: e.podcast_id == ^podcast.id)
   end
 
-  defp filter_by_published(query, true) do
-    from(e in query, where: e.published_at <= fragment("NOW()"))
+  def filter_by_published(query, true) do
+    now = DateTime.utc_now()
+    from(e in query, where: e.published_at <= ^now)
   end
 
-  defp filter_by_published(query, false) do
-    from(e in query, where: e.published_at > fragment("NOW()") or is_nil(e.published_at))
+  def filter_by_published(query, false) do
+    now = DateTime.utc_now()
+    from(e in query, where: e.published_at > ^now or is_nil(e.published_at))
   end
 
-  defp filter_by_published(query, :any) do
+  def filter_by_published(query, :any) do
     query
   end
 
-  defp order(query, order) do
+  def order(query, order) do
     from(e in query, order_by: ^order)
   end
 
   @default_items_per_page 10
 
-  defp paginate(query, %{items_per_page: items_per_page, page: page})
-       when is_integer(items_per_page) and is_integer(page) do
+  def paginate(query, %{items_per_page: items_per_page, page: page})
+      when is_integer(items_per_page) and is_integer(page) do
     offset = items_per_page * (page - 1)
     from(e in query, limit: ^items_per_page, offset: ^offset)
   end
 
-  defp paginate(query, %{page: page}) when is_integer(page) do
+  def paginate(query, %{page: page}) when is_integer(page) do
     paginate(query, %{items_per_page: @default_items_per_page, page: page})
   end
 
-  defp paginate(query, %{items_per_page: items_per_page}) when is_integer(items_per_page) do
+  def paginate(query, %{items_per_page: items_per_page}) when is_integer(items_per_page) do
     paginate(query, %{items_per_page: items_per_page, page: 1})
   end
 
-  defp paginate(query, _) do
+  def paginate(query, _) do
     query
   end
 end

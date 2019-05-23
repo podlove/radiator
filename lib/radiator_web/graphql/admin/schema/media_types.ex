@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.GraphQL.Schema.MediaTypes do
+defmodule RadiatorWeb.GraphQL.Admin.Schema.MediaTypes do
   use Absinthe.Schema.Notation
 
   @desc "An audio enclosure"

@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.GraphQL.Schema.Middleware.RequireAuthentication do
+defmodule RadiatorWeb.GraphQL.Admin.Schema.Middleware.RequireAuthentication do
   @behaviour Absinthe.Middleware
 
   def call(resolution, _) do

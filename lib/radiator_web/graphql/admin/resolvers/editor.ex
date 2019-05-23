@@ -1,47 +1,72 @@
-defmodule RadiatorWeb.GraphQL.Resolvers.Directory do
-  alias Radiator.Directory
+defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
+  alias Radiator.Directory.Editor
   alias Radiator.Directory.{Episode, Podcast, Network}
   alias Radiator.EpisodeMeta
   alias Radiator.Media
 
-  alias Directory.Editor
+  @not_authorized_match {:error, :not_authorized}
+  @not_authorized_response {:error, "Not Authorized"}
 
-  def list_networks(_parent, _args, _resolution) do
-    {:ok, Directory.list_networks()}
+  #  TODO: DRY this up with a macro:
+  #
+  #  case Editor.get_network(user, id) do
+  #    network = %Network{} -> ___custom_code_goes_here___
+  #    @not_authorized_match -> @not_authorized_response
+  #    {:error, _} -> {:error, "Network ID #{id} not found"}
+  #  end
+
+  def list_networks(_parent, _args, %{context: %{authenticated_user: user}}) do
+    {:ok, Editor.list_networks(user)}
   end
 
-  def find_network(_parent, %{id: id}, _resolution) do
-    case Directory.get_network(id) do
-      nil -> {:error, "Network ID #{id} not found"}
-      network -> {:ok, network}
+  def find_network(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+    case Editor.get_network(user, id) do
+      network = %Network{} -> {:ok, network}
+      @not_authorized_match -> @not_authorized_response
+      {:error, _} -> {:error, "Network ID #{id} not found"}
     end
   end
 
-  def create_network(_parent, %{network: args}, _resolution) do
-    user = Editor.Owner.api_user_shim()
-    # TODO: use the correct user once authentication is in place for graphql
-    case Editor.Owner.create_network(user, args) do
-      {:ok, %{network: network}} -> {:ok, network}
+  def create_network(_parent, %{network: args}, %{context: %{authenticated_user: user}}) do
+    case Editor.create_network(user, args) do
+      {:ok, network} -> {:ok, network}
+      @not_authorized_match -> @not_authorized_response
       _ -> {:error, "Could not create network with #{args}"}
     end
   end
 
-  def update_network(_parent, %{id: id, network: args}, _resolution) do
-    case Directory.get_network(id) do
-      nil -> {:error, "Network ID #{id} not found"}
-      network -> Editor.Owner.update_network(network, args)
+  def update_network(_parent, %{id: id, network: args}, %{context: %{authenticated_user: user}}) do
+    case Editor.get_network(user, id) do
+      @not_authorized_match ->
+        @not_authorized_response
+
+      {:error, _} ->
+        {:error, "Network ID #{id} not found"}
+
+      network = %Network{} ->
+        Editor.update_network(user, network, args)
+        |> case do
+          @not_authorized_match -> @not_authorized_response
+          {:ok, network} -> {:ok, network}
+        end
     end
   end
 
-  def list_podcasts(%Network{id: id}, _args, _resolution) do
-    case Directory.get_network(id) do
-      nil -> {:error, "Network ID #{id} not found"}
-      network -> {:ok, Directory.list_podcasts(network)}
+  def list_podcasts(%Network{id: id}, _args, %{context: %{authenticated_user: user}}) do
+    case Editor.get_network(user, id) do
+      @not_authorized_match ->
+        @not_authorized_response
+
+      {:error, _} ->
+        {:error, "Network ID #{id} not found"}
+
+      network = %Network{} ->
+        {:ok, Editor.list_podcasts(user, network)}
     end
   end
 
-  def list_podcasts(_parent, _args, _resolution) do
-    {:ok, Directory.list_podcasts()}
+  def list_podcasts(_parent, _args, %{context: %{authenticated_user: user}}) do
+    {:ok, Editor.list_podcasts(user)}
   end
 
   def find_podcast(%Episode{} = episode, _args, _resolution) do

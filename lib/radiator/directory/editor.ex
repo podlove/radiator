@@ -29,7 +29,6 @@ defmodule Radiator.Directory.Editor do
       [%Network{}, ...]
 
   """
-
   def list_networks(actor = %Auth.User{}) do
     query =
       from n in Network,
@@ -113,6 +112,37 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def list_podcasts(actor = %Auth.User{}) do
+    query =
+      from n in Podcast,
+        join: p in "podcasts_perm",
+        where: n.id == p.subject_id,
+        where: p.user_id == ^actor.id,
+        order_by: n.title
+
+    query
+    |> Repo.all()
+  end
+
+  def list_podcasts(actor = %Auth.User{}, network = %Network{}) do
+    query =
+      from pod in Podcast,
+        join: perm in "podcasts_perm",
+        where: pod.id == perm.subject_id,
+        where: perm.user_id == ^actor.id,
+        where: pod.network_id == ^network.id,
+        order_by: pod.title
+
+    query
+    |> Repo.all()
+  end
+
+  # def update_podcast
+  # def delete_podcast
+  # def is_published(podcast)
+  # def publish_podcast
+  # def depublish_podcast
+
   def create_podcast(actor = %Auth.User{}, network = %Network{}, attrs) do
     if has_permission(actor, network, :manage) do
       Editor.Manager.create_podcast(network, attrs)
@@ -130,6 +160,15 @@ defmodule Radiator.Directory.Editor do
       @not_authorized
     end
   end
+
+  # def list_episodes
+  # def get_episode
+  # def create_episode
+  # def update_episode
+  # def delete_episode
+  # def is_published(episode)
+  # def publish_episode
+  # def depublish_episode
 
   @spec attach_audio_to_network(Network.t(), Media.AudioFile.t()) ::
           {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
