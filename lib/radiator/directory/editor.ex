@@ -1,9 +1,12 @@
 defmodule Radiator.Directory.Editor do
   @moduledoc """
   The Editor context for querying and modifying data as an authorized user.
+
+  It is the single point of access for all actions requiring an authenticated user.
   """
 
   import Ecto.Query, warn: false
+  import Radiator.Auth.Permission
 
   alias Radiator.Auth
 
@@ -11,9 +14,6 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.Directory.{Network, Podcast, Episode}
 
   alias Radiator.Directory.Editor
-  alias Radiator.Directory.Editor.EditorHelpers
-
-  alias Radiator.Perm.Ecto.PermissionType
 
   alias Radiator.Media
 
@@ -121,57 +121,14 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  # Permission
+  def get_podcast!(actor = %Auth.User{}, id) do
+    podcast = Repo.get!(Podcast, id)
 
-  def get_permission(user = %Auth.User{}, subject = %Network{}),
-    do: do_get_permission(user, subject)
-
-  def get_permission(user = %Auth.User{}, subject = %Podcast{}),
-    do: do_get_permission(user, subject)
-
-  def get_permission(user = %Auth.User{}, subject = %Episode{}),
-    do: do_get_permission(user, subject)
-
-  defp do_get_permission(user, subject) do
-    case EditorHelpers.get_permission(user, subject) do
-      nil -> nil
-      perm -> perm.permission
+    if has_permission(actor, podcast, :readonly) do
+      podcast
+    else
+      @not_authorized
     end
-  end
-
-  def has_permission(_user, nil, _permission), do: false
-
-  def has_permission(user, subject, permission) do
-    case PermissionType.compare(get_permission(user, subject), permission) do
-      :lt ->
-        case parent(subject) do
-          nil ->
-            false
-
-          parent ->
-            has_permission(user, parent, permission)
-        end
-
-      # greater or equal is fine
-      _ ->
-        true
-    end
-  end
-
-  defp parent(subject = %Episode{}) do
-    subject
-    |> Ecto.assoc(:podcast)
-    |> Repo.one!()
-  end
-
-  defp parent(subject = %Podcast{}) do
-    subject
-    |> Ecto.assoc(:podcast)
-    |> Repo.one!()
-  end
-
-  defp parent(_) do
-    nil
   end
 
   @spec attach_audio_to_network(Network.t(), Media.AudioFile.t()) ::

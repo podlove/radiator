@@ -1,6 +1,29 @@
 defmodule Radiator.Factory do
   use ExMachina.Ecto, repo: Radiator.Repo
 
+  import Radiator.Auth.Permission
+
+  alias Radiator.Auth.User
+  alias Radiator.Directory.{Network, Podcast}
+
+  def user_factory do
+    %User{
+      name: "admin",
+      email: "admin@example.com",
+      display_name: "admin"
+    }
+  end
+
+  def make_owner(user = %User{}, network = %Network{}) do
+    :ok = set_permission(user, network, :own)
+    user
+  end
+
+  def make_owner(user = %User{}, podcast = %Podcast{}) do
+    :ok = set_permission(user, podcast, :own)
+    user
+  end
+
   def network_factory do
     title = sequence(:title, &"Network ##{&1}")
 
@@ -14,8 +37,18 @@ defmodule Radiator.Factory do
 
     %Radiator.Directory.Podcast{
       network: build(:network),
-      title: title
+      title: title,
+      published_at: DateTime.utc_now() |> DateTime.add(-3600, :second)
     }
+  end
+
+  def unpublished_podcast_factory do
+    struct!(
+      podcast_factory(),
+      %{
+        published_at: DateTime.utc_now() |> DateTime.add(3600, :second)
+      }
+    )
   end
 
   def unpublished_episode_factory do

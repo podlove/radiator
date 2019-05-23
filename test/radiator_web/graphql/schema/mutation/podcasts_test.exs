@@ -19,7 +19,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
     conn =
       post conn, "/api/graphql",
         query: @create_query,
-        variables: %{"podcast" => podcast, "network_id" => network.id}
+        variables: %{"podcast" => %{title: podcast.title}, "network_id" => network.id}
 
     title = podcast[:title]
 

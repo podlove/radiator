@@ -3,8 +3,7 @@ defmodule RadiatorWeb.Plug.AssignCurrentNetwork do
 
   import Plug.Conn
   import Radiator.Directory, only: [get_network: 1]
-
-  alias Radiator.Directory.Editor
+  import Radiator.Auth.Permission, only: [has_permission: 3]
 
   alias RadiatorWeb.Router.Helpers, as: Routes
 
@@ -12,7 +11,7 @@ defmodule RadiatorWeb.Plug.AssignCurrentNetwork do
   def init(opts), do: opts
 
   def user_has_permission(user, network, permission) do
-    Editor.has_permission(user, network, permission)
+    has_permission(user, network, permission)
   end
 
   @impl Plug
