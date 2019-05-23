@@ -121,6 +121,18 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def delete_podcast(actor = %Auth.User{}, podcast = %Podcast{}) do
+    podcast =
+      podcast
+      |> Repo.preload(:network)
+
+    if has_permission(actor, podcast.network, :manage) do
+      Editor.Manager.delete_podcast(podcast)
+    else
+      @not_authorized
+    end
+  end
+
   # Permission
 
   def get_permission(user = %Auth.User{}, subject = %Network{}),
