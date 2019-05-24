@@ -2,7 +2,7 @@ defmodule Radiator.DirectoryTest do
   use Radiator.DataCase
 
   alias Radiator.Directory
-  alias Directory.Editor
+  alias Radiator.Directory.Editor
 
   import Radiator.Factory
 

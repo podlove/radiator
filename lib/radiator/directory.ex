@@ -11,7 +11,7 @@ defmodule Radiator.Directory do
   alias Radiator.Repo
   alias Radiator.Media
   alias Radiator.Media.AudioFile
-  alias Directory.{Network, Episode, Podcast}
+  alias Radiator.Directory.{Network, Episode, Podcast}
   alias Radiator.Directory.PodcastQuery
   alias Radiator.Directory.EpisodeQuery
 

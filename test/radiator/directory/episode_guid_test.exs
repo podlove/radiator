@@ -2,8 +2,8 @@ defmodule Radiator.GuidTest do
   use Radiator.DataCase
 
   alias Radiator.Directory
-  alias Directory.Episode
-  alias Directory.Editor
+  alias Radiator.Directory.Episode
+  alias Radiator.Directory.Editor
 
   import Radiator.Factory
 

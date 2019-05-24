@@ -8,7 +8,7 @@ defmodule Radiator.Directory.Editor.Manager do
   alias Radiator.Repo
   alias Radiator.Directory
 
-  alias Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.{Network, Podcast, Episode}
 
   @doc """
   Creates a podcast.

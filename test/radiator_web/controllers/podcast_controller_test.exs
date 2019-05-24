@@ -4,8 +4,8 @@ defmodule RadiatorWeb.PodcastControllerTest do
   import Radiator.Factory
 
   alias Radiator.Directory
-  alias Directory.Podcast
-  alias Directory.Editor
+  alias Radiator.Directory.Podcast
+  alias Radiator.Directory.Editor
 
   @create_attrs %{
     author: "some author",

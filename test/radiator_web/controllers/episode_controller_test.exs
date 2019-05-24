@@ -4,8 +4,8 @@ defmodule RadiatorWeb.EpisodeControllerTest do
   import Radiator.Factory
 
   alias Radiator.Directory
-  alias Directory.Episode
-  alias Directory.Editor
+  alias Radiator.Directory.Episode
+  alias Radiator.Directory.Editor
 
   @create_attrs %{
     content: "some content",
