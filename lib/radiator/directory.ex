@@ -64,6 +64,8 @@ defmodule Radiator.Directory do
 
   Only temporary until users can be assigned to networks.
   Once this is possible, remove this function.
+
+  @see https://github.com/podlove/radiator/issues/78
   """
   def get_any_network do
     from(n in Network, limit: 1) |> Repo.one!()

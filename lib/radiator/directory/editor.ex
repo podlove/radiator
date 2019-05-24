@@ -70,6 +70,12 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def get_any_network(actor = %Auth.User{}) do
+    actor
+    |> list_networks
+    |> hd
+  end
+
   @doc """
   Creates a network.
 
