@@ -4,6 +4,7 @@ defmodule Radiator.Directory.Editor do
 
   It is the single point of access for all actions requiring an authenticated user.
   """
+  use Radiator.Constants
 
   import Ecto.Query, warn: false
   import Radiator.Auth.Permission
@@ -16,9 +17,6 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.Directory.Editor
 
   alias Radiator.Media
-
-  @not_authorized {:error, :not_authorized}
-  @not_found {:error, :not_found}
 
   @doc """
   Returns a list of networks the actor has at least `:readonly` permissions on.
@@ -61,13 +59,13 @@ defmodule Radiator.Directory.Editor do
   def get_network(actor = %Auth.User{}, id) do
     case Repo.get(Network, id) do
       nil ->
-        @not_found
+        @not_found_match
 
       network = %Network{} ->
         if has_permission(actor, network, :readonly) do
           {:ok, network}
         else
-          @not_authorized
+          @not_authorized_match
         end
     end
   end
@@ -110,7 +108,7 @@ defmodule Radiator.Directory.Editor do
     if has_permission(actor, network, :own) do
       Editor.Owner.update_network(network, attrs)
     else
-      @not_authorized
+      @not_authorized_match
     end
   end
 
@@ -148,7 +146,7 @@ defmodule Radiator.Directory.Editor do
     if has_permission(actor, network, :manage) do
       Editor.Manager.create_podcast(network, attrs)
     else
-      @not_authorized
+      @not_authorized_match
     end
   end
 
@@ -172,13 +170,13 @@ defmodule Radiator.Directory.Editor do
   def get_podcast(actor = %Auth.User{}, id) do
     case Repo.get(Podcast, id) do
       nil ->
-        @not_found
+        @not_found_match
 
       podcast = %Podcast{} ->
         if has_permission(actor, podcast, :readonly) do
           {:ok, podcast}
         else
-          @not_authorized
+          @not_authorized_match
         end
     end
   end
@@ -194,7 +192,7 @@ defmodule Radiator.Directory.Editor do
         {:ok, count}
 
       _ ->
-        @not_authorized
+        @not_authorized_match
     end
   end
 
@@ -225,13 +223,13 @@ defmodule Radiator.Directory.Editor do
   def get_episode(actor = %Auth.User{}, id) do
     case Repo.get(Episode, id) do
       nil ->
-        @not_found
+        @not_found_match
 
       episode = %Episode{} ->
         if has_permission(actor, episode, :readonly) do
           {:ok, episode}
         else
-          @not_authorized
+          @not_authorized_match
         end
     end
   end
