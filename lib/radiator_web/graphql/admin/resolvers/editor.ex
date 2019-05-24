@@ -47,6 +47,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         Editor.update_network(user, network, args)
         |> case do
           @not_authorized_match -> @not_authorized_response
+          {:error, changeset = %Ecto.Changeset{}} -> {:error, changeset}
           {:ok, network} -> {:ok, network}
         end
     end
