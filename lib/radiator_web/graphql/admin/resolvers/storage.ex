@@ -1,13 +1,9 @@
 defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Storage do
+  use Radiator.Constants
+
   alias Radiator.Storage
   alias Radiator.Media
   alias Radiator.Directory.Editor
-
-  @not_authorized_match {:error, :not_authorized}
-  @not_authorized_response {:error, "Not Authorized"}
-
-  @not_found_match {:error, :not_found}
-  @not_found_response {:error, "Entity not found"}
 
   def create_upload(_parent, %{filename: filename}, _resolution) do
     {:ok, upload_url} = Storage.get_upload_url(filename)

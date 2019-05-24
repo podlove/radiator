@@ -1,26 +1,21 @@
 defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
+  use Radiator.Constants
+
   alias Radiator.Directory.Editor
   alias Radiator.Directory.{Episode, Podcast, Network}
   alias Radiator.EpisodeMeta
   alias Radiator.Media
 
-  @not_authorized_match {:error, :not_authorized}
-  @not_authorized_response {:error, "Not Authorized"}
-
-  @not_found_match {:error, :not_found}
-  @not_found_response {:error, "Entity not found"}
-
   @doc """
-  Get network for user and so something with it or error.
+  Get network with user and do something with it or return error.
 
-  Gets network for user using given user and network id.
   The `do` block must be a function with `network` as argument. It is called if the
   network can be retrieved successfully. Otherwise, an error response, ready for
   GraphQL, is returned and the block not executed.
 
   ## Examples
 
-      with_network Radiator.Directory.Editor.get_network(user, id) do
+      with_network user, id do
         fn network -> {:ok, network}
       end
 
@@ -35,13 +30,53 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  #  TODO: DRY this up with a macro:
-  #
-  #  case Editor.get_network(user, id) do
-  #    network = %Network{} -> ___custom_code_goes_here___
-  #    @not_authorized_match -> @not_authorized_response
-  #    {:error, _} -> {:error, "Network ID #{id} not found"}
-  #  end
+  @doc """
+  Get podcast with user and do something with it or return error.
+
+  The `do` block must be a function with `podcast` as argument. It is called if the
+  podcast can be retrieved successfully. Otherwise, an error response, ready for
+  GraphQL, is returned and the block not executed.
+
+  ## Examples
+
+      with_podcast Ruser, id do
+        fn podcast -> {:ok, podcast}
+      end
+
+  """
+  defmacro with_podcast(user, podcast_id, do: block) do
+    quote do
+      case Editor.get_podcast(unquote(user), unquote(podcast_id)) do
+        {:ok, podcast} -> unquote(block).(podcast)
+        @not_found_match -> @not_found_response
+        @not_authorized_match -> @not_authorized_response
+      end
+    end
+  end
+
+  @doc """
+  Get episode with user and do something with it or return error.
+
+  The `do` block must be a function with `episode` as argument. It is called if the
+  episode can be retrieved successfully. Otherwise, an error response, ready for
+  GraphQL, is returned and the block not executed.
+
+  ## Examples
+
+      with_episode user, id do
+        fn episode -> {:ok, episode}
+      end
+
+  """
+  defmacro with_episode(user, episode_id, do: block) do
+    quote do
+      case Editor.get_episode(unquote(user), unquote(episode_id)) do
+        {:ok, episode} -> unquote(block).(episode)
+        @not_found_match -> @not_found_response
+        @not_authorized_match -> @not_authorized_response
+      end
+    end
+  end
 
   def list_networks(_parent, _args, %{context: %{authenticated_user: user}}) do
     {:ok, Editor.list_networks(user)}
@@ -85,18 +120,14 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def find_podcast(%Episode{} = episode, _args, %{context: %{authenticated_user: user}}) do
-    case Editor.get_podcast(user, episode.podcast_id) do
-      {:ok, podcast} -> {:ok, podcast}
-      @not_found_match -> @not_found_response
-      @not_authorized_match -> @not_authorized_response
+    with_podcast user, episode.podcast_id do
+      fn podcast -> {:ok, podcast} end
     end
   end
 
   def find_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_podcast(user, id) do
-      {:ok, podcast} -> {:ok, podcast}
-      @not_found_match -> @not_found_response
-      @not_authorized_match -> @not_authorized_response
+    with_podcast user, id do
+      fn podcast -> {:ok, podcast} end
     end
   end
 
@@ -112,140 +143,93 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def update_podcast(_parent, %{id: id, podcast: args}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_podcast(user, id) do
-      {:ok, podcast} ->
+    with_podcast user, id do
+      fn podcast ->
         # FIXME: no direct manager access
         Editor.Manager.update_podcast(podcast, args)
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
   def publish_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_podcast(user, id) do
-      {:ok, podcast} ->
+    with_podcast user, id do
+      fn podcast ->
         # FIXME: no direct manager access
         Editor.Manager.publish_podcast(podcast)
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
   def depublish_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_podcast(user, id) do
-      {:ok, podcast} ->
+    with_podcast user, id do
+      fn podcast ->
         # FIXME: no direct manager access
         Editor.Manager.depublish_podcast(podcast)
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
   def delete_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_podcast(user, id) do
-      {:ok, podcast} ->
+    with_podcast user, id do
+      fn podcast ->
         # FIXME: no direct manager access
         Editor.Manager.delete_podcast(podcast)
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
   def find_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_episode(user, id) do
-      {:ok, episode} -> {:ok, episode}
-      @not_found_match -> @not_found_response
-      @not_authorized_match -> @not_authorized_response
+    with_episode user, id do
+      fn episode -> {:ok, episode} end
     end
   end
 
   def create_episode(_parent, %{podcast_id: podcast_id, episode: args}, %{
         context: %{authenticated_user: user}
       }) do
-    case Editor.get_podcast(user, podcast_id) do
-      {:ok, podcast} ->
+    with_podcast user, podcast_id do
+      fn podcast ->
         # FIXME: no direct manager access
         Editor.Manager.create_episode(podcast, args)
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
   def update_episode(_parent, %{id: id, episode: args}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_episode(user, id) do
-      {:ok, episode} ->
+    with_episode user, id do
+      fn episode ->
         # FIXME: no direct manager access
         Editor.Manager.update_episode(episode, args)
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
   def publish_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_episode(user, id) do
-      {:ok, episode} ->
+    with_episode user, id do
+      fn episode ->
         # FIXME: no direct manager access
         Editor.Manager.publish_episode(episode)
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
   # todo: do not use Manager context here
   def depublish_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_episode(user, id) do
-      {:ok, episode} ->
+    with_episode user, id do
+      fn episode ->
         # FIXME: no direct manager access
         Editor.Manager.depublish_episode(episode)
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
   # todo: do not use Manager context here
   def delete_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_episode(user, id) do
-      {:ok, episode} ->
+    with_episode user, id do
+      fn episode ->
         # FIXME: no direct manager access
         Editor.Manager.delete_episode(episode)
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
@@ -258,15 +242,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def set_episode_chapters(_parent, %{id: id, chapters: chapters, type: type}, %{
         context: %{authenticated_user: user}
       }) do
-    case Editor.get_episode(user, id) do
-      {:ok, episode} ->
+    with_episode user, id do
+      fn episode ->
         EpisodeMeta.set_chapters(episode, chapters, String.to_existing_atom(type))
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
