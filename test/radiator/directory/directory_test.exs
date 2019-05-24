@@ -146,7 +146,7 @@ defmodule Radiator.DirectoryTest do
       assert {:error, %Ecto.Changeset{}} =
                Editor.Manager.publish_podcast(%{podcast | :title => nil})
 
-      assert %Podcast{published_at: nil} = Editor.get_podcast!(actor, podcast.id)
+      assert {:ok, %Podcast{published_at: nil}} = Editor.get_podcast(actor, podcast.id)
     end
 
     test "depublish_podcast/1 removes a podcasts published_at date" do

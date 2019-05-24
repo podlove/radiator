@@ -203,7 +203,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
         query: @publish_query,
         variables: %{"id" => -1}
 
-    assert %{"errors" => [%{"message" => "Not Authorized"}]} = json_response(conn, 200)
+    assert %{"errors" => [%{"message" => "Entity not found"}]} = json_response(conn, 200)
   end
 
   @depublish_query """
@@ -241,7 +241,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
         query: @depublish_query,
         variables: %{"id" => -1}
 
-    assert %{"errors" => [%{"message" => "Not Authorized"}]} = json_response(conn, 200)
+    assert %{"errors" => [%{"message" => "Entity not found"}]} = json_response(conn, 200)
   end
 
   @delete_query """
@@ -280,6 +280,6 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
         query: @delete_query,
         variables: %{"id" => -1}
 
-    assert %{"errors" => [%{"message" => "Not Authorized"}]} = json_response(conn, 200)
+    assert %{"errors" => [%{"message" => "Entity not found"}]} = json_response(conn, 200)
   end
 end

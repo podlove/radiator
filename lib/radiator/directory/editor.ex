@@ -47,7 +47,7 @@ defmodule Radiator.Directory.Editor do
   ## Examples
 
       iex> get_network(me, 123)
-      %Network{}
+      {:ok, %Network{}}
 
       iex> get_network(unauthorized_me, 123)
       {:error, :not_authorized}
@@ -55,10 +55,9 @@ defmodule Radiator.Directory.Editor do
       iex> get_network(oblivious_me, 999_998)
       {:error, :not_found}
 
-  # TODO unify responses of all get_* methods
-  #   The structure here seems good.
-  #   maybe {:ok, entity} in success case?
   """
+  @spec get_network(Auth.User.t(), pos_integer()) ::
+          {:ok, Network.t()} | {:error, :not_authorized} | {:error, :not_found}
   def get_network(actor = %Auth.User{}, id) do
     case Repo.get(Network, id) do
       nil ->
@@ -66,7 +65,7 @@ defmodule Radiator.Directory.Editor do
 
       network = %Network{} ->
         if has_permission(actor, network, :readonly) do
-          network
+          {:ok, network}
         else
           @not_authorized
         end
@@ -153,23 +152,34 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  def get_podcast!(actor = %Auth.User{}, id) do
-    podcast = Repo.get!(Podcast, id)
+  @doc """
+  Gets a single podcast.
 
-    if has_permission(actor, podcast, :readonly) do
-      podcast
-    else
-      @not_authorized
-    end
-  end
+  ## Examples
 
+      iex> get_podcast(me, 123)
+      {:ok, %Podcast{}}
+
+      iex> get_podcast(unauthorized_me, 123)
+      {:error, :not_authorized}
+
+      iex> get_podcast(oblivious_me, 999_998)
+      {:error, :not_found}
+
+  """
+  @spec get_podcast(Auth.User.t(), pos_integer()) ::
+          {:ok, Podcast.t()} | {:error, :not_authorized} | {:error, :not_found}
   def get_podcast(actor = %Auth.User{}, id) do
-    podcast = Repo.get(Podcast, id)
+    case Repo.get(Podcast, id) do
+      nil ->
+        @not_found
 
-    if has_permission(actor, podcast, :readonly) do
-      podcast
-    else
-      @not_authorized
+      podcast = %Podcast{} ->
+        if has_permission(actor, podcast, :readonly) do
+          {:ok, podcast}
+        else
+          @not_authorized
+        end
     end
   end
 
@@ -195,13 +205,34 @@ defmodule Radiator.Directory.Editor do
   # def publish_episode
   # def depublish_episode
 
-  def get_episode(actor = %Auth.User{}, id) do
-    episode = Repo.get(Episode, id)
+  @doc """
+  Gets a single episode.
 
-    if has_permission(actor, episode, :readonly) do
-      episode
-    else
-      @not_authorized
+  ## Examples
+
+      iex> get_episode(me, 123)
+      {:ok, %Episode{}}
+
+      iex> get_episode(unauthorized_me, 123)
+      {:error, :not_authorized}
+
+      iex> get_episode(oblivious_me, 999_998)
+      {:error, :not_found}
+
+  """
+  @spec get_episode(Auth.User.t(), pos_integer()) ::
+          {:ok, Episode.t()} | {:error, :not_authorized} | {:error, :not_found}
+  def get_episode(actor = %Auth.User{}, id) do
+    case Repo.get(Episode, id) do
+      nil ->
+        @not_found
+
+      episode = %Episode{} ->
+        if has_permission(actor, episode, :readonly) do
+          {:ok, episode}
+        else
+          @not_authorized
+        end
     end
   end
 
