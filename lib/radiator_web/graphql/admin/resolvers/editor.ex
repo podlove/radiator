@@ -107,6 +107,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         {:error, "Valid network must be provided, ID #{network_id} not found"}
 
       network ->
+        # FIXME: no direct manager access
         Editor.Manager.create_podcast(network, args)
     end
   end
@@ -120,6 +121,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         {:error, "Podcast ID #{id} not found"}
 
       podcast ->
+        # FIXME: no direct manager access
         Editor.Manager.update_podcast(podcast, args)
     end
   end
@@ -133,6 +135,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         {:error, "Podcast ID #{id} not found"}
 
       podcast ->
+        # FIXME: no direct manager access
         Editor.Manager.publish_podcast(podcast)
     end
   end
@@ -146,6 +149,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         {:error, "Podcast ID #{id} not found"}
 
       podcast ->
+        # FIXME: no direct manager access
         Editor.Manager.depublish_podcast(podcast)
     end
   end
@@ -159,6 +163,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         {:error, "Podcast ID #{id} not found"}
 
       podcast ->
+        # FIXME: no direct manager access
         Editor.Manager.delete_podcast(podcast)
     end
   end
@@ -181,6 +186,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         {:error, "Podcast ID #{podcast_id} not found"}
 
       podcast ->
+        # FIXME: no direct manager access
         Editor.Manager.create_episode(podcast, args)
     end
   end
@@ -194,6 +200,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         {:error, "Episode ID #{id} not found"}
 
       episode ->
+        # FIXME: no direct manager access
         Editor.Manager.update_episode(episode, args)
     end
   end
@@ -204,6 +211,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         @not_authorized_response
 
       episode ->
+        # FIXME: no direct manager access
         Editor.Manager.publish_episode(episode)
     end
   end
@@ -215,6 +223,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         @not_authorized_response
 
       episode ->
+        # FIXME: no direct manager access
         Editor.Manager.depublish_episode(episode)
     end
   end
@@ -226,6 +235,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         @not_authorized_response
 
       episode ->
+        # FIXME: no direct manager access
         Editor.Manager.delete_episode(episode)
     end
   end
