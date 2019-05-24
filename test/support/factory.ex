@@ -14,14 +14,26 @@ defmodule Radiator.Factory do
     }
   end
 
+  # @deprecated use owned_by/2
   def make_owner(user = %User{}, network = %Network{}) do
     :ok = set_permission(user, network, :own)
     user
   end
 
+  # @deprecated use owned_by/2
   def make_owner(user = %User{}, podcast = %Podcast{}) do
     :ok = set_permission(user, podcast, :own)
     user
+  end
+
+  def owned_by(network = %Network{}, user = %User{}) do
+    :ok = set_permission(user, network, :own)
+    network
+  end
+
+  def owned_by(podcast = %Podcast{}, user = %User{}) do
+    :ok = set_permission(user, podcast, :own)
+    podcast
   end
 
   def network_factory do

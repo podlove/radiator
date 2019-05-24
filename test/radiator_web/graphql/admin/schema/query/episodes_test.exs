@@ -1,6 +1,43 @@
 defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
   use RadiatorWeb.ConnCase, async: true
+
   import Radiator.Factory
+
+  @doc """
+  Generate user and add auth token to connection.
+  """
+  def setup_user_and_conn(%{conn: conn}) do
+    user = Radiator.TestEntries.user()
+
+    [
+      conn: Radiator.TestEntries.put_authenticated_user(conn, user),
+      user: user
+    ]
+  end
+
+  setup :setup_user_and_conn
+
+  @single_query """
+  query ($id: ID!) {
+    episode(id: $id) {
+      id
+      title
+    }
+  }
+  """
+
+  test "episode returns an episode", %{conn: conn, user: user} do
+    podcast = insert(:podcast) |> owned_by(user)
+    episode = insert(:unpublished_episode, podcast: podcast)
+
+    conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => episode.id}
+
+    assert json_response(conn, 200) == %{
+             "data" => %{
+               "episode" => %{"id" => Integer.to_string(episode.id), "title" => episode.title}
+             }
+           }
+  end
 
   @is_published_query """
   query ($id: ID!) {

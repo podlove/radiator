@@ -124,9 +124,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def find_episode(_parent, %{id: id}, _resolution) do
-    case Directory.get_episode(id) do
+  def find_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+    case Editor.get_episode(user, id) do
       nil -> {:error, "Episode ID #{id} not found"}
+      {:error, _} -> {:error, "Episode ID #{id} not found"}
       episode -> {:ok, episode}
     end
   end

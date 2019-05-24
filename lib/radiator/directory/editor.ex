@@ -162,13 +162,22 @@ defmodule Radiator.Directory.Editor do
   end
 
   # def list_episodes
-  # def get_episode
   # def create_episode
   # def update_episode
   # def delete_episode
   # def is_published(episode)
   # def publish_episode
   # def depublish_episode
+
+  def get_episode(actor = %Auth.User{}, id) do
+    episode = Repo.get(Episode, id)
+
+    if has_permission(actor, episode, :readonly) do
+      episode
+    else
+      @not_authorized
+    end
+  end
 
   @spec attach_audio_to_network(Network.t(), Media.AudioFile.t()) ::
           {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
