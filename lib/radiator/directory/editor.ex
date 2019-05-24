@@ -118,6 +118,21 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  @doc """
+  List podcasts for user.
+
+  FIXME does not work as intended.
+
+    test cases:
+    - user has permission in podcast but not in parent network, sees podcast
+    - user has permission in network but not specifically in child podcast, still can see podcast
+
+    implementation idea:
+    1) fetch all podcasts a user has specific permissions for
+    2) fetch all podcasts for all networks a user has specific permissions for
+    3) merge results from 1) and 2)
+
+  """
   def list_podcasts(actor = %Auth.User{}) do
     query =
       from n in Podcast,
@@ -130,6 +145,8 @@ defmodule Radiator.Directory.Editor do
     |> Repo.all()
   end
 
+  # FIXME see list_podcasts/1 above
+  # - user should be able to list podcasts that he has permissions to even if he does not have permissions in the given network
   def list_podcasts(actor = %Auth.User{}, network = %Network{}) do
     query =
       from pod in Podcast,
