@@ -10,6 +10,31 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   @not_found_match {:error, :not_found}
   @not_found_response {:error, "Entity not found"}
 
+  @doc """
+  Get network for user and so something with it or error.
+
+  Gets network for user using given user and network id.
+  The `do` block must be a function with `network` as argument. It is called if the
+  network can be retrieved successfully. Otherwise, an error response, ready for
+  GraphQL, is returned and the block not executed.
+
+  ## Examples
+
+      with_network Radiator.Directory.Editor.get_network(user, id) do
+        fn network -> {:ok, network}
+      end
+
+  """
+  defmacro with_network(user, network_id, do: block) do
+    quote do
+      case Editor.get_network(unquote(user), unquote(network_id)) do
+        {:ok, network} -> unquote(block).(network)
+        @not_found_match -> @not_found_response
+        @not_authorized_match -> @not_authorized_response
+      end
+    end
+  end
+
   #  TODO: DRY this up with a macro:
   #
   #  case Editor.get_network(user, id) do
@@ -23,10 +48,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def find_network(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_network(user, id) do
-      {:ok, network} -> {:ok, network}
-      @not_found_match -> @not_found_response
-      @not_authorized_match -> @not_authorized_response
+    with_network user, id do
+      fn network -> {:ok, network} end
     end
   end
 
@@ -39,28 +62,21 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def update_network(_parent, %{id: id, network: args}, %{context: %{authenticated_user: user}}) do
-    case Editor.get_network(user, id) do
-      {:ok, network} ->
+    with_network user, id do
+      fn network ->
         Editor.update_network(user, network, args)
         |> case do
           @not_authorized_match -> @not_authorized_response
           {:error, changeset = %Ecto.Changeset{}} -> {:error, changeset}
           {:ok, network} -> {:ok, network}
         end
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
   def list_podcasts(%Network{id: id}, _args, %{context: %{authenticated_user: user}}) do
-    case Editor.get_network(user, id) do
-      {:ok, network} -> {:ok, Editor.list_podcasts(user, network)}
-      @not_found_match -> @not_found_response
-      @not_authorized_match -> @not_authorized_response
+    with_network user, id do
+      fn network -> {:ok, Editor.list_podcasts(user, network)} end
     end
   end
 
@@ -87,16 +103,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def create_podcast(_parent, %{podcast: args, network_id: network_id}, %{
         context: %{authenticated_user: user}
       }) do
-    case Editor.get_network(user, network_id) do
-      {:ok, network} ->
+    with_network user, network_id do
+      fn network ->
         # FIXME: no direct manager access
         Editor.Manager.create_podcast(network, args)
-
-      @not_found_match ->
-        @not_found_response
-
-      @not_authorized_match ->
-        @not_authorized_response
+      end
     end
   end
 
