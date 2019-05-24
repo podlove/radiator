@@ -31,11 +31,11 @@ defmodule Radiator.DirectoryTest do
 
       assert Directory.get_episodes_count_for_podcast!(podcast.id) == 0
 
-      _episode1 = insert(:episode, podcast: podcast)
-      _episode2 = insert(:episode, podcast: podcast)
-      _episode3 = insert(:episode, podcast: podcast)
+      _episode1 = insert(:published_episode, podcast: podcast)
+      _episode2 = insert(:published_episode, podcast: podcast)
+      _episode3 = insert(:unpublished_episode, podcast: podcast)
 
-      assert Directory.get_episodes_count_for_podcast!(podcast.id) == 3
+      assert Directory.get_episodes_count_for_podcast!(podcast.id) == 2
     end
 
     test "get_podcast_by_slug/1 returns the podcast with given slug" do
@@ -174,17 +174,17 @@ defmodule Radiator.DirectoryTest do
     @invalid_attrs %{title: nil}
 
     test "list_episodes/0 returns all episodes" do
-      episode = insert(:episode)
+      episode = insert(:published_episode)
       assert Directory.list_episodes() |> Repo.preload(podcast: :network) == [episode]
     end
 
     test "get_episode!/1 returns the episode with given id" do
-      episode = insert(:episode)
+      episode = insert(:published_episode)
       assert Directory.get_episode!(episode.id) |> Repo.preload(podcast: :network) == episode
     end
 
     test "get_episode_by_slug/1 returns the episode with given slug" do
-      episode = insert(:episode, slug: "episode-foo-bar-baz")
+      episode = insert(:published_episode, slug: "episode-foo-bar-baz")
 
       assert Directory.get_episode_by_slug(episode.slug) |> Repo.preload(podcast: :network) ==
                episode
@@ -226,7 +226,6 @@ defmodule Radiator.DirectoryTest do
     test "update_episode/2 with invalid data returns error changeset" do
       episode = insert(:episode)
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.update_episode(episode, @invalid_attrs)
-      assert episode == Directory.get_episode!(episode.id) |> Repo.preload(podcast: :network)
     end
 
     test "delete_episode/1 deletes the episode" do
@@ -281,12 +280,10 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "publish_episode/1 with invalid data returns error changeset" do
-      episode = insert(:episode)
+      episode = insert(:unpublished_episode)
 
       assert {:error, %Ecto.Changeset{}} =
                Editor.Manager.publish_episode(%{episode | :title => nil})
-
-      assert %Episode{published_at: nil} = Directory.get_episode!(episode.id)
     end
 
     test "depublish_episode/1 removes an episodes published_at date" do
