@@ -3,6 +3,20 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
 
   import Radiator.Factory
 
+  @doc """
+  Generate user and add auth token to connection.
+  """
+  def setup_user_and_conn(%{conn: conn}) do
+    user = Radiator.TestEntries.user()
+
+    [
+      conn: Radiator.TestEntries.put_authenticated_user(conn, user),
+      user: user
+    ]
+  end
+
+  setup :setup_user_and_conn
+
   @create_query """
   mutation ($network_id: Int, $podcast: PodcastInput!) {
     createPodcast(network_id: $network_id, podcast: $podcast) {
@@ -12,8 +26,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
   }
   """
 
-  test "createPodcast creates a podcast", %{conn: conn} do
-    network = insert(:network)
+  test "createPodcast creates a podcast", %{conn: conn, user: user} do
+    network = insert(:network) |> owned_by(user)
     podcast = params_for(:podcast)
 
     conn =
@@ -35,8 +49,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
     refute is_nil(id)
   end
 
-  test "createPodcast returns errors when missing data", %{conn: conn} do
-    network = insert(:network)
+  test "createPodcast returns errors when missing data", %{conn: conn, user: user} do
+    network = insert(:network) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -62,8 +76,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
   }
   """
 
-  test "updatePodcast updates a podcast", %{conn: conn} do
-    podcast = insert(:podcast)
+  test "updatePodcast updates a podcast", %{conn: conn, user: user} do
+    podcast = insert(:podcast) |> owned_by(user)
 
     upload = %Plug.Upload{
       path: "test/fixtures/image.jpg",
@@ -91,8 +105,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
     assert String.contains?(image, ".jpg")
   end
 
-  test "updatePodcast returns errors on missing values", %{conn: conn} do
-    podcast = insert(:podcast)
+  test "updatePodcast returns errors on missing values", %{conn: conn, user: user} do
+    podcast = insert(:podcast) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -113,8 +127,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
   }
   """
 
-  test "publishPodcast publishes a podcast", %{conn: conn} do
-    podcast = insert(:podcast, published_at: nil)
+  test "publishPodcast publishes a podcast", %{conn: conn, user: user} do
+    podcast = insert(:podcast, published_at: nil) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -135,8 +149,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
     refute is_nil(published)
   end
 
-  test "publishPodcast generates a podcasts slug", %{conn: conn} do
-    podcast = insert(:podcast)
+  test "publishPodcast generates a podcasts slug", %{conn: conn, user: user} do
+    podcast = insert(:podcast) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -158,8 +172,11 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
     assert String.length(slug) > 0
   end
 
-  test "publishPodcast doesn't generate slug, if podcast already has one", %{conn: conn} do
-    podcast = insert(:podcast, slug: "original-test-slug")
+  test "publishPodcast doesn't generate slug, if podcast already has one", %{
+    conn: conn,
+    user: user
+  } do
+    podcast = insert(:podcast, slug: "original-test-slug") |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -180,14 +197,13 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
     assert "original-test-slug" == slug
   end
 
-  test "publishPodcast returns errors on wrong id", %{conn: conn} do
+  test "publishPodcast returns errors on wrong id", %{conn: conn, user: _user} do
     conn =
       post conn, "/api/graphql",
         query: @publish_query,
         variables: %{"id" => -1}
 
-    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
-    assert message == "Podcast ID -1 not found"
+    assert %{"errors" => [%{"message" => "Not Authorized"}]} = json_response(conn, 200)
   end
 
   @depublish_query """
@@ -199,8 +215,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
   }
   """
 
-  test "depublishPodcast depublishes a podcast", %{conn: conn} do
-    podcast = insert(:podcast, published_at: DateTime.utc_now())
+  test "depublishPodcast depublishes a podcast", %{conn: conn, user: user} do
+    podcast = insert(:podcast, published_at: DateTime.utc_now()) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -219,14 +235,13 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
            } = json_response(conn, 200)
   end
 
-  test "depublishPodcast returns errors on wrong id", %{conn: conn} do
+  test "depublishPodcast returns errors on wrong id", %{conn: conn, user: _user} do
     conn =
       post conn, "/api/graphql",
         query: @depublish_query,
         variables: %{"id" => -1}
 
-    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
-    assert message == "Podcast ID -1 not found"
+    assert %{"errors" => [%{"message" => "Not Authorized"}]} = json_response(conn, 200)
   end
 
   @delete_query """
@@ -238,8 +253,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
   }
   """
 
-  test "deletePodcast deletes a podcast", %{conn: conn} do
-    podcast = insert(:podcast)
+  test "deletePodcast deletes a podcast", %{conn: conn, user: user} do
+    podcast = insert(:podcast) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -259,13 +274,12 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
            } = json_response(conn, 200)
   end
 
-  test "deletePodcast returns an error for non-existing id", %{conn: conn} do
+  test "deletePodcast returns an error for non-existing id", %{conn: conn, user: _user} do
     conn =
       post conn, "/api/graphql",
         query: @delete_query,
         variables: %{"id" => -1}
 
-    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
-    assert message == "Podcast ID -1 not found"
+    assert %{"errors" => [%{"message" => "Not Authorized"}]} = json_response(conn, 200)
   end
 end

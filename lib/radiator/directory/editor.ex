@@ -55,6 +55,9 @@ defmodule Radiator.Directory.Editor do
       iex> get_network(oblivious_me, 999_998)
       {:error, :not_found}
 
+  # TODO unify responses of all get_* methods
+  #   The structure here seems good.
+  #   maybe {:ok, entity} in success case?
   """
   def get_network(actor = %Auth.User{}, id) do
     case Repo.get(Network, id) do

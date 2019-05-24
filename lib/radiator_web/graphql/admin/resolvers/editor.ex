@@ -98,9 +98,15 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def create_podcast(_parent, %{podcast: args, network_id: network_id}, %{
         context: %{authenticated_user: user}
       }) do
-    case Directory.get_network(network_id) do
-      nil -> {:error, "Valid network must be provided, ID #{network_id} not found"}
-      network -> Editor.Manager.create_podcast(network, args)
+    case Editor.get_network(user, network_id) do
+      @not_authorized_match ->
+        @not_authorized_response
+
+      {:error, _} ->
+        {:error, "Valid network must be provided, ID #{network_id} not found"}
+
+      network ->
+        Editor.Manager.create_podcast(network, args)
     end
   end
 
