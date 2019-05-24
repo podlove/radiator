@@ -70,7 +70,7 @@ defmodule Radiator.Auth.Permission do
 
   defp parent(subject = %Podcast{}) do
     subject
-    |> Ecto.assoc(:podcast)
+    |> Ecto.assoc(:network)
     |> Repo.one!()
   end
 
