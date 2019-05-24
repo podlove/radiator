@@ -232,7 +232,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def is_published(entity, _, _), do: {:ok, Editor.is_published(entity)}
 
-  def list_chapters(%Episode{} = episode, _args, %{context: %{authenticated_user: user}}) do
+  def list_chapters(%Episode{} = episode, _args, _resolution) do
     {:ok, EpisodeMeta.list_chapters(episode)}
   end
 
@@ -249,7 +249,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   # PERF: use data loader
-  def get_enclosure(%Episode{} = episode, _args, %{context: %{authenticated_user: user}}) do
+  def get_enclosure(%Episode{} = episode, _args, _resolution) do
     episode = Radiator.Repo.preload(episode, :enclosure)
 
     {:ok,
@@ -272,9 +272,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, Media.NetworkImage.url({network.image, network})}
   end
 
-  def get_episodes_count(%Podcast{id: podcast_id}, _, _) do
-    episodes_count = Directory.get_episodes_count_for_podcast!(podcast_id)
-
-    {:ok, episodes_count}
+  def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{authenticated_user: user}}) do
+    Editor.get_episodes_count_for_podcast!(user, podcast_id)
   end
 end

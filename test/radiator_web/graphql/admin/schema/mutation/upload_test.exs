@@ -3,6 +3,20 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UploadTest do
 
   import Radiator.Factory
 
+  @doc """
+  Generate user and add auth token to connection.
+  """
+  def setup_user_and_conn(%{conn: conn}) do
+    user = Radiator.TestEntries.user()
+
+    [
+      conn: Radiator.TestEntries.put_authenticated_user(conn, user),
+      user: user
+    ]
+  end
+
+  setup :setup_user_and_conn
+
   @query """
   mutation ($filename: String!) {
     createUpload(filename: $filename) {
@@ -11,7 +25,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UploadTest do
   }
   """
 
-  test "createUploads returns a URL", %{conn: conn} do
+  test "createUploads returns a URL", %{conn: conn, user: _user} do
     conn =
       post conn, "/api/graphql",
         query: @query,
@@ -32,8 +46,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UploadTest do
   }
   """
 
-  test "upload audio file to episode", %{conn: conn} do
-    episode = insert(:episode)
+  test "upload audio file to episode", %{conn: conn, user: user} do
+    episode = insert(:episode) |> owned_by(user)
 
     upload = %Plug.Upload{
       path: "test/fixtures/pling.mp3",
@@ -67,8 +81,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UploadTest do
   }
   """
 
-  test "upload audio file to network", %{conn: conn} do
-    network = insert(:network)
+  test "upload audio file to network", %{conn: conn, user: user} do
+    network = insert(:network) |> owned_by(user)
 
     upload = %Plug.Upload{
       path: "test/fixtures/pling.mp3",

@@ -173,6 +173,21 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def get_episodes_count_for_podcast!(actor = %Auth.User{}, id) do
+    get_podcast(actor, id)
+    |> case do
+      podcast = %Podcast{} ->
+        count =
+          from(e in Episode, where: e.podcast_id == ^podcast.id)
+          |> Repo.aggregate(:count, :id)
+
+        {:ok, count}
+
+      _ ->
+        @not_authorized
+    end
+  end
+
   # def list_episodes
   # def create_episode
   # def update_episode
