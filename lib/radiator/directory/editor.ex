@@ -139,7 +139,6 @@ defmodule Radiator.Directory.Editor do
 
   # def update_podcast
   # def delete_podcast
-  # def is_published(podcast)
   # def publish_podcast
   # def depublish_podcast
 
@@ -161,11 +160,20 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def get_podcast(actor = %Auth.User{}, id) do
+    podcast = Repo.get(Podcast, id)
+
+    if has_permission(actor, podcast, :readonly) do
+      podcast
+    else
+      @not_authorized
+    end
+  end
+
   # def list_episodes
   # def create_episode
   # def update_episode
   # def delete_episode
-  # def is_published(episode)
   # def publish_episode
   # def depublish_episode
 
