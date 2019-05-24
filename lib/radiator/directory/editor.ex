@@ -57,7 +57,7 @@ defmodule Radiator.Directory.Editor do
 
   """
   @spec get_network(Auth.User.t(), pos_integer()) ::
-          {:ok, Network.t()} | {:error, :not_authorized} | {:error, :not_found}
+          {:ok, Network.t()} | {:error, :not_authorized | :not_found}
   def get_network(actor = %Auth.User{}, id) do
     case Repo.get(Network, id) do
       nil ->
@@ -168,7 +168,7 @@ defmodule Radiator.Directory.Editor do
 
   """
   @spec get_podcast(Auth.User.t(), pos_integer()) ::
-          {:ok, Podcast.t()} | {:error, :not_authorized} | {:error, :not_found}
+          {:ok, Podcast.t()} | {:error, :not_authorized | :not_found}
   def get_podcast(actor = %Auth.User{}, id) do
     case Repo.get(Podcast, id) do
       nil ->
@@ -186,7 +186,7 @@ defmodule Radiator.Directory.Editor do
   def get_episodes_count_for_podcast!(actor = %Auth.User{}, id) do
     get_podcast(actor, id)
     |> case do
-      podcast = %Podcast{} ->
+      {:ok, podcast} ->
         count =
           from(e in Episode, where: e.podcast_id == ^podcast.id)
           |> Repo.aggregate(:count, :id)
@@ -221,7 +221,7 @@ defmodule Radiator.Directory.Editor do
 
   """
   @spec get_episode(Auth.User.t(), pos_integer()) ::
-          {:ok, Episode.t()} | {:error, :not_authorized} | {:error, :not_found}
+          {:ok, Episode.t()} | {:error, :not_authorized | :not_found}
   def get_episode(actor = %Auth.User{}, id) do
     case Repo.get(Episode, id) do
       nil ->
