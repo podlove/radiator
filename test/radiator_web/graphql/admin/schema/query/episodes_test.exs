@@ -49,8 +49,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
   """
 
   describe "is_published" do
-    test "is false for an unpublished episode", %{conn: conn} do
-      episode = insert(:episode)
+    test "is false for an unpublished episode", %{conn: conn, user: user} do
+      episode = insert(:episode) |> owned_by(user)
 
       conn =
         get conn, "/api/graphql", query: @is_published_query, variables: %{"id" => episode.id}
@@ -62,8 +62,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
              }
     end
 
-    test "is true for a published episode", %{conn: conn} do
-      episode = insert(:episode, published_at: DateTime.utc_now())
+    test "is true for a published episode", %{conn: conn, user: user} do
+      episode = insert(:episode, published_at: DateTime.utc_now()) |> owned_by(user)
 
       conn =
         get conn, "/api/graphql", query: @is_published_query, variables: %{"id" => episode.id}
@@ -75,9 +75,9 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
              }
     end
 
-    test "is false for published_at dates in the future", %{conn: conn} do
+    test "is false for published_at dates in the future", %{conn: conn, user: user} do
       in_one_hour = DateTime.utc_now() |> DateTime.add(3600)
-      episode = insert(:episode, published_at: in_one_hour)
+      episode = insert(:episode, published_at: in_one_hour) |> owned_by(user)
 
       conn =
         get conn, "/api/graphql", query: @is_published_query, variables: %{"id" => episode.id}

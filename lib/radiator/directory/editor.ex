@@ -179,6 +179,19 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def is_published(%Podcast{published_at: nil}), do: false
+  def is_published(%Episode{published_at: nil}), do: false
+
+  def is_published(%Podcast{published_at: date}), do: before_utc_now?(date)
+  def is_published(%Episode{published_at: date}), do: before_utc_now?(date)
+
+  defp before_utc_now?(date) do
+    case DateTime.compare(date, DateTime.utc_now()) do
+      :lt -> true
+      _ -> false
+    end
+  end
+
   @spec attach_audio_to_network(Network.t(), Media.AudioFile.t()) ::
           {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
   def attach_audio_to_network(network = %Network{}, audio = %Media.AudioFile{}) do

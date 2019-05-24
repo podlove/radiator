@@ -92,15 +92,15 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.DirectoryTypes do
     field :slug, :string
 
     field :is_published, :boolean do
-      resolve &Resolvers.Directory.is_published/3
+      resolve &Resolvers.Editor.is_published/3
     end
 
     field :podcast, :podcast do
-      resolve &Resolvers.Directory.find_podcast/3
+      resolve &Resolvers.Editor.find_podcast/3
     end
 
     field :enclosure, :enclosure do
-      resolve &Resolvers.Directory.get_enclosure/3
+      resolve &Resolvers.Editor.get_enclosure/3
     end
 
     field :chapters, list_of(:chapter) do

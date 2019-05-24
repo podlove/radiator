@@ -173,7 +173,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def is_published(entity, _, _), do: {:ok, Directory.is_published(entity)}
+  def is_published(entity, _, _), do: {:ok, Editor.is_published(entity)}
 
   def list_chapters(%Episode{} = episode, _args, _resolution) do
     {:ok, EpisodeMeta.list_chapters(episode)}
