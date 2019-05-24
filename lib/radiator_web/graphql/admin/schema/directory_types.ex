@@ -12,11 +12,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.DirectoryTypes do
     field :slug, :string
 
     field :image, :string do
-      resolve &Resolvers.Directory.get_image_url/3
+      resolve &Resolvers.Editor.get_image_url/3
     end
 
     field :podcasts, list_of(:podcast) do
-      resolve &Resolvers.Directory.list_podcasts/3
+      resolve &Resolvers.Editor.list_podcasts/3
     end
   end
 
@@ -34,7 +34,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.DirectoryTypes do
     field :description, :string
 
     field :image, :string do
-      resolve &Resolvers.Directory.get_image_url/3
+      resolve &Resolvers.Editor.get_image_url/3
     end
 
     field :language, :string
@@ -58,7 +58,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.DirectoryTypes do
     end
 
     field :episodes_count, :integer do
-      resolve &Resolvers.Directory.get_episodes_count/3
+      resolve &Resolvers.Editor.get_episodes_count/3
     end
   end
 
@@ -82,7 +82,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.DirectoryTypes do
     field :guid, :string
 
     field :image, :string do
-      resolve &Resolvers.Directory.get_image_url/3
+      resolve &Resolvers.Editor.get_image_url/3
     end
 
     field :number, :integer

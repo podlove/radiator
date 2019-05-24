@@ -71,15 +71,27 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def find_podcast(%Episode{} = episode, _args, %{context: %{authenticated_user: user}}) do
     case Editor.get_podcast(user, episode.podcast_id) do
-      nil -> {:error, "Podcast ID #{episode.podcast_id} not found"}
-      podcast -> {:ok, podcast}
+      @not_authorized_match ->
+        @not_authorized_response
+
+      nil ->
+        {:error, "Podcast ID #{episode.podcast_id} not found"}
+
+      podcast ->
+        {:ok, podcast}
     end
   end
 
   def find_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
     case Editor.get_podcast(user, id) do
-      nil -> {:error, "Podcast ID #{id} not found"}
-      podcast -> {:ok, podcast}
+      @not_authorized_match ->
+        @not_authorized_response
+
+      nil ->
+        {:error, "Podcast ID #{id} not found"}
+
+      podcast ->
+        {:ok, podcast}
     end
   end
 
@@ -94,13 +106,22 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def update_podcast(_parent, %{id: id, podcast: args}, %{context: %{authenticated_user: user}}) do
     case Editor.get_podcast(user, id) do
-      nil -> {:error, "Podcast ID #{id} not found"}
-      podcast -> Editor.Manager.update_podcast(podcast, args)
+      @not_authorized_match ->
+        @not_authorized_response
+
+      nil ->
+        {:error, "Podcast ID #{id} not found"}
+
+      podcast ->
+        Editor.Manager.update_podcast(podcast, args)
     end
   end
 
   def publish_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
     case Editor.get_podcast(user, id) do
+      @not_authorized_match ->
+        @not_authorized_response
+
       nil ->
         {:error, "Podcast ID #{id} not found"}
 
@@ -111,6 +132,9 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def depublish_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
     case Editor.get_podcast(user, id) do
+      @not_authorized_match ->
+        @not_authorized_response
+
       nil ->
         {:error, "Podcast ID #{id} not found"}
 
@@ -121,14 +145,19 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def delete_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
     case Editor.get_podcast(user, id) do
-      nil -> {:error, "Podcast ID #{id} not found"}
-      podcast -> Editor.Manager.delete_podcast(podcast)
+      @not_authorized_match ->
+        @not_authorized_response
+
+      nil ->
+        {:error, "Podcast ID #{id} not found"}
+
+      podcast ->
+        Editor.Manager.delete_podcast(podcast)
     end
   end
 
   def find_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
     case Editor.get_episode(user, id) do
-      nil -> {:error, "Episode ID #{id} not found"}
       {:error, _} -> {:error, "Episode ID #{id} not found"}
       episode -> {:ok, episode}
     end
@@ -138,42 +167,59 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         context: %{authenticated_user: user}
       }) do
     case Editor.get_podcast(user, podcast_id) do
-      nil -> {:error, "Podcast ID #{podcast_id} not found"}
-      podcast -> Editor.Manager.create_episode(podcast, args)
+      @not_authorized_match ->
+        @not_authorized_response
+
+      nil ->
+        {:error, "Podcast ID #{podcast_id} not found"}
+
+      podcast ->
+        Editor.Manager.create_episode(podcast, args)
     end
   end
 
   def update_episode(_parent, %{id: id, episode: args}, %{context: %{authenticated_user: user}}) do
-    case Directory.get_episode(user, id) do
-      nil -> {:error, "Episode ID #{id} not found"}
-      episode -> Editor.Manager.update_episode(episode, args)
+    case Editor.get_episode(user, id) do
+      @not_authorized_match ->
+        @not_authorized_response
+
+      nil ->
+        {:error, "Episode ID #{id} not found"}
+
+      episode ->
+        Editor.Manager.update_episode(episode, args)
     end
   end
 
   def publish_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Directory.get_episode(user, id) do
-      nil ->
-        {:error, "Episode ID #{id} not found"}
+    case Editor.get_episode(user, id) do
+      @not_authorized_match ->
+        @not_authorized_response
 
       episode ->
         Editor.Manager.publish_episode(episode)
     end
   end
 
+  # todo: do not use Manager context here
   def depublish_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Directory.get_episode(user, id) do
-      nil ->
-        {:error, "Episode ID #{id} not found"}
+    case Editor.get_episode(user, id) do
+      @not_authorized_match ->
+        @not_authorized_response
 
       episode ->
         Editor.Manager.depublish_episode(episode)
     end
   end
 
+  # todo: do not use Manager context here
   def delete_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
-    case Directory.get_episode(user, id) do
-      nil -> {:error, "episode ID #{id} not found"}
-      episode -> Editor.Manager.delete_episode(episode)
+    case Editor.get_episode(user, id) do
+      @not_authorized_match ->
+        @not_authorized_response
+
+      episode ->
+        Editor.Manager.delete_episode(episode)
     end
   end
 
@@ -186,9 +232,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def set_episode_chapters(_parent, %{id: id, chapters: chapters, type: type}, %{
         context: %{authenticated_user: user}
       }) do
-    case Directory.get_episode(user, id) do
-      nil -> {:error, "Episode ID #{id} not found"}
-      episode -> EpisodeMeta.set_chapters(episode, chapters, String.to_existing_atom(type))
+    case Editor.get_episode(user, id) do
+      @not_authorized_match ->
+        @not_authorized_response
+
+      episode ->
+        EpisodeMeta.set_chapters(episode, chapters, String.to_existing_atom(type))
     end
   end
 

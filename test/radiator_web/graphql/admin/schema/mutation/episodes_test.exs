@@ -3,6 +3,20 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
 
   import Radiator.Factory
 
+  @doc """
+  Generate user and add auth token to connection.
+  """
+  def setup_user_and_conn(%{conn: conn}) do
+    user = Radiator.TestEntries.user()
+
+    [
+      conn: Radiator.TestEntries.put_authenticated_user(conn, user),
+      user: user
+    ]
+  end
+
+  setup :setup_user_and_conn
+
   @create_query """
   mutation ($podcast_id: ID!, $episode: EpisodeInput!) {
     createEpisode(podcast_id: $podcast_id, episode: $episode) {
@@ -12,8 +26,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
   }
   """
 
-  test "createEpisode creates an episode", %{conn: conn} do
-    podcast = insert(:podcast)
+  test "createEpisode creates an episode", %{conn: conn, user: user} do
+    podcast = insert(:podcast) |> owned_by(user)
     episode = params_for(:episode)
 
     conn =
@@ -35,8 +49,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
     refute is_nil(id)
   end
 
-  test "createEpisode returns errors when missing data", %{conn: conn} do
-    podcast = insert(:podcast)
+  test "createEpisode returns errors when missing data", %{conn: conn, user: user} do
+    podcast = insert(:podcast) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -52,7 +66,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
     assert msg =~ ~r/Argument "episode" has invalid value \$episode/
   end
 
-  test "createEpisode returns errors when podcast_id is wrong", %{conn: conn} do
+  test "createEpisode returns errors when podcast_id is wrong", %{conn: conn, user: _user} do
     episode = params_for(:episode)
 
     conn =
@@ -60,13 +74,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
         query: @create_query,
         variables: %{"episode" => episode, "podcast_id" => -1}
 
-    assert %{
-             "errors" => [
-               %{"message" => msg}
-             ]
-           } = json_response(conn, 200)
-
-    assert msg == "Podcast ID -1 not found"
+    assert %{"errors" => [%{"message" => "Not Authorized"}]} = json_response(conn, 200)
   end
 
   @update_query """
@@ -79,8 +87,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
   }
   """
 
-  test "updateEpisode updates an episode", %{conn: conn} do
-    episode = insert(:episode)
+  test "updateEpisode updates an episode", %{conn: conn, user: user} do
+    episode = insert(:episode) |> owned_by(user)
 
     upload = %Plug.Upload{
       path: "test/fixtures/image.jpg",
@@ -108,8 +116,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
     assert String.contains?(image, ".jpg")
   end
 
-  test "updateEpisode returns an error when missing values", %{conn: conn} do
-    episode = insert(:episode)
+  test "updateEpisode returns an error when missing values", %{conn: conn, user: user} do
+    episode = insert(:episode) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -130,8 +138,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
   }
   """
 
-  test "publishEpisode publishes an episode", %{conn: conn} do
-    episode = insert(:episode, published_at: nil)
+  test "publishEpisode publishes an episode", %{conn: conn, user: user} do
+    episode = insert(:episode, published_at: nil) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -152,8 +160,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
     refute is_nil(published)
   end
 
-  test "publishEpisode generates an episodes slug", %{conn: conn} do
-    episode = insert(:episode)
+  test "publishEpisode generates an episodes slug", %{conn: conn, user: user} do
+    episode = insert(:episode) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -175,8 +183,11 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
     assert String.length(slug) > 0
   end
 
-  test "publishEpisode doesn't generate slug, if episode already has one", %{conn: conn} do
-    episode = insert(:episode, slug: "original-test-slug")
+  test "publishEpisode doesn't generate slug, if episode already has one", %{
+    conn: conn,
+    user: user
+  } do
+    episode = insert(:episode, slug: "original-test-slug") |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -197,14 +208,13 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
     assert "original-test-slug" == slug
   end
 
-  test "publishEpisode returns errors on wrong id", %{conn: conn} do
+  test "publishEpisode returns errors on wrong id", %{conn: conn, user: _user} do
     conn =
       post conn, "/api/graphql",
         query: @publish_query,
         variables: %{"id" => -1}
 
-    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
-    assert message == "Episode ID -1 not found"
+    assert %{"errors" => [%{"message" => "Not Authorized"}]} = json_response(conn, 200)
   end
 
   @depublish_query """
@@ -216,8 +226,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
   }
   """
 
-  test "depublishEpisode depublishes an episode", %{conn: conn} do
-    episode = insert(:episode, published_at: DateTime.utc_now())
+  test "depublishEpisode depublishes an episode", %{conn: conn, user: user} do
+    episode = insert(:episode, published_at: DateTime.utc_now()) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -236,14 +246,13 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
            } = json_response(conn, 200)
   end
 
-  test "depublishEpisode returns errors on wrong id", %{conn: conn} do
+  test "depublishEpisode returns errors on wrong id", %{conn: conn, user: _user} do
     conn =
       post conn, "/api/graphql",
         query: @depublish_query,
         variables: %{"id" => -1}
 
-    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
-    assert message == "Episode ID -1 not found"
+    assert %{"errors" => [%{"message" => "Not Authorized"}]} = json_response(conn, 200)
   end
 
   @delete_query """
@@ -255,8 +264,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
   }
   """
 
-  test "deleteEpisode deletes an episode", %{conn: conn} do
-    episode = insert(:episode)
+  test "deleteEpisode deletes an episode", %{conn: conn, user: user} do
+    episode = insert(:episode) |> owned_by(user)
 
     conn =
       post conn, "/api/graphql",
@@ -276,14 +285,13 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
            } = json_response(conn, 200)
   end
 
-  test "deleteEpisode returns an error for non-existing id", %{conn: conn} do
+  test "deleteEpisode returns an error for non-existing id", %{conn: conn, user: _user} do
     conn =
       post conn, "/api/graphql",
         query: @delete_query,
         variables: %{"id" => -1}
 
-    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
-    assert message == "episode ID -1 not found"
+    assert %{"errors" => [%{"message" => "Not Authorized"}]} = json_response(conn, 200)
   end
 
   @set_chapters_query """
@@ -298,8 +306,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
   }
   """
 
-  test "setChapters sets chapters for episode", %{conn: conn} do
-    episode = insert(:episode)
+  test "setChapters sets chapters for episode", %{conn: conn, user: user} do
+    episode = insert(:episode) |> owned_by(user)
 
     chapters = ~S"""
     00:00:01.234 Intro <http://example.com>
