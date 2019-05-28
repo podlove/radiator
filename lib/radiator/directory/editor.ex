@@ -160,14 +160,41 @@ defmodule Radiator.Directory.Editor do
     |> Repo.all()
   end
 
-  # def update_podcast
-  # def delete_podcast
-  # def publish_podcast
-  # def depublish_podcast
-
   def create_podcast(actor = %Auth.User{}, network = %Network{}, attrs) do
     if has_permission(actor, network, :manage) do
       Editor.Manager.create_podcast(network, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def update_podcast(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
+    if has_permission(actor, podcast, :edit) do
+      Editor.Manager.update_podcast(podcast, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def publish_podcast(actor = %Auth.User{}, podcast = %Podcast{}) do
+    if has_permission(actor, podcast, :manage) do
+      Editor.Manager.publish_podcast(podcast)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def depublish_podcast(actor = %Auth.User{}, podcast = %Podcast{}) do
+    if has_permission(actor, podcast, :manage) do
+      Editor.Manager.depublish_podcast(podcast)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def delete_podcast(actor = %Auth.User{}, podcast = %Podcast{}) do
+    if has_permission(actor, podcast, :own) do
+      Editor.Manager.depublish_podcast(podcast)
     else
       @not_authorized_match
     end
@@ -219,12 +246,45 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  # def list_episodes
-  # def create_episode
-  # def update_episode
-  # def delete_episode
-  # def publish_episode
-  # def depublish_episode
+  def create_episode(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
+    if has_permission(actor, podcast, :manage) do
+      Editor.Manager.create_episode(podcast, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def update_episode(actor = %Auth.User{}, episode = %Episode{}, attrs) do
+    if has_permission(actor, episode, :edit) do
+      Editor.Manager.update_episode(episode, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def publish_episode(actor = %Auth.User{}, episode = %Episode{}) do
+    if has_permission(actor, episode, :manage) do
+      Editor.Manager.publish_episode(episode)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def depublish_episode(actor = %Auth.User{}, episode = %Episode{}) do
+    if has_permission(actor, episode, :manage) do
+      Editor.Manager.depublish_episode(episode)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def delete_episode(actor = %Auth.User{}, episode = %Episode{}) do
+    if has_permission(actor, episode, :own) do
+      Editor.Manager.delete_episode(episode)
+    else
+      @not_authorized_match
+    end
+  end
 
   @doc """
   Gets a single episode.
