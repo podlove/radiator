@@ -5,8 +5,8 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   alias Radiator.Directory
   alias Radiator.Storage
-  alias Directory.Episode
-  alias Directory.Editor
+  alias Radiator.Directory.Episode
+  alias Radiator.Directory.Editor
   alias Radiator.Media.AudioFileUpload
 
   plug :assign_podcast when action in [:new, :create, :update]

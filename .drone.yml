@@ -2,68 +2,70 @@ kind: pipeline
 name: default
 
 steps:
-- name: setup-minio
-  image: minio/mc
-  commands:
-  - sleep 5
-  - mc config host add radiator http://minio:9000 IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
-  - mc mb radiator/radiator
-  - mc policy public radiator/radiator
+  - name: setup-minio
+    image: minio/mc
+    commands:
+      - sleep 5
+      - mc config host add radiator http://minio:9000 IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
+      - mc mb radiator/radiator
+      - mc policy public radiator/radiator
 
-- name: install
-  image: elixir:1.8
-  volumes:
-  - name: mix
-    path: /root/.mix
-  commands:
-  - mix local.rebar --force
-  - mix local.hex --force
-  - mix deps.get
+  - name: install
+    image: elixir:1.8
+    volumes:
+      - name: mix
+        path: /root/.mix
+    commands:
+      - mix local.rebar --force
+      - mix local.hex --force
+      - mix deps.get
 
-- name: test
-  image: elixir:1.8
-  volumes:
-  - name: mix
-    path: /root/.mix
-  environment:
-    STORAGE_ASSET_HOST: "http://minio:9000/radiator"
-    STORAGE_HOST: "minio"
-    DB_HOST: "database"
-    MIX_ENV: "test"
-  commands:
-  - mix ua_inspector.download --force
-  - mix test
+  - name: test
+    image: elixir:1.8
+    volumes:
+      - name: mix
+        path: /root/.mix
+    environment:
+      STORAGE_ASSET_HOST: "http://minio:9000/radiator"
+      STORAGE_HOST: "minio"
+      DB_HOST: "database"
+      MIX_ENV: "test"
+    commands:
+      - mix ua_inspector.download --force
+      - mix test
 
-- name: docker
-  image: plugins/docker
-  settings:
-    username: podloveradiator
-    password:
-      from_secret: docker_password
-    repo: podlove/radiator
-    tags: latest
-  when:
-    branch:
-    - master
+  - name: docker
+    image: plugins/docker
+    settings:
+      username: podloveradiator
+      password:
+        from_secret: docker_password
+      repo: podlove/radiator
+      tags: latest
+    when:
+      branch:
+        - master
+      exclude:
+        - pull_request
 
 services:
-- name: database
-  image: postgres:9-alpine
-  ports: 
-  - 5432
-  environment:
-    POSTGRES_USER: postgres
-    POSTGRES_DB: radiator_test
+  - name: database
+    image: postgres:9-alpine
+    ports:
+      - 5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: radiator_test
 
-- name: minio
-  image: minio/minio
-  ports:
-  - 9000
-  environment:
-    MINIO_ACCESS_KEY: "IEKAZMUY3KX32CRJPE9R"
-    MINIO_SECRET_KEY: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN"
-  command: [ "server", "/data" ]
+  - name: minio
+    image: minio/minio
+    ports:
+      - 9000
+    environment:
+      MINIO_ACCESS_KEY: "IEKAZMUY3KX32CRJPE9R"
+      MINIO_SECRET_KEY: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN"
+    command: ["server", "/data"]
 
 volumes:
-- name: mix
-  temp: {}
+  - name: mix
+    temp: {}

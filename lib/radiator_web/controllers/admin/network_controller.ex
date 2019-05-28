@@ -2,8 +2,8 @@ defmodule RadiatorWeb.Admin.NetworkController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
-  alias Directory.Network
-  alias Directory.Editor
+  alias Radiator.Directory.Network
+  alias Radiator.Directory.Editor
 
   def index(conn, _params) do
     me = conn.assigns.authenticated_user

@@ -2,6 +2,7 @@ defmodule RadiatorWeb.LoginController do
   use RadiatorWeb, :controller
 
   alias Radiator.Auth
+  alias Radiator.Directory.Editor
 
   def index(conn, _params) do
     render(conn, "index.html", user_changeset: Auth.Register.change_user(%Auth.User{}))
@@ -61,13 +62,18 @@ defmodule RadiatorWeb.LoginController do
     end
   end
 
-  # FIXME Radiator.Directory.get_any_network must be replaced with "any network the user owns"
-  #       and handle the case that there is no network yet
   defp sign_in_valid_user(conn, user, message) do
     path =
       case get_session(conn, :on_login) do
-        {path, _query} -> path
-        _ -> Routes.admin_network_podcast_path(conn, :index, Radiator.Directory.get_any_network())
+        {path, _query} ->
+          path
+
+        _ ->
+          Routes.admin_network_podcast_path(
+            conn,
+            :index,
+            Editor.get_any_network(user)
+          )
       end
 
     conn

@@ -2,7 +2,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
-  alias Directory.Editor
+  alias Radiator.Directory.Editor
 
   def new(conn, _params) do
     render(conn, "new.html")

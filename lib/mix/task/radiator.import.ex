@@ -19,7 +19,7 @@ defmodule Mix.Tasks.Radiator.Import do
   @aliases [d: :debug, p: :preview]
 
   alias Radiator.Directory
-  alias Directory.Editor
+  alias Radiator.Directory.Editor
 
   defmacrop with_services(_opts \\ [], do: block) do
     quote do
