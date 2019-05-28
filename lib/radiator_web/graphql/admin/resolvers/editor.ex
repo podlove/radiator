@@ -136,8 +136,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
       }) do
     with_network user, network_id do
       fn network ->
-        # FIXME: no direct manager access
-        Editor.Manager.create_podcast(network, args)
+        Editor.create_podcast(user, network, args)
       end
     end
   end
