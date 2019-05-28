@@ -1,7 +1,6 @@
 defmodule RadiatorWeb.Admin.NetworkController do
   use RadiatorWeb, :controller
 
-  alias Radiator.Directory
   alias Radiator.Directory.Network
   alias Radiator.Directory.Editor
 
