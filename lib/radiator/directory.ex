@@ -7,7 +7,6 @@ defmodule Radiator.Directory do
 
   import Ecto.Query, warn: false
 
-  alias __MODULE__
   alias Radiator.Repo
   alias Radiator.Media
   alias Radiator.Media.AudioFile
@@ -58,18 +57,6 @@ defmodule Radiator.Directory do
       %Network{}
   """
   def get_network_by_slug(slug), do: Repo.get_by(Network, %{slug: slug})
-
-  @doc """
-  Get the first network.
-
-  Only temporary until users can be assigned to networks.
-  Once this is possible, remove this function.
-
-  @see https://github.com/podlove/radiator/issues/78
-  """
-  def get_any_network do
-    from(n in Network, limit: 1) |> Repo.one!()
-  end
 
   def list_podcasts(%Network{id: id}) do
     from(p in Podcast, where: p.network_id == ^id)
