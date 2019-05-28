@@ -2,8 +2,8 @@ defmodule RadiatorWeb.Admin.PodcastController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
-  alias Directory.Podcast
-  alias Directory.Editor
+  alias Radiator.Directory.Podcast
+  alias Radiator.Directory.Editor
 
   def index(conn, _params) do
     podcasts = Directory.list_podcasts_with_episode_counts(conn.assigns.current_network)

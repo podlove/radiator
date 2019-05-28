@@ -1,13 +1,14 @@
 defmodule Radiator.Directory.Editor.Manager do
   @moduledoc """
-
+  Manipulation of data with the assumption that the actor has
+  the :manage permission to the entity.
   """
   import Ecto.Query, warn: false
 
   alias Radiator.Repo
   alias Radiator.Directory
 
-  alias Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.{Network, Podcast, Episode}
 
   @doc """
   Creates a podcast.

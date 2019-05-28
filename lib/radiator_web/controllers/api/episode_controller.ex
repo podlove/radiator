@@ -2,8 +2,8 @@ defmodule RadiatorWeb.Api.EpisodeController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
-  alias Directory.{Episode, Podcast}
-  alias Directory.Editor
+  alias Radiator.Directory.{Episode, Podcast}
+  alias Radiator.Directory.Editor
 
   action_fallback RadiatorWeb.Api.FallbackController
 
