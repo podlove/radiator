@@ -70,12 +70,6 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  def get_any_network(actor = %Auth.User{}) do
-    actor
-    |> list_networks
-    |> hd
-  end
-
   @doc """
   Creates a network.
 
@@ -145,18 +139,31 @@ defmodule Radiator.Directory.Editor do
     |> Repo.all()
   end
 
-  # FIXME see list_podcasts/1 above
-  # - user should be able to list podcasts that he has permissions to even if he does not have permissions in the given network
-  def list_podcasts(actor = %Auth.User{}, network = %Network{}) do
-    query =
+  defp list_podcast_query(actor = %Auth.User{}, network = %Network{}) do
+    if has_permission(actor, network, :readonly) do
+      from pod in Podcast,
+        where: pod.network_id == ^network.id,
+        order_by: pod.title
+    else
       from pod in Podcast,
         join: perm in "podcasts_perm",
         where: pod.id == perm.subject_id,
         where: perm.user_id == ^actor.id,
         where: pod.network_id == ^network.id,
         order_by: pod.title
+    end
+  end
 
-    query
+  # FIXME see list_podcasts/1 above
+  # - user should be able to list podcasts that he has permissions to even if he does not have permissions in the given network
+  def list_podcasts(actor = %Auth.User{}, network = %Network{}) do
+    list_podcast_query(actor, network)
+    |> Repo.all()
+  end
+
+  def list_podcasts_with_episode_counts(actor = %Auth.User{}, network = %Network{}) do
+    list_podcast_query(actor, network)
+    |> Podcast.preload_episode_counts()
     |> Repo.all()
   end
 
@@ -246,6 +253,26 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def list_episodes(actor = %Auth.User{}, podcast = %Podcast{}) do
+    query =
+      if has_permission(actor, podcast, :readonly) do
+        from ep in Episode,
+          where: ep.podcast_id == ^podcast.id,
+          order_by: ep.title,
+          order_by: [desc: ep.id]
+      else
+        from ep in Episode,
+          join: perm in "episode_perm",
+          where: ep.id == perm.subject_id,
+          where: perm.user_id == ^actor.id,
+          where: ep.podcast_id == ^podcast.id,
+          order_by: [desc: ep.id]
+      end
+
+    query
+    |> Repo.all()
+  end
+
   def create_episode(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
     if has_permission(actor, podcast, :manage) do
       Editor.Manager.create_episode(podcast, attrs)
@@ -310,7 +337,7 @@ defmodule Radiator.Directory.Editor do
 
       episode = %Episode{} ->
         if has_permission(actor, episode, :readonly) do
-          {:ok, episode}
+          {:ok, episode |> Repo.preload(:podcast)}
         else
           @not_authorized_match
         end

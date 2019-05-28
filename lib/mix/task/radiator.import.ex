@@ -1,22 +1,24 @@
 defmodule Mix.Tasks.Radiator.Import do
   use Mix.Task
+  alias Mix.Shell.IO, as: ShellIO
 
   @shortdoc "Import a public rss feed into radiator."
 
   @moduledoc """
   Ingest a public rss podcast feed into radiator.
 
-      mix radiator.import -p fanboys.fm
+      mix radiator.import username -p fanboys.fm
 
   ## Options
 
+    * `--network/-n <network>` - import into a specific network of the user
     * `--preview/-p` - only preview what is going to be imported.
     * `--debug/-d` - turn on debug logging.
 
   """
 
-  @switches [debug: :boolean, preview: :boolean]
-  @aliases [d: :debug, p: :preview]
+  @switches [debug: :boolean, preview: :boolean, network: :string]
+  @aliases [d: :debug, p: :preview, n: :network]
 
   alias Radiator.Directory
   alias Radiator.Directory.Editor
@@ -35,62 +37,116 @@ defmodule Mix.Tasks.Radiator.Import do
   @doc false
   def run(argv) do
     case parse_opts(argv) do
-      {opts, [url]} ->
+      {opts, [username, url]} ->
         opts = Map.new(opts)
 
         unless opts[:debug], do: Logger.configure(level: :info)
 
         with_services do
-          metalove_podcast = Metalove.get_podcast(url)
+          with user = %Radiator.Auth.User{} <- Radiator.Auth.Register.get_user_by_name(username) do
+            ShellIO.info([
+              "Importing for user ",
+              :bright,
+              "#{user.name} <#{user.email}>",
+              :reset,
+              " with id ",
+              :bright,
+              "#{user.id}"
+            ])
 
-          Logger.info("Fetching feed from #{metalove_podcast.main_feed_url}")
+            metalove_podcast = Metalove.get_podcast(url)
 
-          feed =
-            Metalove.PodcastFeed.get_by_feed_url_await_all_pages(
-              metalove_podcast.main_feed_url,
-              120_000
-            )
+            ShellIO.info([
+              "Fetching feed from ",
+              :bright,
+              "#{metalove_podcast.main_feed_url}",
+              :reset
+            ])
 
-          if opts[:debug], do: IO.inspect(feed, pretty: true)
-
-          Logger.info("Found #{length(feed.episodes)} episodes")
-
-          unless opts[:preview] do
-            {:ok, podcast} =
-              Editor.Manager.create_podcast(
-                Directory.get_any_network(),
-                %{
-                  title: feed.title,
-                  subtitle: feed.subtitle,
-                  author: feed.author,
-                  description: feed.description,
-                  image: feed.image_url,
-                  language: feed.language
-                }
+            feed =
+              Metalove.PodcastFeed.get_by_feed_url_await_all_pages(
+                metalove_podcast.main_feed_url,
+                120_000
               )
 
-            feed.episodes
-            |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
-            |> Enum.map(fn episode ->
-              # todo: create enclosure (pull file? currently no model for external URLs)
-              Editor.Manager.create_episode(podcast, %{
-                guid: episode.guid,
-                title: episode.title,
-                subtitle: episode.subtitle,
-                description: episode.description,
-                content: episode.content_encoded,
-                published_at: episode.pub_date,
-                number: episode.episode,
-                image: episode.image_url,
-                duration: episode.duration
-              })
-            end)
-            |> Enum.count(fn
-              {:ok, _} -> true
-              _ -> false
-            end)
-            |> case do
-              count -> Logger.info(~s/Created #{count} episodes in "#{podcast.title}"/)
+            if opts[:debug], do: IO.inspect(feed, pretty: true)
+
+            ShellIO.info([
+              "Found ",
+              :bright,
+              "#{length(feed.episodes)}",
+              :reset,
+              " episodes "
+            ])
+
+            network_name = opts[:network] || "#{user.name}'s Network"
+
+            network = Radiator.Repo.get_by(Directory.Network, %{title: network_name})
+
+            ShellIO.info(
+              case network do
+                network = %Directory.Network{} ->
+                  ["Importing into existing network ", :bright, "#{network.title}", :reset]
+
+                _ ->
+                  [
+                    :yellow,
+                    "Importing ",
+                    "creates network ",
+                    :bright,
+                    "#{network_name}",
+                    :reset
+                  ]
+              end
+            )
+
+            unless opts[:preview] do
+              network =
+                case network do
+                  network = %Directory.Network{} ->
+                    network
+
+                  _ ->
+                    {:ok, network} = Editor.create_network(user, %{title: network_name})
+                    network
+                end
+
+              {:ok, podcast} =
+                Editor.Manager.create_podcast(
+                  network,
+                  %{
+                    title: feed.title,
+                    subtitle: feed.subtitle,
+                    author: feed.author,
+                    description: feed.description,
+                    image: feed.image_url,
+                    language: feed.language
+                  }
+                )
+
+              feed.episodes
+              |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
+              |> Enum.map(fn episode ->
+                # todo: create enclosure (pull file? currently no model for external URLs)
+                Editor.Manager.create_episode(podcast, %{
+                  guid: episode.guid,
+                  title: episode.title,
+                  subtitle: episode.subtitle,
+                  description: episode.description,
+                  content: episode.content_encoded,
+                  published_at: episode.pub_date,
+                  number: episode.episode,
+                  image: episode.image_url,
+                  duration: episode.duration
+                })
+              end)
+              |> Enum.count(fn
+                {:ok, _} -> true
+                _ -> false
+              end)
+              |> case do
+                count -> Logger.info(~s/Created #{count} episodes in "#{podcast.title}"/)
+              end
             end
           end
         end

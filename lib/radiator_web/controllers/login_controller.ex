@@ -2,7 +2,6 @@ defmodule RadiatorWeb.LoginController do
   use RadiatorWeb, :controller
 
   alias Radiator.Auth
-  alias Radiator.Directory.Editor
 
   def index(conn, _params) do
     render(conn, "index.html", user_changeset: Auth.Register.change_user(%Auth.User{}))
@@ -65,15 +64,8 @@ defmodule RadiatorWeb.LoginController do
   defp sign_in_valid_user(conn, user, message) do
     path =
       case get_session(conn, :on_login) do
-        {path, _query} ->
-          path
-
-        _ ->
-          Routes.admin_network_podcast_path(
-            conn,
-            :index,
-            Editor.get_any_network(user)
-          )
+        {path, _query} -> path
+        _ -> Routes.admin_network_path(conn, :index)
       end
 
     conn
