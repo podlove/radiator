@@ -11,7 +11,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   plug :assign_podcast when action in [:new, :create, :update]
 
   defp assign_podcast(conn, _) do
-    {:ok, podcast} = Editor.get_podcast(get_me(conn), conn.params["podcast_id"])
+    {:ok, podcast} = Editor.get_podcast(authenticated_user(conn), conn.params["podcast_id"])
 
     conn
     |> assign(:podcast, podcast)
@@ -51,9 +51,9 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   end
 
   def show(conn, %{"id" => id}) do
-    me = get_me(conn)
+    user = authenticated_user(conn)
 
-    {:ok, episode} = Editor.get_episode(me, id)
+    {:ok, episode} = Editor.get_episode(user, id)
 
     episode =
       episode
@@ -63,18 +63,18 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   end
 
   def edit(conn, %{"id" => id}) do
-    me = get_me(conn)
+    user = authenticated_user(conn)
 
-    {:ok, episode} = Editor.get_episode(me, id)
+    {:ok, episode} = Editor.get_episode(user, id)
     changeset = Editor.Manager.change_episode(episode)
 
     render(conn, "edit.html", episode: episode, changeset: changeset)
   end
 
   def update(conn, %{"id" => id, "episode" => episode_params}) do
-    me = get_me(conn)
+    user = authenticated_user(conn)
 
-    {:ok, episode} = Editor.get_episode(me, id)
+    {:ok, episode} = Editor.get_episode(user, id)
 
     if episode_params["enclosure"] do
       {:ok, _audio, _attachment} = AudioFileUpload.upload(episode_params["enclosure"], episode)

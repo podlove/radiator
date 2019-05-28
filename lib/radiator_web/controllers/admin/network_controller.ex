@@ -5,9 +5,9 @@ defmodule RadiatorWeb.Admin.NetworkController do
   alias Radiator.Directory.Editor
 
   def index(conn, _params) do
-    me = conn.assigns.authenticated_user
+    user = authenticated_user(conn)
 
-    networks = Editor.list_networks(me)
+    networks = Editor.list_networks(user)
     render(conn, "index.html", networks: networks)
   end
 
@@ -36,7 +36,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
 
   def edit(conn, %{"id" => id}) do
     conn
-    |> get_me()
+    |> authenticated_user()
     |> Editor.get_network(id)
     |> case do
       network = %Network{} ->
@@ -51,13 +51,13 @@ defmodule RadiatorWeb.Admin.NetworkController do
   end
 
   def update(conn, %{"id" => id, "network" => network_params}) do
-    me = get_me(conn)
+    user = authenticated_user(conn)
 
-    me
+    user
     |> Editor.get_network(id)
     |> case do
       network = %Network{} ->
-        case Editor.update_network(me, network, network_params) do
+        case Editor.update_network(user, network, network_params) do
           {:ok, _network} ->
             conn
             |> put_flash(:info, "network updated successfully.")

@@ -6,8 +6,8 @@ defmodule RadiatorWeb.Admin.PodcastController do
   alias Radiator.Directory.Editor
 
   def index(conn, _params) do
-    me = get_me(conn)
-    podcasts = Editor.list_podcasts_with_episode_counts(me, conn.assigns.current_network)
+    user = authenticated_user(conn)
+    podcasts = Editor.list_podcasts_with_episode_counts(user, conn.assigns.current_network)
     render(conn, "index.html", podcasts: podcasts)
   end
 
@@ -18,9 +18,9 @@ defmodule RadiatorWeb.Admin.PodcastController do
   end
 
   def create(conn, %{"podcast" => podcast_params}) do
-    me = get_me(conn)
+    user = authenticated_user(conn)
 
-    case Editor.create_podcast(me, conn.assigns.current_network, podcast_params) do
+    case Editor.create_podcast(user, conn.assigns.current_network, podcast_params) do
       {:ok, podcast} ->
         conn
         |> put_flash(:info, "podcast created successfully.")
@@ -34,11 +34,11 @@ defmodule RadiatorWeb.Admin.PodcastController do
   end
 
   def show(conn, %{"id" => id}) do
-    me = get_me(conn)
-    {:ok, podcast} = Editor.get_podcast(me, id)
+    user = authenticated_user(conn)
+    {:ok, podcast} = Editor.get_podcast(user, id)
 
     # FIXME: only draft episodes, probably bring over the directory options semantic
-    draft_episodes = Editor.list_episodes(me, podcast)
+    draft_episodes = Editor.list_episodes(user, podcast)
 
     published_episodes =
       Directory.list_episodes(%{
@@ -54,16 +54,16 @@ defmodule RadiatorWeb.Admin.PodcastController do
   end
 
   def edit(conn, %{"id" => id}) do
-    me = get_me(conn)
-    podcast = Editor.get_podcast(me, id)
+    user = authenticated_user(conn)
+    podcast = Editor.get_podcast(user, id)
     changeset = Editor.Manager.change_podcast(podcast)
 
     render(conn, "edit.html", podcast: podcast, changeset: changeset)
   end
 
   def update(conn, %{"id" => id, "podcast" => podcast_params}) do
-    me = get_me(conn)
-    podcast = Editor.get_podcast(me, id)
+    user = authenticated_user(conn)
+    podcast = Editor.get_podcast(user, id)
 
     case Editor.Manager.update_podcast(podcast, podcast_params) do
       {:ok, podcast} ->
