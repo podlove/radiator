@@ -152,8 +152,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def publish_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
     with_podcast user, id do
       fn podcast ->
-        # FIXME: no direct manager access
-        Editor.Manager.publish_podcast(podcast)
+        Editor.publish_podcast(user, podcast)
       end
     end
   end
@@ -161,8 +160,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def depublish_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
     with_podcast user, id do
       fn podcast ->
-        # FIXME: no direct manager access
-        Editor.Manager.depublish_podcast(podcast)
+        Editor.depublish_podcast(user, podcast)
       end
     end
   end
@@ -170,8 +168,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def delete_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
     with_podcast user, id do
       fn podcast ->
-        # FIXME: no direct manager access
-        Editor.Manager.delete_podcast(podcast)
+        Editor.delete_podcast(user, podcast)
       end
     end
   end
