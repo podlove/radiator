@@ -4,7 +4,7 @@ defmodule Mix.Tasks.Radiator.AddUser do
   @shortdoc "Add a user."
 
   @moduledoc """
-  Ingest a public rss podcast feed into radiator.
+  Add a user. Use `-a` to pre-confirm the email address.
 
       mix radiator.adduser username email password
 
