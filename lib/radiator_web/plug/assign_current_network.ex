@@ -3,7 +3,7 @@ defmodule RadiatorWeb.Plug.AssignCurrentNetwork do
 
   import Plug.Conn
   import Radiator.Directory, only: [get_network: 1]
-  import Radiator.Auth.Permission, only: [has_permission: 3]
+  import Radiator.Directory.Editor.Permission, only: [has_permission: 3]
 
   alias RadiatorWeb.Router.Helpers, as: Routes
 

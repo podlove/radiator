@@ -7,7 +7,7 @@ defmodule Radiator.Directory.Editor do
   use Radiator.Constants
 
   import Ecto.Query, warn: false
-  import Radiator.Auth.Permission
+  import Radiator.Directory.Editor.Permission
 
   alias Radiator.Auth
 

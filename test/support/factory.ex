@@ -1,7 +1,7 @@
 defmodule Radiator.Factory do
   use ExMachina.Ecto, repo: Radiator.Repo
 
-  import Radiator.Auth.Permission
+  import Radiator.Directory.Editor.Permission
 
   alias Radiator.Auth.User
   alias Radiator.Directory.{Network, Podcast, Episode}

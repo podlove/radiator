@@ -1,4 +1,4 @@
-defmodule Radiator.Auth.Permission do
+defmodule Radiator.Directory.Editor.Permission do
   import Ecto.Query, warn: false
 
   use Radiator.Constants
