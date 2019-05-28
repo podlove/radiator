@@ -45,8 +45,8 @@ steps:
     when:
       branch:
         - master
-      exclude:
-        - pull_request
+      event:
+        - push
 
 services:
   - name: database
