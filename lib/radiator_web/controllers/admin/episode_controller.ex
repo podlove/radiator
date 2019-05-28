@@ -3,10 +3,9 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   require Logger
 
-  alias Radiator.Directory
   alias Radiator.Storage
-  alias Radiator.Directory.Episode
   alias Radiator.Directory.Editor
+  alias Radiator.Directory.Episode
   alias Radiator.Media.AudioFileUpload
 
   plug :assign_podcast when action in [:new, :create, :update]

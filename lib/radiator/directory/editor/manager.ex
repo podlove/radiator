@@ -6,7 +6,6 @@ defmodule Radiator.Directory.Editor.Manager do
   import Ecto.Query, warn: false
 
   alias Radiator.Repo
-  alias Radiator.Directory
 
   alias Radiator.Directory.{Network, Podcast, Episode}
 

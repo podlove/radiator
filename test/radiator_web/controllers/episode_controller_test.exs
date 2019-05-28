@@ -3,7 +3,6 @@ defmodule RadiatorWeb.EpisodeControllerTest do
 
   import Radiator.Factory
 
-  alias Radiator.Directory
   alias Radiator.Directory.Episode
   alias Radiator.Directory.Editor
 

@@ -2,7 +2,6 @@ defmodule RadiatorWeb.LoginController do
   use RadiatorWeb, :controller
 
   alias Radiator.Auth
-  alias Radiator.Directory.Editor
 
   def index(conn, _params) do
     render(conn, "index.html", user_changeset: Auth.Register.change_user(%Auth.User{}))
