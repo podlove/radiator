@@ -144,8 +144,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def update_podcast(_parent, %{id: id, podcast: args}, %{context: %{authenticated_user: user}}) do
     with_podcast user, id do
       fn podcast ->
-        # FIXME: no direct manager access
-        Editor.Manager.update_podcast(podcast, args)
+        Editor.update_podcast(user, podcast, args)
       end
     end
   end

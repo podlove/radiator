@@ -160,7 +160,6 @@ defmodule Radiator.Directory.Editor do
     |> Repo.all()
   end
 
-  # def update_podcast
   # def delete_podcast
   # def publish_podcast
   # def depublish_podcast
@@ -168,6 +167,14 @@ defmodule Radiator.Directory.Editor do
   def create_podcast(actor = %Auth.User{}, network = %Network{}, attrs) do
     if has_permission(actor, network, :manage) do
       Editor.Manager.create_podcast(network, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def update_podcast(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
+    if has_permission(actor, podcast, :edit) do
+      Editor.Manager.update_podcast(podcast, attrs)
     else
       @not_authorized_match
     end
