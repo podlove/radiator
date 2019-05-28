@@ -19,7 +19,7 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.Media
 
   @doc """
-  Returns a list of networks the actor has at least `:readonly` permissions on.
+  Returns a list of networks the user has at least `:readonly` permissions on.
 
   ## Examples
 
@@ -27,12 +27,12 @@ defmodule Radiator.Directory.Editor do
       [%Network{}, ...]
 
   """
-  def list_networks(actor = %Auth.User{}) do
+  def list_networks(user = %Auth.User{}) do
     query =
       from n in Network,
         join: p in "networks_perm",
         where: n.id == p.subject_id,
-        where: p.user_id == ^actor.id,
+        where: p.user_id == ^user.id,
         order_by: n.title
 
     query
@@ -56,13 +56,13 @@ defmodule Radiator.Directory.Editor do
   """
   @spec get_network(Auth.User.t(), pos_integer()) ::
           {:ok, Network.t()} | {:error, :not_authorized | :not_found}
-  def get_network(actor = %Auth.User{}, id) do
+  def get_network(user = %Auth.User{}, id) do
     case Repo.get(Network, id) do
       nil ->
         @not_found_match
 
       network = %Network{} ->
-        if has_permission(actor, network, :readonly) do
+        if has_permission(user, network, :readonly) do
           {:ok, network}
         else
           @not_authorized_match
@@ -83,8 +83,8 @@ defmodule Radiator.Directory.Editor do
 
   """
 
-  def create_network(actor = %Auth.User{}, attrs) do
-    case Editor.Owner.create_network(actor, attrs) do
+  def create_network(user = %Auth.User{}, attrs) do
+    case Editor.Owner.create_network(user, attrs) do
       {:ok, %{network: network}} -> {:ok, network}
       {:error, :network, changeset, _} -> {:error, changeset}
     end
@@ -104,8 +104,8 @@ defmodule Radiator.Directory.Editor do
       iex> update_network(me, readonly_network, %{title: "Hostile Takeover 1"})
       {:error, :not_authorized}
   """
-  def update_network(actor = %Auth.User{}, network = %Network{}, attrs) do
-    if has_permission(actor, network, :own) do
+  def update_network(user = %Auth.User{}, network = %Network{}, attrs) do
+    if has_permission(user, network, :own) do
       Editor.Owner.update_network(network, attrs)
     else
       @not_authorized_match
@@ -127,20 +127,20 @@ defmodule Radiator.Directory.Editor do
     3) merge results from 1) and 2)
 
   """
-  def list_podcasts(actor = %Auth.User{}) do
+  def list_podcasts(user = %Auth.User{}) do
     query =
       from n in Podcast,
         join: p in "podcasts_perm",
         where: n.id == p.subject_id,
-        where: p.user_id == ^actor.id,
+        where: p.user_id == ^user.id,
         order_by: n.title
 
     query
     |> Repo.all()
   end
 
-  defp list_podcast_query(actor = %Auth.User{}, network = %Network{}) do
-    if has_permission(actor, network, :readonly) do
+  defp list_podcast_query(user = %Auth.User{}, network = %Network{}) do
+    if has_permission(user, network, :readonly) do
       from pod in Podcast,
         where: pod.network_id == ^network.id,
         order_by: pod.title
@@ -148,7 +148,7 @@ defmodule Radiator.Directory.Editor do
       from pod in Podcast,
         join: perm in "podcasts_perm",
         where: pod.id == perm.subject_id,
-        where: perm.user_id == ^actor.id,
+        where: perm.user_id == ^user.id,
         where: pod.network_id == ^network.id,
         order_by: pod.title
     end
@@ -156,51 +156,51 @@ defmodule Radiator.Directory.Editor do
 
   # FIXME see list_podcasts/1 above
   # - user should be able to list podcasts that he has permissions to even if he does not have permissions in the given network
-  def list_podcasts(actor = %Auth.User{}, network = %Network{}) do
-    list_podcast_query(actor, network)
+  def list_podcasts(user = %Auth.User{}, network = %Network{}) do
+    list_podcast_query(user, network)
     |> Repo.all()
   end
 
-  def list_podcasts_with_episode_counts(actor = %Auth.User{}, network = %Network{}) do
-    list_podcast_query(actor, network)
+  def list_podcasts_with_episode_counts(user = %Auth.User{}, network = %Network{}) do
+    list_podcast_query(user, network)
     |> Podcast.preload_episode_counts()
     |> Repo.all()
   end
 
-  def create_podcast(actor = %Auth.User{}, network = %Network{}, attrs) do
-    if has_permission(actor, network, :manage) do
+  def create_podcast(user = %Auth.User{}, network = %Network{}, attrs) do
+    if has_permission(user, network, :manage) do
       Editor.Manager.create_podcast(network, attrs)
     else
       @not_authorized_match
     end
   end
 
-  def update_podcast(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
-    if has_permission(actor, podcast, :edit) do
+  def update_podcast(user = %Auth.User{}, podcast = %Podcast{}, attrs) do
+    if has_permission(user, podcast, :edit) do
       Editor.Manager.update_podcast(podcast, attrs)
     else
       @not_authorized_match
     end
   end
 
-  def publish_podcast(actor = %Auth.User{}, podcast = %Podcast{}) do
-    if has_permission(actor, podcast, :manage) do
+  def publish_podcast(user = %Auth.User{}, podcast = %Podcast{}) do
+    if has_permission(user, podcast, :manage) do
       Editor.Manager.publish_podcast(podcast)
     else
       @not_authorized_match
     end
   end
 
-  def depublish_podcast(actor = %Auth.User{}, podcast = %Podcast{}) do
-    if has_permission(actor, podcast, :manage) do
+  def depublish_podcast(user = %Auth.User{}, podcast = %Podcast{}) do
+    if has_permission(user, podcast, :manage) do
       Editor.Manager.depublish_podcast(podcast)
     else
       @not_authorized_match
     end
   end
 
-  def delete_podcast(actor = %Auth.User{}, podcast = %Podcast{}) do
-    if has_permission(actor, podcast, :own) do
+  def delete_podcast(user = %Auth.User{}, podcast = %Podcast{}) do
+    if has_permission(user, podcast, :own) do
       Editor.Manager.depublish_podcast(podcast)
     else
       @not_authorized_match
@@ -224,13 +224,13 @@ defmodule Radiator.Directory.Editor do
   """
   @spec get_podcast(Auth.User.t(), pos_integer()) ::
           {:ok, Podcast.t()} | {:error, :not_authorized | :not_found}
-  def get_podcast(actor = %Auth.User{}, id) do
+  def get_podcast(user = %Auth.User{}, id) do
     case Repo.get(Podcast, id) do
       nil ->
         @not_found_match
 
       podcast = %Podcast{} ->
-        if has_permission(actor, podcast, :readonly) do
+        if has_permission(user, podcast, :readonly) do
           {:ok, podcast}
         else
           @not_authorized_match
@@ -238,8 +238,8 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  def get_episodes_count_for_podcast!(actor = %Auth.User{}, id) do
-    get_podcast(actor, id)
+  def get_episodes_count_for_podcast!(user = %Auth.User{}, id) do
+    get_podcast(user, id)
     |> case do
       {:ok, podcast} ->
         count =
@@ -253,9 +253,9 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  def list_episodes(actor = %Auth.User{}, podcast = %Podcast{}) do
+  def list_episodes(user = %Auth.User{}, podcast = %Podcast{}) do
     query =
-      if has_permission(actor, podcast, :readonly) do
+      if has_permission(user, podcast, :readonly) do
         from ep in Episode,
           where: ep.podcast_id == ^podcast.id,
           order_by: ep.title,
@@ -264,7 +264,7 @@ defmodule Radiator.Directory.Editor do
         from ep in Episode,
           join: perm in "episode_perm",
           where: ep.id == perm.subject_id,
-          where: perm.user_id == ^actor.id,
+          where: perm.user_id == ^user.id,
           where: ep.podcast_id == ^podcast.id,
           order_by: [desc: ep.id]
       end
@@ -273,40 +273,40 @@ defmodule Radiator.Directory.Editor do
     |> Repo.all()
   end
 
-  def create_episode(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
-    if has_permission(actor, podcast, :manage) do
+  def create_episode(user = %Auth.User{}, podcast = %Podcast{}, attrs) do
+    if has_permission(user, podcast, :manage) do
       Editor.Manager.create_episode(podcast, attrs)
     else
       @not_authorized_match
     end
   end
 
-  def update_episode(actor = %Auth.User{}, episode = %Episode{}, attrs) do
-    if has_permission(actor, episode, :edit) do
+  def update_episode(user = %Auth.User{}, episode = %Episode{}, attrs) do
+    if has_permission(user, episode, :edit) do
       Editor.Manager.update_episode(episode, attrs)
     else
       @not_authorized_match
     end
   end
 
-  def publish_episode(actor = %Auth.User{}, episode = %Episode{}) do
-    if has_permission(actor, episode, :manage) do
+  def publish_episode(user = %Auth.User{}, episode = %Episode{}) do
+    if has_permission(user, episode, :manage) do
       Editor.Manager.publish_episode(episode)
     else
       @not_authorized_match
     end
   end
 
-  def depublish_episode(actor = %Auth.User{}, episode = %Episode{}) do
-    if has_permission(actor, episode, :manage) do
+  def depublish_episode(user = %Auth.User{}, episode = %Episode{}) do
+    if has_permission(user, episode, :manage) do
       Editor.Manager.depublish_episode(episode)
     else
       @not_authorized_match
     end
   end
 
-  def delete_episode(actor = %Auth.User{}, episode = %Episode{}) do
-    if has_permission(actor, episode, :own) do
+  def delete_episode(user = %Auth.User{}, episode = %Episode{}) do
+    if has_permission(user, episode, :own) do
       Editor.Manager.delete_episode(episode)
     else
       @not_authorized_match
@@ -330,13 +330,13 @@ defmodule Radiator.Directory.Editor do
   """
   @spec get_episode(Auth.User.t(), pos_integer()) ::
           {:ok, Episode.t()} | {:error, :not_authorized | :not_found}
-  def get_episode(actor = %Auth.User{}, id) do
+  def get_episode(user = %Auth.User{}, id) do
     case Repo.get(Episode, id) do
       nil ->
         @not_found_match
 
       episode = %Episode{} ->
-        if has_permission(actor, episode, :readonly) do
+        if has_permission(user, episode, :readonly) do
           {:ok, episode |> Repo.preload(:podcast)}
         else
           @not_authorized_match

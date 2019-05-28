@@ -1,6 +1,6 @@
 defmodule Radiator.Directory.Editor.Manager do
   @moduledoc """
-  Manipulation of data with the assumption that the actor has
+  Manipulation of data with the assumption that the user has
   the :manage permission to the entity.
   """
   import Ecto.Query, warn: false

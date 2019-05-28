@@ -1,6 +1,6 @@
 defmodule Radiator.Directory.Editor.Owner do
   @moduledoc """
-  Manipulation of data with the assumption that the actor has
+  Manipulation of data with the assumption that the user has
   the :own permission to the entity.
   """
   import Ecto.Query, warn: false
@@ -37,7 +37,7 @@ defmodule Radiator.Directory.Editor.Owner do
 
   """
 
-  def create_network(actor = %Auth.User{}, attrs) when is_map(attrs) do
+  def create_network(user = %Auth.User{}, attrs) when is_map(attrs) do
     network =
       %Network{}
       |> Network.creation_changeset(attrs)
@@ -47,7 +47,7 @@ defmodule Radiator.Directory.Editor.Owner do
     |> Multi.insert(:permission, fn %{network: network} ->
       Ecto.build_assoc(network, :permissions)
       |> Permission.changeset(%{permission: :own})
-      |> Ecto.Changeset.put_assoc(:user, actor)
+      |> Ecto.Changeset.put_assoc(:user, user)
     end)
     |> Repo.transaction()
   end

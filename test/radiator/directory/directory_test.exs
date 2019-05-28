@@ -141,12 +141,12 @@ defmodule Radiator.DirectoryTest do
 
     test "publish_podcast/1 with invalid data returns error changeset" do
       podcast = insert(:podcast, published_at: nil)
-      actor = insert(:user) |> make_owner(podcast)
+      user = insert(:user) |> make_owner(podcast)
 
       assert {:error, %Ecto.Changeset{}} =
                Editor.Manager.publish_podcast(%{podcast | :title => nil})
 
-      assert {:ok, %Podcast{published_at: nil}} = Editor.get_podcast(actor, podcast.id)
+      assert {:ok, %Podcast{published_at: nil}} = Editor.get_podcast(user, podcast.id)
     end
 
     test "depublish_podcast/1 removes a podcasts published_at date" do
