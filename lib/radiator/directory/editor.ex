@@ -204,7 +204,8 @@ defmodule Radiator.Directory.Editor do
       podcast
       |> Repo.preload(:network)
 
-    if has_permission(actor, podcast.network, :manage) do
+    if has_permission(actor, podcast, :own) ||
+         has_permission(actor, podcast.network, :manage) do
       Editor.Manager.delete_podcast(podcast)
     else
       @not_authorized_match
