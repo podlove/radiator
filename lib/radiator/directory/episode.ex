@@ -60,7 +60,7 @@ defmodule Radiator.Directory.Episode do
       :slug,
       :podcast_id
     ])
-    |> cast_attachments(attrs, [:image])
+    |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
     |> validate_required([:title])
     |> set_guid_if_missing()
     |> TitleSlug.maybe_generate_slug()

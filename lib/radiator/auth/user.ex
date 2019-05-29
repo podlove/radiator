@@ -39,7 +39,7 @@ defmodule Radiator.Auth.User do
   def changeset(%User{} = user, attrs) do
     user
     |> cast(attrs, [:name, :email, :display_name, :password, :password_hash, :status])
-    |> cast_attachments(attrs, [:avatar])
+    |> cast_attachments(attrs, [:avatar], allow_paths: true, allow_urls: true)
     |> unique_constraint(:name, name: :auth_users__lower_name_index)
     |> unique_constraint(:email, name: :auth_users__lower_email_index)
     |> validate_format(:name, ~r/^[^\s ]+$/)
