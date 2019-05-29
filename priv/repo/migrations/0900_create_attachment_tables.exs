@@ -1,6 +1,8 @@
 defmodule Radiator.Repo.Migrations.CreateAttachmentTables do
   use Ecto.Migration
 
+  # todo: rename all audio_id to audio_file_id to avoid confusion
+
   def up do
     create table(:network_attachments, primary_key: false) do
       add :audio_id, references("audio_files", on_delete: :delete_all), primary_key: true
@@ -15,9 +17,17 @@ defmodule Radiator.Repo.Migrations.CreateAttachmentTables do
 
       timestamps()
     end
+
+    create table(:audio_attachments, primary_key: false) do
+      add :audio_file_id, references("audio_files", on_delete: :delete_all), primary_key: true
+      add :subject_id, references("audios", on_delete: :delete_all), primary_key: true
+
+      timestamps()
+    end
   end
 
   def down do
+    drop table(:audio_attachments)
     drop table(:episode_attachments)
     drop table(:network_attachments)
   end

@@ -16,6 +16,8 @@ defmodule Radiator.Tracking do
         time: time,
         http_range: http_range
       ) do
+    # todo/fixme: what do we track? just the audio access and ignore if it's connected to an episode, multiple episodes, or network?
+    #   maybe episode/network is in an optional tracking param?
     file = Repo.preload(file, episode: [podcast: :network])
     episode = file.episode
     podcast = episode.podcast

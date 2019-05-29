@@ -7,13 +7,13 @@ defmodule Radiator.Directory.Episode do
 
   alias __MODULE__
   alias Radiator.Media
-  alias Radiator.Directory.{Podcast, Audio, TitleSlug}
+  alias Radiator.Directory.{Episode, Podcast, Audio, TitleSlug}
 
   schema "episodes" do
     field :content, :string
     field :description, :string
     field :guid, :string
-    field :image, Radiator.Media.EpisodeImage.Type
+    field :image, Media.EpisodeImage.Type
     field :number, :integer
     field :published_at, :utc_datetime
     field :subtitle, :string
@@ -22,20 +22,6 @@ defmodule Radiator.Directory.Episode do
 
     belongs_to :podcast, Podcast
     belongs_to :audio, Audio
-
-    has_many :attachments,
-             {"episode_attachments", Media.EpisodeAttachment},
-             foreign_key: :subject_id
-
-    many_to_many :audio_files,
-                 Media.AudioFile,
-                 join_through: "episode_attachments",
-                 join_keys: [subject_id: :id, audio_id: :id]
-
-    # RESEARCH needed
-    # Repo.preload(episode, :enclosure) works
-    # Ecto.assoc(episode, :enclosure) does not work
-    has_one :enclosure, through: [:attachments, :audio]
 
     has_many :permissions, {"episodes_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
 
@@ -61,12 +47,14 @@ defmodule Radiator.Directory.Episode do
     |> set_guid_if_missing()
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()
+
+    # todo: episode cannot be published without audio
   end
 
   @doc """
   Convenience accessor for enclosure URL.
   """
-  def enclosure_url(%Episode{enclosure: enclosure}) do
+  def enclosure_url(%Episode{audio: %Audio{audio_files: [enclosure]}}) do
     Media.AudioFile.url({enclosure.file, enclosure})
   end
 

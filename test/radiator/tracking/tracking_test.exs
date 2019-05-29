@@ -97,7 +97,7 @@ defmodule Radiator.TrackingTest do
       filename: "pling.mp3"
     }
 
-    {:ok, audio, _} = Radiator.Media.AudioFileUpload.upload(upload, episode)
+    {:ok, audio, _} = Radiator.Media.AudioFileUpload.upload(upload, episode.audio)
 
     audio
   end

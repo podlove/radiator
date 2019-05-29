@@ -12,6 +12,7 @@ defmodule Radiator.Directory.Audio do
   import Ecto.Changeset
   import Ecto.Query, warn: false
 
+  alias Radiator.Media
   alias Radiator.Directory.{Episode, Network}
   alias Radiator.EpisodeMeta.Chapter
 
@@ -26,7 +27,14 @@ defmodule Radiator.Directory.Audio do
     has_many :episodes, Episode
     belongs_to :network, Network
 
-    # many_to_many :audio_files, ...
+    has_many :attachments,
+             {"audio_attachments", Media.AudioAttachment},
+             foreign_key: :subject_id
+
+    many_to_many :audio_files,
+                 Media.AudioFile,
+                 join_through: "audio_attachments",
+                 join_keys: [subject_id: :id, audio_file_id: :id]
 
     has_many :chapters, Chapter
 
