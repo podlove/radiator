@@ -57,7 +57,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
     episode =
       episode
-      |> Radiator.Repo.preload(:chapters)
+      |> Radiator.Repo.preload([:chapters, :enclosure, :audio_files])
 
     render(conn, "show.html", episode: episode)
   end

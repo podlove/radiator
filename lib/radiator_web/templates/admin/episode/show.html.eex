@@ -4,7 +4,7 @@
       <h1 class="text-3xl font-bold mb-1 text-blue-900">
         <%= @episode.title %>
       </h1>
-      <div class="max-w-md text-gray-600 font-normal text-lg mb-2">
+      <div class="max-w-m text-gray-600 font-normal text-lg mb-2">
         <%= @episode.subtitle %>
       </div>
       <div class="max-w-md text-black font-normal">
@@ -20,8 +20,10 @@
     </div>
   </div>
 
-  <%= if assigns[:episode] && Ecto.assoc_loaded?(@episode.enclosure) do %>
-    <div class="card max-w-sm flex justify-between items-center">
+  <%= if assigns[:episode] && Ecto.assoc_loaded?(@episode.enclosure) && @episode.enclosure do %>
+    <div class="card max-w-m flex justify-between items-center">
+      <h3>Audio</h3>
+      <%= content_tag(:p, Radiator.Directory.Episode.enclosure_url(@episode)) %>
       <audio src="<%= Radiator.Directory.Episode.enclosure_url(@episode) %>" type="<%= @episode.enclosure.mime_type %>" controls></audio>
       <div class="text-gray-900">
         <%= @episode.enclosure.byte_length |> format_bytes() %>
@@ -33,7 +35,7 @@
     <div class="card max-w-sm flex flex-col mt-8">
       <span class="text-gray-700 font-normal text-lg mb-4">Chapters</span>
       <%= for chapter <- @episode.chapters do %>
-        <div><%= chapter.title %></div>
+        <div class="border border-blue-900 mb-3" ><%= chapter.title %></div>
       <% end %>
     </div>
   <% end %>
