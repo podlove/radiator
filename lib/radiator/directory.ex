@@ -140,6 +140,7 @@ defmodule Radiator.Directory do
   def list_episodes(args) do
     episodes_query(args)
     |> Repo.all()
+    |> Repo.preload([:podcast, :audio])
   end
 
   @doc """
@@ -160,14 +161,14 @@ defmodule Radiator.Directory do
     Episode
     |> EpisodeQuery.filter_by_published(true)
     |> Repo.get!(id)
-    |> Repo.preload(:podcast)
+    |> Repo.preload([:podcast, :audio])
   end
 
   def get_episode(id) do
     Episode
     |> EpisodeQuery.filter_by_published(true)
     |> Repo.get(id)
-    |> Repo.preload(:podcast)
+    |> Repo.preload([:podcast, :audio])
   end
 
   @doc """
@@ -178,7 +179,8 @@ defmodule Radiator.Directory do
       iex> get_episode_by_slug(slug)
       {:ok, %Episode{}}
   """
-  def get_episode_by_slug(slug), do: Repo.get_by(Episode, %{slug: slug}) |> Repo.preload(:podcast)
+  def get_episode_by_slug(slug),
+    do: Repo.get_by(Episode, %{slug: slug}) |> Repo.preload([:podcast, :audio])
 
   def is_published(%Podcast{published_at: nil}), do: false
   def is_published(%Episode{published_at: nil}), do: false

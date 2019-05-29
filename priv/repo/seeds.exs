@@ -41,5 +41,5 @@ if Mix.env() != :test do
       title: "BCME"
     })
 
-  Editor.Owner.set_permission(foo, network2, :readonly)
+  Editor.Permission.set_permission(foo, network2, :readonly)
 end

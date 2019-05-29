@@ -6,15 +6,12 @@ defmodule Radiator.Directory.Episode do
   import Ecto.Query, warn: false
 
   alias __MODULE__
-  alias Radiator.Directory.Podcast
   alias Radiator.Media
-  alias Radiator.Directory.{Podcast, TitleSlug}
-  alias Radiator.EpisodeMeta.Chapter
+  alias Radiator.Directory.{Podcast, Audio, TitleSlug}
 
   schema "episodes" do
     field :content, :string
     field :description, :string
-    field :duration, :string
     field :guid, :string
     field :image, Radiator.Media.EpisodeImage.Type
     field :number, :integer
@@ -24,7 +21,7 @@ defmodule Radiator.Directory.Episode do
     field :slug, TitleSlug.Type
 
     belongs_to :podcast, Podcast
-    has_many :chapters, Chapter
+    belongs_to :audio, Audio
 
     has_many :attachments,
              {"episode_attachments", Media.EpisodeAttachment},
@@ -53,7 +50,6 @@ defmodule Radiator.Directory.Episode do
       :subtitle,
       :description,
       :content,
-      :duration,
       :guid,
       :number,
       :published_at,

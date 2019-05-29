@@ -3,7 +3,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
   import Radiator.Feed.Builder, only: [add: 2]
   import Radiator.Feed.Guards
 
-  alias Radiator.Directory.Episode
+  alias Radiator.Directory.{Episode, Audio}
 
   def new(feed_data, episode) do
     element(:item, fields(feed_data, episode))
@@ -57,7 +57,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
     element(:guid, %{isPermaLink: "false"}, guid)
   end
 
-  defp chapters(%Episode{chapters: chapters}) when length(chapters) > 0 do
+  defp chapters(%Episode{audio: %Audio{chapters: chapters}}) when length(chapters) > 0 do
     element(
       :"psc:chapters",
       %{"version" => 1.2},

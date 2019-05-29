@@ -8,7 +8,7 @@ defmodule Radiator.Repo.Migrations.CreateChapters do
       add :link, :text
       add :image, :text
 
-      add :episode_id, references(:episodes, on_delete: :nothing)
+      add :audio_id, references(:audios, on_delete: :nothing)
     end
   end
 end

@@ -250,6 +250,16 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
      }}
   end
 
+  def get_chapters(%Episode{audio: audio}, _, _) do
+    audio = Radiator.Repo.preload(audio, :chapters)
+
+    {:ok, audio.chapters}
+  end
+
+  def get_duration(%Episode{audio: audio}, _, _) do
+    {:ok, audio.duration}
+  end
+
   def get_image_url(episode = %Episode{}, _, _) do
     {:ok, Media.EpisodeImage.url({episode.image, episode})}
   end

@@ -337,7 +337,7 @@ defmodule Radiator.Directory.Editor do
 
       episode = %Episode{} ->
         if has_permission(user, episode, :readonly) do
-          {:ok, episode |> Repo.preload(:podcast)}
+          {:ok, episode |> Repo.preload([:podcast, :audio])}
         else
           @not_authorized_match
         end

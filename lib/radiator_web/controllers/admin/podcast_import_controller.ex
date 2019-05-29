@@ -44,9 +44,12 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
           content: episode.content_encoded,
           published_at: episode.pub_date,
           number: episode.episode,
-          image: episode.image_url,
-          duration: episode.duration
+          image: episode.image_url
         })
+
+      Ecto.build_assoc(new_episode, :audio)
+      |> Ecto.Changeset.change(duration: episode.duration)
+      |> Radiator.Repo.insert()
 
       if episode.chapters do
         Enum.each(episode.chapters, fn chapter ->

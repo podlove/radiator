@@ -86,11 +86,18 @@ defmodule Radiator.Factory do
     )
   end
 
+  def audio_factory do
+    %Radiator.Directory.Audio{
+      duration: "1:02:03"
+    }
+  end
+
   def episode_factory do
     title = sequence(:title, &"Episode ##{&1}")
 
     %Radiator.Directory.Episode{
       podcast: build(:podcast),
+      audio: build(:audio),
       title: title
     }
   end

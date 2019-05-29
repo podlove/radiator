@@ -128,17 +128,21 @@ defmodule Mix.Tasks.Radiator.Import do
               |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
               |> Enum.map(fn episode ->
                 # todo: create enclosure (pull file? currently no model for external URLs)
-                Editor.Manager.create_episode(podcast, %{
-                  guid: episode.guid,
-                  title: episode.title,
-                  subtitle: episode.subtitle,
-                  description: episode.description,
-                  content: episode.content_encoded,
-                  published_at: episode.pub_date,
-                  number: episode.episode,
-                  image: episode.image_url,
-                  duration: episode.duration
-                })
+                {:ok, new_episode} =
+                  Editor.Manager.create_episode(podcast, %{
+                    guid: episode.guid,
+                    title: episode.title,
+                    subtitle: episode.subtitle,
+                    description: episode.description,
+                    content: episode.content_encoded,
+                    published_at: episode.pub_date,
+                    number: episode.episode,
+                    image: episode.image_url
+                  })
+
+                Ecto.build_assoc(new_episode, :audio)
+                |> Ecto.Changeset.change(duration: episode.duration)
+                |> Radiator.Repo.insert()
               end)
               |> Enum.count(fn
                 {:ok, _} -> true

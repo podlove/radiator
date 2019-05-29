@@ -36,10 +36,10 @@ defmodule Radiator.EpisodeMeta do
     |> Repo.all()
   end
 
-  def create_chapter(%Episode{} = episode, attrs) do
+  def create_chapter(%Episode{audio: audio}, attrs) do
     %Chapter{}
     |> Chapter.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:episode, episode)
+    |> Ecto.Changeset.put_assoc(:audio, audio)
     |> Repo.insert()
   end
 
