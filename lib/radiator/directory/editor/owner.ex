@@ -1,6 +1,7 @@
 defmodule Radiator.Directory.Editor.Owner do
   @moduledoc """
-  Manipulation of data with the assumption that the actor has the :own right to the entity
+  Manipulation of data with the assumption that the user has
+  the :own permission to the entity.
   """
   import Ecto.Query, warn: false
 
@@ -8,13 +9,10 @@ defmodule Radiator.Directory.Editor.Owner do
 
   alias Radiator.Repo
 
-  alias Radiator.Directory
-  alias Radiator.Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.Network
 
   alias Radiator.Auth
   alias Radiator.Perm.Permission
-
-  alias Directory.Editor.EditorHelpers
 
   use Radiator.Constants
 
@@ -39,7 +37,7 @@ defmodule Radiator.Directory.Editor.Owner do
 
   """
 
-  def create_network(actor = %Auth.User{}, attrs) when is_map(attrs) do
+  def create_network(user = %Auth.User{}, attrs) when is_map(attrs) do
     network =
       %Network{}
       |> Network.creation_changeset(attrs)
@@ -49,7 +47,7 @@ defmodule Radiator.Directory.Editor.Owner do
     |> Multi.insert(:permission, fn %{network: network} ->
       Ecto.build_assoc(network, :permissions)
       |> Permission.changeset(%{permission: :own})
-      |> Ecto.Changeset.put_assoc(:user, actor)
+      |> Ecto.Changeset.put_assoc(:user, user)
     end)
     |> Repo.transaction()
   end
@@ -99,49 +97,5 @@ defmodule Radiator.Directory.Editor.Owner do
   """
   def change_network(%Network{} = network) do
     Network.changeset(network, %{})
-  end
-
-  ## Permission manipulation
-
-  def remove_permission(user = %Auth.User{}, subject) do
-    case EditorHelpers.get_permission(user, subject) do
-      nil ->
-        nil
-
-      perm ->
-        Repo.delete(perm)
-        # hide the implementation detail for now
-        |> case do
-          {:ok, _perm} -> :ok
-          _ -> nil
-        end
-    end
-  end
-
-  def set_permission(user = %Auth.User{}, subject = %st{}, permission)
-      when st in [Podcast, Network, Episode] and is_permission(permission),
-      do: do_set_permission(user, subject, permission)
-
-  defp do_set_permission(user = %Auth.User{}, subject, permission)
-       when is_permission(permission) do
-    query =
-      from perm in Ecto.assoc(subject, :permissions),
-        where: perm.user_id == ^user.id
-
-    Repo.one(query)
-    |> case do
-      nil ->
-        Ecto.build_assoc(subject, :permissions, %{user_id: user.id})
-
-      permission ->
-        permission
-    end
-    |> Permission.changeset(%{permission: permission})
-    |> Repo.insert_or_update()
-    |> case do
-      # hide the implementation detail for now
-      {:ok, _perm} -> :ok
-      {:error, changeset} -> {:error, changeset}
-    end
   end
 end

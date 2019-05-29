@@ -3,9 +3,9 @@ defmodule Radiator.Repo.Migrations.CreatePodcasts do
 
   def change do
     create table(:podcasts) do
-      add :title, :string
-      add :subtitle, :string
-      add :description, :string
+      add :title, :text
+      add :subtitle, :text
+      add :description, :text
       add :image, :string
       add :author, :string
       add :owner_name, :string

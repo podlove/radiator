@@ -5,8 +5,8 @@ defmodule Radiator.Repo.Migrations.CreateEpisodes do
     create table(:episodes) do
       add :title, :string
       add :subtitle, :string
-      add :description, :string
-      add :content, :string
+      add :description, :text
+      add :content, :text
       add :image, :string
       add :duration, :string
       add :guid, :string

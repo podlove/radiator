@@ -3,16 +3,18 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   require Logger
 
-  alias Radiator.Directory
   alias Radiator.Storage
-  alias Directory.Episode
-  alias Directory.Editor
+  alias Radiator.Directory.Editor
+  alias Radiator.Directory.Episode
   alias Radiator.Media.AudioFileUpload
 
   plug :assign_podcast when action in [:new, :create, :update]
 
   defp assign_podcast(conn, _) do
-    assign(conn, :podcast, Directory.get_podcast!(conn.params["podcast_id"]))
+    {:ok, podcast} = Editor.get_podcast(authenticated_user(conn), conn.params["podcast_id"])
+
+    conn
+    |> assign(:podcast, podcast)
   end
 
   def new(conn, _params) do
@@ -49,20 +51,30 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   end
 
   def show(conn, %{"id" => id}) do
-    episode = Directory.get_episode!(id) |> Radiator.Repo.preload(:chapters)
+    user = authenticated_user(conn)
+
+    {:ok, episode} = Editor.get_episode(user, id)
+
+    episode =
+      episode
+      |> Radiator.Repo.preload(:chapters)
 
     render(conn, "show.html", episode: episode)
   end
 
   def edit(conn, %{"id" => id}) do
-    episode = Directory.get_episode!(id)
+    user = authenticated_user(conn)
+
+    {:ok, episode} = Editor.get_episode(user, id)
     changeset = Editor.Manager.change_episode(episode)
 
     render(conn, "edit.html", episode: episode, changeset: changeset)
   end
 
   def update(conn, %{"id" => id, "episode" => episode_params}) do
-    episode = Directory.get_episode!(id)
+    user = authenticated_user(conn)
+
+    {:ok, episode} = Editor.get_episode(user, id)
 
     if episode_params["enclosure"] do
       {:ok, _audio, _attachment} = AudioFileUpload.upload(episode_params["enclosure"], episode)

@@ -3,9 +3,8 @@ defmodule RadiatorWeb.EpisodeControllerTest do
 
   import Radiator.Factory
 
-  alias Radiator.Directory
-  alias Directory.Episode
-  alias Directory.Editor
+  alias Radiator.Directory.Episode
+  alias Radiator.Directory.Editor
 
   @create_attrs %{
     content: "some content",
@@ -49,7 +48,13 @@ defmodule RadiatorWeb.EpisodeControllerTest do
 
   def fixture(:podcast) do
     network = insert(:network)
-    {:ok, podcast} = Editor.Manager.create_podcast(network, %{title: "Example Podcast"})
+
+    {:ok, podcast} =
+      Editor.Manager.create_podcast(network, %{
+        title: "Example Podcast",
+        published_at: "2009-05-18T15:01:01Z"
+      })
+
     podcast
   end
 
