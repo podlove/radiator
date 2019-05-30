@@ -34,8 +34,13 @@
   <%= if @episode.chapters do %>
     <div class="card max-w-sm flex flex-col mt-8">
       <span class="text-gray-700 font-normal text-lg mb-4">Chapters</span>
-      <%= for chapter <- @episode.chapters do %>
-        <div class="border border-blue-900 mb-3" ><%= chapter.title %></div>
+      <%= for {chapter, index} <- (@episode.chapters |> Enum.with_index(1)) do %>
+        <div class="border-1-b border-blue-900 mb-3" >
+        <%= content_tag(:span, "#{index}. ") %>
+        <%= content_tag(:span, chapter.title) %>
+        <%= if chapter.link, do: link(chapter.link, "(url)") %>
+        <%= if chapter.image, do: HTML.image(chapter.image) %>
+        </div>
       <% end %>
     </div>
   <% end %>
