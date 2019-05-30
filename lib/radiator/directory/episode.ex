@@ -16,7 +16,7 @@ defmodule Radiator.Directory.Episode do
     field :description, :string
     field :duration, :string
     field :guid, :string
-    field :image, Radiator.Media.EpisodeImage.Type
+    field :image, Media.EpisodeImage.Type
     field :number, :integer
     field :published_at, :utc_datetime
     field :subtitle, :string
@@ -72,6 +72,13 @@ defmodule Radiator.Directory.Episode do
   """
   def enclosure_url(%Episode{enclosure: enclosure}) do
     Media.AudioFile.url({enclosure.file, enclosure})
+  end
+
+  @doc """
+  Convenience accessor for image URL.
+  """
+  def image_url(%Episode{} = episode) do
+    Media.EpisodeImage.url({episode.image, episode})
   end
 
   def regenerate_guid(changeset) do

@@ -6,11 +6,12 @@ defmodule Radiator.Directory.Podcast do
   import Ecto.Query, warn: false
 
   alias Radiator.Directory.{Episode, Podcast, Network, TitleSlug}
+  alias Radiator.Media.PodcastImage
 
   schema "podcasts" do
     field :author, :string
     field :description, :string
-    field :image, Radiator.Media.PodcastImage.Type
+    field :image, PodcastImage.Type
     field :language, :string
     field :last_built_at, :utc_datetime
     field :owner_email, :string
@@ -70,5 +71,12 @@ defmodule Radiator.Directory.Podcast do
       group_by: p.id,
       select: %Podcast{p | episode_count: count(e.id)}
     )
+  end
+
+  @doc """
+  Convenience accessor for image URL.
+  """
+  def image_url(%Podcast{} = podcast) do
+    PodcastImage.url({podcast.image, podcast})
   end
 end

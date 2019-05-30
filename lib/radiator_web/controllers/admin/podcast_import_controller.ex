@@ -11,6 +11,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
   # - needs error handling
   # - should be done async with waiting animation (progress?) and notice/redirect when done
   def create(conn, %{"feed" => %{"feed_url" => url}}) do
+    user = authenticated_user(conn)
     network = conn.assigns.current_network
 
     metalove_podcast = Metalove.get_podcast(url)
@@ -22,7 +23,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
       )
 
     {:ok, podcast} =
-      Editor.Manager.create_podcast(network, %{
+      Editor.create_podcast(user, network, %{
         title: feed.title,
         subtitle: feed.subtitle,
         author: feed.author,
