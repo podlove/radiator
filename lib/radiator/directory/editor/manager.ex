@@ -5,6 +5,8 @@ defmodule Radiator.Directory.Editor.Manager do
   """
   import Ecto.Query, warn: false
 
+  alias Ecto.Multi
+
   alias Radiator.Repo
 
   alias Radiator.Directory.{Network, Podcast, Episode}
@@ -24,11 +26,32 @@ defmodule Radiator.Directory.Editor.Manager do
 
   """
 
+  require Logger
+
   def create_podcast(%Network{} = network, attrs) do
-    %Podcast{}
-    |> Podcast.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:network, network)
-    |> Repo.insert()
+    Logger.debug("creating podcast --- #{inspect(attrs)}")
+
+    # we need the podcast to have an id before we can save the image
+    {update_attrs, insert_attrs} = Map.split(attrs, [:image])
+
+    insert =
+      %Podcast{}
+      |> Podcast.changeset(insert_attrs)
+      |> Ecto.Changeset.put_assoc(:network, network)
+
+    Multi.new()
+    |> Multi.insert(:podcast, insert)
+    |> Multi.update(:podcast_updated, fn %{podcast: podcast} ->
+      Podcast.changeset(podcast, update_attrs)
+    end)
+    |> Repo.transaction()
+    # translate the multi result in a regular result
+    |> case do
+      {:ok, %{podcast_updated: podcast}} -> {:ok, podcast}
+      {:error, :podcast, changeset, _map} -> {:error, changeset}
+      {:error, :podcast_updates, changeset, _map} -> {:error, changeset}
+      something -> something
+    end
   end
 
   @doc """
