@@ -36,10 +36,11 @@
       <span class="text-gray-700 font-normal text-lg mb-4">Chapters</span>
       <%= for {chapter, index} <- (@episode.chapters |> Enum.with_index(1)) do %>
         <div class="border-1-b border-blue-900 mb-3" >
+        <%= if chapter.image, do: HTML.image(chapter.image) %>
         <%= content_tag(:span, "#{index}. ") %>
         <%= content_tag(:span, chapter.title) %>
         <%= if chapter.link, do: link(chapter.link, "(url)") %>
-        <%= if chapter.image, do: HTML.image(chapter.image) %>
+        <%= content_tag(:span, format_chapter_time(chapter.start), class: "text-gray-900") %>
         </div>
       <% end %>
     </div>
