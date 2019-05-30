@@ -1,6 +1,8 @@
 defmodule RadiatorWeb.Admin.EpisodeView do
   use RadiatorWeb, :view
 
+  alias Radiator.Directory.Episode
+
   def format_bytes(number, precision \\ 2)
 
   def format_bytes(nil, _) do
@@ -29,5 +31,9 @@ defmodule RadiatorWeb.Admin.EpisodeView do
       sth -> sth
     end
     |> String.slice(0..-5)
+  end
+
+  def episode_image_url(episode) do
+    Episode.image_url(episode)
   end
 end

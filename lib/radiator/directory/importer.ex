@@ -1,6 +1,7 @@
 defmodule Radiator.Directory.Importer do
   alias Radiator.Directory.Editor
-  alias Radiator.Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.Network
+  alias Radiator.Directory.Podcast
   alias Radiator.Auth
   alias Radiator.Media
 
@@ -71,7 +72,12 @@ defmodule Radiator.Directory.Importer do
     Chapters.Parsers.Normalplaytime.Parser.total_ms(parsed)
   end
 
-  def import_enclosures(user, podcast, feed, limit \\ 10) do
+  def import_enclosures(
+        user = %Auth.User{},
+        podcast = %Podcast{},
+        feed = %Metalove.PodcastFeed{},
+        limit \\ 10
+      ) do
     Metalove.PodcastFeed.trigger_episode_metadata_scrape(feed)
     Logger.info("Import: Scraping metadata for #{feed.feed_url}")
     feed = Metalove.PodcastFeed.get_by_feed_url_await_all_metdata(feed.feed_url, 1_000 * 15 * 60)
@@ -109,8 +115,8 @@ defmodule Radiator.Directory.Importer do
       end
 
       case metalove_episode.image_url do
-        url -> Editor.update_episode(user, podlove_episode, %{image: url})
         nil -> nil
+        url -> Editor.update_episode(user, podlove_episode, %{image: url})
       end
 
       Media.AudioFileUpload.sideload(metalove_episode.enclosure.url, podlove_episode)
