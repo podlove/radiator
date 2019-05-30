@@ -45,7 +45,7 @@ defmodule Radiator.Directory.Podcast do
       :last_built_at,
       :slug
     ])
-    |> cast_attachments(attrs, [:image])
+    |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
     |> validate_required([:title])
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()

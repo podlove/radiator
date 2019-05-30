@@ -26,7 +26,7 @@ defmodule Radiator.Directory.Network do
   def changeset(network, attrs) do
     network
     |> cast(attrs, [:title])
-    |> cast_attachments(attrs, [:image])
+    |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
     |> validate_required([:title])
   end
 

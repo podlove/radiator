@@ -18,11 +18,13 @@ defmodule Radiator.Media.AudioFile do
     has_many :episode_attachments,
              {"episode_attachments", Media.EpisodeAttachment},
              foreign_key: :audio_id
+
     has_one :episode, through: [:episode_attachments, :episode]
 
     has_many :network_attachments,
              {"network_attachments", Media.NetworkAttachment},
              foreign_key: :audio_id
+
     has_one :network, through: [:network_attachments, :network]
 
     timestamps()
@@ -32,7 +34,7 @@ defmodule Radiator.Media.AudioFile do
   def changeset(audio, attrs) do
     audio
     |> cast(attrs, [:title, :mime_type, :byte_length])
-    |> cast_attachments(attrs, [:file])
+    |> cast_attachments(attrs, [:file], allow_paths: true, allow_urls: true)
   end
 
   def public_url(audio) do
