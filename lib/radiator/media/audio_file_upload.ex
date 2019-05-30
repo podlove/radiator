@@ -104,4 +104,103 @@ defmodule Radiator.Media.AudioFileUpload do
       })
     end
   end
+
+  # Need to download first, otherwise the database transaction is not having fun and timing out
+  def sideload(url, episode = %Episode{}) do
+    uri = URI.parse(url)
+    filename = Path.basename(uri.path)
+
+    case save_file(uri, filename) do
+      {:ok, local_path} ->
+        upload(
+          %Plug.Upload{
+            filename: filename,
+            path: local_path
+          },
+          episode
+        )
+
+      _ ->
+        {:error, :download_failed}
+    end
+  end
+
+  defp save_file(uri, filename) do
+    local_path =
+      generate_temporary_path()
+      |> Kernel.<>(Path.extname(filename))
+
+    case save_temp_file(local_path, uri) do
+      :ok -> {:ok, local_path}
+      _ -> :error
+    end
+  end
+
+  defp save_temp_file(local_path, remote_path) do
+    remote_file = get_remote_path(remote_path)
+
+    case remote_file do
+      {:ok, body} -> File.write(local_path, body)
+      {:error, error} -> {:error, error}
+    end
+  end
+
+  # hakney :connect_timeout - timeout used when establishing a connection, in milliseconds
+  # hakney :recv_timeout - timeout used when receiving from a connection, in milliseconds
+  # poison :timeout - timeout to establish a connection, in milliseconds
+  # :backoff_max - maximum backoff time, in milliseconds
+  # :backoff_factor - a backoff factor to apply between attempts, in milliseconds
+  defp get_remote_path(remote_path) do
+    options = [
+      follow_redirect: true,
+      recv_timeout: Application.get_env(:arc, :recv_timeout, 5_000),
+      connect_timeout: Application.get_env(:arc, :connect_timeout, 10_000),
+      timeout: Application.get_env(:arc, :timeout, 10_000),
+      max_retries: Application.get_env(:arc, :max_retries, 3),
+      backoff_factor: Application.get_env(:arc, :backoff_factor, 1000),
+      backoff_max: Application.get_env(:arc, :backoff_max, 30_000)
+    ]
+
+    request(remote_path, options)
+  end
+
+  defp request(remote_path, options, tries \\ 0) do
+    case :hackney.get(URI.to_string(remote_path), [], "", options) do
+      {:ok, 200, _headers, client_ref} ->
+        :hackney.body(client_ref)
+
+      {:error, %{reason: :timeout}} ->
+        case retry(tries, options) do
+          {:ok, :retry} -> request(remote_path, options, tries + 1)
+          {:error, :out_of_tries} -> {:error, :timeout}
+        end
+
+      _ ->
+        {:error, :arc_httpoison_error}
+    end
+  end
+
+  defp retry(tries, options) do
+    cond do
+      tries < options[:max_retries] ->
+        backoff = round(options[:backoff_factor] * :math.pow(2, tries - 1))
+        backoff = :erlang.min(backoff, options[:backoff_max])
+        :timer.sleep(backoff)
+        {:ok, :retry}
+
+      true ->
+        {:error, :out_of_tries}
+    end
+  end
+
+  def generate_temporary_path(file \\ nil) do
+    extension = Path.extname((file && file.path) || "")
+
+    file_name =
+      :crypto.strong_rand_bytes(20)
+      |> Base.encode32()
+      |> Kernel.<>(extension)
+
+    Path.join(System.tmp_dir(), file_name)
+  end
 end

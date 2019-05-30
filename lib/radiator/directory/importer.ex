@@ -1,10 +1,12 @@
 defmodule Radiator.Directory.Importer do
   alias Radiator.Directory.Editor
   alias Radiator.Directory.{Network, Podcast, Episode}
+  alias Radiator.Auth
+  alias Radiator.Media
 
   require Logger
 
-  def import_from_url(user, network, url) do
+  def import_from_url(user = %Auth.User{}, network = %Network{}, url) do
     metalove_podcast = Metalove.get_podcast(url)
 
     feed =
@@ -39,7 +41,6 @@ defmodule Radiator.Directory.Importer do
             content: episode.content_encoded,
             published_at: episode.pub_date,
             number: episode.episode,
-            image: episode.image_url,
             duration: episode.duration
           })
 
@@ -70,7 +71,7 @@ defmodule Radiator.Directory.Importer do
     Chapters.Parsers.Normalplaytime.Parser.total_ms(parsed)
   end
 
-  def import_enclosures(user, podcast, feed) do
+  def import_enclosures(user, podcast, feed, limit \\ 10) do
     Metalove.PodcastFeed.trigger_episode_metadata_scrape(feed)
     Logger.info("Import: Scraping metadata for #{feed.feed_url}")
     feed = Metalove.PodcastFeed.get_by_feed_url_await_all_metdata(feed.feed_url, 1_000 * 15 * 60)
@@ -78,6 +79,7 @@ defmodule Radiator.Directory.Importer do
     Logger.info("Import: Got all metadata for #{feed.feed_url} - importing enclosures")
 
     feed.episodes
+    |> Enum.take(limit)
     |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
     |> Enum.each(fn metalove_episode ->
       Logger.info("Import:  Episode #{metalove_episode.title}")
@@ -85,20 +87,33 @@ defmodule Radiator.Directory.Importer do
       {:ok, podlove_episode} =
         Editor.get_episode_by_podcast_id_and_guid(user, podcast.id, metalove_episode.guid)
 
-      if metalove_episode.chapters do
-        Radiator.EpisodeMeta.delete_chapters(podlove_episode)
+      case metalove_episode.enclosure.metadata do
+        %{chapters: chapters} ->
+          Radiator.EpisodeMeta.delete_chapters(podlove_episode)
 
-        Enum.each(metalove_episode.chapters, fn chapter ->
-          attrs = %{
-            start: parse_chapter_time(chapter.start),
-            title: chapter.title,
-            link: Map.get(chapter, :href),
-            image: Map.get(chapter, :image)
-          }
+          chapters
+          |> Enum.each(fn chapter ->
+            attrs = %{
+              start: parse_chapter_time(chapter.start),
+              title: chapter.title,
+              link: Map.get(chapter, :href)
+              # TODO: upload the found image and insert the url - image is a map with keys :data, and :type (mime/type)
+              #              image: Map.get(chapter, :image)
+            }
 
-          Radiator.EpisodeMeta.create_chapter(podlove_episode, attrs)
-        end)
+            Radiator.EpisodeMeta.create_chapter(podlove_episode, attrs)
+          end)
+
+        _ ->
+          nil
       end
+
+      case metalove_episode.image_url do
+        url -> Editor.update_episode(user, podlove_episode, %{image: url})
+        nil -> nil
+      end
+
+      Media.AudioFileUpload.sideload(metalove_episode.enclosure.url, podlove_episode)
     end)
   end
 end

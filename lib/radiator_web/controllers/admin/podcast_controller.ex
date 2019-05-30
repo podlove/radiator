@@ -46,6 +46,14 @@ defmodule RadiatorWeb.Admin.PodcastController do
         order_by: [desc: :published_at]
       })
 
+    published_ids =
+      published_episodes
+      |> Enum.map(fn episode -> episode.id end)
+
+    draft_episodes =
+      draft_episodes
+      |> Enum.reject(fn episode -> episode.id in published_ids end)
+
     render(conn, "show.html",
       podcast: podcast,
       published_episodes: published_episodes,

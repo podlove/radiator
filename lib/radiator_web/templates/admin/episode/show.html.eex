@@ -39,7 +39,7 @@
         <%= if chapter.image, do: HTML.image(chapter.image) %>
         <%= content_tag(:span, "#{index}. ") %>
         <%= content_tag(:span, chapter.title) %>
-        <%= if chapter.link, do: link(chapter.link, "(url)") %>
+        <%= if chapter.link, do: link("(url)", to: chapter.link, target: "_blank" )%>
         <%= content_tag(:span, format_chapter_time(chapter.start), class: "text-gray-900") %>
         </div>
       <% end %>
