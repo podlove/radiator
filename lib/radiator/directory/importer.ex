@@ -26,6 +26,8 @@ defmodule Radiator.Directory.Importer do
         language: feed.language
       })
 
+    {:ok, podcast} = Editor.publish_podcast(user, podcast)
+
     metalove_episodes =
       feed.episodes
       |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
