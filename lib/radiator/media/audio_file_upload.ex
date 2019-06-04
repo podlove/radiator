@@ -25,7 +25,7 @@ defmodule Radiator.Media.AudioFileUpload do
   alias Radiator.Repo
   alias Radiator.Media.AudioFile
   alias Radiator.Media.Attachment
-  alias Radiator.Directory.{Audio, Editor}
+  alias Radiator.Directory.{Audio, Editor, Episode}
 
   @doc """
   Upload audio file and attach it to audio object.
