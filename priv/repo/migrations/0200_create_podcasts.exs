@@ -15,7 +15,7 @@ defmodule Radiator.Repo.Migrations.CreatePodcasts do
       add :last_built_at, :utc_datetime
       add :slug, :string
 
-      add :network_id, references(:networks, on_delete: :nothing)
+      add :network_id, references(:networks, on_delete: :delete_all)
 
       timestamps()
     end

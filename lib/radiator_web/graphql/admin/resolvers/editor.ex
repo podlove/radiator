@@ -265,7 +265,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def get_image_url(podcast = %Podcast{}, _, _) do
-    {:ok, Media.PodcastImage.url({podcast.image, podcast})}
+    {:ok, Podcast.image_url(podcast)}
   end
 
   def get_image_url(network = %Network{}, _, _) do

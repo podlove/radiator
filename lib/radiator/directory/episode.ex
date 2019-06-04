@@ -42,7 +42,7 @@ defmodule Radiator.Directory.Episode do
       :slug,
       :podcast_id
     ])
-    |> cast_attachments(attrs, [:image])
+    |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
     |> validate_required([:title])
     |> set_guid_if_missing()
     |> TitleSlug.maybe_generate_slug()
@@ -56,6 +56,13 @@ defmodule Radiator.Directory.Episode do
   """
   def enclosure_url(%Episode{audio: %Audio{audio_files: [enclosure]}}) do
     Media.AudioFile.url({enclosure.file, enclosure})
+  end
+
+  @doc """
+  Convenience accessor for image URL.
+  """
+  def image_url(%Episode{} = episode) do
+    Media.EpisodeImage.url({episode.image, episode})
   end
 
   def regenerate_guid(changeset) do

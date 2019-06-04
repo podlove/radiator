@@ -22,6 +22,12 @@
       <%= error_tag f, :description %>
     </div>
 
+    <div class="flex justify-between">
     <%= submit @button_text, class: "btn btn-blue" %>
+
+    <%= if @changeset.data.__meta__.state == :loaded do %>
+      <%= submit "Delete Podcast", class: "btn btn-red", name: "button_action", value: "delete" %>
+    <% end %>
+    </div>
 <% end %>
 </div>

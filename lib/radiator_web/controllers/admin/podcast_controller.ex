@@ -46,6 +46,14 @@ defmodule RadiatorWeb.Admin.PodcastController do
         order_by: [desc: :published_at]
       })
 
+    published_ids =
+      published_episodes
+      |> Enum.map(fn episode -> episode.id end)
+
+    draft_episodes =
+      draft_episodes
+      |> Enum.reject(fn episode -> episode.id in published_ids end)
+
     render(conn, "show.html",
       podcast: podcast,
       published_episodes: published_episodes,
@@ -55,26 +63,40 @@ defmodule RadiatorWeb.Admin.PodcastController do
 
   def edit(conn, %{"id" => id}) do
     user = authenticated_user(conn)
-    podcast = Editor.get_podcast(user, id)
+    {:ok, podcast} = Editor.get_podcast(user, id)
     changeset = Editor.Manager.change_podcast(podcast)
 
     render(conn, "edit.html", podcast: podcast, changeset: changeset)
   end
 
-  def update(conn, %{"id" => id, "podcast" => podcast_params}) do
+  def update(conn, %{"id" => id, "podcast" => podcast_params} = params) do
     user = authenticated_user(conn)
-    podcast = Editor.get_podcast(user, id)
+    {:ok, podcast} = Editor.get_podcast(user, id)
 
-    case Editor.Manager.update_podcast(podcast, podcast_params) do
-      {:ok, podcast} ->
-        conn
-        |> put_flash(:info, "podcast updated successfully.")
-        |> redirect(
-          to: Routes.admin_network_podcast_path(conn, :show, podcast.network_id, podcast)
-        )
+    case Map.get(params, "button_action", "change") do
+      "change" ->
+        case Editor.Manager.update_podcast(podcast, podcast_params) do
+          {:ok, podcast} ->
+            conn
+            |> put_flash(:info, "podcast updated successfully.")
+            |> redirect(
+              to: Routes.admin_network_podcast_path(conn, :show, podcast.network_id, podcast)
+            )
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, "edit.html", podcast: podcast, changeset: changeset)
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, "edit.html", podcast: podcast, changeset: changeset)
+        end
+
+      "delete" ->
+        case Editor.delete_podcast(user, podcast) do
+          {:ok, podcast} ->
+            conn
+            |> put_flash(:info, "podcast '#{podcast.title} - #{podcast.subtitle}' deleted")
+            |> redirect(to: Routes.admin_network_path(conn, :show, podcast.network_id))
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, "edit.html", podcast: podcast, changeset: changeset)
+        end
     end
   end
 end

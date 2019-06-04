@@ -197,9 +197,14 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  def delete_podcast(user = %Auth.User{}, podcast = %Podcast{}) do
-    if has_permission(user, podcast, :own) do
-      Editor.Manager.depublish_podcast(podcast)
+  def delete_podcast(actor = %Auth.User{}, podcast = %Podcast{}) do
+    podcast =
+      podcast
+      |> Repo.preload(:network)
+
+    if has_permission(actor, podcast, :own) ||
+         has_permission(actor, podcast.network, :manage) do
+      Editor.Manager.delete_podcast(podcast)
     else
       @not_authorized_match
     end
@@ -340,6 +345,32 @@ defmodule Radiator.Directory.Editor do
           @not_authorized_match
         end
     end
+  end
+
+  def get_episode_by_podcast_id_and_guid(user = %Auth.User{}, podcast_id, guid) do
+    query =
+      from ep in Episode,
+        where: ep.podcast_id == ^podcast_id,
+        where: ep.guid == ^guid
+
+    query
+    |> Repo.one()
+    |> case do
+      nil ->
+        @not_found_match
+
+      episode = %Episode{} ->
+        if has_permission(user, episode, :readonly) do
+          {:ok, episode |> preloaded_episode()}
+        else
+          @not_authorized_match
+        end
+    end
+  end
+
+  defp preloaded_episode(episode) do
+    episode
+    |> Repo.preload([:podcast, :chapters, :enclosure, :audio_files])
   end
 
   def is_published(%Podcast{published_at: nil}), do: false

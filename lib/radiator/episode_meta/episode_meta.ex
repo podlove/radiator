@@ -36,6 +36,14 @@ defmodule Radiator.EpisodeMeta do
     |> Repo.all()
   end
 
+  def delete_chapters(%Episode{} = episode) do
+    from(
+      c in Chapter,
+      where: c.episode_id == ^episode.id
+    )
+    |> Repo.delete_all()
+  end
+
   def create_chapter(%Episode{audio: audio}, attrs) do
     %Chapter{}
     |> Chapter.changeset(attrs)
@@ -50,6 +58,8 @@ defmodule Radiator.EpisodeMeta do
     # transaction:
     # - delete existing chapters
     # - insert all new chapters
+
+    delete_chapters(episode)
 
     chapters
     |> Enum.each(fn chapter ->
