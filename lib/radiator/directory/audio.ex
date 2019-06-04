@@ -27,15 +27,7 @@ defmodule Radiator.Directory.Audio do
     has_many :episodes, Episode
     belongs_to :network, Network
 
-    has_many :attachments,
-             {"audio_attachments", Media.AudioAttachment},
-             foreign_key: :subject_id
-
-    many_to_many :audio_files,
-                 Media.AudioFile,
-                 join_through: "audio_attachments",
-                 join_keys: [subject_id: :id, audio_file_id: :id]
-
+    has_many :audio_files, Media.AudioFile
     has_many :chapters, Chapter
 
     timestamps()

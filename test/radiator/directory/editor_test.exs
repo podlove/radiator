@@ -9,10 +9,8 @@ defmodule Radiator.EditorTest do
     audio = insert(:empty_audio)
     audio_file = insert(:audio_file)
 
-    {:ok, attachment} = Editor.attach_audio_file(audio, audio_file)
+    {:ok, audio_file} = Editor.attach_audio_file(audio, audio_file)
 
-    assert ^attachment = Ecto.assoc(audio, :attachments) |> Repo.one()
-    assert ^audio = Ecto.assoc(attachment, :audio) |> Repo.one()
-    assert ^audio_file = Ecto.assoc(attachment, :audio_file) |> Repo.one()
+    assert audio_file.id == Ecto.assoc(audio, :audio_files) |> Repo.one() |> Map.get(:id)
   end
 end

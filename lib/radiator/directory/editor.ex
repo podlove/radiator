@@ -392,10 +392,11 @@ defmodule Radiator.Directory.Editor do
   @spec attach_audio_file(Audio.t(), Media.AudioFile.t()) ::
           {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
   def attach_audio_file(audio = %Audio{}, file = %Media.AudioFile{}) do
-    audio
-    |> Ecto.build_assoc(:attachments, %{audio_file_id: file.id})
-    |> Media.Attachment.changeset(%{})
-    |> Repo.insert_or_update()
+    file
+    |> Repo.preload(:audio)
+    |> Media.AudioFile.changeset(%{})
+    |> Ecto.Changeset.put_assoc(:audio, audio)
+    |> Repo.update()
   end
 
   @spec detach_all_audios_from_episode(Episode.t()) :: Episode.t()

@@ -13,12 +13,13 @@ defmodule Radiator.TrackingTest do
 
   describe "downloads" do
     test "track_download/1 tracks a download" do
-      episode = insert(:published_episode)
-      file = create_episode_audio(episode)
+      episode = insert(:published_episode) |> Repo.preload(audio: :audio_files)
+      [file] = episode.audio.audio_files
 
       {:ok, download} =
         Tracking.track_download(
           file: file,
+          episode: episode,
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),
@@ -36,12 +37,13 @@ defmodule Radiator.TrackingTest do
     end
 
     test "track_download/1 discards bot requests" do
-      episode = insert(:published_episode)
-      file = create_episode_audio(episode)
+      episode = insert(:published_episode) |> Repo.preload(audio: :audio_files)
+      [file] = episode.audio.audio_files
 
       {:ok, response} =
         Tracking.track_download(
           file: file,
+          episode: episode,
           remote_ip: @valid_ip,
           user_agent: "Googlebot",
           time: DateTime.utc_now(),
@@ -53,12 +55,13 @@ defmodule Radiator.TrackingTest do
     end
 
     test "track_download/1 discards bot first-byte-requests" do
-      episode = insert(:published_episode)
-      file = create_episode_audio(episode)
+      episode = insert(:published_episode) |> Repo.preload(audio: :audio_files)
+      [file] = episode.audio.audio_files
 
       {:ok, response} =
         Tracking.track_download(
           file: file,
+          episode: episode,
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),
@@ -75,12 +78,14 @@ defmodule Radiator.TrackingTest do
         insert(:published_episode, %{
           published_at: DateTime.utc_now() |> DateTime.add(-:timer.hours(@hours), :millisecond)
         })
+        |> Repo.preload(audio: :audio_files)
 
-      file = create_episode_audio(episode)
+      [file] = episode.audio.audio_files
 
       {:ok, download} =
         Tracking.track_download(
           file: file,
+          episode: episode,
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),

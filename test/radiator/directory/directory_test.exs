@@ -175,19 +175,23 @@ defmodule Radiator.DirectoryTest do
 
     test "list_episodes/0 returns all episodes" do
       episode = insert(:published_episode)
-      assert Directory.list_episodes() |> Repo.preload(podcast: :network) == [episode]
+      episode_id = episode.id
+
+      assert [%Episode{id: ^episode_id}] = Directory.list_episodes()
     end
 
     test "get_episode!/1 returns the episode with given id" do
       episode = insert(:published_episode)
-      assert Directory.get_episode!(episode.id) |> Repo.preload(podcast: :network) == episode
+      episode_id = episode.id
+
+      assert %Episode{id: ^episode_id} = Directory.get_episode!(episode.id)
     end
 
     test "get_episode_by_slug/1 returns the episode with given slug" do
       episode = insert(:published_episode, slug: "episode-foo-bar-baz")
+      episode_id = episode.id
 
-      assert Directory.get_episode_by_slug(episode.slug) |> Repo.preload(podcast: :network) ==
-               episode
+      assert %Episode{id: ^episode_id} = Directory.get_episode_by_slug(episode.slug)
     end
 
     test "create_episode/1 with valid data creates an episode" do
@@ -383,17 +387,20 @@ defmodule Radiator.DirectoryTest do
 
     test "get_audio_file/1 returns audio file" do
       episode = insert(:published_episode)
-      audio = create_episode_audio(episode)
+      audio = Ecto.assoc(episode, [:audio]) |> Repo.one()
+      [audio_file] = Ecto.assoc(audio, :audio_files) |> Repo.all()
 
-      assert {:ok, %AudioFile{file: %{file_name: "pling.mp3"}}} =
-               Directory.get_audio_file(audio.id)
+      file = audio_file.file
+
+      assert {:ok, %AudioFile{file: ^file}} = Directory.get_audio_file(audio_file.id)
     end
 
     test "get_audio_file/1 errors when accessing unpublished audio file" do
       episode = insert(:unpublished_episode)
-      audio = create_episode_audio(episode)
+      audio = Ecto.assoc(episode, [:audio]) |> Repo.one()
+      [audio_file] = Ecto.assoc(audio, :audio_files) |> Repo.all()
 
-      assert {:error, :unpublished} = Directory.get_audio_file(audio.id)
+      assert {:error, :unpublished} = Directory.get_audio_file(audio_file.id)
     end
 
     test "get_audio_file/1 errors when accessing nonexisting audio file" do
@@ -407,7 +414,7 @@ defmodule Radiator.DirectoryTest do
       filename: "pling.mp3"
     }
 
-    {:ok, audio, _} = Radiator.Media.AudioFileUpload.upload(upload, episode)
+    {:ok, audio, _} = Radiator.Media.AudioFileUpload.upload(upload, episode.audio)
 
     audio
   end

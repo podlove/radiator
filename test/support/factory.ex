@@ -99,7 +99,7 @@ defmodule Radiator.Factory do
   def audio_factory do
     %Radiator.Directory.Audio{
       duration: "1:02:03",
-      attachments: [build(:audio_attachment)]
+      audio_files: [build(:audio_file)]
     }
   end
 
@@ -112,6 +112,7 @@ defmodule Radiator.Factory do
   # NOTE: do not uncomment the audio attribute, as it creates cyclic
   #       generation when building an episode or audio.
   #       Not sure what's the best way to handle m:n entities in factories.
+  # TODO: this is not required any more?
   def audio_attachment_factory do
     %Radiator.Media.AudioAttachment{
       # audio: build(:audio),

@@ -9,17 +9,18 @@ defmodule Radiator.Tracking do
   alias Radiator.Directory.Episode
   alias Radiator.Tracking.Download
 
+  # todo: track file attached to network, without episode
   def track_download(
         file: file,
+        episode: episode,
         remote_ip: remote_ip,
         user_agent: user_agent_string,
         time: time,
         http_range: http_range
       ) do
-    # todo/fixme: what do we track? just the audio access and ignore if it's connected to an episode, multiple episodes, or network?
-    #   maybe episode/network is in an optional tracking param?
-    file = Repo.preload(file, episode: [podcast: :network])
-    episode = file.episode
+    # todo: verify given file and episode actually belong together?
+    # is there an attack vector to mangle with tracking if we don't?
+    file = Repo.preload(file, :audio)
     podcast = episode.podcast
     network = podcast.network
 
