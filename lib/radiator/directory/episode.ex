@@ -58,6 +58,18 @@ defmodule Radiator.Directory.Episode do
     Media.AudioFile.url({enclosure.file, enclosure})
   end
 
+  def enclosure_url(%Episode{audio: %Audio{audio_files: []}}) do
+    raise ArgumentError, "Audio without attached files"
+  end
+
+  def enclosure_url(%Episode{audio: %Audio{audio_files: [_enclosure | _more]}}) do
+    raise ArgumentError, "Audio without unexpected number of attached files (> 1)"
+  end
+
+  def enclosure_url(%Episode{audio: %Audio{audio_files: _}}) do
+    raise ArgumentError, "Audio needs preloaded audio_files"
+  end
+
   @doc """
   Convenience accessor for image URL.
   """

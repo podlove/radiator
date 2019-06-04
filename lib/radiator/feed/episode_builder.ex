@@ -45,11 +45,11 @@ defmodule Radiator.Feed.EpisodeBuilder do
   # a totally different module takes care of validation / hints.
   # Well, the builder could focus only on hard RSS requirements,
   # so either :ok or :error.
-  defp enclosure(episode) do
+  defp enclosure(%Episode{audio: %Audio{audio_files: [enclosure]}} = episode) do
     element(:enclosure, %{
       url: Episode.enclosure_url(episode),
-      type: episode.enclosure.mime_type,
-      length: episode.enclosure.byte_length
+      type: enclosure.mime_type,
+      length: enclosure.byte_length
     })
   end
 

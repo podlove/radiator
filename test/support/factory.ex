@@ -86,12 +86,6 @@ defmodule Radiator.Factory do
     )
   end
 
-  def audio_factory do
-    %Radiator.Directory.Audio{
-      duration: "1:02:03"
-    }
-  end
-
   def episode_factory do
     title = sequence(:title, &"Episode ##{&1}")
 
@@ -99,6 +93,23 @@ defmodule Radiator.Factory do
       podcast: build(:podcast),
       audio: build(:audio),
       title: title
+    }
+  end
+
+  def audio_factory do
+    %Radiator.Directory.Audio{
+      duration: "1:02:03",
+      attachments: [build(:audio_attachment)]
+    }
+  end
+
+  # NOTE: do not uncomment the audio attribute, as it creates cyclic
+  #       generation when building an episode or audio.
+  #       Not sure what's the best way to handle m:n entities in factories.
+  def audio_attachment_factory do
+    %Radiator.Media.AudioAttachment{
+      # audio: build(:audio),
+      audio_file: build(:audio_file)
     }
   end
 

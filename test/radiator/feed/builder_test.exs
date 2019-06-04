@@ -1,6 +1,7 @@
 defmodule Radiator.BuilderTest do
   use Radiator.DataCase
 
+  alias Radiator.Directory
   alias Radiator.Directory.Podcast
   alias Radiator.Feed.{Builder, EpisodeBuilder, PodcastBuilder}
 
@@ -43,8 +44,12 @@ defmodule Radiator.BuilderTest do
   describe "Radiator.Feed.Builder" do
     test "builds an RSS feed" do
       podcast = insert(:podcast, title: "Hello World")
-      episode1 = insert(:episode, podcast: podcast, title: "Ep 001")
-      episode2 = insert(:episode, podcast: podcast, title: "Ep 002")
+
+      episode1 =
+        insert(:episode, podcast: podcast, title: "Ep 001") |> Directory.preload_for_episode()
+
+      episode2 =
+        insert(:episode, podcast: podcast, title: "Ep 002") |> Directory.preload_for_episode()
 
       data =
         data_fixture(%{
@@ -63,9 +68,15 @@ defmodule Radiator.BuilderTest do
 
     test "pages feeds" do
       podcast = insert(:podcast, title: "Hello World")
-      episode1 = insert(:episode, podcast: podcast)
-      episode2 = insert(:episode, podcast: podcast)
-      episode3 = insert(:episode, podcast: podcast)
+
+      episode1 =
+        insert(:episode, title: "Ep 001", podcast: podcast) |> Directory.preload_for_episode()
+
+      episode2 =
+        insert(:episode, title: "Ep 002", podcast: podcast) |> Directory.preload_for_episode()
+
+      episode3 =
+        insert(:episode, title: "Ep 003", podcast: podcast) |> Directory.preload_for_episode()
 
       # todo: how to handle an empty feed/page with no episodes?
       data =
@@ -129,7 +140,9 @@ defmodule Radiator.BuilderTest do
 
   describe "Radiator.Feed.EpisodeBuilder" do
     test "builds an item" do
-      episode = insert(:episode, title: "Ep 001", subitle: "sub", description: "desc")
+      episode =
+        insert(:episode, title: "Ep 001", subtitle: "sub", description: "desc")
+        |> Directory.preload_for_episode()
 
       rss = build_episode_xml(%{}, episode)
 
@@ -139,16 +152,11 @@ defmodule Radiator.BuilderTest do
 
       [enclosure] = episode.audio.audio_files
 
-      assert %{
-               url: Radiator.Media.AudioFile.url({enclosure.file, enclosure}),
-               type: enclosure.mime_type,
-               length: enclosure.byte_length
-             } ==
-               xpath(rss, ~x"//item/enclosure",
-                 url: ~x"./@url"s,
-                 type: ~x"./@type"s,
-                 length: ~x"./@length"i
-               )
+      assert Radiator.Media.AudioFile.url({enclosure.file, enclosure}) ==
+               xpath(rss, ~x"//item/enclosure/@url"s)
+
+      assert enclosure.mime_type == xpath(rss, ~x"//item/enclosure/@type"s)
+      assert enclosure.byte_length == xpath(rss, ~x"//item/enclosure/@length"i)
     end
   end
 end
