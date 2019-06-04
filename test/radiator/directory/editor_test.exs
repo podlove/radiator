@@ -6,7 +6,7 @@ defmodule Radiator.EditorTest do
   alias Radiator.Directory.Editor
 
   test "attach_audio_file_to_audio/2" do
-    audio = insert(:audio)
+    audio = insert(:empty_audio)
     audio_file = insert(:audio_file)
 
     {:ok, attachment} = Editor.attach_audio_file(audio, audio_file)

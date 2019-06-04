@@ -103,6 +103,12 @@ defmodule Radiator.Factory do
     }
   end
 
+  def empty_audio_factory do
+    %Radiator.Directory.Audio{
+      duration: "1:02:03"
+    }
+  end
+
   # NOTE: do not uncomment the audio attribute, as it creates cyclic
   #       generation when building an episode or audio.
   #       Not sure what's the best way to handle m:n entities in factories.
