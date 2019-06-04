@@ -306,8 +306,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
   }
   """
 
-  test "setChapters sets chapters for episode", %{conn: conn, user: user} do
-    episode = insert(:episode) |> owned_by(user)
+  test "setChapters sets chapters for audio", %{conn: conn, user: user} do
+    audio = insert(:audio) |> owned_by(user)
 
     chapters = ~S"""
     00:00:01.234 Intro <http://example.com>
@@ -318,7 +318,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
     conn =
       post conn, "/api/graphql",
         query: @set_chapters_query,
-        variables: %{"chapters" => chapters, "id" => episode.id, "type" => "mp4chaps"}
+        variables: %{"chapters" => chapters, "id" => audio.id, "type" => "mp4chaps"}
 
     assert %{
              "data" => %{

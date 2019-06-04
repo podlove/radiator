@@ -4,7 +4,7 @@ defmodule Radiator.Factory do
   import Radiator.Directory.Editor.Permission
 
   alias Radiator.Auth.User
-  alias Radiator.Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.{Network, Podcast, Episode, Audio}
 
   def user_factory do
     %User{
@@ -39,6 +39,11 @@ defmodule Radiator.Factory do
   def owned_by(episode = %Episode{}, user = %User{}) do
     :ok = set_permission(user, episode, :own)
     episode
+  end
+
+  def owned_by(audio = %Audio{}, user = %User{}) do
+    :ok = set_permission(user, audio, :own)
+    audio
   end
 
   def network_factory do

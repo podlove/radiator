@@ -6,7 +6,7 @@ defmodule Radiator.EpisodeMeta do
   import Ecto.Query, warn: false
 
   alias Radiator.Repo
-  alias Radiator.Directory.Episode
+  alias Radiator.Directory.Audio
   alias Radiator.EpisodeMeta.Chapter
 
   def data() do
@@ -27,31 +27,31 @@ defmodule Radiator.EpisodeMeta do
     end)
   end
 
-  def list_chapters(%Episode{} = episode) do
+  def list_chapters(%Audio{} = audio) do
     from(
       c in Chapter,
-      where: c.episode_id == ^episode.id,
+      where: c.audio_id == ^audio.id,
       order_by: [asc: c.start]
     )
     |> Repo.all()
   end
 
-  def delete_chapters(%Episode{} = episode) do
+  def delete_chapters(%Audio{} = audio) do
     from(
       c in Chapter,
-      where: c.episode_id == ^episode.id
+      where: c.audio_id == ^audio.id
     )
     |> Repo.delete_all()
   end
 
-  def create_chapter(%Episode{audio: audio}, attrs) do
+  def create_chapter(%Audio{} = audio, attrs) do
     %Chapter{}
     |> Chapter.changeset(attrs)
     |> Ecto.Changeset.put_assoc(:audio, audio)
     |> Repo.insert()
   end
 
-  def set_chapters(%Episode{} = episode, input, type)
+  def set_chapters(%Audio{} = audio, input, type)
       when is_binary(input) and type in [:psc, :json, :mp4chaps] do
     chapters = Chapters.decode(input, type)
 
@@ -59,11 +59,11 @@ defmodule Radiator.EpisodeMeta do
     # - delete existing chapters
     # - insert all new chapters
 
-    delete_chapters(episode)
+    delete_chapters(audio)
 
     chapters
     |> Enum.each(fn chapter ->
-      create_chapter(episode, %{
+      create_chapter(audio, %{
         start: chapter.time,
         title: chapter.title,
         link: chapter.url,
@@ -71,6 +71,6 @@ defmodule Radiator.EpisodeMeta do
       })
     end)
 
-    {:ok, episode}
+    {:ok, audio}
   end
 end

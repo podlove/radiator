@@ -6,12 +6,12 @@ defmodule Radiator.Directory.Editor.Permission do
   alias Radiator.Repo
   alias Radiator.Auth
   alias Radiator.Perm.Permission
-  alias Radiator.Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.{Network, Podcast, Episode, Audio}
 
   alias Radiator.Perm.Ecto.PermissionType
 
   @type permission() :: :readonly | :edit | :manage | :own
-  @type subject() :: Podcast.t() | Network.t() | Episode.t()
+  @type subject() :: Podcast.t() | Network.t() | Episode.t() | Audio.t()
 
   @spec get_permission(Auth.User.t(), subject()) :: nil | any()
   def get_permission(user, subject)
@@ -23,6 +23,9 @@ defmodule Radiator.Directory.Editor.Permission do
     do: do_get_permission(user, subject)
 
   def get_permission(user = %Auth.User{}, subject = %Episode{}),
+    do: do_get_permission(user, subject)
+
+  def get_permission(user = %Auth.User{}, subject = %Audio{}),
     do: do_get_permission(user, subject)
 
   defp do_get_permission(user, subject) do
@@ -62,6 +65,15 @@ defmodule Radiator.Directory.Editor.Permission do
     end
   end
 
+  # fixme: audio might have multiple parents:
+  #        - either one of possibly many episodes
+  #        - or network
+  defp parent(subject = %Audio{}) do
+    subject
+    |> Ecto.assoc(:episodes)
+    |> Repo.one!()
+  end
+
   defp parent(subject = %Episode{}) do
     subject
     |> Ecto.assoc(:podcast)
@@ -96,7 +108,7 @@ defmodule Radiator.Directory.Editor.Permission do
 
   @spec set_permission(Auth.User.t(), subject(), permission()) :: :ok | {:error, any()}
   def set_permission(user = %Auth.User{}, subject = %st{}, permission)
-      when st in [Podcast, Network, Episode] and is_permission(permission),
+      when st in [Podcast, Network, Episode, Audio] and is_permission(permission),
       do: do_set_permission(user, subject, permission)
 
   defp do_set_permission(user = %Auth.User{}, subject, permission)

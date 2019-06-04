@@ -30,6 +30,8 @@ defmodule Radiator.Directory.Audio do
     has_many :audio_files, Media.AudioFile
     has_many :chapters, Chapter
 
+    has_many :permissions, {"audios_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
+
     timestamps()
   end
 

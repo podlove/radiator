@@ -87,15 +87,15 @@ defmodule RadiatorWeb.Api.EpisodeView do
   end
 
   defp maybe_embed_enclosure(document, episode, _assigns) do
-    if Ecto.assoc_loaded?(episode.enclosure) && episode.enclosure do
+    if Ecto.assoc_loaded?(episode.audio) && episode.audio do
       Document.add_embed(document, %Embed{
         resource: "rad:enclosure",
         embed:
           %Document{}
           |> Document.add_properties(%{
             url: Episode.enclosure_url(episode),
-            length: episode.enclosure.byte_length,
-            type: episode.enclosure.mime_type
+            length: Episode.enclosure_byte_length(episode),
+            type: Episode.enclosure_mime_type(episode)
           })
       })
     else

@@ -106,8 +106,15 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.DirectoryTypes do
     field :enclosure, :enclosure do
       resolve &Resolvers.Editor.get_enclosure/3
     end
+  end
 
-    # TODO: needs discussion - keep audio meta available in episode as well?
+  @desc "An audio object"
+  object :audio do
+    field :id, non_null(:id)
+    field :title, :string
+    field :duration, :string
+    field :published_at, :datetime
+
     field :chapters, list_of(:chapter) do
       arg :order, type: :sort_order, default_value: :asc
 

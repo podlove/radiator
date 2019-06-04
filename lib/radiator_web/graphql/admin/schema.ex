@@ -200,7 +200,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema do
     end
 
     @desc "Set chapters for an episode"
-    field :set_chapters, type: :episode do
+    field :set_chapters, type: :audio do
       arg :id, non_null(:id)
       arg :chapters, non_null(:string)
       arg :type, non_null(:string)

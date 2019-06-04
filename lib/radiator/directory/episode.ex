@@ -71,6 +71,20 @@ defmodule Radiator.Directory.Episode do
   end
 
   @doc """
+  Convenience accessor for enclosure MIME type.
+  """
+  def enclosure_mime_type(%Episode{audio: %Audio{audio_files: [enclosure]}}) do
+    enclosure.mime_type
+  end
+
+  @doc """
+  Convenience accessor for enclosure byte length.
+  """
+  def enclosure_byte_length(%Episode{audio: %Audio{audio_files: [enclosure]}}) do
+    enclosure.byte_length
+  end
+
+  @doc """
   Convenience accessor for image URL.
   """
   def image_url(%Episode{} = episode) do

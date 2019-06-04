@@ -404,4 +404,20 @@ defmodule Radiator.Directory.Editor do
     Ecto.assoc(episode, :attachments) |> Repo.delete_all()
     episode
   end
+
+  @spec get_audio(Auth.User.t(), pos_integer()) ::
+          {:ok, Audio.t()} | {:error, :not_authorized | :not_found}
+  def get_audio(user = %Auth.User{}, id) do
+    case Repo.get(Audio, id) do
+      nil ->
+        @not_found_match
+
+      audio = %Audio{} ->
+        if has_permission(user, audio, :readonly) do
+          {:ok, audio}
+        else
+          @not_authorized_match
+        end
+    end
+  end
 end
