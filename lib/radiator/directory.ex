@@ -181,7 +181,10 @@ defmodule Radiator.Directory do
     |> preload_for_episode()
   end
 
-  # todo: consolidate with Editor.preloaded_episode/1
+  # fixme: this is currently identical to `Editor.preloaded_episode/1`,
+  #        however: in Directory context preloading is dangerous as it might
+  #        provide access to entities without checking for permissions.
+  #        Solution: write preloader that checks permissions.
   def preload_for_episode(episode) do
     Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files]])
   end
