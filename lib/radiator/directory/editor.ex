@@ -419,4 +419,12 @@ defmodule Radiator.Directory.Editor do
         end
     end
   end
+
+  def update_audio(user = %Auth.User{}, audio = %Audio{}, attrs) do
+    if has_permission(user, audio, :edit) do
+      Editor.Manager.update_audio(audio, attrs)
+    else
+      @not_authorized_match
+    end
+  end
 end

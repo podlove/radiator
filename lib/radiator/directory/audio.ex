@@ -10,19 +10,18 @@ defmodule Radiator.Directory.Audio do
   use Ecto.Schema
 
   import Ecto.Changeset
+  import Arc.Ecto.Changeset
   import Ecto.Query, warn: false
 
   alias Radiator.Media
   alias Radiator.Directory.{Episode, Network}
   alias Radiator.EpisodeMeta.Chapter
 
-  # todo: audio image
-  # todo: audio file
   schema "audios" do
     field :title, :string
     field :duration, :string
     field :published_at, :utc_datetime
-    # field :image, Radiator.Media.EpisodeImage.Type
+    field :image, Media.AudioImage.Type
 
     has_many :episodes, Episode
     belongs_to :network, Network
@@ -39,6 +38,7 @@ defmodule Radiator.Directory.Audio do
   def changeset(audio, attrs) do
     audio
     |> cast(attrs, [:title, :duration, :published_at])
+    |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
 
     # todo: validate it belongs to _something_ / not a zombie
   end

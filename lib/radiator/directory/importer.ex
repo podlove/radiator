@@ -130,8 +130,12 @@ defmodule Radiator.Directory.Importer do
       end
 
       case metalove_episode.image_url do
-        nil -> nil
-        url -> Editor.update_episode(user, podlove_episode, %{image: url})
+        nil ->
+          nil
+
+        url ->
+          Editor.update_episode(user, podlove_episode, %{image: url})
+          Editor.update_audio(user, podlove_episode.audio, %{image: url})
       end
 
       Media.AudioFileUpload.sideload(metalove_episode.enclosure.url, podlove_episode.audio)

@@ -60,6 +60,12 @@ defmodule Radiator.Directory.Editor.Manager do
     |> Repo.insert()
   end
 
+  def update_audio(%Audio{} = audio, attrs) do
+    audio
+    |> Audio.changeset(attrs)
+    |> Repo.update()
+  end
+
   @doc """
   Creates an episode.
 
