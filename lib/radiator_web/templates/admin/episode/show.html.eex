@@ -25,21 +25,22 @@
     </div>
   </div>
 
-  <%= if assigns[:episode] && Ecto.assoc_loaded?(@episode.enclosure) && @episode.enclosure do %>
+  <%= if length(@episode.audio.audio_files) > 0 do %>
     <div class="card max-w-m flex justify-between items-center">
-      <h3>Audio</h3>
-      <%= content_tag(:p, Radiator.Directory.Episode.enclosure_url(@episode)) %>
-      <audio src="<%= Radiator.Directory.Episode.enclosure_url(@episode) %>" type="<%= @episode.enclosure.mime_type %>" controls></audio>
+      <%= content_tag(:div, content_tag(:a, Radiator.Directory.Episode.enclosure_url(@episode), href: Radiator.Directory.Episode.enclosure_url(@episode))) %>
+      <div>
+        <audio src="<%= Radiator.Directory.Episode.enclosure_url(@episode) %>" type="<%= Radiator.Directory.Episode.enclosure_mime_type(@episode) %>" controls></audio>
+      </div>
       <div class="text-gray-900">
-        <%= @episode.enclosure.byte_length |> format_bytes() %>
+        <%= Radiator.Directory.Episode.enclosure_byte_length(@episode) |> format_bytes() %>
       </div>
     </div>
   <% end %>
 
-  <%= if @episode.chapters do %>
+  <%= if @episode.audio.chapters do %>
     <div class="card max-w-sm flex flex-col mt-8">
       <span class="text-gray-700 font-normal text-lg mb-4">Chapters</span>
-      <%= for {chapter, index} <- (@episode.chapters |> Enum.with_index(1)) do %>
+      <%= for {chapter, index} <- (@episode.audio.chapters |> Enum.with_index(1)) do %>
         <div class="border-1-b border-blue-900 mb-3" >
         <%= if chapter.image, do: img_tag(chapter.image) %>
         <%= content_tag(:span, "#{index}. ") %>

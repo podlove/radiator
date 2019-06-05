@@ -4,6 +4,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   require Logger
 
   alias Radiator.Storage
+  alias Radiator.Directory
   alias Radiator.Directory.Editor
   alias Radiator.Directory.Episode
   alias Radiator.Media.AudioFileUpload
@@ -55,9 +56,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
     {:ok, episode} = Editor.get_episode(user, id)
 
-    episode =
-      episode
-      |> Radiator.Repo.preload([:chapters, :enclosure, :audio_files])
+    episode = episode |> Directory.preload_for_episode()
 
     render(conn, "show.html", episode: episode)
   end

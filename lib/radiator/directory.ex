@@ -183,7 +183,7 @@ defmodule Radiator.Directory do
 
   # todo: consolidate with Editor.preloaded_episode/1
   def preload_for_episode(episode) do
-    Repo.preload(episode, [:podcast, audio: [:audio_files]])
+    Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files]])
   end
 
   @doc """

@@ -21,16 +21,6 @@
       <%= textarea f, :description, rows: 3, class: "input", placeholder: "One-liner to grab the listener's attention" %>
       <%= error_tag f, :description %>
     </div>
-    <div class="mb-6">
-      <%= label f, :enclosure, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
-      <%= file_input f, :enclosure, rows: 3, class: "input" %>
-      <%= error_tag f, :enclosure %>
-    </div>
-    <%= if assigns[:episode] && Ecto.assoc_loaded?(@episode.enclosure) do %>
-      <div class="mb-6">
-        <audio src="<%= Radiator.Directory.Episode.enclosure_url(@episode) %>" type="<%= @episode.enclosure.mime_type %>" controls></audio>
-      </div>
-    <% end %>
 
     <%= submit @button_text, class: "btn btn-blue" %>
 <% end %>
