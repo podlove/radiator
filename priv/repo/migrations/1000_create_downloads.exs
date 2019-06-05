@@ -21,6 +21,7 @@ defmodule Radiator.Repo.Migrations.CreateDownloads do
       add :network_id, references(:networks, on_delete: :nothing)
       add :podcast_id, references(:podcasts, on_delete: :nothing)
       add :episode_id, references(:episodes, on_delete: :nothing)
+      add :audio_id, references(:audios, on_delete: :nothing)
       add :file_id, references(:audio_files, on_delete: :nothing)
 
       timestamps()

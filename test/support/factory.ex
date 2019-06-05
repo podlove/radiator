@@ -104,6 +104,7 @@ defmodule Radiator.Factory do
   def audio_factory do
     %Radiator.Directory.Audio{
       duration: "1:02:03",
+      published_at: DateTime.utc_now() |> DateTime.add(-3600, :second),
       audio_files: [build(:audio_file)]
     }
   end
