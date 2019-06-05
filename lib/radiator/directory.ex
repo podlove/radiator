@@ -10,7 +10,7 @@ defmodule Radiator.Directory do
   alias Radiator.Repo
   alias Radiator.Media
   alias Radiator.Media.AudioFile
-  alias Radiator.Directory.{Network, Episode, Podcast}
+  alias Radiator.Directory.{Network, Episode, Podcast, Audio}
   alias Radiator.Directory.PodcastQuery
   alias Radiator.Directory.EpisodeQuery
 
@@ -141,6 +141,16 @@ defmodule Radiator.Directory do
     episodes_query(args)
     |> Repo.all()
     |> preload_for_episode()
+  end
+
+  @doc """
+  Reject episodes without audio or audio files.
+  """
+  def reject_invalid_episodes(episodes) when is_list(episodes) do
+    Enum.filter(episodes, fn
+      %Episode{audio: %Audio{audio_files: [_ | _]}} -> true
+      _ -> false
+    end)
   end
 
   @doc """

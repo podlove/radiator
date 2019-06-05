@@ -9,7 +9,9 @@ defmodule RadiatorWeb.FeedController do
   def show(conn, %{"podcast_id" => id, "page" => page}) do
     podcast = Directory.get_podcast!(id)
 
-    episodes = Directory.list_episodes(%{podcast: podcast})
+    episodes =
+      Directory.list_episodes(%{podcast: podcast})
+      |> Directory.reject_invalid_episodes()
 
     page = String.to_integer(page)
 
