@@ -369,8 +369,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   defp preloaded_episode(episode) do
-    episode
-    |> Repo.preload([:podcast, :chapters, :enclosure, :audio_files])
+    Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files]])
   end
 
   def is_published(%Podcast{published_at: nil}), do: false

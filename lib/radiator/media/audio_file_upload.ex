@@ -25,7 +25,7 @@ defmodule Radiator.Media.AudioFileUpload do
   alias Radiator.Repo
   alias Radiator.Media.AudioFile
   alias Radiator.Media.Attachment
-  alias Radiator.Directory.{Audio, Editor, Episode}
+  alias Radiator.Directory.{Audio, Editor}
 
   @doc """
   Upload audio file and attach it to audio object.
@@ -92,7 +92,7 @@ defmodule Radiator.Media.AudioFileUpload do
   end
 
   # Need to download first, otherwise the database transaction is not having fun and timing out
-  def sideload(url, episode = %Episode{}) do
+  def sideload(url, audio = %Audio{}) do
     uri = URI.parse(url)
     filename = Path.basename(uri.path)
 
@@ -103,7 +103,7 @@ defmodule Radiator.Media.AudioFileUpload do
             filename: filename,
             path: local_path
           },
-          episode
+          audio
         )
 
       _ ->

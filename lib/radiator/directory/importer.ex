@@ -35,6 +35,13 @@ defmodule Radiator.Directory.Importer do
     episodes =
       metalove_episodes
       |> Enum.map(fn episode ->
+        {:ok, audio} =
+          Editor.Manager.create_audio(%{
+            title: episode.title,
+            published_at: episode.pub_date,
+            duration: episode.duration
+          })
+
         {:ok, new_episode} =
           Editor.Manager.create_episode(podcast, %{
             guid: episode.guid,
@@ -43,9 +50,15 @@ defmodule Radiator.Directory.Importer do
             description: episode.description,
             content: episode.content_encoded,
             published_at: episode.pub_date,
-            number: episode.episode,
-            duration: episode.duration
+            number: episode.episode
           })
+
+        {:ok, new_episode} =
+          new_episode
+          |> Radiator.Repo.preload(:audio)
+          |> Ecto.Changeset.change()
+          |> Ecto.Changeset.put_assoc(:audio, audio)
+          |> Radiator.Repo.update()
 
         if episode.chapters do
           Enum.each(episode.chapters, fn chapter ->
@@ -56,7 +69,7 @@ defmodule Radiator.Directory.Importer do
               image: Map.get(chapter, :image)
             }
 
-            Radiator.EpisodeMeta.create_chapter(new_episode, attrs)
+            Radiator.EpisodeMeta.create_chapter(audio, attrs)
           end)
         end
 
@@ -97,7 +110,7 @@ defmodule Radiator.Directory.Importer do
 
       case metalove_episode.enclosure.metadata do
         %{chapters: chapters} ->
-          Radiator.EpisodeMeta.delete_chapters(podlove_episode)
+          Radiator.EpisodeMeta.delete_chapters(podlove_episode.audio)
 
           chapters
           |> Enum.each(fn chapter ->
@@ -109,7 +122,7 @@ defmodule Radiator.Directory.Importer do
               #              image: Map.get(chapter, :image)
             }
 
-            Radiator.EpisodeMeta.create_chapter(podlove_episode, attrs)
+            Radiator.EpisodeMeta.create_chapter(podlove_episode.audio, attrs)
           end)
 
         _ ->
@@ -121,7 +134,7 @@ defmodule Radiator.Directory.Importer do
         url -> Editor.update_episode(user, podlove_episode, %{image: url})
       end
 
-      Media.AudioFileUpload.sideload(metalove_episode.enclosure.url, podlove_episode)
+      Media.AudioFileUpload.sideload(metalove_episode.enclosure.url, podlove_episode.audio)
     end)
   end
 end
