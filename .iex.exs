@@ -53,8 +53,8 @@ defmodule H do
       filename: "pling.mp3"
     }
 
-    {:ok, audio, _} = Media.AudioFileUpload.upload(upload, episode)
+    {:ok, audio_file} = Media.AudioFileUpload.upload(upload, episode)
 
-    audio
+    audio_file
   end
 end

@@ -18,13 +18,12 @@ defmodule Radiator.Media.AudioFileUpload do
       ...>   filename: "ls013-ultraschall.mp3",
       ...>   path: "/tmp/ls013-ultraschall.mp3"
       ...> }
-      iex> {:ok, audio_file, attachment} = Radiator.Media.AudioFileUpload.upload(upload, audio)
+      iex> {:ok, audio_file} = Radiator.Media.AudioFileUpload.upload(upload, audio)
 
   """
   alias Ecto.Multi
   alias Radiator.Repo
   alias Radiator.Media.AudioFile
-  alias Radiator.Media.Attachment
   alias Radiator.Directory.{Audio, Editor}
 
   @doc """
@@ -32,15 +31,14 @@ defmodule Radiator.Media.AudioFileUpload do
 
   `upload` parameter can be anything that the arc `store` function accepts, see https://github.com/stavro/arc#basics
   """
-  @spec upload(any(), Audio.t()) ::
-          {:ok, AudioFile.t(), Attachment.t()} | {:error, :failed}
+  @spec upload(any(), Audio.t()) :: {:ok, AudioFile.t()} | {:error, :failed}
   def upload(upload, audio = %Audio{}) do
     {:ok, audio_file} = upload(upload)
 
     audio
     |> Editor.attach_audio_file(audio_file)
     |> case do
-      {:ok, attachment} -> {:ok, audio_file, attachment}
+      {:ok, audio_file} -> {:ok, audio_file}
       _ -> {:error, :failed}
     end
   end

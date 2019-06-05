@@ -16,7 +16,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Storage do
     case Editor.get_audio(user, id) do
       {:ok, audio} ->
         case Media.AudioFileUpload.upload(file, audio) do
-          {:ok, audio_file, _attachment} -> {:ok, audio_file}
+          {:ok, audio_file} -> {:ok, audio_file}
           {:error, reason} -> {:error, "Upload failed: #{reason}"}
         end
 

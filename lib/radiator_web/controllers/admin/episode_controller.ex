@@ -29,8 +29,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
     case Editor.Manager.create_episode(podcast, episode_params) do
       {:ok, episode} ->
         if episode_params["enclosure"] do
-          {:ok, _audio, _attachment} =
-            AudioFileUpload.upload(episode_params["enclosure"], episode)
+          {:ok, _audio} = AudioFileUpload.upload(episode_params["enclosure"], episode)
         end
 
         conn
@@ -76,7 +75,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
     {:ok, episode} = Editor.get_episode(user, id)
 
     if episode_params["enclosure"] do
-      {:ok, _audio, _attachment} = AudioFileUpload.upload(episode_params["enclosure"], episode)
+      {:ok, _audio} = AudioFileUpload.upload(episode_params["enclosure"], episode)
     end
 
     case Editor.Manager.update_episode(episode, episode_params) do

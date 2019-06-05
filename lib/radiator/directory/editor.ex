@@ -389,7 +389,7 @@ defmodule Radiator.Directory.Editor do
   Attach file to audio entity.
   """
   @spec attach_audio_file(Audio.t(), Media.AudioFile.t()) ::
-          {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Media.AudioFile.t()} | {:error, Ecto.Changeset.t()}
   def attach_audio_file(audio = %Audio{}, file = %Media.AudioFile{}) do
     file
     |> Repo.preload(:audio)

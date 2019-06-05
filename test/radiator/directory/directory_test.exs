@@ -407,15 +407,4 @@ defmodule Radiator.DirectoryTest do
       assert {:error, :not_found} = Directory.get_audio_file(1)
     end
   end
-
-  def create_episode_audio(episode) do
-    upload = %Plug.Upload{
-      path: "test/fixtures/pling.mp3",
-      filename: "pling.mp3"
-    }
-
-    {:ok, audio, _} = Radiator.Media.AudioFileUpload.upload(upload, episode.audio)
-
-    audio
-  end
 end

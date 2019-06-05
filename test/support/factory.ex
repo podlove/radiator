@@ -115,17 +115,6 @@ defmodule Radiator.Factory do
     }
   end
 
-  # NOTE: do not uncomment the audio attribute, as it creates cyclic
-  #       generation when building an episode or audio.
-  #       Not sure what's the best way to handle m:n entities in factories.
-  # TODO: this is not required any more?
-  def audio_attachment_factory do
-    %Radiator.Media.AudioAttachment{
-      # audio: build(:audio),
-      audio_file: build(:audio_file)
-    }
-  end
-
   # @deprecated, use audio_file_factory
   def enclosure_factory do
     %Radiator.Media.AudioFile{

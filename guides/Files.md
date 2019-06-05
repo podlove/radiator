@@ -2,6 +2,8 @@
 
 Files are managed by [arc] with [arc_ecto].
 
+> ⚠️ This document is outdated and does not reflect the current "Audio" abstraction.
+
 ## Audio Files
 
 The `Radiator.Media.AudioFile` schema represents a single audio file. It is attached to either an episode or network via `Radiator.Media.Attachment`.
@@ -18,7 +20,6 @@ The `Radiator.Media.AudioFile` schema represents a single audio file. It is atta
             | AudioFile |
             +-----------+
 
-
 ### Access
 
 Currently it can be assumed that each episode only has one audio attachment. For convenience, this is a dedicated association called `:enclosure`. You can preload it with `Repo.preload(episode, :enclosure)`.
@@ -33,7 +34,7 @@ upload = %Plug.Upload{
   filename: "ls013-ultraschall.mp3",
   path: "/tmp/ls013-ultraschall.mp3"
 }
-{:ok, audio, attachment} = Radiator.Media.AudioFileUpload.upload(upload, episode)
+{:ok, audio_file} = Radiator.Media.AudioFileUpload.upload(upload, episode)
 ```
 
 See `Radiator.Media.AudioFileUpload.upload/2` for details.
@@ -68,10 +69,10 @@ PodcastImage.url({podcast.image, podcast}, :thumbnail)
 Via schema/arc_ecto:
 
 ```elixir
-podcast 
+podcast
 |> Podcast.changeset(%{
   image: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
-}) 
+})
 |> Repo.update
 ```
 
@@ -113,4 +114,3 @@ Setting the image for podcasts and episodes works in the same way.
 
 [arc]: https://hex.pm/packages/arc
 [arc_ecto]: https://hex.pm/packages/arc_ecto
-
