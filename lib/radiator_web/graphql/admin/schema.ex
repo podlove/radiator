@@ -144,20 +144,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema do
       resolve &Resolvers.Storage.create_upload/3
     end
 
-    @desc "Upload a single audio file to an episode"
-    field :upload_episode_audio, type: :audio_file do
-      arg :episode_id, non_null(:integer)
-      arg :audio, :upload
+    @desc "Upload audio file to audio object"
+    field :upload_audio_file, type: :audio_file do
+      arg :audio_id, non_null(:integer)
+      arg :file, :upload
 
-      resolve &Resolvers.Storage.upload_episode_audio/3
-    end
-
-    @desc "Upload a single audio file to a network"
-    field :upload_network_audio, type: :audio_file do
-      arg :network_id, non_null(:integer)
-      arg :audio, :upload
-
-      resolve &Resolvers.Storage.upload_episode_audio/3
+      resolve &Resolvers.Storage.upload_audio_file/3
     end
 
     @desc "Create an episode"

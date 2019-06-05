@@ -40,7 +40,7 @@ defmodule Radiator.Media.AudioFileUpload do
     audio
     |> Editor.attach_audio_file(audio_file)
     |> case do
-      {:ok, attachment} -> {:ok, audio, attachment}
+      {:ok, attachment} -> {:ok, audio_file, attachment}
       _ -> {:error, :failed}
     end
   end

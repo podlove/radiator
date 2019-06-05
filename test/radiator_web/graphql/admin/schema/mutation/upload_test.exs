@@ -36,9 +36,9 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UploadTest do
     refute is_nil(url)
   end
 
-  @upload_episode_audio """
-  mutation ($episode_id: ID!) {
-    uploadEpisodeAudio(episode_id: $episode_id, audio: "myaudio") {
+  @upload_audio_file """
+  mutation ($audio_id: ID!) {
+    uploadAudioFile(audio_id: $audio_id, file: "myfile") {
       mimeType
       byteLength
       title
@@ -46,8 +46,9 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UploadTest do
   }
   """
 
-  test "upload audio file to episode", %{conn: conn, user: user} do
-    episode = insert(:episode) |> owned_by(user)
+  test "upload audio file to audio", %{conn: conn, user: user} do
+    episode = insert(:episode, audio: build(:audio)) |> owned_by(user)
+    audio = episode.audio
 
     upload = %Plug.Upload{
       path: "test/fixtures/pling.mp3",
@@ -56,48 +57,13 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UploadTest do
 
     conn =
       post conn, "/api/graphql",
-        query: @upload_episode_audio,
-        myaudio: upload,
-        variables: %{"episode_id" => episode.id}
+        query: @upload_audio_file,
+        myfile: upload,
+        variables: %{"audio_id" => audio.id}
 
     assert %{
              "data" => %{
-               "uploadEpisodeAudio" => %{
-                 "byteLength" => 8476,
-                 "mimeType" => "audio/mpeg",
-                 "title" => "pling.mp3"
-               }
-             }
-           } = json_response(conn, 200)
-  end
-
-  @upload_network_audio """
-  mutation ($network_id: ID!) {
-    uploadNetworkAudio(network_id: $network_id, audio: "myaudio") {
-      mimeType
-      byteLength
-      title
-    }
-  }
-  """
-
-  test "upload audio file to network", %{conn: conn, user: user} do
-    network = insert(:network) |> owned_by(user)
-
-    upload = %Plug.Upload{
-      path: "test/fixtures/pling.mp3",
-      filename: "pling.mp3"
-    }
-
-    conn =
-      post conn, "/api/graphql",
-        query: @upload_network_audio,
-        myaudio: upload,
-        variables: %{"network_id" => network.id}
-
-    assert %{
-             "data" => %{
-               "uploadNetworkAudio" => %{
+               "uploadAudioFile" => %{
                  "byteLength" => 8476,
                  "mimeType" => "audio/mpeg",
                  "title" => "pling.mp3"
