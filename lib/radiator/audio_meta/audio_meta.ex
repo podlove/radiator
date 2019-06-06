@@ -51,6 +51,12 @@ defmodule Radiator.AudioMeta do
     |> Repo.insert()
   end
 
+  def update_chapter(chapter = %Chapter{}, attrs) do
+    chapter
+    |> Chapter.changeset(attrs)
+    |> Repo.update()
+  end
+
   def set_chapters(%Audio{} = audio, input, type)
       when is_binary(input) and type in [:psc, :json, :mp4chaps] do
     chapters = Chapters.decode(input, type)

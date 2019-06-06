@@ -7,7 +7,7 @@ defmodule Radiator.Media.CoverImageBase do
       @versions [:original, :thumbnail]
 
       def transform(:thumbnail, _) do
-        {:convert, "-thumbnail 256x256^ -gravity center -extent 256x256 -format png", :png}
+        {:convert, "-thumbnail 256x256^ -gravity center -extent 256x256 -quality 94", :jpg}
       end
 
       def s3_object_headers(_version, {file, _subject}) do

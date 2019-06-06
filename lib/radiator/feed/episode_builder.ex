@@ -77,7 +77,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
             title: Map.get(chapter, :title)
           }
           |> maybe_put(:href, Map.get(chapter, :link))
-          |> maybe_put(:image, Map.get(chapter, :image))
+          |> maybe_put(:image, Radiator.AudioMeta.Chapter.image_url(chapter))
         )
       end)
     )

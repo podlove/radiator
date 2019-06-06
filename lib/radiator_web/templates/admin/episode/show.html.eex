@@ -42,7 +42,7 @@
       <span class="text-gray-700 font-normal text-lg mb-4">Chapters</span>
       <%= for {chapter, index} <- (@episode.audio.chapters |> Enum.with_index(1)) do %>
         <div class="border-1-b border-blue-900 mb-3" >
-        <%= if chapter.image, do: img_tag(chapter.image) %>
+        <%= if chapter.image, do: img_tag(chapter_image_url(chapter)) %>
         <%= content_tag(:span, "#{index}. ") %>
         <%= content_tag(:span, chapter.title) %>
         <%= if chapter.link, do: link("(url)", to: chapter.link, target: "_blank" )%>
