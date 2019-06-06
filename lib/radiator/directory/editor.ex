@@ -310,7 +310,7 @@ defmodule Radiator.Directory.Editor do
 
   def schedule_episode(user = %Auth.User{}, episode = %Episode{}, datetime = %DateTime{}) do
     if has_permission(user, episode, :manage) do
-      Editor.Manager.shedule_episode(episode, datetime)
+      Editor.Manager.schedule_episode(episode, datetime)
     else
       @not_authorized_match
     end
