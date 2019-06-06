@@ -23,6 +23,11 @@ defmodule RadiatorWeb.GraphQL.Public.Schema do
     value :desc
   end
 
+  enum :episode_order do
+    value :published_at
+    value :title
+  end
+
   import_types Absinthe.Type.Custom
   import_types Absinthe.Plug.Types
   import_types RadiatorWeb.GraphQL.Public.Schema.Directory.EpisodeTypes

@@ -23,6 +23,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema do
     value :desc
   end
 
+  enum :episode_order do
+    value :published_at
+    value :title
+  end
+
   enum :published do
     value true
     value false

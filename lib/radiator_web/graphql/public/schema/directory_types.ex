@@ -42,6 +42,8 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
     field :episodes, list_of(:episode) do
       arg :page, type: :integer, default_value: 1
       arg :items_per_page, type: :integer, default_value: 10
+      arg :order_by, type: :episode_order, default_value: :published_at
+      arg :order, type: :sort_order, default_value: :desc
 
       resolve dataloader(Radiator.Directory, :episodes)
     end
