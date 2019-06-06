@@ -255,6 +255,29 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
     assert %{"errors" => [%{"message" => "Entity not found"}]} = json_response(conn, 200)
   end
 
+  @schedule_query """
+  mutation ($id: ID!, $datetime: DateTime) {
+    scheduleEpisode(id: $id, datetime: $datetime) {
+      id
+      publishedAt
+      slug
+    }
+  }
+  """
+
+  test "scheduleEpisode schedules episode for future", %{conn: conn, user: user} do
+    episode = insert(:episode, published_at: nil) |> owned_by(user)
+
+    schedule_date = DateTime.utc_now() |> DateTime.add(7200, :second) |> DateTime.to_iso8601()
+
+    conn =
+      post conn, "/api/graphql",
+        query: @schedule_query,
+        variables: %{"id" => episode.id, "datetime" => schedule_date}
+
+    refute %{"errors" => _errors} = json_response(conn, 200)
+  end
+
   @delete_query """
   mutation ($id: ID!) {
     deleteEpisode(id: $id) {
