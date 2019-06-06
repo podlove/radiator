@@ -237,6 +237,16 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
+  def schedule_episode(_parent, %{id: id, datetime: datetime}, %{
+        context: %{authenticated_user: user}
+      }) do
+    with_episode user, id do
+      fn episode ->
+        Editor.schedule_episode(user, episode, datetime)
+      end
+    end
+  end
+
   # todo: do not use Manager context here
   def delete_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
     with_episode user, id do

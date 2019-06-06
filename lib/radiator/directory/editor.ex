@@ -11,6 +11,7 @@ defmodule Radiator.Directory.Editor do
 
   alias Radiator.Auth
 
+  alias Radiator.Support
   alias Radiator.Repo
   alias Radiator.Directory
   alias Radiator.Directory.{Network, Podcast, Episode, Editor, Audio}
@@ -308,6 +309,14 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def schedule_episode(user = %Auth.User{}, episode = %Episode{}, datetime = %DateTime{}) do
+    if has_permission(user, episode, :manage) do
+      Editor.Manager.schedule_episode(episode, datetime)
+    else
+      @not_authorized_match
+    end
+  end
+
   def delete_episode(user = %Auth.User{}, episode = %Episode{}) do
     if has_permission(user, episode, :own) do
       Editor.Manager.delete_episode(episode)
@@ -375,15 +384,11 @@ defmodule Radiator.Directory.Editor do
   def is_published(%Podcast{published_at: nil}), do: false
   def is_published(%Episode{published_at: nil}), do: false
 
-  def is_published(%Podcast{published_at: date}), do: before_utc_now?(date)
-  def is_published(%Episode{published_at: date}), do: before_utc_now?(date)
+  def is_published(%Podcast{published_at: date}),
+    do: Support.DateTime.before_utc_now?(date)
 
-  defp before_utc_now?(date) do
-    case DateTime.compare(date, DateTime.utc_now()) do
-      :lt -> true
-      _ -> false
-    end
-  end
+  def is_published(%Episode{published_at: date}),
+    do: Support.DateTime.before_utc_now?(date)
 
   @doc """
   Attach file to audio entity.
