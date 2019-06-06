@@ -170,6 +170,35 @@ defmodule Radiator.Directory.Editor.Manager do
   end
 
   @doc """
+  Shedules episode for publication by giving it a future `published_at` date.
+
+  ## Examples
+
+      iex> schedule_episode(episode, datetime)
+      {:ok, %Episode{}}
+
+      iex> schedule_episode(bad_value, datetime)
+      {:error, %Ecto.Changeset{}}
+
+      iex> schedule_episode(episode, past_datetime)
+      {:error, :datetime_not_future}
+  """
+  def schedule_episode(episode = %Episode{}, datetime = %DateTime{}) do
+    if after_utc_now?(datetime) do
+      update_episode(episode, %{published_at: datetime})
+    else
+      {:error, :datetime_not_future}
+    end
+  end
+
+  defp after_utc_now?(date) do
+    case DateTime.compare(date, DateTime.utc_now()) do
+      :gt -> true
+      _ -> false
+    end
+  end
+
+  @doc """
   Updates a podcast.
 
   ## Examples
