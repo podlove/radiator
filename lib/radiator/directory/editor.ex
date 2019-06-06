@@ -11,6 +11,7 @@ defmodule Radiator.Directory.Editor do
 
   alias Radiator.Auth
 
+  alias Radiator.Support
   alias Radiator.Repo
   alias Radiator.Directory
   alias Radiator.Directory.{Network, Podcast, Episode, Editor, Audio}
@@ -383,15 +384,11 @@ defmodule Radiator.Directory.Editor do
   def is_published(%Podcast{published_at: nil}), do: false
   def is_published(%Episode{published_at: nil}), do: false
 
-  def is_published(%Podcast{published_at: date}), do: before_utc_now?(date)
-  def is_published(%Episode{published_at: date}), do: before_utc_now?(date)
+  def is_published(%Podcast{published_at: date}),
+    do: Support.DateTime.before_utc_now?(date)
 
-  defp before_utc_now?(date) do
-    case DateTime.compare(date, DateTime.utc_now()) do
-      :lt -> true
-      _ -> false
-    end
-  end
+  def is_published(%Episode{published_at: date}),
+    do: Support.DateTime.before_utc_now?(date)
 
   @doc """
   Attach file to audio entity.

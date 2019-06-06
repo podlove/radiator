@@ -7,6 +7,7 @@ defmodule Radiator.Directory.Editor.Manager do
 
   alias Ecto.Multi
 
+  alias Radiator.Support
   alias Radiator.Repo
 
   alias Radiator.Directory.{Network, Podcast, Episode, Audio}
@@ -184,17 +185,10 @@ defmodule Radiator.Directory.Editor.Manager do
       {:error, :datetime_not_future}
   """
   def schedule_episode(episode = %Episode{}, datetime = %DateTime{}) do
-    if after_utc_now?(datetime) do
+    if Support.DateTime.after_utc_now?(datetime) do
       update_episode(episode, %{published_at: datetime})
     else
       {:error, :datetime_not_future}
-    end
-  end
-
-  defp after_utc_now?(date) do
-    case DateTime.compare(date, DateTime.utc_now()) do
-      :gt -> true
-      _ -> false
     end
   end
 

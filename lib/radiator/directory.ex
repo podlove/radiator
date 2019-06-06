@@ -7,6 +7,7 @@ defmodule Radiator.Directory do
 
   import Ecto.Query, warn: false
 
+  alias Radiator.Support
   alias Radiator.Repo
   alias Radiator.Media
   alias Radiator.Media.AudioFile
@@ -203,8 +204,11 @@ defmodule Radiator.Directory do
   def is_published(%Podcast{published_at: nil}), do: false
   def is_published(%Episode{published_at: nil}), do: false
 
-  def is_published(%Podcast{published_at: date}), do: before_utc_now?(date)
-  def is_published(%Episode{published_at: date}), do: before_utc_now?(date)
+  def is_published(%Podcast{published_at: date}),
+    do: Support.DateTime.before_utc_now?(date)
+
+  def is_published(%Episode{published_at: date}),
+    do: Support.DateTime.before_utc_now?(date)
 
   def is_published(_), do: false
 
@@ -220,13 +224,6 @@ defmodule Radiator.Directory do
     else
       {:get, _} -> {:error, :not_found}
       {:published, _} -> {:error, :unpublished}
-    end
-  end
-
-  defp before_utc_now?(date) do
-    case DateTime.compare(date, DateTime.utc_now()) do
-      :lt -> true
-      _ -> false
     end
   end
 end
