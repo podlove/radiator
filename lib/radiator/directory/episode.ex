@@ -52,6 +52,18 @@ defmodule Radiator.Directory.Episode do
   end
 
   @doc """
+  Get enclosure data for episode.
+  """
+  @spec enclosure(Episode.t()) :: %{url: binary(), type: binary(), length: integer()}
+  def enclosure(%Episode{} = episode) do
+    %{
+      url: enclosure_url(episode),
+      type: enclosure_mime_type(episode),
+      length: enclosure_byte_length(episode)
+    }
+  end
+
+  @doc """
   Convenience accessor for enclosure URL.
   """
   def enclosure_url(%Episode{audio: %Audio{audio_files: [enclosure]}}) do

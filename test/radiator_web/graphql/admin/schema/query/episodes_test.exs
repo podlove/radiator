@@ -3,6 +3,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
 
   import Radiator.Factory
 
+  alias Radiator.Directory.Episode
+
   @doc """
   Generate user and add auth token to connection.
   """
@@ -22,6 +24,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
     episode(id: $id) {
       id
       title
+      enclosure {
+        length
+        type
+        url
+      }
     }
   }
   """
@@ -29,12 +36,21 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
   test "episode returns an episode", %{conn: conn, user: user} do
     podcast = insert(:podcast) |> owned_by(user)
     episode = insert(:unpublished_episode, podcast: podcast)
+    enclosure = Episode.enclosure(episode)
 
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => episode.id}
 
     assert json_response(conn, 200) == %{
              "data" => %{
-               "episode" => %{"id" => Integer.to_string(episode.id), "title" => episode.title}
+               "episode" => %{
+                 "id" => Integer.to_string(episode.id),
+                 "title" => episode.title,
+                 "enclosure" => %{
+                   "length" => enclosure.length,
+                   "type" => enclosure.type,
+                   "url" => enclosure.url
+                 }
+               }
              }
            }
   end

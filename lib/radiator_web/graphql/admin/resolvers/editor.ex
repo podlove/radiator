@@ -272,16 +272,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  # PERF: use data loader
-  def get_enclosure(%Episode{} = episode, _args, _resolution) do
-    episode = Radiator.Repo.preload(episode, :enclosure)
-
-    {:ok,
-     %{
-       url: Episode.enclosure_url(episode),
-       type: episode.enclosure.mime_type,
-       length: episode.enclosure.byte_length
-     }}
+  def get_enclosure(%Episode{} = episode, _args, %{context: %{authenticated_user: _user}}) do
+    {:ok, Episode.enclosure(episode)}
   end
 
   def get_chapters(%Audio{} = audio, _, _) do

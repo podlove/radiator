@@ -51,16 +51,8 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
     {:ok, AudioMeta.list_chapters(episode)}
   end
 
-  # PERF: use data loader
   def get_enclosure(%Episode{} = episode, _args, _resolution) do
-    episode = Radiator.Repo.preload(episode, :enclosure)
-
-    {:ok,
-     %{
-       url: Episode.enclosure_url(episode),
-       type: episode.enclosure.mime_type,
-       length: episode.enclosure.byte_length
-     }}
+    {:ok, Episode.enclosure(episode)}
   end
 
   def get_image_url(episode = %Episode{}, _, _) do
