@@ -184,6 +184,14 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema do
       resolve &Resolvers.Editor.depublish_episode/3
     end
 
+    @desc "Schedule episode"
+    field :schedule_episode, type: :episode do
+      arg :id, non_null(:id)
+      arg :datetime, non_null(:datetime)
+
+      resolve &Resolvers.Editor.schedule_episode/3
+    end
+
     @desc "Delete an episode"
     field :delete_episode, type: :episode do
       arg :id, non_null(:id)
