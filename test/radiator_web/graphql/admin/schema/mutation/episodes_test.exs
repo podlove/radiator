@@ -255,6 +255,53 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
     assert %{"errors" => [%{"message" => "Entity not found"}]} = json_response(conn, 200)
   end
 
+  @schedule_query """
+  mutation ($id: ID!, $datetime: DateTime) {
+    scheduleEpisode(id: $id, datetime: $datetime) {
+      id
+      publishedAt
+      slug
+    }
+  }
+  """
+
+  test "scheduleEpisode schedules episode for future", %{conn: conn, user: user} do
+    episode = insert(:episode, published_at: nil) |> owned_by(user)
+
+    schedule_date =
+      DateTime.utc_now() |> DateTime.add(14400, :second) |> DateTime.truncate(:second)
+
+    schedule_date_string = schedule_date |> DateTime.to_iso8601()
+
+    conn =
+      post conn, "/api/graphql",
+        query: @schedule_query,
+        variables: %{"id" => episode.id, "datetime" => schedule_date_string}
+
+    assert %{"data" => %{"scheduleEpisode" => scheduled_episode}} = json_response(conn, 200)
+
+    {:ok, scheduled_episode_date, _} =
+      DateTime.from_iso8601(Map.get(scheduled_episode, "publishedAt"))
+
+    assert schedule_date == scheduled_episode_date
+    assert scheduled_episode_date > DateTime.utc_now()
+  end
+
+  test "scheduleEpisode rejects scheduling in the past", %{conn: conn, user: user} do
+    episode = insert(:episode, published_at: nil) |> owned_by(user)
+
+    schedule_date = DateTime.utc_now() |> DateTime.add(-1, :second) |> DateTime.truncate(:second)
+
+    schedule_date_string = schedule_date |> DateTime.to_iso8601()
+
+    conn =
+      post conn, "/api/graphql",
+        query: @schedule_query,
+        variables: %{"id" => episode.id, "datetime" => schedule_date_string}
+
+    assert %{"errors" => [%{"message" => "datetime_not_future"}]} = json_response(conn, 200)
+  end
+
   @delete_query """
   mutation ($id: ID!) {
     deleteEpisode(id: $id) {
