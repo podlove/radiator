@@ -42,7 +42,7 @@ mc config host add radiator http://127.0.0.1:9000 <AccessKey> <SecretKey>
 
 ```shell
 mc mb radiator/radiator
-mc mb radiator/radiator_test
+mc mb radiator/radiator-test
 mc policy public radiator/radiator
 ```
 

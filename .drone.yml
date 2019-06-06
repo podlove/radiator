@@ -7,8 +7,8 @@ steps:
     commands:
       - sleep 5
       - mc config host add radiator http://minio:9000 IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
-      - mc mb radiator/radiator_test
-      - mc policy public radiator/radiator_test
+      - mc mb radiator/radiator-test
+      - mc policy public radiator/radiator-test
 
   - name: install
     image: elixir:1.8
