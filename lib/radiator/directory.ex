@@ -212,6 +212,8 @@ defmodule Radiator.Directory do
 
   def is_published(_), do: false
 
+  def is_published(_), do: false
+
   # todo: missing verification that podcast (& network?) is published
   def get_audio_file(audio_file_id) do
     with {:get, audio = %AudioFile{}} <-
