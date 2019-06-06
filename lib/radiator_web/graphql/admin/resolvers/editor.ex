@@ -3,7 +3,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   alias Radiator.Directory.Editor
   alias Radiator.Directory.{Episode, Podcast, Network, Audio}
-  alias Radiator.EpisodeMeta
+  alias Radiator.AudioMeta
   alias Radiator.Media
 
   @doc """
@@ -249,7 +249,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def is_published(entity, _, _), do: {:ok, Editor.is_published(entity)}
 
   def list_chapters(%Audio{} = audio, _args, _resolution) do
-    {:ok, EpisodeMeta.list_chapters(audio)}
+    {:ok, AudioMeta.list_chapters(audio)}
   end
 
   def set_episode_chapters(_parent, %{id: id, chapters: chapters, type: type}, %{
@@ -257,7 +257,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
       }) do
     with_audio user, id do
       fn audio ->
-        EpisodeMeta.set_chapters(audio, chapters, String.to_existing_atom(type))
+        AudioMeta.set_chapters(audio, chapters, String.to_existing_atom(type))
       end
     end
   end

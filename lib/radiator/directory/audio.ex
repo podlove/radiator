@@ -15,7 +15,7 @@ defmodule Radiator.Directory.Audio do
 
   alias Radiator.Media
   alias Radiator.Directory.{Episode, Network}
-  alias Radiator.EpisodeMeta.Chapter
+  alias Radiator.AudioMeta.Chapter
 
   schema "audios" do
     field :title, :string

@@ -1,4 +1,4 @@
-defmodule Radiator.EpisodeMeta do
+defmodule Radiator.AudioMeta do
   @moduledoc """
   The Episode Metadata context.
   """
@@ -7,7 +7,7 @@ defmodule Radiator.EpisodeMeta do
 
   alias Radiator.Repo
   alias Radiator.Directory.Audio
-  alias Radiator.EpisodeMeta.Chapter
+  alias Radiator.AudioMeta.Chapter
 
   def data() do
     Dataloader.Ecto.new(Repo, query: &query/2)

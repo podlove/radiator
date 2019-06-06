@@ -69,7 +69,7 @@ defmodule Radiator.Directory.Importer do
               image: Map.get(chapter, :image)
             }
 
-            Radiator.EpisodeMeta.create_chapter(audio, attrs)
+            Radiator.AudioMeta.create_chapter(audio, attrs)
           end)
         end
 
@@ -110,7 +110,7 @@ defmodule Radiator.Directory.Importer do
 
       case metalove_episode.enclosure.metadata do
         %{chapters: chapters} ->
-          Radiator.EpisodeMeta.delete_chapters(podlove_episode.audio)
+          Radiator.AudioMeta.delete_chapters(podlove_episode.audio)
 
           chapters
           |> Enum.each(fn chapter ->
@@ -122,7 +122,7 @@ defmodule Radiator.Directory.Importer do
               #              image: Map.get(chapter, :image)
             }
 
-            Radiator.EpisodeMeta.create_chapter(podlove_episode.audio, attrs)
+            Radiator.AudioMeta.create_chapter(podlove_episode.audio, attrs)
           end)
 
         _ ->

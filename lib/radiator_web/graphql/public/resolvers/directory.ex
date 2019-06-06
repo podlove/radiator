@@ -1,7 +1,7 @@
 defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
   alias Radiator.Directory
   alias Radiator.Directory.{Episode, Podcast, Network}
-  alias Radiator.EpisodeMeta
+  alias Radiator.AudioMeta
   alias Radiator.Media
 
   def list_networks(_parent, _args, _resolution) do
@@ -48,7 +48,7 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
   end
 
   def list_chapters(%Episode{} = episode, _args, _resolution) do
-    {:ok, EpisodeMeta.list_chapters(episode)}
+    {:ok, AudioMeta.list_chapters(episode)}
   end
 
   # PERF: use data loader

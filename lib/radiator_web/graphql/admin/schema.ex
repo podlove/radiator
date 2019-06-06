@@ -6,11 +6,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema do
   end
 
   def dataloader() do
-    alias Radiator.EpisodeMeta
+    alias Radiator.AudioMeta
     alias Radiator.Directory
 
     Dataloader.new()
-    |> Dataloader.add_source(EpisodeMeta, EpisodeMeta.data())
+    |> Dataloader.add_source(AudioMeta, AudioMeta.data())
     |> Dataloader.add_source(Directory, Directory.data())
   end
 

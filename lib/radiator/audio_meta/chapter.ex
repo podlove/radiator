@@ -1,4 +1,4 @@
-defmodule Radiator.EpisodeMeta.Chapter do
+defmodule Radiator.AudioMeta.Chapter do
   use Ecto.Schema
   import Ecto.Changeset
 
