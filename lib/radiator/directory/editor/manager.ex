@@ -9,7 +9,7 @@ defmodule Radiator.Directory.Editor.Manager do
 
   alias Radiator.Repo
 
-  alias Radiator.Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.{Network, Podcast, Episode, Audio}
 
   @doc """
   Creates a podcast.
@@ -52,6 +52,18 @@ defmodule Radiator.Directory.Editor.Manager do
       {:error, :podcast_updates, changeset, _map} -> {:error, changeset}
       something -> something
     end
+  end
+
+  def create_audio(attrs \\ %{}) do
+    %Audio{}
+    |> Audio.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_audio(%Audio{} = audio, attrs) do
+    audio
+    |> Audio.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """

@@ -1,7 +1,8 @@
 defmodule Radiator.BuilderTest do
-  use ExUnit.Case
+  use Radiator.DataCase
 
-  alias Radiator.Directory.{Episode, Podcast}
+  alias Radiator.Directory
+  alias Radiator.Directory.Podcast
   alias Radiator.Feed.{Builder, EpisodeBuilder, PodcastBuilder}
 
   import SweetXml
@@ -42,20 +43,20 @@ defmodule Radiator.BuilderTest do
 
   describe "Radiator.Feed.Builder" do
     test "builds an RSS feed" do
-      enclosure = build(:enclosure)
+      podcast = insert(:podcast, title: "Hello World")
+
+      episode1 =
+        insert(:episode, podcast: podcast, title: "Ep 001") |> Directory.preload_for_episode()
+
+      episode2 =
+        insert(:episode, podcast: podcast, title: "Ep 002") |> Directory.preload_for_episode()
 
       data =
         data_fixture(%{
-          podcast: %Podcast{title: "Hello World"},
+          podcast: podcast,
           episodes: [
-            %Episode{
-              title: "Ep 001",
-              enclosure: enclosure
-            },
-            %Episode{
-              title: "Ep 002",
-              enclosure: enclosure
-            }
+            episode1,
+            episode2
           ]
         })
 
@@ -66,16 +67,25 @@ defmodule Radiator.BuilderTest do
     end
 
     test "pages feeds" do
-      enclosure = build(:enclosure)
+      podcast = insert(:podcast, title: "Hello World")
+
+      episode1 =
+        insert(:episode, title: "Ep 001", podcast: podcast) |> Directory.preload_for_episode()
+
+      episode2 =
+        insert(:episode, title: "Ep 002", podcast: podcast) |> Directory.preload_for_episode()
+
+      episode3 =
+        insert(:episode, title: "Ep 003", podcast: podcast) |> Directory.preload_for_episode()
 
       # todo: how to handle an empty feed/page with no episodes?
       data =
         data_fixture(%{
-          podcast: %Podcast{title: "Hello World"},
+          podcast: podcast,
           episodes: [
-            %Episode{title: "Ep 001", enclosure: enclosure},
-            %Episode{title: "Ep 002", enclosure: enclosure},
-            %Episode{title: "Ep 003", enclosure: enclosure}
+            episode1,
+            episode2,
+            episode3
           ]
         })
 
@@ -130,30 +140,23 @@ defmodule Radiator.BuilderTest do
 
   describe "Radiator.Feed.EpisodeBuilder" do
     test "builds an item" do
-      enclosure = build(:enclosure)
+      episode =
+        insert(:episode, title: "Ep 001", subtitle: "sub", description: "desc")
+        |> Directory.preload_for_episode()
 
-      rss =
-        build_episode_xml(%{}, %Episode{
-          title: "Ep 001",
-          subtitle: "sub",
-          description: "desc",
-          enclosure: enclosure
-        })
+      rss = build_episode_xml(%{}, episode)
 
       assert "Ep 001" == xpath(rss, ~x"//item/title/text()"s)
       assert "sub" == xpath(rss, ~x"//item/itunes:subtitle/text()"s)
       assert "desc" == xpath(rss, ~x"//item/description/text()"s)
 
-      assert %{
-               url: Radiator.Media.AudioFile.url({enclosure.file, enclosure}),
-               type: enclosure.mime_type,
-               length: enclosure.byte_length
-             } ==
-               xpath(rss, ~x"//item/enclosure",
-                 url: ~x"./@url"s,
-                 type: ~x"./@type"s,
-                 length: ~x"./@length"i
-               )
+      [enclosure] = episode.audio.audio_files
+
+      assert Radiator.Media.AudioFile.url({enclosure.file, enclosure}) ==
+               xpath(rss, ~x"//item/enclosure/@url"s)
+
+      assert enclosure.mime_type == xpath(rss, ~x"//item/enclosure/@type"s)
+      assert enclosure.byte_length == xpath(rss, ~x"//item/enclosure/@length"i)
     end
   end
 end

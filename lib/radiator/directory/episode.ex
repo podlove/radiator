@@ -6,15 +6,12 @@ defmodule Radiator.Directory.Episode do
   import Ecto.Query, warn: false
 
   alias __MODULE__
-  alias Radiator.Directory.Podcast
   alias Radiator.Media
-  alias Radiator.Directory.{Podcast, TitleSlug}
-  alias Radiator.EpisodeMeta.Chapter
+  alias Radiator.Directory.{Episode, Podcast, Audio, TitleSlug}
 
   schema "episodes" do
     field :content, :string
     field :description, :string
-    field :duration, :string
     field :guid, :string
     field :image, Media.EpisodeImage.Type
     field :number, :integer
@@ -24,21 +21,7 @@ defmodule Radiator.Directory.Episode do
     field :slug, TitleSlug.Type
 
     belongs_to :podcast, Podcast
-    has_many :chapters, Chapter
-
-    has_many :attachments,
-             {"episode_attachments", Media.EpisodeAttachment},
-             foreign_key: :subject_id
-
-    many_to_many :audio_files,
-                 Media.AudioFile,
-                 join_through: "episode_attachments",
-                 join_keys: [subject_id: :id, audio_id: :id]
-
-    # RESEARCH needed
-    # Repo.preload(episode, :enclosure) works
-    # Ecto.assoc(episode, :enclosure) does not work
-    has_one :enclosure, through: [:attachments, :audio]
+    belongs_to :audio, Audio
 
     has_many :permissions, {"episodes_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
 
@@ -53,7 +36,6 @@ defmodule Radiator.Directory.Episode do
       :subtitle,
       :description,
       :content,
-      :duration,
       :guid,
       :number,
       :published_at,
@@ -65,13 +47,41 @@ defmodule Radiator.Directory.Episode do
     |> set_guid_if_missing()
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()
+
+    # todo: episode cannot be published without audio
   end
 
   @doc """
   Convenience accessor for enclosure URL.
   """
-  def enclosure_url(%Episode{enclosure: enclosure}) do
+  def enclosure_url(%Episode{audio: %Audio{audio_files: [enclosure]}}) do
     Media.AudioFile.url({enclosure.file, enclosure})
+  end
+
+  def enclosure_url(%Episode{audio: %Audio{audio_files: []}}) do
+    raise ArgumentError, "Audio without attached files"
+  end
+
+  def enclosure_url(%Episode{audio: %Audio{audio_files: [_enclosure | _more]}}) do
+    raise ArgumentError, "Audio without unexpected number of attached files (> 1)"
+  end
+
+  def enclosure_url(%Episode{audio: %Audio{audio_files: _}}) do
+    raise ArgumentError, "Audio needs preloaded audio_files"
+  end
+
+  @doc """
+  Convenience accessor for enclosure MIME type.
+  """
+  def enclosure_mime_type(%Episode{audio: %Audio{audio_files: [enclosure]}}) do
+    enclosure.mime_type
+  end
+
+  @doc """
+  Convenience accessor for enclosure byte length.
+  """
+  def enclosure_byte_length(%Episode{audio: %Audio{audio_files: [enclosure]}}) do
+    enclosure.byte_length
   end
 
   @doc """

@@ -78,7 +78,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.DirectoryTypes do
     field :id, non_null(:id)
     field :content, :string
     field :description, :string
-    field :duration, :string
+
+    field :duration, :string do
+      resolve &Resolvers.Editor.get_duration/3
+    end
+
     field :guid, :string
 
     field :image, :string do
@@ -102,11 +106,20 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.DirectoryTypes do
     field :enclosure, :enclosure do
       resolve &Resolvers.Editor.get_enclosure/3
     end
+  end
+
+  @desc "An audio object"
+  object :audio do
+    field :id, non_null(:id)
+    field :title, :string
+    field :duration, :string
+    field :published_at, :datetime
 
     field :chapters, list_of(:chapter) do
       arg :order, type: :sort_order, default_value: :asc
 
-      resolve dataloader(Radiator.EpisodeMeta, :chapters)
+      # resolve dataloader(Radiator.AudioMeta, :chapters)
+      resolve &Resolvers.Editor.get_chapters/3
     end
   end
 

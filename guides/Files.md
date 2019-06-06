@@ -4,24 +4,29 @@ Files are managed by [arc] with [arc_ecto].
 
 ## Audio Files
 
-The `Radiator.Media.AudioFile` schema represents a single audio file. It is attached to either an episode or network via `Radiator.Media.Attachment`.
+            +---------+
+         +--+ Network +-+
+         |  +---------+ |
+         |              |
+    +----+----+         |
+    | Podcast |         |
+    +----+----+         |
+         |              |
+         |              |
+         |              |
+    +----+----+    +----+--+    +-----------+
+    | Episode +----+ Audio +----+ AudioFile |
+    +---------+    +----+--+    +-----------+
+                        |
+                        +------------+
+                        |            |
+                  +-----+----+ +-----+------+
+                  | Chapters | | Transcript |
+                  +----------+ +------------+
 
-    +---------+       +---------+
-    | Episode |       | Network |
-    +----+----+       +----+----+
-         | +------------+  |
-         +-> Attachment +<-+
-           +------+-----+
-                  |
-                  v
-            +-----+-----+
-            | AudioFile |
-            +-----------+
+`Radiator.Directory.Audio` is the central container. It can stand on its own and supply a web player with metadata. An `Audio` exists either in a `Radiator.Directory.Network`, or attached to one or more `Radiator.Directory.Episode`s. `Audio` contains one or more `AudioFile`s. If there is more than one `Radiator.Media.AudioFile`, each file is a different file format of the same audio track. Complex audio metadata like chapters and transcripts (tbd) belong to `Audio`. `Episode` represents the connection between `Audio` and `Radiator.Directory.Podcast`, while enriching it with episode-specific metadata (e.g. episode number).
 
-
-### Access
-
-Currently it can be assumed that each episode only has one audio attachment. For convenience, this is a dedicated association called `:enclosure`. You can preload it with `Repo.preload(episode, :enclosure)`.
+The reason for this abstraction is that it allows audios to exist outside of an episode. That enables the user to add an audio to Radiator and generate an embeddable web player, even if it does not belong to a podcast. Furthermore it enables reuse of the same audio in multiple podcasts or even republication of the same audio within the same podcast without duplicating the audio object and metadata.
 
 ### Upload
 
@@ -33,10 +38,16 @@ upload = %Plug.Upload{
   filename: "ls013-ultraschall.mp3",
   path: "/tmp/ls013-ultraschall.mp3"
 }
-{:ok, audio, attachment} = Radiator.Media.AudioFileUpload.upload(upload, episode)
+{:ok, audio_file} = Radiator.Media.AudioFileUpload.upload(upload, audio)
 ```
 
 See `Radiator.Media.AudioFileUpload.upload/2` for details.
+
+It works with external URLs as well, using `Radiator.Media.AudioFileUpload.sideload/2`.
+
+```elixir
+{:ok, audio_file} = Radiator.Media.AudioFileUpload.sideload(upload, audio)
+```
 
 ## Cover Images & User Avatars
 
@@ -48,6 +59,7 @@ They are:
 - `Radiator.Directory.Network` field `:image`
 - `Radiator.Directory.Podcast` field `:image`
 - `Radiator.Directory.Episode` field `:image`
+- `Radiator.Directory.Audio` field `:image`
 
 ### Access
 
@@ -68,10 +80,10 @@ PodcastImage.url({podcast.image, podcast}, :thumbnail)
 Via schema/arc_ecto:
 
 ```elixir
-podcast 
+podcast
 |> Podcast.changeset(%{
   image: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
-}) 
+})
 |> Repo.update
 ```
 
@@ -82,10 +94,10 @@ Send POST request with content type `multipart/form-data`. Using curl, `-F` is k
 ### Example: Upload episode audio with curl
 
 ```bash
-curl -X POST -F query='mutation { uploadEpisodeAudio(episode_id: 1, audio: "myupload") {mimeType byteLength title } }'  -F myupload=@test/fixtures/pling.mp3 localhost:4000/api/graphql
+curl -X POST -F query='mutation { uploadAudioFile(episode_id: 1, file: "myupload") {mimeType byteLength title } }'  -F myupload=@test/fixtures/pling.mp3 localhost:4000/api/graphql
 # {
 #   "data": {
-#     "uploadEpisodeAudio": {
+#     "uploadAudioFile": {
 #       "title": "pling.mp3",
 #       "mimeType": "application/octet-stream",
 #       "byteLength": 8476
@@ -113,4 +125,3 @@ Setting the image for podcasts and episodes works in the same way.
 
 [arc]: https://hex.pm/packages/arc
 [arc_ecto]: https://hex.pm/packages/arc_ecto
-

@@ -12,10 +12,8 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.Auth
 
   alias Radiator.Repo
-  alias Radiator.Directory.{Network, Podcast, Episode}
-
-  alias Radiator.Directory.Editor
-
+  alias Radiator.Directory
+  alias Radiator.Directory.{Network, Podcast, Episode, Editor, Audio}
   alias Radiator.Media
 
   @doc """
@@ -342,7 +340,7 @@ defmodule Radiator.Directory.Editor do
 
       episode = %Episode{} ->
         if has_permission(user, episode, :readonly) do
-          {:ok, episode |> Repo.preload(:podcast)}
+          {:ok, episode |> Directory.preload_for_episode()}
         else
           @not_authorized_match
         end
@@ -371,8 +369,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   defp preloaded_episode(episode) do
-    episode
-    |> Repo.preload([:podcast, :chapters, :enclosure, :audio_files])
+    Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files]])
   end
 
   def is_published(%Podcast{published_at: nil}), do: false
@@ -388,27 +385,46 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  @spec attach_audio_to_network(Network.t(), Media.AudioFile.t()) ::
-          {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
-  def attach_audio_to_network(network = %Network{}, audio = %Media.AudioFile{}) do
-    network
-    |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
-    |> Media.Attachment.changeset(%{})
-    |> Repo.insert_or_update()
-  end
-
-  @spec attach_audio_to_episode(Episode.t(), Media.AudioFile.t()) ::
-          {:ok, Media.Attachment.t()} | {:error, Ecto.Changeset.t()}
-  def attach_audio_to_episode(episode = %Episode{}, audio = %Media.AudioFile{}) do
-    episode
-    |> Ecto.build_assoc(:attachments, %{audio_id: audio.id})
-    |> Media.Attachment.changeset(%{})
-    |> Repo.insert_or_update()
+  @doc """
+  Attach file to audio entity.
+  """
+  @spec attach_audio_file(Audio.t(), Media.AudioFile.t()) ::
+          {:ok, Media.AudioFile.t()} | {:error, Ecto.Changeset.t()}
+  def attach_audio_file(audio = %Audio{}, file = %Media.AudioFile{}) do
+    file
+    |> Repo.preload(:audio)
+    |> Media.AudioFile.changeset(%{})
+    |> Ecto.Changeset.put_assoc(:audio, audio)
+    |> Repo.update()
   end
 
   @spec detach_all_audios_from_episode(Episode.t()) :: Episode.t()
   def detach_all_audios_from_episode(episode = %Episode{}) do
     Ecto.assoc(episode, :attachments) |> Repo.delete_all()
     episode
+  end
+
+  @spec get_audio(Auth.User.t(), pos_integer()) ::
+          {:ok, Audio.t()} | {:error, :not_authorized | :not_found}
+  def get_audio(user = %Auth.User{}, id) do
+    case Repo.get(Audio, id) do
+      nil ->
+        @not_found_match
+
+      audio = %Audio{} ->
+        if has_permission(user, audio, :readonly) do
+          {:ok, audio}
+        else
+          @not_authorized_match
+        end
+    end
+  end
+
+  def update_audio(user = %Auth.User{}, audio = %Audio{}, attrs) do
+    if has_permission(user, audio, :edit) do
+      Editor.Manager.update_audio(audio, attrs)
+    else
+      @not_authorized_match
+    end
   end
 end

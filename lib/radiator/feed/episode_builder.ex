@@ -3,7 +3,9 @@ defmodule Radiator.Feed.EpisodeBuilder do
   import Radiator.Feed.Builder, only: [add: 2]
   import Radiator.Feed.Guards
 
-  alias Radiator.Directory.Episode
+  require Logger
+
+  alias Radiator.Directory.{Episode, Audio}
 
   def new(feed_data, episode) do
     element(:item, fields(feed_data, episode))
@@ -36,7 +38,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
 
   defp description(_), do: nil
 
-  # thought: it might be useful to build in validation while buildung.
+  # thought: it might be useful to build in validation while building.
   # For example, either I return {:ok, element} or {:error, reason}.
   # :ok tuples are added to the tree, errors and warnings are collected.
   # For example, a missing enclosure URL is an error, but a subtitle that
@@ -45,19 +47,24 @@ defmodule Radiator.Feed.EpisodeBuilder do
   # a totally different module takes care of validation / hints.
   # Well, the builder could focus only on hard RSS requirements,
   # so either :ok or :error.
-  defp enclosure(episode) do
+  defp enclosure(%Episode{audio: %Audio{audio_files: [enclosure]}} = episode) do
     element(:enclosure, %{
       url: Episode.enclosure_url(episode),
-      type: episode.enclosure.mime_type,
-      length: episode.enclosure.byte_length
+      type: enclosure.mime_type,
+      length: enclosure.byte_length
     })
+  end
+
+  defp enclosure(%Episode{id: id, title: title}) do
+    Logger.warn("[Feed Builder] Episode \"#{title}\" (##{id}) has no enclosure")
+    nil
   end
 
   defp guid(%Episode{guid: guid}) do
     element(:guid, %{isPermaLink: "false"}, guid)
   end
 
-  defp chapters(%Episode{chapters: chapters}) when length(chapters) > 0 do
+  defp chapters(%Episode{audio: %Audio{chapters: chapters}}) when length(chapters) > 0 do
     element(
       :"psc:chapters",
       %{"version" => 1.2},

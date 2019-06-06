@@ -4,7 +4,7 @@ defmodule Radiator.Factory do
   import Radiator.Directory.Editor.Permission
 
   alias Radiator.Auth.User
-  alias Radiator.Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.{Network, Podcast, Episode, Audio}
 
   def user_factory do
     %User{
@@ -39,6 +39,11 @@ defmodule Radiator.Factory do
   def owned_by(episode = %Episode{}, user = %User{}) do
     :ok = set_permission(user, episode, :own)
     episode
+  end
+
+  def owned_by(audio = %Audio{}, user = %User{}) do
+    :ok = set_permission(user, audio, :own)
+    audio
   end
 
   def network_factory do
@@ -91,11 +96,35 @@ defmodule Radiator.Factory do
 
     %Radiator.Directory.Episode{
       podcast: build(:podcast),
+      audio: build(:audio),
       title: title
     }
   end
 
+  def audio_factory do
+    %Radiator.Directory.Audio{
+      duration: "1:02:03",
+      published_at: DateTime.utc_now() |> DateTime.add(-3600, :second),
+      audio_files: [build(:audio_file)]
+    }
+  end
+
+  def empty_audio_factory do
+    %Radiator.Directory.Audio{
+      duration: "1:02:03"
+    }
+  end
+
+  # @deprecated, use audio_file_factory
   def enclosure_factory do
+    %Radiator.Media.AudioFile{
+      file: %{file_name: "example.mp3", updated_at: ~N[2019-04-24 09:41:47]},
+      byte_length: 123,
+      mime_type: "audio/mpeg"
+    }
+  end
+
+  def audio_file_factory do
     %Radiator.Media.AudioFile{
       file: %{file_name: "example.mp3", updated_at: ~N[2019-04-24 09:41:47]},
       byte_length: 123,

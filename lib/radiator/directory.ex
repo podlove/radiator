@@ -10,7 +10,7 @@ defmodule Radiator.Directory do
   alias Radiator.Repo
   alias Radiator.Media
   alias Radiator.Media.AudioFile
-  alias Radiator.Directory.{Network, Episode, Podcast}
+  alias Radiator.Directory.{Network, Episode, Podcast, Audio}
   alias Radiator.Directory.PodcastQuery
   alias Radiator.Directory.EpisodeQuery
 
@@ -140,6 +140,17 @@ defmodule Radiator.Directory do
   def list_episodes(args) do
     episodes_query(args)
     |> Repo.all()
+    |> preload_for_episode()
+  end
+
+  @doc """
+  Reject episodes without audio or audio files.
+  """
+  def reject_invalid_episodes(episodes) when is_list(episodes) do
+    Enum.filter(episodes, fn
+      %Episode{audio: %Audio{audio_files: [_ | _]}} -> true
+      _ -> false
+    end)
   end
 
   @doc """
@@ -160,14 +171,22 @@ defmodule Radiator.Directory do
     Episode
     |> EpisodeQuery.filter_by_published(true)
     |> Repo.get!(id)
-    |> Repo.preload(:podcast)
+    |> preload_for_episode()
   end
 
   def get_episode(id) do
     Episode
     |> EpisodeQuery.filter_by_published(true)
     |> Repo.get(id)
-    |> Repo.preload(:podcast)
+    |> preload_for_episode()
+  end
+
+  # fixme: this is currently identical to `Editor.preloaded_episode/1`,
+  #        however: in Directory context preloading is dangerous as it might
+  #        provide access to entities without checking for permissions.
+  #        Solution: write preloader that checks permissions.
+  def preload_for_episode(episode) do
+    Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files]])
   end
 
   @doc """
@@ -178,7 +197,8 @@ defmodule Radiator.Directory do
       iex> get_episode_by_slug(slug)
       {:ok, %Episode{}}
   """
-  def get_episode_by_slug(slug), do: Repo.get_by(Episode, %{slug: slug}) |> Repo.preload(:podcast)
+  def get_episode_by_slug(slug),
+    do: Repo.get_by(Episode, %{slug: slug}) |> preload_for_episode()
 
   def is_published(%Podcast{published_at: nil}), do: false
   def is_published(%Episode{published_at: nil}), do: false
@@ -186,11 +206,16 @@ defmodule Radiator.Directory do
   def is_published(%Podcast{published_at: date}), do: before_utc_now?(date)
   def is_published(%Episode{published_at: date}), do: before_utc_now?(date)
 
+  def is_published(_), do: false
+
   # todo: missing verification that podcast (& network?) is published
-  def get_audio_file(id) do
+  def get_audio_file(audio_file_id) do
     with {:get, audio = %AudioFile{}} <-
-           {:get, Media.get_audio_file(id) |> Repo.preload(:episode)},
-         {:published, published} when published <- {:published, is_published(audio.episode)} do
+           {:get,
+            Media.get_audio_file(audio_file_id)
+            |> Repo.preload(audio: :episodes)},
+         {:published, published} when published <-
+           {:published, is_published(hd(audio.audio.episodes))} do
       {:ok, audio}
     else
       {:get, _} -> {:error, :not_found}

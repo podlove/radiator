@@ -80,7 +80,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
     field :chapters, list_of(:chapter) do
       arg :order, type: :sort_order, default_value: :asc
 
-      resolve dataloader(Radiator.EpisodeMeta, :chapters)
+      resolve dataloader(Radiator.AudioMeta, :chapters)
     end
   end
 end

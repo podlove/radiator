@@ -9,10 +9,6 @@ defmodule RadiatorWeb.EpisodeControllerTest do
   @create_attrs %{
     content: "some content",
     description: "some description",
-    duration: "some duration",
-    enclosure_length: 123,
-    enclosure_type: "some enclosure_type",
-    enclosure_url: "some enclosure_url",
     guid: "some guid",
     number: 42,
     published_at: "2010-04-17T14:00:00Z",
@@ -22,10 +18,6 @@ defmodule RadiatorWeb.EpisodeControllerTest do
   @update_attrs %{
     content: "some updated content",
     description: "some updated description",
-    duration: "some updated duration",
-    enclosure_length: 234,
-    enclosure_type: "some updated enclosure_type",
-    enclosure_url: "some updated enclosure_url",
     guid: "some updated guid",
     number: 43,
     published_at: "2011-05-18T15:01:01Z",
@@ -35,10 +27,6 @@ defmodule RadiatorWeb.EpisodeControllerTest do
   @invalid_attrs %{
     content: nil,
     description: nil,
-    duration: nil,
-    enclosure_length: nil,
-    enclosure_type: nil,
-    enclosure_url: nil,
     guid: nil,
     number: nil,
     published_at: nil,
@@ -59,8 +47,7 @@ defmodule RadiatorWeb.EpisodeControllerTest do
   end
 
   def fixture(:episode) do
-    {:ok, episode} = Editor.Manager.create_episode(fixture(:podcast), @create_attrs)
-    episode
+    insert(:episode, @create_attrs |> Map.put(:podcast, fixture(:podcast)))
   end
 
   setup %{conn: conn} do
@@ -115,7 +102,6 @@ defmodule RadiatorWeb.EpisodeControllerTest do
                "id" => ^id,
                "content" => "some content",
                "description" => "some description",
-               "duration" => "some duration",
                "guid" => "some guid",
                "number" => 42,
                "published_at" => "2010-04-17T14:00:00Z",
@@ -168,7 +154,6 @@ defmodule RadiatorWeb.EpisodeControllerTest do
                "id" => ^id,
                "content" => "some updated content",
                "description" => "some updated description",
-               "duration" => "some updated duration",
                "guid" => "some updated guid",
                "number" => 43,
                "published_at" => "2011-05-18T15:01:01Z",

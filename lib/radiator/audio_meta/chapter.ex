@@ -1,10 +1,10 @@
-defmodule Radiator.EpisodeMeta.Chapter do
+defmodule Radiator.AudioMeta.Chapter do
   use Ecto.Schema
   import Ecto.Changeset
 
   import Ecto.Query, warn: false
 
-  alias Radiator.Directory.Episode
+  alias Radiator.Directory.Audio
 
   schema "chapters" do
     field :start, :integer
@@ -12,7 +12,7 @@ defmodule Radiator.EpisodeMeta.Chapter do
     field :link, :string
     field :image, :string
 
-    belongs_to :episode, Episode
+    belongs_to :audio, Audio
   end
 
   @doc false

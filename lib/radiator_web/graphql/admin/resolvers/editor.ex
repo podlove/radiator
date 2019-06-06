@@ -2,8 +2,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   use Radiator.Constants
 
   alias Radiator.Directory.Editor
-  alias Radiator.Directory.{Episode, Podcast, Network}
-  alias Radiator.EpisodeMeta
+  alias Radiator.Directory.{Episode, Podcast, Network, Audio}
+  alias Radiator.AudioMeta
   alias Radiator.Media
 
   @doc """
@@ -72,6 +72,30 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     quote do
       case Editor.get_episode(unquote(user), unquote(episode_id)) do
         {:ok, episode} -> unquote(block).(episode)
+        @not_found_match -> @not_found_response
+        @not_authorized_match -> @not_authorized_response
+      end
+    end
+  end
+
+  @doc """
+  Get audio with user and do something with it or return error.
+
+  The `do` block must be a function with `audio` as argument. It is called if the
+  audio can be retrieved successfully. Otherwise, an error response, ready for
+  GraphQL, is returned and the block not executed.
+
+  ## Examples
+
+      with_audio user, id do
+        fn audio -> {:ok, audio}
+      end
+
+  """
+  defmacro with_audio(user, audio_id, do: block) do
+    quote do
+      case Editor.get_audio(unquote(user), unquote(audio_id)) do
+        {:ok, audio} -> unquote(block).(audio)
         @not_found_match -> @not_found_response
         @not_authorized_match -> @not_authorized_response
       end
@@ -224,16 +248,16 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def is_published(entity, _, _), do: {:ok, Editor.is_published(entity)}
 
-  def list_chapters(%Episode{} = episode, _args, _resolution) do
-    {:ok, EpisodeMeta.list_chapters(episode)}
+  def list_chapters(%Audio{} = audio, _args, _resolution) do
+    {:ok, AudioMeta.list_chapters(audio)}
   end
 
   def set_episode_chapters(_parent, %{id: id, chapters: chapters, type: type}, %{
         context: %{authenticated_user: user}
       }) do
-    with_episode user, id do
-      fn episode ->
-        EpisodeMeta.set_chapters(episode, chapters, String.to_existing_atom(type))
+    with_audio user, id do
+      fn audio ->
+        AudioMeta.set_chapters(audio, chapters, String.to_existing_atom(type))
       end
     end
   end
@@ -248,6 +272,16 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
        type: episode.enclosure.mime_type,
        length: episode.enclosure.byte_length
      }}
+  end
+
+  def get_chapters(%Audio{} = audio, _, _) do
+    audio = Radiator.Repo.preload(audio, :chapters)
+
+    {:ok, audio.chapters}
+  end
+
+  def get_duration(%Episode{audio: audio}, _, _) do
+    {:ok, audio.duration}
   end
 
   def get_image_url(episode = %Episode{}, _, _) do

@@ -3,7 +3,7 @@ defmodule RadiatorWeb.Api.EpisodeView do
   alias RadiatorWeb.Api.{ChapterView, EpisodeView, PodcastView}
 
   alias HAL.{Document, Link, Embed}
-  alias Radiator.Directory.{Episode, Podcast}
+  alias Radiator.Directory.{Episode, Podcast, Audio}
 
   def render("index.json", assigns = %{podcast: podcast, episodes: episodes}) do
     %Document{}
@@ -38,14 +38,14 @@ defmodule RadiatorWeb.Api.EpisodeView do
       description: episode.description,
       content: episode.content,
       image: episode.image,
-      duration: episode.duration,
       guid: episode.guid,
       number: episode.number,
       published_at: episode.published_at
     })
+    |> maybe_add_duration(episode, assigns)
     |> maybe_embed_enclosure(episode, assigns)
     |> maybe_embed_podcast(episode.podcast, assigns)
-    |> maybe_embed_chapters(episode.chapters, assigns)
+    |> maybe_embed_chapters(episode.audio, assigns)
   end
 
   def render("enclosure.json", %{episode: episode}) do
@@ -57,6 +57,14 @@ defmodule RadiatorWeb.Api.EpisodeView do
     })
   end
 
+  def maybe_add_duration(document, %Episode{audio: %Audio{duration: duration}}, _) do
+    Document.add_properties(document, %{duration: duration})
+  end
+
+  def maybe_add_duration(document, _, _) do
+    document
+  end
+
   defp maybe_embed_podcast(document, %Podcast{} = podcast, assigns) do
     Document.add_embed(document, %Embed{
       resource: "rad:podcast",
@@ -66,7 +74,7 @@ defmodule RadiatorWeb.Api.EpisodeView do
 
   defp maybe_embed_podcast(document, _, _), do: document
 
-  defp maybe_embed_chapters(document, chapters, assigns)
+  defp maybe_embed_chapters(document, %Audio{chapters: chapters}, assigns)
        when is_list(chapters) and length(chapters) > 0 do
     Document.add_embed(document, %Embed{
       resource: "rad:chapter",
@@ -79,15 +87,15 @@ defmodule RadiatorWeb.Api.EpisodeView do
   end
 
   defp maybe_embed_enclosure(document, episode, _assigns) do
-    if Ecto.assoc_loaded?(episode.enclosure) && episode.enclosure do
+    if Ecto.assoc_loaded?(episode.audio) && episode.audio do
       Document.add_embed(document, %Embed{
         resource: "rad:enclosure",
         embed:
           %Document{}
           |> Document.add_properties(%{
             url: Episode.enclosure_url(episode),
-            length: episode.enclosure.byte_length,
-            type: episode.enclosure.mime_type
+            length: Episode.enclosure_byte_length(episode),
+            type: Episode.enclosure_mime_type(episode)
           })
       })
     else

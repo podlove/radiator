@@ -3,7 +3,7 @@ defmodule Radiator.Tracking.Download do
 
   import Ecto.Changeset
 
-  alias Radiator.Directory.{Network, Podcast, Episode}
+  alias Radiator.Directory.{Network, Podcast, Episode, Audio}
   alias Radiator.Media.AudioFile
 
   schema "downloads" do
@@ -25,6 +25,7 @@ defmodule Radiator.Tracking.Download do
     belongs_to :network, Network
     belongs_to :podcast, Podcast
     belongs_to :episode, Episode
+    belongs_to :audio, Audio
     belongs_to :file, AudioFile
 
     timestamps()

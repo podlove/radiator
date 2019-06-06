@@ -11,7 +11,7 @@ defmodule RadiatorWeb.FeedController do
 
     episodes =
       Directory.list_episodes(%{podcast: podcast})
-      |> Radiator.Repo.preload([:chapters, :enclosure])
+      |> Directory.reject_invalid_episodes()
 
     page = String.to_integer(page)
 
