@@ -42,6 +42,7 @@ mc config host add radiator http://127.0.0.1:9000 <AccessKey> <SecretKey>
 
 ```shell
 mc mb radiator/radiator
+mc mb radiator/radiator-test
 mc policy public radiator/radiator
 ```
 
@@ -71,7 +72,7 @@ Seed database with data for development (unless you did `mix ecto.reset`, it run
 
 ```shell
 mix run priv/repo/seeds.exs
-``` 
+```
 
 Creates:
 
@@ -86,7 +87,7 @@ mix ua_inspector.download --force
 
 ## ⚠️ Migrations during development ⚠️
 
-During the early stages of development we _edit_ existing migrations to keep them readable instead of adding new ones as you would expect in a live system. 
+During the early stages of development we _edit_ existing migrations to keep them readable instead of adding new ones as you would expect in a live system.
 
 So whenever you pull an update that changed a migration, you need to:
 
@@ -105,15 +106,15 @@ Entrypoint: `/api/graphql`
 
 Open http://localhost:4000/api/graphiql for schema and documentation exploration.
 
-For calls that need authentication, make sure to put the token gotten from a 
+For calls that need authentication, make sure to put the token gotten from a
 
 ```GraphQL
-mutation { 
+mutation {
 	authenticatedSession(
-		username_or_email: "admin", 
-		         password: "password" ) { 
-		token 
-	} 
+		username_or_email: "admin",
+		         password: "password" ) {
+		token
+	}
 }
 ```
 
