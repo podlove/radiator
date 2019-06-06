@@ -13,7 +13,7 @@ mix ecto.migrate
 # Create a minio bucket called "radiator" at our s3 mimic
 ./mc config host add radiator http://minio:9000 IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
 ./mc mb radiator/radiator
-./mc mb radiator/radiator=test
+./mc mb radiator/radiator-test
 ./mc policy public radiator/radiator
 ./mc policy public radiator/radiator-test
 
