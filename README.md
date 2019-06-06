@@ -122,6 +122,8 @@ request into the `Authorization: Bearer <token>` header.
 
 ### REST
 
+⚠️ The REST API has not been updated in a long time and is probably out of order. For now, use GraphQL if you can.
+
 Follows [HAL][hal]+json specification.
 
 Entrypoint: `/api/rest/v1`
