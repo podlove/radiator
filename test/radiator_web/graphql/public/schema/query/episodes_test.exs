@@ -2,11 +2,18 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
   use RadiatorWeb.ConnCase, async: true
   import Radiator.Factory
 
+  alias Radiator.Directory.Episode
+
   @single_query """
   query ($id: ID!) {
     episode(id: $id) {
       id
       title
+      enclosure {
+        length
+        type
+        url
+      }
     }
   }
   """
@@ -14,12 +21,21 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
   test "episode returns an episode", %{conn: conn} do
     podcast = insert(:podcast)
     episode = insert(:published_episode, podcast: podcast)
+    enclosure = Episode.enclosure(episode)
 
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => episode.id}
 
     assert json_response(conn, 200) == %{
              "data" => %{
-               "episode" => %{"id" => Integer.to_string(episode.id), "title" => episode.title}
+               "episode" => %{
+                 "id" => Integer.to_string(episode.id),
+                 "title" => episode.title,
+                 "enclosure" => %{
+                   "length" => enclosure.length,
+                   "type" => enclosure.type,
+                   "url" => enclosure.url
+                 }
+               }
              }
            }
   end
