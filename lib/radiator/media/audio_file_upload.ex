@@ -104,6 +104,8 @@ defmodule Radiator.Media.AudioFileUpload do
           audio
         )
 
+        File.rm(local_path)
+
       _ ->
         {:error, :download_failed}
     end

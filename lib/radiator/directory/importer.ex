@@ -113,16 +113,41 @@ defmodule Radiator.Directory.Importer do
           Radiator.AudioMeta.delete_chapters(podlove_episode.audio)
 
           chapters
-          |> Enum.each(fn chapter ->
+          |> Enum.with_index(1)
+          |> Enum.each(fn {chapter, index} ->
             attrs = %{
               start: parse_chapter_time(chapter.start),
               title: chapter.title,
               link: Map.get(chapter, :href)
-              # TODO: upload the found image and insert the url - image is a map with keys :data, and :type (mime/type)
-              #              image: Map.get(chapter, :image)
             }
 
-            Radiator.AudioMeta.create_chapter(podlove_episode.audio, attrs)
+            with {:ok, radiator_chapter} =
+                   Radiator.AudioMeta.create_chapter(podlove_episode.audio, attrs) do
+              case Map.get(chapter, :image) do
+                %{
+                  data: binary_data,
+                  type: mime_type
+                } ->
+                  extension = hd(:mimerl.mime_to_exts(mime_type))
+
+                  upload = %Plug.Upload{
+                    content_type: mime_type,
+                    filename: "Chapter_#{index}.#{extension}",
+                    path: Plug.Upload.random_file!("chapter")
+                  }
+
+                  File.write(upload.path, binary_data)
+
+                  {:ok, radiator_chapter} =
+                    Radiator.AudioMeta.update_chapter(radiator_chapter, %{image: upload})
+
+                  File.rm(upload.path)
+                  radiator_chapter
+
+                _ ->
+                  radiator_chapter
+              end
+            end
           end)
 
         _ ->
