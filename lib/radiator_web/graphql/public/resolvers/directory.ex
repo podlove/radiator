@@ -2,6 +2,7 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
   alias Radiator.Directory
   alias Radiator.Directory.{Episode, Podcast, Network}
   alias Radiator.AudioMeta
+  alias Radiator.AudioMeta.Chapter
   alias Radiator.Media
 
   def list_networks(_parent, _args, _resolution) do
@@ -47,8 +48,8 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
     end
   end
 
-  def list_chapters(%Episode{} = episode, _args, _resolution) do
-    {:ok, AudioMeta.list_chapters(episode)}
+  def find_audio(%Episode{} = episode, _args, _resolution) do
+    {:ok, episode.audio}
   end
 
   def get_enclosure(%Episode{} = episode, _args, _resolution) do
@@ -65,6 +66,10 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
 
   def get_image_url(network = %Network{}, _, _) do
     {:ok, Media.NetworkImage.url({network.image, network})}
+  end
+
+  def get_image_url(chapter = %Chapter{}, _, _) do
+    {:ok, Media.ChapterImage.url({chapter.image, chapter})}
   end
 
   def get_episodes_count(%Podcast{id: podcast_id}, _, _) do

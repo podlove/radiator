@@ -79,10 +79,8 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
       resolve &Resolvers.Directory.get_enclosure/3
     end
 
-    field :chapters, list_of(:chapter) do
-      arg :order, type: :sort_order, default_value: :asc
-
-      resolve dataloader(Radiator.AudioMeta, :chapters)
+    field :audio, :audio do
+      resolve &Resolvers.Directory.find_audio/3
     end
   end
 end
