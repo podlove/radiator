@@ -35,8 +35,12 @@ defmodule Radiator.Directory.EpisodeQuery do
       {:podcast, podcast}, query ->
         filter_by_podcast(query, podcast)
 
-      {:order_by, order}, query ->
-        order(query, order)
+      {:order_by, order_by}, query ->
+        direction = Map.get(args, :order, :desc)
+        order(query, order_by, direction)
+
+      {:order, _}, query ->
+        query
 
       {:items_per_page, _}, query ->
         paginate(query, pagination_args)
@@ -64,8 +68,9 @@ defmodule Radiator.Directory.EpisodeQuery do
     query
   end
 
-  def order(query, order) do
-    from(e in query, order_by: ^order)
+  def order(query, order, direction) when direction in [:asc, :desc] do
+    order_by = [{direction, order}]
+    from(e in query, order_by: ^order_by)
   end
 
   @default_items_per_page 10

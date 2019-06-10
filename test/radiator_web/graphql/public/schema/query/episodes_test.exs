@@ -54,4 +54,57 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
     assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
     assert message == "Episode ID #{episode.id} not found"
   end
+
+  @episodes_in_podcast_query """
+  query ($podcast_id: ID!) {
+    podcast(id: $podcast_id) {
+      episodes {
+        title
+      }
+    }
+  }
+  """
+
+  test "episodes in podcast are ordered, latest first", %{conn: conn} do
+    podcast = insert(:podcast)
+    timestamp = 1_500_000_000
+
+    _ep1 =
+      insert(:published_episode,
+        title: "E001",
+        published_at: DateTime.from_unix!(timestamp),
+        podcast: podcast
+      )
+
+    _ep3 =
+      insert(:published_episode,
+        title: "E003",
+        published_at: DateTime.from_unix!(timestamp + 20),
+        podcast: podcast
+      )
+
+    _ep2 =
+      insert(:published_episode,
+        title: "E002",
+        published_at: DateTime.from_unix!(timestamp + 10),
+        podcast: podcast
+      )
+
+    conn =
+      get conn, "/api/graphql",
+        query: @episodes_in_podcast_query,
+        variables: %{"podcast_id" => podcast.id}
+
+    assert %{
+             "data" => %{
+               "podcast" => %{
+                 "episodes" => [
+                   %{"title" => "E003"},
+                   %{"title" => "E002"},
+                   %{"title" => "E001"}
+                 ]
+               }
+             }
+           } = json_response(conn, 200)
+  end
 end

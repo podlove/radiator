@@ -105,4 +105,57 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
              }
     end
   end
+
+  @episodes_in_podcast_query """
+  query ($podcast_id: ID!) {
+    podcast(id: $podcast_id) {
+      episodes {
+        title
+      }
+    }
+  }
+  """
+
+  test "episodes in podcast are ordered, latest first", %{conn: conn, user: user} do
+    podcast = insert(:podcast) |> owned_by(user)
+    timestamp = 1_500_000_000
+
+    _ep1 =
+      insert(:published_episode,
+        title: "E001",
+        published_at: DateTime.from_unix!(timestamp),
+        podcast: podcast
+      )
+
+    _ep3 =
+      insert(:published_episode,
+        title: "E003",
+        published_at: DateTime.from_unix!(timestamp + 20),
+        podcast: podcast
+      )
+
+    _ep2 =
+      insert(:published_episode,
+        title: "E002",
+        published_at: DateTime.from_unix!(timestamp + 10),
+        podcast: podcast
+      )
+
+    conn =
+      get conn, "/api/graphql",
+        query: @episodes_in_podcast_query,
+        variables: %{"podcast_id" => podcast.id}
+
+    assert %{
+             "data" => %{
+               "podcast" => %{
+                 "episodes" => [
+                   %{"title" => "E003"},
+                   %{"title" => "E002"},
+                   %{"title" => "E001"}
+                 ]
+               }
+             }
+           } = json_response(conn, 200)
+  end
 end

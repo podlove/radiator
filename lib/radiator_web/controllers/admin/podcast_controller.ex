@@ -43,7 +43,8 @@ defmodule RadiatorWeb.Admin.PodcastController do
     published_episodes =
       Directory.list_episodes(%{
         podcast: podcast,
-        order_by: [desc: :published_at]
+        order_by: :published_at,
+        order: :desc
       })
 
     published_ids =
