@@ -85,7 +85,7 @@ defmodule RadiatorWeb.Router do
   scope "/api" do
     pipe_through :api
 
-    forward "/graphql", RadiatorWeb.GraphQL.Plug
-    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: RadiatorWeb.GraphQL.Public.Schema
+    forward "/graphql", Absinthe.Plug, schema: RadiatorWeb.GraphQL.Schema
+    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: RadiatorWeb.GraphQL.Schema
   end
 end
