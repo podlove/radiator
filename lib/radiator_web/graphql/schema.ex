@@ -39,8 +39,8 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
   import_types RadiatorWeb.GraphQL.Common.Types
 
-  import_types RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes
-  import_types RadiatorWeb.GraphQL.Admin.Schema.DirectoryTypes
+  import_types RadiatorWeb.GraphQL.Public.Types
+  import_types RadiatorWeb.GraphQL.Admin.Types
 
   alias RadiatorWeb.GraphQL.Public
   alias RadiatorWeb.GraphQL.Admin
