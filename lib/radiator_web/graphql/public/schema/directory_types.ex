@@ -15,7 +15,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
       resolve &Resolvers.Directory.get_image_url/3
     end
 
-    field :podcasts, list_of(:public_podcast) do
+    field :public_podcasts, list_of(:public_podcast) do
       resolve &Resolvers.Directory.list_podcasts/3
     end
   end
@@ -39,7 +39,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
     field :subtitle, :string
     field :slug, :string
 
-    field :episodes, list_of(:public_episode) do
+    field :public_episodes, list_of(:public_episode) do
       arg :page, type: :integer, default_value: 1
       arg :items_per_page, type: :integer, default_value: 10
       arg :order_by, type: :episode_order, default_value: :published_at
@@ -48,7 +48,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
       resolve dataloader(Radiator.Directory, :episodes)
     end
 
-    field :episodes_count, :integer do
+    field :public_episodes_count, :integer do
       resolve &Resolvers.Directory.get_episodes_count/3
     end
   end
@@ -71,7 +71,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
     field :title, :string
     field :slug, :string
 
-    field :podcast, :public_podcast do
+    field :public_podcast, :public_podcast do
       resolve &Resolvers.Directory.find_podcast/3
     end
 
