@@ -1,4 +1,41 @@
 defmodule Radiator.Directory.EpisodeQuery do
+  @moduledoc """
+  Builds Ecto query to list episodes.
+
+  ## Arguments
+
+  * `:published` - which publication state should be included
+    * `true` - only published episodes are included
+    * `false` - only unpublished episodes are included
+    * `:any` - no filter is applied
+
+  * `:podcast` - only include episodes belonging to given podcast
+
+  **Ordering**
+
+  * `:order_by` - Sort retrieved episodes by parameter.
+    * `:title` - sort by episode title
+    * `:published_at` - sort by episode publication date
+    * `:number` - sort by episode number
+
+  * `:order` -  Designates the ascending or descending order of the `:order_by` parameter. Default: `:desc`
+    * `:asc` - ascending order from lowest to highest values (1, 2, 3; a, b, c).
+    * `:desc` - descending order from highest to lowest values (3, 2, 1; c, b, a).
+
+  **Pagination**
+
+  * `:items_per_page` - number of episodes to show per page. Use `:unlimited` to remove pagination. Default: 10
+
+  * `:page` - page number. Has no effect if `:items_per_page` is `:unlimited`. Default: 1
+
+  ## Examples
+
+      iex> Radiator.Directory.EpisodeQuery.build(%{published: true, order_by: :published_at, order: :desc})
+      #Ecto.Query<from e0 in Radiator.Directory.Episode, ...>
+
+      iex> Radiator.Directory.EpisodeQuery.build(%{})
+      Radiator.Directory.Episode
+  """
   import Ecto.Query, warn: false
 
   alias Radiator.Directory.{Episode, Podcast}
@@ -25,7 +62,7 @@ defmodule Radiator.Directory.EpisodeQuery do
   #  Also, it seems there are differnt pagination recommendations in graphql,
   #  see https://graphql.org/learn/pagination/
 
-  def build(args) do
+  def build(args) when is_map(args) do
     pagination_args = Map.take(args, [:items_per_page, :page])
 
     Enum.reduce(args, Episode, fn
@@ -75,6 +112,10 @@ defmodule Radiator.Directory.EpisodeQuery do
 
   @default_items_per_page 10
 
+  def paginate(query, %{items_per_page: :unlimited}) do
+    query
+  end
+
   def paginate(query, %{items_per_page: items_per_page, page: page})
       when is_integer(items_per_page) and is_integer(page) do
     offset = items_per_page * (page - 1)
@@ -90,6 +131,6 @@ defmodule Radiator.Directory.EpisodeQuery do
   end
 
   def paginate(query, _) do
-    query
+    paginate(query, %{items_per_page: @default_items_per_page, page: 1})
   end
 end

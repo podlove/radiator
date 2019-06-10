@@ -134,10 +134,18 @@ defmodule Radiator.Directory do
     |> EpisodeQuery.build()
   end
 
+  @doc """
+  List public episodes.
+  """
   def list_episodes do
     list_episodes(%{})
   end
 
+  @doc """
+  List public episodes.
+
+  See `Radiator.Directory.EpisodeQuery` for options.
+  """
   def list_episodes(args) do
     episodes_query(args)
     |> Repo.all()
