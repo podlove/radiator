@@ -257,6 +257,11 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  @doc """
+  List episodes.
+
+  TODO: use `Radiator.Directory.EpisodeQuery`
+  """
   def list_episodes(user = %Auth.User{}, podcast = %Podcast{}) do
     query =
       if has_permission(user, podcast, :readonly) do
