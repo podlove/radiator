@@ -15,7 +15,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
       resolve &Resolvers.Directory.get_image_url/3
     end
 
-    field :published_podcasts, list_of(:published_podcast) do
+    field :podcasts, list_of(:published_podcast) do
       resolve &Resolvers.Directory.list_podcasts/3
     end
   end
@@ -39,7 +39,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :subtitle, :string
     field :slug, :string
 
-    field :published_episodes, list_of(:published_episode) do
+    field :episodes, list_of(:published_episode) do
       arg :page, type: :integer, default_value: 1
       arg :items_per_page, type: :integer, default_value: 10
       arg :order_by, type: :episode_order, default_value: :published_at
@@ -71,7 +71,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :title, :string
     field :slug, :string
 
-    field :published_podcast, :published_podcast do
+    field :podcast, :published_podcast do
       resolve &Resolvers.Directory.find_podcast/3
     end
 

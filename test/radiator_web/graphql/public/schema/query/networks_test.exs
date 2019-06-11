@@ -37,7 +37,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
     publishedNetwork(id: $id) {
       id
       title
-      publishedPodcasts {
+      podcasts {
         title
       }
     }
@@ -61,7 +61,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
                "publishedNetwork" => %{
                  "id" => Integer.to_string(network.id),
                  "title" => network.title,
-                 "publishedPodcasts" => [
+                 "podcasts" => [
                    %{"title" => podcast_1.title},
                    %{"title" => podcast_2.title}
                  ]

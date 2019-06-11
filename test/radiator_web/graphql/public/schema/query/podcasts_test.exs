@@ -68,7 +68,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
     query ($id: ID!) {
       publishedPodcast(id: $id) {
         id
-        publishedEpisodes {
+        episodes {
           id
           title
         }
@@ -88,7 +88,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
                "data" => %{
                  "publishedPodcast" => %{
                    "id" => Integer.to_string(podcast.id),
-                   "publishedEpisodes" => [
+                   "episodes" => [
                      %{"id" => Integer.to_string(episode.id), "title" => episode.title}
                    ]
                  }
