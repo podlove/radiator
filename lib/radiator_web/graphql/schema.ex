@@ -50,34 +50,34 @@ defmodule RadiatorWeb.GraphQL.Schema do
   query do
     # Public queries
 
-    @desc "Public: Get all podcasts"
-    field :public_podcasts, list_of(:public_podcast) do
+    @desc "Get all published podcasts"
+    field :published_podcasts, list_of(:published_podcast) do
       resolve &Public.Resolvers.Directory.list_podcasts/3
     end
 
-    @desc "Public: Get one podcast"
-    field :public_podcast, :public_podcast do
+    @desc "Get one published podcast"
+    field :published_podcast, :published_podcast do
       arg :id, non_null(:id)
 
       resolve &Public.Resolvers.Directory.find_podcast/3
     end
 
-    @desc "Public: Get one episode"
-    field :public_episode, :public_episode do
+    @desc "Get one published episode"
+    field :published_episode, :published_episode do
       arg :id, non_null(:id)
 
       resolve &Public.Resolvers.Directory.find_episode/3
     end
 
-    @desc "Public: Get one network"
-    field :public_network, :public_network do
+    @desc "Get one published network"
+    field :published_network, :published_network do
       arg :id, non_null(:id)
 
       resolve &Public.Resolvers.Directory.find_network/3
     end
 
-    @desc "Public: Get all networks"
-    field :public_networks, list_of(:public_network) do
+    @desc "Get all published networks"
+    field :published_networks, list_of(:published_network) do
       resolve &Public.Resolvers.Directory.list_networks/3
     end
 

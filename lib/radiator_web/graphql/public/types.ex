@@ -5,8 +5,8 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
 
   alias RadiatorWeb.GraphQL.Public.Resolvers
 
-  @desc "Public: A network"
-  object :public_network do
+  @desc "A published network"
+  object :published_network do
     field :id, non_null(:id)
     field :title, :string
     field :slug, :string
@@ -15,13 +15,13 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
       resolve &Resolvers.Directory.get_image_url/3
     end
 
-    field :public_podcasts, list_of(:public_podcast) do
+    field :published_podcasts, list_of(:published_podcast) do
       resolve &Resolvers.Directory.list_podcasts/3
     end
   end
 
-  @desc "Public: A podcast"
-  object :public_podcast do
+  @desc "A published podcast"
+  object :published_podcast do
     field :id, non_null(:id)
     field :title, :string
     field :author, :string
@@ -39,7 +39,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :subtitle, :string
     field :slug, :string
 
-    field :public_episodes, list_of(:public_episode) do
+    field :published_episodes, list_of(:published_episode) do
       arg :page, type: :integer, default_value: 1
       arg :items_per_page, type: :integer, default_value: 10
       arg :order_by, type: :episode_order, default_value: :published_at
@@ -48,13 +48,13 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
       resolve dataloader(Radiator.Directory, :episodes)
     end
 
-    field :public_episodes_count, :integer do
+    field :published_episodes_count, :integer do
       resolve &Resolvers.Directory.get_episodes_count/3
     end
   end
 
-  @desc "Public: An episode in a podcast"
-  object :public_episode do
+  @desc "A published episode in a podcast"
+  object :published_episode do
     field :id, non_null(:id)
     field :content, :string
     field :description, :string
@@ -71,7 +71,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :title, :string
     field :slug, :string
 
-    field :public_podcast, :public_podcast do
+    field :published_podcast, :published_podcast do
       resolve &Resolvers.Directory.find_podcast/3
     end
 

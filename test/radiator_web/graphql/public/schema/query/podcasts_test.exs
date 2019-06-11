@@ -5,7 +5,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
 
   @list_query """
   {
-    publicPodcasts {
+    publishedPodcasts {
       id
       title
     }
@@ -20,7 +20,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
 
     assert json_response(conn, 200) == %{
              "data" => %{
-               "publicPodcasts" =>
+               "publishedPodcasts" =>
                  Enum.map(podcasts, &%{"id" => Integer.to_string(&1.id), "title" => &1.title})
              }
            }
@@ -28,7 +28,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
 
   @single_query """
   query ($id: ID!) {
-    publicPodcast(id: $id) {
+    publishedPodcast(id: $id) {
       id
       title
     }
@@ -41,7 +41,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
 
     assert json_response(conn, 200) == %{
              "data" => %{
-               "publicPodcast" => %{
+               "publishedPodcast" => %{
                  "id" => Integer.to_string(podcast.id),
                  "title" => podcast.title
                }
@@ -66,9 +66,9 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
   describe "episodes" do
     @with_episodes_query """
     query ($id: ID!) {
-      publicPodcast(id: $id) {
+      publishedPodcast(id: $id) {
         id
-        publicEpisodes {
+        publishedEpisodes {
           id
           title
         }
@@ -86,9 +86,9 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
 
       assert json_response(conn, 200) == %{
                "data" => %{
-                 "publicPodcast" => %{
+                 "publishedPodcast" => %{
                    "id" => Integer.to_string(podcast.id),
-                   "publicEpisodes" => [
+                   "publishedEpisodes" => [
                      %{"id" => Integer.to_string(episode.id), "title" => episode.title}
                    ]
                  }
@@ -100,9 +100,9 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
   describe "episodes_count" do
     @with_episodes_count_query """
     query ($id: ID!) {
-      publicPodcast(id: $id) {
+      publishedPodcast(id: $id) {
         id
-        publicEpisodesCount
+        publishedEpisodesCount
       }
     }
     """
@@ -120,9 +120,9 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
 
       assert json_response(conn, 200) == %{
                "data" => %{
-                 "publicPodcast" => %{
+                 "publishedPodcast" => %{
                    "id" => Integer.to_string(podcast.id),
-                   "publicEpisodesCount" => 2
+                   "publishedEpisodesCount" => 2
                  }
                }
              }
