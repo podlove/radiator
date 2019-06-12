@@ -15,7 +15,7 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Session do
     end
   end
 
-  def signup(
+  def user_signup(
         _parent,
         %{username: username, email: email, password: password},
         %{context: context}

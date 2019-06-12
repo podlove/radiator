@@ -25,7 +25,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
 
   @signup_query """
   mutation ($username: String!, $password: String!, $email: String!) {
-    signup(username: $username, email: $email, password: $password) {
+    userSignup(username: $username, email: $email, password: $password) {
       token
       username
       expiresAt
@@ -33,7 +33,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
   }
   """
 
-  test "signup returns a session token for a the created user", %{conn: conn} do
+  test "userSignup returns a session token for a the created user", %{conn: conn} do
     testusermap = params_for(:testuser)
 
     username = testusermap.username
@@ -51,7 +51,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
 
     assert %{
              "data" => %{
-               "signup" => %{
+               "userSignup" => %{
                  "username" => ^username,
                  "token" => token,
                  "expiresAt" => expires_at
@@ -68,7 +68,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
     assert {:ok, _tokenmap} = Radiator.Auth.Guardian.decode_and_verify(token)
   end
 
-  test "authenticated signup returns a session token for a the created activated user", %{
+  test "authenticated userSignup returns a session token for a the created activated user", %{
     conn: conn
   } do
     conn =
@@ -110,7 +110,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
 
     assert %{
              "data" => %{
-               "signup" => %{
+               "userSignup" => %{
                  "username" => ^username,
                  "token" => token,
                  "expiresAt" => expires_at

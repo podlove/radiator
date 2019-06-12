@@ -122,11 +122,11 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
   mutation do
     @desc "Sign up a user"
-    field :signup, :session do
+    field :user_signup, :session do
       arg :username, non_null(:string)
       arg :email, non_null(:string)
       arg :password, non_null(:string)
-      resolve &Public.Resolvers.Session.signup/3
+      resolve &Public.Resolvers.Session.user_signup/3
     end
 
     @desc "Request an authenticated session"
