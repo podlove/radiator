@@ -85,6 +85,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
     @desc "Get all podcasts"
     field :podcasts, list_of(:podcast) do
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.list_podcasts/3
     end
 
@@ -92,6 +93,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
     field :podcast, :podcast do
       arg :id, non_null(:id)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.find_podcast/3
     end
 
@@ -99,6 +101,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
     field :episode, :episode do
       arg :id, non_null(:id)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.find_episode/3
     end
 
@@ -106,11 +109,13 @@ defmodule RadiatorWeb.GraphQL.Schema do
     field :network, :network do
       arg :id, non_null(:id)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.find_network/3
     end
 
     @desc "Get all networks"
     field :networks, list_of(:network) do
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.list_networks/3
     end
   end
@@ -126,14 +131,16 @@ defmodule RadiatorWeb.GraphQL.Schema do
     @desc "Prolong an authenticated session"
     field :prolong_session, :session do
       arg :username_or_email, non_null(:string)
+
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Session.prolong_authenticated_session/3
     end
 
     @desc "Create a network (Authenticated)"
     field :create_network, type: :network do
       arg :network, non_null(:network_input)
-      middleware Middleware.RequireAuthentication
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.create_network/3
       middleware Middleware.TranslateChangeset
     end
@@ -143,6 +150,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
       arg :id, non_null(:id)
       arg :network, non_null(:network_input)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.update_network/3
       middleware Middleware.TranslateChangeset
     end
@@ -152,6 +160,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
       arg :podcast, non_null(:podcast_input)
       arg :network_id, non_null(:integer)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.create_podcast/3
       middleware Middleware.TranslateChangeset
     end
@@ -160,6 +169,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
     field :publish_podcast, type: :podcast do
       arg :id, non_null(:id)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.publish_podcast/3
     end
 
@@ -167,6 +177,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
     field :depublish_podcast, type: :podcast do
       arg :id, non_null(:id)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.depublish_podcast/3
     end
 
@@ -175,6 +186,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
       arg :id, non_null(:id)
       arg :podcast, non_null(:podcast_input)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.update_podcast/3
       middleware Middleware.TranslateChangeset
     end
@@ -183,6 +195,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
     field :delete_podcast, type: :podcast do
       arg :id, non_null(:id)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.delete_podcast/3
     end
 
@@ -191,6 +204,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
       arg :audio_id, non_null(:integer)
       arg :file, :upload
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Storage.upload_audio_file/3
     end
 
@@ -199,6 +213,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
       arg :podcast_id, non_null(:id)
       arg :episode, non_null(:episode_input)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.create_episode/3
       middleware Middleware.TranslateChangeset
     end
@@ -208,6 +223,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
       arg :id, non_null(:id)
       arg :episode, non_null(:episode_input)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.update_episode/3
       middleware Middleware.TranslateChangeset
     end
@@ -216,6 +232,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
     field :publish_episode, type: :episode do
       arg :id, non_null(:id)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.publish_episode/3
     end
 
@@ -223,6 +240,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
     field :depublish_episode, type: :episode do
       arg :id, non_null(:id)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.depublish_episode/3
     end
 
@@ -231,6 +249,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
       arg :id, non_null(:id)
       arg :datetime, non_null(:datetime)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.schedule_episode/3
     end
 
@@ -238,6 +257,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
     field :delete_episode, type: :episode do
       arg :id, non_null(:id)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.delete_episode/3
     end
 
@@ -247,6 +267,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
       arg :chapters, non_null(:string)
       arg :type, non_null(:string)
 
+      middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.set_episode_chapters/3
     end
   end
