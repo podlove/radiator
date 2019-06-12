@@ -1,21 +1,28 @@
+alias Radiator.Auth
+
 defmodule RadiatorWeb.GraphQL.Public.Resolvers.Session do
   def get_authenticated_session(
         _parent,
         %{username_or_email: username_or_email, password: password},
         _resolution
       ) do
-    case Radiator.Auth.Register.get_user_by_credentials(username_or_email, password) do
+    case Auth.Register.get_user_by_credentials(username_or_email, password) do
       nil ->
         {:error, "Invalid credentials"}
 
       valid_user ->
-        token = Radiator.Auth.Guardian.api_session_token(valid_user)
-
-        {:ok,
-         %{
-           username: valid_user.name,
-           token: token
-         }}
+        new_session_for_valid_user(valid_user)
     end
+  end
+
+  def new_session_for_valid_user(user) do
+    token = Auth.Guardian.api_session_token(user)
+
+    {:ok,
+     %{
+       username: user.name,
+       token: token,
+       expires_at: Auth.Guardian.get_expiry_datetime(token)
+     }}
   end
 end

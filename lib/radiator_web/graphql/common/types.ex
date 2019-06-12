@@ -27,5 +27,6 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
   object :session do
     field :username, :string
     field :token, :string
+    field :expires_at, :datetime
   end
 end

@@ -6,6 +6,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
     authenticatedSession(usernameOrEmail: $username, password: $password) {
       token
       username
+      expiresAt
     }
   }
   """
@@ -15,6 +16,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
     prolongSession(usernameOrEmail: $username) {
       token
       username
+      expiresAt
     }
   }
   """
@@ -34,11 +36,15 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
              "data" => %{
                "authenticatedSession" => %{
                  "username" => ^username,
-                 "token" => token
+                 "token" => token,
+                 "expiresAt" => expires_at
                }
              }
            } = json_response(conn, 200)
 
+    {:ok, expiry_date, _} = DateTime.from_iso8601(expires_at)
+
+    assert :lt == DateTime.compare(DateTime.utc_now(), expiry_date)
     assert {:ok, _tokenmap} = Radiator.Auth.Guardian.decode_and_verify(token)
   end
 
@@ -73,7 +79,13 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
         }
       )
 
-    assert %{"data" => %{"prolongSession" => %{"token" => token2}}} = json_response(conn, 200)
+    assert %{"data" => %{"prolongSession" => %{"token" => token2, "expiresAt" => expires_at}}} =
+             json_response(conn, 200)
+
+    {:ok, expiry_date, _} = DateTime.from_iso8601(expires_at)
+
+    assert :lt == DateTime.compare(DateTime.utc_now(), expiry_date)
+
     assert {:ok, _tokenmap} = Radiator.Auth.Guardian.decode_and_verify(token2)
   end
 end

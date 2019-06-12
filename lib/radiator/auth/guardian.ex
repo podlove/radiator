@@ -14,6 +14,23 @@ defmodule Radiator.Auth.Guardian do
     token
   end
 
+  @doc """
+  Returns the expiry time of a token as `DateTime`. Returns value in the past if invalid or expired.
+  """
+  def get_expiry_datetime(token) do
+    {:ok, datetime} =
+      case Guardian.decode_and_verify(__MODULE__, token) do
+        {:ok, %{"exp" => expiry_timestamp}} ->
+          DateTime.from_unix(expiry_timestamp)
+
+        # treat as expired
+        _ ->
+          DateTime.from_unix(0)
+      end
+
+    datetime
+  end
+
   # Callbacks
 
   @impl Guardian
