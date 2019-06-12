@@ -4,7 +4,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
 
   @single_query """
   query ($id: ID!) {
-    network(id: $id) {
+    publishedNetwork(id: $id) {
       id
       title
     }
@@ -18,7 +18,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
 
     assert json_response(conn, 200) == %{
              "data" => %{
-               "network" => %{
+               "publishedNetwork" => %{
                  "id" => Integer.to_string(network.id),
                  "title" => network.title
                }
@@ -34,7 +34,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
 
   @single_query_with_podcasts """
   query ($id: ID!) {
-    network(id: $id) {
+    publishedNetwork(id: $id) {
       id
       title
       podcasts {
@@ -58,7 +58,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
 
     assert json_response(conn, 200) == %{
              "data" => %{
-               "network" => %{
+               "publishedNetwork" => %{
                  "id" => Integer.to_string(network.id),
                  "title" => network.title,
                  "podcasts" => [
@@ -72,7 +72,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
 
   @list_query """
     {
-      networks {
+      publishedNetworks {
         id
         title
       }
@@ -86,7 +86,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
 
     assert json_response(conn, 200) == %{
              "data" => %{
-               "networks" => [
+               "publishedNetworks" => [
                  %{
                    "id" => Integer.to_string(network.id),
                    "title" => network.title

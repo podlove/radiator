@@ -1,12 +1,12 @@
-defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
+defmodule RadiatorWeb.GraphQL.Public.Types do
   use Absinthe.Schema.Notation
 
   import Absinthe.Resolution.Helpers
 
   alias RadiatorWeb.GraphQL.Public.Resolvers
 
-  @desc "A network"
-  object :network do
+  @desc "A published network"
+  object :published_network do
     field :id, non_null(:id)
     field :title, :string
     field :slug, :string
@@ -15,13 +15,13 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
       resolve &Resolvers.Directory.get_image_url/3
     end
 
-    field :podcasts, list_of(:podcast) do
+    field :podcasts, list_of(:published_podcast) do
       resolve &Resolvers.Directory.list_podcasts/3
     end
   end
 
-  @desc "A podcast"
-  object :podcast do
+  @desc "A published podcast"
+  object :published_podcast do
     field :id, non_null(:id)
     field :title, :string
     field :author, :string
@@ -39,7 +39,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
     field :subtitle, :string
     field :slug, :string
 
-    field :episodes, list_of(:episode) do
+    field :episodes, list_of(:published_episode) do
       arg :page, type: :integer, default_value: 1
       arg :items_per_page, type: :integer, default_value: 10
       arg :order_by, type: :episode_order, default_value: :published_at
@@ -48,13 +48,13 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
       resolve dataloader(Radiator.Directory, :episodes)
     end
 
-    field :episodes_count, :integer do
+    field :published_episodes_count, :integer do
       resolve &Resolvers.Directory.get_episodes_count/3
     end
   end
 
-  @desc "An episode in a podcast"
-  object :episode do
+  @desc "A published episode in a podcast"
+  object :published_episode do
     field :id, non_null(:id)
     field :content, :string
     field :description, :string
@@ -71,7 +71,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.DirectoryTypes do
     field :title, :string
     field :slug, :string
 
-    field :podcast, :podcast do
+    field :podcast, :published_podcast do
       resolve &Resolvers.Directory.find_podcast/3
     end
 

@@ -17,25 +17,6 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UploadTest do
 
   setup :setup_user_and_conn
 
-  @query """
-  mutation ($filename: String!) {
-    createUpload(filename: $filename) {
-      uploadUrl
-    }
-  }
-  """
-
-  test "createUploads returns a URL", %{conn: conn, user: _user} do
-    conn =
-      post conn, "/api/graphql",
-        query: @query,
-        variables: %{"filename" => "foobar"}
-
-    assert %{"data" => %{"createUpload" => %{"uploadUrl" => url}}} = json_response(conn, 200)
-
-    refute is_nil(url)
-  end
-
   @upload_audio_file """
   mutation ($audio_id: ID!) {
     uploadAudioFile(audio_id: $audio_id, file: "myfile") {

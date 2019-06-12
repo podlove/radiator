@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.GraphQL.Admin.Schema.DirectoryTypes do
+defmodule RadiatorWeb.GraphQL.Admin.Types do
   use Absinthe.Schema.Notation
 
   import Absinthe.Resolution.Helpers
