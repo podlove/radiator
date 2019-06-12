@@ -81,7 +81,7 @@ defmodule RadiatorWeb.LoginController do
     |> redirect(to: "/")
   end
 
-  defp email_configuration_url(conn, %Auth.User{} = user) do
+  def email_configuration_url(conn, %Auth.User{} = user) do
     Routes.login_url(
       conn,
       :verify_email,

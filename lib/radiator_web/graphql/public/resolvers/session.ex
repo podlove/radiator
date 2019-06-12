@@ -15,6 +15,41 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Session do
     end
   end
 
+  def signup(
+        _parent,
+        %{username: username, email: email, password: password},
+        %{context: context}
+      ) do
+    case Auth.Register.create_user(%{
+           name: username,
+           email: email,
+           password: password
+         }) do
+      {:ok, user} ->
+        with authenticated_user = %Auth.User{} <- context[:authenticated_user],
+             :active <- authenticated_user.status do
+          # activate user immediatly when created by an already authenticated user
+          Auth.Register.activate_user(user)
+        else
+          _ ->
+            # Todo: resolve the depency on the login controller more gracefully for the email activation
+            user
+            |> Auth.Email.email_verification_email(
+              RadiatorWeb.LoginController.email_configuration_url(context.context_conn, user)
+            )
+            |> Radiator.Mailer.deliver_later()
+        end
+
+        new_session_for_valid_user(user)
+
+      {:error, _changeset} ->
+        {:error, "Failed to create #{username} <#{email}>"}
+    end
+  end
+
+  @doc """
+  Helper method to be shared
+  """
   def new_session_for_valid_user(user) do
     token = Auth.Guardian.api_session_token(user)
 

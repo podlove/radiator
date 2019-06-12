@@ -14,6 +14,11 @@ defmodule Radiator.Factory do
     }
   end
 
+  def testuser_factory do
+    username = sequence("signup_test_user_")
+    %{username: username, password: sequence("pass_"), email: "#{username}@testhost.local"}
+  end
+
   # @deprecated use owned_by/2
   def make_owner(user = %User{}, network = %Network{}) do
     :ok = set_permission(user, network, :own)
