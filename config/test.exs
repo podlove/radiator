@@ -23,3 +23,5 @@ config :argon2_elixir, t_cost: 1, m_cost: 8
 config :arc,
   storage: Arc.Storage.S3,
   bucket: "radiator-test"
+
+config :radiator, Radiator.Mailer, adapter: Radiator.Email.Console

@@ -130,6 +130,7 @@ defmodule Radiator.Directory.Importer do
                 } ->
                   extension = hd(:mimerl.mime_to_exts(mime_type))
 
+                  # TODO: make a nice wrapper around this temporary file creation
                   upload = %Plug.Upload{
                     content_type: mime_type,
                     filename: "Chapter_#{index}.#{extension}",

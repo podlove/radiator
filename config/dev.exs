@@ -75,5 +75,4 @@ config :radiator, Radiator.Repo,
   hostname: System.get_env("POSTGRES_HOST") || "localhost",
   pool_size: 10
 
-config :radiator, Radiator.Mailer,
-  adapter: Radiator.Email.Console
+config :radiator, Radiator.Mailer, adapter: Radiator.Email.Console

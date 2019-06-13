@@ -14,6 +14,23 @@ defmodule Radiator.Auth.Guardian do
     token
   end
 
+  @doc """
+  Returns the expiry time of a token as `DateTime`. Returns value in the past if invalid or expired.
+  """
+  def get_expiry_datetime(token) do
+    {:ok, datetime} =
+      case Guardian.decode_and_verify(__MODULE__, token) do
+        {:ok, %{"exp" => expiry_timestamp}} ->
+          DateTime.from_unix(expiry_timestamp)
+
+        # treat as expired
+        _ ->
+          DateTime.from_unix(0)
+      end
+
+    datetime
+  end
+
   # Callbacks
 
   @impl Guardian
@@ -37,9 +54,9 @@ defmodule Radiator.Auth.Guardian do
     # Here we'll look up our resource from the claims, the subject can be
     # found in the `"sub"` key. In `above subject_for_token/2` we returned
     # the resource id so here we'll rely on that to look it up.
-    id = claims["sub"]
+    username = claims["sub"]
 
-    case Radiator.Auth.Register.get_user_by_name(id) do
+    case Radiator.Auth.Register.get_user_by_name(username) do
       nil ->
         {:error, :resource_not_found}
 

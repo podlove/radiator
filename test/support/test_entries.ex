@@ -19,7 +19,9 @@ defmodule Radiator.TestEntries do
           password: "#{@testuserpassword}"
         })
         |> case do
-          {:ok, user} -> user
+          {:ok, user} ->
+            Auth.Register.activate_user(user)
+            user
         end
 
       user ->

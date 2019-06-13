@@ -1,6 +1,8 @@
 defmodule RadiatorWeb.Plug.ValidateAPIUser do
   @moduledoc """
   Put `:authenticated_user` into the `:context` map for GraphQL absinthe if a valid bearer token is present.
+
+  Also put the the current state of the conn in context to enable URL generation for e.g. email templates and such.
   """
   @behaviour Plug
 
@@ -25,5 +27,6 @@ defmodule RadiatorWeb.Plug.ValidateAPIUser do
     else
       _ -> %{}
     end
+    |> Map.put(:context_conn, conn)
   end
 end
