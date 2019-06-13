@@ -108,6 +108,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :enclosure, :enclosure do
       resolve &Resolvers.Editor.get_enclosure/3
     end
+
+    field :audio, :audio do
+      resolve &Resolvers.Editor.find_audio/3
+    end
   end
 
   @desc "An audio object"

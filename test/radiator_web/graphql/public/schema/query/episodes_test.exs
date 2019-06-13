@@ -3,6 +3,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
   import Radiator.Factory
 
   alias Radiator.Directory.Episode
+  alias Radiator.Media
 
   @single_query """
   query ($id: ID!) {
@@ -14,16 +15,49 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
         type
         url
       }
+      audio {
+        chapters {
+          image
+          link
+          start
+          title
+        }
+      }
     }
   }
   """
 
   test "episode returns an episode", %{conn: conn} do
-    podcast = insert(:podcast)
-    episode = insert(:published_episode, podcast: podcast)
+    podcast = build(:podcast)
+
+    upload = %Plug.Upload{
+      path: "test/fixtures/image.jpg",
+      filename: "image.jpg"
+    }
+
+    audio = insert(:audio)
+
+    {:ok, chapter} =
+      Radiator.AudioMeta.create_chapter(audio, %{
+        image: upload,
+        link: "http://example.com",
+        title: "An Example",
+        start: 12345
+      })
+
+    image_url = Media.ChapterImage.url({chapter.image, chapter})
+
+    episode =
+      insert(:published_episode,
+        podcast: podcast,
+        audio: audio
+      )
+
     enclosure = Episode.enclosure(episode)
 
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => episode.id}
+
+    assert image_url =~ "http"
 
     assert json_response(conn, 200) == %{
              "data" => %{
@@ -34,6 +68,16 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
                    "length" => enclosure.length,
                    "type" => enclosure.type,
                    "url" => enclosure.url
+                 },
+                 "audio" => %{
+                   "chapters" => [
+                     %{
+                       "image" => image_url,
+                       "link" => "http://example.com",
+                       "title" => "An Example",
+                       "start" => 12345
+                     }
+                   ]
                  }
                }
              }

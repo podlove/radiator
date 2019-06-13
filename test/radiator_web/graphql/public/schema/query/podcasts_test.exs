@@ -3,6 +3,8 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
 
   import Radiator.Factory
 
+  alias Radiator.Media
+
   @list_query """
   {
     publishedPodcasts {
@@ -31,19 +33,71 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
     publishedPodcast(id: $id) {
       id
       title
+      episodes {
+        id
+        title
+        audio {
+          chapters {
+            image
+            link
+            start
+            title
+          }
+        }
+      }
     }
   }
   """
 
   test "podcast returns a podcast", %{conn: conn} do
     podcast = insert(:podcast)
+
+    upload = %Plug.Upload{
+      path: "test/fixtures/image.jpg",
+      filename: "image.jpg"
+    }
+
+    audio = insert(:audio)
+
+    {:ok, chapter} =
+      Radiator.AudioMeta.create_chapter(audio, %{
+        image: upload,
+        link: "http://example.com",
+        title: "An Example",
+        start: 12345
+      })
+
+    image_url = Media.ChapterImage.url({chapter.image, chapter})
+
+    episode =
+      insert(:published_episode,
+        podcast: podcast,
+        audio: audio
+      )
+
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => podcast.id}
 
     assert json_response(conn, 200) == %{
              "data" => %{
                "publishedPodcast" => %{
                  "id" => Integer.to_string(podcast.id),
-                 "title" => podcast.title
+                 "title" => podcast.title,
+                 "episodes" => [
+                   %{
+                     "audio" => %{
+                       "chapters" => [
+                         %{
+                           "image" => image_url,
+                           "link" => "http://example.com",
+                           "title" => "An Example",
+                           "start" => 12345
+                         }
+                       ]
+                     },
+                     "id" => to_string(episode.id),
+                     "title" => episode.title
+                   }
+                 ]
                }
              }
            }
