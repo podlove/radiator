@@ -1,7 +1,6 @@
 defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
   alias Radiator.Directory
   alias Radiator.Directory.{Episode, Podcast, Network}
-  alias Radiator.AudioMeta
   alias Radiator.AudioMeta.Chapter
   alias Radiator.Media
 
