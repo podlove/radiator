@@ -13,9 +13,9 @@
           style="background-image: url(<%= podcast_image_url(podcast) %>)"
         ></div>
 
-        <div class="p-3 h-32">
+        <div class="p-3 h-32 overflow-hidden">
           <h1 class="text-base mb-1"><%= podcast.title %></h1>
-          <p class="text-xs text-gray-600"><%= podcast.subtitle %></p>
+          <p class="text-xs text-gray-600"><%= shorten_string(podcast.subtitle, 140) %></p>
         </div>
 
         <div class="flex items-center p-3 border-t border-gray-500 border-solid text-xs text-gray-600">
