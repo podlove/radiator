@@ -38,6 +38,7 @@ defmodule Radiator.AudioMeta do
     |> Repo.all()
   end
 
+  # todo: if chapters have images, delete them from storage (#115)
   def delete_chapters(%Audio{} = audio) do
     from(
       c in Chapter,
