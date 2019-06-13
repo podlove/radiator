@@ -20,7 +20,7 @@ defmodule Radiator.Directory do
   end
 
   def query(Episode, args) do
-    episodes_query(args)
+    episodes_query(args) |> preload([:podcast, audio: [:chapters, :audio_files]])
   end
 
   def query(queryable, _) do
