@@ -6,7 +6,10 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
     field :start, :integer
     field :title, :string
     field :link, :string
-    field :image, :string
+
+    field :image, :string do
+      resolve &RadiatorWeb.GraphQL.Public.Resolvers.Directory.get_image_url/3
+    end
   end
 
   @desc "Audio File"

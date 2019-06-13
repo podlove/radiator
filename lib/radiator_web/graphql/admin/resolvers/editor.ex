@@ -272,6 +272,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
+  def find_audio(%Episode{} = episode, _args, %{context: %{authenticated_user: _user}}) do
+    {:ok, episode.audio}
+  end
+
   def get_enclosure(%Episode{} = episode, _args, %{context: %{authenticated_user: _user}}) do
     {:ok, Episode.enclosure(episode)}
   end

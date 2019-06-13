@@ -4,6 +4,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
   import Radiator.Factory
 
   alias Radiator.Directory.Episode
+  alias Radiator.Media
 
   @doc """
   Generate user and add auth token to connection.
@@ -29,13 +30,44 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
         type
         url
       }
+      audio {
+        chapters {
+          image
+          link
+          start
+          title
+        }
+      }
     }
   }
   """
 
   test "episode returns an episode", %{conn: conn, user: user} do
     podcast = insert(:podcast) |> owned_by(user)
-    episode = insert(:unpublished_episode, podcast: podcast)
+
+    upload = %Plug.Upload{
+      path: "test/fixtures/image.jpg",
+      filename: "image.jpg"
+    }
+
+    audio = insert(:audio)
+
+    {:ok, chapter} =
+      Radiator.AudioMeta.create_chapter(audio, %{
+        image: upload,
+        link: "http://example.com",
+        title: "An Example",
+        start: 12345
+      })
+
+    image_url = Media.ChapterImage.url({chapter.image, chapter})
+
+    episode =
+      insert(:unpublished_episode,
+        podcast: podcast,
+        audio: audio
+      )
+
     enclosure = Episode.enclosure(episode)
 
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => episode.id}
@@ -49,6 +81,16 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
                    "length" => enclosure.length,
                    "type" => enclosure.type,
                    "url" => enclosure.url
+                 },
+                 "audio" => %{
+                   "chapters" => [
+                     %{
+                       "image" => image_url,
+                       "link" => "http://example.com",
+                       "title" => "An Example",
+                       "start" => 12345
+                     }
+                   ]
                  }
                }
              }

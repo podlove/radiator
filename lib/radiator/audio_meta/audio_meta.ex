@@ -5,6 +5,8 @@ defmodule Radiator.AudioMeta do
 
   import Ecto.Query, warn: false
 
+  alias Ecto.Multi
+
   alias Radiator.Repo
   alias Radiator.Directory.Audio
   alias Radiator.AudioMeta.Chapter
@@ -36,6 +38,7 @@ defmodule Radiator.AudioMeta do
     |> Repo.all()
   end
 
+  # todo: if chapters have images, delete them from storage (#115)
   def delete_chapters(%Audio{} = audio) do
     from(
       c in Chapter,
@@ -45,10 +48,23 @@ defmodule Radiator.AudioMeta do
   end
 
   def create_chapter(%Audio{} = audio, attrs) do
-    %Chapter{}
-    |> Chapter.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:audio, audio)
-    |> Repo.insert()
+    {update_attrs, insert_attrs} = Map.split(attrs, [:image])
+
+    insert =
+      %Chapter{}
+      |> Chapter.changeset(insert_attrs)
+      |> Ecto.Changeset.put_assoc(:audio, audio)
+
+    Multi.new()
+    |> Multi.insert(:chapter, insert)
+    |> Multi.update(:chapter_updated, fn %{chapter: chapter} ->
+      Chapter.changeset(chapter, update_attrs)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{chapter_updated: chapter}} -> {:ok, chapter}
+      {:error, _, changeset, _} -> {:error, changeset}
+    end
   end
 
   def update_chapter(chapter = %Chapter{}, attrs) do
