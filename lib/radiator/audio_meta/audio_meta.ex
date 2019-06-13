@@ -10,6 +10,7 @@ defmodule Radiator.AudioMeta do
   alias Radiator.Repo
   alias Radiator.Directory.Audio
   alias Radiator.AudioMeta.Chapter
+  alias Radiator.Media.ChapterImage
 
   def data() do
     Dataloader.Ecto.new(Repo, query: &query/2)
@@ -38,13 +39,27 @@ defmodule Radiator.AudioMeta do
     |> Repo.all()
   end
 
-  # todo: if chapters have images, delete them from storage (#115)
   def delete_chapters(%Audio{} = audio) do
+    audio = Repo.preload(audio, :chapters)
+
+    # delete chapter images from storage
+    Enum.each(audio.chapters, &delete_chapter_image/1)
+
+    # delete chapters
     from(
       c in Chapter,
       where: c.audio_id == ^audio.id
     )
     |> Repo.delete_all()
+  end
+
+  def delete_chapter_image(%Chapter{image: nil}) do
+    {:ok, :no_image_to_delete}
+  end
+
+  def delete_chapter_image(chapter = %Chapter{image: image}) do
+    ChapterImage.delete({image, chapter})
+    {:ok, :deleted}
   end
 
   def create_chapter(%Audio{} = audio, attrs) do
@@ -76,10 +91,6 @@ defmodule Radiator.AudioMeta do
   def set_chapters(%Audio{} = audio, input, type)
       when is_binary(input) and type in [:psc, :json, :mp4chaps] do
     chapters = Chapters.decode(input, type)
-
-    # transaction:
-    # - delete existing chapters
-    # - insert all new chapters
 
     delete_chapters(audio)
 
