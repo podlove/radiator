@@ -2,24 +2,54 @@ defmodule RadiatorWeb.PlayerController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
-  alias Radiator.Directory.Audio
+  alias Radiator.Directory.{Audio, Episode, Podcast}
   alias Radiator.Media.AudioFile
   alias Radiator.AudioMeta.Chapter
 
-  def show(conn, %{"audio_id" => id}) do
-    audio = Directory.get_audio(id)
+  def show(conn, %{"episode_id" => episode_id, "audio_id" => audio_id}) do
+    audio = Directory.get_audio(audio_id)
+    episode = Directory.get_episode(episode_id)
 
-    json(conn, config(conn, audio))
+    # todo: ensure given audio and episode belong together
+
+    json(conn, config(conn, %{audio: audio, episode: episode}))
   end
 
-  def config(conn, audio) do
+  def show(conn, %{"audio_id" => audio_id}) do
+    audio = Directory.get_audio(audio_id)
+
+    # todo: handle invalid audio id
+
+    json(conn, config(conn, %{audio: audio}))
+  end
+
+  def config(conn, %{audio: audio, episode: episode}) do
+    podcast = episode.podcast
+
+    config(conn, %{audio: audio})
+    |> Map.merge(%{
+      title: episode.title,
+      subtitle: episode.subtitle,
+      summary: episode.description,
+      poster: Episode.image_url(episode),
+      show: %{
+        title: podcast.title,
+        subtitle: podcast.subtitle,
+        summary: podcast.description,
+        poster: Podcast.image_url(podcast)
+      }
+    })
+  end
+
+  def config(conn, %{audio: audio}) do
     %{
       title: audio.title,
       duration: audio.duration,
       audio: audio_files(audio),
       chapters: chapters(audio),
       reference: %{
-        config: Routes.player_url(conn, :show, audio.id)
+        config: Routes.player_url(conn, :show, audio.id),
+        share: "//cdn.podlove.org/web-player/share.html"
       }
     }
   end
