@@ -43,9 +43,7 @@ defmodule Radiator.AudioMeta do
     audio = Repo.preload(audio, :chapters)
 
     # delete chapter images from storage
-    Enum.each(audio.chapters, fn chapter ->
-      ChapterImage.delete({chapter.image, chapter})
-    end)
+    Enum.each(audio.chapters, &delete_chapter_image/1)
 
     # delete chapters
     from(
@@ -53,6 +51,15 @@ defmodule Radiator.AudioMeta do
       where: c.audio_id == ^audio.id
     )
     |> Repo.delete_all()
+  end
+
+  def delete_chapter_image(%Chapter{image: nil}) do
+    {:ok, :no_image_to_delete}
+  end
+
+  def delete_chapter_image(chapter = %Chapter{image: image}) do
+    ChapterImage.delete({image, chapter})
+    {:ok, :deleted}
   end
 
   def create_chapter(%Audio{} = audio, attrs) do
