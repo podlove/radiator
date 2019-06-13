@@ -129,6 +129,11 @@ defmodule RadiatorWeb.GraphQL.Schema do
       resolve &Public.Resolvers.Session.user_signup/3
     end
 
+    @desc "Request resend of verification email (need auth)"
+    field :user_resend_verification_email, :boolean do
+      resolve &Admin.Resolvers.User.resend_verification_email/3
+    end
+
     @desc "Request an authenticated session"
     field :authenticated_session, :session do
       arg :username_or_email, non_null(:string)
@@ -138,8 +143,6 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
     @desc "Prolong an authenticated session"
     field :prolong_session, :session do
-      arg :username_or_email, non_null(:string)
-
       middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Session.prolong_authenticated_session/3
     end

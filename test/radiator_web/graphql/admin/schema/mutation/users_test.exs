@@ -14,8 +14,8 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
   """
 
   @prolong_session_query """
-  mutation ($username: String!) {
-    prolongSession(usernameOrEmail: $username) {
+  mutation {
+    prolongSession {
       token
       username
       expiresAt
@@ -34,20 +34,21 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
   """
 
   test "userSignup returns a session token for a the created user", %{conn: conn} do
-    testusermap = params_for(:testuser)
+    tu = params_for(:testuser)
 
-    username = testusermap.username
-    password = testusermap.password
-    email = testusermap.email
+    username = tu.username
+    password = tu.password
+    email = tu.email
 
     conn =
-      post conn, "/api/graphql",
+      post(conn, "/api/graphql",
         query: @signup_query,
         variables: %{
           "username" => username,
           "password" => password,
           "email" => email
         }
+      )
 
     assert %{
              "data" => %{
@@ -71,34 +72,14 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
   test "authenticated userSignup returns a session token for a the created activated user", %{
     conn: conn
   } do
-    conn =
-      conn
-      |> post("/api/graphql",
-        query: @request_session_query,
-        variables: %{
-          "username" => Radiator.TestEntries.user().name,
-          "password" => Radiator.TestEntries.user_password()
-        }
-      )
+    tu = params_for(:testuser)
 
-    assert %{
-             "data" => %{
-               "authenticatedSession" => %{
-                 "token" => token
-               }
-             }
-           } = json_response(conn, 200)
-
-    testusermap = params_for(:testuser)
-
-    username = testusermap.username
-    password = testusermap.password
-    email = testusermap.email
+    username = tu.username
+    password = tu.password
+    email = tu.email
 
     conn =
-      conn
-      |> recycle()
-      |> Plug.Conn.put_req_header("authorization", "Bearer #{token}")
+      admin_bearing_conn(conn)
       |> post("/api/graphql",
         query: @signup_query,
         variables: %{
@@ -155,43 +136,82 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.UsersTest do
   end
 
   test "prolongSession returns a refreshed session for a valid user", %{conn: conn} do
-    username = Radiator.TestEntries.user().name
-
     conn =
-      post conn, "/api/graphql",
-        query: @request_session_query,
-        variables: %{
-          "username" => username,
-          "password" => Radiator.TestEntries.user_password()
-        }
-
-    assert %{
-             "data" => %{
-               "authenticatedSession" => %{
-                 "username" => ^username,
-                 "token" => token
-               }
-             }
-           } = json_response(conn, 200)
-
-    conn =
-      conn
-      |> recycle()
-      |> Plug.Conn.put_req_header("authorization", "Bearer #{token}")
+      admin_bearing_conn(conn)
       |> post("/api/graphql",
-        query: @prolong_session_query,
-        variables: %{
-          "username" => username
-        }
+        query: @prolong_session_query
       )
 
-    assert %{"data" => %{"prolongSession" => %{"token" => token2, "expiresAt" => expires_at}}} =
+    assert %{"data" => %{"prolongSession" => %{"token" => token, "expiresAt" => expires_at}}} =
              json_response(conn, 200)
 
     {:ok, expiry_date, _} = DateTime.from_iso8601(expires_at)
 
     assert :lt == DateTime.compare(DateTime.utc_now(), expiry_date)
 
-    assert {:ok, _tokenmap} = Radiator.Auth.Guardian.decode_and_verify(token2)
+    assert {:ok, _tokenmap} = Radiator.Auth.Guardian.decode_and_verify(token)
+  end
+
+  @resend_verification_email_query """
+  mutation { userResendVerificationEmail }
+  """
+
+  test "userResendVerificationEmail works for unverified users", %{conn: conn} do
+    tu = params_for(:testuser)
+    username = tu.username
+
+    conn =
+      post(conn, "/api/graphql",
+        query: @signup_query,
+        variables: %{
+          "username" => tu.username,
+          "password" => tu.password,
+          "email" => tu.email
+        }
+      )
+
+    assert %{
+             "data" => %{
+               "userSignup" => %{
+                 "username" => ^username,
+                 "token" => token
+               }
+             }
+           } = json_response(conn, 200)
+
+    recyled_bearing_conn(conn, token)
+    |> post("/api/graphql",
+      query: @resend_verification_email_query
+    )
+  end
+
+  defp recyled_bearing_conn(conn, token) do
+    conn
+    |> recycle()
+    |> Plug.Conn.put_req_header("authorization", "Bearer #{token}")
+  end
+
+  defp admin_bearing_conn(conn) do
+    conn =
+      conn
+      |> post("/api/graphql",
+        query: @request_session_query,
+        variables: %{
+          "username" => Radiator.TestEntries.user().name,
+          "password" => Radiator.TestEntries.user_password()
+        }
+      )
+
+    %{
+      "data" => %{
+        "authenticatedSession" => %{
+          "token" => token
+        }
+      }
+    } = json_response(conn, 200)
+
+    conn
+    |> recycle()
+    |> Plug.Conn.put_req_header("authorization", "Bearer #{token}")
   end
 end
