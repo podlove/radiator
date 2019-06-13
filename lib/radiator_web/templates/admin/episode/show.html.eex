@@ -26,12 +26,12 @@
   </div>
 
   <%= if length(@episode.audio.audio_files) > 0 do %>
-    <script src="https://cdn.podlove.org/web-player/embed.js"></script>
+    <script src="//cdn.podlove.org/web-player/embed.js"></script>
 
     <div id="preview-web-player"></div>
 
     <script>
-    podlovePlayer('#preview-web-player', '<%= Routes.player_url(@conn, :show, @episode.id, @episode.audio.id) %>');
+    podlovePlayer('#preview-web-player', '<%= Routes.player_url(@conn, :episode_config, @episode.id) %>');
     </script>
   <% end %>
 

@@ -38,8 +38,8 @@ defmodule RadiatorWeb.Router do
 
     get "/feed/:podcast_id", FeedController, :show
 
-    get "/audio/:audio_id/player.json", PlayerController, :show
-    get "/episode/:episode_id/audio/:audio_id/player.json", PlayerController, :show
+    get "/audio/:audio_id/player.json", PlayerController, :audio_config
+    get "/episode/:episode_id/player.json", PlayerController, :episode_config
 
     get "/login/request_verification/:token", LoginController, :resend_verification_mail
     get "/login/verify_email/:token", LoginController, :verify_email

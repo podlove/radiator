@@ -6,16 +6,14 @@ defmodule RadiatorWeb.PlayerController do
   alias Radiator.Media.AudioFile
   alias Radiator.AudioMeta.Chapter
 
-  def show(conn, %{"episode_id" => episode_id, "audio_id" => audio_id}) do
-    audio = Directory.get_audio(audio_id)
+  def episode_config(conn, %{"episode_id" => episode_id}) do
     episode = Directory.get_episode(episode_id)
-
-    # todo: ensure given audio and episode belong together
+    audio = episode.audio
 
     json(conn, config(conn, %{audio: audio, episode: episode}))
   end
 
-  def show(conn, %{"audio_id" => audio_id}) do
+  def audio_config(conn, %{"audio_id" => audio_id}) do
     audio = Directory.get_audio(audio_id)
 
     # todo: handle invalid audio id
@@ -37,6 +35,10 @@ defmodule RadiatorWeb.PlayerController do
         subtitle: podcast.subtitle,
         summary: podcast.description,
         poster: Podcast.image_url(podcast)
+      },
+      reference: %{
+        config: Routes.player_url(conn, :episode_config, episode.id),
+        share: "//cdn.podlove.org/web-player/share.html"
       }
     })
   end
@@ -48,7 +50,7 @@ defmodule RadiatorWeb.PlayerController do
       audio: audio_files(audio),
       chapters: chapters(audio),
       reference: %{
-        config: Routes.player_url(conn, :show, audio.id),
+        config: Routes.player_url(conn, :audio_config, audio.id),
         share: "//cdn.podlove.org/web-player/share.html"
       }
     }
