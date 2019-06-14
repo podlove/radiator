@@ -21,7 +21,7 @@ defmodule RadiatorWeb.Admin.UserSettingsController do
         )
 
       true ->
-        user = Guardian.Plug.current_resource(conn)
+        user = authenticated_user(conn)
 
         case Auth.Register.update_user(user, user_map) do
           {:ok, _user} ->
