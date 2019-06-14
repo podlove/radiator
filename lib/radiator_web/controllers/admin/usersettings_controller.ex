@@ -10,36 +10,34 @@ defmodule RadiatorWeb.Admin.UserSettingsController do
   end
 
   def create(conn, params) do
-    user_map = params["user"]
+    user_params = params["user"]
 
-    cond do
-      user_map["password"] != user_map["password_repeat"] ->
-        conn
-        |> put_flash(:error, "Passwords don't match.")
-        |> render("usersettings.html",
-          changeset: Auth.Register.change_user(%Auth.User{}, user_map)
-        )
+    if user_params["password"] != user_params["password_repeat"] do
+      conn
+      |> put_flash(:error, "Passwords don't match.")
+      |> render("usersettings.html",
+        changeset: Auth.Register.change_user(%Auth.User{}, user_params)
+      )
+    else
+      user = authenticated_user(conn)
 
-      true ->
-        user = authenticated_user(conn)
+      case Auth.Register.update_user(user, user_params) do
+        {:ok, _user} ->
+          conn
+          |> put_flash(:info, "Successfully updated password.")
+          |> redirect(to: Routes.admin_network_path(conn, :index))
 
-        case Auth.Register.update_user(user, user_map) do
-          {:ok, _user} ->
-            conn
-            |> put_flash(:info, "Successfully updated password.")
-            |> redirect(to: Routes.admin_network_path(conn, :index))
+        {:error, %Ecto.Changeset{} = changeset} ->
+          conn
+          |> put_flash(:error, "There were problems updating the password.")
+          |> render("usersettings.html", changeset: changeset)
 
-          {:error, %Ecto.Changeset{} = changeset} ->
-            conn
-            |> put_flash(:error, "There were problems updating the password.")
-            |> render("usersettings.html", changeset: changeset)
-
-            conn
-            |> put_flash(:info, "success")
-            |> render("usersettings.html",
-              changeset: Auth.Register.change_user(%Auth.User{}, user_map)
-            )
-        end
+          conn
+          |> put_flash(:info, "success")
+          |> render("usersettings.html",
+            changeset: Auth.Register.change_user(%Auth.User{}, user_params)
+          )
+      end
     end
   end
 end
