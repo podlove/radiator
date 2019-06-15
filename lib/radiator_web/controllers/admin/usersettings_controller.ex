@@ -9,7 +9,7 @@ defmodule RadiatorWeb.Admin.UserSettingsController do
     render(conn, "usersettings.html", changeset: Auth.Register.change_user(%Auth.User{}))
   end
 
-  def create(conn, params) do
+  def update(conn, params) do
     user_params = params["user"]
 
     if user_params["password"] != user_params["password_repeat"] do
