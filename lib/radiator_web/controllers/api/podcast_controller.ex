@@ -24,12 +24,12 @@ defmodule RadiatorWeb.Api.PodcastController do
   end
 
   def show(conn, %{"id" => id}) do
-    podcast = Directory.get_podcast!(id)
+    podcast = Directory.get_podcast(id)
     render(conn, "show.json", podcast: podcast)
   end
 
   def update(conn, %{"id" => id, "podcast" => podcast_params}) do
-    podcast = Directory.get_podcast!(id)
+    podcast = Directory.get_podcast(id)
 
     with {:ok, %Podcast{} = podcast} <- Editor.Manager.update_podcast(podcast, podcast_params) do
       render(conn, "show.json", podcast: podcast)
@@ -37,7 +37,7 @@ defmodule RadiatorWeb.Api.PodcastController do
   end
 
   def delete(conn, %{"id" => id}) do
-    podcast = Directory.get_podcast!(id)
+    podcast = Directory.get_podcast(id)
 
     with {:ok, %Podcast{}} <- Editor.Manager.delete_podcast(podcast) do
       send_resp(conn, :no_content, "")

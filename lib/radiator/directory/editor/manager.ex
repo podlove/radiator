@@ -268,4 +268,14 @@ defmodule Radiator.Directory.Editor.Manager do
   def depublish_podcast(%Podcast{} = podcast) do
     update_podcast(podcast, %{published_at: nil})
   end
+
+  def propagate_short_id(%Podcast{} = podcast) do
+    Repo.transaction(fn ->
+      Repo.all(Ecto.assoc(podcast, :episodes))
+      |> Enum.each(fn episode ->
+        short_id = Episode.construct_short_id(episode, podcast)
+        Repo.update(Episode.changeset(episode, %{short_id: short_id}))
+      end)
+    end)
+  end
 end

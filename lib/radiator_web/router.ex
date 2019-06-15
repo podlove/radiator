@@ -31,30 +31,6 @@ defmodule RadiatorWeb.Router do
     plug RadiatorWeb.Plug.ValidateAPIUser
   end
 
-  scope "/", RadiatorWeb do
-    pipe_through :browser
-
-    get "/", PageController, :index
-
-    get "/feed/:podcast_id", FeedController, :show
-
-    get "/audio/:audio_id/player.json", PlayerController, :audio_config
-    get "/episode/:episode_id/player.json", PlayerController, :episode_config
-
-    get "/login/request_verification/:token", LoginController, :resend_verification_mail
-    get "/login/verify_email/:token", LoginController, :verify_email
-
-    get "/login", LoginController, :index
-    post "/login", LoginController, :login
-
-    get "/login_form", LoginController, :login_form
-
-    get "/signup", LoginController, :signup_form
-    post "/signup", LoginController, :signup
-
-    get "/logout", LoginController, :logout
-  end
-
   scope "/admin", RadiatorWeb.Admin, as: :admin do
     pipe_through :browser
 
@@ -90,5 +66,36 @@ defmodule RadiatorWeb.Router do
 
     forward "/graphql", Absinthe.Plug, schema: RadiatorWeb.GraphQL.Schema
     forward "/graphiql", Absinthe.Plug.GraphiQL, schema: RadiatorWeb.GraphQL.Schema
+  end
+
+  scope "/", RadiatorWeb do
+    pipe_through :browser
+
+    get "/", PageController, :index
+
+    get "/feed/:podcast_id", FeedController, :show
+
+    get "/audio/:audio_id/player.json", PlayerController, :audio_config
+    get "/episode/:episode_id/player.json", PlayerController, :episode_config
+
+    get "/login/request_verification/:token", LoginController, :resend_verification_mail
+    get "/login/verify_email/:token", LoginController, :verify_email
+
+    get "/login", LoginController, :index
+    post "/login", LoginController, :login
+
+    get "/login_form", LoginController, :login_form
+
+    get "/signup", LoginController, :signup_form
+    post "/signup", LoginController, :signup
+
+    get "/logout", LoginController, :logout
+  end
+
+  scope "/", RadiatorWeb.Public do
+    pipe_through :browser
+
+    get "/:podcast_slug/:episode_slug", EpisodeController, :show
+    get "/:podcast_slug", EpisodeController, :index
   end
 end

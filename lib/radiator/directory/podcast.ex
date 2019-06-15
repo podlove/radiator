@@ -20,6 +20,7 @@ defmodule Radiator.Directory.Podcast do
     field :subtitle, :string
     field :title, :string
     field :slug, TitleSlug.Type
+    field :short_id, :string
 
     field :episode_count, :integer, virtual: true
 
@@ -44,7 +45,8 @@ defmodule Radiator.Directory.Podcast do
       :language,
       :published_at,
       :last_built_at,
-      :slug
+      :slug,
+      :short_id
     ])
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
     |> validate_required([:title])

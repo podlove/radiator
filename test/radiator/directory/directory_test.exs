@@ -15,14 +15,13 @@ defmodule Radiator.DirectoryTest do
       assert Directory.list_podcasts() |> Repo.preload(:network) == [podcast]
     end
 
-    test "get_podcast!/1 returns the podcast with given id if it is public" do
+    test "get_podcast/1 returns the podcast with given id if it is public" do
       podcast = insert(:podcast)
-      assert Directory.get_podcast!(podcast.id) |> Repo.preload(:network) == podcast
+      assert Directory.get_podcast(podcast.id) |> Repo.preload(:network) == podcast
 
       podcast2 = insert(:unpublished_podcast)
 
-      assert_raise Ecto.NoResultsError, fn ->
-        Directory.get_podcast!(podcast2.id)
+      assert nil = Directory.get_podcast(podcast2.id)
       end
     end
 

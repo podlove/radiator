@@ -1,0 +1,38 @@
+<div class="container mx-auto mb-6 px-8">
+  <div class="mb-6 flex w-full justify-between">
+    <div>
+        <%= if @episode.image do %>
+          <img src="<%= episode_image_url(@episode) %>" class="w-24 h-24 mr-6" />
+        <% else %>
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='24' height='24' style='fill:rgb(200,200,200)' /%3E%3C/svg%3E" class="w-24 h-24 mr-6" />
+        <% end %>
+      <h1 class="text-3xl font-bold mb-1 text-blue-900">
+        <%= @episode.title %>
+      </h1>
+      <div class="max-w-m text-gray-600 font-normal text-lg mb-2">
+        <%= @episode.subtitle %>
+      </div>
+      <div class="max-w-md text-black font-normal">
+        <%= raw @episode.description %>
+      </div>
+    </div>
+    <div>
+      <%= link to: Routes.admin_network_podcast_episode_path(@conn, :edit, @episode.podcast.network_id, @episode.podcast, @episode), class: "no-underline text-blue-500" do %>
+      <div class="shadow bg-white text-blue-500 py-2 px-4 rounded-full">
+        edit
+      </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%= if length(@episode.audio.audio_files) > 0 do %>
+    <script src="//cdn.podlove.org/web-player/embed.js"></script>
+
+    <div id="preview-web-player"></div>
+
+    <script>
+    podlovePlayer('#preview-web-player', '<%= Routes.player_url(@conn, :episode_config, @episode.id) %>');
+    </script>
+  <% end %>
+
+</div>

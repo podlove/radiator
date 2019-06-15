@@ -19,6 +19,7 @@ defmodule Radiator.Directory.Episode do
     field :subtitle, :string
     field :title, :string
     field :slug, TitleSlug.Type
+    field :short_id, :string
 
     belongs_to :podcast, Podcast
     belongs_to :audio, Audio
@@ -40,6 +41,7 @@ defmodule Radiator.Directory.Episode do
       :number,
       :published_at,
       :slug,
+      :short_id,
       :podcast_id
     ])
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
@@ -49,6 +51,13 @@ defmodule Radiator.Directory.Episode do
     |> TitleSlug.unique_constraint()
 
     # todo: episode cannot be published without audio
+  end
+
+  def construct_short_id(%Episode{} = episode, %Podcast{} = podcast) do
+    podcast.short_id <>
+      (episode.number
+       |> Integer.to_string()
+       |> String.pad_leading(3, "0"))
   end
 
   @doc """
@@ -97,10 +106,22 @@ defmodule Radiator.Directory.Episode do
   end
 
   @doc """
-  Convenience accessor for image URL.
+  Convenience accessor for image URL. Use `fallback: true` to get podcast image if ther is no special episode image
   """
-  def image_url(%Episode{} = episode) do
-    Media.EpisodeImage.url({episode.image, episode})
+  def image_url(%Episode{} = episode, opts \\ []) do
+    case Media.EpisodeImage.url({episode.image, episode}) do
+      nil ->
+        case opts[:podcast] do
+          podcast = %Podcast{} ->
+            Podcast.image_url(podcast)
+
+          _ ->
+            nil
+        end
+
+      url ->
+        url
+    end
   end
 
   def regenerate_guid(changeset) do

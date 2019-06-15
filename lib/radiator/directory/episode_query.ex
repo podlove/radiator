@@ -11,6 +11,10 @@ defmodule Radiator.Directory.EpisodeQuery do
 
   * `:podcast` - only include episodes belonging to given podcast
 
+  * `:slug` - find the episode with a given slug
+
+  * `:short_id` - find the episode with a given short_id
+
   **Ordering**
 
   * `:order_by` - Sort retrieved episodes by parameter.
@@ -84,6 +88,12 @@ defmodule Radiator.Directory.EpisodeQuery do
 
       {:page, _}, query ->
         paginate(query, pagination_args)
+
+      {:slug, slug}, query ->
+        find_by_slug(query, slug)
+
+      {:short_id, short_id}, query ->
+        find_by_short_id(query, short_id)
     end)
   end
 
@@ -132,5 +142,15 @@ defmodule Radiator.Directory.EpisodeQuery do
 
   def paginate(query, _) do
     paginate(query, %{items_per_page: @default_items_per_page, page: 1})
+  end
+
+  def find_by_slug(query, slug) do
+    slug = slug |> String.downcase()
+    from(e in query, where: fragment("lower(?)", e.slug) == ^slug)
+  end
+
+  def find_by_short_id(query, short_id) do
+    short_id = short_id |> String.downcase()
+    from(e in query, where: fragment("lower(?)", e.short_id) == ^short_id)
   end
 end
