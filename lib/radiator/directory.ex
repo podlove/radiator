@@ -12,8 +12,7 @@ defmodule Radiator.Directory do
   alias Radiator.Media
   alias Radiator.Media.AudioFile
   alias Radiator.Directory.{Network, Episode, Podcast, Audio}
-  alias Radiator.Directory.PodcastQuery
-  alias Radiator.Directory.EpisodeQuery
+  alias Radiator.Directory.{PodcastQuery, EpisodeQuery, AudioQuery}
 
   def data() do
     Dataloader.Ecto.new(Repo, query: &query/2)
@@ -198,6 +197,10 @@ defmodule Radiator.Directory do
     Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files]])
   end
 
+  def preload_for_audio(audio) do
+    Repo.preload(audio, [:chapters, :audio_files])
+  end
+
   @doc """
   Gets a single episode by its slug.
 
@@ -219,6 +222,13 @@ defmodule Radiator.Directory do
     do: Support.DateTime.before_utc_now?(date)
 
   def is_published(_), do: false
+
+  def get_audio(id) do
+    Audio
+    |> AudioQuery.filter_by_published(true)
+    |> Repo.get(id)
+    |> preload_for_audio()
+  end
 
   # todo: missing verification that podcast (& network?) is published
   def get_audio_file(audio_file_id) do

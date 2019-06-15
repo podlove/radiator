@@ -26,15 +26,13 @@
   </div>
 
   <%= if length(@episode.audio.audio_files) > 0 do %>
-    <div class="card max-w-m flex justify-between items-center">
-      <%= content_tag(:div, content_tag(:a, Radiator.Directory.Episode.enclosure_url(@episode), href: Radiator.Directory.Episode.enclosure_url(@episode))) %>
-      <div>
-        <audio src="<%= Radiator.Directory.Episode.enclosure_url(@episode) %>" type="<%= Radiator.Directory.Episode.enclosure_mime_type(@episode) %>" controls></audio>
-      </div>
-      <div class="text-gray-900">
-        <%= Radiator.Directory.Episode.enclosure_byte_length(@episode) |> format_bytes() %>
-      </div>
-    </div>
+    <script src="//cdn.podlove.org/web-player/embed.js"></script>
+
+    <div id="preview-web-player"></div>
+
+    <script>
+    podlovePlayer('#preview-web-player', '<%= Routes.player_url(@conn, :episode_config, @episode.id) %>');
+    </script>
   <% end %>
 
   <%= if @episode.audio.chapters do %>
