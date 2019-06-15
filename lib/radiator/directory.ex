@@ -194,11 +194,11 @@ defmodule Radiator.Directory do
   #        provide access to entities without checking for permissions.
   #        Solution: write preloader that checks permissions.
   def preload_for_episode(episode) do
-    Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files]])
+    Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files, :contributors]])
   end
 
   def preload_for_audio(audio) do
-    Repo.preload(audio, [:chapters, :audio_files])
+    Repo.preload(audio, [:chapters, :audio_files, :contributors])
   end
 
   @doc """

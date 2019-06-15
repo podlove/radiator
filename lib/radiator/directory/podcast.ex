@@ -7,6 +7,7 @@ defmodule Radiator.Directory.Podcast do
 
   alias Radiator.Directory.{Episode, Podcast, Network, TitleSlug}
   alias Radiator.Media.PodcastImage
+  alias Radiator.Contribution
 
   schema "podcasts" do
     field :author, :string
@@ -25,6 +26,9 @@ defmodule Radiator.Directory.Podcast do
 
     belongs_to :network, Network
     has_many :episodes, Episode
+
+    has_many :contributions, Contribution.PodcastContribution
+    has_many :contributors, through: [:contributions, :person]
 
     has_many :permissions, {"podcasts_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
 

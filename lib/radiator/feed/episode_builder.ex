@@ -6,6 +6,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
   require Logger
 
   alias Radiator.Directory.{Episode, Audio}
+  alias Radiator.Contribution.Person
 
   def new(feed_data, episode) do
     element(:item, fields(feed_data, episode))
@@ -18,6 +19,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
     |> add(summary(episode))
     |> add(description(episode))
     |> add(enclosure(episode))
+    |> add(contributors(episode))
     |> add(guid(episode))
     |> add(chapters(episode))
     |> Enum.reverse()
@@ -59,6 +61,18 @@ defmodule Radiator.Feed.EpisodeBuilder do
     Logger.warn("[Feed Builder] Episode \"#{title}\" (##{id}) has no enclosure")
     nil
   end
+
+  defp contributors(%Episode{audio: %Audio{contributors: contributors}}) do
+    contributors
+    |> Enum.filter(fn %Person{public_name: name} ->
+      String.valid?(name) && String.length(name) > 0
+    end)
+    |> Enum.map(fn contributor ->
+      element(:"atom:contributor", [element(:"atom:name", contributor.public_name)])
+    end)
+  end
+
+  defp contributors(_), do: nil
 
   defp guid(%Episode{guid: guid}) do
     element(:guid, %{isPermaLink: "false"}, guid)

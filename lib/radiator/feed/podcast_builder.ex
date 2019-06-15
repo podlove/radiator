@@ -6,6 +6,7 @@ defmodule Radiator.Feed.PodcastBuilder do
   alias Radiator.Directory.Podcast
   alias Radiator.Feed.EpisodeBuilder
   alias Radiator.Feed.PagingMeta
+  alias Radiator.Contribution.Person
 
   @doc """
   See `Radiator.Feed.Builder.new/2` for parameter docs.
@@ -23,6 +24,7 @@ defmodule Radiator.Feed.PodcastBuilder do
     |> add(description(podcast))
     |> add(element(:generator, "Podlove Radiator"))
     |> add(self_reference(feed_data))
+    |> add(contributors(podcast))
     # |> add(last_build_date())
     |> Enum.reverse()
     |> Enum.concat(paging_elements(feed_data, opts))
@@ -100,4 +102,16 @@ defmodule Radiator.Feed.PodcastBuilder do
     do: element(:description, description)
 
   defp description(_), do: nil
+
+  defp contributors(%Podcast{contributors: contributors}) do
+    contributors
+    |> Enum.filter(fn %Person{public_name: name} ->
+      String.valid?(name) && String.length(name) > 0
+    end)
+    |> Enum.map(fn contributor ->
+      element(:"atom:contributor", [element(:"atom:name", contributor.public_name)])
+    end)
+  end
+
+  defp contributors(_), do: nil
 end
