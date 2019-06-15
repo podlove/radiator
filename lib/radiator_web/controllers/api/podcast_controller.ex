@@ -24,8 +24,13 @@ defmodule RadiatorWeb.Api.PodcastController do
   end
 
   def show(conn, %{"id" => id}) do
-    podcast = Directory.get_podcast(id)
-    render(conn, "show.json", podcast: podcast)
+    case Directory.get_podcast(id) do
+      nil ->
+        {:error, :not_found}
+
+      podcast = %Podcast{} ->
+        render(conn, "show.json", podcast: podcast)
+    end
   end
 
   def update(conn, %{"id" => id, "podcast" => podcast_params}) do

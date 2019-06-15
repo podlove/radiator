@@ -4,7 +4,9 @@ defmodule RadiatorWeb.Public.EpisodeController do
   require Logger
 
   alias Radiator.Directory
-  alias Radiator.Directory.{Podcast, Episode, Audio}
+  alias Radiator.Directory.{Podcast, Episode}
+
+  action_fallback RadiatorWeb.FallbackController
 
   def index(conn, %{"podcast_slug" => podcast_slug}) do
     podcast =
@@ -15,10 +17,13 @@ defmodule RadiatorWeb.Public.EpisodeController do
   end
 
   def show(conn, %{"podcast_slug" => podcast_slug, "episode_slug" => episode_slug}) do
-    podcast = Directory.get_podcast_by_slug(podcast_slug)
-
-    episode = Directory.get_episode_by_slug(podcast, episode_slug)
-
-    render(conn, "show.html", episode: episode)
+    with podcast = %Podcast{} <- Directory.get_podcast_by_slug(podcast_slug),
+         episode = %Episode{} <-
+           Directory.get_episode_by_slug(podcast, episode_slug) do
+      render(conn, "show.html", episode: episode)
+    else
+      _ ->
+        {:error, :not_found}
+    end
   end
 end

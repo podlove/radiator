@@ -166,9 +166,8 @@ defmodule RadiatorWeb.PodcastControllerTest do
       conn = delete(conn, Routes.api_podcast_path(conn, :delete, podcast))
       assert response(conn, 204)
 
-      assert_error_sent 404, fn ->
-        get(conn, Routes.api_podcast_path(conn, :show, podcast))
-      end
+      conn = get(conn, Routes.api_podcast_path(conn, :show, podcast))
+      assert response(conn, 404)
     end
   end
 

@@ -29,7 +29,14 @@ defmodule RadiatorWeb.Api.EpisodeController do
 
   def show(conn, %{"id" => id}) do
     episode = Directory.get_episode(id) |> Directory.preload_for_episode()
-    render(conn, "show.json", episode: episode)
+
+    case episode do
+      nil ->
+        {:error, :not_found}
+
+      episode ->
+        render(conn, "show.json", episode: episode)
+    end
   end
 
   def update(conn, %{"id" => id, "episode" => episode_params}) do

@@ -4,6 +4,8 @@ defmodule RadiatorWeb.Admin.NetworkController do
   alias Radiator.Directory.Network
   alias Radiator.Directory.Editor
 
+  action_fallback RadiatorWeb.FallbackController
+
   def index(conn, _params) do
     user = authenticated_user(conn)
 
