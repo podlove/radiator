@@ -43,7 +43,7 @@ defmodule Radiator.BuilderTest do
 
   describe "Radiator.Feed.Builder" do
     test "builds an RSS feed" do
-      podcast = insert(:podcast, title: "Hello World")
+      podcast = insert(:podcast, title: "Hello World") |> Repo.preload(:contributors)
 
       episode1 =
         insert(:episode, podcast: podcast, title: "Ep 001") |> Directory.preload_for_episode()
@@ -67,7 +67,7 @@ defmodule Radiator.BuilderTest do
     end
 
     test "pages feeds" do
-      podcast = insert(:podcast, title: "Hello World")
+      podcast = insert(:podcast, title: "Hello World") |> Repo.preload(:contributors)
 
       episode1 =
         insert(:episode, title: "Ep 001", podcast: podcast) |> Directory.preload_for_episode()
@@ -115,7 +115,7 @@ defmodule Radiator.BuilderTest do
     test "has atom:link self reference" do
       data =
         data_fixture(%{
-          podcast: %Podcast{id: 1, title: "Hello World"},
+          podcast: %Podcast{id: 1, title: "Hello World"} |> Repo.preload(:contributors),
           urls: %{
             self: "/dummy/self/url",
             main: "/dummy/self/url"
