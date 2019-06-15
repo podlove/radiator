@@ -5,11 +5,11 @@ defmodule RadiatorWeb.FeedControllerTest do
 
   describe "#show" do
     test "renders the podcast feed" do
-      podcast = insert(:podcast, title: "ACME Cast")
+      podcast = insert(:podcast, title: "ACME Cast", slug: "ACME")
       episode = insert(:published_episode, title: "E001", podcast: podcast)
 
       conn = build_conn()
-      conn = get(conn, Routes.feed_path(conn, :show, podcast.id))
+      conn = get(conn, Routes.feed_path(conn, :show, podcast.slug))
 
       response = response(conn, 200)
 
@@ -17,8 +17,8 @@ defmodule RadiatorWeb.FeedControllerTest do
       assert response =~ episode.title
     end
 
-    test "dows not include episodes without enclosure" do
-      podcast = insert(:podcast, title: "ACME Cast")
+    test "shows not include episodes without enclosure" do
+      podcast = insert(:podcast, title: "ACME Cast", slug: "ACME")
 
       episode =
         insert(:published_episode, title: "E001", podcast: podcast, audio: build(:empty_audio))

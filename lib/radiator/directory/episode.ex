@@ -9,6 +9,8 @@ defmodule Radiator.Directory.Episode do
   alias Radiator.Media
   alias Radiator.Directory.{Episode, Podcast, Audio, TitleSlug}
 
+  alias RadiatorWeb.Router.Helpers, as: Routes
+
   schema "episodes" do
     field :content, :string
     field :description, :string
@@ -51,6 +53,12 @@ defmodule Radiator.Directory.Episode do
     |> TitleSlug.unique_constraint()
 
     # todo: episode cannot be published without audio
+  end
+
+  def public_url(%Episode{} = episode), do: public_url(episode, episode.podcast)
+
+  def public_url(%Episode{} = episode, %Podcast{} = podcast) do
+    Routes.episode_url(RadiatorWeb.Endpoint, :show, podcast.slug, episode.slug)
   end
 
   def construct_short_id(%Episode{} = episode, %Podcast{} = podcast) do

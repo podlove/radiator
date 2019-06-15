@@ -134,11 +134,13 @@ defmodule Radiator.Directory do
   def get_episode_by_slug(%Podcast{} = podcast, slug) do
     episodes_query(%{podcast: podcast, slug: slug})
     |> Repo.one()
+    |> preload_for_episode()
   end
 
   def get_episode_by_short_id(short_id) do
     episodes_query(%{short_id: short_id})
     |> Repo.one()
+    |> preload_for_episode()
   end
 
   defp episodes_query(args) when is_map(args) do

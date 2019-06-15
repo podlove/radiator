@@ -8,6 +8,8 @@ defmodule Radiator.Directory.Podcast do
   alias Radiator.Directory.{Episode, Podcast, Network, TitleSlug}
   alias Radiator.Media.PodcastImage
 
+  alias RadiatorWeb.Router.Helpers, as: Routes
+
   schema "podcasts" do
     field :author, :string
     field :description, :string
@@ -80,5 +82,9 @@ defmodule Radiator.Directory.Podcast do
   """
   def image_url(%Podcast{} = podcast) do
     PodcastImage.url({podcast.image, podcast})
+  end
+
+  def public_url(%Podcast{} = podcast) do
+    Routes.episode_url(RadiatorWeb.Endpoint, :index, podcast.slug)
   end
 end

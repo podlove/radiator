@@ -73,8 +73,6 @@ defmodule RadiatorWeb.Router do
 
     get "/", PageController, :index
 
-    get "/feed/:podcast_id", FeedController, :show
-
     get "/audio/:audio_id/player.json", PlayerController, :audio_config
     get "/episode/:episode_id/player.json", PlayerController, :episode_config
 
@@ -95,6 +93,7 @@ defmodule RadiatorWeb.Router do
   scope "/", RadiatorWeb.Public do
     pipe_through :browser
 
+    get "/:slug/feed.xml", FeedController, :show
     get "/:podcast_slug/:episode_slug", EpisodeController, :show
     get "/:podcast_slug", EpisodeController, :index
   end

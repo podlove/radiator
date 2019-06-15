@@ -18,4 +18,11 @@ defmodule RadiatorWeb.Public.EpisodeView do
   def chapter_image_url(chapter) do
     Radiator.AudioMeta.Chapter.image_url(chapter)
   end
+
+  def format_date(datetime) do
+    Timex.Format.DateTime.Formatters.Relative.format(datetime, "{relative}")
+    |> case do
+      {:ok, result} -> result
+    end
+  end
 end

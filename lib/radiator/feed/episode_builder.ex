@@ -14,6 +14,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
   def fields(_, episode) do
     []
     |> add(element(:title, episode.title))
+    |> add(element(:link, Episode.public_url(episode)))
     |> add(subtitle(episode))
     |> add(summary(episode))
     |> add(description(episode))

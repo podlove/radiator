@@ -20,6 +20,7 @@ defmodule Radiator.Feed.PodcastBuilder do
     []
     |> add(element(:title, podcast.title))
     |> add(subtitle(podcast))
+    |> add(link(Podcast.public_url(podcast)))
     |> add(description(podcast))
     |> add(element(:generator, "Podlove Radiator"))
     |> add(self_reference(feed_data))
@@ -89,6 +90,10 @@ defmodule Radiator.Feed.PodcastBuilder do
         EpisodeBuilder.new(feed_data, episode)
       end)
     end
+  end
+
+  defp link(url) when is_binary(url) do
+    element("link", url)
   end
 
   defp subtitle(%Podcast{subtitle: subtitle}) when set?(subtitle),
