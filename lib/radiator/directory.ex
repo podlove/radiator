@@ -62,26 +62,6 @@ defmodule Radiator.Directory do
     |> Repo.all()
   end
 
-  @doc """
-  Gets a single podcast.
-
-  Raises `Ecto.NoResultsError` if the Podcast does not exist.
-
-  ## Examples
-
-      iex> get_podcast!(123)
-      %Podcast{}
-
-      iex> get_podcast!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_podcast!(id) do
-    Podcast
-    |> PodcastQuery.filter_by_published()
-    |> Repo.get!(id)
-  end
-
   def get_podcast(id) do
     Podcast
     |> PodcastQuery.filter_by_published()

@@ -7,7 +7,7 @@ defmodule RadiatorWeb.FeedController do
   @items_per_page 50
 
   def show(conn, %{"podcast_id" => id, "page" => page}) do
-    podcast = Directory.get_podcast!(id)
+    podcast = Directory.get_podcast(id)
 
     episodes =
       Directory.list_episodes(%{podcast: podcast})

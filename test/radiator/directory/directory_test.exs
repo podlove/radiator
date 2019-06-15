@@ -15,15 +15,13 @@ defmodule Radiator.DirectoryTest do
       assert Directory.list_podcasts() |> Repo.preload(:network) == [podcast]
     end
 
-    test "get_podcast!/1 returns the podcast with given id if it is public" do
+    test "get_podcast/1 returns the podcast with given id if it is public" do
       podcast = insert(:podcast)
-      assert Directory.get_podcast!(podcast.id) |> Repo.preload(:network) == podcast
+      assert Directory.get_podcast(podcast.id) |> Repo.preload(:network) == podcast
 
       podcast2 = insert(:unpublished_podcast)
 
-      assert_raise Ecto.NoResultsError, fn ->
-        Directory.get_podcast!(podcast2.id)
-      end
+      assert is_nil(Directory.get_podcast(podcast2.id))
     end
 
     test "get_episodes_count_for_podcast!/1 return the number of episodes" do
@@ -85,13 +83,13 @@ defmodule Radiator.DirectoryTest do
 
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.update_podcast(podcast, %{title: nil})
 
-      assert podcast == Directory.get_podcast!(podcast.id) |> Repo.preload(:network)
+      assert podcast == Directory.get_podcast(podcast.id) |> Repo.preload(:network)
     end
 
     test "delete_podcast/1 deletes the podcast" do
       podcast = insert(:podcast)
       assert {:ok, %Podcast{}} = Editor.Manager.delete_podcast(podcast)
-      assert_raise Ecto.NoResultsError, fn -> Directory.get_podcast!(podcast.id) end
+      assert is_nil(Directory.get_podcast(podcast.id))
     end
 
     test "change_podcast/1 returns a podcast changeset" do
@@ -162,7 +160,7 @@ defmodule Radiator.DirectoryTest do
       assert {:error, %Ecto.Changeset{}} =
                Editor.Manager.depublish_podcast(%{podcast | :title => nil})
 
-      assert %Podcast{published_at: ^published_at} = Directory.get_podcast!(podcast.id)
+      assert %Podcast{published_at: ^published_at} = Directory.get_podcast(podcast.id)
     end
   end
 
