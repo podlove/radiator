@@ -28,12 +28,16 @@ defmodule RadiatorWeb.Api.EpisodeController do
   end
 
   def show(conn, %{"id" => id}) do
-    episode = Directory.get_episode!(id) |> Directory.preload_for_episode()
-    render(conn, "show.json", episode: episode)
+    Directory.get_episode(id)
+    |> Directory.preload_for_episode()
+    |> case do
+      nil -> send_resp(conn, 404, "Not found")
+      episode -> render(conn, "show.json", episode: episode)
+    end
   end
 
   def update(conn, %{"id" => id, "episode" => episode_params}) do
-    episode = Directory.get_episode!(id)
+    episode = Directory.get_episode(id)
 
     with {:ok, %Episode{} = episode} <- Editor.Manager.update_episode(episode, episode_params) do
       render(conn, "show.json", episode: episode)
@@ -41,7 +45,7 @@ defmodule RadiatorWeb.Api.EpisodeController do
   end
 
   def delete(conn, %{"id" => id}) do
-    episode = Directory.get_episode!(id)
+    episode = Directory.get_episode(id)
 
     with {:ok, %Episode{}} <- Editor.Manager.delete_episode(episode) do
       send_resp(conn, :no_content, "")

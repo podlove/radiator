@@ -178,11 +178,11 @@ defmodule Radiator.DirectoryTest do
       assert [%Episode{id: ^episode_id}] = Directory.list_episodes()
     end
 
-    test "get_episode!/1 returns the episode with given id" do
+    test "get_episode/1 returns the episode with given id" do
       episode = insert(:published_episode)
       episode_id = episode.id
 
-      assert %Episode{id: ^episode_id} = Directory.get_episode!(episode.id)
+      assert %Episode{id: ^episode_id} = Directory.get_episode(episode.id)
     end
 
     test "get_episode_by_slug/1 returns the episode with given slug" do
@@ -233,7 +233,7 @@ defmodule Radiator.DirectoryTest do
     test "delete_episode/1 deletes the episode" do
       episode = insert(:episode)
       assert {:ok, %Episode{}} = Editor.Manager.delete_episode(episode)
-      assert_raise Ecto.NoResultsError, fn -> Directory.get_episode!(episode.id) end
+      assert is_nil(Directory.get_episode(episode.id))
     end
 
     test "change_episode/1 returns an episode changeset" do
@@ -301,7 +301,7 @@ defmodule Radiator.DirectoryTest do
       assert {:error, %Ecto.Changeset{}} =
                Editor.Manager.depublish_episode(%{episode | :title => nil})
 
-      assert %Episode{published_at: ^published_at} = Directory.get_episode!(episode.id)
+      assert %Episode{published_at: ^published_at} = Directory.get_episode(episode.id)
     end
   end
 

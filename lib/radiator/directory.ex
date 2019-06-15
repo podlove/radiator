@@ -126,27 +126,6 @@ defmodule Radiator.Directory do
     end)
   end
 
-  @doc """
-  Gets a single published episode.
-
-  Raises `Ecto.NoResultsError` if the Episode does not exist.
-
-  ## Examples
-
-      iex> get_episode!(123)
-      %Episode{}
-
-      iex> get_episode!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_episode!(id) do
-    Episode
-    |> EpisodeQuery.filter_by_published(true)
-    |> Repo.get!(id)
-    |> preload_for_episode()
-  end
-
   def get_episode(id) do
     Episode
     |> EpisodeQuery.filter_by_published(true)
