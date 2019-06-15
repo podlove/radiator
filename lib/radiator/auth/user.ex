@@ -45,6 +45,7 @@ defmodule Radiator.Auth.User do
     |> validate_format(:name, ~r/^[^\s ]+$/)
     |> validate_format(:email, ~r/^\S+@\S+$/)
     |> validate_length(:name, min: 2, max: 99)
+    |> validate_length(:password, min: 2)
     |> validate_required([:email, :name])
     |> encrypt_password
     |> validate_required([:password_hash])
