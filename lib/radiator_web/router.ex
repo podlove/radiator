@@ -38,6 +38,9 @@ defmodule RadiatorWeb.Router do
 
     get "/feed/:podcast_id", FeedController, :show
 
+    # temporary web player routes
+    # long term, these should be similar to the public episode routes,
+    # not containing database IDs
     get "/audio/:audio_id/player.json", PlayerController, :audio_config
     get "/episode/:episode_id/player.json", PlayerController, :episode_config
 
