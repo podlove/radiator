@@ -2,6 +2,11 @@
   <div class="card">
   <%= form_for @changeset, Routes.admin_user_settings_path(@conn, :update), [], fn f -> %>
       <div class="mb-6">
+        <%= label f, "Current Password", class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>
+        <%= password_input f, :password_current, class: "input", placeholder: "" %>
+        <%= error_tag f, :password_hash %>
+      </div>
+      <div class="mb-6">
         <%= label f, "New Password", class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>
         <%= password_input f, :password, class: "input", placeholder: "" %>
         <%= error_tag f, :password_hash %>
