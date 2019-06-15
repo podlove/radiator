@@ -328,9 +328,9 @@ defmodule Radiator.DirectoryTest do
       assert Directory.list_networks() == [network]
     end
 
-    test "get_network!/1 returns the network with given id" do
+    test "get_network/1 returns the network with given id" do
       network = network_fixture()
-      assert Directory.get_network!(network.id) == network
+      assert Directory.get_network(network.id) == network
     end
 
     test "get_network_by_slug/1 returns the network with given slug" do
@@ -372,13 +372,13 @@ defmodule Radiator.DirectoryTest do
     test "update_network/2 with invalid data returns error changeset" do
       network = network_fixture()
       assert {:error, %Ecto.Changeset{}} = Editor.Owner.update_network(network, @invalid_attrs)
-      assert network == Directory.get_network!(network.id)
+      assert network == Directory.get_network(network.id)
     end
 
     test "delete_network/1 deletes the network" do
       network = network_fixture()
       assert {:ok, %Network{}} = Editor.Owner.delete_network(network)
-      assert_raise Ecto.NoResultsError, fn -> Directory.get_network!(network.id) end
+      assert is_nil(Directory.get_network(network.id))
     end
   end
 

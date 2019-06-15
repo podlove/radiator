@@ -31,22 +31,6 @@ defmodule Radiator.Directory do
     Repo.all(Network)
   end
 
-  @doc """
-  Gets a single network.
-
-  Raises `Ecto.NoResultsError` if the Network does not exist.
-
-  ## Examples
-
-      iex> get_network!(123)
-      %Network{}
-
-      iex> get_network!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_network!(id), do: Repo.get!(Network, id)
-
   def get_network(id), do: Repo.get(Network, id)
 
   @doc """
