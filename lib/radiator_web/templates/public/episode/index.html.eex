@@ -24,7 +24,7 @@
 </div>
 
   <%= for episode <- @episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-blue-100" do %>
+    <%= link to: episode_public_url(episode, @podcast), class: "block no-underline card mb-1 hover:bg-blue-100" do %>
       <%= render("_episode_entry.html", podcast: @podcast, episode: episode) %>
     <% end %>
   <% end %>

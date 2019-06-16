@@ -114,7 +114,7 @@ defmodule Radiator.Directory.Episode do
   end
 
   @doc """
-  Convenience accessor for image URL. Use `fallback: true` to get podcast image if ther is no special episode image
+  Convenience accessor for image URL. Use `podcast: podcast` to get podcast image if ther is no special episode image
   """
   def image_url(%Episode{} = episode, opts \\ []) do
     case Media.EpisodeImage.url({episode.image, episode}) do

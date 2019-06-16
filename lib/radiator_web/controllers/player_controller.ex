@@ -6,19 +6,23 @@ defmodule RadiatorWeb.PlayerController do
   alias Radiator.Media.AudioFile
   alias Radiator.AudioMeta.Chapter
 
-  def episode_config(conn, %{"episode_id" => episode_id}) do
-    episode = Directory.get_episode(episode_id)
-    audio = episode.audio
+  action_fallback RadiatorWeb.Api.FallbackController
 
-    json(conn, config(conn, %{audio: audio, episode: episode}))
+  def episode_config(conn, %{"episode_id" => episode_id}) do
+    with episode = %Episode{} <- Directory.get_episode(episode_id),
+         audio <- episode.audio do
+      json(conn, config(conn, %{audio: audio, episode: episode}))
+    else
+      _ -> {:error, :not_found}
+    end
   end
 
   def audio_config(conn, %{"audio_id" => audio_id}) do
-    audio = Directory.get_audio(audio_id)
-
-    # todo: handle invalid audio id
-
-    json(conn, config(conn, %{audio: audio}))
+    with audio = %Audio{} <- Directory.get_audio(audio_id) do
+      json(conn, config(conn, %{audio: audio}))
+    else
+      _ -> {:error, :not_found}
+    end
   end
 
   def config(conn, %{audio: audio, episode: episode}) do
@@ -29,16 +33,22 @@ defmodule RadiatorWeb.PlayerController do
       title: episode.title,
       subtitle: episode.subtitle,
       summary: episode.description,
-      poster: Episode.image_url(episode),
+      poster: Episode.image_url(episode, %{podcast: podcast}),
+      link: Episode.public_url(episode, podcast),
+      publicationDate: DateTime.to_iso8601(episode.published_at),
       show: %{
         title: podcast.title,
         subtitle: podcast.subtitle,
         summary: podcast.description,
-        poster: Podcast.image_url(podcast)
+        poster: Podcast.image_url(podcast),
+        link: Podcast.public_url(podcast)
       },
       reference: %{
         config: Routes.player_url(conn, :episode_config, episode.id),
         share: "//cdn.podlove.org/web-player/share.html"
+      },
+      theme: %{
+        main: podcast.main_color
       }
     })
   end

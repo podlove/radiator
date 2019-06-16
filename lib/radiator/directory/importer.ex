@@ -7,6 +7,36 @@ defmodule Radiator.Directory.Importer do
 
   require Logger
 
+  def short_id_from_metalove_podcast(%Metalove.PodcastFeed{} = feed) do
+    metalove_episodes =
+      feed.episodes
+      |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
+
+    # common title?
+    titles =
+      metalove_episodes
+      |> Enum.map(fn episode ->
+        episode.title
+      end)
+
+    case :binary.longest_common_prefix(titles) do
+      length when length >= 2 ->
+        titles
+        |> hd
+        |> String.slice(0, length)
+        |> only_first_alphas()
+
+      _ ->
+        feed.title
+        |> String.slice(0, 3)
+        |> String.upcase()
+    end
+  end
+
+  defp only_first_alphas(binary) do
+    hd(Regex.run(~r/[\w]+/, hd(Regex.run(~r/[\D]+/, binary))))
+  end
+
   def import_from_url(user = %Auth.User{}, network = %Network{}, url) do
     metalove_podcast = Metalove.get_podcast(url)
 
@@ -16,6 +46,9 @@ defmodule Radiator.Directory.Importer do
         120_000
       )
 
+    # deduce short_id
+    short_id = short_id_from_metalove_podcast(feed)
+
     {:ok, podcast} =
       Editor.create_podcast(user, network, %{
         title: feed.title,
@@ -23,7 +56,8 @@ defmodule Radiator.Directory.Importer do
         author: feed.author,
         description: feed.description,
         image: feed.image_url,
-        language: feed.language
+        language: feed.language,
+        short_id: short_id
       })
 
     {:ok, podcast} = Editor.publish_podcast(user, podcast)

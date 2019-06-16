@@ -36,9 +36,8 @@ defmodule Radiator.Directory.Editor.Manager do
     {update_attrs, insert_attrs} = Map.split(attrs, [:image])
 
     insert =
-      %Podcast{}
+      %Podcast{network_id: network.id}
       |> Podcast.changeset(insert_attrs)
-      |> Ecto.Changeset.put_assoc(:network, network)
 
     Multi.new()
     |> Multi.insert(:podcast, insert)
@@ -80,9 +79,9 @@ defmodule Radiator.Directory.Editor.Manager do
 
   """
   def create_episode(%Podcast{} = podcast, attrs \\ %{}) do
-    %Episode{}
+    # always do it this way so the id is present in the validations
+    %Episode{podcast_id: podcast.id}
     |> Episode.changeset(attrs)
-    |> Ecto.Changeset.put_assoc(:podcast, podcast)
     |> Repo.insert()
   end
 

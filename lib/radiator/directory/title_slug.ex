@@ -12,6 +12,16 @@ defmodule Radiator.Directory.TitleSlug do
     [title]
   end
 
+  # for Podcast Changesets get the short_id if present, otherwise the title
+  def get_sources(%Ecto.Changeset{data: %Podcast{}} = changeset, _opts) do
+    [
+      case get_field(changeset, :short_id) do
+        nil -> get_field(changeset, :title)
+        short_id -> short_id
+      end
+    ]
+  end
+
   # for other Changesets only get the title when a `published_at` is set
   def get_sources(changeset, _opts) do
     case get_change(changeset, :published_at) do

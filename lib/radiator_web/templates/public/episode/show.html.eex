@@ -1,11 +1,11 @@
 <div class="container mx-auto mb-6 px-8">
+      <h1 class="text-3xl font-bold mb-1 text-blue-900">
+        <%= link(@current_podcast.title, to: podcast_public_url(@current_podcast)) %>
+      </h1>
+  
   <div class="mb-6 flex w-full justify-between">
     <div>
-        <%= if @episode.image do %>
-          <img src="<%= episode_image_url(@episode) %>" class="w-24 h-24 mr-6" />
-        <% else %>
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='24' height='24' style='fill:rgb(200,200,200)' /%3E%3C/svg%3E" class="w-24 h-24 mr-6" />
-        <% end %>
+        <img src="<%= episode_image_url(@episode, @current_podcast) %>" class="w-24 h-24 mr-6" />
       <h1 class="text-3xl font-bold mb-1 text-blue-900">
         <%= @episode.title %>
       </h1>
@@ -17,7 +17,6 @@
       </div>
     </div>
   </div>
-
   <%= if length(@episode.audio.audio_files) > 0 do %>
     <script src="//cdn.podlove.org/web-player/embed.js"></script>
 
@@ -28,4 +27,7 @@
     </script>
   <% end %>
 
+</div>
+<div class="container mx-auto mb-6 px-8">
+<%= raw(@episode.content) %>
 </div>

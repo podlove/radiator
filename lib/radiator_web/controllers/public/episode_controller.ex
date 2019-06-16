@@ -22,8 +22,8 @@ defmodule RadiatorWeb.Public.EpisodeController do
 
   def index(_, _, _), do: {:error, :not_found}
 
-  def show(conn, _params, %{current_episode: episode}) do
-    render(conn, "show.html", episode: episode)
+  def show(conn, _params, %{current_podcast: podcast, current_episode: episode}) do
+    render(conn, "show.html", episode: episode, podcast: podcast)
   end
 
   def show(_, _, _), do: {:error, :not_found}
