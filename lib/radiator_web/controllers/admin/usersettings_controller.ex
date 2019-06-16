@@ -16,30 +16,16 @@ defmodule RadiatorWeb.Admin.UserSettingsController do
 
     case User.check_password(user, user_params["password_current"]) do
       {:ok, _} ->
-        if user_params["password"] != user_params["password_repeat"] do
-          conn
-          |> put_flash(:error, "Passwords don't match.")
-          |> render("usersettings.html",
-            changeset: Auth.Register.change_user(%Auth.User{}, user_params)
-          )
-        else
-          case Auth.Register.update_user(user, user_params) do
-            {:ok, _user} ->
-              conn
-              |> put_flash(:info, "Successfully updated password.")
-              |> redirect(to: Routes.admin_network_path(conn, :index))
+        case Auth.Register.change_password(user, user_params) do
+          {:ok, _user} ->
+            conn
+            |> put_flash(:info, "Successfully updated password.")
+            |> redirect(to: Routes.admin_network_path(conn, :index))
 
-            {:error, %Ecto.Changeset{} = changeset} ->
-              conn
-              |> put_flash(:error, "There were problems updating the password.")
-              |> render("usersettings.html", changeset: changeset)
-
-              conn
-              |> put_flash(:info, "success")
-              |> render("usersettings.html",
-                changeset: Auth.Register.change_user(%Auth.User{}, user_params)
-              )
-          end
+          {:error, %Ecto.Changeset{} = changeset} ->
+            conn
+            |> put_flash(:error, "There were problems updating the password.")
+            |> render("usersettings.html", changeset: changeset)
         end
 
       {:error, msg} ->

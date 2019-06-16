@@ -12,8 +12,9 @@
         <%= error_tag f, :password%>
       </div>
       <div class="mb-6">
-        <%= label f, "Repeat new Password", class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>
-        <%= password_input f, :password_repeat, class: "input", placeholder: "" %>
+        <%= label f, "Confirm new Password", class: "font-bold text-sm text-grey-darker uppercase tracking-wide mb-2 block" %>
+        <%= password_input f, :password_confirmation, class: "input", placeholder: "" %>
+        <%= error_tag f, :password_confirmation%>
       </div>
       <%= submit "Change Password", class: "btn btn-blue" %>
   
