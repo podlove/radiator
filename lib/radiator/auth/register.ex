@@ -51,7 +51,7 @@ defmodule Radiator.Auth.Register do
 
   def change_password(%User{} = user, attrs) do
     user
-    |> User.change_password_changelog(attrs)
+    |> User.change_password_changeset(attrs)
     |> Repo.update()
   end
 end

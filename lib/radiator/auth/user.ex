@@ -52,7 +52,7 @@ defmodule Radiator.Auth.User do
     |> validate_required([:password_hash])
   end
 
-  def change_password_changelog(%User{} = user, attrs) do
+  def change_password_changeset(%User{} = user, attrs) do
     user
     |> cast(attrs, [:password, :password_confirmation])
     |> validate_required([:password, :password_confirmation])
