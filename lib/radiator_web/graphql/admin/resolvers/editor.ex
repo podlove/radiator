@@ -5,6 +5,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   alias Radiator.Directory.{Episode, Podcast, Network, Audio}
   alias Radiator.AudioMeta
   alias Radiator.Media
+  alias Radiator.Auth.User
 
   @doc """
   Get network with user and do something with it or return error.
@@ -100,6 +101,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         @not_authorized_match -> @not_authorized_response
       end
     end
+  end
+
+  def find_user(_, _, %{context: %{authenticated_user: user}}) do
+    {:ok, user}
   end
 
   def list_networks(_parent, _args, %{context: %{authenticated_user: user}}) do
@@ -300,6 +305,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def get_image_url(network = %Network{}, _, _) do
     {:ok, Media.NetworkImage.url({network.image, network})}
+  end
+
+  def get_image_url(%User{person: person}, _, _) do
+    {:ok, Media.PersonAvatar.url({person.avatar, person})}
   end
 
   def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{authenticated_user: user}}) do

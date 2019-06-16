@@ -64,11 +64,11 @@ defmodule Radiator.Feed.EpisodeBuilder do
 
   defp contributors(%Episode{audio: %Audio{contributors: contributors}}) do
     contributors
-    |> Enum.filter(fn %Person{public_name: name} ->
+    |> Enum.filter(fn %Person{display_name: name} ->
       String.valid?(name) && String.length(name) > 0
     end)
     |> Enum.map(fn contributor ->
-      element(:"atom:contributor", [element(:"atom:name", contributor.public_name)])
+      element(:"atom:contributor", [element(:"atom:name", contributor.display_name)])
     end)
   end
 

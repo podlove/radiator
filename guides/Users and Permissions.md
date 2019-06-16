@@ -4,7 +4,7 @@ Radiator offers a multi-tenancy architecture with global permissions to access/m
 
 ## Authentication Model
 
-Users are managed in the `Radiator.Auth.*` submodules. We have a minimal `Radiator.Auth.User` schema with `id, name, display_name, email, password_hash`. These users should be accessed, created, modified, checked using the `Radiator.Auth.Directory` context. The name can't be changed easily, `email` and `display_name` can be. Both `name` and `email` must be unique and present.  
+Users are managed in the `Radiator.Auth.*` submodules. We have a minimal `Radiator.Auth.User` schema with `id, name, email, password_hash`. These users should be accessed, created, modified, checked using the `Radiator.Auth.Directory` context. The name can't be changed easily, `email` can be. Both `name` and `email` must be unique and present.  
 
 Other (internal and external) parts of Radiator must use a relation to a `Radiator.Auth.User` to drive their authorization and permission model.
 

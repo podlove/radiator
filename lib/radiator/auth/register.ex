@@ -6,11 +6,28 @@ defmodule Radiator.Auth.Register do
   alias Radiator.Repo
   alias Radiator.Auth.User
 
-  def get_user(id), do: Repo.get!(User, id)
+  def get_user(id),
+    do:
+      Repo.get!(User, id)
+      |> preload()
 
-  def get_user_by_email(email), do: email |> User.by_email_query() |> Repo.one()
+  def get_user_by_email(email),
+    do:
+      email
+      |> User.by_email_query()
+      |> Repo.one()
+      |> preload()
 
-  def get_user_by_name(name), do: name |> User.by_name_query() |> Repo.one()
+  def get_user_by_name(name),
+    do:
+      name
+      |> User.by_name_query()
+      |> Repo.one()
+      |> preload()
+
+  def preload(user) do
+    Repo.preload(user, :person)
+  end
 
   def get_user_by_credentials(name_or_email, password) do
     max_id = User.max_reserved_user_id()
@@ -31,8 +48,12 @@ defmodule Radiator.Auth.Register do
   end
 
   def create_user(attrs \\ %{}) do
+    {person_attrs, user_attrs} =
+      Map.split(attrs, [:real_name, :display_name, :nick_name, :gender, :avatar])
+
     %User{}
-    |> User.changeset(attrs)
+    |> User.changeset(user_attrs)
+    |> Ecto.Changeset.put_assoc(:person, person_attrs)
     |> Repo.insert()
   end
 
