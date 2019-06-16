@@ -9,5 +9,4 @@
       button_text: "Signup"})
       %>
 
-    <%= submit @button_text, class: "btn btn-blue" %>
 </div>

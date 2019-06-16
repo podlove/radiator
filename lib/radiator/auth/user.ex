@@ -53,8 +53,6 @@ defmodule Radiator.Auth.User do
   end
 
   def change_password_changelog(%User{} = user, attrs) do
-    IO.inspect(attrs)
-
     user
     |> cast(attrs, [:password, :password_confirmation])
     |> validate_required([:password, :password_confirmation])
@@ -67,8 +65,6 @@ defmodule Radiator.Auth.User do
   defp password_and_confirmation_matches(changeset) do
     password = get_change(changeset, :password)
     password_confirmation = get_change(changeset, :password_confirmation)
-
-    IO.puts("Password: #{password}, COnfirmation: #{password_confirmation}")
 
     if password == password_confirmation do
       changeset
