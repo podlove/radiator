@@ -9,6 +9,16 @@ defmodule RadiatorWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :public_browser do
+    plug :accepts, ["html", "xml", "rss"]
+    plug :fetch_session
+    plug :fetch_flash
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+
+    plug RadiatorWeb.Plug.AssignFromPublicSlugs
+  end
+
   @otp_app Mix.Project.config()[:app]
 
   pipeline :authenticated_browser do
@@ -91,9 +101,9 @@ defmodule RadiatorWeb.Router do
   end
 
   scope "/", RadiatorWeb.Public do
-    pipe_through :browser
+    pipe_through :public_browser
 
-    get "/:slug/feed.xml", FeedController, :show
+    get "/:podcast_slug/feed.xml", FeedController, :show
     get "/:podcast_slug/:episode_slug", EpisodeController, :show
     get "/:podcast_slug", EpisodeController, :index
   end

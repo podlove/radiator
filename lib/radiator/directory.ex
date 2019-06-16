@@ -128,8 +128,8 @@ defmodule Radiator.Directory do
 
   ## Examples
 
-      iex> get_episode_by_slug(slug)
-      %Podcast{}
+      iex> get_episode_by_slug(podcast, slug)
+      %Episode{}
   """
   def get_episode_by_slug(%Podcast{} = podcast, slug) do
     episodes_query(%{podcast: podcast, slug: slug})
@@ -209,17 +209,6 @@ defmodule Radiator.Directory do
   def preload_episodes(podcast = %Podcast{}) do
     %{podcast | episodes: list_episodes(%{podcast: podcast, order_by: :number, order: :desc})}
   end
-
-  @doc """
-  Gets a single episode by its slug.
-
-  ## Examples
-
-      iex> get_episode_by_slug(slug)
-      {:ok, %Episode{}}
-  """
-  def get_episode_by_slug(slug),
-    do: Repo.get_by(Episode, %{slug: slug}) |> preload_for_episode()
 
   def is_published(%Podcast{published_at: nil}), do: false
   def is_published(%Episode{published_at: nil}), do: false

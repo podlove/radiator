@@ -2,7 +2,6 @@ defmodule RadiatorWeb.Public.FeedController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
-  alias Radiator.Directory.Podcast
   alias Radiator.Feed.Builder
 
   @items_per_page 50
@@ -11,10 +10,14 @@ defmodule RadiatorWeb.Public.FeedController do
 
   require Logger
 
-  def show(conn, %{"slug" => slug, "page" => page}) do
-    with podcast = %Podcast{} <- Directory.get_podcast_by_slug(slug),
-         episodes <-
-           Directory.list_episodes(%{podcast: podcast})
+  def action(conn, _) do
+    args = [conn, conn.params, conn.assigns]
+    apply(__MODULE__, action_name(conn), args)
+  end
+
+  def show(conn, %{"page" => page}, %{current_podcast: podcast}) do
+    with episodes <-
+           Directory.list_episodes(%{podcast: podcast, order_by: :number, order: :desc})
            |> Directory.reject_invalid_episodes(),
          page <- String.to_integer(page) do
       # I wonder where I could extract that to.
@@ -47,10 +50,9 @@ defmodule RadiatorWeb.Public.FeedController do
     end
   end
 
+  def show(_, %{"page" => _page}, _), do: {:error, :not_found}
   # todo: enforce canonical URL when ?page=1 is set
-  def show(conn, params) do
-    show(conn, Map.put(params, "page", "1"))
-  end
+  def show(conn, params, assigns), do: show(conn, Map.put(params, "page", "1"), assigns)
 
   defp self_url(conn, podcast) do
     Routes.feed_url(conn, :show, podcast.slug)

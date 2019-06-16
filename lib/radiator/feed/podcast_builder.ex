@@ -24,6 +24,7 @@ defmodule Radiator.Feed.PodcastBuilder do
     |> add(description(podcast))
     |> add(element(:generator, "Podlove Radiator"))
     |> add(self_reference(feed_data))
+    |> add(publication_date(podcast))
     # |> add(last_build_date())
     |> Enum.reverse()
     |> Enum.concat(paging_elements(feed_data, opts))
@@ -105,4 +106,7 @@ defmodule Radiator.Feed.PodcastBuilder do
     do: element(:description, description)
 
   defp description(_), do: nil
+
+  defp publication_date(%Podcast{published_at: published_at}),
+    do: element(:pubDate, Timex.format!(published_at, "{RFC822}"))
 end

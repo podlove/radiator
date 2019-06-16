@@ -28,9 +28,16 @@ defmodule Radiator.Directory.TitleSlug do
   def build_slug(sources, changeset) do
     lookup_fn =
       case changeset.data do
-        %Podcast{} -> &Directory.get_podcast_by_slug/1
-        %Episode{} -> &Directory.get_episode_by_slug/1
-        %Network{} -> &Directory.get_network_by_slug/1
+        %Podcast{} ->
+          &Directory.get_podcast_by_slug/1
+
+        %Episode{podcast_id: podcast_id} ->
+          fn slug ->
+            Directory.get_episode_by_slug(Directory.get_podcast(podcast_id), slug)
+          end
+
+        %Network{} ->
+          &Directory.get_network_by_slug/1
       end
 
     sources

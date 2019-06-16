@@ -16,11 +16,13 @@ defmodule Radiator.Feed.EpisodeBuilder do
     |> add(element(:title, episode.title))
     |> add(element(:link, Episode.public_url(episode)))
     |> add(subtitle(episode))
+    |> add(publication_date(episode))
     |> add(summary(episode))
     |> add(description(episode))
     |> add(enclosure(episode))
     |> add(guid(episode))
     |> add(chapters(episode))
+    |> add(content(episode))
     |> Enum.reverse()
   end
 
@@ -38,6 +40,11 @@ defmodule Radiator.Feed.EpisodeBuilder do
     do: element(:description, description)
 
   defp description(_), do: nil
+
+  defp content(%Episode{content: content}) when set?(content),
+    do: element("content:encoded", {:cdata, content})
+
+  defp content(_), do: nil
 
   # thought: it might be useful to build in validation while building.
   # For example, either I return {:ok, element} or {:error, reason}.
@@ -85,6 +92,9 @@ defmodule Radiator.Feed.EpisodeBuilder do
   end
 
   defp chapters(_), do: nil
+
+  defp publication_date(%Episode{published_at: published_at}),
+    do: element(:pubDate, Timex.format!(published_at, "{RFC822}"))
 
   defp maybe_put(map, _key, nil), do: map
   defp maybe_put(map, key, value), do: Map.put(map, key, value)
