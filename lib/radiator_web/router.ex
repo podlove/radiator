@@ -53,6 +53,9 @@ defmodule RadiatorWeb.Router do
 
       resources "/import", PodcastImportController, only: [:new, :create]
     end
+
+    get "/usersettings", UserSettingsController, :index
+    post "/usersettings", UserSettingsController, :update
   end
 
   scope "/download", RadiatorWeb do

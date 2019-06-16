@@ -31,6 +31,7 @@ steps:
       DB_HOST: "database"
       MIX_ENV: "test"
     commands:
+      - mix format --check-formatted
       - mix ua_inspector.download --force
       - mix test
 
