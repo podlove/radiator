@@ -21,7 +21,7 @@ defmodule Radiator.DirectoryTest do
 
       podcast2 = insert(:unpublished_podcast)
 
-      assert nil == Directory.get_podcast(podcast2.id)
+      assert is_nil(Directory.get_podcast(podcast2.id))
     end
 
     test "get_episodes_count_for_podcast!/1 return the number of episodes" do
@@ -64,20 +64,6 @@ defmodule Radiator.DirectoryTest do
       assert podcast.subtitle == "some updated subtitle"
     end
 
-    test "update_podcast/2 doesn't generate slug when published_at is not set" do
-      podcast = insert(:podcast)
-
-      {:ok, updated_podcast} =
-        Editor.Manager.update_podcast(podcast, %{title: "some updated podcast title"})
-
-      assert updated_podcast.slug == nil
-
-      {:ok, published_podcast} =
-        Editor.Manager.update_podcast(updated_podcast, %{published_at: DateTime.utc_now()})
-
-      assert String.length(published_podcast.slug) > 0
-    end
-
     test "update_podcast/2 with invalid data returns error changeset" do
       podcast = insert(:podcast)
 
@@ -89,7 +75,7 @@ defmodule Radiator.DirectoryTest do
     test "delete_podcast/1 deletes the podcast" do
       podcast = insert(:podcast)
       assert {:ok, %Podcast{}} = Editor.Manager.delete_podcast(podcast)
-      assert nil == Directory.get_podcast(podcast.id)
+      assert is_nil(Directory.get_podcast(podcast.id))
     end
 
     test "change_podcast/1 returns a podcast changeset" do
@@ -189,7 +175,8 @@ defmodule Radiator.DirectoryTest do
       episode = insert(:published_episode, slug: "episode-foo-bar-baz")
       episode_id = episode.id
 
-      assert %Episode{id: ^episode_id} = Directory.get_episode_by_slug(episode.slug)
+      assert %Episode{id: ^episode_id} =
+               Directory.get_episode_by_slug(episode.podcast_id, episode.slug)
     end
 
     test "create_episode/1 with valid data creates an episode" do
@@ -233,7 +220,7 @@ defmodule Radiator.DirectoryTest do
     test "delete_episode/1 deletes the episode" do
       episode = insert(:episode)
       assert {:ok, %Episode{}} = Editor.Manager.delete_episode(episode)
-      assert nil == Directory.get_episode(episode.id)
+      assert is_nil(Directory.get_episode(episode.id))
     end
 
     test "change_episode/1 returns an episode changeset" do
@@ -258,24 +245,35 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "publish_episode/1 generates sequential slugs" do
+      podcast = insert(:podcast)
+
       {:ok, existing_episode} =
-        insert(:episode)
+        insert(:episode, %{podcast: podcast})
         |> Editor.Manager.publish_episode()
 
       {:ok, published_episode1} =
-        insert(:episode, title: existing_episode.title)
+        insert(:episode,
+          title: existing_episode.title,
+          podcast: podcast
+        )
         |> Editor.Manager.publish_episode()
 
       assert published_episode1.slug == "#{existing_episode.slug}-1"
 
       {:ok, published_episode2} =
-        insert(:episode, title: existing_episode.title)
+        insert(:episode,
+          title: existing_episode.title,
+          podcast: podcast
+        )
         |> Editor.Manager.publish_episode()
 
       assert published_episode2.slug == "#{existing_episode.slug}-2"
 
       {:ok, published_episode3} =
-        insert(:episode, title: existing_episode.title)
+        insert(:episode,
+          title: existing_episode.title,
+          podcast: podcast
+        )
         |> Editor.Manager.publish_episode()
 
       assert published_episode3.slug == "#{existing_episode.slug}-3"
@@ -376,7 +374,7 @@ defmodule Radiator.DirectoryTest do
     test "delete_network/1 deletes the network" do
       network = network_fixture()
       assert {:ok, %Network{}} = Editor.Owner.delete_network(network)
-      assert nil == Directory.get_network(network.id)
+      assert is_nil(Directory.get_network(network.id))
     end
   end
 

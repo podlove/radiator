@@ -97,8 +97,12 @@ defmodule Radiator.Directory.EpisodeQuery do
     end)
   end
 
+  def filter_by_podcast(query, podcast_id) when is_integer(podcast_id) do
+    from(e in query, where: e.podcast_id == ^podcast_id)
+  end
+
   def filter_by_podcast(query, %Podcast{} = podcast) do
-    from(e in query, where: e.podcast_id == ^podcast.id)
+    filter_by_podcast(query, podcast.id)
   end
 
   def filter_by_published(query, true) do

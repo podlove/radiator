@@ -28,13 +28,6 @@ defmodule Radiator.Directory.TitleSlugTest do
       assert [^title] = TitleSlug.get_sources(changeset, [])
     end
 
-    test "returns nil, for Podcast without published_at" do
-      podcast = insert(:podcast)
-      changeset = Podcast.changeset(podcast, %{})
-
-      assert nil == TitleSlug.get_sources(changeset, [])
-    end
-
     test "returns nil, for Episode without published_at" do
       episode = insert(:episode)
       changeset = Episode.changeset(episode, %{})
@@ -97,7 +90,7 @@ defmodule Radiator.Directory.TitleSlugTest do
       assert "sequential-podcast-slug-test-1" == TitleSlug.build_slug(sources, changeset)
     end
 
-    test "generates sequential slug, when there is already an Episode using the original" do
+    test "generates sequential slug, when there is already an Episode using the original for the same podcast" do
       existing_episode =
         insert(:episode, %{
           title: "Sequential Episode Slug Test",
@@ -107,7 +100,10 @@ defmodule Radiator.Directory.TitleSlugTest do
 
       changeset =
         insert(:episode, title: existing_episode.title)
-        |> Episode.changeset(%{published_at: DateTime.utc_now()})
+        |> Episode.changeset(%{
+          published_at: DateTime.utc_now(),
+          podcast_id: existing_episode.podcast_id
+        })
 
       sources = TitleSlug.get_sources(changeset, [])
 

@@ -43,40 +43,62 @@ defmodule Radiator.BuilderTest do
 
   describe "Radiator.Feed.Builder" do
     test "builds an RSS feed" do
-      podcast = insert(:podcast, title: "Hello World")
+      podcast =
+        insert(:podcast, title: "Hello World", slug: "hw", published_at: DateTime.utc_now())
 
-      episode1 =
-        insert(:episode, podcast: podcast, title: "Ep 001") |> Directory.preload_for_episode()
+      insert_episode = fn number ->
+        number_string =
+          number
+          |> to_string
+          |> String.pad_leading(3, "0")
 
-      episode2 =
-        insert(:episode, podcast: podcast, title: "Ep 002") |> Directory.preload_for_episode()
+        insert(:episode,
+          title: "Ep #{number_string}",
+          podcast: podcast,
+          slug: "hw#{number_string}",
+          published_at: DateTime.utc_now()
+        )
+      end
+
+      episodes =
+        1..4
+        |> Enum.map(insert_episode)
 
       data =
         data_fixture(%{
           podcast: podcast,
-          episodes: [
-            episode1,
-            episode2
-          ]
+          episodes: episodes
         })
 
       rss = build_xml(data)
 
       assert "Hello World" == xpath(rss, ~x"//rss/channel/title/text()"s)
-      assert ["Ep 001", "Ep 002"] == xpath(rss, ~x"//rss/channel/item/title/text()"sl)
+
+      assert Enum.map(episodes, fn ep -> ep.title end) ==
+               xpath(rss, ~x"//rss/channel/item/title/text()"sl)
     end
 
     test "pages feeds" do
-      podcast = insert(:podcast, title: "Hello World")
+      podcast =
+        insert(:podcast, title: "Hello World", slug: "hw", published_at: DateTime.utc_now())
 
-      episode1 =
-        insert(:episode, title: "Ep 001", podcast: podcast) |> Directory.preload_for_episode()
+      insert_episode = fn number ->
+        number_string =
+          number
+          |> to_string
+          |> String.pad_leading(3, "0")
 
-      episode2 =
-        insert(:episode, title: "Ep 002", podcast: podcast) |> Directory.preload_for_episode()
+        insert(:episode,
+          title: "Ep #{number_string}",
+          podcast: podcast,
+          slug: "hw#{number_string}",
+          published_at: DateTime.utc_now()
+        )
+      end
 
-      episode3 =
-        insert(:episode, title: "Ep 003", podcast: podcast) |> Directory.preload_for_episode()
+      [episode1, episode2, episode3] =
+        1..3
+        |> Enum.map(insert_episode)
 
       # todo: how to handle an empty feed/page with no episodes?
       data =
@@ -115,7 +137,12 @@ defmodule Radiator.BuilderTest do
     test "has atom:link self reference" do
       data =
         data_fixture(%{
-          podcast: %Podcast{id: 1, title: "Hello World"},
+          podcast: %Podcast{
+            id: 1,
+            title: "Hello World",
+            slug: "hw",
+            published_at: DateTime.utc_now()
+          },
           urls: %{
             self: "/dummy/self/url",
             main: "/dummy/self/url"
@@ -140,8 +167,16 @@ defmodule Radiator.BuilderTest do
 
   describe "Radiator.Feed.EpisodeBuilder" do
     test "builds an item" do
+      podcast = insert(:podcast, slug: "pod", short_id: "POD")
+
       episode =
-        insert(:episode, title: "Ep 001", subtitle: "sub", description: "desc")
+        insert(:published_episode,
+          title: "Ep 001",
+          subtitle: "sub",
+          description: "desc",
+          slug: "ep001",
+          podcast: podcast
+        )
         |> Directory.preload_for_episode()
 
       rss = build_episode_xml(%{}, episode)

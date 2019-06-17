@@ -41,9 +41,11 @@ defmodule Radiator.Directory.TitleSlug do
         %Podcast{} ->
           &Directory.get_podcast_by_slug/1
 
-        %Episode{podcast_id: podcast_id} ->
+        %Episode{} ->
+          {_change_or_data, podcast_id} = Ecto.Changeset.fetch_field(changeset, :podcast_id)
+
           fn slug ->
-            Directory.get_episode_by_slug(Directory.get_podcast(podcast_id), slug)
+            Directory.get_episode_by_slug(podcast_id, slug)
           end
 
         %Network{} ->

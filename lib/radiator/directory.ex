@@ -131,10 +131,14 @@ defmodule Radiator.Directory do
       iex> get_episode_by_slug(podcast, slug)
       %Episode{}
   """
-  def get_episode_by_slug(%Podcast{} = podcast, slug) do
-    episodes_query(%{podcast: podcast, slug: slug})
+  def get_episode_by_slug(podcast_id, slug) when is_integer(podcast_id) do
+    episodes_query(%{podcast: podcast_id, slug: slug})
     |> Repo.one()
     |> preload_for_episode()
+  end
+
+  def get_episode_by_slug(%Podcast{} = podcast, slug) do
+    get_episode_by_slug(podcast.id, slug)
   end
 
   def get_episode_by_short_id(short_id) do

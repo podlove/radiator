@@ -31,6 +31,22 @@ defmodule Radiator.Factory do
     user
   end
 
+  @spec owned_by(
+          %{
+            __struct__:
+              Radiator.Directory.Audio
+              | Radiator.Directory.Episode
+              | Radiator.Directory.Network
+              | Radiator.Directory.Podcast
+          },
+          Radiator.Auth.User.t()
+        ) :: %{
+          __struct__:
+            Radiator.Directory.Audio
+            | Radiator.Directory.Episode
+            | Radiator.Directory.Network
+            | Radiator.Directory.Podcast
+        }
   def owned_by(network = %Network{}, user = %User{}) do
     :ok = set_permission(user, network, :own)
     network
@@ -88,6 +104,7 @@ defmodule Radiator.Factory do
   end
 
   def published_episode_factory do
+    ## TODO: this needs to actually run through the publish machinery to generate the slug
     struct!(
       episode_factory(),
       %{
@@ -96,7 +113,7 @@ defmodule Radiator.Factory do
     )
   end
 
-  def episode_factory do
+  def episode_factory() do
     title = sequence(:title, &"Episode ##{&1}")
 
     %Radiator.Directory.Episode{
