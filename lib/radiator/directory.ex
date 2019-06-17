@@ -216,7 +216,10 @@ defmodule Radiator.Directory do
   end
 
   def preload_episodes(podcast = %Podcast{}) do
-    %{podcast | episodes: list_episodes(%{podcast: podcast, order_by: :number, order: :desc})}
+    %{
+      podcast
+      | episodes: list_episodes(%{podcast: podcast, order_by: :published_at, order: :desc})
+    }
   end
 
   def is_published(%Podcast{published_at: nil}), do: false
