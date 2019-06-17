@@ -19,17 +19,43 @@ defmodule Radiator.Directory.Importer do
         episode.title
       end)
 
-    case :binary.longest_common_prefix(titles) do
+    filenames =
+      metalove_episodes
+      |> Enum.map(fn episode ->
+        uri =
+          episode.enclosure.url
+          |> URI.parse()
+
+        uri.path
+        |> Path.basename()
+      end)
+
+    candidate =
+      [filenames, titles]
+      |> Enum.map(&prefix_candidate/1)
+      |> Enum.find(fn value -> value end)
+
+    case candidate do
+      nil ->
+        feed.title
+        |> String.slice(0, 3)
+        |> String.upcase()
+
+      candidate ->
+        candidate
+    end
+  end
+
+  defp prefix_candidate(stringlist) do
+    case :binary.longest_common_prefix(stringlist) do
       length when length >= 2 ->
-        titles
+        stringlist
         |> hd
         |> String.slice(0, length)
         |> only_first_alphas()
 
       _ ->
-        feed.title
-        |> String.slice(0, 3)
-        |> String.upcase()
+        nil
     end
   end
 
