@@ -116,6 +116,18 @@ defmodule Radiator.Directory.Importer do
     {:ok, %{podcast: podcast, episodes: episodes, metalove: %{feed: feed}}}
   end
 
+  # temporary workaround for a metalove bug with fanboys episode FAN362
+  defp sanitize_metalove_chaptertitle(title, _) when is_binary(title), do: title
+
+  defp sanitize_metalove_chaptertitle(tuple, _) when is_tuple(tuple) do
+    Tuple.to_list(tuple)
+    |> Enum.drop(1)
+    |> Enum.map(&to_string/1)
+    |> Enum.join()
+  end
+
+  defp sanitize_metalove_chaptertitle(_, index), do: "Chapter #{index}"
+
   defp parse_chapter_time(time) when is_binary(time) do
     {:ok, parsed, _, _, _, _} = Chapters.Parsers.Normalplaytime.Parser.parse(time)
     Chapters.Parsers.Normalplaytime.Parser.total_ms(parsed)
@@ -151,11 +163,11 @@ defmodule Radiator.Directory.Importer do
           |> Enum.each(fn {chapter, index} ->
             attrs = %{
               start: parse_chapter_time(chapter.start),
-              title: chapter.title,
+              title: sanitize_metalove_chaptertitle(chapter.title, index),
               link: Map.get(chapter, :href)
             }
 
-            with {:ok, radiator_chapter} =
+            with {:ok, radiator_chapter} <-
                    Radiator.AudioMeta.create_chapter(podlove_episode.audio, attrs) do
               case Map.get(chapter, :image) do
                 %{
@@ -182,6 +194,13 @@ defmodule Radiator.Directory.Importer do
                 _ ->
                   radiator_chapter
               end
+            else
+              failure ->
+                Logger.debug(
+                  "Failed to create chapter #{index} with attributes: #{
+                    inspect(attrs, pretty: true)
+                  } - result: #{inspect(failure)}"
+                )
             end
           end)
 
