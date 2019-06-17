@@ -14,7 +14,7 @@ config :radiator,
 
 # Configures the endpoint
 config :radiator, RadiatorWeb.Endpoint,
-  url: [host: "darthdom.local"],
+  url: [host: default_host],
   secret_key_base: "Ulfk2ILpLFu95vdZSe8Af8pjN9n516jHZXb7BUnPHU0xu8g/tyAdNzZBVGtMo0JH",
   render_errors: [view: RadiatorWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Radiator.PubSub, adapter: Phoenix.PubSub.PG2]
