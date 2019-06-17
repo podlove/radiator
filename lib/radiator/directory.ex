@@ -19,7 +19,10 @@ defmodule Radiator.Directory do
   end
 
   def query(Episode, args) do
-    episodes_query(args) |> preload([:podcast, audio: [:chapters, :audio_files]])
+    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
+
+    episodes_query(args)
+    |> preload([:podcast, audio: [chapters: ^chapter_query, audio_files: []]])
   end
 
   def query(queryable, _) do
@@ -203,11 +206,13 @@ defmodule Radiator.Directory do
   #        provide access to entities without checking for permissions.
   #        Solution: write preloader that checks permissions.
   def preload_for_episode(episode) do
-    Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files]])
+    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
+    Repo.preload(episode, [:podcast, audio: [chapters: chapter_query, audio_files: []]])
   end
 
   def preload_for_audio(audio) do
-    Repo.preload(audio, [:chapters, :audio_files])
+    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
+    Repo.preload(audio, chapters: chapter_query, audio_files: [])
   end
 
   def preload_episodes(podcast = %Podcast{}) do

@@ -17,7 +17,7 @@ defmodule RadiatorWeb.Public.FeedController do
 
   def show(conn, %{"page" => page}, %{current_podcast: podcast}) do
     with episodes <-
-           Directory.list_episodes(%{podcast: podcast, order_by: :number, order: :desc})
+           Directory.list_episodes(%{podcast: podcast, order_by: :published_at, order: :desc})
            |> Directory.reject_invalid_episodes(),
          page <- String.to_integer(page) do
       # I wonder where I could extract that to.
