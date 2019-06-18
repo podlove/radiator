@@ -11,6 +11,7 @@ defmodule Radiator.Repo.Migrations.CreatePeople do
       add :avatar, :string
 
       add :user_id, references(:auth_users, on_delete: :nothing)
+      add :network_id, references(:networks, on_delete: :nothing)
 
       timestamps()
     end

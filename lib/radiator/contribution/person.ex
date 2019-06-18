@@ -23,6 +23,7 @@ defmodule Radiator.Contribution.Person do
 
   alias Radiator.Auth.User
   alias Radiator.Media
+  alias Radiator.Directory.Network
 
   schema "people" do
     field :real_name, :string
@@ -34,6 +35,7 @@ defmodule Radiator.Contribution.Person do
     field :avatar, Media.PersonAvatar.Type
 
     belongs_to :user, User
+    belongs_to :network, Network
 
     timestamps()
   end
