@@ -5,6 +5,7 @@ defmodule Radiator.Contribution.AudioContribution do
   schema "audio_contributions" do
     belongs_to :person, Radiator.Contribution.Person
     belongs_to :audio, Radiator.Directory.Audio
+    belongs_to :role, Radiator.Contribution.Role
 
     timestamps()
   end

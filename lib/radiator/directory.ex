@@ -127,6 +127,20 @@ defmodule Radiator.Directory do
   """
   def get_podcast_by_slug(slug), do: Repo.get_by(Podcast, %{slug: slug})
 
+  def get_podcast_contributions(podcast = %Podcast{}) do
+    podcast
+    |> Ecto.assoc(:contributions)
+    |> Repo.all()
+    |> Repo.preload([:person, :role])
+  end
+
+  def get_audio_contributions(audio = %Audio{}) do
+    audio
+    |> Ecto.assoc(:contributions)
+    |> Repo.all()
+    |> Repo.preload([:person, :role])
+  end
+
   defp episodes_query(args) when is_map(args) do
     args
     |> Map.put(:published, true)

@@ -5,6 +5,7 @@ defmodule Radiator.Contribution.PodcastContribution do
   schema "podcast_contributions" do
     belongs_to :person, Radiator.Contribution.Person
     belongs_to :podcast, Radiator.Directory.Podcast
+    belongs_to :role, Radiator.Contribution.Role
 
     timestamps()
   end
