@@ -11,6 +11,8 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   plug :assign_podcast when action in [:new, :create, :update]
 
+  action_fallback RadiatorWeb.FallbackController
+
   defp assign_podcast(conn, _) do
     {:ok, podcast} = Editor.get_podcast(authenticated_user(conn), conn.params["podcast_id"])
 

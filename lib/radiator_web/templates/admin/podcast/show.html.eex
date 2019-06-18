@@ -8,11 +8,21 @@
         <div class="flex">
           <h1 class="text-3xl font-bold mb-1 text-blue-900 mr-4">
             <%= @podcast.title %>
+            <%= if @podcast.published_at && @podcast.slug do %>
             <span class="text-gray-600 font-normal text-lg">
-              <%= link to: Routes.feed_path(@conn, :show, @podcast), class: "no-underline text-blue-500" do %>
+              <%= link to: Routes.feed_path(@conn, :show, @podcast.slug), class: "no-underline text-blue-500" do %>
                 RSS Feed
               <% end %>   
             </span>
+            <span class="text-gray-600 font-normal text-lg">
+            |
+            </span>
+            <span class="text-gray-600 font-normal text-lg">
+              <%= link to: Routes.episode_path(@conn, :index, @podcast.slug), class: "no-underline text-blue-500", target: "_blank" do %>
+                Public Page
+              <% end %>   
+            </span>
+            <% end %>
           </h1>
           <%= link to: Routes.admin_network_podcast_path(@conn, :edit, @podcast.network_id, @podcast), class: "no-underline text-blue-500" do %>
           <div class="pill">edit</div>

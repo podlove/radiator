@@ -14,12 +14,16 @@ defmodule Radiator.Repo.Migrations.CreatePodcasts do
       add :published_at, :utc_datetime
       add :last_built_at, :utc_datetime
       add :slug, :string
+      add :short_id, :string
+      add :main_color, :string, size: 7
+      add :is_using_short_id, :boolean
 
       add :network_id, references(:networks, on_delete: :delete_all)
 
       timestamps()
     end
 
-    create unique_index(:podcasts, [:slug])
+    create index(:podcasts, ["lower(slug)"], unique: true)
+    create index(:podcasts, ["lower(short_id)"])
   end
 end

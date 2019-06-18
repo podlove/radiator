@@ -9,6 +9,18 @@ defmodule RadiatorWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :public_browser do
+    plug :accepts, ["html", "xml", "rss"]
+    plug :fetch_session
+    plug :fetch_flash
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+
+    plug :put_layout, {RadiatorWeb.LayoutView, :public}
+
+    plug RadiatorWeb.Plug.AssignFromPublicSlugs
+  end
+
   @otp_app Mix.Project.config()[:app]
 
   pipeline :authenticated_browser do
@@ -31,33 +43,6 @@ defmodule RadiatorWeb.Router do
     plug RadiatorWeb.Plug.ValidateAPIUser
   end
 
-  scope "/", RadiatorWeb do
-    pipe_through :browser
-
-    get "/", PageController, :index
-
-    get "/feed/:podcast_id", FeedController, :show
-
-    # temporary web player routes
-    # long term, these should be similar to the public episode routes,
-    # not containing database IDs
-    get "/audio/:audio_id/player.json", PlayerController, :audio_config
-    get "/episode/:episode_id/player.json", PlayerController, :episode_config
-
-    get "/login/request_verification/:token", LoginController, :resend_verification_mail
-    get "/login/verify_email/:token", LoginController, :verify_email
-
-    get "/login", LoginController, :index
-    post "/login", LoginController, :login
-
-    get "/login_form", LoginController, :login_form
-
-    get "/signup", LoginController, :signup_form
-    post "/signup", LoginController, :signup
-
-    get "/logout", LoginController, :logout
-  end
-
   scope "/admin", RadiatorWeb.Admin, as: :admin do
     pipe_through :browser
 
@@ -70,6 +55,9 @@ defmodule RadiatorWeb.Router do
 
       resources "/import", PodcastImportController, only: [:new, :create]
     end
+
+    get "/usersettings", UserSettingsController, :index
+    post "/usersettings", UserSettingsController, :update
   end
 
   scope "/download", RadiatorWeb do
@@ -93,5 +81,35 @@ defmodule RadiatorWeb.Router do
 
     forward "/graphql", Absinthe.Plug, schema: RadiatorWeb.GraphQL.Schema
     forward "/graphiql", Absinthe.Plug.GraphiQL, schema: RadiatorWeb.GraphQL.Schema
+  end
+
+  scope "/", RadiatorWeb do
+    pipe_through :browser
+
+    get "/", PageController, :index
+
+    get "/audio/:audio_id/player.json", PlayerController, :audio_config
+    get "/episode/:episode_id/player.json", PlayerController, :episode_config
+
+    get "/login/request_verification/:token", LoginController, :resend_verification_mail
+    get "/login/verify_email/:token", LoginController, :verify_email
+
+    get "/login", LoginController, :index
+    post "/login", LoginController, :login
+
+    get "/login_form", LoginController, :login_form
+
+    get "/signup", LoginController, :signup_form
+    post "/signup", LoginController, :signup
+
+    get "/logout", LoginController, :logout
+  end
+
+  scope "/", RadiatorWeb.Public do
+    pipe_through :public_browser
+
+    get "/:podcast_slug/feed.xml", FeedController, :show
+    get "/:podcast_slug/:episode_slug", EpisodeController, :show
+    get "/:podcast_slug", EpisodeController, :index
   end
 end

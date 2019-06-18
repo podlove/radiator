@@ -5,6 +5,8 @@ defmodule RadiatorWeb.Admin.PodcastController do
   alias Radiator.Directory.Podcast
   alias Radiator.Directory.Editor
 
+  action_fallback RadiatorWeb.FallbackController
+
   def index(conn, _params) do
     user = authenticated_user(conn)
     podcasts = Editor.list_podcasts_with_episode_counts(user, conn.assigns.current_network)
@@ -34,32 +36,32 @@ defmodule RadiatorWeb.Admin.PodcastController do
   end
 
   def show(conn, %{"id" => id}) do
-    user = authenticated_user(conn)
-    {:ok, podcast} = Editor.get_podcast(user, id)
+    with user <- authenticated_user(conn),
+         {:ok, podcast} <- Editor.get_podcast(user, id) do
+      # FIXME: only draft episodes, probably bring over the directory options semantic
+      draft_episodes = Editor.list_episodes(user, podcast)
 
-    # FIXME: only draft episodes, probably bring over the directory options semantic
-    draft_episodes = Editor.list_episodes(user, podcast)
+      published_episodes =
+        Directory.list_episodes(%{
+          podcast: podcast,
+          order_by: :published_at,
+          order: :desc
+        })
 
-    published_episodes =
-      Directory.list_episodes(%{
+      published_ids =
+        published_episodes
+        |> Enum.map(fn episode -> episode.id end)
+
+      draft_episodes =
+        draft_episodes
+        |> Enum.reject(fn episode -> episode.id in published_ids end)
+
+      render(conn, "show.html",
         podcast: podcast,
-        order_by: :published_at,
-        order: :desc
-      })
-
-    published_ids =
-      published_episodes
-      |> Enum.map(fn episode -> episode.id end)
-
-    draft_episodes =
-      draft_episodes
-      |> Enum.reject(fn episode -> episode.id in published_ids end)
-
-    render(conn, "show.html",
-      podcast: podcast,
-      published_episodes: published_episodes,
-      draft_episodes: draft_episodes
-    )
+        published_episodes: published_episodes,
+        draft_episodes: draft_episodes
+      )
+    end
   end
 
   def edit(conn, %{"id" => id}) do

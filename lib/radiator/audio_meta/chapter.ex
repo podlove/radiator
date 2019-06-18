@@ -34,4 +34,8 @@ defmodule Radiator.AudioMeta.Chapter do
   def image_url(%__MODULE__{} = subject) do
     Media.ChapterImage.url({subject.image, subject})
   end
+
+  def ordered_query do
+    from c in __MODULE__, order_by: c.start
+  end
 end

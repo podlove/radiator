@@ -1,0 +1,32 @@
+<div class="container mx-auto mb-6 px-8">
+
+  <div class="mb-6 flex w-full justify-between">
+    
+    <div class="flex justify-between w-full">
+    
+      <div class="w-3/4">
+        <div class="flex">
+          <h1 class="text-3xl font-bold mb-1 text-blue-900 mr-4">
+            <%= @podcast.title %>
+            <span class="text-gray-600 font-normal text-lg">
+              <%= link to: Routes.feed_path(@conn, :show, @podcast.slug), class: "no-underline text-blue-500" do %>
+                RSS Feed
+              <% end %>   
+            </span>
+          </h1>
+        </div>
+        <span class="text-gray-600 font-normal text-lg">
+          <%= @podcast.subtitle %>
+        </span>
+      </div>
+
+    </div>
+</div>
+
+  <%= for episode <- @episodes do %>
+    <%= link to: episode_public_url(episode, @podcast), class: "block no-underline card mb-1 hover:bg-blue-100" do %>
+      <%= render("_episode_entry.html", podcast: @podcast, episode: episode) %>
+    <% end %>
+  <% end %>
+
+</div>

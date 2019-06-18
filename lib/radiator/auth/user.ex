@@ -11,6 +11,7 @@ defmodule Radiator.Auth.User do
     field :email, :string
     field :password_hash, :binary
     field :password, :string, virtual: true
+    field :password_confirmation, :string, virtual: true
     field :status, Radiator.Auth.Ecto.UserStatusType, default: :unverified
     # unverified, active, suspended
 
@@ -42,9 +43,32 @@ defmodule Radiator.Auth.User do
     |> validate_format(:name, ~r/^[^\s ]+$/)
     |> validate_format(:email, ~r/^\S+@\S+$/)
     |> validate_length(:name, min: 2, max: 99)
+    |> validate_length(:password, min: 2)
     |> validate_required([:email, :name])
     |> encrypt_password
     |> validate_required([:password_hash])
+  end
+
+  def change_password_changeset(%User{} = user, attrs) do
+    user
+    |> cast(attrs, [:password, :password_confirmation])
+    |> validate_required([:password, :password_confirmation])
+    |> validate_length(:password, min: 2)
+    |> password_and_confirmation_matches
+    |> encrypt_password
+    |> validate_required([:password_hash])
+  end
+
+  defp password_and_confirmation_matches(changeset) do
+    password = get_change(changeset, :password)
+    password_confirmation = get_change(changeset, :password_confirmation)
+
+    if password == password_confirmation do
+      changeset
+    else
+      changeset
+      |> add_error(:password_confirmation, "does not match password")
+    end
   end
 
   defp encrypt_password(changeset) do

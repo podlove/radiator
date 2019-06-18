@@ -20,13 +20,17 @@ defmodule Radiator.Directory do
   end
 
   def query(Episode, args) do
-    episodes_query(args) |> preload([:podcast, audio: [:chapters, :audio_files]])
+    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
+
+    episodes_query(args)
+    |> preload([:podcast, audio: [chapters: ^chapter_query, audio_files: []]])
   end
 
   def query(queryable, _) do
     queryable
   end
 
+  # TODO: add a notion of published to networks as well and only show those
   def list_networks do
     Repo.all(Network)
   end
@@ -79,24 +83,14 @@ defmodule Radiator.Directory do
   end
 
   @doc """
-  Gets a single podcast.
-
-  Raises `Ecto.NoResultsError` if the Podcast does not exist.
+  Gets a single podcast. `nil` if not found.
 
   ## Examples
 
       iex> get_podcast!(123)
       %Podcast{}
 
-      iex> get_podcast!(456)
-      ** (Ecto.NoResultsError)
-
   """
-  def get_podcast!(id) do
-    Podcast
-    |> PodcastQuery.filter_by_published()
-    |> Repo.get!(id)
-  end
 
   def get_podcast(id) do
     Podcast
@@ -125,9 +119,38 @@ defmodule Radiator.Directory do
   ## Examples
 
       iex> get_podcast_by_slug(slug)
-      {:ok, %Podcast{}}
+      %Podcast{}
   """
-  def get_podcast_by_slug(slug), do: Repo.get_by(Podcast, %{slug: slug})
+  def get_podcast_by_slug(slug) do
+    Podcast
+    |> PodcastQuery.filter_by_published(true)
+    |> PodcastQuery.find_by_slug(slug)
+    |> Repo.one()
+  end
+
+  @doc """
+  Gets a single episode by its slug.
+
+  ## Examples
+
+      iex> get_episode_by_slug(podcast, slug)
+      %Episode{}
+  """
+  def get_episode_by_slug(podcast_id, slug) when is_integer(podcast_id) do
+    episodes_query(%{podcast: podcast_id, slug: slug})
+    |> Repo.one()
+    |> preload_for_episode()
+  end
+
+  def get_episode_by_slug(%Podcast{} = podcast, slug) do
+    get_episode_by_slug(podcast.id, slug)
+  end
+
+  def get_episode_by_short_id(short_id) do
+    episodes_query(%{short_id: short_id})
+    |> Repo.one()
+    |> preload_for_episode()
+  end
 
   def get_podcast_contributions(podcast = %Podcast{}) do
     podcast
@@ -182,23 +205,12 @@ defmodule Radiator.Directory do
   @doc """
   Gets a single published episode.
 
-  Raises `Ecto.NoResultsError` if the Episode does not exist.
-
   ## Examples
 
-      iex> get_episode!(123)
+      iex> get_episode(123)
       %Episode{}
 
-      iex> get_episode!(456)
-      ** (Ecto.NoResultsError)
-
   """
-  def get_episode!(id) do
-    Episode
-    |> EpisodeQuery.filter_by_published(true)
-    |> Repo.get!(id)
-    |> preload_for_episode()
-  end
 
   def get_episode(id) do
     Episode
@@ -236,19 +248,16 @@ defmodule Radiator.Directory do
   end
 
   def preload_for_audio(audio) do
-    Repo.preload(audio, [:chapters, :audio_files, :contributors])
+    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
+    Repo.preload(audio, chapters: chapter_query, audio_files: [])
   end
 
-  @doc """
-  Gets a single episode by its slug.
-
-  ## Examples
-
-      iex> get_episode_by_slug(slug)
-      {:ok, %Episode{}}
-  """
-  def get_episode_by_slug(slug),
-    do: Repo.get_by(Episode, %{slug: slug}) |> preload_for_episode()
+  def preload_episodes(podcast = %Podcast{}) do
+    %{
+      podcast
+      | episodes: list_episodes(%{podcast: podcast, order_by: :published_at, order: :desc})
+    }
+  end
 
   def is_published(%Podcast{published_at: nil}), do: false
   def is_published(%Episode{published_at: nil}), do: false

@@ -286,7 +286,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def get_chapters(%Audio{} = audio, _, _) do
-    audio = Radiator.Repo.preload(audio, :chapters)
+    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
+    audio = Radiator.Repo.preload(audio, chapters: chapter_query)
 
     {:ok, audio.chapters}
   end

@@ -38,6 +38,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :published_at, :datetime
     field :subtitle, :string
     field :slug, :string
+    field :short_id, :string
 
     field :episodes, list_of(:published_episode) do
       arg :page, type: :integer, default_value: 1
@@ -70,6 +71,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :subtitle, :string
     field :title, :string
     field :slug, :string
+    field :short_id, :string
 
     field :podcast, :published_podcast do
       resolve &Resolvers.Directory.find_podcast/3

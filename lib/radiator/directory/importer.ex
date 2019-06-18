@@ -7,6 +7,62 @@ defmodule Radiator.Directory.Importer do
 
   require Logger
 
+  def short_id_from_metalove_podcast(%Metalove.PodcastFeed{} = feed) do
+    metalove_episodes =
+      feed.episodes
+      |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
+
+    # common title?
+    titles =
+      metalove_episodes
+      |> Enum.map(fn episode ->
+        episode.title
+      end)
+
+    filenames =
+      metalove_episodes
+      |> Enum.map(fn episode ->
+        uri =
+          episode.enclosure.url
+          |> URI.parse()
+
+        uri.path
+        |> Path.basename()
+      end)
+
+    candidate =
+      [filenames, titles]
+      |> Enum.map(&prefix_candidate/1)
+      |> Enum.find(fn value -> value end)
+
+    case candidate do
+      nil ->
+        feed.title
+        |> String.slice(0, 3)
+        |> String.upcase()
+
+      candidate ->
+        candidate
+    end
+  end
+
+  defp prefix_candidate(stringlist) do
+    case :binary.longest_common_prefix(stringlist) do
+      length when length >= 2 ->
+        stringlist
+        |> hd
+        |> String.slice(0, length)
+        |> only_first_alphas()
+
+      _ ->
+        nil
+    end
+  end
+
+  defp only_first_alphas(binary) do
+    hd(Regex.run(~r/[\w]+/, hd(Regex.run(~r/[\D]+/, binary))))
+  end
+
   def import_from_url(user = %Auth.User{}, network = %Network{}, url) do
     metalove_podcast = Metalove.get_podcast(url)
 
@@ -16,6 +72,9 @@ defmodule Radiator.Directory.Importer do
         120_000
       )
 
+    # deduce short_id
+    short_id = short_id_from_metalove_podcast(feed)
+
     {:ok, podcast} =
       Editor.create_podcast(user, network, %{
         title: feed.title,
@@ -23,7 +82,8 @@ defmodule Radiator.Directory.Importer do
         author: feed.author,
         description: feed.description,
         image: feed.image_url,
-        language: feed.language
+        language: feed.language,
+        short_id: short_id
       })
 
     {:ok, podcast} = Editor.publish_podcast(user, podcast)
@@ -82,6 +142,18 @@ defmodule Radiator.Directory.Importer do
     {:ok, %{podcast: podcast, episodes: episodes, metalove: %{feed: feed}}}
   end
 
+  # temporary workaround for a metalove bug with fanboys episode FAN362
+  defp sanitize_metalove_chaptertitle(title, _) when is_binary(title), do: title
+
+  defp sanitize_metalove_chaptertitle(tuple, _) when is_tuple(tuple) do
+    Tuple.to_list(tuple)
+    |> Enum.drop(1)
+    |> Enum.map(&to_string/1)
+    |> Enum.join()
+  end
+
+  defp sanitize_metalove_chaptertitle(_, index), do: "Chapter #{index}"
+
   defp parse_chapter_time(time) when is_binary(time) do
     {:ok, parsed, _, _, _, _} = Chapters.Parsers.Normalplaytime.Parser.parse(time)
     Chapters.Parsers.Normalplaytime.Parser.total_ms(parsed)
@@ -117,11 +189,11 @@ defmodule Radiator.Directory.Importer do
           |> Enum.each(fn {chapter, index} ->
             attrs = %{
               start: parse_chapter_time(chapter.start),
-              title: chapter.title,
+              title: sanitize_metalove_chaptertitle(chapter.title, index),
               link: Map.get(chapter, :href)
             }
 
-            with {:ok, radiator_chapter} =
+            with {:ok, radiator_chapter} <-
                    Radiator.AudioMeta.create_chapter(podlove_episode.audio, attrs) do
               case Map.get(chapter, :image) do
                 %{
@@ -148,6 +220,13 @@ defmodule Radiator.Directory.Importer do
                 _ ->
                   radiator_chapter
               end
+            else
+              failure ->
+                Logger.debug(
+                  "Failed to create chapter #{index} with attributes: #{
+                    inspect(attrs, pretty: true)
+                  } - result: #{inspect(failure)}"
+                )
             end
           end)
 
