@@ -8,6 +8,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
 
   alias Radiator.Directory.{Episode, Audio}
   alias Radiator.Contribution.Person
+  alias Radiator.Contribution.AudioContribution
 
   def new(feed_data, episode) do
     element(:item, fields(feed_data, episode))
@@ -63,9 +64,9 @@ defmodule Radiator.Feed.EpisodeBuilder do
     nil
   end
 
-  defp contributors(%Episode{audio: %Audio{contributors: contributors}}) do
-    contributors
-    |> Enum.filter(fn %Person{display_name: name} ->
+  defp contributors(%Episode{audio: %Audio{contributions: contributions}}) do
+    contributions
+    |> Enum.filter(fn %AudioContribution{person: %Person{display_name: name}} ->
       String.valid?(name) && String.length(name) > 0
     end)
     |> Enum.map(&contributor/1)

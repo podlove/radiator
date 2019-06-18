@@ -13,6 +13,7 @@ defmodule Radiator.Directory do
   alias Radiator.Media.AudioFile
   alias Radiator.Directory.{Network, Episode, Podcast, Audio}
   alias Radiator.Directory.{PodcastQuery, EpisodeQuery, AudioQuery}
+  alias Radiator.Contribution.{PodcastContribution, AudioContribution}
 
   def data() do
     Dataloader.Ecto.new(Repo, query: &query/2)
@@ -101,6 +102,7 @@ defmodule Radiator.Directory do
     Podcast
     |> PodcastQuery.filter_by_published()
     |> Repo.get(id)
+    |> preload_for_podcast()
   end
 
   @doc """
@@ -205,12 +207,32 @@ defmodule Radiator.Directory do
     |> preload_for_episode()
   end
 
+  def preload_for_podcast(%Podcast{} = podcast) do
+    contributions_query =
+      PodcastContribution
+      |> order_by(asc: :position)
+
+    Repo.preload(podcast, contributions: {contributions_query, [:person, :role]})
+  end
+
   # fixme: this is currently identical to `Editor.preloaded_episode/1`,
   #        however: in Directory context preloading is dangerous as it might
   #        provide access to entities without checking for permissions.
   #        Solution: write preloader that checks permissions.
   def preload_for_episode(episode) do
-    Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files, :contributors]])
+    contributions_query =
+      AudioContribution
+      |> order_by(asc: :position)
+
+    Repo.preload(episode, [
+      :podcast,
+      audio: [
+        :chapters,
+        :audio_files,
+        :contributors,
+        contributions: {contributions_query, [:person, :role]}
+      ]
+    ])
   end
 
   def preload_for_audio(audio) do

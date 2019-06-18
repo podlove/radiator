@@ -8,6 +8,7 @@ defmodule Radiator.Feed.PodcastBuilder do
   alias Radiator.Feed.EpisodeBuilder
   alias Radiator.Feed.PagingMeta
   alias Radiator.Contribution.Person
+  alias Radiator.Contribution.PodcastContribution
 
   @doc """
   See `Radiator.Feed.Builder.new/2` for parameter docs.
@@ -104,9 +105,9 @@ defmodule Radiator.Feed.PodcastBuilder do
 
   defp description(_), do: nil
 
-  defp contributors(%Podcast{contributors: contributors}) do
-    contributors
-    |> Enum.filter(fn %Person{display_name: name} ->
+  defp contributors(%Podcast{contributions: contributions}) do
+    contributions
+    |> Enum.filter(fn %PodcastContribution{person: %Person{display_name: name}} ->
       String.valid?(name) && String.length(name) > 0
     end)
     |> Enum.map(&contributor/1)

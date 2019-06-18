@@ -2,12 +2,14 @@ defmodule Radiator.Feed.Common do
   import XmlBuilder
   import Radiator.Feed.Builder, only: [add: 2]
 
-  alias Radiator.Contribution.Person
+  alias Radiator.Contribution.{Person, Role}
 
-  def contributor(%Person{} = contributor) do
+  def contributor(%{person: person, role: role}) do
     element(
       :"atom:contributor",
-      [element(:"atom:name", contributor.display_name)] |> add(contributor_uri(contributor))
+      [element(:"atom:name", person.display_name)]
+      |> add(contributor_uri(person))
+      |> add(contributor_role(role))
     )
   end
 
@@ -15,4 +17,9 @@ defmodule Radiator.Feed.Common do
     do: element(:"atom:uri", uri)
 
   def contributor_uri(_), do: nil
+
+  def contributor_role(%Role{title: title}) when byte_size(title) > 0,
+    do: element(:"atom:role", title)
+
+  def contributor_role(_), do: nil
 end
