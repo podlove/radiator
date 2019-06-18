@@ -17,7 +17,9 @@ defmodule Radiator.DirectoryTest do
 
     test "get_podcast/1 returns the podcast with given id if it is public" do
       podcast = insert(:podcast)
-      assert Directory.get_podcast(podcast.id) |> Repo.preload(:network) == podcast
+
+      assert Directory.get_podcast(podcast.id) |> Repo.preload([:network, :contributions]) ==
+               podcast |> Repo.preload([:network, :contributions])
 
       podcast2 = insert(:unpublished_podcast)
 
@@ -38,7 +40,10 @@ defmodule Radiator.DirectoryTest do
 
     test "get_podcast_by_slug/1 returns the podcast with given slug" do
       podcast = insert(:podcast, slug: "podcast-foo-bar-baz")
-      assert Directory.get_podcast_by_slug(podcast.slug) |> Repo.preload(:network) == podcast
+
+      assert Directory.get_podcast_by_slug(podcast.slug)
+             |> Repo.preload([:network, :contributions]) ==
+               podcast |> Repo.preload([:network, :contributions])
     end
 
     test "create_podcast/1 with valid data creates a podcast" do
@@ -69,7 +74,8 @@ defmodule Radiator.DirectoryTest do
 
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.update_podcast(podcast, %{title: nil})
 
-      assert podcast == Directory.get_podcast(podcast.id) |> Repo.preload(:network)
+      assert podcast |> Repo.preload([:network, :contributions]) ==
+               Directory.get_podcast(podcast.id) |> Repo.preload([:network, :contributions])
     end
 
     test "delete_podcast/1 deletes the podcast" do

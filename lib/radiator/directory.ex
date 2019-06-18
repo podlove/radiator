@@ -126,6 +126,7 @@ defmodule Radiator.Directory do
     |> PodcastQuery.filter_by_published(true)
     |> PodcastQuery.find_by_slug(slug)
     |> Repo.one()
+    |> preload_for_podcast()
   end
 
   @doc """
@@ -217,6 +218,10 @@ defmodule Radiator.Directory do
     |> EpisodeQuery.filter_by_published(true)
     |> Repo.get(id)
     |> preload_for_episode()
+  end
+
+  def preload_for_podcast(nil) do
+    nil
   end
 
   def preload_for_podcast(%Podcast{} = podcast) do

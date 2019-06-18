@@ -112,11 +112,15 @@ defmodule Radiator.Feed.PodcastBuilder do
   defp description(_), do: nil
 
   defp contributors(%Podcast{contributions: contributions}) do
-    contributions
-    |> Enum.filter(fn %PodcastContribution{person: %Person{display_name: name}} ->
-      String.valid?(name) && String.length(name) > 0
-    end)
-    |> Enum.map(&contributor/1)
+    if Ecto.assoc_loaded?(contributions) do
+      contributions
+      |> Enum.filter(fn %PodcastContribution{person: %Person{display_name: name}} ->
+        String.valid?(name) && String.length(name) > 0
+      end)
+      |> Enum.map(&contributor/1)
+    else
+      []
+    end
   end
 
   defp contributors(_), do: nil
