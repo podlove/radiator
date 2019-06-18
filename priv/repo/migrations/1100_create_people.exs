@@ -8,6 +8,7 @@ defmodule Radiator.Repo.Migrations.CreatePeople do
       add :nick_name, :text
       add :email, :text
       add :avatar, :string
+      add :uri, :text
 
       add :user_id, references(:auth_users, on_delete: :nothing)
       add :network_id, references(:networks, on_delete: :nothing)

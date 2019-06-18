@@ -2,6 +2,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
   import XmlBuilder
   import Radiator.Feed.Builder, only: [add: 2]
   import Radiator.Feed.Guards
+  import Radiator.Feed.Common
 
   require Logger
 
@@ -67,9 +68,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
     |> Enum.filter(fn %Person{display_name: name} ->
       String.valid?(name) && String.length(name) > 0
     end)
-    |> Enum.map(fn contributor ->
-      element(:"atom:contributor", [element(:"atom:name", contributor.display_name)])
-    end)
+    |> Enum.map(&contributor/1)
   end
 
   defp contributors(_), do: nil

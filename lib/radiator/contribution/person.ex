@@ -30,6 +30,7 @@ defmodule Radiator.Contribution.Person do
     field :display_name, :string
     field :nick_name, :string
     field :email, :string
+    field :uri, :string
 
     field :avatar, Media.PersonAvatar.Type
 
@@ -42,7 +43,7 @@ defmodule Radiator.Contribution.Person do
   @doc false
   def changeset(chapter, attrs) do
     chapter
-    |> cast(attrs, [:real_name, :display_name, :nick_name, :gender, :email])
+    |> cast(attrs, [:real_name, :display_name, :nick_name, :uri, :email])
     |> cast_attachments(attrs, [:avatar], allow_paths: true, allow_urls: true)
   end
 
