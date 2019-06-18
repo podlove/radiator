@@ -178,15 +178,13 @@ defmodule RadiatorWeb.EpisodeControllerTest do
     setup [:create_episode]
 
     test "deletes chosen episode", %{conn: conn, episode: episode} do
-      conn =
-        delete(conn, Routes.api_podcast_episode_path(conn, :delete, episode.podcast.id, episode))
+      podcast_id = episode.podcast.id
 
+      conn = delete(conn, Routes.api_podcast_episode_path(conn, :delete, podcast_id, episode))
       assert response(conn, 204)
 
-      assert_error_sent 404, fn ->
-        podcast = fixture(:podcast)
-        get(conn, Routes.api_podcast_episode_path(conn, :show, podcast.id, episode))
-      end
+      conn = get(conn, Routes.api_podcast_episode_path(conn, :show, podcast_id, episode))
+      assert response(conn, 404)
     end
   end
 

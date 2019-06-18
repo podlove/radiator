@@ -13,4 +13,8 @@ defmodule RadiatorWeb.ErrorView do
   def template_not_found(template, _assigns) do
     Phoenix.Controller.status_message_from_template(template)
   end
+
+  def page_title(template, _assigns) do
+    Phoenix.Controller.status_message_from_template(template)
+  end
 end

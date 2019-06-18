@@ -20,4 +20,14 @@ defmodule Radiator.Directory.PodcastQuery do
   def filter_by_published(query, :any) do
     query
   end
+
+  def find_by_slug(query, slug) do
+    slug = slug |> String.downcase()
+    from(p in query, where: fragment("lower(?)", p.slug) == ^slug)
+  end
+
+  def find_by_short_id(query, short_id) do
+    short_id = short_id |> String.downcase()
+    from(p in query, where: fragment("lower(?)", p.short_id) == ^short_id)
+  end
 end

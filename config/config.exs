@@ -7,12 +7,14 @@
 # General application configuration
 use Mix.Config
 
+default_host = "localhost"
+
 config :radiator,
   ecto_repos: [Radiator.Repo]
 
 # Configures the endpoint
 config :radiator, RadiatorWeb.Endpoint,
-  url: [host: "localhost"],
+  url: [host: default_host],
   secret_key_base: "Ulfk2ILpLFu95vdZSe8Af8pjN9n516jHZXb7BUnPHU0xu8g/tyAdNzZBVGtMo0JH",
   render_errors: [view: RadiatorWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Radiator.PubSub, adapter: Phoenix.PubSub.PG2]
@@ -54,7 +56,7 @@ config :arc,
   storage: Arc.Storage.S3,
   # if using Amazon S3
   bucket: "radiator",
-  asset_host: System.get_env("STORAGE_ASSET_HOST") || "http://localhost:9000/radiator"
+  asset_host: System.get_env("STORAGE_ASSET_HOST") || "http://#{default_host}:9000/radiator"
 
 config :ex_aws,
   access_key_id: "IEKAZMUY3KX32CRJPE9R",
@@ -63,7 +65,7 @@ config :ex_aws,
 
 config :ex_aws, :s3,
   scheme: "http://",
-  host: System.get_env("STORAGE_HOST") || "localhost",
+  host: System.get_env("STORAGE_HOST") || default_host,
   port: 9000
 
 config :ex_aws, :hackney_opts,

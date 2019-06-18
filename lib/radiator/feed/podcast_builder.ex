@@ -20,9 +20,11 @@ defmodule Radiator.Feed.PodcastBuilder do
     []
     |> add(element(:title, podcast.title))
     |> add(subtitle(podcast))
+    |> add(link(Podcast.public_url(podcast)))
     |> add(description(podcast))
     |> add(element(:generator, "Podlove Radiator"))
     |> add(self_reference(feed_data))
+    |> add(publication_date(podcast))
     # |> add(last_build_date())
     |> Enum.reverse()
     |> Enum.concat(paging_elements(feed_data, opts))
@@ -91,6 +93,10 @@ defmodule Radiator.Feed.PodcastBuilder do
     end
   end
 
+  defp link(url) when is_binary(url) do
+    element("link", url)
+  end
+
   defp subtitle(%Podcast{subtitle: subtitle}) when set?(subtitle),
     do: element("itunes:subtitle", subtitle)
 
@@ -100,4 +106,7 @@ defmodule Radiator.Feed.PodcastBuilder do
     do: element(:description, description)
 
   defp description(_), do: nil
+
+  defp publication_date(%Podcast{published_at: published_at}),
+    do: element(:pubDate, Timex.format!(published_at, "{RFC822}"))
 end

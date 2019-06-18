@@ -44,6 +44,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :published_at, :datetime
     field :subtitle, :string
     field :slug, :string
+    field :short_id, :string
 
     field :is_published, :boolean do
       resolve &Resolvers.Editor.is_published/3

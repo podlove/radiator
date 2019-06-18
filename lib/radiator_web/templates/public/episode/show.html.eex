@@ -1,0 +1,34 @@
+<div class="container mx-auto mb-6 px-8 w-full">
+  
+  <div class="mb-6 flex clearfix">
+    <div class="w-full">
+      <img src="<%= episode_image_url(@episode, @current_podcast) %>" class="w-40 h-40 float-right" />
+      <h1 class="text-3xl font-bold mb-10 text-blue-900">
+        <%= link(@current_podcast.title, to: podcast_public_url(@current_podcast)) %>
+      </h1>
+      <h1 class="text-3xl font-bold mb-1 text-blue-900">
+        <%= @episode.title %>
+      </h1>
+      <div class="text-gray-600 font-normal text-lg mb-2 pr-10">
+        <%= @episode.subtitle %>
+      </div>
+      </div>
+  </div>
+    <div class="w-full mb-4">
+      <div class="text-black font-normal episode-description">
+        <%= raw @episode.description %>
+      </div>
+    </div>
+
+  <script src="//cdn.podlove.org/web-player/embed.js"></script>
+
+  <div id="preview-web-player"></div>
+
+  <script>
+  podlovePlayer('#preview-web-player', '<%= Routes.player_url(@conn, :episode_config, @episode.id) %>');
+  </script>
+
+</div>
+<div class="container mx-auto mb-6 px-8 content-encoded">
+<%= raw(@episode.content) %>
+</div>

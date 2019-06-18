@@ -12,6 +12,7 @@ defmodule Radiator.Repo.Migrations.CreateEpisodes do
       add :number, :integer
       add :published_at, :utc_datetime
       add :slug, :string
+      add :short_id, :string
 
       add :podcast_id, references(:podcasts, on_delete: :delete_all)
       add :audio_id, references(:audios, on_delete: :delete_all)
@@ -20,6 +21,7 @@ defmodule Radiator.Repo.Migrations.CreateEpisodes do
     end
 
     create index(:episodes, [:podcast_id])
-    create unique_index(:episodes, [:slug])
+    create index(:episodes, ["lower(short_id)"])
+    create index(:episodes, ["lower(slug)", :podcast_id], unique: true)
   end
 end
