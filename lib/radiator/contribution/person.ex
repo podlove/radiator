@@ -29,7 +29,6 @@ defmodule Radiator.Contribution.Person do
     field :real_name, :string
     field :display_name, :string
     field :nick_name, :string
-    field :gender, :string
     field :email, :string
 
     field :avatar, Media.PersonAvatar.Type

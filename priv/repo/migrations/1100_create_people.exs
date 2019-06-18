@@ -6,7 +6,6 @@ defmodule Radiator.Repo.Migrations.CreatePeople do
       add :real_name, :text
       add :display_name, :text
       add :nick_name, :text
-      add :gender, :text
       add :email, :text
       add :avatar, :string
 
