@@ -10,6 +10,7 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
+alias Radiator.Repo
 alias Radiator.Auth.Register
 alias Radiator.Directory.Editor
 alias Radiator.Contribution.Role
