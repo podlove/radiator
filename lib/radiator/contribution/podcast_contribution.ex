@@ -3,6 +3,8 @@ defmodule Radiator.Contribution.PodcastContribution do
   import Ecto.Changeset
 
   schema "podcast_contributions" do
+    field :position, :float
+
     belongs_to :person, Radiator.Contribution.Person
     belongs_to :podcast, Radiator.Directory.Podcast
     belongs_to :role, Radiator.Contribution.Role
@@ -13,6 +15,6 @@ defmodule Radiator.Contribution.PodcastContribution do
   @doc false
   def changeset(podcast, attrs) do
     podcast
-    |> cast(attrs, [])
+    |> cast(attrs, [:position])
   end
 end

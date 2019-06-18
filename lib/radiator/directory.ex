@@ -130,6 +130,7 @@ defmodule Radiator.Directory do
   def get_podcast_contributions(podcast = %Podcast{}) do
     podcast
     |> Ecto.assoc(:contributions)
+    |> order_by(asc: :position)
     |> Repo.all()
     |> Repo.preload([:person, :role])
   end
@@ -137,6 +138,7 @@ defmodule Radiator.Directory do
   def get_audio_contributions(audio = %Audio{}) do
     audio
     |> Ecto.assoc(:contributions)
+    |> order_by(asc: :position)
     |> Repo.all()
     |> Repo.preload([:person, :role])
   end
