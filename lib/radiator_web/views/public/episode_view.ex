@@ -3,6 +3,15 @@ defmodule RadiatorWeb.Public.EpisodeView do
 
   alias Radiator.Directory.{Podcast, Episode}
 
+  def page_title(_template, %{current_podcast: podcast, current_episode: episode}) do
+    [podcast.title, episode.title]
+    |> Enum.join(" – ")
+  end
+
+  def page_title(_template, %{current_podcast: podcast}) do
+    podcast.title
+  end
+
   def podcast_public_url(podcast) do
     Podcast.public_url(podcast)
   end
