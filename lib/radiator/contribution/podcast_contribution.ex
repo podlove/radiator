@@ -13,8 +13,8 @@ defmodule Radiator.Contribution.PodcastContribution do
   end
 
   @doc false
-  def changeset(podcast, attrs) do
-    podcast
+  def changeset(contribution, attrs) do
+    contribution
     |> cast(attrs, [:position])
   end
 end
