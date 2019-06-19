@@ -17,7 +17,13 @@ defmodule RadiatorWeb.Admin.PodcastView do
     Episode.image_url(episode)
   end
 
-  def shorten_string(s, max_length, ellipsis \\ "...") do
+  def shorten_string(s, max_length, ellipsis \\ "...")
+  # used for fields that allow for nil (e.g. Podcast.tagline)
+  def shorten_string(nil, _, _) do
+    ""
+  end
+
+  def shorten_string(s, max_length, ellipsis) when is_binary(s) do
     s
     |> String.split(" ")
     |> Enum.reduce_while("", fn x, prev_string ->
