@@ -11,9 +11,6 @@ defmodule RadiatorWeb.Router do
 
   pipeline :public_browser do
     plug :accepts, ["html", "xml", "rss"]
-    plug :fetch_session
-    plug :fetch_flash
-    plug :protect_from_forgery
     plug :put_secure_browser_headers
 
     plug :put_layout, {RadiatorWeb.LayoutView, :public}
