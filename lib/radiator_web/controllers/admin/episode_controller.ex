@@ -5,8 +5,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   alias Radiator.Storage
   alias Radiator.Directory
-  alias Radiator.Directory.Editor
-  alias Radiator.Directory.Episode
+  alias Radiator.Directory.{Editor, Episode, Audio}
   alias Radiator.Media.AudioFileUpload
 
   plug :assign_podcast when action in [:new, :create, :update]
@@ -30,9 +29,15 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
     case Editor.Manager.create_episode(podcast, episode_params) do
       {:ok, episode} ->
+        audio =
+          %Audio{} |> Ecto.Changeset.change(%{episodes: [episode]}) |> Radiator.Repo.insert!()
+
         if episode_params["enclosure"] do
-          {:ok, _audio} = AudioFileUpload.upload(episode_params["enclosure"], episode)
+          {:ok, _audio} = AudioFileUpload.upload(episode_params["enclosure"], audio)
         end
+
+        # temporary: publish immediately
+        Editor.Manager.publish_episode(episode)
 
         conn
         |> put_flash(:info, "episode created successfully.")

@@ -36,7 +36,7 @@
     </script>
   <% end %>
 
-  <%= if @episode.audio.chapters do %>
+  <%= if @episode.audio.chapters && length(@episode.audio.chapters) > 0 do %>
     <div class="card max-w-sm flex flex-col mt-8">
       <span class="text-gray-700 font-normal text-lg mb-4">Chapters</span>
       <%= for {chapter, index} <- (@episode.audio.chapters |> Enum.with_index(1)) do %>

@@ -62,7 +62,7 @@ defmodule Radiator.Media.AudioFileUpload do
   defp add_audio_file_changeset(upload = %Plug.Upload{path: path, filename: filename})
        when is_binary(path) and is_binary(filename) do
     {:ok, %File.Stat{size: size}} = File.lstat(path)
-    mime_type = MIME.from_path(path)
+    mime_type = MIME.from_path(path) |> fix_mime_type()
 
     fn %{create_audio_file: audio} ->
       AudioFile.changeset(audio, %{
@@ -75,7 +75,7 @@ defmodule Radiator.Media.AudioFileUpload do
   end
 
   defp add_audio_file_changeset(upload) when is_binary(upload) do
-    mime_type = MIME.from_path(upload)
+    mime_type = MIME.from_path(upload) |> fix_mime_type()
 
     # todo: get byte_length _after_ storing
 
@@ -88,6 +88,9 @@ defmodule Radiator.Media.AudioFileUpload do
       })
     end
   end
+
+  defp fix_mime_type("application/octet-stream"), do: "audio/mpeg"
+  defp fix_mime_type(mime), do: mime
 
   # Need to download first, otherwise the database transaction is not having fun and timing out
   def sideload(url, audio = %Audio{}) do
