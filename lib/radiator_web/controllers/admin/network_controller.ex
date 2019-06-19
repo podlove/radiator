@@ -41,7 +41,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
     |> authenticated_user()
     |> Editor.get_network(id)
     |> case do
-      network = %Network{} ->
+      {:ok, network = %Network{}} ->
         changeset = Editor.Owner.change_network(network)
 
         render(conn, "edit.html", network: network, changeset: changeset)
@@ -58,7 +58,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
     user
     |> Editor.get_network(id)
     |> case do
-      network = %Network{} ->
+      {:ok, network = %Network{}} ->
         case Editor.update_network(user, network, network_params) do
           {:ok, _network} ->
             conn
