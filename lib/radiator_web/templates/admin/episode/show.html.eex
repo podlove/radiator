@@ -25,7 +25,7 @@
     </div>
   </div>
 
-<% if @episode.audio do %>
+<%= if @episode.audio do %>
   <%= if length(@episode.audio.audio_files) > 0 do %>
     <script src="//cdn.podlove.org/web-player/embed.js"></script>
 
