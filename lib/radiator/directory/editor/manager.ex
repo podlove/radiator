@@ -80,7 +80,7 @@ defmodule Radiator.Directory.Editor.Manager do
   """
   def create_episode(%Podcast{} = podcast, attrs \\ %{}) do
     # todo: keys are sometimes atoms, sometimes binaries? why? can/should we enforce atoms?
-    {update_attrs, insert_attrs} = Map.split(attrs, [:image, "image"])
+    {update_attrs, insert_attrs} = Map.split(attrs, [:image, "image", :enclosure, "enclosure"])
 
     insert =
       Ecto.build_assoc(podcast, :episodes)

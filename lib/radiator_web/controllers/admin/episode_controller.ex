@@ -29,15 +29,6 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
     case Editor.Manager.create_episode(podcast, episode_params) do
       {:ok, episode} ->
-        # todo: maybe add an "enclosure" virtual attribute to Episode,
-        #       and handle this upload logic through changeset?
-        audio =
-          %Audio{} |> Ecto.Changeset.change(%{episodes: [episode]}) |> Radiator.Repo.insert!()
-
-        if episode_params["enclosure"] do
-          {:ok, _audio} = AudioFileUpload.upload(episode_params["enclosure"], audio)
-        end
-
         # temporary: publish immediately
         Editor.Manager.publish_episode(episode)
 
@@ -82,11 +73,6 @@ defmodule RadiatorWeb.Admin.EpisodeController do
     user = authenticated_user(conn)
 
     {:ok, episode} = Editor.get_episode(user, id)
-
-    # fixme: broken, see create/2
-    if episode_params["enclosure"] do
-      {:ok, _audio} = AudioFileUpload.upload(episode_params["enclosure"], episode)
-    end
 
     case Editor.Manager.update_episode(episode, episode_params) do
       {:ok, episode} ->
