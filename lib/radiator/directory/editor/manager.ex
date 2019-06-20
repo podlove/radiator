@@ -79,10 +79,25 @@ defmodule Radiator.Directory.Editor.Manager do
 
   """
   def create_episode(%Podcast{} = podcast, attrs \\ %{}) do
-    # always do it this way so the id is present in the validations
-    %Episode{podcast_id: podcast.id}
-    |> Episode.changeset(attrs)
-    |> Repo.insert()
+    # todo: keys are sometimes atoms, sometimes binaries? why? can/should we enforce atoms?
+    {update_attrs, insert_attrs} = Map.split(attrs, [:image, "image", :enclosure, "enclosure"])
+
+    insert =
+      Ecto.build_assoc(podcast, :episodes)
+      |> Episode.changeset(insert_attrs)
+
+    Multi.new()
+    |> Multi.insert(:episode, insert)
+    |> Multi.update(:episode_updated, fn %{episode: episode} ->
+      Episode.changeset(episode, update_attrs)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{episode_updated: episode}} -> {:ok, episode}
+      {:error, :episode, changeset, _map} -> {:error, changeset}
+      {:error, :episode_updates, changeset, _map} -> {:error, changeset}
+      something -> something
+    end
   end
 
   @doc """

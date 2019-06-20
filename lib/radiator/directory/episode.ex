@@ -10,6 +10,7 @@ defmodule Radiator.Directory.Episode do
   alias Radiator.Directory.{Episode, Podcast, Audio, TitleSlug}
 
   alias RadiatorWeb.Router.Helpers, as: Routes
+  alias Radiator.Media.AudioFileUpload
 
   schema "episodes" do
     field :content, :string
@@ -22,6 +23,9 @@ defmodule Radiator.Directory.Episode do
     field :title, :string
     field :slug, TitleSlug.Type
     field :short_id, :string
+
+    # use enclosure form field to upload audio file
+    field :enclosure, :map, virtual: true
 
     belongs_to :podcast, Podcast
     belongs_to :audio, Audio
@@ -44,11 +48,13 @@ defmodule Radiator.Directory.Episode do
       :published_at,
       :slug,
       :short_id,
-      :podcast_id
+      :podcast_id,
+      :enclosure
     ])
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
     |> validate_required([:title])
     |> set_guid_if_missing()
+    |> create_audio_from_enclosure()
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()
 
@@ -138,6 +144,23 @@ defmodule Radiator.Directory.Episode do
 
   defp set_guid_if_missing(changeset) do
     maybe_regenerate_guid(changeset, get_field(changeset, :guid))
+  end
+
+  @doc """
+  Create Audio for Episode from enclosure upload.
+
+  FIXME: creates new audio even if there was one before, leaving audio orphans on multiple uploads
+  TODO: actually inserting db data in a changeset feels icky (side effects), not sure there's a way around it
+  """
+  def create_audio_from_enclosure(changeset) do
+    if get_field(changeset, :enclosure) do
+      episode = changeset.data
+      audio = %Audio{} |> change(%{episodes: [episode]}) |> Radiator.Repo.insert!()
+      {:ok, _audio} = AudioFileUpload.upload(get_field(changeset, :enclosure), audio)
+      changeset
+    else
+      changeset
+    end
   end
 
   defp maybe_regenerate_guid(changeset, nil), do: regenerate_guid(changeset)

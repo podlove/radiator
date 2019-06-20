@@ -22,6 +22,18 @@
       <%= error_tag f, :description %>
     </div>
 
+    <div class="mb-6">
+      <%= label f, :image, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
+      <%= file_input f, :image, rows: 3, class: "input" %>
+      <%= error_tag f, :image %>
+    </div>
+
+    <div class="mb-6">
+      <%= label f, :enclosure, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
+      <%= file_input f, :enclosure, rows: 3, class: "input" %>
+      <%= error_tag f, :enclosure %>
+    </div>
+
     <%= submit @button_text, class: "btn btn-blue" %>
 <% end %>
 </div>
