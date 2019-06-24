@@ -10,7 +10,7 @@
             <%= @podcast.title %>
             <%= if @podcast.published_at && @podcast.slug do %>
             <span class="text-gray-600 font-normal text-lg">
-              <%= link to: Routes.feed_path(@conn, :show, @podcast.slug), class: "no-underline text-blue-500" do %>
+              <%= link to: Routes.feed_path(@conn, :show, @podcast.slug), class: "txt-lnk" do %>
                 RSS Feed
               <% end %>   
             </span>
@@ -34,7 +34,7 @@
       </div>
 
       <div class="flex w-full h-12 justify-end mb-2">
-        <%= link to: Routes.admin_network_podcast_episode_path(@conn, :new, @podcast.network_id, @podcast), class: "btn btn-blue inline-flex items-center" do %>
+        <%= link to: Routes.admin_network_podcast_episode_path(@conn, :new, @podcast.network_id, @podcast), class: "btn inline-flex items-center" do %>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 mr-2 icon-add"><path fill="white" d="M17 11a1 1 0 0 1 0 2h-4v4a1 1 0 0 1-2 0v-4H7a1 1 0 0 1 0-2h4V7a1 1 0 0 1 2 0v4h4z"></path></svg>
           <span>Create Episode</span>
         <% end %>
@@ -46,7 +46,7 @@
   <h2 class="text-gray-700 mb-2">Drafts</h2>
 
   <%= for episode <- @draft_episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-blue-100" do %>
+    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-highlight" do %>
       <div class="flex">
         <%= if episode.image do %>
           <img src="<%= episode_image_url(episode) %>" class="w-24 h-24 mr-6" />
@@ -67,7 +67,7 @@
   <h2 class="text-gray-700 mb-2">Published</h2>
 
   <%= for episode <- @published_episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-blue-100" do %>
+    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-highlight" do %>
       <div class="flex">
         <%= if episode.image do %>
           <img src="<%= episode_image_url(episode) %>" class="w-24 h-24 mr-6" />

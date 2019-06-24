@@ -21,6 +21,6 @@
       <%= password_input f, :password_repeat, class: "input", placeholder: "" %>
     </div>
 
-    <%= submit @button_text, class: "btn btn-blue" %>
+    <%= submit @button_text, class: "btn" %>
 <% end %>
 </div>

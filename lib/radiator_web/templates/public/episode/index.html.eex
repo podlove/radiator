@@ -24,7 +24,7 @@
 </div>
 
   <%= for episode <- @episodes do %>
-    <%= link to: episode_public_url(episode, @podcast), class: "block no-underline card mb-1 hover:bg-blue-100" do %>
+    <%= link to: episode_public_url(episode, @podcast), class: "block no-underline card mb-1 hover:bg-highlight" do %>
       <%= render("_episode_entry.html", podcast: @podcast, episode: episode) %>
     <% end %>
   <% end %>

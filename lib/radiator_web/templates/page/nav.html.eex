@@ -1,8 +1,8 @@
 <div class="flex">
-  <div class="w-full bg-blue-500 h-1"></div>
+  <div class="w-full bg-secondary h-1"></div>
 </div>
 <div class="flex mb-10 text-white">
-  <div class="w-full bg-gray-900 h-16 flex items-center px-5">
+  <div class="w-full bg-primary h-16 flex items-center px-5">
     <span class="text-2xl font-thin">
       Radiator 🔥
     </span>

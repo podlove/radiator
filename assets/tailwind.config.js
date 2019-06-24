@@ -10,6 +10,11 @@ module.exports = {
       xl: '1280px',
     },
     colors: {
+      primary: '#2C6272',
+      secondary: '#5C9EB2',
+      tertiary: '#74B7C9',
+      highlight: '#B9E2ED',
+
       transparent: 'transparent',
 
       black: '#000',
@@ -221,9 +226,8 @@ module.exports = {
     },
     fontFamily: {
       sans: [
+        'Avenir Next',
         '-apple-system',
-        'BlinkMacSystemFont',
-        '"Segoe UI"',
         'Roboto',
         '"Helvetica Neue"',
         'Arial',
