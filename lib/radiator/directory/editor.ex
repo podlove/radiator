@@ -361,7 +361,8 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  def get_episode_by_podcast_id_and_guid(user = %Auth.User{}, podcast_id, guid) do
+  def get_episode_by_podcast_id_and_guid(user = %Auth.User{}, podcast_id, guid)
+      when not is_nil(podcast_id) and not is_nil(guid) do
     query =
       from ep in Episode,
         where: ep.podcast_id == ^podcast_id,

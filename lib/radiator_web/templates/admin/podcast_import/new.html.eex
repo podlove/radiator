@@ -14,7 +14,7 @@
             <%= text_input :feed, :feed_url, class: "input", placeholder: "https://www.example.com/feed.xml" %>
           </div>
 
-          <%= submit "Import RSS Feed", class: "btn btn-blue" %>
+          <%= submit "Import RSS Feed", class: "btn" %>
       </form>
     </div>
 

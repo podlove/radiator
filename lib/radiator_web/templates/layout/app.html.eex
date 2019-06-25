@@ -7,7 +7,7 @@
     <title>Radiator</title>
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
   </head>
-  <body class="bg-gray-200 antialiased">
+  <body class="font-sans bg-gray-200 antialiased">
 
     <%= render RadiatorWeb.PageView, "nav.html", assigns %>
 

@@ -43,6 +43,8 @@ defmodule RadiatorWeb do
 
       import RadiatorWeb.ErrorHelpers
       import RadiatorWeb.Gettext
+      import RadiatorWeb.FormatHelpers
+
       alias RadiatorWeb.Router.Helpers, as: Routes
     end
   end
