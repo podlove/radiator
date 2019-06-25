@@ -65,11 +65,14 @@ defmodule RadiatorWeb.Router do
   scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
     pipe_through :api
 
-    resources "/files", FileController, only: [:index, :show]
+    # resources "/files", FileController, only: [:index, :show]
+
+    resources "/audio_file", AudioFileController, only: [:show, :create]
 
     resources "/podcasts", PodcastController, except: [:new, :edit] do
       resources "/episodes", EpisodeController, except: [:new, :edit]
     end
+
   end
 
   scope "/api" do
