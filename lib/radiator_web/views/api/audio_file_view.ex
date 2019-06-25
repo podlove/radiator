@@ -8,7 +8,7 @@ defmodule RadiatorWeb.Api.AudioFileView do
     render(__MODULE__, "audio_file.json", assigns)
   end
 
-  def render("audio_file.json", assigns = %{conn: conn, audio_file: audio_file}) do
+  def render("audio_file.json", %{conn: conn, audio_file: audio_file}) do
     %Document{}
     |> Document.add_link(%Link{
       rel: "self",

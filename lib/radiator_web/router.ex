@@ -30,6 +30,7 @@ defmodule RadiatorWeb.Router do
     plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
     plug Guardian.Plug.EnsureAuthenticated
     plug Guardian.Plug.LoadResource
+
     plug RadiatorWeb.Plug.EnsureUserValidity
     plug RadiatorWeb.Plug.AssignCurrentNetwork
   end
@@ -37,6 +38,20 @@ defmodule RadiatorWeb.Router do
   pipeline :api do
     plug :accepts, ["json"]
     plug RadiatorWeb.Plug.ValidateAPIUser
+  end
+
+  pipeline :authenticated_api do
+    plug Guardian.Plug.Pipeline,
+      otp_app: @otp_app,
+      module: Radiator.Auth.Guardian,
+      error_handler: RadiatorWeb.GuardianApiErrorHandler
+
+    plug Guardian.Plug.VerifySession, claims: %{"typ" => "api_session"}
+    plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "api_session"}
+    plug Guardian.Plug.EnsureAuthenticated
+    plug Guardian.Plug.LoadResource
+
+    plug RadiatorWeb.Plug.AssignCurrentUser
   end
 
   scope "/admin", RadiatorWeb.Admin, as: :admin do
@@ -64,14 +79,20 @@ defmodule RadiatorWeb.Router do
   scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
     pipe_through :api
 
-    # resources "/files", FileController, only: [:index, :show]
-
-    resources "/audio_file", AudioFileController, only: [:show, :create]
+    post "/auth", AuthenticationController, :create
 
     resources "/podcasts", PodcastController, except: [:new, :edit] do
       resources "/episodes", EpisodeController, except: [:new, :edit]
     end
+  end
 
+  scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
+    pipe_through [:api, :authenticated_api]
+
+    post "/auth/prolong", AuthenticationController, :prolong
+    post "/auth/logout", AuthenticationController, :logout
+
+    resources "/audio_file", AudioFileController, only: [:show, :create]
   end
 
   scope "/api" do
