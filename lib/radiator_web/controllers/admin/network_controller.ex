@@ -22,12 +22,12 @@ defmodule RadiatorWeb.Admin.NetworkController do
     user = Guardian.Plug.current_resource(conn)
 
     case Editor.create_network(user, network_params) do
-      {:ok, network} ->
+      {:ok, %Network{} = network} ->
         conn
         |> put_flash(:info, "Network created successfully.")
         |> redirect(to: Routes.admin_network_path(conn, :show, network.id))
 
-      {:error, %Ecto.Changeset{} = changeset, _} ->
+      {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
   end

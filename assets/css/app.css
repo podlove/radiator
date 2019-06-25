@@ -104,6 +104,9 @@ html {
   @apply text-black bg-gray-300;
 }
 
+.btn-wicon {
+  @apply inline-flex items-center pl-3;
+}
 
 .pill {
   @apply shadow bg-white text-primary py-2 px-4 rounded-full;
@@ -119,23 +122,32 @@ html {
 }
 
 .nav-link {
-  @apply mx-1 h-full flex items-center;
+  @apply mx-0 h-full flex items-center;
 
   a {
     @apply text-gray-200 no-underline;
   }
 
-  &.active,
-  &:hover {
-    @apply border-b-4 border-gray-200;
+}
 
-    a {
-      position: relative;
-      top: 2px;
-    }
-  }
+.nav-link:hover {
+  @apply underline;
 }
 
 .help-block {
   @apply block text-red-600 mx-4 mt-2;
+}
+
+.truncate-fade {
+  @apply truncate;
+  position: relative;
+}
+.truncate-fade:after {
+  position: absolute;
+  content: "";
+  height: 100%;
+  bottom: 0;
+  right: 0;
+  width: 2em;
+  background: linear-gradient(to right,theme("colors.primarytransparent"), theme("colors.primary"));
 }
