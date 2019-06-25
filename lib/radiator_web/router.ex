@@ -36,7 +36,6 @@ defmodule RadiatorWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-    plug CORSPlug
     plug RadiatorWeb.Plug.ValidateAPIUser
   end
 
