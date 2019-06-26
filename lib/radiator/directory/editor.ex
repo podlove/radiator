@@ -53,8 +53,8 @@ defmodule Radiator.Directory.Editor do
       {:error, :not_found}
 
   """
-  @spec get_network(Auth.User.t(), pos_integer()) ::
-          {:ok, Network.t()} | {:error, :not_authorized | :not_found}
+  @spec get_network(Auth.User.t(), pos_integer() | nil) ::
+          {:ok, Network.t()} | {:error, :not_authorized | :not_found | :unprocessable}
   def get_network(user, id)
 
   def get_network(_, nil) do
@@ -240,8 +240,14 @@ defmodule Radiator.Directory.Editor do
       {:error, :not_found}
 
   """
-  @spec get_podcast(Auth.User.t(), pos_integer()) ::
-          {:ok, Podcast.t()} | {:error, :not_authorized | :not_found}
+  @spec get_podcast(Auth.User.t(), pos_integer() | nil) ::
+          {:ok, Podcast.t()} | {:error, :not_authorized | :not_found | :unprocessable}
+  def get_podcast(user, id)
+
+  def get_podcast(_, nil) do
+    {:error, :unprocessable}
+  end
+
   def get_podcast(user = %Auth.User{}, id) do
     case Repo.get(Podcast, id) do
       nil ->

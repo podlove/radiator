@@ -88,6 +88,9 @@ defmodule RadiatorWeb.Router do
 
     resources "/networks", NetworkController, only: [:show, :create, :update, :delete]
     resources "/podcasts", PodcastController, only: [:show, :create, :update, :delete]
+    resources "/episodes", EpisodeController, only: [:show, :create, :update, :delete]
+
+    # todo: pluralize
     resources "/audio_file", AudioFileController, only: [:show, :create]
   end
 
