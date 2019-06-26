@@ -31,7 +31,7 @@
       </a>        
       <% end %>
 
-      <%= if has_manage_permission_for_network(@authenticated_user, @current_network) do %>
+      <%= if has_manage_permission_for_network(@current_user, @current_network) do %>
 
       <a href="<%= Routes.admin_network_podcast_path(@conn, :new, @current_network) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-blue-100">
         

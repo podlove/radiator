@@ -13,7 +13,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
     user = Radiator.TestEntries.user()
 
     [
-      conn: Radiator.TestEntries.put_authenticated_user(conn, user),
+      conn: Radiator.TestEntries.put_current_user(conn, user),
       user: user
     ]
   end

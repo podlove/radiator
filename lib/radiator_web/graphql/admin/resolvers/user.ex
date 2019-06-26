@@ -5,7 +5,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.User do
   def resend_verification_email(_parent, _params, %{
         context: context
       }) do
-    case Map.get(context, :authenticated_user) do
+    case Map.get(context, :current_user) do
       %Auth.User{status: :unverified} = user ->
         case UserHelpers.resend_verification_email_for_user(user, context) do
           :sent ->

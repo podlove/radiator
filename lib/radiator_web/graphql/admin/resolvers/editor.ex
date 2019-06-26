@@ -102,17 +102,17 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def list_networks(_parent, _args, %{context: %{authenticated_user: user}}) do
+  def list_networks(_parent, _args, %{context: %{current_user: user}}) do
     {:ok, Editor.list_networks(user)}
   end
 
-  def find_network(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+  def find_network(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_network user, id do
       fn network -> {:ok, network} end
     end
   end
 
-  def create_network(_parent, %{network: args}, %{context: %{authenticated_user: user}}) do
+  def create_network(_parent, %{network: args}, %{context: %{current_user: user}}) do
     case Editor.create_network(user, args) do
       {:ok, network} -> {:ok, network}
       @not_authorized_match -> @not_authorized_response
@@ -120,7 +120,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def update_network(_parent, %{id: id, network: args}, %{context: %{authenticated_user: user}}) do
+  def update_network(_parent, %{id: id, network: args}, %{context: %{current_user: user}}) do
     with_network user, id do
       fn network ->
         Editor.update_network(user, network, args)
@@ -133,30 +133,30 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def list_podcasts(%Network{id: id}, _args, %{context: %{authenticated_user: user}}) do
+  def list_podcasts(%Network{id: id}, _args, %{context: %{current_user: user}}) do
     with_network user, id do
       fn network -> {:ok, Editor.list_podcasts(user, network)} end
     end
   end
 
-  def list_podcasts(_parent, _args, %{context: %{authenticated_user: user}}) do
+  def list_podcasts(_parent, _args, %{context: %{current_user: user}}) do
     {:ok, Editor.list_podcasts(user)}
   end
 
-  def find_podcast(%Episode{} = episode, _args, %{context: %{authenticated_user: user}}) do
+  def find_podcast(%Episode{} = episode, _args, %{context: %{current_user: user}}) do
     with_podcast user, episode.podcast_id do
       fn podcast -> {:ok, podcast} end
     end
   end
 
-  def find_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+  def find_podcast(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_podcast user, id do
       fn podcast -> {:ok, podcast} end
     end
   end
 
   def create_podcast(_parent, %{podcast: args, network_id: network_id}, %{
-        context: %{authenticated_user: user}
+        context: %{current_user: user}
       }) do
     with_network user, network_id do
       fn network ->
@@ -165,7 +165,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def update_podcast(_parent, %{id: id, podcast: args}, %{context: %{authenticated_user: user}}) do
+  def update_podcast(_parent, %{id: id, podcast: args}, %{context: %{current_user: user}}) do
     with_podcast user, id do
       fn podcast ->
         Editor.update_podcast(user, podcast, args)
@@ -173,7 +173,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def publish_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+  def publish_podcast(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_podcast user, id do
       fn podcast ->
         Editor.publish_podcast(user, podcast)
@@ -181,7 +181,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def depublish_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+  def depublish_podcast(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_podcast user, id do
       fn podcast ->
         Editor.depublish_podcast(user, podcast)
@@ -189,7 +189,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def delete_podcast(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+  def delete_podcast(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_podcast user, id do
       fn podcast ->
         Editor.delete_podcast(user, podcast)
@@ -197,14 +197,14 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def find_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+  def find_episode(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_episode user, id do
       fn episode -> {:ok, episode} end
     end
   end
 
   def create_episode(_parent, %{podcast_id: podcast_id, episode: args}, %{
-        context: %{authenticated_user: user}
+        context: %{current_user: user}
       }) do
     with_podcast user, podcast_id do
       fn podcast ->
@@ -213,7 +213,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def update_episode(_parent, %{id: id, episode: args}, %{context: %{authenticated_user: user}}) do
+  def update_episode(_parent, %{id: id, episode: args}, %{context: %{current_user: user}}) do
     with_episode user, id do
       fn episode ->
         Editor.update_episode(user, episode, args)
@@ -221,7 +221,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def publish_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+  def publish_episode(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_episode user, id do
       fn episode ->
         Editor.publish_episode(user, episode)
@@ -229,7 +229,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def depublish_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+  def depublish_episode(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_episode user, id do
       fn episode ->
         Editor.depublish_episode(user, episode)
@@ -238,7 +238,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def schedule_episode(_parent, %{id: id, datetime: datetime}, %{
-        context: %{authenticated_user: user}
+        context: %{current_user: user}
       }) do
     with_episode user, id do
       fn episode ->
@@ -248,7 +248,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   # todo: do not use Manager context here
-  def delete_episode(_parent, %{id: id}, %{context: %{authenticated_user: user}}) do
+  def delete_episode(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_episode user, id do
       fn episode ->
         Editor.delete_episode(user, episode)
@@ -263,7 +263,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def set_episode_chapters(_parent, %{id: id, chapters: chapters, type: type}, %{
-        context: %{authenticated_user: user}
+        context: %{current_user: user}
       }) do
     with_audio user, id do
       fn audio ->
@@ -272,11 +272,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def find_audio(%Episode{} = episode, _args, %{context: %{authenticated_user: _user}}) do
+  def find_audio(%Episode{} = episode, _args, %{context: %{current_user: _user}}) do
     {:ok, episode.audio}
   end
 
-  def get_enclosure(%Episode{} = episode, _args, %{context: %{authenticated_user: _user}}) do
+  def get_enclosure(%Episode{} = episode, _args, %{context: %{current_user: _user}}) do
     {:ok, Episode.enclosure(episode)}
   end
 
@@ -303,7 +303,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, Media.NetworkImage.url({network.image, network})}
   end
 
-  def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{authenticated_user: user}}) do
+  def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{current_user: user}}) do
     Editor.get_episodes_count_for_podcast!(user, podcast_id)
   end
 end

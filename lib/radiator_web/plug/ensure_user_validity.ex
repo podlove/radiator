@@ -13,7 +13,7 @@ defmodule RadiatorWeb.Plug.EnsureUserValidity do
   def call(conn, _opts) do
     case Guardian.Plug.current_resource(conn) do
       %Radiator.Auth.User{status: :active} = user ->
-        assign(conn, :authenticated_user, user)
+        assign(conn, :current_user, user)
 
       %Radiator.Auth.User{status: :unverified} = user ->
         conn

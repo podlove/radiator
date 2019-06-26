@@ -18,7 +18,7 @@
           <h1 class="text-base mb-1"><%= network.title %></h1>
         </div>
       </a> 
-      <%= if has_edit_permission_for_network(@authenticated_user, network) do %>       
+      <%= if has_edit_permission_for_network(@current_user, network) do %>       
         <%= link to: Routes.admin_network_path(@conn, :edit, network.id), class: "no-underline text-blue-500" do %>
           <div class="pill">edit</div>
         <% end %>

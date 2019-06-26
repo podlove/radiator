@@ -12,7 +12,7 @@ defmodule RadiatorWeb.Admin.UserSettingsController do
 
   def update(conn, params) do
     user_params = params["user"]
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     with {:ok, _} <- User.check_password(user, user_params["password_current"]),
          {:ok, _user} <- Auth.Register.change_password(user, user_params) do

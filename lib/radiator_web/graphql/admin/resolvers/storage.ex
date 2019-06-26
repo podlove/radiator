@@ -1,12 +1,11 @@
 defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Storage do
   use Radiator.Constants
 
-  alias Radiator.Storage
   alias Radiator.Media
   alias Radiator.Directory.Editor
 
   def upload_audio_file(_parent, %{audio_id: id, file: file}, %{
-        context: %{authenticated_user: user}
+        context: %{current_user: user}
       }) do
     case Editor.get_audio(user, id) do
       {:ok, audio} ->

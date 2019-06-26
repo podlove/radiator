@@ -27,8 +27,8 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Session do
            password: password
          }) do
       {:ok, user} ->
-        with authenticated_user = %Auth.User{} <- context[:authenticated_user],
-             :active <- authenticated_user.status do
+        with current_user = %Auth.User{} <- context[:current_user],
+             :active <- current_user.status do
           # activate user immediatly when created by an already authenticated user
           Auth.Register.activate_user(user)
         else
