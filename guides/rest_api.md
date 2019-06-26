@@ -12,10 +12,10 @@ POST /api/rest/v1/auth
 
 ### Parameters
 
-| Name                   | Type     | Description                      |
-| ---------------------- | -------- | -------------------------------- |
-| `audio_file[name]`     | `string` | **Required.** Username or email. |
-| `audio_file[password]` | `string` | **Required.** Password.          |
+| Name       | Type     | Description                      |
+| ---------- | -------- | -------------------------------- |
+| `name`     | `string` | **Required.** Username or email. |
+| `password` | `string` | **Required.** Password.          |
 
 ### Response
 
