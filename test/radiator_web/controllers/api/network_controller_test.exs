@@ -56,4 +56,24 @@ defmodule RadiatorWeb.Api.NetworkControllerTest do
       assert response = json_response(conn, 401)
     end
   end
+
+  describe "update network" do
+    test "renders network", %{conn: conn, user: user} do
+      network = insert(:network) |> owned_by(user)
+
+      conn =
+        put(conn, Routes.api_network_path(conn, :update, network.id), %{network: %{title: "new"}})
+
+      assert %{"title" => "new"} = json_response(conn, 200)
+    end
+
+    test "renders error on invalid data", %{conn: conn, user: user} do
+      network = insert(:network) |> owned_by(user)
+
+      conn =
+        put(conn, Routes.api_network_path(conn, :update, network.id), %{network: %{title: ""}})
+
+      assert %{"errors" => %{"title" => _error}} = json_response(conn, 422)
+    end
+  end
 end

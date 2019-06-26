@@ -23,4 +23,13 @@ defmodule RadiatorWeb.Api.NetworkController do
       render(conn, "show.json", %{network: network})
     end
   end
+
+  def update(conn, %{"id" => id, "network" => network_params}) do
+    user = current_user(conn)
+
+    with {:ok, network} <- Editor.get_network(user, id),
+         {:ok, network} <- Editor.update_network(user, network, network_params) do
+      render(conn, "show.json", %{network: network})
+    end
+  end
 end

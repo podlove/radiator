@@ -91,7 +91,7 @@ defmodule RadiatorWeb.Router do
 
     post "/auth/prolong", AuthenticationController, :prolong
 
-    resources "/networks", NetworkController, only: [:show, :create]
+    resources "/networks", NetworkController, only: [:show, :create, :update]
     resources "/audio_file", AudioFileController, only: [:show, :create]
   end
 
