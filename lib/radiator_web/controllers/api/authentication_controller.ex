@@ -25,10 +25,4 @@ defmodule RadiatorWeb.Api.AuthenticationController do
     conn
     |> json(AuthHelpers.session_response(user, token))
   end
-
-  def logout(conn, _params) do
-    conn
-    |> Auth.Guardian.Plug.sign_out()
-    |> send_resp(200, "ok")
-  end
 end
