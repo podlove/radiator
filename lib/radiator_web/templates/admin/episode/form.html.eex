@@ -34,6 +34,11 @@
       <%= error_tag f, :enclosure %>
     </div>
 
-    <%= submit @button_text, class: "btn btn-blue" %>
+    <div class="flex">
+      <%= submit @button_text, class: "btn" %>
+      <%= if assigns[:cancel_url] do %>
+        <%= link @cancel_text, to: @cancel_url, class: "btn btn-cancel ml-2" %>
+      <% end %>
+    </div>
 <% end %>
 </div>

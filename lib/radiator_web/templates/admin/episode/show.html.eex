@@ -18,7 +18,7 @@
     </div>
     <div>
       <%= link to: Routes.admin_network_podcast_episode_path(@conn, :edit, @episode.podcast.network_id, @episode.podcast, @episode), class: "no-underline text-blue-500" do %>
-      <div class="shadow bg-white text-blue-500 py-2 px-4 rounded-full">
+      <div class="pill">
         edit
       </div>
       <% end %>

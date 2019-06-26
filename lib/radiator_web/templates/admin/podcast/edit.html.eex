@@ -4,5 +4,7 @@
       <span class="text-gray-600 font-normal text-lg">Changes can take a moment until they are visible on third party platforms.</span>
     </div>
 
-    <%= render "form.html", Map.merge(assigns, %{action: Routes.admin_network_podcast_path(@conn, :update, @podcast.network_id, @podcast), button_text: "Update Podcast"}) %>
+    <%= render "form.html", Map.merge(assigns, %{action: Routes.admin_network_podcast_path(@conn, :update, @podcast.network_id, @podcast), button_text: "Update Podcast",
+    cancel_text: "Cancel",
+    cancel_url: Routes.admin_network_podcast_path(@conn, :show, @podcast.network_id, @podcast)}) %>
 </div>

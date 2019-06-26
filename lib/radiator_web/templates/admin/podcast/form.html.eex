@@ -22,12 +22,16 @@
       <%= error_tag f, :description %>
     </div>
 
-    <div class="flex justify-between">
-    <%= submit @button_text, class: "btn btn-blue" %>
+    <div class="flex">
+      <%= submit @button_text, class: "btn" %>
+      <%= if assigns[:cancel_url] do %>
+        <%= link @cancel_text, to: @cancel_url, class: "btn btn-cancel ml-2" %>
+      <% end %>
 
-    <%= if @changeset.data.__meta__.state == :loaded do %>
-      <%= submit "Delete Podcast", class: "btn btn-red", name: "button_action", value: "delete" %>
-    <% end %>
+      <%= if @changeset.data.__meta__.state == :loaded do %>
+        <span class="flex-grow"> </span>
+        <%= submit "Delete Podcast", class: "btn btn-destructive", name: "button_action", value: "delete" %>
+      <% end %>
     </div>
 <% end %>
 </div>

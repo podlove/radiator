@@ -50,12 +50,14 @@ html {
  * @import "utilities/skew-transforms";
  */
 
+
+ /* used in svg icons that have 2 colors */
 .primary {
-  fill: #bcdefa;
+  fill: theme("colors.tertiary");
 }
 
 .secondary {
-  fill: #0D2B3E;
+  fill: theme("colors.primary");
 }
 
 .card {
@@ -70,56 +72,82 @@ html {
   }
 }
 
+.txt-lnk {
+  @apply no-underline text-primary;
+}
+
+.txt-lnk:hover {
+  @apply underline;
+}
+
 .btn {
-  @apply no-underline font-bold py-2 px-4 rounded;
+  @apply no-underline font-bold py-2 px-4 bg-primary text-white rounded;
 }
 
-.btn-blue {
-  @apply bg-blue-500 text-white;
+.btn:hover {
+  @apply bg-secondary;
 }
 
-.btn-blue:hover {
-  @apply bg-blue-600;
-}
-
-.btn-red {
+.btn-destructive {
   @apply bg-red-500 text-white;
 }
 
-.btn-red:hover {
+.btn-destructive:hover {
   @apply bg-red-600;
 }
 
-.pill {
-  @apply shadow bg-white text-blue-500 py-2 px-4 rounded-full;
-
-  &:hover {
-    @apply text-blue-700;
-  }
+.btn-cancel {
+  @apply text-gray-900 bg-gray-200 border-secondary border rounded;
 }
+
+.btn-cancel:hover {
+  @apply text-black bg-gray-300;
+}
+
+.btn-wicon {
+  @apply inline-flex items-center pl-3;
+}
+
+.pill {
+  @apply shadow bg-white text-primary py-2 px-4 rounded-full;
+}
+
+.pill:hover {
+  @apply text-secondary;
+}
+
 
 .nav-chevron {
   @apply mx-1 h-full flex items-center;
 }
 
 .nav-link {
-  @apply mx-1 h-full flex items-center;
+  @apply mx-0 h-full flex items-center;
 
   a {
     @apply text-gray-200 no-underline;
   }
 
-  &.active,
-  &:hover {
-    @apply border-b-4 border-gray-200;
+}
 
-    a {
-      position: relative;
-      top: 2px;
-    }
-  }
+.nav-link:hover {
+  @apply underline;
 }
 
 .help-block {
   @apply block text-red-600 mx-4 mt-2;
+}
+
+.truncate-fade {
+  @apply truncate;
+  position: relative;
+}
+.truncate-fade:after {
+  position: absolute;
+  content: "";
+  height: 100%;
+  bottom: 0;
+  right: 0;
+  width: 2em;
+  background: linear-gradient(to right,theme("colors.primarytransparent"), theme("colors.primary"));
 }

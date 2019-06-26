@@ -7,26 +7,27 @@
     <div class="flex justify-center md:justify-start flex-wrap">
       <%= for network <- @networks do %>
       <div class="w-48 flex flex-col mr-8 mb-10">
-      <a href="<%= Routes.admin_network_podcast_path(@conn, :index, network.id) %>" class="no-underline text-black w-48 bg-white rounded flex flex-col shadow mr-8 mb-8">
-        
-        <div
-          class="w-48 h-48 bg-cover shadow-inner"
-          style="background-image: url(<%= network.image %>)"
-        ></div>
+        <%= link to: Routes.admin_network_podcast_path(@conn, :index, network.id),
+        class: "no-underline text-black w-48 bg-white rounded flex flex-col shadow mr-8 mb-8" do %>
+          
+          <div
+            class="w-48 h-48 bg-cover shadow-inner"
+            style="background-image: url(<%= network.image %>)"
+          ></div>
 
-        <div class="p-3 h-32">
-          <h1 class="text-base mb-1"><%= network.title %></h1>
-        </div>
-      </a> 
-      <%= if has_edit_permission_for_network(@current_user, network) do %>       
-        <%= link to: Routes.admin_network_path(@conn, :edit, network.id), class: "no-underline text-blue-500" do %>
-          <div class="pill">edit</div>
+          <div class="p-3 h-32">
+            <h1 class="text-base mb-1"><%= network.title %></h1>
+          </div>
         <% end %>
+        <%= if has_edit_permission_for_network(@authenticated_user, network) do %>       
+          <%= link to: Routes.admin_network_path(@conn, :edit, network.id), class: "no-underline text-blue-500" do %>
+            <div class="pill">edit</div>
+          <% end %>
+        <% end %>
+        </div>
       <% end %>
-      </div>
-    <% end %>
   
-      <a href="<%= Routes.admin_network_path(@conn, :new) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-blue-100">
+      <a href="<%= Routes.admin_network_path(@conn, :new) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-highlight">
         
         <div class="w-48 h-48 flex flex-col justify-center items-center">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 mb-4 icon-add-circle"><circle cx="12" cy="12" r="10" class="primary"></circle><path class="secondary" d="M13 11h4a1 1 0 0 1 0 2h-4v4a1 1 0 0 1-2 0v-4H7a1 1 0 0 1 0-2h4V7a1 1 0 0 1 2 0v4z"></path></svg>

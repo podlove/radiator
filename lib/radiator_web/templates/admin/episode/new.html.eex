@@ -4,5 +4,11 @@
       <span class="text-gray-600 font-normal text-lg">Let's add some META to your DATA.</span>
     </div>
 
-    <%= render "form.html", Map.merge(assigns, %{action: Routes.admin_network_podcast_episode_path(@conn, :create, @podcast.network_id, @podcast), button_text: "Create Episode"}) %>
+    <%= render "form.html", Map.merge(assigns, %{
+      action: Routes.admin_network_podcast_episode_path(@conn, :create, @podcast.network_id, @podcast), 
+      button_text: "Create Episode",
+      cancel_text: "Cancel",
+      cancel_url: Routes.admin_network_podcast_path(@conn, :show, @podcast.network_id, @podcast)
+    
+    }) %>
 </div>
