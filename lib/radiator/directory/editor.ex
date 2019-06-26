@@ -111,6 +111,14 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def delete_network(user = %Auth.User{}, network = %Network{}) do
+    if has_permission(user, network, :own) do
+      Editor.Owner.delete_network(network)
+    else
+      @not_authorized_match
+    end
+  end
+
   @doc """
   List podcasts for user.
 

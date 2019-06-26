@@ -76,4 +76,12 @@ defmodule RadiatorWeb.Api.NetworkControllerTest do
       assert %{"errors" => %{"title" => _error}} = json_response(conn, 422)
     end
   end
+
+  test "delete network", %{conn: conn, user: user} do
+    network = insert(:network) |> owned_by(user)
+
+    conn = delete(conn, Routes.api_network_path(conn, :delete, network.id))
+
+    assert response(conn, 204)
+  end
 end
