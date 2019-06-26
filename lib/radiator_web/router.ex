@@ -75,15 +75,10 @@ defmodule RadiatorWeb.Router do
     get "/audio/:id", TrackingController, :show
   end
 
-  # Other scopes may use custom stacks.
   scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
     pipe_through :api
 
     post "/auth", AuthenticationController, :create
-
-    resources "/podcasts", PodcastController, except: [:new, :edit] do
-      resources "/episodes", EpisodeController, except: [:new, :edit]
-    end
   end
 
   scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
@@ -92,6 +87,7 @@ defmodule RadiatorWeb.Router do
     post "/auth/prolong", AuthenticationController, :prolong
 
     resources "/networks", NetworkController, only: [:show, :create, :update, :delete]
+    resources "/podcasts", PodcastController, only: [:show, :create, :update, :delete]
     resources "/audio_file", AudioFileController, only: [:show, :create]
   end
 

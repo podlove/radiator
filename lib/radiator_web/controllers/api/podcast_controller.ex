@@ -1,51 +1,42 @@
 defmodule RadiatorWeb.Api.PodcastController do
   use RadiatorWeb, :controller
+  use Radiator.Constants
 
-  alias Radiator.Directory
-  alias Radiator.Directory.Podcast
   alias Radiator.Directory.Editor
 
   action_fallback RadiatorWeb.Api.FallbackController
 
-  def index(conn, _params) do
-    podcasts = Directory.list_podcasts()
-    render(conn, "index.json", podcasts: podcasts)
-  end
-
-  def create(conn, %{"podcast" => podcast_params, "network_id" => network_id}) do
-    network = Directory.get_network(network_id)
-
-    with {:ok, %Podcast{} = podcast} <- Editor.Manager.create_podcast(network, podcast_params) do
+  def create(conn, %{"podcast" => params}) do
+    with user = current_user(conn),
+         {:ok, network} <- Editor.get_network(user, params["network_id"]),
+         {:ok, podcast} <- Editor.create_podcast(user, network, params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.api_podcast_path(conn, :show, podcast))
-      |> render("show.json", podcast: podcast)
+      |> render("show.json", %{podcast: podcast})
     end
   end
 
   def show(conn, %{"id" => id}) do
-    case Directory.get_podcast(id) do
-      nil ->
-        {:error, :not_found}
-
-      podcast = %Podcast{} ->
-        render(conn, "show.json", podcast: podcast)
+    with user = current_user(conn),
+         {:ok, podcast} <- Editor.get_podcast(user, id) do
+      render(conn, "show.json", %{podcast: podcast})
     end
   end
 
   def update(conn, %{"id" => id, "podcast" => podcast_params}) do
-    podcast = Directory.get_podcast(id)
-
-    with {:ok, %Podcast{} = podcast} <- Editor.Manager.update_podcast(podcast, podcast_params) do
-      render(conn, "show.json", podcast: podcast)
+    with user = current_user(conn),
+         {:ok, podcast} <- Editor.get_podcast(user, id),
+         {:ok, podcast} <- Editor.update_podcast(user, podcast, podcast_params) do
+      render(conn, "show.json", %{podcast: podcast})
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    podcast = Directory.get_podcast(id)
-
-    with {:ok, %Podcast{}} <- Editor.Manager.delete_podcast(podcast) do
-      send_resp(conn, :no_content, "")
+    with user <- current_user(conn),
+         {:ok, podcast} <- Editor.get_podcast(user, id),
+         {:ok, _} <- Editor.delete_podcast(user, podcast) do
+      send_resp(conn, 204, "")
     end
   end
 end

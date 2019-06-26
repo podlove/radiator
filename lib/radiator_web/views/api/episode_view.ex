@@ -9,7 +9,7 @@ defmodule RadiatorWeb.Api.EpisodeView do
     %Document{}
     |> Document.add_link(%Link{
       rel: "self",
-      href: Routes.api_podcast_episode_path(assigns.conn, :index, podcast.id)
+      href: Routes.api_episode_path(assigns.conn, :index, podcast.id)
     })
     |> Document.add_embed(%Embed{
       resource: "rad:episode",
@@ -25,7 +25,7 @@ defmodule RadiatorWeb.Api.EpisodeView do
     %Document{}
     |> Document.add_link(%Link{
       rel: "self",
-      href: Routes.api_podcast_episode_path(conn, :show, episode.podcast_id, episode)
+      href: Routes.api_episode_path(conn, :show, episode.podcast_id, episode)
     })
     |> Document.add_link(%Link{
       rel: "rad:podcast",

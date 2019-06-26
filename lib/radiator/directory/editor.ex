@@ -55,6 +55,12 @@ defmodule Radiator.Directory.Editor do
   """
   @spec get_network(Auth.User.t(), pos_integer()) ::
           {:ok, Network.t()} | {:error, :not_authorized | :not_found}
+  def get_network(user, id)
+
+  def get_network(_, nil) do
+    {:error, :unprocessable}
+  end
+
   def get_network(user = %Auth.User{}, id) do
     case Repo.get(Network, id) do
       nil ->

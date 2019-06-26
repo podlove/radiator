@@ -8,6 +8,13 @@ defmodule RadiatorWeb.Api.FallbackController do
 
   require Logger
 
+  def call(conn, {:error, :unprocessable}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> put_view(RadiatorWeb.ErrorView)
+    |> render(:"422")
+  end
+
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
     |> put_status(:unprocessable_entity)

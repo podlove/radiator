@@ -11,10 +11,7 @@ defmodule RadiatorWeb.Api.NetworkController do
          {:ok, network} <- Editor.create_network(user, params) do
       conn
       |> put_status(:created)
-      |> put_resp_header(
-        "location",
-        Routes.api_network_path(conn, :show, network)
-      )
+      |> put_resp_header("location", Routes.api_network_path(conn, :show, network))
       |> render("show.json", %{network: network})
     end
   end
