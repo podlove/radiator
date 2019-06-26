@@ -15,6 +15,13 @@ defmodule RadiatorWeb.Api.FallbackController do
     |> render("error.json", changeset: changeset)
   end
 
+  def call(conn, {:error, :not_authorized}) do
+    conn
+    |> put_status(:unauthorized)
+    |> put_view(RadiatorWeb.ErrorView)
+    |> render(:"401")
+  end
+
   def call(conn, {:error, :not_found}) do
     conn
     |> put_status(:not_found)
