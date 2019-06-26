@@ -6,18 +6,14 @@ defmodule RadiatorWeb.Api.AudioFileController do
   action_fallback(RadiatorWeb.Api.FallbackController)
 
   def create(conn, %{"audio_file" => audio_file_params}) do
-    case Media.create_audio_file(audio_file_params) do
-      {:ok, audio_file} ->
-        conn
-        |> put_status(:created)
-        |> put_resp_header(
-          "location",
-          Routes.api_audio_file_path(conn, :show, audio_file)
-        )
-        |> render("show.json", audio_file: audio_file)
-
-      other ->
-        other
+    with {:ok, audio_file} <- Media.create_audio_file(audio_file_params) do
+      conn
+      |> put_status(:created)
+      |> put_resp_header(
+        "location",
+        Routes.api_audio_file_path(conn, :show, audio_file)
+      )
+      |> render("show.json", audio_file: audio_file)
     end
   end
 
