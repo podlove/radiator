@@ -12,6 +12,6 @@ defmodule Radiator.Media.PersonAvatar do
   end
 
   def default_url(_, person) do
-    "https://robohash.org/#{person.real_name}?size=200x200"
+    "https://robohash.org/#{person.name}?size=200x200"
   end
 end

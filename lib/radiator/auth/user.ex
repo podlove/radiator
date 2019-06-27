@@ -9,6 +9,7 @@ defmodule Radiator.Auth.User do
   schema "auth_users" do
     field :name, :string
     field :email, :string
+    field :display_name, :string
     field :password_hash, :binary
     field :password, :string, virtual: true
     field :password_confirmation, :string, virtual: true
@@ -37,7 +38,7 @@ defmodule Radiator.Auth.User do
   @doc false
   def changeset(%User{} = user, attrs) do
     user
-    |> cast(attrs, [:name, :email, :password, :password_hash, :status])
+    |> cast(attrs, [:name, :display_name, :email, :password, :password_hash, :status])
     |> unique_constraint(:name, name: :auth_users__lower_name_index)
     |> unique_constraint(:email, name: :auth_users__lower_email_index)
     |> validate_format(:name, ~r/^[^\s ]+$/)

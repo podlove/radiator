@@ -7,27 +7,19 @@ defmodule Radiator.Auth.Register do
   alias Radiator.Auth.User
 
   def get_user(id),
-    do:
-      Repo.get!(User, id)
-      |> preload()
+    do: Repo.get!(User, id)
 
   def get_user_by_email(email),
     do:
       email
       |> User.by_email_query()
       |> Repo.one()
-      |> preload()
 
   def get_user_by_name(name),
     do:
       name
       |> User.by_name_query()
       |> Repo.one()
-      |> preload()
-
-  def preload(user) do
-    Repo.preload(user, :person)
-  end
 
   def get_user_by_credentials(name_or_email, password) do
     max_id = User.max_reserved_user_id()
@@ -47,9 +39,9 @@ defmodule Radiator.Auth.Register do
     end
   end
 
+  # TODO: we want to always have a person associated with a user but can we do it without coupling the logic here?
   def create_user(attrs \\ %{}) do
-    {person_attrs, user_attrs} =
-      Map.split(attrs, [:real_name, :display_name, :nick_name, :gender, :avatar])
+    {person_attrs, user_attrs} = Map.split(attrs, [:nick, :avatar])
 
     %User{}
     |> User.changeset(user_attrs)

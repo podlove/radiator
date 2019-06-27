@@ -15,8 +15,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       resolve fn user, _, _ -> {:ok, user.person.display_name} end
     end
 
-    field :nick_name, :string do
-      resolve fn user, _, _ -> {:ok, user.person.nick_name} end
+    field :nick, :string do
+      resolve fn user, _, _ -> {:ok, user.person.nick} end
     end
 
     field :gender, :string do

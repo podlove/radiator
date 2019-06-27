@@ -3,9 +3,9 @@ defmodule Radiator.Repo.Migrations.CreatePeople do
 
   def change do
     create table(:people) do
-      add :real_name, :text
+      add :name, :text
       add :display_name, :text
-      add :nick_name, :text
+      add :nick, :text
       add :email, :text
       add :avatar, :string
       add :uri, :text

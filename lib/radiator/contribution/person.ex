@@ -26,9 +26,9 @@ defmodule Radiator.Contribution.Person do
   alias Radiator.Directory.Network
 
   schema "people" do
-    field :real_name, :string
+    field :name, :string
     field :display_name, :string
-    field :nick_name, :string
+    field :nick, :string
     field :email, :string
     field :uri, :string
 
@@ -43,7 +43,7 @@ defmodule Radiator.Contribution.Person do
   @doc false
   def changeset(chapter, attrs) do
     chapter
-    |> cast(attrs, [:real_name, :display_name, :nick_name, :uri, :email])
+    |> cast(attrs, [:name, :display_name, :nick, :uri, :email])
     |> cast_attachments(attrs, [:avatar], allow_paths: true, allow_urls: true)
   end
 
