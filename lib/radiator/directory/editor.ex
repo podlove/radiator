@@ -125,6 +125,14 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def list_collaborators(user = %Auth.User{}, network = %Network{}) do
+    if has_permission(user, network, :manage) do
+      Repo.all(Auth.User)
+    else
+      @not_authorized_match
+    end
+  end
+
   @doc """
   List podcasts for user.
 

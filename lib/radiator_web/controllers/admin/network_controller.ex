@@ -35,10 +35,12 @@ defmodule RadiatorWeb.Admin.NetworkController do
   def show(conn, %{"id" => id}) do
     with user <- current_user(conn),
          {:ok, network} <- Editor.get_network(user, id),
-         podcasts <- Editor.list_podcasts_with_episode_counts(user, network) do
+         podcasts <- Editor.list_podcasts_with_episode_counts(user, network),
+         collaborators <- Editor.list_collaborators(user, network) do
       render(conn, "show.html",
         network: network,
-        podcasts: podcasts
+        podcasts: podcasts,
+        collaborators: collaborators
       )
     end
   end

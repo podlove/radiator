@@ -72,4 +72,27 @@
     <% end %>
 
     </div>
+
+    <%= if has_manage_permission_for_network(@current_user, @network) do %>
+
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold mb-3 text-blue-900">Collborators for <%= @network.title %></h1>
+
+      <div class="flex-vertical">
+        <%= for user <- @collaborators do %>
+          <div class="flex px-2 justify-begin w-1/2 h-12 border-primary border-b items-center hover:bg-highlight">
+            <div class="bg-gray-500 rounded-full w-10 h-10"></div>
+            <div class="text-left mx-4">
+            <%= content_tag(:span, user.name, class: "font-bold") %><br/>
+            <%= content_tag(:span, user.display_name, class: "text-sm") %>
+            </div>
+            <div class="text-sm py-1 px-2 text-white bg-tertiary rounded-full">
+              owner
+            </div>
+          </div>
+        <% end %>
+      <div>
+    </div>
+
+    <% end %>
 </div>
