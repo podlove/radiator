@@ -62,10 +62,10 @@ defmodule RadiatorWeb.LoginController do
   end
 
   defp sign_in_valid_user(conn, user, message) do
-    path =
+    {conn, path} =
       case get_session(conn, :on_login) do
-        {path, _query} -> path
-        _ -> Routes.admin_network_path(conn, :index)
+        {path, _query} -> {delete_session(conn, :on_login), path}
+        _ -> {conn, Routes.admin_network_path(conn, :index)}
       end
 
     conn

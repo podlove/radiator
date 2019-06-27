@@ -7,7 +7,7 @@ defmodule RadiatorWeb.Admin.UserSettingsController do
   action_fallback RadiatorWeb.Api.FallbackController
 
   def index(conn, _params) do
-    render(conn, "usersettings.html", changeset: Auth.Register.change_user(%Auth.User{}))
+    render(conn, "form.html", changeset: Auth.Register.change_user(%Auth.User{}))
   end
 
   def update(conn, params) do

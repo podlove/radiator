@@ -69,6 +69,7 @@ defmodule RadiatorWeb.Router do
 
     get "/usersettings", UserSettingsController, :index
     post "/usersettings", UserSettingsController, :update
+    put "/usersettings", UserSettingsController, :update
   end
 
   scope "/download", RadiatorWeb do
