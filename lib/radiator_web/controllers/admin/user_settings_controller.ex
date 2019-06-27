@@ -23,12 +23,12 @@ defmodule RadiatorWeb.Admin.UserSettingsController do
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> put_flash(:error, "There were problems updating the password.")
-        |> render("usersettings.html", changeset: changeset)
+        |> render("form.html", changeset: changeset)
 
       {:error, msg} ->
         conn
         |> put_flash(:error, "The current password is incorrect: #{msg}")
-        |> render("usersettings.html",
+        |> render("form.html",
           changeset: Auth.Register.change_user(%Auth.User{}, user_params)
         )
     end
