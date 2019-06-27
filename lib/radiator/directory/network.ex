@@ -6,6 +6,7 @@ defmodule Radiator.Directory.Network do
 
   alias Radiator.Directory.{Podcast, TitleSlug}
   alias Radiator.Contribution.Person
+  alias Radiator.Directory.Audio
 
   schema "networks" do
     field :image, Radiator.Media.NetworkImage.Type
@@ -14,6 +15,7 @@ defmodule Radiator.Directory.Network do
 
     has_many :podcasts, Podcast
     has_many :people, Person
+    has_many :audios, Audio
     has_many :permissions, {"networks_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
 
     timestamps()
