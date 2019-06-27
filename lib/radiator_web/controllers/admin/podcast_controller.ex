@@ -8,7 +8,7 @@ defmodule RadiatorWeb.Admin.PodcastController do
   action_fallback RadiatorWeb.FallbackController
 
   def index(conn, _params) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
     podcasts = Editor.list_podcasts_with_episode_counts(user, conn.assigns.current_network)
     render(conn, "index.html", podcasts: podcasts)
   end
@@ -20,7 +20,7 @@ defmodule RadiatorWeb.Admin.PodcastController do
   end
 
   def create(conn, %{"podcast" => podcast_params}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     case Editor.create_podcast(user, conn.assigns.current_network, podcast_params) do
       {:ok, podcast} ->
@@ -36,7 +36,7 @@ defmodule RadiatorWeb.Admin.PodcastController do
   end
 
   def show(conn, %{"id" => id}) do
-    with user <- authenticated_user(conn),
+    with user <- current_user(conn),
          {:ok, podcast} <- Editor.get_podcast(user, id) do
       # FIXME: only draft episodes, probably bring over the directory options semantic
       draft_episodes = Editor.list_episodes(user, podcast)
@@ -65,7 +65,7 @@ defmodule RadiatorWeb.Admin.PodcastController do
   end
 
   def edit(conn, %{"id" => id}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
     {:ok, podcast} = Editor.get_podcast(user, id)
     changeset = Editor.Manager.change_podcast(podcast)
 
@@ -73,7 +73,7 @@ defmodule RadiatorWeb.Admin.PodcastController do
   end
 
   def update(conn, %{"id" => id, "podcast" => podcast_params} = params) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
     {:ok, podcast} = Editor.get_podcast(user, id)
 
     case Map.get(params, "button_action", "change") do

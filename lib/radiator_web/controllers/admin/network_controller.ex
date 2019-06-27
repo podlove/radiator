@@ -7,7 +7,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
   action_fallback RadiatorWeb.FallbackController
 
   def index(conn, _params) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     networks = Editor.list_networks(user)
     render(conn, "index.html", networks: networks)
@@ -38,7 +38,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
 
   def edit(conn, %{"id" => id}) do
     conn
-    |> authenticated_user()
+    |> current_user()
     |> Editor.get_network(id)
     |> case do
       {:ok, network = %Network{}} ->
@@ -53,7 +53,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
   end
 
   def update(conn, %{"id" => id, "network" => network_params}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     user
     |> Editor.get_network(id)

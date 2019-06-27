@@ -11,29 +11,35 @@ defmodule Radiator.Media.AudioFile do
   alias Radiator.Directory.Audio
 
   schema "audio_files" do
-    field :file, Media.AudioFile.Type
-    field :title, :string
-    field :mime_type, :string
-    field :byte_length, :integer
+    field(:file, Media.AudioFile.Type)
+    field(:title, :string)
+    field(:mime_type, :string)
+    field(:byte_length, :integer)
 
-    belongs_to :audio, Audio
+    belongs_to(:audio, Audio)
 
     timestamps()
   end
 
   @doc false
-  def changeset(audio, attrs) do
-    audio
+  def changeset(audio_file = %__MODULE__{}, attrs) do
+    audio_file
     |> cast(attrs, [:title, :mime_type, :byte_length])
     |> cast_attachments(attrs, [:file], allow_paths: true, allow_urls: true)
+
+    # todo: determine byte length and mime type on file change, don't take them as attrs
   end
 
-  def public_url(audio) do
-    tracking_url(audio)
+  def public_url(audio_file = %__MODULE__{}) do
+    tracking_url(audio_file)
   end
 
-  def tracking_url(audio = %__MODULE__{}) do
-    RadiatorWeb.Router.Helpers.tracking_url(RadiatorWeb.Endpoint, :show, audio.id)
+  def tracking_url(audio_file = %__MODULE__{}) do
+    RadiatorWeb.Router.Helpers.tracking_url(RadiatorWeb.Endpoint, :show, audio_file.id)
+  end
+
+  def internal_url(audio_file = %__MODULE__{}) do
+    __MODULE__.url({audio_file.file, audio_file})
   end
 
   # arc override

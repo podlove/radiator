@@ -12,7 +12,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   action_fallback RadiatorWeb.FallbackController
 
   defp assign_podcast(conn, _) do
-    {:ok, podcast} = Editor.get_podcast(authenticated_user(conn), conn.params["podcast_id"])
+    {:ok, podcast} = Editor.get_podcast(current_user(conn), conn.params["podcast_id"])
 
     conn
     |> assign(:podcast, podcast)
@@ -50,7 +50,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   end
 
   def show(conn, %{"id" => id}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     {:ok, episode} = Editor.get_episode(user, id)
 
@@ -60,7 +60,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   end
 
   def edit(conn, %{"id" => id}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     {:ok, episode} = Editor.get_episode(user, id)
     changeset = Editor.Manager.change_episode(episode)
@@ -69,7 +69,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   end
 
   def update(conn, %{"id" => id, "episode" => episode_params}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     {:ok, episode} = Editor.get_episode(user, id)
 

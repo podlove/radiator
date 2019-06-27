@@ -8,11 +8,25 @@ defmodule RadiatorWeb.Api.FallbackController do
 
   require Logger
 
+  def call(conn, {:error, :unprocessable}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> put_view(RadiatorWeb.ErrorView)
+    |> render(:"422")
+  end
+
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
     |> put_status(:unprocessable_entity)
     |> put_view(RadiatorWeb.ChangesetView)
     |> render("error.json", changeset: changeset)
+  end
+
+  def call(conn, {:error, :not_authorized}) do
+    conn
+    |> put_status(:unauthorized)
+    |> put_view(RadiatorWeb.ErrorView)
+    |> render(:"401")
   end
 
   def call(conn, {:error, :not_found}) do

@@ -9,7 +9,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
   # - needs error handling
   # - should be done async with waiting animation (progress?) and notice/redirect when done
   def create(conn, %{"feed" => %{"feed_url" => url}}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
     network = conn.assigns.current_network
 
     {:ok, %{podcast: podcast}} = Radiator.Directory.Importer.import_from_url(user, network, url)
