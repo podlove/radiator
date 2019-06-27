@@ -15,7 +15,6 @@
 
 - User
 	- identity (email/username/password_hash/other auhentication)
-	- profile (display_name, avatar_image)
 
 
 

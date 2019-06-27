@@ -5,12 +5,21 @@ defmodule Radiator.Factory do
 
   alias Radiator.Auth.User
   alias Radiator.Directory.{Network, Podcast, Episode, Audio}
+  alias Radiator.Contribution.Person
 
   def user_factory do
     %User{
       name: "admin",
       email: "admin@example.com",
-      display_name: "admin"
+      person: build(:person)
+    }
+  end
+
+  def person_factory do
+    name = sequence("maxi_muster_")
+
+    %Person{
+      display_name: name
     }
   end
 

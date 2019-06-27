@@ -5,6 +5,7 @@ defmodule Radiator.Directory.Network do
   import Arc.Ecto.Changeset
 
   alias Radiator.Directory.{Podcast, TitleSlug}
+  alias Radiator.Contribution.Person
 
   schema "networks" do
     field :image, Radiator.Media.NetworkImage.Type
@@ -12,6 +13,7 @@ defmodule Radiator.Directory.Network do
     field :slug, TitleSlug.Type
 
     has_many :podcasts, Podcast
+    has_many :people, Person
     has_many :permissions, {"networks_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
 
     timestamps()

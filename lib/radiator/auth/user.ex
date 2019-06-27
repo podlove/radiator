@@ -2,7 +2,6 @@ defmodule Radiator.Auth.User do
   use Ecto.Schema
 
   import Ecto.Changeset
-  import Arc.Ecto.Changeset
   import Ecto.Query, warn: false
 
   alias Radiator.Auth.User
@@ -11,12 +10,13 @@ defmodule Radiator.Auth.User do
     field :name, :string
     field :email, :string
     field :display_name, :string
-    field :avatar, Radiator.Media.UserAvatar.Type
     field :password_hash, :binary
     field :password, :string, virtual: true
     field :password_confirmation, :string, virtual: true
     field :status, Radiator.Auth.Ecto.UserStatusType, default: :unverified
     # unverified, active, suspended
+
+    has_one :person, Radiator.Contribution.Person
 
     timestamps()
   end
@@ -30,7 +30,6 @@ defmodule Radiator.Auth.User do
     %User{
       id: 1,
       name: "public",
-      display_name: "Public",
       email: "public@public.local",
       password_hash: "thoushaltnotpass"
     }
@@ -39,8 +38,7 @@ defmodule Radiator.Auth.User do
   @doc false
   def changeset(%User{} = user, attrs) do
     user
-    |> cast(attrs, [:name, :email, :display_name, :password, :password_hash, :status])
-    |> cast_attachments(attrs, [:avatar], allow_paths: true, allow_urls: true)
+    |> cast(attrs, [:name, :display_name, :email, :password, :password_hash, :status])
     |> unique_constraint(:name, name: :auth_users__lower_name_index)
     |> unique_constraint(:email, name: :auth_users__lower_email_index)
     |> validate_format(:name, ~r/^[^\s ]+$/)

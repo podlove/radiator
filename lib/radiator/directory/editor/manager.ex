@@ -11,6 +11,7 @@ defmodule Radiator.Directory.Editor.Manager do
   alias Radiator.Repo
 
   alias Radiator.Directory.{Network, Podcast, Episode, Audio}
+  alias Radiator.Contribution.{AudioContribution, PodcastContribution, Person}
 
   @doc """
   Creates a podcast.
@@ -282,6 +283,64 @@ defmodule Radiator.Directory.Editor.Manager do
   def depublish_podcast(%Podcast{} = podcast) do
     update_podcast(podcast, %{published_at: nil})
   end
+
+  @doc """
+  Make person contributor for podcast.
+  """
+  def add_podcast_contribution(%Podcast{} = podcast, %Person{} = person, role \\ nil) do
+    position = determine_new_podcast_contribution_position(podcast)
+
+    %PodcastContribution{}
+    |> Ecto.Changeset.change(%{position: position})
+    |> Ecto.Changeset.put_assoc(:podcast, podcast)
+    |> Ecto.Changeset.put_assoc(:person, person)
+    |> Ecto.Changeset.put_assoc(:role, role)
+    |> Repo.insert!()
+  end
+
+  @doc """
+  Make person contributor for audio.
+  """
+  def add_audio_contribution(%Audio{} = audio, %Person{} = person, role \\ nil) do
+    position = determine_new_audio_contribution_position(audio)
+
+    %AudioContribution{}
+    |> Ecto.Changeset.change(%{position: position})
+    |> Ecto.Changeset.put_assoc(:audio, audio)
+    |> Ecto.Changeset.put_assoc(:person, person)
+    |> Ecto.Changeset.put_assoc(:role, role)
+    |> Repo.insert!()
+  end
+
+  defp determine_new_podcast_contribution_position(podcast) do
+    get_max_contribution_position(podcast, PodcastContribution, :podcast_id) + 1
+  end
+
+  defp determine_new_audio_contribution_position(audio) do
+    get_max_contribution_position(audio, AudioContribution, :audio_id) + 1
+  end
+
+  @spec get_max_contribution_position(Podcast.t() | Audio.t(), atom(), :audio_id | :podcast_id) ::
+          integer()
+  defp get_max_contribution_position(entity, schema, id_field) do
+    entity_id = entity.id
+    filters = [{id_field, entity_id}]
+
+    from(c in schema, where: ^filters, select: max(c.position))
+    |> Repo.one()
+    |> case do
+      nil -> 0
+      value -> value
+    end
+  end
+
+  # TODO
+  # def add_podcast_contribution(%Podcast{} = podcast, %Person{} = person, role \\ nil)
+  # def move_podcast_contribution(contribution, position)
+  # def delete_podcast_contribution(contribution)
+  #
+  # def move_audio_contribution(contribution, position)
+  # def delete_audio_contribution(contribution)
 
   def propagate_short_id(%Podcast{} = podcast) do
     Repo.transaction(fn ->

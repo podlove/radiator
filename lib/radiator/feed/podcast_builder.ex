@@ -2,10 +2,13 @@ defmodule Radiator.Feed.PodcastBuilder do
   import XmlBuilder
   import Radiator.Feed.Builder, only: [add: 2]
   import Radiator.Feed.Guards
+  import Radiator.Feed.Common
 
   alias Radiator.Directory.Podcast
   alias Radiator.Feed.EpisodeBuilder
   alias Radiator.Feed.PagingMeta
+  alias Radiator.Contribution.Person
+  alias Radiator.Contribution.PodcastContribution
 
   @doc """
   See `Radiator.Feed.Builder.new/2` for parameter docs.
@@ -24,6 +27,7 @@ defmodule Radiator.Feed.PodcastBuilder do
     |> add(description(podcast))
     |> add(element(:generator, "Podlove Radiator"))
     |> add(self_reference(feed_data))
+    |> add(contributors(podcast))
     |> add(publication_date(podcast))
     # |> add(last_build_date())
     |> Enum.reverse()
@@ -106,6 +110,20 @@ defmodule Radiator.Feed.PodcastBuilder do
     do: element(:description, description)
 
   defp description(_), do: nil
+
+  defp contributors(%Podcast{contributions: contributions}) do
+    if Ecto.assoc_loaded?(contributions) do
+      contributions
+      |> Enum.filter(fn %PodcastContribution{person: %Person{display_name: name}} ->
+        String.valid?(name) && String.length(name) > 0
+      end)
+      |> Enum.map(&contributor/1)
+    else
+      []
+    end
+  end
+
+  defp contributors(_), do: nil
 
   defp publication_date(%Podcast{published_at: published_at}),
     do: element(:pubDate, Timex.format!(published_at, "{RFC822}"))

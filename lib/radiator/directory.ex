@@ -13,6 +13,7 @@ defmodule Radiator.Directory do
   alias Radiator.Media.AudioFile
   alias Radiator.Directory.{Network, Episode, Podcast, Audio}
   alias Radiator.Directory.{PodcastQuery, EpisodeQuery, AudioQuery}
+  alias Radiator.Contribution.{PodcastContribution, AudioContribution}
 
   def data() do
     Dataloader.Ecto.new(Repo, query: &query/2)
@@ -95,6 +96,7 @@ defmodule Radiator.Directory do
     Podcast
     |> PodcastQuery.filter_by_published()
     |> Repo.get(id)
+    |> preload_for_podcast()
   end
 
   @doc """
@@ -124,6 +126,7 @@ defmodule Radiator.Directory do
     |> PodcastQuery.filter_by_published(true)
     |> PodcastQuery.find_by_slug(slug)
     |> Repo.one()
+    |> preload_for_podcast()
   end
 
   @doc """
@@ -148,6 +151,22 @@ defmodule Radiator.Directory do
     episodes_query(%{short_id: short_id})
     |> Repo.one()
     |> preload_for_episode()
+  end
+
+  def get_podcast_contributions(podcast = %Podcast{}) do
+    podcast
+    |> Ecto.assoc(:contributions)
+    |> order_by(asc: :position)
+    |> Repo.all()
+    |> Repo.preload([:person, :role])
+  end
+
+  def get_audio_contributions(audio = %Audio{}) do
+    audio
+    |> Ecto.assoc(:contributions)
+    |> order_by(asc: :position)
+    |> Repo.all()
+    |> Repo.preload([:person, :role])
   end
 
   defp episodes_query(args) when is_map(args) do
@@ -201,13 +220,36 @@ defmodule Radiator.Directory do
     |> preload_for_episode()
   end
 
+  def preload_for_podcast(nil) do
+    nil
+  end
+
+  def preload_for_podcast(%Podcast{} = podcast) do
+    contributions_query =
+      PodcastContribution
+      |> order_by(asc: :position)
+
+    Repo.preload(podcast, contributions: {contributions_query, [:person, :role]})
+  end
+
   # fixme: this is currently identical to `Editor.preloaded_episode/1`,
   #        however: in Directory context preloading is dangerous as it might
   #        provide access to entities without checking for permissions.
   #        Solution: write preloader that checks permissions.
   def preload_for_episode(episode) do
-    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
-    Repo.preload(episode, [:podcast, audio: [chapters: chapter_query, audio_files: []]])
+    contributions_query =
+      AudioContribution
+      |> order_by(asc: :position)
+
+    Repo.preload(episode, [
+      :podcast,
+      audio: [
+        :chapters,
+        :audio_files,
+        :contributors,
+        contributions: {contributions_query, [:person, :role]}
+      ]
+    ])
   end
 
   def preload_for_audio(audio) do

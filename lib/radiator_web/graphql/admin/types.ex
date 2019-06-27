@@ -5,6 +5,29 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   alias RadiatorWeb.GraphQL.Admin.Resolvers
 
+  @desc "The authenticated User"
+  object :user do
+    field :name, :string
+    field :email, :string
+    field :status, :string
+
+    field :display_name, :string do
+      resolve fn user, _, _ -> {:ok, user.person.display_name} end
+    end
+
+    field :nick, :string do
+      resolve fn user, _, _ -> {:ok, user.person.nick} end
+    end
+
+    field :gender, :string do
+      resolve fn user, _, _ -> {:ok, user.person.gender} end
+    end
+
+    field :avatar, :string do
+      resolve &Resolvers.Editor.get_image_url/3
+    end
+  end
+
   @desc "A network"
   object :network do
     field :id, non_null(:id)
