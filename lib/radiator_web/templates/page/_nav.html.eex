@@ -11,23 +11,23 @@
         <li class="nav-link">
           <%= link "Networks", to: Routes.admin_network_path(@conn, :index) %>
         </li>
-        <%= if assigns[:current_network] do %>
-          <%= render("nav_chevron.html") %>
+        <%= with network when not is_nil(network) <- assigns[:current_network] || assigns[:network] do %>
+          <%= render("_nav_chevron.html") %>
           <li class="nav-link">
-            <%= link  @current_network.title , to: Routes.admin_network_podcast_path(@conn, :index, @current_network) %>
+            <%= link  network.title , to: Routes.admin_network_path(@conn, :show, network) %>
           </li>
           <%= if assigns[:podcast] do %>
-            <%= render("nav_chevron.html") %>
+            <%= render("_nav_chevron.html") %>
             <li class="nav-link">
               <%= link @podcast.title, to: Routes.admin_network_podcast_path(@conn, :show, @podcast.network_id, @podcast) %>
             </li>      
           <% end %>
           <%= if assigns[:episode] do %>
-            <%= render("nav_chevron.html") %>
+            <%= render("_nav_chevron.html") %>
             <li class="nav-link truncate-fade">
               <%= link shorten_string(@episode.podcast.title, 32), to: Routes.admin_network_podcast_path(@conn, :show, @episode.podcast.network_id, @episode.podcast) %>
             </li>
-            <%= render("nav_chevron.html") %>
+            <%= render("_nav_chevron.html") %>
             <li class="nav-link">
               <%= link @episode.title, to: Routes.admin_network_podcast_episode_path(@conn, :show, @episode.podcast.network_id, @episode.podcast, @episode) %>
             </li>
