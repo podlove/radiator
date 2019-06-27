@@ -6,6 +6,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   alias Radiator.AudioMeta
   alias Radiator.Media
   alias Radiator.Auth.User
+  alias Radiator.Contribution.Person
 
   @doc """
   Get network with user and do something with it or return error.
@@ -309,7 +310,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def get_image_url(%User{person: person}, _, _) do
-    {:ok, Media.PersonAvatar.url({person.avatar, person})}
+    {:ok, Person.image_url(person)}
   end
 
   def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{current_user: user}}) do
