@@ -80,7 +80,7 @@ defmodule RadiatorWeb.PlayerController do
   def chapters(%Audio{chapters: chapters}) do
     Enum.map(chapters, fn chapter ->
       %{
-        start: RadiatorWeb.Admin.EpisodeView.format_chapter_time(chapter.start),
+        start: RadiatorWeb.FormatHelpers.format_chapter_time(chapter.start),
         title: chapter.title,
         href: chapter.link,
         image: Chapter.image_url(chapter)

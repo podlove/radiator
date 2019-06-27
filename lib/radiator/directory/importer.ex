@@ -167,7 +167,14 @@ defmodule Radiator.Directory.Importer do
       ) do
     Metalove.PodcastFeed.trigger_episode_metadata_scrape(feed)
     Logger.info("Import: Scraping metadata for #{feed.feed_url}")
-    feed = Metalove.PodcastFeed.get_by_feed_url_await_all_metdata(feed.feed_url, 1_000 * 15 * 60)
+
+    feed =
+      Metalove.PodcastFeed.get_by_feed_url_await_all_metdata(feed.feed_url, :timer.minutes(10))
+      |> case do
+        # just get the one without the parsed metadata, probably something went wrong on download
+        nil -> Metalove.PodcastFeed.get_by_feed_url(feed.feed_url)
+        feed -> feed
+      end
 
     Logger.info("Import: Got all metadata for #{feed.feed_url} - importing enclosures")
 

@@ -11,9 +11,6 @@ defmodule RadiatorWeb.Router do
 
   pipeline :public_browser do
     plug :accepts, ["html", "xml", "rss"]
-    plug :fetch_session
-    plug :fetch_flash
-    plug :protect_from_forgery
     plug :put_secure_browser_headers
 
     plug :put_layout, {RadiatorWeb.LayoutView, :public}
@@ -33,14 +30,28 @@ defmodule RadiatorWeb.Router do
     plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
     plug Guardian.Plug.EnsureAuthenticated
     plug Guardian.Plug.LoadResource
+
     plug RadiatorWeb.Plug.EnsureUserValidity
     plug RadiatorWeb.Plug.AssignCurrentNetwork
   end
 
   pipeline :api do
     plug :accepts, ["json"]
-    plug CORSPlug
     plug RadiatorWeb.Plug.ValidateAPIUser
+  end
+
+  pipeline :authenticated_api do
+    plug Guardian.Plug.Pipeline,
+      otp_app: @otp_app,
+      module: Radiator.Auth.Guardian,
+      error_handler: RadiatorWeb.GuardianApiErrorHandler
+
+    plug Guardian.Plug.VerifySession, claims: %{"typ" => "api_session"}
+    plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "api_session"}
+    plug Guardian.Plug.EnsureAuthenticated
+    plug Guardian.Plug.LoadResource
+
+    plug RadiatorWeb.Plug.AssignCurrentUser
   end
 
   scope "/admin", RadiatorWeb.Admin, as: :admin do
@@ -64,16 +75,23 @@ defmodule RadiatorWeb.Router do
     get "/audio/:id", TrackingController, :show
   end
 
-  # Other scopes may use custom stacks.
   scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
     pipe_through :api
 
-    resources "/upload", UploadController, only: [:create]
-    resources "/files", FileController, only: [:index, :show]
+    post "/auth", AuthenticationController, :create
+  end
 
-    resources "/podcasts", PodcastController, except: [:new, :edit] do
-      resources "/episodes", EpisodeController, except: [:new, :edit]
-    end
+  scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
+    pipe_through [:api, :authenticated_api]
+
+    post "/auth/prolong", AuthenticationController, :prolong
+
+    resources "/networks", NetworkController, only: [:show, :create, :update, :delete]
+    resources "/podcasts", PodcastController, only: [:show, :create, :update, :delete]
+    resources "/episodes", EpisodeController, only: [:show, :create, :update, :delete]
+
+    # todo: pluralize
+    resources "/audio_file", AudioFileController, only: [:show, :create]
   end
 
   scope "/api" do

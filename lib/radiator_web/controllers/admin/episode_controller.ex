@@ -5,16 +5,14 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   alias Radiator.Storage
   alias Radiator.Directory
-  alias Radiator.Directory.Editor
-  alias Radiator.Directory.Episode
-  alias Radiator.Media.AudioFileUpload
+  alias Radiator.Directory.{Editor, Episode}
 
   plug :assign_podcast when action in [:new, :create, :update]
 
   action_fallback RadiatorWeb.FallbackController
 
   defp assign_podcast(conn, _) do
-    {:ok, podcast} = Editor.get_podcast(authenticated_user(conn), conn.params["podcast_id"])
+    {:ok, podcast} = Editor.get_podcast(current_user(conn), conn.params["podcast_id"])
 
     conn
     |> assign(:podcast, podcast)
@@ -30,9 +28,8 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
     case Editor.Manager.create_episode(podcast, episode_params) do
       {:ok, episode} ->
-        if episode_params["enclosure"] do
-          {:ok, _audio} = AudioFileUpload.upload(episode_params["enclosure"], episode)
-        end
+        # temporary: publish immediately
+        Editor.Manager.publish_episode(episode)
 
         conn
         |> put_flash(:info, "episode created successfully.")
@@ -53,7 +50,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   end
 
   def show(conn, %{"id" => id}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     {:ok, episode} = Editor.get_episode(user, id)
 
@@ -63,7 +60,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   end
 
   def edit(conn, %{"id" => id}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     {:ok, episode} = Editor.get_episode(user, id)
     changeset = Editor.Manager.change_episode(episode)
@@ -72,13 +69,9 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   end
 
   def update(conn, %{"id" => id, "episode" => episode_params}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     {:ok, episode} = Editor.get_episode(user, id)
-
-    if episode_params["enclosure"] do
-      {:ok, _audio} = AudioFileUpload.upload(episode_params["enclosure"], episode)
-    end
 
     case Editor.Manager.update_episode(episode, episode_params) do
       {:ok, episode} ->

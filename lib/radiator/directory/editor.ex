@@ -53,8 +53,14 @@ defmodule Radiator.Directory.Editor do
       {:error, :not_found}
 
   """
-  @spec get_network(Auth.User.t(), pos_integer()) ::
-          {:ok, Network.t()} | {:error, :not_authorized | :not_found}
+  @spec get_network(Auth.User.t(), pos_integer() | nil) ::
+          {:ok, Network.t()} | {:error, :not_authorized | :not_found | :unprocessable}
+  def get_network(user, id)
+
+  def get_network(_, nil) do
+    {:error, :unprocessable}
+  end
+
   def get_network(user = %Auth.User{}, id) do
     case Repo.get(Network, id) do
       nil ->
@@ -106,6 +112,14 @@ defmodule Radiator.Directory.Editor do
   def update_network(user = %Auth.User{}, network = %Network{}, attrs) do
     if has_permission(user, network, :own) do
       Editor.Owner.update_network(network, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def delete_network(user = %Auth.User{}, network = %Network{}) do
+    if has_permission(user, network, :own) do
+      Editor.Owner.delete_network(network)
     else
       @not_authorized_match
     end
@@ -226,8 +240,14 @@ defmodule Radiator.Directory.Editor do
       {:error, :not_found}
 
   """
-  @spec get_podcast(Auth.User.t(), pos_integer()) ::
-          {:ok, Podcast.t()} | {:error, :not_authorized | :not_found}
+  @spec get_podcast(Auth.User.t(), pos_integer() | nil) ::
+          {:ok, Podcast.t()} | {:error, :not_authorized | :not_found | :unprocessable}
+  def get_podcast(user, id)
+
+  def get_podcast(_, nil) do
+    {:error, :unprocessable}
+  end
+
   def get_podcast(user = %Auth.User{}, id) do
     case Repo.get(Podcast, id) do
       nil ->
@@ -361,7 +381,8 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  def get_episode_by_podcast_id_and_guid(user = %Auth.User{}, podcast_id, guid) do
+  def get_episode_by_podcast_id_and_guid(user = %Auth.User{}, podcast_id, guid)
+      when not is_nil(podcast_id) and not is_nil(guid) do
     query =
       from ep in Episode,
         where: ep.podcast_id == ^podcast_id,

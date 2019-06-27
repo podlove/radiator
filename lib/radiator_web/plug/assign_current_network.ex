@@ -26,7 +26,7 @@ defmodule RadiatorWeb.Plug.AssignCurrentNetwork do
           |> String.to_integer()
           |> get_network()
 
-        user = conn.assigns.authenticated_user
+        user = conn.assigns.current_user
 
         if user_has_permission(user, network, :readonly) do
           assign(

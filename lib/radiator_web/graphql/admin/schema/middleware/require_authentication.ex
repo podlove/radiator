@@ -3,7 +3,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Middleware.RequireAuthentication do
 
   def call(resolution, _) do
     case resolution.context do
-      %{authenticated_user: user} ->
+      %{current_user: user} ->
         case user.status do
           :active ->
             resolution

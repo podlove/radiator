@@ -29,7 +29,7 @@ defmodule Radiator.TestEntries do
     end
   end
 
-  def put_authenticated_user(conn, user \\ user()) do
+  def put_current_user(conn, user \\ user()) do
     conn
     |> put_req_header(
       "authorization",

@@ -9,4 +9,10 @@ defmodule Radiator.Media do
   alias Radiator.Media.AudioFile
 
   def get_audio_file(id), do: Repo.get(AudioFile, id)
+
+  def create_audio_file(attrs \\ %{}) do
+    %AudioFile{}
+    |> AudioFile.changeset(attrs)
+    |> Repo.insert()
+  end
 end

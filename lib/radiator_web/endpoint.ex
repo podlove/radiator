@@ -46,5 +46,6 @@ defmodule RadiatorWeb.Endpoint do
     key: "_radiator_key",
     signing_salt: "ZRbumoaT"
 
+  plug CORSPlug
   plug RadiatorWeb.Router
 end

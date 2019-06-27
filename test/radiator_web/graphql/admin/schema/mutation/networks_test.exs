@@ -10,7 +10,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.NetworksTest do
     user = Radiator.TestEntries.user()
 
     [
-      conn: Radiator.TestEntries.put_authenticated_user(conn, user),
+      conn: Radiator.TestEntries.put_current_user(conn, user),
       user: user
     ]
   end
@@ -28,7 +28,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.NetworksTest do
   """
 
   test "createNetwork creates a network", %{conn: conn, user: _user} do
-    conn = Radiator.TestEntries.put_authenticated_user(conn)
+    conn = Radiator.TestEntries.put_current_user(conn)
 
     network = params_for(:network)
 
@@ -67,7 +67,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.NetworksTest do
   end
 
   test "createNetwork generates a slug from the title", %{conn: conn, user: _user} do
-    conn = Radiator.TestEntries.put_authenticated_user(conn)
+    conn = Radiator.TestEntries.put_current_user(conn)
 
     network = params_for(:network)
 

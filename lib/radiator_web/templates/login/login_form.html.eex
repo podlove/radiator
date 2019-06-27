@@ -12,6 +12,6 @@
       <%= error_tag f, :password %>
     </div>
 
-    <%= submit @button_text, class: "btn btn-blue" %>
+    <%= submit @button_text, class: "btn " %>
 <% end %>
 </div>

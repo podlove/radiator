@@ -7,7 +7,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
   action_fallback RadiatorWeb.FallbackController
 
   def index(conn, _params) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     networks = Editor.list_networks(user)
     render(conn, "index.html", networks: networks)
@@ -22,12 +22,12 @@ defmodule RadiatorWeb.Admin.NetworkController do
     user = Guardian.Plug.current_resource(conn)
 
     case Editor.create_network(user, network_params) do
-      {:ok, network} ->
+      {:ok, %Network{} = network} ->
         conn
         |> put_flash(:info, "Network created successfully.")
         |> redirect(to: Routes.admin_network_path(conn, :show, network.id))
 
-      {:error, %Ecto.Changeset{} = changeset, _} ->
+      {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
     end
   end
@@ -38,10 +38,10 @@ defmodule RadiatorWeb.Admin.NetworkController do
 
   def edit(conn, %{"id" => id}) do
     conn
-    |> authenticated_user()
+    |> current_user()
     |> Editor.get_network(id)
     |> case do
-      network = %Network{} ->
+      {:ok, network = %Network{}} ->
         changeset = Editor.Owner.change_network(network)
 
         render(conn, "edit.html", network: network, changeset: changeset)
@@ -53,12 +53,12 @@ defmodule RadiatorWeb.Admin.NetworkController do
   end
 
   def update(conn, %{"id" => id, "network" => network_params}) do
-    user = authenticated_user(conn)
+    user = current_user(conn)
 
     user
     |> Editor.get_network(id)
     |> case do
-      network = %Network{} ->
+      {:ok, network = %Network{}} ->
         case Editor.update_network(user, network, network_params) do
           {:ok, _network} ->
             conn

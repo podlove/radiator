@@ -6,6 +6,8 @@ defmodule Radiator.Auth.Guardian do
 
   @doc """
   Generates and returns a Bearer token for api usage.
+
+  TODO: rename to make it clear it is a mutating function, not just a getter
   """
   def api_session_token(%Auth.User{} = user) do
     {:ok, token, _claims} =
