@@ -33,6 +33,7 @@ html {
  *
  * @import "tailwindcss/utilities";
  */
+ @tailwind utilities;
 
 
  /* used in svg icons that have 2 colors */
@@ -82,6 +83,14 @@ html {
 
 .btn:hover {
   @apply bg-secondary;
+}
+
+.btn-danger {
+  @apply text-red-600 bg-white font-medium;
+}
+
+.btn-danger:hover {
+  @apply text-red-700 bg-red-100;
 }
 
 .btn-destructive {
@@ -147,8 +156,6 @@ html {
   width: 2em;
   background: linear-gradient(to right,theme("colors.primarytransparent"), theme("colors.primary"));
 }
-
-@tailwind utilities;
 
 /**
  * Here you would add any custom utilities you need that don't come out of the

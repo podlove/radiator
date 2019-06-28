@@ -125,4 +125,31 @@ defmodule RadiatorWeb.Admin.NetworkController do
       )
     end
   end
+
+  def remove_collaborator(conn, %{"id" => id, "collaborator" => collaborator}) do
+    with actor <- current_user(conn),
+         {:ok, network} <- Editor.get_network(actor, id) do
+      case Radiator.Auth.Register.get_user_by_name(collaborator["name"]) do
+        nil ->
+          conn
+          |> put_flash(:error, "No user by this name in the system.")
+
+        user ->
+          with {:ok, _collaborator} <-
+                 Editor.remove_collaborator(actor, %Collaborator{
+                   user: user,
+                   permission: String.to_existing_atom(collaborator["permission"]),
+                   subject: network
+                 }) do
+            conn
+            |> put_flash(:info, "Removed #{user.name}")
+          else
+            _ ->
+              conn
+              |> put_flash(:error, "Could not remove #{user.name} from #{network.title}.")
+          end
+      end
+      |> redirect(to: Routes.admin_network_path(conn, :show, id))
+    end
+  end
 end

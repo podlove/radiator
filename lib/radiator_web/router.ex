@@ -60,6 +60,7 @@ defmodule RadiatorWeb.Router do
     pipe_through :authenticated_browser
 
     post "/networks/:id/collab", NetworkController, :add_collaborator
+    get "/networks/:id/collab/remove", NetworkController, :remove_collaborator
 
     resources "/networks", NetworkController do
       resources "/podcasts", PodcastController do

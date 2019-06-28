@@ -1,0 +1,7 @@
+<div class="inline">
+<%= content_tag :span, @action_text, class: "btn btn-danger", onclick: "this.style.display = 'none'; this.parentNode.querySelector(\"div\").style.display = 'inline';"%>
+    <div style="display: none;" class="confirm-container">
+    <%= content_tag :span, "Cancel", class: "btn btn-cancel", onclick: "this.parentNode.style.display = 'none'; this.parentNode.parentNode.querySelector(\".btn-danger\").style.display = 'inline';"%>
+    <%= link @confirm_action_text, to: @action_target, class: "btn btn-destructive" %>
+    </div>
+</div>
