@@ -7,7 +7,7 @@ defmodule Radiator.Directory.Editor do
   use Radiator.Constants
 
   import Ecto.Query, warn: false
-  import Radiator.Directory.Editor.Permission
+  import Radiator.Directory.Editor.Permission, only: :functions
 
   alias Radiator.Auth
 
@@ -461,20 +461,21 @@ defmodule Radiator.Directory.Editor do
 
   ## User Permission Management
 
+  # TODO: list all collaborators of underlying entities as well.
+
   @spec list_collaborators(Auth.User.t(), Network.t()) ::
           [
             Collaborator.t()
           ]
           | {:error, any}
-  def list_collaborators(user = %Auth.User{}, subject = %Network{}) do
-    if has_permission(user, subject, :manage) do
+  def list_collaborators(actor = %Auth.User{}, subject = %Network{}) do
+    if has_permission(actor, subject, :manage) do
       query =
         from p in Ecto.assoc(subject, :permissions),
           join: u in Auth.User,
           on: p.user_id == u.id,
           join: s in Network,
           on: s.id == p.subject_id,
-          order_by: p.permission,
           preload: [user: u]
 
       with perm_list when is_list(perm_list) <- Repo.all(query) do
@@ -483,6 +484,60 @@ defmodule Radiator.Directory.Editor do
           perm = %Radiator.Perm.Permission{} ->
             %Collaborator{user: perm.user, permission: perm.permission, subject: subject}
         end)
+        |> Enum.sort(fn
+          a, b ->
+            case Radiator.Perm.Ecto.PermissionType.compare(a.permission, b.permission) do
+              :gt -> true
+              :eq -> a.user.name < b.user.name
+              :lt -> false
+            end
+        end)
+      end
+    else
+      @not_authorized_match
+    end
+  end
+
+  # TODO: Handle the accidental update case
+  @spec add_collaborator(Auth.User.t(), Collaborator.t()) ::
+          {:error, any} | {:ok, Collaborator.t()}
+  def add_collaborator(
+        actor = %Auth.User{},
+        collaborator = %Collaborator{user: user, subject: subject, permission: permission}
+      )
+      when is_permission(permission) do
+    if has_permission(actor, subject, :manage) do
+      case Editor.Permission.set_permission(user, subject, permission) do
+        :ok -> {:ok, collaborator}
+        other -> other
+      end
+    else
+      @not_authorized_match
+    end
+  end
+
+  def update_collaborator(
+        actor = %Auth.User{},
+        collaborator = %Collaborator{user: user, subject: subject, permission: permission}
+      ) do
+    if has_permission(actor, subject, :manage) do
+      case Editor.Permission.set_permission(user, subject, permission) do
+        :ok -> {:ok, collaborator}
+        other -> other
+      end
+    else
+      @not_authorized_match
+    end
+  end
+
+  def remove_collaborator(
+        actor = %Auth.User{},
+        collaborator = %Collaborator{user: user, subject: subject, permission: permission}
+      ) do
+    if has_permission(actor, subject, :manage) do
+      case Editor.Permission.remove_permission(user, subject) do
+        :ok -> {:ok, collaborator}
+        other -> other
       end
     else
       @not_authorized_match

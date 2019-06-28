@@ -46,6 +46,10 @@ defmodule RadiatorWeb do
       import RadiatorWeb.FormatHelpers
 
       alias RadiatorWeb.Router.Helpers, as: Routes
+
+      def render_shared_partial(template, assigns \\ []) do
+        render(RadiatorWeb.SharedPartialsView, template, assigns)
+      end
     end
   end
 

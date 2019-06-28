@@ -33,22 +33,6 @@ html {
  *
  * @import "tailwindcss/utilities";
  */
-@tailwind utilities;
-
-/**
- * Here you would add any custom utilities you need that don't come out of the
- * box with Tailwind.
- *
- * Example :
- *
- * .bg-pattern-graph-paper { ... }
- * .skew-45 { ... }
- *
- * Or if using a preprocessor or `postcss-import`:
- *
- * @import "utilities/background-patterns";
- * @import "utilities/skew-transforms";
- */
 
 
  /* used in svg icons that have 2 colors */
@@ -78,6 +62,18 @@ html {
 
 .txt-lnk:hover {
   @apply underline;
+}
+
+.inline-frm {
+  @apply py-1 px-2 mr-2 rounded border-gray-300 bg-white h-full;
+}
+
+.inline-input {
+  @apply inline-frm;
+}
+
+.inline-select {
+  @apply inline-frm
 }
 
 .btn {
@@ -151,3 +147,20 @@ html {
   width: 2em;
   background: linear-gradient(to right,theme("colors.primarytransparent"), theme("colors.primary"));
 }
+
+@tailwind utilities;
+
+/**
+ * Here you would add any custom utilities you need that don't come out of the
+ * box with Tailwind.
+ *
+ * Example :
+ *
+ * .bg-pattern-graph-paper { ... }
+ * .skew-45 { ... }
+ *
+ * Or if using a preprocessor or `postcss-import`:
+ *
+ * @import "utilities/background-patterns";
+ * @import "utilities/skew-transforms";
+ */
