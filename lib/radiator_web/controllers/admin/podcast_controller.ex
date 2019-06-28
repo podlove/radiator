@@ -7,12 +7,6 @@ defmodule RadiatorWeb.Admin.PodcastController do
 
   action_fallback RadiatorWeb.FallbackController
 
-  def index(conn, _params) do
-    user = current_user(conn)
-    podcasts = Editor.list_podcasts_with_episode_counts(user, conn.assigns.current_network)
-    render(conn, "index.html", podcasts: podcasts)
-  end
-
   def new(conn, _params) do
     # FIXME: change the source for the changesets
     changeset = Editor.Manager.change_podcast(%Podcast{})

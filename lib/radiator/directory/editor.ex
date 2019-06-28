@@ -14,7 +14,7 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.Support
   alias Radiator.Repo
   alias Radiator.Directory
-  alias Radiator.Directory.{Network, Podcast, Episode, Editor, Audio}
+  alias Radiator.Directory.{Network, Podcast, Episode, Editor, Audio, Collaborator}
   alias Radiator.Media
 
   @doc """
@@ -120,14 +120,6 @@ defmodule Radiator.Directory.Editor do
   def delete_network(user = %Auth.User{}, network = %Network{}) do
     if has_permission(user, network, :own) do
       Editor.Owner.delete_network(network)
-    else
-      @not_authorized_match
-    end
-  end
-
-  def list_collaborators(user = %Auth.User{}, network = %Network{}) do
-    if has_permission(user, network, :manage) do
-      Repo.all(Auth.User)
     else
       @not_authorized_match
     end
@@ -462,6 +454,36 @@ defmodule Radiator.Directory.Editor do
   def update_audio(user = %Auth.User{}, audio = %Audio{}, attrs) do
     if has_permission(user, audio, :edit) do
       Editor.Manager.update_audio(audio, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  ## User Permission Management
+
+  @spec list_collaborators(Auth.User.t(), Network.t()) ::
+          [
+            Collaborator.t()
+          ]
+          | {:error, any}
+  def list_collaborators(user = %Auth.User{}, subject = %Network{}) do
+    if has_permission(user, subject, :manage) do
+      query =
+        from p in Ecto.assoc(subject, :permissions),
+          join: u in Auth.User,
+          on: p.user_id == u.id,
+          join: s in Network,
+          on: s.id == p.subject_id,
+          order_by: p.permission,
+          preload: [user: u]
+
+      with perm_list when is_list(perm_list) <- Repo.all(query) do
+        perm_list
+        |> Enum.map(fn
+          perm = %Radiator.Perm.Permission{} ->
+            %Collaborator{user: perm.user, permission: perm.permission, subject: subject}
+        end)
+      end
     else
       @not_authorized_match
     end
