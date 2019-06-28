@@ -22,6 +22,18 @@ config :radiator, RadiatorWeb.Endpoint,
     ]
   ]
 
+config :arc,
+  asset_host: System.get_env("STORAGE_ASSET_HOST") || "http://#{default_host}:9000/radiator"
+
+config :ex_aws,
+  access_key_id: "IEKAZMUY3KX32CRJPE9R",
+  secret_access_key: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN",
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: System.get_env("STORAGE_HOST") || default_host,
+  port: 9000
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

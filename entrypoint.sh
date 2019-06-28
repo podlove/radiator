@@ -1,10 +1,10 @@
 # Reference: https://medium.com/@hex337/running-a-phoenix-1-3-project-with-docker-compose-d82ab55e43cf
 
 # Wait for Postgres to become available
-until psql -h db -U "postgres" -c '\q' 2>/dev/null; do
-  >&2 echo "Postgres is unavailable - sleeping"
-  sleep 1
-done
+# until psql -h db -U "postgres" -c '\q' 2>/dev/null; do
+#   >&2 echo "Postgres is unavailable - sleeping"
+#   sleep 1
+# done
 
 # Ecto will migrate the db to the latest changes
 mix ecto.create
@@ -18,4 +18,4 @@ mix ecto.migrate
 ./mc policy public radiator/radiator-test
 
 # Start the Phoenix server
-mix phx.server
+./prod/rel/radiator/bin/radiator start

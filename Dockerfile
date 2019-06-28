@@ -1,39 +1,52 @@
-FROM elixir:1.8.1
+# ---- Build Stage ----
+FROM elixir:1.9.0 AS app_builder
 
-# Install hex package manager
-# By using --force, we don’t need to type “Y” to confirm the installation
-RUN mix local.hex --force && mix local.rebar --force
+# Set environment variables for building the application
+ENV MIX_ENV=prod \
+  LANG=C.UTF-8
 
-# Install:
-# npm for the assets folder
-# inotify-tools for phoenix
-# postgresql-client to connect with the remote db
-RUN apt-get update -yq \
-    && apt-get install curl gnupg -yq \
-    && curl -sL https://deb.nodesource.com/setup_10.x | bash \
-    && apt-get install nodejs inotify-tools postgresql-client -yq
+# Install hex and rebar
+RUN mix local.hex --force && \
+  mix local.rebar --force
 
-# Create the app directory
-RUN mkdir /app /app/assets
+# Create the application build directory
+RUN mkdir /app
 WORKDIR /app
 
-# Install the mimio client
+# Copy over all the necessary application files and directories
+COPY config ./config
+COPY lib ./lib
+COPY priv ./priv
+COPY mix.exs .
+COPY mix.lock .
+
+# Fetch the application dependencies and build the application
+RUN mix deps.get
+RUN mix deps.compile
+RUN mix phx.digest
+RUN mix release
+
+# ---- Application Stage ----
+FROM debian:stretch AS app
+
+ENV LANG=C.UTF-8
+
+# Install openssl
+RUN apt-get update && apt-get install -y openssl wget
+
+# Copy over the build artifact from the previous step and create a non root user
+RUN useradd --create-home app
+WORKDIR /home/app
+COPY --from=app_builder /app/_build .
+RUN chown -R app: ./prod
+USER app
+
+# Install minio client
 RUN wget --quiet https://dl.minio.io/client/mc/release/linux-amd64/mc
 RUN chmod +x mc
-RUN echo $PWD
 
-# Get the Dependencies
-## Elixir
-COPY mix.* /app/
-RUN mix deps.get
-## npm
-COPY assets/package*.json /app/assets/
-WORKDIR /app/assets
-RUN npm install
-WORKDIR /app
+COPY entrypoint.sh .
 
-# copy the Elixir projects into it and compile what's there
-COPY . /app
-RUN mix compile
-
+# Run the Phoenix app
+# CMD ["./prod/rel/radiator/bin/radiator", "start"]
 ENTRYPOINT [ "/bin/bash", "entrypoint.sh" ]
