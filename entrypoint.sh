@@ -1,10 +1,16 @@
 # Reference: https://medium.com/@hex337/running-a-phoenix-1-3-project-with-docker-compose-d82ab55e43cf
 
+# FIXME: find out why psql wait script is not working
+
 # Wait for Postgres to become available
 # until psql -h db -U "postgres" -c '\q' 2>/dev/null; do
 #   >&2 echo "Postgres is unavailable - sleeping"
 #   sleep 1
 # done
+
+# FIXME: there is no mix with releases
+# - https://github.com/elixir-ecto/ecto_sql/pull/113
+# - https://groups.google.com/forum/#!topic/elixir-lang-core/OkJ9C4U-C-k
 
 # Ecto will migrate the db to the latest changes
 mix ecto.create
