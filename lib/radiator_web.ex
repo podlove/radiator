@@ -24,6 +24,7 @@ defmodule RadiatorWeb do
       import Plug.Conn
       import RadiatorWeb.Gettext
       import RadiatorWeb.Helpers.AuthHelpers, only: [current_user: 1]
+      import RadiatorWeb.Helpers.AdminResourceHelpers, only: [current_network: 1]
 
       alias RadiatorWeb.Router.Helpers, as: Routes
     end

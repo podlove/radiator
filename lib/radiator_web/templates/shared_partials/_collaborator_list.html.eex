@@ -14,14 +14,14 @@
             <%= unless @current_user.name == collaborator.user.name, do: render_shared_partial("_destructive_button.html", 
             action_text: "Remove", 
             confirm_action_text: "Remove",
-            action_target: Routes.admin_network_path(@conn, :remove_collaborator, @subject.id, [{"collaborator[name]", collaborator.user.name},{"collaborator[permission]", collaborator.permission}])) %>
+            action_target: Routes.admin_network_collaborator_path(@conn, :delete, @subject.id, collaborator.user.name)) %>
             </div>
         </div>
     <% end %>
         <div class="flex px-2 justify-begin h-12 border-primary items-center">
             <%= form_for @conn, @add_action_route, [as: :collaborator], fn f -> %>
                 <%= text_input f, :name, class: "inline-input font-bold", placeholder: "username" %>
-                <%= select f, :permission, permission_select_values , class: "inline-select" %>
+                <%= select f, :permission, permission_select_values() , class: "inline-select" %>
                 <%= submit "Add", class: "btn" %>
             <% end %>
         </div>

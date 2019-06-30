@@ -148,6 +148,7 @@ html {
   position: relative;
 }
 .truncate-fade:after {
+  pointer-events:none;
   position: absolute;
   content: "";
   height: 100%;

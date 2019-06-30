@@ -1,7 +1,7 @@
 defmodule RadiatorWeb.Admin.NetworkController do
   use RadiatorWeb, :controller
 
-  alias Radiator.Directory.{Network, Collaborator}
+  alias Radiator.Directory.Network
   alias Radiator.Directory.Editor
 
   action_fallback RadiatorWeb.FallbackController
@@ -88,68 +88,6 @@ defmodule RadiatorWeb.Admin.NetworkController do
 
       other ->
         other
-    end
-  end
-
-  def add_collaborator(conn, %{"id" => id, "collaborator" => collaborator}) do
-    with actor <- current_user(conn),
-         {:ok, network} <- Editor.get_network(actor, id),
-         podcasts <- Editor.list_podcasts_with_episode_counts(actor, network),
-         {:ok, collaborators} <- Editor.list_collaborators(actor, network) do
-      case Radiator.Auth.Register.get_user_by_name(collaborator["name"]) do
-        nil ->
-          conn
-          |> put_flash(:error, "No user by this name in the system.")
-
-        user ->
-          with {:ok, _collaborator} <-
-                 Editor.add_collaborator(actor, %Collaborator{
-                   user: user,
-                   permission: String.to_existing_atom(collaborator["permission"]),
-                   subject: network
-                 }) do
-            conn
-            |> put_flash(:info, "Added #{user.name}")
-            |> redirect(to: Routes.admin_network_path(conn, :show, id))
-          else
-            _ ->
-              conn
-              |> put_flash(:error, "Could not add #{user.name} to #{network.title}.")
-          end
-      end
-      |> render("show.html",
-        network: network,
-        podcasts: podcasts,
-        collaborators: collaborators,
-        collaborator: collaborator
-      )
-    end
-  end
-
-  def remove_collaborator(conn, %{"id" => id, "collaborator" => collaborator}) do
-    with actor <- current_user(conn),
-         {:ok, network} <- Editor.get_network(actor, id) do
-      case Radiator.Auth.Register.get_user_by_name(collaborator["name"]) do
-        nil ->
-          conn
-          |> put_flash(:error, "No user by this name in the system.")
-
-        user ->
-          with {:ok, _collaborator} <-
-                 Editor.remove_collaborator(actor, %Collaborator{
-                   user: user,
-                   permission: String.to_existing_atom(collaborator["permission"]),
-                   subject: network
-                 }) do
-            conn
-            |> put_flash(:info, "Removed #{user.name}")
-          else
-            _ ->
-              conn
-              |> put_flash(:error, "Could not remove #{user.name} from #{network.title}.")
-          end
-      end
-      |> redirect(to: Routes.admin_network_path(conn, :show, id))
     end
   end
 end

@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Router do
   use RadiatorWeb, :router
 
   pipeline :browser do
+    plug RadiatorWeb.Plug.BlockKnownPaths
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
@@ -10,6 +11,7 @@ defmodule RadiatorWeb.Router do
   end
 
   pipeline :public_browser do
+    plug RadiatorWeb.Plug.BlockKnownPaths
     plug :accepts, ["html", "xml", "rss"]
     plug :put_secure_browser_headers
 
@@ -32,7 +34,7 @@ defmodule RadiatorWeb.Router do
     plug Guardian.Plug.LoadResource
 
     plug RadiatorWeb.Plug.EnsureUserValidity
-    plug RadiatorWeb.Plug.AssignCurrentNetwork
+    plug RadiatorWeb.Plug.AssignCurrentAdminResources
   end
 
   pipeline :api do
@@ -56,13 +58,11 @@ defmodule RadiatorWeb.Router do
 
   scope "/admin", RadiatorWeb.Admin, as: :admin do
     pipe_through :browser
-
     pipe_through :authenticated_browser
 
-    post "/networks/:id/collab", NetworkController, :add_collaborator
-    get "/networks/:id/collab/remove", NetworkController, :remove_collaborator
-
     resources "/networks", NetworkController do
+      resources "/collaborators", NetworkCollaboratorController, name: "collaborator"
+
       resources "/podcasts", PodcastController do
         resources "/episodes", EpisodeController
       end

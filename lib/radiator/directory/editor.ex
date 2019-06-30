@@ -495,6 +495,29 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def get_collaborator(actor = %Auth.User{}, subject = %Network{}, username) do
+    if has_permission(actor, subject, :manage) do
+      network_perm_query =
+        from p in Ecto.assoc(subject, :permissions),
+          join: u in Auth.User,
+          on: p.user_id == u.id,
+          join: s in Network,
+          on: s.id == p.subject_id,
+          where: u.name == ^username,
+          preload: [user: u]
+
+      with [perm] <- Repo.all(network_perm_query) do
+        %Collaborator{user: perm.user, permission: perm.permission, subject: subject}
+        |> (&{:ok, &1}).()
+      else
+        _ ->
+          @not_found_match
+      end
+    else
+      @not_authorized_match
+    end
+  end
+
   # TODO: Handle the accidental update case
   @spec add_collaborator(Auth.User.t(), Collaborator.t()) ::
           {:error, any} | {:ok, Collaborator.t()}
@@ -529,7 +552,7 @@ defmodule Radiator.Directory.Editor do
 
   def remove_collaborator(
         actor = %Auth.User{},
-        collaborator = %Collaborator{user: user, subject: subject, permission: permission}
+        collaborator = %Collaborator{user: user, subject: subject, permission: _permission}
       ) do
     if has_permission(actor, subject, :manage) do
       case Editor.Permission.remove_permission(user, subject) do
