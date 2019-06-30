@@ -36,7 +36,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
     with user <- current_user(conn),
          {:ok, network} <- Editor.get_network(user, id),
          podcasts <- Editor.list_podcasts_with_episode_counts(user, network),
-         collaborators <- Editor.list_collaborators(user, network) do
+         {:ok, collaborators} <- Editor.list_collaborators(user, network) do
       render(conn, "show.html",
         network: network,
         podcasts: podcasts,
@@ -95,7 +95,7 @@ defmodule RadiatorWeb.Admin.NetworkController do
     with actor <- current_user(conn),
          {:ok, network} <- Editor.get_network(actor, id),
          podcasts <- Editor.list_podcasts_with_episode_counts(actor, network),
-         collaborators <- Editor.list_collaborators(actor, network) do
+         {:ok, collaborators} <- Editor.list_collaborators(actor, network) do
       case Radiator.Auth.Register.get_user_by_name(collaborator["name"]) do
         nil ->
           conn

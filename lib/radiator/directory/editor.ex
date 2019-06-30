@@ -464,13 +464,10 @@ defmodule Radiator.Directory.Editor do
   # TODO: list all collaborators of underlying entities as well.
 
   @spec list_collaborators(Auth.User.t(), Network.t()) ::
-          [
-            Collaborator.t()
-          ]
-          | {:error, any}
+          {:ok, [Collaborator.t()]} | {:error, any}
   def list_collaborators(actor = %Auth.User{}, subject = %Network{}) do
     if has_permission(actor, subject, :manage) do
-      query =
+      network_perm_query =
         from p in Ecto.assoc(subject, :permissions),
           join: u in Auth.User,
           on: p.user_id == u.id,
@@ -478,21 +475,21 @@ defmodule Radiator.Directory.Editor do
           on: s.id == p.subject_id,
           preload: [user: u]
 
-      with perm_list when is_list(perm_list) <- Repo.all(query) do
-        perm_list
-        |> Enum.map(fn
-          perm = %Radiator.Perm.Permission{} ->
-            %Collaborator{user: perm.user, permission: perm.permission, subject: subject}
-        end)
-        |> Enum.sort(fn
-          a, b ->
-            case Radiator.Perm.Ecto.PermissionType.compare(a.permission, b.permission) do
-              :gt -> true
-              :eq -> a.user.name < b.user.name
-              :lt -> false
-            end
-        end)
-      end
+      network_perm_query
+      |> Repo.all()
+      |> Enum.map(fn
+        perm = %Radiator.Perm.Permission{} ->
+          %Collaborator{user: perm.user, permission: perm.permission, subject: subject}
+      end)
+      |> Enum.sort(fn
+        a, b ->
+          case Radiator.Perm.Ecto.PermissionType.compare(a.permission, b.permission) do
+            :gt -> true
+            :eq -> a.user.name < b.user.name
+            :lt -> false
+          end
+      end)
+      |> (&{:ok, &1}).()
     else
       @not_authorized_match
     end
