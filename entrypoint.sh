@@ -8,13 +8,9 @@
 #   sleep 1
 # done
 
-# FIXME: there is no mix with releases
-# - https://github.com/elixir-ecto/ecto_sql/pull/113
-# - https://groups.google.com/forum/#!topic/elixir-lang-core/OkJ9C4U-C-k
+./prod/rel/radiator/bin/radiator eval "Radiator.Release.create"
+./prod/rel/radiator/bin/radiator eval "Radiator.Release.migrate"
 
-# Ecto will migrate the db to the latest changes
-mix ecto.create
-mix ecto.migrate
 
 # Create a minio bucket called "radiator" at our s3 mimic
 ./mc config host add radiator http://minio:9000 IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
