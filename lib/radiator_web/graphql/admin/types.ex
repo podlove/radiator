@@ -5,23 +5,13 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   alias RadiatorWeb.GraphQL.Admin.Resolvers
 
-  @desc "The authenticated User"
+  @desc "A radiator instance user"
   object :user do
-    field :name, :string
-    field :email, :string
-    field :status, :string
-
-    field :display_name, :string do
-      resolve fn user, _, _ -> {:ok, user.person.display_name} end
+    field :username, :string do
+      resolve fn user, _, _ -> {:ok, user.name} end
     end
 
-    field :nick, :string do
-      resolve fn user, _, _ -> {:ok, user.person.nick} end
-    end
-
-    field :gender, :string do
-      resolve fn user, _, _ -> {:ok, user.person.gender} end
-    end
+    field :display_name, :string
 
     field :avatar, :string do
       resolve &Resolvers.Editor.get_image_url/3

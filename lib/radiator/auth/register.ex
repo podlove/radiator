@@ -3,6 +3,8 @@ defmodule Radiator.Auth.Register do
   The Authentication Register Context, giving access to  `Auth.Users` and related data
   """
 
+  import Ecto.Query
+
   alias Radiator.Repo
   alias Radiator.Auth.User
 
@@ -37,6 +39,16 @@ defmodule Radiator.Auth.Register do
       _ ->
         nil
     end
+  end
+
+  def find_users(query_string \\ "") do
+    query =
+      from u in User,
+        where: ilike(u.name, ^"#{query_string}%"),
+        or_where: ilike(u.display_name, ^"#{query_string}%"),
+        preload: [:person]
+
+    Repo.all(query)
   end
 
   # TODO: we want to always have a person associated with a user but can we do it without coupling the logic here?

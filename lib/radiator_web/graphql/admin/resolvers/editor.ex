@@ -105,7 +105,13 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def find_user(_, _, %{context: %{current_user: user}}) do
-    {:ok, user}
+    user
+    |> Radiator.Repo.preload(:person)
+    |> (&{:ok, &1}).()
+  end
+
+  def find_users(_, %{query: query_string}, _) do
+    {:ok, Radiator.Auth.Register.find_users(query_string)}
   end
 
   def list_networks(_parent, _args, %{context: %{current_user: user}}) do
