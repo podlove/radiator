@@ -76,7 +76,8 @@
     <%= if has_manage_permission_for_network(@current_user, @network), 
         do: render_shared_partial("_collaborator_list.html", 
               Map.merge(assigns, %{ subject: @network, 
-                                    add_action_route: Routes.admin_network_collaborator_path(@conn, :create, @network.id)
+                                    add_action_route: Routes.admin_network_collaborator_path(@conn, :create, @network.id),
+                                    delete_route_builder: delete_collaborator_route_builder(@conn, @network)
                                   })
             ) %>
 </div>

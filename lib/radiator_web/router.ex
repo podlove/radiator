@@ -61,9 +61,11 @@ defmodule RadiatorWeb.Router do
     pipe_through :authenticated_browser
 
     resources "/networks", NetworkController do
-      resources "/collaborators", NetworkCollaboratorController, name: "collaborator"
+      resources "/collaborators", CollaboratorController, only: [:create, :update, :delete]
 
       resources "/podcasts", PodcastController do
+        resources "/collaborators", CollaboratorController, only: [:create, :update, :delete]
+
         resources "/episodes", EpisodeController
       end
 

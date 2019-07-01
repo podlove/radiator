@@ -1,5 +1,5 @@
 <div class="mb-6">
-    <h1 class="text-3xl font-bold mb-3 text-blue-900">Collborators</h1>
+    <h2 class="text-xl font-bold mb-3 text-blue-900">Collborators</h2>
 
     <div class="flex-vertical">
     <%= for collaborator <- @collaborators do %>
@@ -14,7 +14,7 @@
             <%= unless @current_user.name == collaborator.user.name, do: render_shared_partial("_destructive_button.html", 
             action_text: "Remove", 
             confirm_action_text: "Remove",
-            action_target: Routes.admin_network_collaborator_path(@conn, :delete, @subject.id, collaborator.user.name)) %>
+            action_target: @delete_route_builder.(collaborator.user.name)) %>
             </div>
         </div>
     <% end %>

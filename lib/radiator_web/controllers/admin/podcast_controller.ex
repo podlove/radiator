@@ -32,6 +32,12 @@ defmodule RadiatorWeb.Admin.PodcastController do
   def show(conn, %{"id" => id}) do
     with user <- current_user(conn),
          {:ok, podcast} <- Editor.get_podcast(user, id) do
+      collaborators =
+        case Editor.list_collaborators(user, podcast) do
+          {:ok, list} -> list
+          _ -> []
+        end
+
       # FIXME: only draft episodes, probably bring over the directory options semantic
       draft_episodes = Editor.list_episodes(user, podcast)
 
@@ -53,7 +59,8 @@ defmodule RadiatorWeb.Admin.PodcastController do
       render(conn, "show.html",
         podcast: podcast,
         published_episodes: published_episodes,
-        draft_episodes: draft_episodes
+        draft_episodes: draft_episodes,
+        collaborators: collaborators
       )
     end
   end

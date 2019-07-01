@@ -463,7 +463,7 @@ defmodule Radiator.Directory.Editor do
 
   # TODO: list all collaborators of underlying entities as well.
 
-  @spec list_collaborators(Auth.User.t(), Network.t()) ::
+  @spec list_collaborators(Auth.User.t(), Network.t() | Podcast.t()) ::
           {:ok, [Collaborator.t()]} | {:error, any}
   def list_collaborators(actor = %Auth.User{}, subject = %Network{}) do
     if has_permission(actor, subject, :manage) do
@@ -495,6 +495,36 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def list_collaborators(actor = %Auth.User{}, subject = %Podcast{}) do
+    if has_permission(actor, subject, :manage) do
+      podcast_perm_query =
+        from p in Ecto.assoc(subject, :permissions),
+          join: u in Auth.User,
+          on: p.user_id == u.id,
+          join: s in Podcast,
+          on: s.id == p.subject_id,
+          preload: [user: u]
+
+      podcast_perm_query
+      |> Repo.all()
+      |> Enum.map(fn
+        perm = %Radiator.Perm.Permission{} ->
+          %Collaborator{user: perm.user, permission: perm.permission, subject: subject}
+      end)
+      |> Enum.sort(fn
+        a, b ->
+          case Radiator.Perm.Ecto.PermissionType.compare(a.permission, b.permission) do
+            :gt -> true
+            :eq -> a.user.name < b.user.name
+            :lt -> false
+          end
+      end)
+      |> (&{:ok, &1}).()
+    else
+      @not_authorized_match
+    end
+  end
+
   def get_collaborator(actor = %Auth.User{}, subject = %Network{}, username) do
     if has_permission(actor, subject, :manage) do
       network_perm_query =
@@ -507,6 +537,29 @@ defmodule Radiator.Directory.Editor do
           preload: [user: u]
 
       with [perm] <- Repo.all(network_perm_query) do
+        %Collaborator{user: perm.user, permission: perm.permission, subject: subject}
+        |> (&{:ok, &1}).()
+      else
+        _ ->
+          @not_found_match
+      end
+    else
+      @not_authorized_match
+    end
+  end
+
+  def get_collaborator(actor = %Auth.User{}, subject = %Podcast{}, username) do
+    if has_permission(actor, subject, :manage) do
+      podcast_perm_query =
+        from p in Ecto.assoc(subject, :permissions),
+          join: u in Auth.User,
+          on: p.user_id == u.id,
+          join: s in Podcast,
+          on: s.id == p.subject_id,
+          where: u.name == ^username,
+          preload: [user: u]
+
+      with [perm] <- Repo.all(podcast_perm_query) do
         %Collaborator{user: perm.user, permission: perm.permission, subject: subject}
         |> (&{:ok, &1}).()
       else
