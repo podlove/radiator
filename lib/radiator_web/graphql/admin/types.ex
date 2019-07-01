@@ -5,6 +5,34 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   alias RadiatorWeb.GraphQL.Admin.Resolvers
 
+  alias Radiator.Directory.{Network, Podcast}
+
+  @desc "A type of access permission."
+  enum :permission do
+    value :readonly, description: "viewer"
+    value :edit, description: "editor"
+    value :manage, description: "manager"
+    value :own, description: "owner"
+  end
+
+  @desc "A radiator instance user that is allowed to work on this subject"
+  object :collaborator do
+    field :user, :user
+    field :subject, :permission_subject
+    field :permission, :permission
+  end
+
+  union :permission_subject do
+    description "A subject for permissions / user roles. E.g. a Network, Podcast, etc."
+
+    types [:network, :podcast]
+
+    resolve_type fn
+      %Network{}, _ -> :network
+      %Podcast{}, _ -> :podcast
+    end
+  end
+
   @desc "A radiator instance user"
   object :user do
     field :username, :string do
@@ -30,6 +58,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
     field :podcasts, list_of(:podcast) do
       resolve &Resolvers.Editor.list_podcasts/3
+    end
+
+    field :collaborators, list_of(:collaborator) do
+      resolve &Resolvers.Editor.list_collaborators/3
     end
   end
 

@@ -145,6 +145,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
+  def list_collaborators(%Network{id: id}, _args, %{context: %{current_user: user}}) do
+    with_network user, id do
+      fn network -> Editor.list_collaborators(user, network) end
+    end
+  end
+
   def list_podcasts(%Network{id: id}, _args, %{context: %{current_user: user}}) do
     with_network user, id do
       fn network -> {:ok, Editor.list_podcasts(user, network)} end
@@ -315,8 +321,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, Media.NetworkImage.url({network.image, network})}
   end
 
-  def get_image_url(%User{person: person}, _, _) do
-    {:ok, Person.image_url(person)}
+  def get_image_url(%User{} = user, _, _) do
+    user = user |> Radiator.Repo.preload(:person)
+
+    {:ok, Person.image_url(user.person)}
   end
 
   def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{current_user: user}}) do
