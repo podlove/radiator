@@ -51,13 +51,9 @@ defmodule Radiator.Directory.Editor.Permission do
   def has_permission(user, subject, permission) do
     case PermissionType.compare(get_permission(user, subject), permission) do
       :lt ->
-        case parent(subject) do
-          nil ->
-            false
-
-          parent ->
-            has_permission(user, parent, permission)
-        end
+        Enum.any?(parents(subject), fn parent ->
+          has_permission(user, parent, permission)
+        end)
 
       # greater or equal is fine
       _ ->
@@ -65,29 +61,33 @@ defmodule Radiator.Directory.Editor.Permission do
     end
   end
 
-  # fixme: audio might have multiple parents:
-  #        - either one of possibly many episodes
-  #        - or network
-  defp parent(subject = %Audio{}) do
-    subject
-    |> Ecto.assoc(:episodes)
-    |> Repo.one!()
+  defp parents(subject = %Audio{}) do
+    network =
+      subject
+      |> Ecto.assoc(:network)
+      |> Repo.one()
+
+    episodes = subject |> Ecto.assoc(:episodes) |> Repo.all()
+
+    if network, do: [network | episodes], else: episodes
   end
 
-  defp parent(subject = %Episode{}) do
+  defp parents(subject = %Episode{}) do
     subject
     |> Ecto.assoc(:podcast)
     |> Repo.one!()
+    |> List.wrap()
   end
 
-  defp parent(subject = %Podcast{}) do
+  defp parents(subject = %Podcast{}) do
     subject
     |> Ecto.assoc(:network)
     |> Repo.one!()
+    |> List.wrap()
   end
 
-  defp parent(_) do
-    nil
+  defp parents(_) do
+    []
   end
 
   @spec remove_permission(Auth.User.t(), subject()) :: :ok | nil
