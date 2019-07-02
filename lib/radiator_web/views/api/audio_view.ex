@@ -1,7 +1,7 @@
 defmodule RadiatorWeb.Api.AudioView do
   use RadiatorWeb, :view
   alias RadiatorWeb.Api.AudioView
-  alias HAL.{Document, Link, Embed}
+  alias HAL.{Document, Link}
 
   def render("show.json", assigns) do
     render(AudioView, "audio.json", assigns)

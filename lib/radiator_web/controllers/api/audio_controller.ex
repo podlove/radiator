@@ -29,7 +29,9 @@ defmodule RadiatorWeb.Api.AudioController do
   end
 
   def create(conn, %{"audio" => _}) do
-    send_resp(conn, 422, "Either episode_id or network_id must be present.")
+    conn
+    |> put_status(422)
+    |> json(%{"errors" => %{"assignment" => "Either episode_id or network_id must be present."}})
   end
 
   def show(conn, %{"id" => id}) do
