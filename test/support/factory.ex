@@ -9,8 +9,8 @@ defmodule Radiator.Factory do
 
   def user_factory do
     %User{
-      name: "admin",
-      email: "admin@example.com",
+      name: sequence(:name, &"me-#{&1}"),
+      email: sequence(:email, &"me-#{&1}@foo.com"),
       person: build(:person)
     }
   end
