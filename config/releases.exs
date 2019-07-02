@@ -21,3 +21,5 @@ config :ex_aws, :s3,
   scheme: "http://",
   host: System.fetch_env!("STORAGE_HOST"),
   port: System.fetch_env!("STORAGE_PORT")
+
+#  fixme: SMTP Settings
