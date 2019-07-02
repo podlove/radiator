@@ -8,7 +8,6 @@
 use Mix.Config
 
 default_host = "localhost"
-default_host = "darthdom.local"
 
 config :radiator,
   ecto_repos: [Radiator.Repo]
@@ -80,11 +79,6 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
-
-config :ex_aws,
-  access_key_id: "9Q6BJW3959KUSF70H3AT",
-  secret_access_key: "DebokMib7cSHHtfc3zHQoDLZ4uXXQmNGXdI6qVe+",
-  json_codec: Jason
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
