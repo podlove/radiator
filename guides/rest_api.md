@@ -25,12 +25,18 @@
     - [Read](#Read-2)
     - [Update](#Update-2)
     - [Delete](#Delete-2)
-  - [Episodes](#Episodes)
+  - [Podcasts Collaborators](#Podcasts-Collaborators)
     - [Parameters for Create & Update](#Parameters-for-Create--Update-3)
-    - [Create](#Create-3)
-    - [Read](#Read-3)
-    - [Update](#Update-3)
-    - [Delete](#Delete-3)
+      - [Read](#Read-3)
+      - [Create](#Create-3)
+      - [Update](#Update-3)
+      - [Delete](#Delete-3)
+  - [Episodes](#Episodes)
+    - [Parameters for Create & Update](#Parameters-for-Create--Update-4)
+    - [Create](#Create-4)
+    - [Read](#Read-4)
+    - [Update](#Update-4)
+    - [Delete](#Delete-4)
 
 ## Authentication
 
@@ -113,8 +119,8 @@ DELETE /api/rest/v1/networks/:id
 
 ### Parameters for Create & Update
 
-| Name                       | Type     | Description                                                      |
-| -------------------------- | -------- | ---------------------------------------------------------------- |
+| Name         | Type     | Description                                                      |
+| ------------ | -------- | ---------------------------------------------------------------- |
 | `username`   | `string` | **Required.** Name of user to modify                             |
 | `permission` | `string` | **Required.** one of `"own"`, `"manage"`, `"edit"`, `"readonly"` |
 
@@ -186,8 +192,8 @@ DELETE /api/rest/v1/podcasts/:id
 
 ### Parameters for Create & Update
 
-| Name                       | Type     | Description                                                      |
-| -------------------------- | -------- | ---------------------------------------------------------------- |
+| Name         | Type     | Description                                                      |
+| ------------ | -------- | ---------------------------------------------------------------- |
 | `username`   | `string` | **Required.** Name of user to modify                             |
 | `permission` | `string` | **Required.** one of `"own"`, `"manage"`, `"edit"`, `"readonly"` |
 
