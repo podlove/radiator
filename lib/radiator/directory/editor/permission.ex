@@ -52,13 +52,7 @@ defmodule Radiator.Directory.Editor.Permission do
     case PermissionType.compare(get_permission(user, subject), permission) do
       :lt ->
         Enum.any?(parents(subject), fn parent ->
-          case parent do
-            nil ->
-              false
-
-            parent ->
-              has_permission(user, parent, permission)
-          end
+          has_permission(user, parent, permission)
         end)
 
       # greater or equal is fine
