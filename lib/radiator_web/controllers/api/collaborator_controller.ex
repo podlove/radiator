@@ -10,7 +10,7 @@ defmodule RadiatorWeb.Api.CollaboratorController do
 
   def create(conn, %{"username" => username, "permission" => permission} = params) do
     with actor <- current_user(conn),
-         {:ok, subject} <- Editor.get_network(actor, params["network_id"]) do
+         {:ok, subject} <- current_subject(actor, params) do
       case Radiator.Auth.Register.get_user_by_name(username) do
         nil ->
           {:error, :not_found}
@@ -34,7 +34,7 @@ defmodule RadiatorWeb.Api.CollaboratorController do
   def update(conn, %{"id" => username, "permission" => permission} = params) do
     with ^username <- params["username"],
          actor = current_user(conn),
-         {:ok, subject} <- Editor.get_network(actor, params["network_id"]) do
+         {:ok, subject} <- current_subject(actor, params) do
       with {:ok, collaborator} <- Editor.get_collaborator(actor, subject, username),
            {:ok, collaborator} <-
              Editor.update_collaborator(actor, %{
@@ -49,12 +49,32 @@ defmodule RadiatorWeb.Api.CollaboratorController do
 
   def delete(conn, %{"id" => username} = params) do
     with actor = current_user(conn),
-         {:ok, subject} <- Editor.get_network(actor, params["network_id"]) do
+         {:ok, subject} <- current_subject(actor, params) do
       with {:ok, collaborator} <- Editor.get_collaborator(actor, subject, username),
            {:ok, collaborator} <- Editor.remove_collaborator(actor, collaborator) do
         conn
         |> render("show.json", %{collaborator: collaborator})
       end
+    end
+  end
+
+  def show(conn, %{"id" => username} = params) do
+    with actor = current_user(conn),
+         {:ok, subject} <- current_subject(actor, params) do
+      with {:ok, collaborator} <- Editor.get_collaborator(actor, subject, username) do
+        conn
+        |> render("show.json", %{collaborator: collaborator})
+      end
+    end
+  end
+
+  defp current_subject(actor = %Radiator.Auth.User{}, params) do
+    case params["podcast_id"] do
+      nil ->
+        Editor.get_network(actor, params["network_id"])
+
+      id ->
+        Editor.get_podcast(actor, id)
     end
   end
 end

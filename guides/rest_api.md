@@ -121,7 +121,11 @@ DELETE /api/rest/v1/networks/:id
 
 #### Read
 
-use GraphQL api to get them
+use GraphQL API to list them
+
+```
+GET /api/rest/v1/networks/:id/collaborators/:username 
+```
 
 #### Create
 ```
@@ -176,6 +180,40 @@ PUT /api/rest/v1/podcasts/:id
 
 ```
 DELETE /api/rest/v1/podcasts/:id
+```
+
+## Podcasts Collaborators
+
+### Parameters for Create & Update
+
+| Name                       | Type     | Description                                                      |
+| -------------------------- | -------- | ---------------------------------------------------------------- |
+| `username`   | `string` | **Required.** Name of user to modify                             |
+| `permission` | `string` | **Required.** one of `"own"`, `"manage"`, `"edit"`, `"readonly"` |
+
+
+#### Read
+
+use GraphQL API to list them
+
+```
+GET /api/rest/v1/podcasts/:id/collaborators/:username 
+```
+
+#### Create
+```
+POST /api/rest/v1/podcasts/:id/collaborators 
+```
+
+#### Update 
+```
+PUT /api/rest/v1/podcasts/:id/collaborators/:username 
+```
+
+#### Delete
+
+```
+DELETE /api/rest/v1/podcasts/:id/collaborators/:username 
 ```
 
 ## Episodes
