@@ -69,10 +69,7 @@ defmodule Radiator.Directory.Editor.Permission do
 
     episodes = subject |> Ecto.assoc(:episodes) |> Repo.all()
 
-    case network do
-      nil -> episodes
-      network -> [network | episodes]
-    end
+    if network, do: [network | episodes], else: episodes
   end
 
   defp parents(subject = %Episode{}) do
