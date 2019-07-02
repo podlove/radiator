@@ -1,29 +1,36 @@
 # REST API
 
-- [Authentication](#Authentication)
-  - [Login](#Login)
-    - [Parameters](#Parameters)
-    - [Response](#Response)
-  - [Prolong Session](#Prolong-Session)
-    - [Response](#Response-1)
-- [Networks](#Networks)
-  - [Parameters for Create & Update](#Parameters-for-Create--Update)
-  - [Create](#Create)
-  - [Read](#Read)
-  - [Update](#Update)
-  - [Delete](#Delete)
-- [Podcats](#Podcats)
-  - [Parameters for Create & Update](#Parameters-for-Create--Update-1)
-  - [Create](#Create-1)
-  - [Read](#Read-1)
-  - [Update](#Update-1)
-  - [Delete](#Delete-1)
-- [Episodes](#Episodes)
-  - [Parameters for Create & Update](#Parameters-for-Create--Update-2)
-  - [Create](#Create-2)
-  - [Read](#Read-2)
-  - [Update](#Update-2)
-  - [Delete](#Delete-2)
+- [REST API](#REST-API)
+  - [Authentication](#Authentication)
+    - [Login](#Login)
+      - [Parameters](#Parameters)
+      - [Response](#Response)
+    - [Prolong Session](#Prolong-Session)
+      - [Response](#Response-1)
+  - [Networks](#Networks)
+    - [Parameters for Create & Update](#Parameters-for-Create--Update)
+    - [Create](#Create)
+    - [Read](#Read)
+    - [Update](#Update)
+    - [Delete](#Delete)
+  - [Network Collaborators](#Network-Collaborators)
+    - [Parameters for Create & Update](#Parameters-for-Create--Update-1)
+      - [Read](#Read-1)
+      - [Create](#Create-1)
+      - [Update](#Update-1)
+      - [Delete](#Delete-1)
+  - [Podcasts](#Podcasts)
+    - [Parameters for Create & Update](#Parameters-for-Create--Update-2)
+    - [Create](#Create-2)
+    - [Read](#Read-2)
+    - [Update](#Update-2)
+    - [Delete](#Delete-2)
+  - [Episodes](#Episodes)
+    - [Parameters for Create & Update](#Parameters-for-Create--Update-3)
+    - [Create](#Create-3)
+    - [Read](#Read-3)
+    - [Update](#Update-3)
+    - [Delete](#Delete-3)
 
 ## Authentication
 
@@ -102,7 +109,37 @@ PUT /api/rest/v1/networks/:id
 DELETE /api/rest/v1/networks/:id
 ```
 
-## Podcats
+## Network Collaborators
+
+### Parameters for Create & Update
+
+| Name                       | Type     | Description                                                      |
+| -------------------------- | -------- | ---------------------------------------------------------------- |
+| `username`   | `string` | **Required.** Name of user to modify                             |
+| `permission` | `string` | **Required.** one of `"own"`, `"manage"`, `"edit"`, `"readonly"` |
+
+
+#### Read
+
+use GraphQL api to get them
+
+#### Create
+```
+POST /api/rest/v1/networks/:id/collaborators 
+```
+
+#### Update 
+```
+PUT /api/rest/v1/networks/:id/collaborators/:username 
+```
+
+#### Delete
+
+```
+DELETE /api/rest/v1/networks/:id/collaborators/:username 
+```
+
+## Podcasts
 
 ### Parameters for Create & Update
 

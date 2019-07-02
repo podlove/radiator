@@ -92,7 +92,10 @@ defmodule RadiatorWeb.Router do
 
     post "/auth/prolong", AuthenticationController, :prolong
 
-    resources "/networks", NetworkController, only: [:show, :create, :update, :delete]
+    resources "/networks", NetworkController, only: [:show, :create, :update, :delete] do
+      resources "/collaborators", CollaboratorController, only: [:create, :update, :delete]
+    end
+
     resources "/podcasts", PodcastController, only: [:show, :create, :update, :delete]
     resources "/episodes", EpisodeController, only: [:show, :create, :update, :delete]
 
