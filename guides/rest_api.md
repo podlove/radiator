@@ -24,6 +24,12 @@
   - [Read](#Read-2)
   - [Update](#Update-2)
   - [Delete](#Delete-2)
+- [Audio](#Audio)
+  - [Parameters for Create & Update](#Parameters-for-Create--Update-3)
+  - [Create](#Create-3)
+  - [Read](#Read-3)
+  - [Update](#Update-3)
+  - [Delete](#Delete-3)
 
 ## Authentication
 
@@ -176,4 +182,39 @@ PUT /api/rest/v1/episodes/:id
 
 ```
 DELETE /api/rest/v1/episodes/:id
+```
+
+## Audio
+
+### Parameters for Create & Update
+
+| Name                | Type      | Description                                                |
+| ------------------- | --------- | ---------------------------------------------------------- |
+| `audio[network_id]` | `integer` | Network ID. Either network ID or episode ID must be given. |
+| `audio[episode_id]` | `integer` | Episode ID. Either network ID or episode ID must be given. |
+| `audio[title]`      | `string`  |                                                            |
+| `audio[image]`      | `file`    | Audio image.                                               |
+
+### Create
+
+```
+POST /api/rest/v1/audios
+```
+
+### Read
+
+```
+GET /api/rest/v1/audios/:id
+```
+
+### Update
+
+```
+PUT /api/rest/v1/audios/:id
+```
+
+### Delete
+
+```
+DELETE /api/rest/v1/audios/:id
 ```
