@@ -41,14 +41,19 @@ defmodule Radiator.Auth.Register do
     end
   end
 
-  def find_users(query_string \\ "") do
-    query =
-      from u in User,
-        where: ilike(u.name, ^"#{query_string}%"),
-        or_where: ilike(u.display_name, ^"#{query_string}%"),
-        preload: [:person]
+  defp users_query("") do
+    from u in User, order_by: u.display_name, preload: [:person]
+  end
 
-    Repo.all(query)
+  defp users_query(query_string) do
+    from u in users_query(""),
+      where: ilike(u.name, ^"#{query_string}%"),
+      or_where: ilike(u.display_name, ^"#{query_string}%")
+  end
+
+  def find_users(query_string \\ "") do
+    users_query(query_string)
+    |> Repo.all()
   end
 
   # TODO: we want to always have a person associated with a user but can we do it without coupling the logic here?

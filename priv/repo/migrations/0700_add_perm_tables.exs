@@ -35,15 +35,11 @@ defmodule Radiator.Repo.Migrations.AddPermTables do
     end
 
     flush()
-
-    Radiator.Repo.insert(Radiator.Auth.User.reserved_user(:public))
   end
 
   def down do
     drop table(:episodes_perm)
     drop table(:podcasts_perm)
     drop table(:networks_perm)
-
-    Radiator.Repo.delete(Radiator.Auth.User.reserved_user(:public))
   end
 end
