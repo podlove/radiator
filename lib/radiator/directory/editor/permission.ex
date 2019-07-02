@@ -10,10 +10,7 @@ defmodule Radiator.Directory.Editor.Permission do
 
   alias Radiator.Perm.Ecto.PermissionType
 
-  @type permission() :: :readonly | :edit | :manage | :own
-  @type subject() :: Podcast.t() | Network.t() | Episode.t() | Audio.t()
-
-  @spec get_permission(Auth.User.t(), subject()) :: nil | any()
+  @spec get_permission(Auth.User.t(), permission_subject()) :: nil | any()
   def get_permission(user, subject)
 
   def get_permission(user = %Auth.User{}, subject = %Network{}),
@@ -43,7 +40,7 @@ defmodule Radiator.Directory.Editor.Permission do
     Repo.one(query)
   end
 
-  @spec has_permission(Auth.User.t(), subject(), permission()) :: boolean()
+  @spec has_permission(Auth.User.t(), permission_subject(), permission()) :: boolean()
   def has_permission(user, subject, permission)
 
   def has_permission(_user, nil, _permission), do: false
@@ -90,7 +87,7 @@ defmodule Radiator.Directory.Editor.Permission do
     []
   end
 
-  @spec remove_permission(Auth.User.t(), subject()) :: :ok | nil
+  @spec remove_permission(Auth.User.t(), permission_subject()) :: :ok | nil
   def remove_permission(user = %Auth.User{}, subject) do
     case fetch_permission(user, subject) do
       nil ->
@@ -106,7 +103,7 @@ defmodule Radiator.Directory.Editor.Permission do
     end
   end
 
-  @spec set_permission(Auth.User.t(), subject(), permission()) :: :ok | {:error, any()}
+  @spec set_permission(Auth.User.t(), permission_subject(), permission()) :: :ok | {:error, any()}
   def set_permission(user = %Auth.User{}, subject = %st{}, permission)
       when st in [Podcast, Network, Episode, Audio] and is_permission(permission),
       do: do_set_permission(user, subject, permission)

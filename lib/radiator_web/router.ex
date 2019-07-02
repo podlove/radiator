@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Router do
   use RadiatorWeb, :router
 
   pipeline :browser do
+    plug RadiatorWeb.Plug.BlockKnownPaths
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
@@ -10,6 +11,7 @@ defmodule RadiatorWeb.Router do
   end
 
   pipeline :public_browser do
+    plug RadiatorWeb.Plug.BlockKnownPaths
     plug :accepts, ["html", "xml", "rss"]
     plug :put_secure_browser_headers
 
@@ -32,7 +34,7 @@ defmodule RadiatorWeb.Router do
     plug Guardian.Plug.LoadResource
 
     plug RadiatorWeb.Plug.EnsureUserValidity
-    plug RadiatorWeb.Plug.AssignCurrentNetwork
+    plug RadiatorWeb.Plug.AssignCurrentAdminResources
   end
 
   pipeline :api do
@@ -56,11 +58,14 @@ defmodule RadiatorWeb.Router do
 
   scope "/admin", RadiatorWeb.Admin, as: :admin do
     pipe_through :browser
-
     pipe_through :authenticated_browser
 
     resources "/networks", NetworkController do
+      resources "/collaborators", CollaboratorController, only: [:create, :update, :delete]
+
       resources "/podcasts", PodcastController do
+        resources "/collaborators", CollaboratorController, only: [:create, :update, :delete]
+
         resources "/episodes", EpisodeController
       end
 
@@ -87,8 +92,14 @@ defmodule RadiatorWeb.Router do
 
     post "/auth/prolong", AuthenticationController, :prolong
 
-    resources "/networks", NetworkController, only: [:show, :create, :update, :delete]
-    resources "/podcasts", PodcastController, only: [:show, :create, :update, :delete]
+    resources "/networks", NetworkController, only: [:show, :create, :update, :delete] do
+      resources "/collaborators", CollaboratorController, only: [:show, :create, :update, :delete]
+    end
+
+    resources "/podcasts", PodcastController, only: [:show, :create, :update, :delete] do
+      resources "/collaborators", CollaboratorController, only: [:show, :create, :update, :delete]
+    end
+
     resources "/episodes", EpisodeController, only: [:show, :create, :update, :delete]
 
     # todo: pluralize

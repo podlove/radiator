@@ -3,6 +3,8 @@ defmodule RadiatorWeb.FormatHelpers do
   General formatting view helpers that should be readily available
   """
 
+  use Radiator.Constants, :permissions
+
   def format_bytes(number, precision \\ 2)
 
   def format_bytes(nil, _) do
@@ -55,5 +57,14 @@ defmodule RadiatorWeb.FormatHelpers do
         {:halt, prev_string <> ellipsis}
       end
     end)
+  end
+
+  def format_permission(perm) when is_permission(perm) do
+    case perm do
+      :own -> "owner"
+      :manage -> "manager"
+      :edit -> "editor"
+      :readonly -> "viewer"
+    end
   end
 end

@@ -1,0 +1,29 @@
+<div class="mb-6">
+    <h2 class="text-xl font-bold mb-3 text-blue-900">Collborators</h2>
+
+    <div class="flex-vertical">
+    <%= for collaborator <- @collaborators do %>
+        <div class="flex px-2 justify-begin h-12 border-primary border-b items-center <%= unless @current_user == collaborator.user, do: "hover:bg-highlight" %>">
+            <div class="bg-gray-500 rounded-full w-10 h-10 flex-shrink-0"></div>
+            <div class="text-left mx-4 flex-shrink-0">
+            <%= content_tag(:span, collaborator.user.name, class: "font-bold") %><br/>
+            <%= content_tag(:span, collaborator.user.display_name, class: "text-sm") %>
+            </div>
+            <%= render_shared_partial("_user_role_bubble.html", permission: collaborator.permission) %>
+            <div class="w-full flex justify-end">
+            <%= unless @current_user.name == collaborator.user.name, do: render_shared_partial("_destructive_button.html", 
+            action_text: "Remove", 
+            confirm_action_text: "Remove",
+            action_target: @delete_route_builder.(collaborator.user.name)) %>
+            </div>
+        </div>
+    <% end %>
+        <div class="flex px-2 justify-begin h-12 border-primary items-center">
+            <%= form_for @conn, @add_action_route, [as: :collaborator], fn f -> %>
+                <%= text_input f, :name, class: "inline-input font-bold", placeholder: "username" %>
+                <%= select f, :permission, permission_select_values() , class: "inline-select" %>
+                <%= submit "Add", class: "btn" %>
+            <% end %>
+        </div>
+    <div>
+</div>
