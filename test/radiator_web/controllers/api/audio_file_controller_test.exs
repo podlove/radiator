@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.Api.AudioControllerTest do
+defmodule RadiatorWeb.Api.AudioFileControllerTest do
   use RadiatorWeb.ConnCase
 
   import Radiator.Factory
