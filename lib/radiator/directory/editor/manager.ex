@@ -70,6 +70,10 @@ defmodule Radiator.Directory.Editor.Manager do
       |> Ecto.Changeset.put_assoc(:audio, audio)
     end)
     |> Repo.transaction()
+    |> case do
+      {:ok, %{audio: audio}} -> {:ok, audio}
+      something -> something
+    end
   end
 
   def create_audio(network = %Network{}, attrs) do
