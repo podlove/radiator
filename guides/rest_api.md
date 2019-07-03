@@ -137,7 +137,7 @@ GET /api/rest/v1/networks/:id
 ### Update
 
 ```
-PUT /api/rest/v1/networks/:id
+PATCH /api/rest/v1/networks/:id
 ```
 
 ### Delete
@@ -171,7 +171,7 @@ POST /api/rest/v1/networks/:id/collaborators
 
 #### Update 
 ```
-PUT /api/rest/v1/networks/:id/collaborators/:username 
+PATCH /api/rest/v1/networks/:id/collaborators/:username 
 ```
 
 #### Delete
@@ -210,7 +210,7 @@ GET /api/rest/v1/podcasts/:id
 ### Update
 
 ```
-PUT /api/rest/v1/podcasts/:id
+PATCH /api/rest/v1/podcasts/:id
 ```
 
 ### Delete
@@ -244,7 +244,7 @@ POST /api/rest/v1/podcasts/:id/collaborators
 
 #### Update 
 ```
-PUT /api/rest/v1/podcasts/:id/collaborators/:username 
+PATCH /api/rest/v1/podcasts/:id/collaborators/:username 
 ```
 
 #### Delete
@@ -281,7 +281,7 @@ GET /api/rest/v1/episodes/:id
 ### Update
 
 ```
-PUT /api/rest/v1/episodes/:id
+PATCH /api/rest/v1/episodes/:id
 ```
 
 ### Delete
@@ -316,7 +316,7 @@ GET /api/rest/v1/audios/:id
 ### Update
 
 ```
-PUT /api/rest/v1/audios/:id
+PATCH /api/rest/v1/audios/:id
 ```
 
 ### Delete
