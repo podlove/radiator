@@ -305,11 +305,14 @@ DELETE /api/rest/v1/audios/:id
 
 ## Audio File
 
+> ⚠️ An [Audio](#Audio) must exist before an Audio File can be created.
+
 ### Parameters for Create
 
 | Name                   | Type      | Description                                                 |
 | ---------------------- | --------- | ----------------------------------------------------------- |
 | `audio_file[audio_id]` | `integer` | **Required.** File is attached to Audio object of given ID. |
+| `audio_file[file]`     | `file`    | audio file to upload                                        |
 | `audio_file[title]`    | `string`  | file title                                                  |
 
 ### Create
