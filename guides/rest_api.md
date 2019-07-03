@@ -30,6 +30,10 @@
   - [Read](#Read-3)
   - [Update](#Update-3)
   - [Delete](#Delete-3)
+- [Audio File](#Audio-File)
+  - [Parameters for Create](#Parameters-for-Create)
+  - [Create](#Create-4)
+  - [Read](#Read-4)
 
 ## Authentication
 
@@ -217,4 +221,25 @@ PUT /api/rest/v1/audios/:id
 
 ```
 DELETE /api/rest/v1/audios/:id
+```
+
+## Audio File
+
+### Parameters for Create
+
+| Name                   | Type      | Description                                                 |
+| ---------------------- | --------- | ----------------------------------------------------------- |
+| `audio_file[audio_id]` | `integer` | **Required.** File is attached to Audio object of given ID. |
+| `audio_file[title]`    | `string`  | file title                                                  |
+
+### Create
+
+```
+POST /api/rest/v1/audio_file
+```
+
+### Read
+
+```
+GET /api/rest/v1/audio_file/:id
 ```
