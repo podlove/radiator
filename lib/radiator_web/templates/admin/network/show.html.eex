@@ -1,6 +1,6 @@
 <div class="container mb-6 px-8">
     <div class="mb-6">
-      <h1 class="text-3xl font-bold mb-1 text-blue-900">Podcasts in <%= @current_network.title %></h1>
+      <h1 class="text-3xl font-bold mb-1 text-blue-900">Podcasts in <%= @network.title %></h1>
     </div>
 
     <div class="flex justify-center md:justify-start flex-wrap">
@@ -31,9 +31,9 @@
         <% end %>
       <% end %>
 
-      <%= if has_manage_permission_for_network(@current_user, @current_network) do %>
+      <%= if has_manage_permission_for_network(@current_user, @network) do %>
 
-      <a href="<%= Routes.admin_network_podcast_path(@conn, :new, @current_network) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-highlight">
+      <a href="<%= Routes.admin_network_podcast_path(@conn, :new, @network) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-highlight">
         
         <div class="w-48 h-48 flex flex-col justify-center items-center">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 mb-4 icon-add-circle"><circle cx="12" cy="12" r="10" class="primary"></circle><path class="secondary" d="M13 11h4a1 1 0 0 1 0 2h-4v4a1 1 0 0 1-2 0v-4H7a1 1 0 0 1 0-2h4V7a1 1 0 0 1 2 0v4z"></path></svg>
@@ -51,7 +51,7 @@
 
       </a>
 
-      <a href="<%= Routes.admin_network_podcast_import_path(@conn, :new, @current_network) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-highlight">
+      <a href="<%= Routes.admin_network_podcast_import_path(@conn, :new, @network) %>" class="w-48 bg-white rounded flex flex-col shadow mr-8 mb-8 no-underline text-black bg-white hover:bg-highlight">
         
         <div class="w-48 h-48 flex flex-col justify-center items-center">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 mb-4 icon-inbox-download"><path class="primary" d="M8 5H5v10h2a2 2 0 0 1 2 2c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h2V5h-3a1 1 0 0 1 0-2h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3a1 1 0 1 1 0 2z"></path><path class="secondary" d="M11 10.59V4a1 1 0 0 1 2 0v6.59l1.3-1.3a1 1 0 0 1 1.4 1.42l-3 3a1 1 0 0 1-1.4 0l-3-3a1 1 0 0 1 1.4-1.42l1.3 1.3z"></path></svg>
@@ -72,4 +72,12 @@
     <% end %>
 
     </div>
+
+    <%= if has_manage_permission_for_network(@current_user, @network), 
+        do: render_shared_partial("_collaborator_list.html", 
+              Map.merge(assigns, %{ subject: @network, 
+                                    add_action_route: Routes.admin_network_collaborator_path(@conn, :create, @network.id),
+                                    delete_route_builder: delete_collaborator_route_builder(@conn, @network)
+                                  })
+            ) %>
 </div>

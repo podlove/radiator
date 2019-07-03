@@ -89,6 +89,14 @@ defmodule RadiatorWeb.GraphQL.Schema do
       resolve &Admin.Resolvers.Editor.find_user/3
     end
 
+    @desc "Find users of this instance"
+    field :users, list_of(:user) do
+      arg :query, non_null(:string)
+
+      middleware Middleware.RequireAuthentication
+      resolve &Admin.Resolvers.Editor.find_users/3
+    end
+
     @desc "Get all podcasts"
     field :podcasts, list_of(:podcast) do
       middleware Middleware.RequireAuthentication

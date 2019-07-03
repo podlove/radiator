@@ -12,28 +12,40 @@
   - [Read](#Read)
   - [Update](#Update)
   - [Delete](#Delete)
-- [Podcats](#Podcats)
+- [Network Collaborators](#Network-Collaborators)
   - [Parameters for Create & Update](#Parameters-for-Create--Update-1)
-  - [Create](#Create-1)
-  - [Read](#Read-1)
-  - [Update](#Update-1)
-  - [Delete](#Delete-1)
-- [Episodes](#Episodes)
+    - [Read](#Read-1)
+    - [Create](#Create-1)
+    - [Update](#Update-1)
+    - [Delete](#Delete-1)
+- [Podcasts](#Podcasts)
   - [Parameters for Create & Update](#Parameters-for-Create--Update-2)
   - [Create](#Create-2)
   - [Read](#Read-2)
   - [Update](#Update-2)
   - [Delete](#Delete-2)
-- [Audio](#Audio)
+- [Podcasts Collaborators](#Podcasts-Collaborators)
   - [Parameters for Create & Update](#Parameters-for-Create--Update-3)
-  - [Create](#Create-3)
-  - [Read](#Read-3)
-  - [Update](#Update-3)
-  - [Delete](#Delete-3)
-- [Audio File](#Audio-File)
-  - [Parameters for Create](#Parameters-for-Create)
+    - [Read](#Read-3)
+    - [Create](#Create-3)
+    - [Update](#Update-3)
+    - [Delete](#Delete-3)
+- [Episodes](#Episodes)
+  - [Parameters for Create & Update](#Parameters-for-Create--Update-4)
   - [Create](#Create-4)
   - [Read](#Read-4)
+  - [Update](#Update-4)
+  - [Delete](#Delete-4)
+- [Audio](#Audio)
+  - [Parameters for Create & Update](#Parameters-for-Create--Update-5)
+  - [Create](#Create-5)
+  - [Read](#Read-5)
+  - [Update](#Update-5)
+  - [Delete](#Delete-5)
+- [Audio File](#Audio-File)
+  - [Parameters for Create](#Parameters-for-Create)
+  - [Create](#Create-6)
+  - [Read](#Read-6)
 
 ## Authentication
 
@@ -112,7 +124,41 @@ PUT /api/rest/v1/networks/:id
 DELETE /api/rest/v1/networks/:id
 ```
 
-## Podcats
+## Network Collaborators
+
+### Parameters for Create & Update
+
+| Name         | Type     | Description                                                      |
+| ------------ | -------- | ---------------------------------------------------------------- |
+| `username`   | `string` | **Required.** Name of user to modify                             |
+| `permission` | `string` | **Required.** one of `"own"`, `"manage"`, `"edit"`, `"readonly"` |
+
+
+#### Read
+
+use GraphQL API to list them
+
+```
+GET /api/rest/v1/networks/:id/collaborators/:username 
+```
+
+#### Create
+```
+POST /api/rest/v1/networks/:id/collaborators 
+```
+
+#### Update 
+```
+PUT /api/rest/v1/networks/:id/collaborators/:username 
+```
+
+#### Delete
+
+```
+DELETE /api/rest/v1/networks/:id/collaborators/:username 
+```
+
+## Podcasts
 
 ### Parameters for Create & Update
 
@@ -149,6 +195,40 @@ PUT /api/rest/v1/podcasts/:id
 
 ```
 DELETE /api/rest/v1/podcasts/:id
+```
+
+## Podcasts Collaborators
+
+### Parameters for Create & Update
+
+| Name         | Type     | Description                                                      |
+| ------------ | -------- | ---------------------------------------------------------------- |
+| `username`   | `string` | **Required.** Name of user to modify                             |
+| `permission` | `string` | **Required.** one of `"own"`, `"manage"`, `"edit"`, `"readonly"` |
+
+
+#### Read
+
+use GraphQL API to list them
+
+```
+GET /api/rest/v1/podcasts/:id/collaborators/:username 
+```
+
+#### Create
+```
+POST /api/rest/v1/podcasts/:id/collaborators 
+```
+
+#### Update 
+```
+PUT /api/rest/v1/podcasts/:id/collaborators/:username 
+```
+
+#### Delete
+
+```
+DELETE /api/rest/v1/podcasts/:id/collaborators/:username 
 ```
 
 ## Episodes

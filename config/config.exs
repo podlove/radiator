@@ -7,7 +7,7 @@
 # General application configuration
 use Mix.Config
 
-default_host = "localhost"
+default_host = System.get_env("DEFAULT_HOST") || "localhost"
 
 config :radiator,
   ecto_repos: [Radiator.Repo]

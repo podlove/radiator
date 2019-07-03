@@ -51,6 +51,6 @@ defmodule Radiator.Contribution.Person do
   Convenience accessor for image URL.
   """
   def image_url(%__MODULE__{} = subject) do
-    Media.PersonAvatar.url({subject.image, subject})
+    Media.PersonAvatar.url({subject.avatar, subject})
   end
 end

@@ -9,7 +9,7 @@
   </head>
   <body class="font-sans bg-gray-200 antialiased">
 
-    <%= render RadiatorWeb.PageView, "nav.html", assigns %>
+    <%= render RadiatorWeb.LayoutView, "_nav.html", assigns %>
 
     <%= if get_flash(@conn, :info) do %>
       <div class="bg-yellow-200 border-l-4 border-yellow-400 text-yellow-900 px-4 py-3 mb-10 mx-2">
