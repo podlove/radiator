@@ -1,5 +1,6 @@
 # REST API
 
+- [API Usage](#API-Usage)
 - [Authentication](#Authentication)
   - [Login](#Login)
     - [Parameters](#Parameters)
@@ -36,6 +37,37 @@
   - [Read](#Read-4)
   - [Update](#Update-4)
   - [Delete](#Delete-4)
+- [Audio](#Audio)
+  - [Parameters for Create & Update](#Parameters-for-Create--Update-5)
+  - [Create](#Create-5)
+  - [Read](#Read-5)
+  - [Update](#Update-5)
+  - [Delete](#Delete-5)
+- [Audio File](#Audio-File)
+  - [Parameters for Create](#Parameters-for-Create)
+  - [Create](#Create-6)
+  - [Read](#Read-6)
+
+## API Usage
+
+All requests need to be authenticated. See [Authentication](#Authentication) below for details.
+
+The documentation will often write parameters like this: `network[title]`. This indicates hierarchical parameter keys.
+
+In JavaScript there are multiple ways to set them:
+
+```js
+// using FormData
+var data = new FormData();
+data.append("network[title]", "Example Network");
+
+// using nested JSON
+var data = JSON.stringify({
+  "network": {
+    "title": "Example Network"
+  }
+});
+```
 
 ## Authentication
 
@@ -105,7 +137,7 @@ GET /api/rest/v1/networks/:id
 ### Update
 
 ```
-PUT /api/rest/v1/networks/:id
+PATCH /api/rest/v1/networks/:id
 ```
 
 ### Delete
@@ -139,7 +171,7 @@ POST /api/rest/v1/networks/:id/collaborators
 
 #### Update 
 ```
-PUT /api/rest/v1/networks/:id/collaborators/:username 
+PATCH /api/rest/v1/networks/:id/collaborators/:username 
 ```
 
 #### Delete
@@ -178,7 +210,7 @@ GET /api/rest/v1/podcasts/:id
 ### Update
 
 ```
-PUT /api/rest/v1/podcasts/:id
+PATCH /api/rest/v1/podcasts/:id
 ```
 
 ### Delete
@@ -212,7 +244,7 @@ POST /api/rest/v1/podcasts/:id/collaborators
 
 #### Update 
 ```
-PUT /api/rest/v1/podcasts/:id/collaborators/:username 
+PATCH /api/rest/v1/podcasts/:id/collaborators/:username 
 ```
 
 #### Delete
@@ -249,11 +281,70 @@ GET /api/rest/v1/episodes/:id
 ### Update
 
 ```
-PUT /api/rest/v1/episodes/:id
+PATCH /api/rest/v1/episodes/:id
 ```
 
 ### Delete
 
 ```
 DELETE /api/rest/v1/episodes/:id
+```
+
+## Audio
+
+### Parameters for Create & Update
+
+| Name                | Type      | Description                                                |
+| ------------------- | --------- | ---------------------------------------------------------- |
+| `audio[network_id]` | `integer` | Network ID. Either network ID or episode ID must be given. |
+| `audio[episode_id]` | `integer` | Episode ID. Either network ID or episode ID must be given. |
+| `audio[title]`      | `string`  |                                                            |
+| `audio[image]`      | `file`    | Audio image.                                               |
+
+### Create
+
+```
+POST /api/rest/v1/audios
+```
+
+### Read
+
+```
+GET /api/rest/v1/audios/:id
+```
+
+### Update
+
+```
+PATCH /api/rest/v1/audios/:id
+```
+
+### Delete
+
+```
+DELETE /api/rest/v1/audios/:id
+```
+
+## Audio File
+
+> ⚠️ An [Audio](#Audio) must exist before an Audio File can be created.
+
+### Parameters for Create
+
+| Name                   | Type      | Description                                                 |
+| ---------------------- | --------- | ----------------------------------------------------------- |
+| `audio_file[audio_id]` | `integer` | **Required.** File is attached to Audio object of given ID. |
+| `audio_file[file]`     | `file`    | audio file to upload                                        |
+| `audio_file[title]`    | `string`  | file title                                                  |
+
+### Create
+
+```
+POST /api/rest/v1/audio_file
+```
+
+### Read
+
+```
+GET /api/rest/v1/audio_file/:id
 ```

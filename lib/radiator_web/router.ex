@@ -101,6 +101,7 @@ defmodule RadiatorWeb.Router do
     end
 
     resources "/episodes", EpisodeController, only: [:show, :create, :update, :delete]
+    resources "/audios", AudioController, only: [:show, :create, :update, :delete]
 
     # todo: pluralize
     resources "/audio_file", AudioFileController, only: [:show, :create]

@@ -95,13 +95,6 @@ defmodule Radiator.Directory.Importer do
     episodes =
       metalove_episodes
       |> Enum.map(fn episode ->
-        {:ok, audio} =
-          Editor.Manager.create_audio(%{
-            title: episode.title,
-            published_at: episode.pub_date,
-            duration: episode.duration
-          })
-
         {:ok, new_episode} =
           Editor.Manager.create_episode(podcast, %{
             guid: episode.guid,
@@ -113,12 +106,12 @@ defmodule Radiator.Directory.Importer do
             number: episode.episode
           })
 
-        {:ok, new_episode} =
-          new_episode
-          |> Radiator.Repo.preload(:audio)
-          |> Ecto.Changeset.change()
-          |> Ecto.Changeset.put_assoc(:audio, audio)
-          |> Radiator.Repo.update()
+        {:ok, audio} =
+          Editor.Manager.create_audio(new_episode, %{
+            title: episode.title,
+            published_at: episode.pub_date,
+            duration: episode.duration
+          })
 
         if episode.chapters do
           Enum.each(episode.chapters, fn chapter ->

@@ -15,7 +15,7 @@ defmodule Radiator.Repo.Migrations.CreateEpisodes do
       add :short_id, :string
 
       add :podcast_id, references(:podcasts, on_delete: :delete_all)
-      add :audio_id, references(:audios, on_delete: :delete_all)
+      add :audio_id, references(:audios, on_delete: :nilify_all)
 
       timestamps()
     end

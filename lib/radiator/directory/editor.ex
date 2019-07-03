@@ -15,7 +15,6 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.Repo
   alias Radiator.Directory
   alias Radiator.Directory.{Network, Podcast, Episode, Editor, Audio, Collaborator}
-  alias Radiator.Media
 
   @doc """
   Returns a list of networks the actor has at least `:readonly` permissions on.
@@ -416,19 +415,6 @@ defmodule Radiator.Directory.Editor do
   def is_published(%Episode{published_at: date}),
     do: Support.DateTime.before_utc_now?(date)
 
-  @doc """
-  Attach file to audio entity.
-  """
-  @spec attach_audio_file(Audio.t(), Media.AudioFile.t()) ::
-          {:ok, Media.AudioFile.t()} | {:error, Ecto.Changeset.t()}
-  def attach_audio_file(audio = %Audio{}, file = %Media.AudioFile{}) do
-    file
-    |> Repo.preload(:audio)
-    |> Media.AudioFile.changeset(%{})
-    |> Ecto.Changeset.put_assoc(:audio, audio)
-    |> Repo.update()
-  end
-
   @spec detach_all_audios_from_episode(Episode.t()) :: Episode.t()
   def detach_all_audios_from_episode(episode = %Episode{}) do
     Ecto.assoc(episode, :attachments) |> Repo.delete_all()
@@ -451,9 +437,33 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def create_audio(actor = %Auth.User{}, episode = %Episode{}, attrs) do
+    if has_permission(actor, episode, :edit) do
+      Editor.Manager.create_audio(episode, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def create_audio(actor = %Auth.User{}, network = %Network{}, attrs) do
+    if has_permission(actor, network, :edit) do
+      Editor.Manager.create_audio(network, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
   def update_audio(actor = %Auth.User{}, audio = %Audio{}, attrs) do
     if has_permission(actor, audio, :edit) do
       Editor.Manager.update_audio(audio, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def delete_audio(actor = %Auth.User{}, audio = %Audio{}) do
+    if has_permission(actor, audio, :own) do
+      Editor.Manager.delete_audio(audio)
     else
       @not_authorized_match
     end

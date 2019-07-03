@@ -55,8 +55,29 @@ defmodule Radiator.Directory.Editor.Manager do
     end
   end
 
-  def create_audio(attrs \\ %{}) do
-    %Audio{}
+  # todo: this raises if used on an episode that already has an associated audio.
+  #       we need to define a way, maybe even a separate API,
+  #       to remove or replace an episode audio.
+  def create_audio(episode = %Episode{}, attrs) do
+    Multi.new()
+    |> Multi.insert(:audio, fn _ ->
+      %Audio{} |> Audio.changeset(attrs)
+    end)
+    |> Multi.update(:episode, fn %{audio: audio} ->
+      episode
+      |> Repo.preload(:audio)
+      |> Ecto.Changeset.change()
+      |> Ecto.Changeset.put_assoc(:audio, audio)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{audio: audio}} -> {:ok, audio}
+      something -> something
+    end
+  end
+
+  def create_audio(network = %Network{}, attrs) do
+    Ecto.build_assoc(network, :audios)
     |> Audio.changeset(attrs)
     |> Repo.insert()
   end
@@ -65,6 +86,10 @@ defmodule Radiator.Directory.Editor.Manager do
     audio
     |> Audio.changeset(attrs)
     |> Repo.update()
+  end
+
+  def delete_audio(%Audio{} = audio) do
+    Repo.delete(audio)
   end
 
   @doc """

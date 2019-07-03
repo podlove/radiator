@@ -24,7 +24,7 @@ defmodule Radiator.Media.AudioFileUpload do
   alias Ecto.Multi
   alias Radiator.Repo
   alias Radiator.Media.AudioFile
-  alias Radiator.Directory.{Audio, Editor}
+  alias Radiator.Directory.Audio
 
   @doc """
   Upload audio file and attach it to audio object.
@@ -33,30 +33,18 @@ defmodule Radiator.Media.AudioFileUpload do
   """
   @spec upload(any(), Audio.t()) :: {:ok, AudioFile.t()} | {:error, :failed}
   def upload(upload, audio = %Audio{}) do
-    {:ok, audio_file} = upload(upload)
-
-    audio
-    |> Editor.attach_audio_file(audio_file)
-    |> case do
-      {:ok, audio_file} -> {:ok, audio_file}
-      _ -> {:error, :failed}
-    end
-  end
-
-  @spec upload(Plug.Upload.t()) :: {:ok, Radiator.Media.AudioFile.t()} | {:error, atom()}
-  defp upload(upload) do
     Multi.new()
-    |> Multi.insert(:create_audio_file, create_audio_file_changeset())
+    |> Multi.insert(:create_audio_file, create_audio_file_changeset(audio))
     |> Multi.update(:audio_file, add_audio_file_changeset(upload))
     |> Repo.transaction()
     |> case do
       {:ok, %{audio_file: audio_file}} -> {:ok, audio_file}
-      {:error, _, _, _} -> {:error, :upload_failed}
+      {:error, _, _, _} -> {:error, :failed}
     end
   end
 
-  defp create_audio_file_changeset do
-    AudioFile.changeset(%AudioFile{}, %{})
+  defp create_audio_file_changeset(audio) do
+    AudioFile.changeset(%AudioFile{}, %{audio_id: audio.id})
   end
 
   defp add_audio_file_changeset(upload = %Plug.Upload{path: path, filename: filename})
@@ -64,8 +52,8 @@ defmodule Radiator.Media.AudioFileUpload do
     {:ok, %File.Stat{size: size}} = File.lstat(path)
     mime_type = MIME.from_path(path) |> fix_mime_type()
 
-    fn %{create_audio_file: audio} ->
-      AudioFile.changeset(audio, %{
+    fn %{create_audio_file: audio_file} ->
+      AudioFile.changeset(audio_file, %{
         "title" => filename,
         "file" => upload,
         "mime_type" => mime_type,
@@ -79,8 +67,10 @@ defmodule Radiator.Media.AudioFileUpload do
 
     # todo: get byte_length _after_ storing
 
-    fn %{create_audio: audio} ->
-      AudioFile.changeset(audio, %{
+    fn %{create_audio_file: audio_file} ->
+      audio_file = Repo.preload(audio_file, :audio)
+
+      AudioFile.changeset(audio_file, %{
         # "title" => filename,
         "file" => upload,
         "mime_type" => mime_type
