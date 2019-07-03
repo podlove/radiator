@@ -89,11 +89,26 @@ defmodule RadiatorWeb.Api.AudioControllerTest do
     # end
   end
 
-  test "delete audio", %{conn: conn, user: user} do
-    audio = insert(:audio) |> owned_by(user)
+  describe "delete audio" do
+    test "delete audio", %{conn: conn, user: user} do
+      audio = insert(:audio) |> owned_by(user)
 
-    conn = delete(conn, Routes.api_audio_path(conn, :delete, audio.id))
+      conn = delete(conn, Routes.api_audio_path(conn, :delete, audio.id))
 
-    assert response(conn, 204)
+      assert response(conn, 204)
+    end
+
+    test "deletes associated audio files", %{conn: conn, user: user} do
+      audio = insert(:audio) |> owned_by(user)
+      _file1 = insert(:audio_file, audio: audio)
+      _file2 = insert(:audio_file, audio: audio)
+
+      conn = delete(conn, Routes.api_audio_path(conn, :delete, audio.id))
+
+      assert response(conn, 204)
+
+      assert [] == Radiator.Repo.all(Radiator.Directory.Audio)
+      assert [] == Radiator.Repo.all(Radiator.Media.AudioFile)
+    end
   end
 end
