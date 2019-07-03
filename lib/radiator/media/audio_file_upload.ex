@@ -52,8 +52,8 @@ defmodule Radiator.Media.AudioFileUpload do
     {:ok, %File.Stat{size: size}} = File.lstat(path)
     mime_type = MIME.from_path(path) |> fix_mime_type()
 
-    fn %{create_audio_file: audio} ->
-      AudioFile.changeset(audio, %{
+    fn %{create_audio_file: audio_file} ->
+      AudioFile.changeset(audio_file, %{
         "title" => filename,
         "file" => upload,
         "mime_type" => mime_type,
@@ -67,10 +67,10 @@ defmodule Radiator.Media.AudioFileUpload do
 
     # todo: get byte_length _after_ storing
 
-    fn %{create_audio_file: audio} ->
-      audio = Repo.preload(audio, :audio)
+    fn %{create_audio_file: audio_file} ->
+      audio_file = Repo.preload(audio_file, :audio)
 
-      AudioFile.changeset(audio, %{
+      AudioFile.changeset(audio_file, %{
         # "title" => filename,
         "file" => upload,
         "mime_type" => mime_type
