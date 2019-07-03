@@ -1,5 +1,6 @@
 # REST API
 
+- [API Usage](#API-Usage)
 - [Authentication](#Authentication)
   - [Login](#Login)
     - [Parameters](#Parameters)
@@ -46,6 +47,27 @@
   - [Parameters for Create](#Parameters-for-Create)
   - [Create](#Create-6)
   - [Read](#Read-6)
+
+## API Usage
+
+All requests need to be authenticated. See [Authentication](#Authentication) below for details.
+
+The documentation will often write parameters like this: `network[title]`. This indicates hierarchical parameter keys.
+
+In JavaScript there are multiple ways to set them:
+
+```js
+// using FormData
+var data = new FormData();
+data.append("network[title]", "Example Network");
+
+// using nested JSON
+var data = JSON.stringify({
+  "network": {
+    "title": "Example Network"
+  }
+});
+```
 
 ## Authentication
 
