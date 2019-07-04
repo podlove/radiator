@@ -62,7 +62,7 @@ defmodule RadiatorWeb.Api.ChaptersControllerTest do
           chapter: %{title: "new"}
         })
 
-      assert json_response(conn, 404)
+      assert json_response(conn, 401)
     end
   end
 

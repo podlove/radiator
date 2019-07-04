@@ -437,6 +437,22 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def create_chapter(actor = %Auth.User{}, audio, attrs) do
+    if has_permission(actor, audio, :edit) do
+      AudioMeta.create_chapter(audio, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def update_chapter(actor = %Auth.User{}, chapter = %Chapter{}, attrs) do
+    if has_permission(actor, chapter, :edit) do
+      AudioMeta.update_chapter(chapter, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
   def delete_chapter(actor = %Auth.User{}, chapter = %Chapter{}) do
     if has_permission(actor, chapter, :own) do
       AudioMeta.delete_chapter(chapter)
