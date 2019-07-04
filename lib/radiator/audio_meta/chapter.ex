@@ -25,6 +25,7 @@ defmodule Radiator.AudioMeta.Chapter do
       :title,
       :link
     ])
+    |> validate_required([:start])
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
   end
 
