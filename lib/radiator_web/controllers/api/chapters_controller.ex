@@ -52,7 +52,7 @@ defmodule RadiatorWeb.Api.ChaptersController do
       error = {:error, _} ->
         conn
         |> RadiatorWeb.Api.FallbackController.call(error)
-        |> Plug.Conn.halt()
+        |> halt()
     end
   end
 end
