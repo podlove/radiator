@@ -1,12 +1,9 @@
 defmodule RadiatorWeb.Api.CollaboratorController do
-  use RadiatorWeb, :controller
-  use Radiator.Constants, :permissions
+  use RadiatorWeb, :rest_controller
 
   alias Radiator.Directory.Editor
   alias Radiator.Directory.Collaborator
   alias Radiator.Auth
-
-  action_fallback RadiatorWeb.Api.FallbackController
 
   def create(conn, %{"username" => username, "permission" => permission} = params) do
     with actor <- current_user(conn),
@@ -65,9 +62,8 @@ defmodule RadiatorWeb.Api.CollaboratorController do
     with actor = current_user(conn),
          {:ok, subject} <- current_subject(actor, params) do
       with {:ok, collaborator} <- Editor.get_collaborator(actor, subject, username),
-           {:ok, collaborator} <- Editor.remove_collaborator(actor, collaborator) do
-        conn
-        |> render("show.json", %{collaborator: collaborator})
+           {:ok, _collaborator} <- Editor.remove_collaborator(actor, collaborator) do
+        send_delete_resp(conn)
       end
     end
   end

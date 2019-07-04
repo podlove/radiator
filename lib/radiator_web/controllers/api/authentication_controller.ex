@@ -1,5 +1,5 @@
 defmodule RadiatorWeb.Api.AuthenticationController do
-  use RadiatorWeb, :controller
+  use RadiatorWeb, :rest_controller
 
   alias Radiator.Auth
   alias RadiatorWeb.Helpers.AuthHelpers

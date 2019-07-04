@@ -1,10 +1,7 @@
 defmodule RadiatorWeb.Api.PodcastController do
-  use RadiatorWeb, :controller
-  use Radiator.Constants
+  use RadiatorWeb, :rest_controller
 
   alias Radiator.Directory.Editor
-
-  action_fallback RadiatorWeb.Api.FallbackController
 
   def create(conn, %{"podcast" => params}) do
     with user = current_user(conn),
@@ -36,7 +33,7 @@ defmodule RadiatorWeb.Api.PodcastController do
     with user <- current_user(conn),
          {:ok, podcast} <- Editor.get_podcast(user, id),
          {:ok, _} <- Editor.delete_podcast(user, podcast) do
-      send_resp(conn, 204, "")
+      send_delete_resp(conn)
     end
   end
 end

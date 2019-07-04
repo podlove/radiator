@@ -32,6 +32,17 @@ defmodule RadiatorWeb do
     end
   end
 
+  def rest_controller do
+    quote do
+      unquote(do: controller())
+
+      import RadiatorWeb.Helpers.RestApiHelpers
+      use Radiator.Constants
+
+      action_fallback RadiatorWeb.Api.FallbackController
+    end
+  end
+
   def view do
     quote do
       use Phoenix.View,

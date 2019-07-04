@@ -1,10 +1,7 @@
 defmodule RadiatorWeb.Api.AudioController do
-  use RadiatorWeb, :controller
-  use Radiator.Constants
+  use RadiatorWeb, :rest_controller
 
   alias Radiator.Directory.Editor
-
-  action_fallback RadiatorWeb.Api.FallbackController
 
   def create(conn, %{"audio" => params = %{"network_id" => network_id}}) do
     with user = current_user(conn),
@@ -53,7 +50,7 @@ defmodule RadiatorWeb.Api.AudioController do
     with user <- current_user(conn),
          {:ok, audio} <- Editor.get_audio(user, id),
          {:ok, _} <- Editor.delete_audio(user, audio) do
-      send_resp(conn, 204, "")
+      send_delete_resp(conn)
     end
   end
 end
