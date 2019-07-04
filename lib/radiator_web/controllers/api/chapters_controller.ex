@@ -3,29 +3,27 @@ defmodule RadiatorWeb.Api.ChaptersController do
 
   alias Radiator.Directory.Editor
 
-  def create(conn, %{"audio_id" => audio_id, "chapter" => chapter_params}) do
+  plug :assign_audio when action in [:create, :update]
+
+  def create(conn, %{"chapter" => chapter_params}) do
     with user <- current_user(conn),
-         {:ok, audio} <- Editor.get_audio(user, audio_id),
-         {:ok, chapter} <- Editor.create_chapter(user, audio, chapter_params) do
+         {:ok, chapter} <- Editor.create_chapter(user, conn.assigns[:audio], chapter_params) do
       conn
       |> put_status(:created)
       |> put_resp_header(
         "location",
-        Routes.api_audio_chapters_path(conn, :show, audio.id, chapter)
+        Routes.api_audio_chapters_path(conn, :show, conn.assigns[:audio].id, chapter)
       )
-      |> assign(:audio, audio)
       |> assign(:chapter, chapter)
       |> render("show.json")
     end
   end
 
-  def update(conn, %{"audio_id" => audio_id, "id" => id, "chapter" => chapter_params}) do
+  def update(conn, %{"id" => id, "chapter" => chapter_params}) do
     with user <- current_user(conn),
-         {:ok, audio} <- Editor.get_audio(user, audio_id),
          {:ok, chapter} <- Editor.get_chapter(user, id),
          {:ok, chapter} <- Editor.update_chapter(user, chapter, chapter_params) do
       conn
-      |> assign(:audio, audio)
       |> assign(:chapter, chapter)
       |> render("show.json")
     end
@@ -39,6 +37,22 @@ defmodule RadiatorWeb.Api.ChaptersController do
     else
       @not_found_match -> send_delete_resp(conn)
       error -> error
+    end
+  end
+
+  defp assign_audio(conn, _) do
+    conn
+    |> current_user()
+    |> Editor.get_audio(conn.params["audio_id"])
+    |> case do
+      {:ok, audio} ->
+        conn
+        |> assign(:audio, audio)
+
+      error = {:error, _} ->
+        conn
+        |> RadiatorWeb.Api.FallbackController.call(error)
+        |> Plug.Conn.halt()
     end
   end
 end
