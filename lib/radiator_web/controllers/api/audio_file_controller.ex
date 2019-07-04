@@ -1,9 +1,7 @@
 defmodule RadiatorWeb.Api.AudioFileController do
-  use RadiatorWeb, :controller
+  use RadiatorWeb, :rest_controller
 
   alias Radiator.Media
-
-  action_fallback(RadiatorWeb.Api.FallbackController)
 
   def create(conn, %{"audio_file" => audio_file_params}) do
     with {:ok, audio_file} <- Media.create_audio_file(audio_file_params) do
