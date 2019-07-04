@@ -22,18 +22,9 @@ defmodule Radiator.Auth.User do
   end
 
   @doc """
-  this is the upper bound of reserved `user_id`s. All regular users need to have an id above this.
+  this is the upper bound of reserved `user_id`s. All regular users need to have an id above this. This was/is intended for special users, of which there currently is none.
   """
   def max_reserved_user_id, do: 10
-
-  def reserved_user(:public) do
-    %User{
-      id: 1,
-      name: "public",
-      email: "public@public.local",
-      password_hash: "thoushaltnotpass"
-    }
-  end
 
   @doc false
   def changeset(%User{} = user, attrs) do
@@ -46,6 +37,7 @@ defmodule Radiator.Auth.User do
     |> validate_length(:name, min: 2, max: 99)
     |> validate_length(:password, min: 2)
     |> validate_required([:email, :name])
+    |> ensure_display_name()
     |> encrypt_password
     |> validate_required([:password_hash])
   end
@@ -58,6 +50,17 @@ defmodule Radiator.Auth.User do
     |> password_and_confirmation_matches
     |> encrypt_password
     |> validate_required([:password_hash])
+  end
+
+  ## Changeset Pipeline
+
+  defp ensure_display_name(changeset) do
+    if is_nil(get_field(changeset, :display_name)) do
+      changeset
+      |> put_change(:display_name, get_field(changeset, :name))
+    else
+      changeset
+    end
   end
 
   defp password_and_confirmation_matches(changeset) do
@@ -82,6 +85,8 @@ defmodule Radiator.Auth.User do
       changeset
     end
   end
+
+  ## PUblic API
 
   def check_password(%User{} = user, password) do
     Argon2.check_pass(user, password)
@@ -128,13 +133,15 @@ defmodule Radiator.Auth.User do
     email_downcase = String.downcase(email)
 
     from u in User,
-      where: fragment("lower(?)", u.email) == ^email_downcase
+      where: fragment("lower(?)", u.email) == ^email_downcase,
+      preload: [:person]
   end
 
   def by_name_query(name) do
     name_downcase = String.downcase(name)
 
     from u in User,
-      where: fragment("lower(?)", u.name) == ^name_downcase
+      where: fragment("lower(?)", u.name) == ^name_downcase,
+      preload: [:person]
   end
 end

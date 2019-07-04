@@ -38,8 +38,9 @@
 
     <div class="inline-flex ml-auto items-center ml-3" style="margin-left:auto">
       <%= case Guardian.Plug.current_resource(@conn) do %>
-        <% %Radiator.Auth.User{ name: name, display_name: display_name } -> %>
+        <% %Radiator.Auth.User{ name: name, display_name: display_name } = user -> %>
           <li class="nav-link text-center mx-2">
+            <%= img_tag(Radiator.Contribution.Person.image_url(user.person), alt: "Avatar of #{name}", class: "w-8 h-8 rounded-full bg-tertiary mr-2") %>
             <%= link to: Routes.admin_user_settings_path(@conn, :index) do %>
               <%= content_tag :span, name %>
               <%= if name != display_name do %>
