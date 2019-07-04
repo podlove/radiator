@@ -47,6 +47,12 @@
   - [Parameters for Create](#Parameters-for-Create)
   - [Create](#Create-6)
   - [Read](#Read-6)
+- [Audio Chapters](#Audio-Chapters)
+  - [Parameters for Create & Update](#Parameters-for-Create--Update-6)
+  - [Create](#Create-7)
+  - [Read](#Read-7)
+  - [Update](#Update-6)
+  - [Delete](#Delete-6)
 
 ## API Usage
 
@@ -349,4 +355,40 @@ POST /api/rest/v1/audio_file
 
 ```
 GET /api/rest/v1/audio_file/:id
+```
+
+## Audio Chapters
+
+### Parameters for Create & Update
+
+| Name                | Type      | Description                                                    |
+| ------------------- | --------- | -------------------------------------------------------------- |
+| `chapter[audio_id]` | `integer` | **Required.** Chapter is attached to Audio object of given ID. |
+| `chapter[start]`    | `integer` | **Required.** chapter start time in milliseconds               |
+| `chapter[title]`    | `string`  | chapter title                                                  |
+| `chapter[link]`     | `string`  | chapter link                                                   |
+| `chapter[file]`     | `image`   | chapter image                                                  |
+
+### Create
+
+```
+POST /api/rest/v1/audios/:audio_id/chapters
+```
+
+### Read
+
+```
+GET /api/rest/v1/audios/:audio_id/chapters/:id
+```
+
+### Update
+
+```
+PATCH /api/rest/v1/audios/:audio_id/chapters/:id
+```
+
+### Delete
+
+```
+DELETE /api/rest/v1/audios/:audio_id/chapters/:id
 ```
