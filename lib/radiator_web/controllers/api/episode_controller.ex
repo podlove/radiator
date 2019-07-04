@@ -33,7 +33,10 @@ defmodule RadiatorWeb.Api.EpisodeController do
     with user <- current_user(conn),
          {:ok, episode} <- Editor.get_episode(user, id),
          {:ok, _} <- Editor.delete_episode(user, episode) do
-          send_delete_resp(conn)
-        end
+      send_delete_resp(conn)
+    else
+      @not_found_match -> send_delete_resp(conn)
+      error -> error
+    end
   end
 end

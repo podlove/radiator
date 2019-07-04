@@ -34,6 +34,9 @@ defmodule RadiatorWeb.Api.PodcastController do
          {:ok, podcast} <- Editor.get_podcast(user, id),
          {:ok, _} <- Editor.delete_podcast(user, podcast) do
       send_delete_resp(conn)
+    else
+      @not_found_match -> send_delete_resp(conn)
+      error -> error
     end
   end
 end

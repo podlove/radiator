@@ -33,6 +33,9 @@ defmodule RadiatorWeb.Api.NetworkController do
          {:ok, network} <- Editor.get_network(user, id),
          {:ok, _} <- Editor.delete_network(user, network) do
       send_delete_resp(conn)
+    else
+      @not_found_match -> send_delete_resp(conn)
+      error -> error
     end
   end
 end

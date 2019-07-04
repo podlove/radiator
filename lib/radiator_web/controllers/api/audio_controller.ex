@@ -51,6 +51,9 @@ defmodule RadiatorWeb.Api.AudioController do
          {:ok, audio} <- Editor.get_audio(user, id),
          {:ok, _} <- Editor.delete_audio(user, audio) do
       send_delete_resp(conn)
+    else
+      @not_found_match -> send_delete_resp(conn)
+      error -> error
     end
   end
 end

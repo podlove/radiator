@@ -64,6 +64,9 @@ defmodule RadiatorWeb.Api.CollaboratorController do
       with {:ok, collaborator} <- Editor.get_collaborator(actor, subject, username),
            {:ok, _collaborator} <- Editor.remove_collaborator(actor, collaborator) do
         send_delete_resp(conn)
+      else
+        @not_found_match -> send_delete_resp(conn)
+        error -> error
       end
     end
   end

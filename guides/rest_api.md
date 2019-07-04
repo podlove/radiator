@@ -69,6 +69,8 @@ var data = JSON.stringify({
 });
 ```
 
+`DELETE` methods will always return a `204 No Content` when authenticated and the necessary params were in place.
+
 ## Authentication
 
 To make full use of the API you need to authenticate as an existing user. A successful authentication returns a _token_ that you can use in subsequent requests to authenticate yourself as that user. You do this by setting the token as request header.
