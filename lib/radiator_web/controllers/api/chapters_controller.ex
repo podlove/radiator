@@ -1,9 +1,7 @@
 defmodule RadiatorWeb.Api.ChaptersController do
-  use RadiatorWeb, :controller
+  use RadiatorWeb, :rest_controller
 
   alias Radiator.Directory.Editor
-
-  action_fallback(RadiatorWeb.Api.FallbackController)
 
   def create(conn, %{"audio_id" => audio_id, "chapter" => chapter_params}) do
     with user <- current_user(conn),
@@ -37,7 +35,10 @@ defmodule RadiatorWeb.Api.ChaptersController do
     with user <- current_user(conn),
          {:ok, chapter} <- Editor.get_chapter(user, id),
          {:ok, _} <- Editor.delete_chapter(user, chapter) do
-      send_resp(conn, 204, "")
+      send_delete_resp(conn)
+    else
+      @not_found_match -> send_delete_resp(conn)
+      error -> error
     end
   end
 end
