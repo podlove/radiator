@@ -31,4 +31,12 @@ defmodule RadiatorWeb.Api.ChaptersController do
       |> render("show.json")
     end
   end
+
+  def delete(conn, %{"id" => id}) do
+    with user <- current_user(conn),
+         {:ok, chapter} <- Editor.get_chapter(user, id),
+         {:ok, _} <- Editor.delete_chapter(user, chapter) do
+      send_resp(conn, 204, "")
+    end
+  end
 end

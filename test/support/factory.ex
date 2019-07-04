@@ -150,7 +150,8 @@ defmodule Radiator.Factory do
     %Radiator.AudioMeta.Chapter{
       start: 0,
       title: sequence(:title, &"chapter #{&1}"),
-      link: sequence(:link, &"http://example.com/#{&1}")
+      link: sequence(:link, &"http://example.com/#{&1}"),
+      audio: build(:audio)
     }
   end
 

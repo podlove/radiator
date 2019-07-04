@@ -65,4 +65,13 @@ defmodule RadiatorWeb.Api.ChaptersControllerTest do
       assert json_response(conn, 404)
     end
   end
+
+  test "delete chapter", %{conn: conn, user: user} do
+    audio = insert(:audio) |> owned_by(user)
+    chapter = insert(:chapter, audio: audio)
+
+    conn = delete(conn, Routes.api_audio_chapters_path(conn, :delete, audio.id, chapter.id))
+
+    assert response(conn, 204)
+  end
 end

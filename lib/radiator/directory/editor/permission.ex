@@ -4,6 +4,7 @@ defmodule Radiator.Directory.Editor.Permission do
   use Radiator.Constants
 
   alias Radiator.Repo
+  alias Radiator.AudioMeta.Chapter
   alias Radiator.Auth
   alias Radiator.Perm.Permission
   alias Radiator.Directory.{Network, Podcast, Episode, Audio}
@@ -24,6 +25,9 @@ defmodule Radiator.Directory.Editor.Permission do
 
   def get_permission(user = %Auth.User{}, subject = %Audio{}),
     do: do_get_permission(user, subject)
+
+  def get_permission(_user = %Auth.User{}, _subject = %Chapter{}),
+    do: nil
 
   defp do_get_permission(user, subject) do
     case fetch_permission(user, subject) do
@@ -79,6 +83,13 @@ defmodule Radiator.Directory.Editor.Permission do
   defp parents(subject = %Podcast{}) do
     subject
     |> Ecto.assoc(:network)
+    |> Repo.one!()
+    |> List.wrap()
+  end
+
+  defp parents(subject = %Chapter{}) do
+    subject
+    |> Ecto.assoc(:audio)
     |> Repo.one!()
     |> List.wrap()
   end
