@@ -39,6 +39,14 @@ defmodule Radiator.AudioMeta do
     |> Repo.all()
   end
 
+  def find_chapter(%Audio{} = audio, id) do
+    Repo.get_by(Chapter, audio_id: audio.id, id: id)
+    |> case do
+      nil -> {:error, :not_found}
+      chapter -> {:ok, chapter}
+    end
+  end
+
   def delete_chapters(%Audio{} = audio) do
     audio = Repo.preload(audio, :chapters)
 

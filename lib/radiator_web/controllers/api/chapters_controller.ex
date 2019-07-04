@@ -20,4 +20,15 @@ defmodule RadiatorWeb.Api.ChaptersController do
       |> render("show.json")
     end
   end
+
+  def update(conn, %{"audio_id" => audio_id, "id" => id, "chapter" => chapter_params}) do
+    with {:ok, audio} <- Editor.get_audio(current_user(conn), audio_id),
+         {:ok, chapter} <- AudioMeta.find_chapter(audio, id),
+         {:ok, chapter} <- AudioMeta.update_chapter(chapter, chapter_params) do
+      conn
+      |> assign(:audio, audio)
+      |> assign(:chapter, chapter)
+      |> render("show.json")
+    end
+  end
 end

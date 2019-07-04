@@ -38,4 +38,31 @@ defmodule RadiatorWeb.Api.ChaptersControllerTest do
       assert json_response(conn, 401)
     end
   end
+
+  describe "update chapter" do
+    test "updates and renders chapter", %{conn: conn, user: user} do
+      audio = insert(:audio) |> owned_by(user)
+      chapter = insert(:chapter, audio: audio)
+
+      conn =
+        put(conn, Routes.api_audio_chapters_path(conn, :update, audio.id, chapter.id), %{
+          chapter: %{title: "new"}
+        })
+
+      assert %{"title" => "new"} = json_response(conn, 200)
+    end
+
+    test "renders error when accessing foreign chapter", %{conn: conn, user: user} do
+      audio = insert(:audio) |> owned_by(user)
+      _chapter = insert(:chapter, audio: audio)
+      other_chapter = insert(:chapter, audio: build(:audio))
+
+      conn =
+        put(conn, Routes.api_audio_chapters_path(conn, :update, audio.id, other_chapter.id), %{
+          chapter: %{title: "new"}
+        })
+
+      assert json_response(conn, 404)
+    end
+  end
 end

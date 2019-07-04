@@ -146,6 +146,14 @@ defmodule Radiator.Factory do
     }
   end
 
+  def chapter_factory do
+    %Radiator.AudioMeta.Chapter{
+      start: 0,
+      title: sequence(:title, &"chapter #{&1}"),
+      link: sequence(:link, &"http://example.com/#{&1}")
+    }
+  end
+
   # @deprecated, use audio_file_factory
   def enclosure_factory do
     %Radiator.Media.AudioFile{
