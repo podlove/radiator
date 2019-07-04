@@ -60,8 +60,19 @@ defmodule Radiator.Auth.Register do
   def create_user(attrs \\ %{}) do
     {person_attrs, user_attrs} = Map.split(attrs, [:nick, :avatar])
 
-    %User{}
-    |> User.changeset(user_attrs)
+    changeset =
+      %User{}
+      |> User.changeset(user_attrs)
+
+    display_name = Ecto.Changeset.get_field(changeset, :display_name)
+
+    person_attrs =
+      Map.merge(
+        %{display_name: display_name, name: display_name},
+        person_attrs
+      )
+
+    changeset
     |> Ecto.Changeset.put_assoc(:person, person_attrs)
     |> Repo.insert()
   end

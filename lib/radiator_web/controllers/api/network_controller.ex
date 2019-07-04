@@ -1,10 +1,7 @@
 defmodule RadiatorWeb.Api.NetworkController do
-  use RadiatorWeb, :controller
-  use Radiator.Constants
+  use RadiatorWeb, :rest_controller
 
   alias Radiator.Directory.Editor
-
-  action_fallback RadiatorWeb.Api.FallbackController
 
   def create(conn, %{"network" => params}) do
     with user = current_user(conn),
@@ -35,7 +32,10 @@ defmodule RadiatorWeb.Api.NetworkController do
     with user <- current_user(conn),
          {:ok, network} <- Editor.get_network(user, id),
          {:ok, _} <- Editor.delete_network(user, network) do
-      send_resp(conn, 204, "")
+      send_delete_resp(conn)
+    else
+      @not_found_match -> send_delete_resp(conn)
+      error -> error
     end
   end
 end

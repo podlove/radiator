@@ -4,7 +4,7 @@
     <div class="flex-vertical">
     <%= for collaborator <- @collaborators do %>
         <div class="flex px-2 justify-begin h-12 border-primary border-b items-center <%= unless @current_user == collaborator.user, do: "hover:bg-highlight" %>">
-            <div class="bg-gray-500 rounded-full w-10 h-10 flex-shrink-0"></div>
+            <%= img_tag(Radiator.Contribution.Person.image_url(collaborator.user.person), alt: "Avatar of #{collaborator.user.name}", class: "w-8 h-8 rounded-full bg-tertiary mr-2") %>
             <div class="text-left mx-4 flex-shrink-0">
             <%= content_tag(:span, collaborator.user.name, class: "font-bold") %><br/>
             <%= content_tag(:span, collaborator.user.display_name, class: "text-sm") %>
