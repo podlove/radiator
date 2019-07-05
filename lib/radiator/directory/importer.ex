@@ -148,8 +148,7 @@ defmodule Radiator.Directory.Importer do
   defp sanitize_metalove_chaptertitle(_, index), do: "Chapter #{index}"
 
   defp parse_chapter_time(time) when is_binary(time) do
-    {:ok, parsed, _, _, _, _} = Chapters.Parsers.Normalplaytime.Parser.parse(time)
-    Chapters.Parsers.Normalplaytime.Parser.total_ms(parsed)
+    Chapters.Parsers.Normalplaytime.Parser.parse_total_ms(time) || 0
   end
 
   def import_enclosures(
