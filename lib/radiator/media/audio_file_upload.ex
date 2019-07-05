@@ -26,6 +26,8 @@ defmodule Radiator.Media.AudioFileUpload do
   alias Radiator.Media.AudioFile
   alias Radiator.Directory.Audio
 
+  require Logger
+
   @doc """
   Upload audio file and attach it to audio object.
 
@@ -38,8 +40,12 @@ defmodule Radiator.Media.AudioFileUpload do
     |> Multi.update(:audio_file, add_audio_file_changeset(upload))
     |> Repo.transaction()
     |> case do
-      {:ok, %{audio_file: audio_file}} -> {:ok, audio_file}
-      {:error, _, _, _} -> {:error, :failed}
+      {:ok, %{audio_file: audio_file}} ->
+        {:ok, audio_file}
+
+      {:error, _, _, _} = error ->
+        Logger.debug("Upload failure: #{inspect(error, pretty: true)}")
+        {:error, :failed}
     end
   end
 
@@ -124,12 +130,16 @@ defmodule Radiator.Media.AudioFileUpload do
     end
   end
 
+  require Logger
+
   # hakney :connect_timeout - timeout used when establishing a connection, in milliseconds
   # hakney :recv_timeout - timeout used when receiving from a connection, in milliseconds
   # poison :timeout - timeout to establish a connection, in milliseconds
   # :backoff_max - maximum backoff time, in milliseconds
   # :backoff_factor - a backoff factor to apply between attempts, in milliseconds
   defp get_remote_path(remote_path) do
+    Logger.debug("get remote: #{remote_path}")
+
     options = [
       follow_redirect: true,
       recv_timeout: Application.get_env(:arc, :recv_timeout, 5_000),
@@ -137,14 +147,22 @@ defmodule Radiator.Media.AudioFileUpload do
       timeout: Application.get_env(:arc, :timeout, 10_000),
       max_retries: Application.get_env(:arc, :max_retries, 3),
       backoff_factor: Application.get_env(:arc, :backoff_factor, 1000),
-      backoff_max: Application.get_env(:arc, :backoff_max, 30_000)
+      backoff_max: Application.get_env(:arc, :backoff_max, 30_000),
+
+      # disable cert verification for sideloading for now, as we got spurious {bad_cert,invalid_key_usage}
+      ssl_options: [verify: :verify_none]
     ]
 
     request(remote_path, options)
   end
 
+  defp request_headers do
+    # TODO: unify with metalove
+    [{"User-Agent", "RadiatorImportBot/1.0 (https://github.com/podlove/radiator)"}]
+  end
+
   defp request(remote_path, options, tries \\ 0) do
-    case :hackney.get(URI.to_string(remote_path), [], "", options) do
+    case :hackney.get(URI.to_string(remote_path), request_headers(), "", options) do
       {:ok, 200, _headers, client_ref} ->
         :hackney.body(client_ref)
 

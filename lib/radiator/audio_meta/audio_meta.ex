@@ -97,9 +97,9 @@ defmodule Radiator.AudioMeta do
     chapters
     |> Enum.each(fn chapter ->
       create_chapter(audio, %{
-        start: chapter.time,
+        start: chapter.start,
         title: chapter.title,
-        link: chapter.url,
+        link: chapter.href,
         image: chapter.image
       })
     end)
