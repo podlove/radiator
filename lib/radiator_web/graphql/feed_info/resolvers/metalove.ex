@@ -24,6 +24,11 @@ defmodule RadiatorWeb.GraphQL.FeedInfo.Resolvers.Metalove do
   end
 
   def metalove_feed_to_podcast_feed(feed = %Metalove.PodcastFeed{}) do
+    episodes =
+      feed.episodes
+      |> Enum.map(&Metalove.Episode.get_by_episode_id/1)
+      |> Enum.map(&metalove_episode_to_podcast_feed_episode/1)
+
     %{
       feed_url: feed.feed_url,
       link: feed.link,
@@ -32,10 +37,8 @@ defmodule RadiatorWeb.GraphQL.FeedInfo.Resolvers.Metalove do
       description: feed.description,
       author: feed.author,
       image: feed.image_url,
-      episodes:
-        feed.episodes
-        |> Enum.map(&Metalove.Episode.get_by_episode_id/1)
-        |> Enum.map(&metalove_episode_to_podcast_feed_episode/1),
+      enclosure_type: hd(episodes).enclosure_type,
+      episodes: episodes,
       episode_count: length(feed.episodes),
       waiting_for_pages: feed.waiting_for_pages
     }

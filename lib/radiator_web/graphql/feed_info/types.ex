@@ -22,6 +22,7 @@ defmodule RadiatorWeb.GraphQL.FeedInfo.Types do
     field :description, :string
     field :author, :string
     field :image, :string
+    field :enclosure_type, :string
 
     field :episodes, list_of(:podcast_feed_episode)
 
