@@ -32,6 +32,7 @@ defmodule Radiator.Directory.Importer do
 
     candidate =
       [filenames, titles]
+      |> Enum.map(&Enum.take(&1, 10))
       |> Enum.map(&prefix_candidate/1)
       |> Enum.find(fn value -> value end)
 

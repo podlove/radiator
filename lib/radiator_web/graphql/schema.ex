@@ -41,9 +41,11 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
   import_types RadiatorWeb.GraphQL.Public.Types
   import_types RadiatorWeb.GraphQL.Admin.Types
+  import_types RadiatorWeb.GraphQL.FeedInfo.Types
 
   alias RadiatorWeb.GraphQL.Public
   alias RadiatorWeb.GraphQL.Admin
+  alias RadiatorWeb.GraphQL.FeedInfo
 
   alias RadiatorWeb.GraphQL.Admin.Schema.Middleware
 
@@ -79,6 +81,22 @@ defmodule RadiatorWeb.GraphQL.Schema do
     @desc "Get all published networks"
     field :published_networks, list_of(:published_network) do
       resolve &Public.Resolvers.Directory.list_networks/3
+    end
+
+    # Metalove queries (probably should move to admin eventually to avoid abuse)
+
+    @desc "Get podcast feed info for an url"
+    field :feed_info, :feed_info do
+      arg :url, non_null(:string)
+
+      resolve &FeedInfo.Resolvers.Metalove.get_feed_info/3
+    end
+
+    @desc "Get the content of a feed url"
+    field :podcast_feed, :podcast_feed do
+      arg :url, non_null(:string)
+
+      resolve &FeedInfo.Resolvers.Metalove.get_feed_content/3
     end
 
     # Admin queries
