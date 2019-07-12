@@ -69,6 +69,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         fn episode -> {:ok, episode}
       end
 
+      with_episode user, guid, :get_episode_by_guid do
+        fn episode -> {:ok, episode} end
+      end
+
   """
   defmacro with_episode(user, episode_id, do: block) do
     quote do
@@ -76,9 +80,9 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  defmacro with_episode(user, episode_id, method, do: block) do
+  defmacro with_episode(user, episode_id, function_name, do: block) do
     quote do
-      apply(Editor, unquote(method), [unquote(user), unquote(episode_id)])
+      apply(Editor, unquote(function_name), [unquote(user), unquote(episode_id)])
       |> case do
         {:ok, episode} -> unquote(block).(episode)
         @not_found_match -> @not_found_response
