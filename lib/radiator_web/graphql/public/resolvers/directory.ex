@@ -47,6 +47,18 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
     end
   end
 
+  def find_episode(_parent, %{guid: guid}, _resolution) do
+    try do
+      with episode = %Episode{} <- Directory.get_episode_by_guid(guid) do
+        {:ok, episode}
+      else
+        _ -> {:error, "Episode with guid #{guid} not found"}
+      end
+    rescue
+      Ecto.MultipleResultsError -> {:error, "There is more than one episode with given guid"}
+    end
+  end
+
   def find_audio(%Episode{} = episode, _args, _resolution) do
     {:ok, episode.audio}
   end

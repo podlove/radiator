@@ -66,7 +66,8 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
     @desc "Get one published episode"
     field :published_episode, :published_episode do
-      arg :id, non_null(:id)
+      arg :id, :id
+      arg :guid, :string
 
       resolve &Public.Resolvers.Directory.find_episode/3
     end
@@ -131,7 +132,8 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
     @desc "Get one episode"
     field :episode, :episode do
-      arg :id, non_null(:id)
+      arg :id, :id
+      arg :guid, :string
 
       middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.find_episode/3

@@ -220,6 +220,13 @@ defmodule Radiator.Directory do
     |> preload_for_episode()
   end
 
+  def get_episode_by_guid(guid) when not is_nil(guid) do
+    Episode
+    |> EpisodeQuery.filter_by_published(true)
+    |> Repo.get_by(guid: guid)
+    |> preload_for_episode()
+  end
+
   def preload_for_podcast(nil) do
     nil
   end

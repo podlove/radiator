@@ -72,7 +72,14 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   """
   defmacro with_episode(user, episode_id, do: block) do
     quote do
-      case Editor.get_episode(unquote(user), unquote(episode_id)) do
+      with_episode(unquote(user), unquote(episode_id), :get_episode, do: unquote(block))
+    end
+  end
+
+  defmacro with_episode(user, episode_id, method, do: block) do
+    quote do
+      apply(Editor, unquote(method), [unquote(user), unquote(episode_id)])
+      |> case do
         {:ok, episode} -> unquote(block).(episode)
         @not_found_match -> @not_found_response
         @not_authorized_match -> @not_authorized_response
@@ -218,6 +225,16 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def find_episode(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_episode user, id do
       fn episode -> {:ok, episode} end
+    end
+  end
+
+  def find_episode(_parent, %{guid: guid}, %{context: %{current_user: user}}) do
+    try do
+      with_episode user, guid, :get_episode_by_guid do
+        fn episode -> {:ok, episode} end
+      end
+    rescue
+      Ecto.MultipleResultsError -> {:error, "There is more than one episode with given guid"}
     end
   end
 

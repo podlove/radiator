@@ -97,6 +97,51 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
            }
   end
 
+  @single_guid_query """
+  query ($guid: String!) {
+    episode(guid: $guid) {
+      id
+      title
+      guid
+    }
+  }
+  """
+
+  test "episode by guid returns an episode", %{conn: conn, user: user} do
+    episode = insert(:published_episode, title: "Foo", guid: "guid-foo") |> owned_by(user)
+
+    conn = get conn, "/api/graphql", query: @single_guid_query, variables: %{"guid" => "guid-foo"}
+
+    assert json_response(conn, 200) == %{
+             "data" => %{
+               "episode" => %{
+                 "id" => Integer.to_string(episode.id),
+                 "title" => episode.title,
+                 "guid" => "guid-foo"
+               }
+             }
+           }
+  end
+
+  test "episode by guid returns an episode when non existent", %{conn: conn} do
+    conn = get conn, "/api/graphql", query: @single_guid_query, variables: %{"guid" => "guid-foo"}
+
+    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
+    assert message =~ "not found"
+  end
+
+  test "episode by guid returns an episode when there is more than one episode with that guid", %{
+    conn: conn,
+    user: user
+  } do
+    _e1 = insert(:published_episode, title: "Foo 1", guid: "guid-foo") |> owned_by(user)
+    _e2 = insert(:published_episode, title: "Foo 2", guid: "guid-foo") |> owned_by(user)
+    conn = get conn, "/api/graphql", query: @single_guid_query, variables: %{"guid" => "guid-foo"}
+
+    assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
+    assert message =~ "more than one"
+  end
+
   @is_published_query """
   query ($id: ID!) {
     episode(id: $id) {

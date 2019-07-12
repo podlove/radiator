@@ -380,6 +380,25 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  @spec get_episode_by_guid(Auth.User.t(), binary()) ::
+          {:ok, Episode.t()} | {:error, :not_authorized | :not_found}
+  def get_episode_by_guid(actor = %Auth.User{}, guid) when not is_nil(guid) do
+    Repo.get_by(Episode, guid: guid)
+    |> case do
+      nil ->
+        @not_found_match
+
+      episode = %Episode{} ->
+        if has_permission(actor, episode, :readonly) do
+          {:ok, episode |> preloaded_episode()}
+        else
+          @not_authorized_match
+        end
+    end
+  end
+
+  @spec get_episode_by_podcast_id_and_guid(Auth.User.t(), pos_integer(), binary()) ::
+          {:ok, Episode.t()} | {:error, :not_authorized | :not_found}
   def get_episode_by_podcast_id_and_guid(actor = %Auth.User{}, podcast_id, guid)
       when not is_nil(podcast_id) and not is_nil(guid) do
     query =
