@@ -123,14 +123,14 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
            }
   end
 
-  test "episode by guid returns an episode when non existent", %{conn: conn} do
+  test "episode by guid returns not found error when non-existent", %{conn: conn} do
     conn = get conn, "/api/graphql", query: @single_guid_query, variables: %{"guid" => "guid-foo"}
 
     assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
     assert message =~ "not found"
   end
 
-  test "episode by guid returns an episode when there is more than one episode with that guid", %{
+  test "episode by guid returns error when there is more than one episode with that guid", %{
     conn: conn,
     user: user
   } do
