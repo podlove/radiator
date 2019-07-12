@@ -361,7 +361,7 @@ GET /api/rest/v1/audio_file/:id
 | Name                              | Type      | Description                                                |
 | --------------------------------- | --------- | ---------------------------------------------------------- |
 | `import_podcast_feed[network_id]` | `integer` | Network ID. (required).                                    |
-| `import_podcast_feed[url]`        | `string`  | feed or show url (check availablity and extent with GraphQL query `feedInfo`       | 
+| `import_podcast_feed[feed_url]`        | `string`  | feed or show url (check availablity and extent with GraphQL query `feedInfo`       | 
 | `import_podcast_feed[enclosure_types]` | `array` of `string` | Optional. E.g. `["audio/mpeg","audio/mp4"]` or [] for none. Defaults to all available enclosures |
 | `import_podcast_feed[short_id]`   | `string`  | Short ID for the podcast. E.g. `"CRE"`, `"FAN"`, `"FG"`. |
 | `import_podcast_feed[limit]`      | `integer` | Limits the amount of episodes to import. Optional, Defaults to 10 |

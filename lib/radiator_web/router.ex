@@ -105,6 +105,8 @@ defmodule RadiatorWeb.Router do
 
     # todo: pluralize
     resources "/audio_file", AudioFileController, only: [:show, :create]
+
+    resources "/tasks", TaskController, only: [:show, :create, :delete]
   end
 
   scope "/api" do
