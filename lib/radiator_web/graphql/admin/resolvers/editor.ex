@@ -294,10 +294,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, episode.audio}
   end
 
-  def get_enclosure(%Episode{} = episode, _args, %{context: %{current_user: _user}}) do
-    {:ok, Episode.enclosure(episode)}
-  end
-
   def get_chapters(%Audio{} = audio, _, _) do
     chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
     audio = Radiator.Repo.preload(audio, chapters: chapter_query)

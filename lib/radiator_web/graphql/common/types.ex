@@ -19,13 +19,6 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
     field :title, :string
   end
 
-  @desc "An audio enclosure"
-  object :enclosure do
-    field :url, :string
-    field :type, :string
-    field :length, :integer
-  end
-
   @desc "A user API session"
   object :session do
     field :username, :string
