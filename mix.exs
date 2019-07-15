@@ -116,6 +116,7 @@ defmodule Radiator.MixProject do
       extras: [
         "README.md",
         "guides/rest_api.md",
+        "guides/graphql_api.md",
         "guides/Download Tracking.md",
         "guides/Files.md",
         "guides/Users and Permissions.md"
