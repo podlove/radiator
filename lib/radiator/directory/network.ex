@@ -4,12 +4,14 @@ defmodule Radiator.Directory.Network do
   import Ecto.Changeset
   import Arc.Ecto.Changeset
 
+  alias __MODULE__
   alias Radiator.Directory.{Podcast, TitleSlug}
   alias Radiator.Contribution.Person
   alias Radiator.Directory.Audio
+  alias Radiator.Media.NetworkImage
 
   schema "networks" do
-    field :image, Radiator.Media.NetworkImage.Type
+    field :image, NetworkImage.Type
     field :title, :string
     field :slug, TitleSlug.Type
 
@@ -35,5 +37,12 @@ defmodule Radiator.Directory.Network do
     |> changeset(attrs)
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()
+  end
+
+  @doc """
+  Convenience accessor for image URL.
+  """
+  def image_url(%Network{} = network) do
+    NetworkImage.url({network.image, network})
   end
 end

@@ -120,9 +120,10 @@ POST /api/rest/v1/auth/prolong
 
 ### Parameters for Create & Update
 
-| Name             | Type     | Description                  |
-| ---------------- | -------- | ---------------------------- |
-| `network[title]` | `string` | **Required.** Network title. |
+| Name             | Type     | Description                     |
+| ---------------- | -------- | ------------------------------- |
+| `network[title]` | `string` | **Required.** Network title.    |
+| `network[image]` | `file`   | Image representing the Network. |
 
 ### Create
 

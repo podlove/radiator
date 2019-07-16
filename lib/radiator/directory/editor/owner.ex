@@ -38,18 +38,30 @@ defmodule Radiator.Directory.Editor.Owner do
   """
 
   def create_network(user = %Auth.User{}, attrs) when is_map(attrs) do
-    network =
+    # we need the network to have an id before we can save the image
+    {update_attrs, insert_attrs} = Map.split(attrs, [:image, "image"])
+
+    insert =
       %Network{}
-      |> Network.creation_changeset(attrs)
+      |> Network.creation_changeset(insert_attrs)
 
     Multi.new()
-    |> Multi.insert(:network, network)
+    |> Multi.insert(:network, insert)
+    |> Multi.update(:network_updated, fn %{network: network} ->
+      Network.changeset(network, update_attrs)
+    end)
     |> Multi.insert(:permission, fn %{network: network} ->
       Ecto.build_assoc(network, :permissions)
       |> Permission.changeset(%{permission: :own})
       |> Ecto.Changeset.put_assoc(:user, user)
     end)
     |> Repo.transaction()
+    |> case do
+      {:ok, %{network_updated: network}} -> {:ok, network}
+      {:error, :network, changeset, _map} -> {:error, changeset}
+      {:error, :network_update, changeset, _map} -> {:error, changeset}
+      error -> error
+    end
   end
 
   @doc """
