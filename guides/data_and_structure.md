@@ -2,6 +2,7 @@
 
 ## Content
 
+#### Hierarchy
 
 - Network
 	- Podcast
@@ -63,8 +64,9 @@ A **Episode** belongs to exactly a **Podcast**
  `title` | `String` | The name of the episode. Will be put into `title`, and `itunes:title`. If prefixed with the short ID, the shortID and following whitespace will be stripped for the `itunes:title` to conform with Apple's guidelines there
  `image` | `Image`  | A cover image for the episode. Optional, if none the one of the podcast will be used.
  `subtitle` | `String` | The subtitle line. Is put in `itunes:subtitle` in the feed. Usually used as one line description display tabular listings (e.g. in the iTunes episode table).
- `summary` | `String` | Long form description of the episode. Also known as show notes. Is put in `description` in the feed. No HTML or Links allowed, or if present will not be preserved or shown appropriately by clients. Optional, if clear will be filled by the stripped version of `summaryHtml` if that is present.
- `summaryHTML` | `String` | Long form description of the episode. Also known as show notes. Is put in `content:encoded` in the feed. Clients that are capable will use this, and at least show links, sometimes more. Optional.
+ `summary` | `Text` | Long form description of the episode. Also known as show notes. Is put in `description` in the feed. No HTML or Links allowed, or if present will not be preserved or shown appropriately by clients. Optional, if clear will be filled by the stripped version of `summaryHtml` if that is present.
+ `summaryHTML` | `Text` | Long form description of the episode. Also known as show notes. Is put in `content:encoded` in the feed. Clients that are capable will use this, and at least show links, sometimes more. Optional.
+ `summarySource` | `Text` | Potential source for the summary fields, e.g. can be used by frontends to store and support any form of structured data they use to edit the fields. Optional
  `guid` | `String` | Globally Unique ID of the episode.
  `slug` | `String` | short name that usually looks good in the title of an URL. Defaults to the shortID but can be customized.
  `publishedAt` | `DateTime` | Time of publishing. Currently also used to determine if the  episode has been published and is public.
@@ -84,8 +86,8 @@ An **Audio** belongs to at least a **Network** or **Episode** but can be used in
 
  Field | Type | Description 
    --: | :--  | :--
- `title` | `String` | The name of the Audio. Mostly used internally or when not used in an Episode
- `duration` | `String` | Duration of the Audio in [normal play time](https://www.w3.org/TR/media-frags/#naming-time) (e.g. 1:30:00.123 )
+ `title` | `String` | The name of the audio. Mostly used internally or when not used in an episode.
+ `duration` | `Integer` | Duration of the audio microseconds
  `publishedAt` | `DateTime` | Time of publishing. Currently also used to determine if the  audio has been published and is public.
  
 
@@ -110,15 +112,40 @@ An **Chapter** belongs to an **Audio**
 
  Field | Type | Description 
    --: | :--  | :--
-`start` | `Integer` | start of chapter in microseconts
-`title` | `String` | title of the chapter
-`image` | `Image` | Chapter Image (optional)
-`link` | `String` | Chapter URL to link to (optional)
+`start` | `Integer` | Start of chapter in microseconds
+`title` | `String` | Title of the chapter
+`image` | `Image` | Chapter image (optional)
+`link`  | `String` | Chapter URL to link to (optional)
+
+### Person
+
+A **Person** belongs to a network. It can take part in contributions.
+
+Field | Type | Description 
+  --: | :--  | :--
+`name` | `String` | The full name of the person                                                                  
+`nick` | `String` | The nickname of the person                                                                   
+`displayName` | `String` | The name that should be used to display this person in public                                
+`link` | `String` | A public accessible http URL representing this person (e.g. social media account or homepage)
+`image` | `Image`  | Avatar image                                                                                 
+
+
+### Contribution
+
+A **Contribution** references a Person and either an **Audio** or a **Podcast**
+
+ Field | Type | Description 
+   --: | :--  | :--
+ `role` | `String` | A contribution role for that person. E.g. `on_air` or `support`
+ 
+ Discussion:
+ 
+ * How much should we formalize this? Currently this is just a text string. I think we should at least make a list of suggestions for the default roles we imagine, that can be offered in frontends and given a good correspondence in the feed metadata too.
 
 
 
 #### Feed Specs
 
-* [Apple Podcast Requirements](https://help.apple.com/itc/podcasts_connect/#/itcb54353390)
+* [Apple podcast requirements](https://help.apple.com/itc/podcasts_connect/#/itcb54353390)
 * [Overcast Info for Podcasters](https://overcast.fm/podcasterinfo)
 * [Google RSS feed requirements](https://developers.google.com/search/reference/podcast/rss-feed)
