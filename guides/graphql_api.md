@@ -138,7 +138,6 @@ union PermissionSubject = Network | Podcast
 """A podcast"""
 type Podcast {
   author: String
-  description: String
   episodes(itemsPerPage: Int = 10, order: SortOrder = DESC, orderBy: EpisodeOrder = PUBLISHED_AT, page: Int = 1, published: Published = ANY): [Episode]
   episodesCount: Int
   id: ID!
@@ -152,6 +151,7 @@ type Podcast {
   shortId: String
   slug: String
   subtitle: String
+  summary: String
   title: String
 }
 
@@ -236,7 +236,6 @@ type PublishedNetwork {
 """A published podcast"""
 type PublishedPodcast {
   author: String
-  description: String
   episodes(itemsPerPage: Int = 10, order: SortOrder = DESC, orderBy: EpisodeOrder = PUBLISHED_AT, page: Int = 1): [PublishedEpisode]
   id: ID!
   image: String
@@ -249,6 +248,7 @@ type PublishedPodcast {
   shortId: String
   slug: String
   subtitle: String
+  summary: String
   title: String
 }
 
@@ -379,5 +379,6 @@ type User {
   displayName: String
   username: String
 }
+
 
 ```
