@@ -74,9 +74,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   @desc "A podcast"
   object :podcast do
     field :id, non_null(:id)
+    field :short_id, :string
     field :title, :string
+    field :subtitle, :string
+    field :summary, :string
+
     field :author, :string
-    field :description, :string
 
     field :image, :string do
       resolve &Resolvers.Editor.get_image_url/3
@@ -87,9 +90,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :owner_email, :string
     field :owner_name, :string
     field :published_at, :datetime
-    field :subtitle, :string
     field :slug, :string
-    field :short_id, :string
 
     field :is_published, :boolean do
       resolve &Resolvers.Editor.is_published/3

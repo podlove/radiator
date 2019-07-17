@@ -79,9 +79,9 @@ defmodule Radiator.Directory.Importer do
     {:ok, podcast} =
       Editor.create_podcast(user, network, %{
         title: feed.title,
-        subtitle: feed.subtitle,
+        subtitle: feed.subtitle || feed.description,
+        summary: feed.summary,
         author: feed.author,
-        description: feed.description,
         image: feed.image_url,
         language: feed.language,
         short_id: short_id

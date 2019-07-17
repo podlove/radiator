@@ -31,16 +31,18 @@ defmodule RadiatorWeb.Api.PodcastView do
     # })
     |> Document.add_properties(%{
       id: podcast.id,
+      short_id: podcast.short_id,
       title: podcast.title,
       subtitle: podcast.subtitle,
-      description: podcast.description,
-      image: podcast.image,
+      summary: podcast.summary,
       author: podcast.author,
+      image: podcast.image,
+      language: podcast.language,
+      last_built_at: podcast.last_built_at,
       owner_name: podcast.owner_name,
       owner_email: podcast.owner_email,
-      language: podcast.language,
       published_at: podcast.published_at,
-      last_built_at: podcast.last_built_at
+      slug: podcast.slug
     })
   end
 end

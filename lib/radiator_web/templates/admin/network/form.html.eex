@@ -1,5 +1,5 @@
 <div class="card">
-<%= form_for @changeset, @action, [], fn f -> %>
+<%= form_for @changeset, @action, [multipart: true], fn f -> %>
   <%= if @changeset.action do %>
     <div class="mb-4 bg-orange-100 border-l-4 border-orange text-orange-600 p-4" role="alert">
       <p class="font-bold">Oops</p>
@@ -10,6 +10,13 @@
     <div class="mb-6">
       <%= text_input f, :title, class: "input font-bold", placeholder: "Network Title" %>
       <%= error_tag f, :title %>
+    </div>
+
+
+    <div class="mb-6">
+      <%= label f, :image, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
+      <%= file_input f, :image, rows: 3, class: "input" %>
+      <%= error_tag f, :image %>
     </div>
 
     <div class="flex">

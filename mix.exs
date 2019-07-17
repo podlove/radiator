@@ -115,7 +115,9 @@ defmodule Radiator.MixProject do
       logo: "guides/images/podlove-radiator-logo.svg",
       extras: [
         "README.md",
+        "guides/data_and_structure.md",
         "guides/rest_api.md",
+        "guides/graphql_api.md",
         "guides/Download Tracking.md",
         "guides/Files.md",
         "guides/Users and Permissions.md"
