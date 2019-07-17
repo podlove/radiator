@@ -51,10 +51,6 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
     {:ok, episode.audio}
   end
 
-  def get_enclosure(%Episode{} = episode, _args, _resolution) do
-    {:ok, Episode.enclosure(episode)}
-  end
-
   def get_image_url(episode = %Episode{}, _, _) do
     {:ok, Media.EpisodeImage.url({episode.image, episode})}
   end

@@ -25,7 +25,7 @@ defmodule Radiator.Media.AudioFile do
   def changeset(audio_file = %__MODULE__{}, attrs) do
     audio_file
     |> cast(attrs, [:title, :mime_type, :byte_length, :audio_id])
-    |> cast_or_constraint_assoc(:audio)
+    #    |> cast_or_constraint_assoc(:audio)
     |> cast_attachments(attrs, [:file], allow_paths: true, allow_urls: true)
 
     # todo: determine byte length and mime type on file change, don't take them as attrs

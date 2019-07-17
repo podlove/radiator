@@ -39,7 +39,7 @@ defmodule RadiatorWeb.PlayerController do
       show: %{
         title: podcast.title,
         subtitle: podcast.subtitle,
-        summary: podcast.description,
+        summary: podcast.summary,
         poster: Podcast.image_url(podcast),
         link: Podcast.public_url(podcast)
       },

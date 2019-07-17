@@ -32,6 +32,7 @@ defmodule Radiator.Directory.Importer do
 
     candidate =
       [filenames, titles]
+      |> Enum.map(&Enum.take(&1, 10))
       |> Enum.map(&prefix_candidate/1)
       |> Enum.find(fn value -> value end)
 
@@ -78,9 +79,9 @@ defmodule Radiator.Directory.Importer do
     {:ok, podcast} =
       Editor.create_podcast(user, network, %{
         title: feed.title,
-        subtitle: feed.subtitle,
+        subtitle: feed.subtitle || feed.description,
+        summary: feed.summary,
         author: feed.author,
-        description: feed.description,
         image: feed.image_url,
         language: feed.language,
         short_id: short_id
@@ -148,8 +149,7 @@ defmodule Radiator.Directory.Importer do
   defp sanitize_metalove_chaptertitle(_, index), do: "Chapter #{index}"
 
   defp parse_chapter_time(time) when is_binary(time) do
-    {:ok, parsed, _, _, _, _} = Chapters.Parsers.Normalplaytime.Parser.parse(time)
-    Chapters.Parsers.Normalplaytime.Parser.total_ms(parsed)
+    Chapters.Parsers.Normalplaytime.Parser.parse_total_ms(time) || 0
   end
 
   def import_enclosures(

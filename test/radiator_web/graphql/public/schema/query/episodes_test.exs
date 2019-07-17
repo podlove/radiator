@@ -2,7 +2,6 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
   use RadiatorWeb.ConnCase, async: true
   import Radiator.Factory
 
-  alias Radiator.Directory.Episode
   alias Radiator.Media
 
   @single_query """
@@ -10,11 +9,6 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
     publishedEpisode(id: $id) {
       id
       title
-      enclosure {
-        length
-        type
-        url
-      }
       audio {
         chapters {
           image
@@ -53,8 +47,6 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
         audio: audio
       )
 
-    enclosure = Episode.enclosure(episode)
-
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => episode.id}
 
     assert image_url =~ "http"
@@ -64,11 +56,6 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
                "publishedEpisode" => %{
                  "id" => Integer.to_string(episode.id),
                  "title" => episode.title,
-                 "enclosure" => %{
-                   "length" => enclosure.length,
-                   "type" => enclosure.type,
-                   "url" => enclosure.url
-                 },
                  "audio" => %{
                    "chapters" => [
                      %{

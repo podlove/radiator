@@ -12,20 +12,23 @@ defmodule Radiator.Directory.Podcast do
   alias RadiatorWeb.Router.Helpers, as: Routes
 
   schema "podcasts" do
+    field :short_id, :string
+    field :title, :string
+    field :subtitle, :string
+    field :summary, :string
+
     field :author, :string
-    field :description, :string
     field :image, PodcastImage.Type
+
     field :language, :string
     field :last_built_at, :utc_datetime
     field :owner_email, :string
     field :owner_name, :string
-    field :published_at, :utc_datetime
-    field :subtitle, :string
-    field :title, :string
-    field :slug, TitleSlug.Type
-    field :short_id, :string
+
     field :use_short_id?, :boolean, source: :is_using_short_id, default: true
     field :main_color, :string, default: "#68b360"
+
+    field :slug, TitleSlug.Type
 
     field :episode_count, :integer, virtual: true
 
@@ -37,6 +40,8 @@ defmodule Radiator.Directory.Podcast do
 
     has_many :permissions, {"podcasts_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
 
+    # TODO: remove and have a better way to determine published state
+    field :published_at, :utc_datetime
     timestamps()
   end
 
@@ -44,9 +49,10 @@ defmodule Radiator.Directory.Podcast do
   def changeset(podcast, attrs) do
     podcast
     |> cast(attrs, [
+      :short_id,
       :title,
       :subtitle,
-      :description,
+      :summary,
       :author,
       :owner_name,
       :owner_email,
@@ -54,7 +60,6 @@ defmodule Radiator.Directory.Podcast do
       :published_at,
       :last_built_at,
       :slug,
-      :short_id,
       :main_color,
       :use_short_id?
     ])

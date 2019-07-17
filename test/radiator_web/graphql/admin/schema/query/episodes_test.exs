@@ -3,7 +3,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
 
   import Radiator.Factory
 
-  alias Radiator.Directory.Episode
   alias Radiator.Media
 
   @doc """
@@ -25,11 +24,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
     episode(id: $id) {
       id
       title
-      enclosure {
-        length
-        type
-        url
-      }
       audio {
         chapters {
           image
@@ -68,8 +62,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
         audio: audio
       )
 
-    enclosure = Episode.enclosure(episode)
-
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => episode.id}
 
     assert json_response(conn, 200) == %{
@@ -77,11 +69,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
                "episode" => %{
                  "id" => Integer.to_string(episode.id),
                  "title" => episode.title,
-                 "enclosure" => %{
-                   "length" => enclosure.length,
-                   "type" => enclosure.type,
-                   "url" => enclosure.url
-                 },
                  "audio" => %{
                    "chapters" => [
                      %{

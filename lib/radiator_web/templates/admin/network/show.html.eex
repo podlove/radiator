@@ -1,6 +1,9 @@
 <div class="container mb-6 px-8">
     <div class="mb-6">
-      <h1 class="text-3xl font-bold mb-1 text-blue-900">Podcasts in <%= @network.title %></h1>
+      <h1 class="text-3xl font-bold mb-1 text-blue-900">Podcasts in <%= @network.title %><%= if @network.image do %>
+          <img src="<%= network_image_url(@network) %>" class="w-8 h-8 mb-2 rounded mr-6 inline" />
+        <% end %></h1>
+        
     </div>
 
     <div class="flex justify-center md:justify-start flex-wrap">
@@ -15,7 +18,8 @@
 
           <div class="p-3 h-32 overflow-hidden">
             <h1 class="text-base mb-1"><%= podcast.title %></h1>
-            <p class="text-xs text-gray-600"><%= shorten_string(podcast.subtitle, 140) %></p>
+            <p class="text-xs text-gray-600 mb-1"><%= shorten_string(podcast.subtitle, 140) %></p>
+            <p class="text-xs text-gray-600"><%= shorten_string(podcast.summary, 140) %></p>
           </div>
 
           <div class="flex items-center p-3 border-t border-gray-500 border-solid text-xs text-gray-600">

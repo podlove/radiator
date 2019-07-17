@@ -60,7 +60,7 @@ defmodule Radiator.MixProject do
       {:hackney, "~> 1.15"},
       {:sweet_xml, "~> 0.6.5"},
       # for feed import
-      {:metalove, "~> 0.2"},
+      {:metalove, "~> 0.3"},
       {:xml_builder, "~> 2.1", override: true},
       {:ex_machina, "~> 2.3", only: :test},
       {:elixir_uuid, "~> 1.2"},
@@ -77,7 +77,7 @@ defmodule Radiator.MixProject do
       # for documentation
       {:earmark, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.19", only: :dev},
-      {:chapters, "~> 0.1.0"},
+      {:chapters, "~> 1.0"},
       {:dataloader, "~> 1.0"},
       {:mime, "~> 1.2"},
       {:remote_ip, "~> 0.1.4"},
@@ -115,7 +115,9 @@ defmodule Radiator.MixProject do
       logo: "guides/images/podlove-radiator-logo.svg",
       extras: [
         "README.md",
+        "guides/data_and_structure.md",
         "guides/rest_api.md",
+        "guides/graphql_api.md",
         "guides/Download Tracking.md",
         "guides/Files.md",
         "guides/Users and Permissions.md"

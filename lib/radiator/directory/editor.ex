@@ -90,10 +90,7 @@ defmodule Radiator.Directory.Editor do
   """
 
   def create_network(actor = %Auth.User{}, attrs) do
-    case Editor.Owner.create_network(actor, attrs) do
-      {:ok, %{network: network}} -> {:ok, network}
-      {:error, :network, changeset, _} -> {:error, changeset}
-    end
+    Editor.Owner.create_network(actor, attrs)
   end
 
   @doc """
@@ -303,6 +300,30 @@ defmodule Radiator.Directory.Editor do
     |> Repo.all()
   end
 
+  @doc """
+  List episodes for audio that given user can see.
+  """
+  def list_episodes(actor = %Auth.User{}, audio = %Audio{}) do
+    if has_permission(actor, audio, :readonly) do
+      audio
+      |> Ecto.assoc(:episodes)
+      |> Repo.all()
+      |> Enum.filter(fn episode -> has_permission(actor, episode, :readonly) end)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def list_audio_files(actor = %Auth.User{}, audio = %Audio{}) do
+    if has_permission(actor, audio, :readonly) do
+      audio
+      |> Ecto.assoc(:audio_files)
+      |> Repo.all()
+    else
+      @not_authorized_match
+    end
+  end
+
   def create_episode(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
     if has_permission(actor, podcast, :manage) do
       Editor.Manager.create_episode(podcast, attrs)
@@ -474,6 +495,14 @@ defmodule Radiator.Directory.Editor do
         else
           @not_authorized_match
         end
+    end
+  end
+
+  def list_audios(actor = %Auth.User{}, network = %Network{}) do
+    if has_permission(actor, network, :readonly) do
+      Editor.Manager.list_audios(network)
+    else
+      @not_authorized_match
     end
   end
 

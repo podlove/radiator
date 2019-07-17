@@ -30,9 +30,19 @@ defmodule Radiator.Directory do
     queryable
   end
 
-  # TODO: add a notion of published to networks as well and only show those
+  defp published_networks_query do
+    published_podcasts_query = PodcastQuery.filter_by_published(Podcast)
+
+    network_query =
+      from(p in published_podcasts_query, join: n in assoc(p, :network), distinct: n, select: n)
+
+    from(n in subquery(network_query), order_by: [desc: n.title])
+  end
+
+  # TODO: have a clearer concept of published for networks (currently just defers to the podcast)
   def list_networks do
-    Repo.all(Network)
+    published_networks_query()
+    |> Repo.all()
   end
 
   @doc """
@@ -49,9 +59,19 @@ defmodule Radiator.Directory do
       ** (Ecto.NoResultsError)
 
   """
-  def get_network!(id), do: Repo.get!(Network, id)
+  def get_network!(id) do
+    query = published_networks_query()
 
-  def get_network(id), do: Repo.get(Network, id)
+    from(n in query, where: n.id == ^id)
+    |> Repo.one!()
+  end
+
+  def get_network(id) do
+    query = published_networks_query()
+
+    from(n in query, where: n.id == ^id)
+    |> Repo.one()
+  end
 
   @doc """
   Gets a single network by its slug.
@@ -273,6 +293,11 @@ defmodule Radiator.Directory do
   def is_published(%Episode{published_at: date}),
     do: Support.DateTime.before_utc_now?(date)
 
+  # fixme: ensure all entities above are published as well
+  #   applies to all is_published implementations
+  def is_published(%Audio{published_at: date}),
+    do: Support.DateTime.before_utc_now?(date)
+
   def is_published(_), do: false
 
   def get_audio(id) do
@@ -294,6 +319,17 @@ defmodule Radiator.Directory do
     else
       {:get, _} -> {:error, :not_found}
       {:published, _} -> {:error, :unpublished}
+    end
+  end
+
+  @spec list_audio_files(Audio.t()) :: [AudioFile.t()]
+  def list_audio_files(audio = %Audio{}) do
+    if is_published(audio) do
+      audio
+      |> Ecto.assoc(:audio_files)
+      |> Repo.all()
+    else
+      []
     end
   end
 end

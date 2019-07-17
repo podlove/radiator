@@ -221,6 +221,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
+  def get_episodes(audio = %Audio{}, _, %{context: %{current_user: user}}) do
+    {:ok, Editor.list_episodes(user, audio)}
+  end
+
   def create_episode(_parent, %{podcast_id: podcast_id, episode: args}, %{
         context: %{current_user: user}
       }) do
@@ -290,12 +294,26 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
+  def get_audio_files(audio = %Audio{}, _args, %{context: %{current_user: user}}) do
+    {:ok, Editor.list_audio_files(user, audio)}
+  end
+
+  def get_audio_files(audio = %Audio{}, _args, _resolution) do
+    {:ok, Radiator.Directory.list_audio_files(audio)}
+  end
+
+  def list_audios(%Network{} = network, _args, %{context: %{current_user: actor}}) do
+    Editor.list_audios(actor, network)
+  end
+
   def find_audio(%Episode{} = episode, _args, %{context: %{current_user: _user}}) do
     {:ok, episode.audio}
   end
 
-  def get_enclosure(%Episode{} = episode, _args, %{context: %{current_user: _user}}) do
-    {:ok, Episode.enclosure(episode)}
+  def find_audio(_parent, %{id: id}, %{context: %{current_user: user}}) do
+    with_audio user, id do
+      fn audio -> {:ok, audio} end
+    end
   end
 
   def get_chapters(%Audio{} = audio, _, _) do
