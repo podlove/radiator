@@ -60,6 +60,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       resolve &Resolvers.Editor.list_podcasts/3
     end
 
+    field :audios, list_of(:audio) do
+      description "Audios attached directly to the network."
+      resolve &Resolvers.Editor.list_audios/3
+    end
+
     field :collaborators, list_of(:collaborator) do
       resolve &Resolvers.Editor.list_collaborators/3
     end

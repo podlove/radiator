@@ -437,6 +437,14 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def list_audios(actor = %Auth.User{}, network = %Network{}) do
+    if has_permission(actor, network, :read) do
+      Editor.Manager.list_audios(network)
+    else
+      @not_authorized_match
+    end
+  end
+
   def create_audio(actor = %Auth.User{}, episode = %Episode{}, attrs) do
     if has_permission(actor, episode, :edit) do
       Editor.Manager.create_audio(episode, attrs)
