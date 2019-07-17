@@ -103,7 +103,9 @@ defmodule RadiatorWeb.Router do
     resources "/episodes", EpisodeController, only: [:show, :create, :update, :delete]
 
     resources "/audios", AudioController, only: [:show, :create, :update, :delete] do
-      resources "/chapters", ChaptersController, only: [:show, :create, :update, :delete]
+      resources "/chapters", ChaptersController,
+        param: "start",
+        only: [:show, :create, :update, :delete]
     end
 
     # todo: pluralize

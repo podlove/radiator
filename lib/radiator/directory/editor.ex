@@ -444,8 +444,8 @@ defmodule Radiator.Directory.Editor do
     episode
   end
 
-  def get_chapter(actor = %Auth.User{}, id) do
-    case Repo.get(Chapter, id) do
+  def get_chapter(actor = %Auth.User{}, audio = %Audio{}, start) do
+    case Repo.get_by(Chapter, audio_id: audio.id, start: start) do
       nil ->
         @not_found_match
 

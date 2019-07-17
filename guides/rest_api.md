@@ -363,6 +363,8 @@ GET /api/rest/v1/audio_file/:id
 
 ## Audio Chapters
 
+> ⚠️ A chapter is uniquely identified by its start time and the associated audio. There can only be exactly one chapter per audio with a given start time.
+
 ### Parameters for Create & Update
 
 | Name                | Type      | Description                                                    |
@@ -382,17 +384,17 @@ POST /api/rest/v1/audios/:audio_id/chapters
 ### Read
 
 ```
-GET /api/rest/v1/audios/:audio_id/chapters/:id
+GET /api/rest/v1/audios/:audio_id/chapters/:start
 ```
 
 ### Update
 
 ```
-PATCH /api/rest/v1/audios/:audio_id/chapters/:id
+PATCH /api/rest/v1/audios/:audio_id/chapters/:start
 ```
 
 ### Delete
 
 ```
-DELETE /api/rest/v1/audios/:audio_id/chapters/:id
+DELETE /api/rest/v1/audios/:audio_id/chapters/:start
 ```
