@@ -272,7 +272,7 @@ DELETE /api/rest/v1/podcasts/:id/collaborators/:username
 | `episode[subtitle]`       | `string`  | One line description of the episode                                     |
 | `episode[summary]`        | `text`    | Multiline description, plain text only                                  |
 | `episode[summary_html]`   | `text`    | Multiline description, html. Will be put in `content:encoded` in a feed |
-| `episode[summary_source]` | `text`    | Multiline description, arbritary format chosen by frontends.            |
+| `episode[summary_source]` | `text`    | Multiline description, arbitrary format chosen by frontends.            |
 | `episode[image]`          | `Image`   | Cover Image                                                             |
 | `episode[number]`         | `integer` | Episode "Track" number, will be put in `itunes:episode` in the feed     |
 
