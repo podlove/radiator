@@ -150,6 +150,14 @@ defmodule RadiatorWeb.GraphQL.Schema do
       middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.list_networks/3
     end
+
+    @desc "Get one audio"
+    field :audio, :audio do
+      arg :id, non_null(:id)
+
+      middleware Middleware.RequireAuthentication
+      resolve &Admin.Resolvers.Editor.find_audio/3
+    end
   end
 
   mutation do

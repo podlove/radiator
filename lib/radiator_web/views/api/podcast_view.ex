@@ -5,10 +5,10 @@ defmodule RadiatorWeb.Api.PodcastView do
 
   def render("index.json", assigns = %{podcasts: podcasts}) do
     %Document{}
-    |> Document.add_link(%Link{
-      rel: "self",
-      href: Routes.api_podcast_path(assigns.conn, :index)
-    })
+    # |> Document.add_link(%Link{
+    #   rel: "self",
+    #   href: Routes.api_podcast_path(assigns.conn, :index)
+    # })
     |> Document.add_embed(%Embed{
       resource: "rad:podcast",
       embed: render_many(podcasts, PodcastView, "podcast.json", assigns)

@@ -78,10 +78,6 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
       resolve &Resolvers.Directory.find_podcast/3
     end
 
-    field :enclosure, :enclosure do
-      resolve &Resolvers.Directory.get_enclosure/3
-    end
-
     field :audio, :audio do
       resolve &Resolvers.Directory.find_audio/3
     end
