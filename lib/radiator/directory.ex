@@ -302,6 +302,7 @@ defmodule Radiator.Directory do
     end
   end
 
+  @spec list_audio_files(Audio.t()) :: [AudioFile.t()]
   def list_audio_files(audio = %Audio{}) do
     if is_published(audio) do
       audio
