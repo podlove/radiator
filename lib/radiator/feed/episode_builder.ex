@@ -16,37 +16,38 @@ defmodule Radiator.Feed.EpisodeBuilder do
 
   def fields(_, episode) do
     []
+    |> add(guid(episode))
     |> add(element(:title, episode.title))
     |> add(element(:link, Episode.public_url(episode)))
     |> add(subtitle(episode))
-    |> add(publication_date(episode))
-    |> add(summary(episode))
     |> add(description(episode))
+    |> add(summary(episode))
+    |> add(publication_date(episode))
     |> add(enclosure(episode))
     |> add(contributors(episode))
-    |> add(guid(episode))
     |> add(chapters(episode))
     |> add(content(episode))
     |> Enum.reverse()
   end
 
+  # Both subtitle and description are derived from the subtitle property intentionally
   defp subtitle(%Episode{subtitle: subtitle}) when set?(subtitle),
     do: element("itunes:subtitle", subtitle)
 
   defp subtitle(_), do: nil
 
-  defp summary(%Episode{description: description}) when set?(description),
-    do: element("itunes:summary", description)
-
-  defp summary(_), do: nil
-
-  defp description(%Episode{description: description}) when set?(description),
+  defp description(%Episode{subtitle: description}) when set?(description),
     do: element(:description, description)
 
   defp description(_), do: nil
 
-  defp content(%Episode{content: content}) when set?(content),
-    do: element("content:encoded", {:cdata, content})
+  defp summary(%Episode{summary: summary}) when set?(summary),
+    do: element("itunes:summary", summary)
+
+  defp summary(_), do: nil
+
+  defp content(%Episode{summary_html: summary_html}) when set?(summary_html),
+    do: element("content:encoded", {:cdata, summary_html})
 
   defp content(_), do: nil
 

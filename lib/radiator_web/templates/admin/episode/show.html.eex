@@ -13,7 +13,7 @@
         <%= @episode.subtitle %>
       </div>
       <div class="max-w-md text-black font-normal">
-        <%= raw @episode.description %>
+        <%= raw @episode.summary %>
       </div>
     </div>
     <div>

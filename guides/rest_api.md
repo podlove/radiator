@@ -263,14 +263,18 @@ DELETE /api/rest/v1/podcasts/:id/collaborators/:username
 
 ### Parameters for Create & Update
 
-| Name                   | Type      | Description   |
-| ---------------------- | --------- | ------------- |
-| `episode[title]`       | `string`  | **Required.** |
-| `episode[podcast_id]`  | `integer` | **Required.** |
-| `episode[subtitle]`    | `string`  |               |
-| `episode[description]` | `string`  |               |
-| `episode[number]`      | `integer` |               |
-| `episode[short_id]`    | `string`  |               |
+| Name                      | Type      | Description                                                             |
+| ------------------------- | --------- | ----------------------------------------------------------------------- |
+| `episode[title]`          | `string`  | **Required.**                                                           |
+| `episode[podcast_id]`     | `integer` | **Required.**                                                           |
+| `episode[short_id]`       | `string`  | Full combined short id, usually short_id + Number                       |
+| `episode[guid]`           | `string`  | guid, prefilled on publish if unspecified                               |
+| `episode[subtitle]`       | `string`  | One line description of the episode                                     |
+| `episode[summary]`        | `text`    | Multiline description, plain text only                                  |
+| `episode[summary_html]`   | `text`    | Multiline description, html. Will be put in `content:encoded` in a feed |
+| `episode[summary_source]` | `text`    | Multiline description, arbritary format chosen by frontends.            |
+| `episode[image]`          | `Image`   | Cover Image                                                             |
+| `episode[number]`         | `integer` | Episode "Track" number, will be put in `itunes:episode` in the feed     |
 
 ### Create
 
