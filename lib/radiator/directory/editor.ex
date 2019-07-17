@@ -438,7 +438,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   def list_audios(actor = %Auth.User{}, network = %Network{}) do
-    if has_permission(actor, network, :read) do
+    if has_permission(actor, network, :readonly) do
       Editor.Manager.list_audios(network)
     else
       @not_authorized_match
