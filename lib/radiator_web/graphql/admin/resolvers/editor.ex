@@ -221,6 +221,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
+  def get_episodes(audio = %Audio{}, _, %{context: %{current_user: user}}) do
+    {:ok, Editor.list_episodes(user, audio)}
+  end
+
   def create_episode(_parent, %{podcast_id: podcast_id, episode: args}, %{
         context: %{current_user: user}
       }) do
@@ -296,6 +300,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def find_audio(%Episode{} = episode, _args, %{context: %{current_user: _user}}) do
     {:ok, episode.audio}
+  end
+
+  def find_audio(_parent, %{id: id}, %{context: %{current_user: user}}) do
+    with_audio user, id do
+      fn audio -> {:ok, audio} end
+    end
   end
 
   def get_chapters(%Audio{} = audio, _, _) do

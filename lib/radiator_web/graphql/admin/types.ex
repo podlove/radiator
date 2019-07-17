@@ -174,6 +174,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       # resolve dataloader(Radiator.AudioMeta, :chapters)
       resolve &Resolvers.Editor.get_chapters/3
     end
+
+    field :episodes, list_of(:episode) do
+      resolve &Resolvers.Editor.get_episodes/3
+    end
   end
 
   @desc "The input for an episode in a podcast"

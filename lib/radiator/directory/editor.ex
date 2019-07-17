@@ -301,6 +301,15 @@ defmodule Radiator.Directory.Editor do
     |> Repo.all()
   end
 
+  @doc """
+  List episodes for audio that given user can see.
+  """
+  def list_episodes(actor = %Auth.User{}, audio = %Audio{}) do
+    from(e in Episode, where: e.audio_id == ^audio.id)
+    |> Repo.all()
+    |> Enum.filter(fn episode -> has_permission(actor, episode, :readonly) end)
+  end
+
   def create_episode(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
     if has_permission(actor, podcast, :manage) do
       Editor.Manager.create_episode(podcast, attrs)
