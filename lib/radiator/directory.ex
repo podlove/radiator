@@ -273,6 +273,11 @@ defmodule Radiator.Directory do
   def is_published(%Episode{published_at: date}),
     do: Support.DateTime.before_utc_now?(date)
 
+  # fixme: ensure all entities above are published as well
+  #   applies to all is_published implementations
+  def is_published(%Audio{published_at: date}),
+    do: Support.DateTime.before_utc_now?(date)
+
   def is_published(_), do: false
 
   def get_audio(id) do
@@ -294,6 +299,16 @@ defmodule Radiator.Directory do
     else
       {:get, _} -> {:error, :not_found}
       {:published, _} -> {:error, :unpublished}
+    end
+  end
+
+  def list_audio_files(audio = %Audio{}) do
+    if is_published(audio) do
+      audio
+      |> Ecto.assoc(:audio_files)
+      |> Repo.all()
+    else
+      []
     end
   end
 end

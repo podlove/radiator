@@ -298,6 +298,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, Editor.list_audio_files(user, audio)}
   end
 
+  def get_audio_files(audio = %Audio{}, _args, _resolution) do
+    {:ok, Radiator.Directory.list_audio_files(audio)}
+  end
+
   def list_audios(%Network{} = network, _args, %{context: %{current_user: actor}}) do
     Editor.list_audios(actor, network)
   end
