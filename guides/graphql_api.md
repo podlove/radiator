@@ -13,8 +13,10 @@ schema {
 
 """An audio object"""
 type Audio {
+  audioFiles: [AudioFile]
   chapters(order: SortOrder = ASC): [Chapter]
   duration: String
+  episodes: [Episode]
   id: ID!
   publishedAt: DateTime
   title: String
@@ -50,20 +52,12 @@ be converted to UTC and any UTC offset other than 0 will be rejected.
 """
 scalar DateTime
 
-"""An audio enclosure"""
-type Enclosure {
-  length: Int
-  type: String
-  url: String
-}
-
 """An episode in a podcast"""
 type Episode {
   audio: Audio
   content: String
   description: String
   duration: String
-  enclosure: Enclosure
   guid: String
   id: ID!
   image: String
@@ -103,6 +97,8 @@ type FeedInfo {
 
 """A network"""
 type Network {
+  """Audios attached directly to the network."""
+  audios: [Audio]
   collaborators: [Collaborator]
   id: ID!
   image: String
@@ -211,7 +207,6 @@ type PublishedEpisode {
   content: String
   description: String
   duration: String
-  enclosure: Enclosure
   guid: String
   id: ID!
   image: String
@@ -312,6 +307,9 @@ type RootMutationType {
 }
 
 type RootQueryType {
+  """Get one audio"""
+  audio(id: ID!): Audio
+
   """Get one episode"""
   episode(id: ID!): Episode
 

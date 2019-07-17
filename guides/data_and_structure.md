@@ -27,11 +27,11 @@ Potential fields open for discussion:
 
 ### Podcast
 
-A **Podcast** belongs to exactly a **Network**
+A **Podcast** belongs to exactly one **Network**
 
  Field | Type | Description 
    --: | :--  | :--
-`shortID` | `String` | Short basis to identify a podcast in an URL, hashtag, etc. Also for easy referring to episodes. E.g. `FS` for freakshow, so an episode becomes `FS130`. Typically between 2 and 5 letters, and has to be unique inside a network as it is used for URL slugs as well.
+`shortId` | `String` | Short basis to identify a podcast in an URL, hashtag, etc. Also for easy referring to episodes. E.g. `FS` for freakshow, so an episode becomes `FS130`. Typically between 2 and 5 letters, and has to be unique inside a network as it is used for URL slugs as well.
  `title` | `String` | The name of the podcast
  `image` | `Image`  | An cover image for the podcast
  `subtitle` | `String` | The subtitle line. Is put in `description` and `itunes:subtitle` in the feed. Usually used as one line description display in podcast directories. Currently doesn't appear in iTunes anywhere prominently.
@@ -56,21 +56,22 @@ Existing fields, worthy of discussion:
 
 ### Episode 
 
-A **Episode** belongs to exactly a **Podcast**
+A **Episode** belongs to exactly one **Podcast**
 
  Field | Type | Description 
  ----: | :--  | :--
-`shortID` | `String` | Full short ID of the episode. Defaults to `<shortIDOfPodcast><episodenumberWithLeadingZeros>`, e.g. `FS002`.
+ `guid` | `String` | Globally Unique ID of the episode. Will be prefilled on publish if omitted
+`shortId` | `String` | Full short ID of the episode. Defaults to `<shortIDOfPodcast><episodenumberWithLeadingZeros>`, e.g. `FS002`.
  `title` | `String` | The name of the episode. Will be put into `title`, and `itunes:title`. If prefixed with the short ID, the shortID and following whitespace will be stripped for the `itunes:title` to conform with Apple's guidelines there
  `image` | `Image`  | A cover image for the episode. Optional, if none the one of the podcast will be used.
  `subtitle` | `String` | The subtitle line. Is put in `itunes:subtitle` in the feed. Usually used as one line description display tabular listings (e.g. in the iTunes episode table).
  `summary` | `Text` | Long form description of the episode. Also known as show notes. Is put in `description` in the feed. No HTML or Links allowed, or if present will not be preserved or shown appropriately by clients. Optional, if clear will be filled by the stripped version of `summaryHtml` if that is present.
- `summaryHTML` | `Text` | Long form description of the episode. Also known as show notes. Is put in `content:encoded` in the feed. Clients that are capable will use this, and at least show links, sometimes more. Optional.
+ `summaryHtml` | `Text` | Long form description of the episode. Also known as show notes. Is put in `content:encoded` in the feed. Clients that are capable will use this, and at least show links, sometimes more. Optional.
  `summarySource` | `Text` | Potential source for the summary fields, e.g. can be used by frontends to store and support any form of structured data they use to edit the fields. Optional
- `guid` | `String` | Globally Unique ID of the episode.
  `slug` | `String` | short name that usually looks good in the title of an URL. Defaults to the shortID but can be customized.
- `publishedAt` | `DateTime` | Time of publishing. Currently also used to determine if the  episode has been published and is public.
- `number` | `Integer` | "Track" number of the episode in the podcast. aka `episodeNumber`
+ `publishedAt` | `DateTime` | Time of publishing. Currently also used to determine if the episode has been published and is public.
+
+ `number` | `Integer` | "Track" number of the episode in the podcast. aka `episodeNumber` will be put in `itunes:episode` in the feed, and used to generate `shortId` and `guid`
  
 Potential fields open for discussion:  
 
@@ -82,7 +83,7 @@ Potential fields open for discussion:
 
 ### Audio
 
-An **Audio** belongs to at least a **Network** or **Episode** but can be used in multiple locations.
+An **Audio** belongs to at least one **Network** or one **Episode** but can be used in multiple locations.
 
  Field | Type | Description 
    --: | :--  | :--
@@ -98,7 +99,7 @@ Important fields currently missing:
 
 ### AudioFile
 
-An **AudioFile** belongs to an **Audio**
+An **AudioFile** belongs to one **Audio**
 
  Field | Type | Description 
    --: | :--  | :--
@@ -108,7 +109,7 @@ An **AudioFile** belongs to an **Audio**
  
 ### Chapter
 
-An **Chapter** belongs to an **Audio**
+An **Chapter** belongs to one **Audio**
 
  Field | Type | Description 
    --: | :--  | :--
@@ -119,7 +120,7 @@ An **Chapter** belongs to an **Audio**
 
 ### Person
 
-A **Person** belongs to a network. It can take part in contributions.
+A **Person** belongs to one network. It can take part in contributions.
 
 Field | Type | Description 
   --: | :--  | :--
@@ -132,7 +133,7 @@ Field | Type | Description
 
 ### Contribution
 
-A **Contribution** references a Person and either an **Audio** or a **Podcast**
+A **Contribution** references a Person and either one **Audio** or one **Podcast**
 
  Field | Type | Description 
    --: | :--  | :--

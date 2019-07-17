@@ -130,14 +130,19 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   @desc "An episode in a podcast"
   object :episode do
     field :id, non_null(:id)
-    field :content, :string
-    field :description, :string
+
+    field :guid, :string
+    field :short_id, :string
+    field :title, :string
+    field :subtitle, :string
+
+    field :summary, :string
+    field :summary_html, :string
+    field :summary_source, :string
 
     field :duration, :string do
       resolve &Resolvers.Editor.get_duration/3
     end
-
-    field :guid, :string
 
     field :image, :string do
       resolve &Resolvers.Editor.get_image_url/3

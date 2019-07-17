@@ -58,21 +58,27 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
   @desc "A published episode in a podcast"
   object :published_episode do
     field :id, non_null(:id)
-    field :content, :string
-    field :description, :string
-    field :duration, :string
     field :guid, :string
+    field :short_id, :string
+    field :title, :string
+    field :subtitle, :string
+
+    field :summary, :string
+    field :summary_html, :string
+    field :summary_source, :string
+
+    field :duration, :string do
+      resolve &RadiatorWeb.GraphQL.Admin.Resolvers.Editor.get_duration/3
+    end
 
     field :image, :string do
       resolve &Resolvers.Directory.get_image_url/3
     end
 
     field :number, :integer
+
     field :published_at, :datetime
-    field :subtitle, :string
-    field :title, :string
     field :slug, :string
-    field :short_id, :string
 
     field :podcast, :published_podcast do
       resolve &Resolvers.Directory.find_podcast/3

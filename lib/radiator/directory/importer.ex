@@ -100,9 +100,9 @@ defmodule Radiator.Directory.Importer do
           Editor.Manager.create_episode(podcast, %{
             guid: episode.guid,
             title: episode.title,
-            subtitle: episode.subtitle,
-            description: episode.description,
-            content: episode.content_encoded,
+            subtitle: episode.subtitle || episode.description,
+            summary: episode.summary || episode.description,
+            summary_html: episode.content_encoded,
             published_at: episode.pub_date,
             number: episode.episode
           })

@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Api.PodcastView do
   use RadiatorWeb, :view
   alias RadiatorWeb.Api.PodcastView
   alias HAL.{Document, Link, Embed}
+  import RadiatorWeb.ContentHelpers
 
   def render("index.json", assigns = %{podcasts: podcasts}) do
     %Document{}
@@ -36,7 +37,7 @@ defmodule RadiatorWeb.Api.PodcastView do
       subtitle: podcast.subtitle,
       summary: podcast.summary,
       author: podcast.author,
-      image: podcast.image,
+      image: podcast_image_url(podcast),
       language: podcast.language,
       last_built_at: podcast.last_built_at,
       owner_name: podcast.owner_name,
