@@ -1,5 +1,5 @@
 <div class="card">
-<%= form_for @changeset, @action, [], fn f -> %>
+<%= form_for @changeset, @action, [multipart: true], fn f -> %>
   <%= if @changeset.action do %>
     <div class="mb-4 bg-orange-100 border-l-4 border-orange text-orange-600 p-4" role="alert">
       <p class="font-bold">Oops</p>
@@ -17,9 +17,39 @@
       <%= error_tag f, :subtitle %>
     </div>
     <div class="mb-6">
-      <%= label f, :description, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
-      <%= textarea f, :description, rows: 3, class: "input", placeholder: "One-liner to grab the listener's attention" %>
-      <%= error_tag f, :description %>
+      <%= label f, :summary, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
+      <%= textarea f, :summary, rows: 4, class: "input text-sm", placeholder: "Short mulitline description appearing e.g. in iTunes Preview" %>
+      <%= error_tag f, :summary %>
+    </div>
+
+        <div class="mb-6">
+      <%= label f, :image, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
+      <%= file_input f, :image, rows: 3, class: "input" %>
+      <%= error_tag f, :image %>
+    </div>
+
+    <div class="mb-6">
+      <%= label f, :author, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
+      <%= text_input f, :author, class: "input", placeholder: "One-line description of the publisher" %>
+      <%= error_tag f, :author %>
+    </div>
+
+    <div class="mb-6">
+      <%= label f, :language, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
+      <%= text_input f, :language, class: "input", placeholder: "en-us" %>
+      <%= error_tag f, :language %>
+    </div>
+
+    <div class="mb-6">
+      <%= label f, "Name of Owner", class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
+      <%= text_input f, :owner_name, class: "input", placeholder: "Owner Name" %>
+      <%= error_tag f, :owner_name %>
+    </div>
+
+    <div class="mb-6">
+      <%= label f, "Email of Owner", class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
+      <%= text_input f, :owner_email, class: "input", placeholder: "Owner Email" %>
+      <%= error_tag f, :owner_email %>
     </div>
 
     <div class="flex">

@@ -23,9 +23,12 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
   @desc "A published podcast"
   object :published_podcast do
     field :id, non_null(:id)
+    field :short_id, :string
     field :title, :string
+    field :subtitle, :string
+    field :summary, :string
+
     field :author, :string
-    field :description, :string
 
     field :image, :string do
       resolve &Resolvers.Directory.get_image_url/3
@@ -36,9 +39,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :owner_email, :string
     field :owner_name, :string
     field :published_at, :datetime
-    field :subtitle, :string
     field :slug, :string
-    field :short_id, :string
 
     field :episodes, list_of(:published_episode) do
       arg :page, type: :integer, default_value: 1

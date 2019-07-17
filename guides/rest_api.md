@@ -187,16 +187,19 @@ DELETE /api/rest/v1/networks/:id/collaborators/:username
 
 ### Parameters for Create & Update
 
-| Name                   | Type      | Description   |
-| ---------------------- | --------- | ------------- |
-| `podcast[title]`       | `string`  | **Required.** |
-| `podcast[network_id]`  | `integer` | **Required.** |
-| `podcast[subtitle]`    | `string`  |               |
-| `podcast[description]` | `string`  |               |
-| `podcast[author]`      | `string`  |               |
-| `podcast[owner_name]`  | `string`  |               |
-| `podcast[owner_email]` | `string`  |               |
-| `podcast[language]`    | `string`  |               |
+| Name                   | Type      | Description                                                                           |
+| ---------------------- | --------- | ------------------------------------------------------------------------------------- |
+| `podcast[title]`       | `string`  | **Required.**                                                                         |
+| `podcast[network_id]`  | `integer` | **Required.**                                                                         |
+| `podcast[short_id]`    | `string`  | Short ID for this podcast, also used as slug. 2-5 characters usually, e.g. FS,FAN,ATP |
+| `podcast[subtitle]`    | `string`  | Attention grabbing one liner appearing in lists/directories                           |
+| `podcast[summary]`     | `string`  | Short multiline description, appears in iTunes Preview                                |
+| `podcast[image]`       | `Image`   | Cover Image                                                                           |
+| `podcast[author]`      | `string`  | One line description of publisher                                                     |
+| `podcast[language]`    | `string`  | ISO 639-1                                                                             |
+| `podcast[owner_name]`  | `string`  |                                                                                       |
+| `podcast[owner_email]` | `string`  |                                                                                       |
+| `podcast[slug]`        | `string`  |                                                                                       |
 
 ### Create
 
