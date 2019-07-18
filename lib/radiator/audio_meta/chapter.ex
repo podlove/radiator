@@ -27,8 +27,16 @@ defmodule Radiator.AudioMeta.Chapter do
       :link
     ])
     |> validate_required([:start])
+    |> maybe_delete_existing_attachments(attrs)
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
   end
+
+  def maybe_delete_existing_attachments(changeset, %{image: _image}) do
+    Radiator.AudioMeta.delete_chapter_image(changeset.data)
+    changeset
+  end
+
+  def maybe_delete_existing_attachments(changeset, _attrs), do: changeset
 
   @doc """
   Convenience accessor for image URL.

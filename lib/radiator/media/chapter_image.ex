@@ -8,9 +8,7 @@ defmodule Radiator.Media.ChapterImage do
     "#{basename}_#{version}"
   end
 
-  # fixme: when the start is changed after the image is uploaded the connection to the image is probably lost?
-  # reintroduce a stable internal id just for this, or find another solution
   def storage_dir(_version, {_file, chapter}) do
-    "chapter/#{chapter.audio_id}_#{chapter.start}"
+    "chapter/#{chapter.audio_id}"
   end
 end
