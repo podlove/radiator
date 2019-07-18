@@ -20,7 +20,7 @@ defmodule Radiator.Directory.Audio do
 
   schema "audios" do
     field :title, :string
-    field :duration, :string
+    field :duration, :integer
     field :published_at, :utc_datetime
     field :image, Media.AudioImage.Type
 

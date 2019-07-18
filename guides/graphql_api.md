@@ -5,8 +5,7 @@ Generated using
 get-graphql-schema http://localhost:4000/api/graphql
 ```
 
-```
-schema {
+```schema {
   query: RootQueryType
   mutation: RootMutationType
 }
@@ -15,7 +14,8 @@ schema {
 type Audio {
   audioFiles: [AudioFile]
   chapters(order: SortOrder = ASC): [Chapter]
-  duration: String
+  duration: Int
+  durationString: String
   episodes: [Episode]
   id: ID!
   publishedAt: DateTime
@@ -34,6 +34,7 @@ type Chapter {
   image: String
   link: String
   start: Int
+  startString: String
   title: String
 }
 
@@ -55,9 +56,6 @@ scalar DateTime
 """An episode in a podcast"""
 type Episode {
   audio: Audio
-  content: String
-  description: String
-  duration: String
   guid: String
   id: ID!
   image: String
@@ -65,8 +63,12 @@ type Episode {
   number: Int
   podcast: Podcast
   publishedAt: DateTime
+  shortId: String
   slug: String
   subtitle: String
+  summary: String
+  summaryHtml: String
+  summarySource: String
   title: String
 }
 
@@ -204,9 +206,6 @@ enum Published {
 """A published episode in a podcast"""
 type PublishedEpisode {
   audio: Audio
-  content: String
-  description: String
-  duration: String
   guid: String
   id: ID!
   image: String
@@ -216,6 +215,9 @@ type PublishedEpisode {
   shortId: String
   slug: String
   subtitle: String
+  summary: String
+  summaryHtml: String
+  summarySource: String
   title: String
 }
 
@@ -283,9 +285,6 @@ type RootMutationType {
 
   """Schedule episode"""
   scheduleEpisode(datetime: DateTime!, id: ID!): Episode
-
-  """Set chapters for an episode"""
-  setChapters(chapters: String!, id: ID!, type: String!): Audio
 
   """Update an episode"""
   updateEpisode(episode: EpisodeInput!, id: ID!): Episode
@@ -377,6 +376,5 @@ type User {
   displayName: String
   username: String
 }
-
 
 ```

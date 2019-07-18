@@ -4,9 +4,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   alias Radiator.Directory.Editor
   alias Radiator.Directory.{Episode, Podcast, Network, Audio}
   alias Radiator.AudioMeta
+  alias Radiator.AudioMeta.Chapter
   alias Radiator.Media
   alias Radiator.Auth.User
   alias Radiator.Contribution.Person
+  import RadiatorWeb.FormatHelpers, only: [format_normal_playtime: 1]
 
   @doc """
   Get network with user and do something with it or return error.
@@ -306,8 +308,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def get_duration(%Episode{audio: audio}, _, _) do
-    {:ok, audio.duration}
+  def get_duration_string(%Audio{duration: time}, _, _) do
+    {:ok, format_normal_playtime(time)}
+  end
+
+  def get_duration_string(%Chapter{start: time}, _, _) do
+    {:ok, format_normal_playtime(time)}
   end
 
   def get_image_url(episode = %Episode{}, _, _) do

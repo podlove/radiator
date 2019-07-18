@@ -67,10 +67,6 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :summary_html, :string
     field :summary_source, :string
 
-    field :duration, :string do
-      resolve &RadiatorWeb.GraphQL.Admin.Resolvers.Editor.get_duration/3
-    end
-
     field :image, :string do
       resolve &Resolvers.Directory.get_image_url/3
     end

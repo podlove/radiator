@@ -24,15 +24,22 @@ defmodule RadiatorWeb.FormatHelpers do
   end
 
   def format_chapter_time(time) do
-    time = round(time / 1_000) * 1_000
+    format_normal_playtime_round_to_seconds(time)
+  end
 
+  def format_normal_playtime_round_to_seconds(time) do
+    (round(time / 1_000) * 1_000)
+    |> format_normal_playtime()
+    |> String.slice(0..-5)
+  end
+
+  def format_normal_playtime(time) do
     time
     |> Chapters.Formatters.Normalplaytime.Formatter.format()
     |> case do
       "00:" <> rest -> rest
       sth -> sth
     end
-    |> String.slice(0..-5)
   end
 
   def shorten_string(s, max_length, ellipsis \\ "...")
