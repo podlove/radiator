@@ -44,31 +44,32 @@ defmodule RadiatorWeb.Api.ChaptersController do
   end
 
   defp assign_audio(conn, _) do
-    conn
-    |> current_user()
-    |> Editor.get_audio(conn.params["audio_id"])
-    |> case do
-      {:ok, audio} ->
-        conn
-        |> assign(:audio, audio)
-
-      error = {:error, _} ->
-        conn
-        |> RadiatorWeb.Api.FallbackController.call(error)
-        |> halt()
+    with {:ok, audio} <-
+           conn
+           |> current_user()
+           |> Editor.get_audio(conn.params["audio_id"]) do
+      conn
+      |> assign(:audio, audio)
+    else
+      response -> apply_action_fallback(conn, response)
     end
   end
 
   defp assign_chapter(conn, _) do
     with {:ok, chapter} <-
-           Editor.get_chapter(current_user(conn), conn.assigns[:audio], conn.params["start"]) do
+           conn
+           |> current_user()
+           |> Editor.get_chapter(conn.assigns[:audio], conn.params["start"]) do
       conn
       |> assign(:chapter, chapter)
     else
-      error = {:error, _} ->
-        conn
-        |> RadiatorWeb.Api.FallbackController.call(error)
-        |> halt()
+      response -> apply_action_fallback(conn, response)
+    end
+  end
+
+  defp apply_action_fallback(conn, response) do
+    case @phoenix_fallback do
+      {:module, module} -> apply(module, :call, [conn, response]) |> halt()
     end
   end
 end
