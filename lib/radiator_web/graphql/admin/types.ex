@@ -140,18 +140,13 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :summary_html, :string
     field :summary_source, :string
 
-    field :duration, :string do
-      resolve &Resolvers.Editor.get_duration/3
-    end
-
     field :image, :string do
       resolve &Resolvers.Editor.get_image_url/3
     end
 
     field :number, :integer
     field :published_at, :datetime
-    field :subtitle, :string
-    field :title, :string
+
     field :slug, :string
 
     field :is_published, :boolean do
@@ -171,7 +166,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   object :audio do
     field :id, non_null(:id)
     field :title, :string
-    field :duration, :string
+    field :duration, :integer
+
+    field :duration_string, :string do
+      resolve &Resolvers.Editor.get_duration_string/3
+    end
+
     field :published_at, :datetime
 
     field :chapters, list_of(:chapter) do

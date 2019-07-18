@@ -15,7 +15,8 @@ schema {
 type Audio {
   audioFiles: [AudioFile]
   chapters(order: SortOrder = ASC): [Chapter]
-  duration: String
+  duration: Int
+  durationString: String
   episodes: [Episode]
   id: ID!
   publishedAt: DateTime
@@ -55,9 +56,6 @@ scalar DateTime
 """An episode in a podcast"""
 type Episode {
   audio: Audio
-  content: String
-  description: String
-  duration: String
   guid: String
   id: ID!
   image: String
@@ -65,8 +63,12 @@ type Episode {
   number: Int
   podcast: Podcast
   publishedAt: DateTime
+  shortId: String
   slug: String
   subtitle: String
+  summary: String
+  summaryHtml: String
+  summarySource: String
   title: String
 }
 
@@ -204,9 +206,6 @@ enum Published {
 """A published episode in a podcast"""
 type PublishedEpisode {
   audio: Audio
-  content: String
-  description: String
-  duration: String
   guid: String
   id: ID!
   image: String
@@ -216,6 +215,9 @@ type PublishedEpisode {
   shortId: String
   slug: String
   subtitle: String
+  summary: String
+  summaryHtml: String
+  summarySource: String
   title: String
 }
 
@@ -377,6 +379,5 @@ type User {
   displayName: String
   username: String
 }
-
 
 ```

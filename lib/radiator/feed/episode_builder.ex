@@ -9,6 +9,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
   alias Radiator.Directory.{Episode, Audio}
   alias Radiator.Contribution.Person
   alias Radiator.Contribution.AudioContribution
+  import RadiatorWeb.FormatHelpers, only: [format_normal_playtime_round_to_seconds: 1]
 
   def new(feed_data, episode) do
     element(:item, fields(feed_data, episode))
@@ -23,6 +24,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
     |> add(description(episode))
     |> add(summary(episode))
     |> add(publication_date(episode))
+    |> add(duration(episode.audio))
     |> add(enclosure(episode))
     |> add(contributors(episode))
     |> add(chapters(episode))
@@ -72,6 +74,12 @@ defmodule Radiator.Feed.EpisodeBuilder do
     Logger.warn("[Feed Builder] Episode \"#{title}\" (##{id}) has no enclosure")
     nil
   end
+
+  defp duration(%Audio{duration: time}) when not is_nil(time) do
+    element("itunes:duration", format_normal_playtime_round_to_seconds(time))
+  end
+
+  defp duration(_), do: nil
 
   defp contributors(%Episode{audio: %Audio{contributions: contributions}}) do
     if Ecto.assoc_loaded?(contributions) do

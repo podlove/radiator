@@ -111,7 +111,7 @@ defmodule Radiator.Directory.Importer do
           Editor.Manager.create_audio(new_episode, %{
             title: episode.title,
             published_at: episode.pub_date,
-            duration: episode.duration
+            duration: episode.duration && parse_chapter_time(episode.duration)
           })
 
         if episode.chapters do
