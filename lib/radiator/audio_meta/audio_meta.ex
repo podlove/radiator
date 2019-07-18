@@ -40,6 +40,7 @@ defmodule Radiator.AudioMeta do
   end
 
   def delete_chapter(chapter = %Chapter{}) do
+    delete_chapter_image(chapter)
     Repo.delete(chapter)
   end
 
