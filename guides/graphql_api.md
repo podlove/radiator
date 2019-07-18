@@ -5,8 +5,7 @@ Generated using
 get-graphql-schema http://localhost:4000/api/graphql
 ```
 
-```
-schema {
+```schema {
   query: RootQueryType
   mutation: RootMutationType
 }
@@ -285,9 +284,6 @@ type RootMutationType {
 
   """Schedule episode"""
   scheduleEpisode(datetime: DateTime!, id: ID!): Episode
-
-  """Set chapters for an episode"""
-  setChapters(chapters: String!, id: ID!, type: String!): Audio
 
   """Update an episode"""
   updateEpisode(episode: EpisodeInput!, id: ID!): Episode

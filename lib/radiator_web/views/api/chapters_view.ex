@@ -3,6 +3,7 @@ defmodule RadiatorWeb.Api.ChaptersView do
 
   alias HAL.{Document, Link}
   alias Radiator.AudioMeta.Chapter
+  import RadiatorWeb.FormatHelpers, only: [format_normal_playtime: 1]
 
   def render("show.json", assigns) do
     render(__MODULE__, "chapter.json", assigns)
@@ -17,6 +18,7 @@ defmodule RadiatorWeb.Api.ChaptersView do
     |> Document.add_properties(%{
       audio_id: chapter.audio_id,
       start: chapter.start,
+      start_string: format_normal_playtime(chapter.start),
       title: chapter.title,
       link: chapter.link,
       image: Chapter.image_url(chapter)
