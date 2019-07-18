@@ -3,7 +3,12 @@ defmodule RadiatorWeb.Api.ChaptersController do
 
   alias Radiator.Directory.Editor
 
-  plug :assign_audio when action in [:create, :update, :delete]
+  plug :assign_audio when action in [:show, :create, :update, :delete]
+  plug :assign_chapter when action in [:show]
+
+  def show(conn, _params) do
+    render(conn, "show.json")
+  end
 
   def create(conn, %{"chapter" => chapter_params}) do
     with user <- current_user(conn),
@@ -49,6 +54,19 @@ defmodule RadiatorWeb.Api.ChaptersController do
         conn
         |> assign(:audio, audio)
 
+      error = {:error, _} ->
+        conn
+        |> RadiatorWeb.Api.FallbackController.call(error)
+        |> halt()
+    end
+  end
+
+  defp assign_chapter(conn, _) do
+    with {:ok, chapter} <-
+           Editor.get_chapter(current_user(conn), conn.assigns[:audio], conn.params["start"]) do
+      conn
+      |> assign(:chapter, chapter)
+    else
       error = {:error, _} ->
         conn
         |> RadiatorWeb.Api.FallbackController.call(error)
