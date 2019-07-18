@@ -38,6 +38,8 @@ alias Radiator.Directory.{Audio, Episode, Podcast, Network, Editor}
 alias Radiator.Media
 alias Radiator.Media.AudioFile
 
+alias Radiator.AudioMeta.Chapter
+
 alias Radiator.Feed.Builder
 
 alias Radiator.Auth

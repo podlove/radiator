@@ -13,6 +13,8 @@ defmodule Radiator.Directory.Editor do
 
   alias Radiator.Support
   alias Radiator.Repo
+  alias Radiator.AudioMeta
+  alias Radiator.AudioMeta.Chapter
   alias Radiator.Directory
   alias Radiator.Directory.{Network, Podcast, Episode, Editor, Audio, Collaborator}
 
@@ -440,6 +442,44 @@ defmodule Radiator.Directory.Editor do
   def detach_all_audios_from_episode(episode = %Episode{}) do
     Ecto.assoc(episode, :attachments) |> Repo.delete_all()
     episode
+  end
+
+  def get_chapter(actor = %Auth.User{}, audio = %Audio{}, start) do
+    case Repo.get_by(Chapter, audio_id: audio.id, start: start) do
+      nil ->
+        @not_found_match
+
+      chapter = %Chapter{} ->
+        if has_permission(actor, audio, :readonly) do
+          {:ok, chapter}
+        else
+          @not_authorized_match
+        end
+    end
+  end
+
+  def create_chapter(actor = %Auth.User{}, audio, attrs) do
+    if has_permission(actor, audio, :edit) do
+      AudioMeta.create_chapter(audio, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def update_chapter(actor = %Auth.User{}, chapter = %Chapter{}, attrs) do
+    if has_permission(actor, %Audio{id: chapter.audio_id}, :edit) do
+      AudioMeta.update_chapter(chapter, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def delete_chapter(actor = %Auth.User{}, chapter = %Chapter{}) do
+    if has_permission(actor, %Audio{id: chapter.audio_id}, :own) do
+      AudioMeta.delete_chapter(chapter)
+    else
+      @not_authorized_match
+    end
   end
 
   @spec get_audio(Auth.User.t(), pos_integer()) ::
