@@ -308,13 +308,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def get_chapters(%Audio{} = audio, _, _) do
-    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
-    audio = Radiator.Repo.preload(audio, chapters: chapter_query)
-
-    {:ok, audio.chapters}
-  end
-
   def get_duration_string(%Audio{duration: time}, _, _) do
     {:ok, format_normal_playtime(time)}
   end
