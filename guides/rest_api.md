@@ -316,7 +316,7 @@ DELETE /api/rest/v1/episodes/:id
 | `audio[episode_id]` | `integer` | Episode ID. Either network ID or episode ID must be given. |
 | `audio[title]`      | `string`  |                                                            |
 | `audio[image]`      | `file`    | Audio image.                                               |
-| `audio[duration]`   | `integer` | Audio duration in microseconds                             |
+| `audio[duration]`   | `integer` | Audio duration in milliseconds                             |
 
 ### Create
 

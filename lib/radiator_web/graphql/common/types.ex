@@ -4,6 +4,11 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
   @desc "A chapter in an episode"
   object :chapter do
     field :start, :integer
+
+    field :start_string, :string do
+      resolve &RadiatorWeb.GraphQL.Admin.Resolvers.Editor.get_duration_string/3
+    end
+
     field :title, :string
     field :link, :string
 

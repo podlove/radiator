@@ -88,7 +88,7 @@ An **Audio** belongs to at least one **Network** or one **Episode** but can be u
  Field | Type | Description 
    --: | :--  | :--
  `title` | `String` | The name of the audio. Mostly used internally or when not used in an episode.
- `duration` | `Integer` | Duration of the audio microseconds, ends up in `itunes:duration` in a feed
+ `duration` | `Integer` | Duration of the audio milliseconds, ends up in `itunes:duration` in a feed
  `durationString` | `String` | Duration as normal play time
  `publishedAt` | `DateTime` | Time of publishing. Currently also used to determine if the  audio has been published and is public.
  `audioFiles` | `listOf(AudioFile)` | List of binary files representing this audio
@@ -115,7 +115,8 @@ An **Chapter** belongs to one **Audio**
 
  Field | Type | Description 
    --: | :--  | :--
-`start` | `Integer` | Start of chapter in microseconds
+`start` | `Integer` | Start of chapter in milliseconds
+`startString` | `String` | Start as normal play time
 `title` | `String` | Title of the chapter
 `image` | `Image` | Chapter image (optional)
 `link`  | `String` | Chapter URL to link to (optional)
