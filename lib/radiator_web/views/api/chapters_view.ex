@@ -8,7 +8,10 @@ defmodule RadiatorWeb.Api.ChaptersView do
     %Document{}
     |> Document.add_embed(%Embed{
       resource: "rad:chapter",
-      embed: render_many(assigns[:chapters], __MODULE__, "chapter.json", assigns)
+      embed:
+        Enum.map(assigns[:chapters], fn chapter ->
+          render(__MODULE__, "chapter.json", Map.put(assigns, :chapter, chapter))
+        end)
     })
   end
 
@@ -16,7 +19,7 @@ defmodule RadiatorWeb.Api.ChaptersView do
     render(__MODULE__, "chapter.json", assigns)
   end
 
-  def render("chapter.json", %{conn: conn, chapters: chapter, audio: audio}) do
+  def render("chapter.json", %{conn: conn, chapter: chapter, audio: audio}) do
     %Document{}
     |> Document.add_link(%Link{
       rel: "self",
