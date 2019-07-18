@@ -8,13 +8,14 @@ defmodule Radiator.AudioMeta.Chapter do
   alias Radiator.Directory.Audio
   alias Radiator.Media
 
+  @primary_key false
   schema "chapters" do
-    field :start, :integer
+    field :start, :integer, primary_key: true
     field :title, :string
     field :link, :string
     field :image, Media.ChapterImage.Type
 
-    belongs_to :audio, Audio
+    belongs_to :audio, Audio, primary_key: true
   end
 
   @doc false
@@ -25,8 +26,17 @@ defmodule Radiator.AudioMeta.Chapter do
       :title,
       :link
     ])
+    |> validate_required([:start])
+    |> maybe_delete_existing_attachments(attrs)
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
   end
+
+  def maybe_delete_existing_attachments(changeset, %{image: _image}) do
+    Radiator.AudioMeta.delete_chapter_image(changeset.data)
+    changeset
+  end
+
+  def maybe_delete_existing_attachments(changeset, _attrs), do: changeset
 
   @doc """
   Convenience accessor for image URL.

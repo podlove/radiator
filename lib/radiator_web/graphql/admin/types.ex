@@ -178,7 +178,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       arg :order, type: :sort_order, default_value: :asc
 
       # resolve dataloader(Radiator.AudioMeta, :chapters)
-      resolve &Resolvers.Editor.get_chapters/3
+      resolve &Resolvers.Editor.list_chapters/3
     end
 
     field :episodes, list_of(:episode) do

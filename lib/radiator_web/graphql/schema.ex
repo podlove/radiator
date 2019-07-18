@@ -311,15 +311,5 @@ defmodule RadiatorWeb.GraphQL.Schema do
       middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.delete_episode/3
     end
-
-    @desc "Set chapters for an episode"
-    field :set_chapters, type: :audio do
-      arg :id, non_null(:id)
-      arg :chapters, non_null(:string)
-      arg :type, non_null(:string)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.set_episode_chapters/3
-    end
   end
 end

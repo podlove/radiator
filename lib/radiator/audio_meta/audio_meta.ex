@@ -39,6 +39,11 @@ defmodule Radiator.AudioMeta do
     |> Repo.all()
   end
 
+  def delete_chapter(chapter = %Chapter{}) do
+    delete_chapter_image(chapter)
+    Repo.delete(chapter)
+  end
+
   def delete_chapters(%Audio{} = audio) do
     audio = Repo.preload(audio, :chapters)
 
