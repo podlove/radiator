@@ -1,9 +1,9 @@
 defmodule RadiatorWeb.Api.EpisodeView do
   use RadiatorWeb, :view
-  alias RadiatorWeb.Api.{ChapterView, EpisodeView, PodcastView}
+  alias RadiatorWeb.Api.{EpisodeView, PodcastView}
 
   alias HAL.{Document, Link, Embed}
-  alias Radiator.Directory.{Episode, Podcast, Audio}
+  alias Radiator.Directory.{Episode, Podcast}
   import RadiatorWeb.ContentHelpers
 
   def render("show.json", assigns) do

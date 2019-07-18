@@ -150,8 +150,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
     field :number, :integer
     field :published_at, :datetime
-    field :subtitle, :string
-    field :title, :string
     field :slug, :string
 
     field :is_published, :boolean do
