@@ -15,8 +15,9 @@ defmodule RadiatorWeb.Api.ChaptersView do
       href: Routes.api_audio_chapters_path(conn, :show, audio.id, chapter.start)
     })
     |> Document.add_properties(%{
-      title: chapter.title,
+      audio_id: chapter.audio_id,
       start: chapter.start,
+      title: chapter.title,
       link: chapter.link,
       image: Chapter.image_url(chapter)
     })
