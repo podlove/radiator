@@ -284,16 +284,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, AudioMeta.list_chapters(audio)}
   end
 
-  def set_episode_chapters(_parent, %{id: id, chapters: chapters, type: type}, %{
-        context: %{current_user: user}
-      }) do
-    with_audio user, id do
-      fn audio ->
-        AudioMeta.set_chapters(audio, chapters, String.to_existing_atom(type))
-      end
-    end
-  end
-
   def get_audio_files(audio = %Audio{}, _args, %{context: %{current_user: user}}) do
     {:ok, Editor.list_audio_files(user, audio)}
   end
