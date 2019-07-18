@@ -34,6 +34,7 @@ type Chapter {
   image: String
   link: String
   start: Int
+  startString: String
   title: String
 }
 
