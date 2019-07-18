@@ -33,7 +33,6 @@ defmodule RadiatorWeb.Api.EpisodeView do
       published_at: episode.published_at
     })
     |> maybe_embed_podcast(episode.podcast, assigns)
-    |> maybe_embed_chapters(episode.audio, assigns)
   end
 
   def render("enclosure.json", %{episode: episode}) do
@@ -53,16 +52,4 @@ defmodule RadiatorWeb.Api.EpisodeView do
   end
 
   defp maybe_embed_podcast(document, _, _), do: document
-
-  defp maybe_embed_chapters(document, %Audio{chapters: chapters}, assigns)
-       when is_list(chapters) and length(chapters) > 0 do
-    Document.add_embed(document, %Embed{
-      resource: "rad:chapter",
-      embed: render_many(chapters, ChapterView, "chapter.json", assigns)
-    })
-  end
-
-  defp maybe_embed_chapters(document, _, _) do
-    document
-  end
 end
