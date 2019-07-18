@@ -450,7 +450,7 @@ defmodule Radiator.Directory.Editor do
         @not_found_match
 
       chapter = %Chapter{} ->
-        if has_permission(actor, chapter, :readonly) do
+        if has_permission(actor, audio, :readonly) do
           {:ok, chapter}
         else
           @not_authorized_match
@@ -467,7 +467,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   def update_chapter(actor = %Auth.User{}, chapter = %Chapter{}, attrs) do
-    if has_permission(actor, chapter, :edit) do
+    if has_permission(actor, %Audio{id: chapter.audio_id}, :edit) do
       AudioMeta.update_chapter(chapter, attrs)
     else
       @not_authorized_match
@@ -475,7 +475,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   def delete_chapter(actor = %Auth.User{}, chapter = %Chapter{}) do
-    if has_permission(actor, chapter, :own) do
+    if has_permission(actor, %Audio{id: chapter.audio_id}, :own) do
       AudioMeta.delete_chapter(chapter)
     else
       @not_authorized_match
