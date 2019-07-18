@@ -4,7 +4,7 @@ defmodule RadiatorWeb.Api.ChaptersController do
   alias Radiator.Directory.Editor
 
   plug :assign_audio when action in [:show, :create, :update, :delete]
-  plug :assign_chapter when action in [:show]
+  plug :assign_chapter when action in [:show, :update, :delete]
 
   def show(conn, _params) do
     render(conn, "show.json")
@@ -24,20 +24,18 @@ defmodule RadiatorWeb.Api.ChaptersController do
     end
   end
 
-  def update(conn, %{"start" => start, "chapter" => chapter_params}) do
+  def update(conn, %{"chapter" => chapter_params}) do
     with user <- current_user(conn),
-         {:ok, chapter} <- Editor.get_chapter(user, conn.assigns[:audio], start),
-         {:ok, chapter} <- Editor.update_chapter(user, chapter, chapter_params) do
+         {:ok, chapter} <- Editor.update_chapter(user, conn.assigns[:chapter], chapter_params) do
       conn
       |> assign(:chapter, chapter)
       |> render("show.json")
     end
   end
 
-  def delete(conn, %{"start" => start}) do
+  def delete(conn, _) do
     with user <- current_user(conn),
-         {:ok, chapter} <- Editor.get_chapter(user, conn.assigns[:audio], start),
-         {:ok, _} <- Editor.delete_chapter(user, chapter) do
+         {:ok, _} <- Editor.delete_chapter(user, conn.assigns[:chapter]) do
       send_delete_resp(conn)
     else
       @not_found_match -> send_delete_resp(conn)
