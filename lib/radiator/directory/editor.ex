@@ -444,6 +444,15 @@ defmodule Radiator.Directory.Editor do
     episode
   end
 
+  def list_chapters(actor = %Auth.User{}, audio = %Audio{}) do
+    if has_permission(actor, audio, :readonly) do
+      chapters = AudioMeta.list_chapters(audio)
+      {:ok, chapters}
+    else
+      @not_authorized_match
+    end
+  end
+
   def get_chapter(actor = %Auth.User{}, audio = %Audio{}, start) do
     case Repo.get_by(Chapter, audio_id: audio.id, start: start) do
       nil ->

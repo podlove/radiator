@@ -49,6 +49,7 @@
   - [Read](#Read-6)
 - [Audio Chapters](#Audio-Chapters)
   - [Parameters for Create & Update](#Parameters-for-Create--Update-6)
+  - [Index](#Index)
   - [Create](#Create-7)
   - [Read](#Read-7)
   - [Update](#Update-6)
@@ -378,6 +379,12 @@ GET /api/rest/v1/audio_file/:id
 | `chapter[title]`    | `string`  | chapter title                                                  |
 | `chapter[link]`     | `string`  | chapter link                                                   |
 | `chapter[file]`     | `image`   | chapter image                                                  |
+
+### Index
+
+```
+GET /api/rest/v1/audios/:audio_id/chapters
+```
 
 ### Create
 

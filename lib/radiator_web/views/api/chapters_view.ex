@@ -1,14 +1,22 @@
 defmodule RadiatorWeb.Api.ChaptersView do
   use RadiatorWeb, :view
 
-  alias HAL.{Document, Link}
+  alias HAL.{Document, Link, Embed}
   alias Radiator.AudioMeta.Chapter
+
+  def render("index.json", assigns) do
+    %Document{}
+    |> Document.add_embed(%Embed{
+      resource: "rad:chapter",
+      embed: render_many(assigns[:chapters], __MODULE__, "chapter.json", assigns)
+    })
+  end
 
   def render("show.json", assigns) do
     render(__MODULE__, "chapter.json", assigns)
   end
 
-  def render("chapter.json", %{conn: conn, chapter: chapter, audio: audio}) do
+  def render("chapter.json", %{conn: conn, chapters: chapter, audio: audio}) do
     %Document{}
     |> Document.add_link(%Link{
       rel: "self",

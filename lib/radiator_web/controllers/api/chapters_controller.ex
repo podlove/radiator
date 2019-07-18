@@ -3,8 +3,17 @@ defmodule RadiatorWeb.Api.ChaptersController do
 
   alias Radiator.Directory.Editor
 
-  plug :assign_audio when action in [:show, :create, :update, :delete]
+  plug :assign_audio when action in [:index, :show, :create, :update, :delete]
   plug :assign_chapter when action in [:show, :update, :delete]
+
+  def index(conn, _params) do
+    with user <- current_user(conn),
+         {:ok, chapters} <- Editor.list_chapters(user, conn.assigns[:audio]) do
+      conn
+      |> assign(:chapters, chapters)
+      |> render("index.json")
+    end
+  end
 
   def show(conn, _params) do
     render(conn, "show.json")
