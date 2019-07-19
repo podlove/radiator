@@ -5,7 +5,8 @@ Generated using
 get-graphql-schema http://localhost:4000/api/graphql
 ```
 
-```schema {
+```
+schema {
   query: RootQueryType
   mutation: RootMutationType
 }
