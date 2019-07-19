@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Api.AudioView do
   use RadiatorWeb, :view
   alias RadiatorWeb.Api.AudioView
   alias HAL.{Document, Link}
+  import RadiatorWeb.FormatHelpers, only: [format_normal_playtime: 1]
 
   def render("show.json", assigns) do
     render(AudioView, "audio.json", assigns)
@@ -17,6 +18,7 @@ defmodule RadiatorWeb.Api.AudioView do
       id: audio.id,
       title: audio.title,
       duration: audio.duration,
+      duration_string: audio.duration && format_normal_playtime(audio.duration),
       published_at: audio.published_at
     })
   end

@@ -12,7 +12,7 @@
           
           <div
             class="w-48 h-48 bg-cover shadow-inner"
-            style="background-image: url(<%= network.image %>)"
+            style="background-image: url(<%= network_image_url(network) %>)"
           ></div>
 
           <div class="p-3 h-32">

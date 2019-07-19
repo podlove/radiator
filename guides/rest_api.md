@@ -47,6 +47,18 @@
   - [Parameters for Create](#Parameters-for-Create)
   - [Create](#Create-6)
   - [Read](#Read-6)
+- [Audio Chapters](#Audio-Chapters)
+  - [Parameters for Create & Update](#Parameters-for-Create--Update-6)
+  - [Create](#Create-7)
+  - [Read](#Read-7)
+  - [Update](#Update-6)
+  - [Delete](#Delete-6)
+- [Tasks](#Tasks)
+  - [Parameters for Create](#Parameters-for-Create-1)
+    - [Import podcast feed](#Import-podcast-feed)
+  - [Create](#Create-8)
+  - [Read](#Read-8)
+  - [Delete](#Delete-7)
 
 ## API Usage
 
@@ -120,9 +132,10 @@ POST /api/rest/v1/auth/prolong
 
 ### Parameters for Create & Update
 
-| Name             | Type     | Description                  |
-| ---------------- | -------- | ---------------------------- |
-| `network[title]` | `string` | **Required.** Network title. |
+| Name             | Type     | Description                     |
+| ---------------- | -------- | ------------------------------- |
+| `network[title]` | `string` | **Required.** Network title.    |
+| `network[image]` | `file`   | Image representing the Network. |
 
 ### Create
 
@@ -186,16 +199,19 @@ DELETE /api/rest/v1/networks/:id/collaborators/:username
 
 ### Parameters for Create & Update
 
-| Name                   | Type      | Description   |
-| ---------------------- | --------- | ------------- |
-| `podcast[title]`       | `string`  | **Required.** |
-| `podcast[network_id]`  | `integer` | **Required.** |
-| `podcast[subtitle]`    | `string`  |               |
-| `podcast[description]` | `string`  |               |
-| `podcast[author]`      | `string`  |               |
-| `podcast[owner_name]`  | `string`  |               |
-| `podcast[owner_email]` | `string`  |               |
-| `podcast[language]`    | `string`  |               |
+| Name                   | Type      | Description                                                                           |
+| ---------------------- | --------- | ------------------------------------------------------------------------------------- |
+| `podcast[title]`       | `string`  | **Required.**                                                                         |
+| `podcast[network_id]`  | `integer` | **Required.**                                                                         |
+| `podcast[short_id]`    | `string`  | Short ID for this podcast, also used as slug. 2-5 characters usually, e.g. FS,FAN,ATP |
+| `podcast[subtitle]`    | `string`  | Attention grabbing one liner appearing in lists/directories                           |
+| `podcast[summary]`     | `string`  | Short multiline description, appears in iTunes Preview                                |
+| `podcast[image]`       | `Image`   | Cover Image                                                                           |
+| `podcast[author]`      | `string`  | One line description of publisher                                                     |
+| `podcast[language]`    | `string`  | ISO 639-1                                                                             |
+| `podcast[owner_name]`  | `string`  |                                                                                       |
+| `podcast[owner_email]` | `string`  |                                                                                       |
+| `podcast[slug]`        | `string`  |                                                                                       |
 
 ### Create
 
@@ -259,14 +275,18 @@ DELETE /api/rest/v1/podcasts/:id/collaborators/:username
 
 ### Parameters for Create & Update
 
-| Name                   | Type      | Description   |
-| ---------------------- | --------- | ------------- |
-| `episode[title]`       | `string`  | **Required.** |
-| `episode[podcast_id]`  | `integer` | **Required.** |
-| `episode[subtitle]`    | `string`  |               |
-| `episode[description]` | `string`  |               |
-| `episode[number]`      | `integer` |               |
-| `episode[short_id]`    | `string`  |               |
+| Name                      | Type      | Description                                                             |
+| ------------------------- | --------- | ----------------------------------------------------------------------- |
+| `episode[title]`          | `string`  | **Required.**                                                           |
+| `episode[podcast_id]`     | `integer` | **Required.**                                                           |
+| `episode[short_id]`       | `string`  | Full combined short id, usually short_id + Number                       |
+| `episode[guid]`           | `string`  | guid, prefilled on publish if unspecified                               |
+| `episode[subtitle]`       | `string`  | One line description of the episode                                     |
+| `episode[summary]`        | `text`    | Multiline description, plain text only                                  |
+| `episode[summary_html]`   | `text`    | Multiline description, html. Will be put in `content:encoded` in a feed |
+| `episode[summary_source]` | `text`    | Multiline description, arbitrary format chosen by frontends.            |
+| `episode[image]`          | `Image`   | Cover Image                                                             |
+| `episode[number]`         | `integer` | Episode "Track" number, will be put in `itunes:episode` in the feed     |
 
 ### Create
 
@@ -302,6 +322,7 @@ DELETE /api/rest/v1/episodes/:id
 | `audio[episode_id]` | `integer` | Episode ID. Either network ID or episode ID must be given. |
 | `audio[title]`      | `string`  |                                                            |
 | `audio[image]`      | `file`    | Audio image.                                               |
+| `audio[duration]`   | `integer` | Audio duration in milliseconds                             |
 
 ### Create
 
@@ -351,6 +372,44 @@ POST /api/rest/v1/audio_file
 GET /api/rest/v1/audio_file/:id
 ```
 
+## Audio Chapters
+
+> ⚠️ A chapter is uniquely identified by its start time and the associated audio. There can only be exactly one chapter per audio with a given start time.
+
+### Parameters for Create & Update
+
+| Name                | Type      | Description                                                    |
+| ------------------- | --------- | -------------------------------------------------------------- |
+| `chapter[audio_id]` | `integer` | **Required.** Chapter is attached to Audio object of given ID. |
+| `chapter[start]`    | `integer` | **Required.** chapter start time in milliseconds               |
+| `chapter[title]`    | `string`  | chapter title                                                  |
+| `chapter[link]`     | `string`  | chapter link                                                   |
+| `chapter[file]`     | `image`   | chapter image                                                  |
+>>>>>>> master
+
+### Create
+
+```
+POST /api/rest/v1/audios/:audio_id/chapters
+```
+
+### Read
+
+```
+GET /api/rest/v1/audios/:audio_id/chapters/:start
+```
+
+### Update
+
+```
+PATCH /api/rest/v1/audios/:audio_id/chapters/:start
+```
+
+### Delete
+
+```
+DELETE /api/rest/v1/audios/:audio_id/chapters/:start
+```
 
 ## Tasks
 
@@ -358,13 +417,14 @@ GET /api/rest/v1/audio_file/:id
 
 #### Import podcast feed
 
-| Name                              | Type      | Description                                                |
-| --------------------------------- | --------- | ---------------------------------------------------------- |
-| `import_podcast_feed[network_id]` | `integer` | Network ID. (required).                                    |
-| `import_podcast_feed[feed_url]`        | `string`  | feed or show url (check availablity and extent with GraphQL query `feedInfo`       | 
+| Name                                   | Type                | Description                                                                                      |
+| -------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------ |
+| `import_podcast_feed[network_id]`      | `integer`           | Network ID. (required).                                                                          |
+| `import_podcast_feed[feed_url]`        | `string`            | feed or show url (check availablity and extent with GraphQL query `feedInfo`                     |
 | `import_podcast_feed[enclosure_types]` | `array` of `string` | Optional. E.g. `["audio/mpeg","audio/mp4"]` or [] for none. Defaults to all available enclosures |
-| `import_podcast_feed[short_id]`   | `string`  | Short ID for the podcast. E.g. `"CRE"`, `"FAN"`, `"FG"`. |
-| `import_podcast_feed[limit]`      | `integer` | Limits the amount of episodes to import. Optional, Defaults to 10 |
+| `import_podcast_feed[short_id]`        | `string`            | Short ID for the podcast. E.g. `"CRE"`, `"FAN"`, `"FG"`.                                         |
+| `import_podcast_feed[limit]`           | `integer`           | Limits the amount of episodes to import. Optional, Defaults to 10                                |
+
 
 ### Create
 

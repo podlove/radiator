@@ -9,6 +9,6 @@ defmodule Radiator.Media.ChapterImage do
   end
 
   def storage_dir(_version, {_file, chapter}) do
-    "chapter/#{chapter.id}"
+    "chapter/#{chapter.audio_id}"
   end
 end

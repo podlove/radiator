@@ -32,14 +32,14 @@ defmodule RadiatorWeb.PlayerController do
     |> Map.merge(%{
       title: episode.title,
       subtitle: episode.subtitle,
-      summary: episode.description,
+      summary: episode.summary_html || episode.summary,
       poster: Episode.image_url(episode, %{podcast: podcast}),
       link: Episode.public_url(episode, podcast),
       publicationDate: DateTime.to_iso8601(episode.published_at),
       show: %{
         title: podcast.title,
         subtitle: podcast.subtitle,
-        summary: podcast.description,
+        summary: podcast.summary,
         poster: Podcast.image_url(podcast),
         link: Podcast.public_url(podcast)
       },

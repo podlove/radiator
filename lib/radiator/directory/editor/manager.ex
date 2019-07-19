@@ -55,6 +55,13 @@ defmodule Radiator.Directory.Editor.Manager do
     end
   end
 
+  def list_audios(network = %Network{}) do
+    network
+    |> Ecto.assoc(:audios)
+    |> Repo.all()
+    |> (&{:ok, &1}).()
+  end
+
   # todo: this raises if used on an episode that already has an associated audio.
   #       we need to define a way, maybe even a separate API,
   #       to remove or replace an episode audio.

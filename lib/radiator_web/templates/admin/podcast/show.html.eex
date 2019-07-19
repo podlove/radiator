@@ -18,10 +18,20 @@
 
 
         <h1 class="text-3xl font-bold mb-1 mt-2 text-blue-900 mr-4">
-          <%= @podcast.title %>
+          <%= @podcast.title %> <span class="text-sm"><%= @podcast.language %></span>
         </h1>
         <p class="text-gray-600 font-normal text-lg mb-2">
           <%= @podcast.subtitle %>
+        </p>
+        <%= if @podcast.image do %>
+          <img src="<%= podcast_image_url(@podcast) %>" class="w-32 h-32 ml-2 mr-6 float-right clear" />
+        <% end %>
+
+        <p class="text-gray-600 font-normal mb-2">
+          <%= @podcast.author %> <span class="text-sm">( <%= @podcast.owner_name %> <%= @podcast.owner_email %>)</span>
+        </p>
+        <p class="text-gray-600 font-sm text-sm mb-2">
+          <%= @podcast.summary %>
         </p>
         <%= if @podcast.published_at && @podcast.slug do %>
           <p>

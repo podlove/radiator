@@ -79,9 +79,9 @@ defmodule Radiator.Directory.Importer do
     {:ok, podcast} =
       Editor.create_podcast(user, network, %{
         title: feed.title,
-        subtitle: feed.subtitle,
+        subtitle: feed.subtitle || feed.description,
+        summary: feed.summary,
         author: feed.author,
-        description: feed.description,
         image: feed.image_url,
         language: feed.language,
         short_id: short_id
@@ -100,9 +100,9 @@ defmodule Radiator.Directory.Importer do
           Editor.Manager.create_episode(podcast, %{
             guid: episode.guid,
             title: episode.title,
-            subtitle: episode.subtitle,
-            description: episode.description,
-            content: episode.content_encoded,
+            subtitle: episode.subtitle || episode.description,
+            summary: episode.summary || episode.description,
+            summary_html: episode.content_encoded,
             published_at: episode.pub_date,
             number: episode.episode
           })
@@ -111,7 +111,7 @@ defmodule Radiator.Directory.Importer do
           Editor.Manager.create_audio(new_episode, %{
             title: episode.title,
             published_at: episode.pub_date,
-            duration: episode.duration
+            duration: episode.duration && parse_chapter_time(episode.duration)
           })
 
         if episode.chapters do

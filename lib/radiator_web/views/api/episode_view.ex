@@ -4,6 +4,7 @@ defmodule RadiatorWeb.Api.EpisodeView do
 
   alias HAL.{Document, Link, Embed}
   alias Radiator.Directory.{Episode, Podcast, Audio}
+  import RadiatorWeb.ContentHelpers
 
   def render("show.json", assigns) do
     render(EpisodeView, "episode.json", assigns)
@@ -21,12 +22,13 @@ defmodule RadiatorWeb.Api.EpisodeView do
     })
     |> Document.add_properties(%{
       id: episode.id,
+      guid: episode.guid,
       title: episode.title,
       subtitle: episode.subtitle,
-      description: episode.description,
-      content: episode.content,
-      image: episode.image,
-      guid: episode.guid,
+      summary: episode.summary,
+      summary_html: episode.summary_html,
+      summary_source: episode.summary_source,
+      image: episode_image_url(episode),
       number: episode.number,
       published_at: episode.published_at
     })

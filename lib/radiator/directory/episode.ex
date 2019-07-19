@@ -13,16 +13,20 @@ defmodule Radiator.Directory.Episode do
   alias Radiator.Media.AudioFileUpload
 
   schema "episodes" do
-    field :content, :string
-    field :description, :string
     field :guid, :string
+    field :short_id, :string
+
+    field :title, :string
+    field :subtitle, :string
+    field :summary, :string
+    field :summary_html, :string
+    field :summary_source, :string
     field :image, Media.EpisodeImage.Type
+
     field :number, :integer
     field :published_at, :utc_datetime
-    field :subtitle, :string
-    field :title, :string
+
     field :slug, TitleSlug.Type
-    field :short_id, :string
 
     # use enclosure form field to upload audio file
     field :enclosure, :map, virtual: true
@@ -41,8 +45,9 @@ defmodule Radiator.Directory.Episode do
     |> cast(attrs, [
       :title,
       :subtitle,
-      :description,
-      :content,
+      :summary,
+      :summary_html,
+      :summary_source,
       :guid,
       :number,
       :published_at,

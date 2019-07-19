@@ -13,6 +13,8 @@ defmodule Radiator.Directory.Editor do
 
   alias Radiator.Support
   alias Radiator.Repo
+  alias Radiator.AudioMeta
+  alias Radiator.AudioMeta.Chapter
   alias Radiator.Directory
   alias Radiator.Directory.{Network, Podcast, Episode, Editor, Audio, Collaborator}
 
@@ -88,10 +90,7 @@ defmodule Radiator.Directory.Editor do
   """
 
   def create_network(actor = %Auth.User{}, attrs) do
-    case Editor.Owner.create_network(actor, attrs) do
-      {:ok, %{network: network}} -> {:ok, network}
-      {:error, :network, changeset, _} -> {:error, changeset}
-    end
+    Editor.Owner.create_network(actor, attrs)
   end
 
   @doc """
@@ -301,6 +300,30 @@ defmodule Radiator.Directory.Editor do
     |> Repo.all()
   end
 
+  @doc """
+  List episodes for audio that given user can see.
+  """
+  def list_episodes(actor = %Auth.User{}, audio = %Audio{}) do
+    if has_permission(actor, audio, :readonly) do
+      audio
+      |> Ecto.assoc(:episodes)
+      |> Repo.all()
+      |> Enum.filter(fn episode -> has_permission(actor, episode, :readonly) end)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def list_audio_files(actor = %Auth.User{}, audio = %Audio{}) do
+    if has_permission(actor, audio, :readonly) do
+      audio
+      |> Ecto.assoc(:audio_files)
+      |> Repo.all()
+    else
+      @not_authorized_match
+    end
+  end
+
   def create_episode(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
     if has_permission(actor, podcast, :manage) do
       Editor.Manager.create_episode(podcast, attrs)
@@ -421,6 +444,44 @@ defmodule Radiator.Directory.Editor do
     episode
   end
 
+  def get_chapter(actor = %Auth.User{}, audio = %Audio{}, start) do
+    case Repo.get_by(Chapter, audio_id: audio.id, start: start) do
+      nil ->
+        @not_found_match
+
+      chapter = %Chapter{} ->
+        if has_permission(actor, audio, :readonly) do
+          {:ok, chapter}
+        else
+          @not_authorized_match
+        end
+    end
+  end
+
+  def create_chapter(actor = %Auth.User{}, audio, attrs) do
+    if has_permission(actor, audio, :edit) do
+      AudioMeta.create_chapter(audio, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def update_chapter(actor = %Auth.User{}, chapter = %Chapter{}, attrs) do
+    if has_permission(actor, %Audio{id: chapter.audio_id}, :edit) do
+      AudioMeta.update_chapter(chapter, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def delete_chapter(actor = %Auth.User{}, chapter = %Chapter{}) do
+    if has_permission(actor, %Audio{id: chapter.audio_id}, :own) do
+      AudioMeta.delete_chapter(chapter)
+    else
+      @not_authorized_match
+    end
+  end
+
   @spec get_audio(Auth.User.t(), pos_integer()) ::
           {:ok, Audio.t()} | {:error, :not_authorized | :not_found}
   def get_audio(actor = %Auth.User{}, id) do
@@ -434,6 +495,14 @@ defmodule Radiator.Directory.Editor do
         else
           @not_authorized_match
         end
+    end
+  end
+
+  def list_audios(actor = %Auth.User{}, network = %Network{}) do
+    if has_permission(actor, network, :readonly) do
+      Editor.Manager.list_audios(network)
+    else
+      @not_authorized_match
     end
   end
 

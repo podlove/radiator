@@ -14,6 +14,8 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
   test "network returns a network", %{conn: conn} do
     network = insert(:network)
 
+    insert(:podcast, network: network)
+
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => network.id}
 
     assert json_response(conn, 200) == %{
@@ -81,6 +83,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
 
   test "networks returns list of networks", %{conn: conn} do
     network = insert(:network)
+    insert(:podcast, network: network)
 
     conn = get conn, "/api/graphql", query: @list_query
 

@@ -134,7 +134,7 @@ defmodule Radiator.Factory do
 
   def audio_factory do
     %Radiator.Directory.Audio{
-      duration: "1:02:03",
+      duration: 3_723_000,
       published_at: DateTime.utc_now() |> DateTime.add(-3600, :second),
       audio_files: [build(:audio_file)]
     }
@@ -142,7 +142,16 @@ defmodule Radiator.Factory do
 
   def empty_audio_factory do
     %Radiator.Directory.Audio{
-      duration: "1:02:03"
+      duration: 3_723_000
+    }
+  end
+
+  def chapter_factory do
+    %Radiator.AudioMeta.Chapter{
+      start: sequence(:start, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+      title: sequence(:title, &"chapter #{&1}"),
+      link: sequence(:link, &"http://example.com/#{&1}"),
+      audio: build(:audio)
     }
   end
 

@@ -1,13 +1,16 @@
 defmodule RadiatorWeb.ContentHelpers do
-  alias Radiator.Directory.{Podcast, Episode}
+  alias Radiator.Directory.{Network, Podcast, Episode}
 
   ## public image urls
+
+  def network_image_url(podcast) do
+    Network.image_url(podcast)
+  end
 
   def podcast_image_url(podcast) do
     Podcast.image_url(podcast)
   end
 
-  @spec episode_image_url(Radiator.Directory.Episode.t()) :: any
   def episode_image_url(episode) do
     Episode.image_url(episode)
   end

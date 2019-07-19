@@ -60,6 +60,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       resolve &Resolvers.Editor.list_podcasts/3
     end
 
+    field :audios, list_of(:audio) do
+      description "Audios attached directly to the network."
+      resolve &Resolvers.Editor.list_audios/3
+    end
+
     field :collaborators, list_of(:collaborator) do
       resolve &Resolvers.Editor.list_collaborators/3
     end
@@ -74,9 +79,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   @desc "A podcast"
   object :podcast do
     field :id, non_null(:id)
+    field :short_id, :string
     field :title, :string
+    field :subtitle, :string
+    field :summary, :string
+
     field :author, :string
-    field :description, :string
 
     field :image, :string do
       resolve &Resolvers.Editor.get_image_url/3
@@ -87,9 +95,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :owner_email, :string
     field :owner_name, :string
     field :published_at, :datetime
-    field :subtitle, :string
     field :slug, :string
-    field :short_id, :string
 
     field :is_published, :boolean do
       resolve &Resolvers.Editor.is_published/3
@@ -124,14 +130,15 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   @desc "An episode in a podcast"
   object :episode do
     field :id, non_null(:id)
-    field :content, :string
-    field :description, :string
-
-    field :duration, :string do
-      resolve &Resolvers.Editor.get_duration/3
-    end
 
     field :guid, :string
+    field :short_id, :string
+    field :title, :string
+    field :subtitle, :string
+
+    field :summary, :string
+    field :summary_html, :string
+    field :summary_source, :string
 
     field :image, :string do
       resolve &Resolvers.Editor.get_image_url/3
@@ -139,8 +146,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
     field :number, :integer
     field :published_at, :datetime
-    field :subtitle, :string
-    field :title, :string
+
     field :slug, :string
 
     field :is_published, :boolean do
@@ -149,10 +155,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
     field :podcast, :podcast do
       resolve &Resolvers.Editor.find_podcast/3
-    end
-
-    field :enclosure, :enclosure do
-      resolve &Resolvers.Editor.get_enclosure/3
     end
 
     field :audio, :audio do
@@ -164,14 +166,27 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   object :audio do
     field :id, non_null(:id)
     field :title, :string
-    field :duration, :string
+    field :duration, :integer
+
+    field :duration_string, :string do
+      resolve &Resolvers.Editor.get_duration_string/3
+    end
+
     field :published_at, :datetime
 
     field :chapters, list_of(:chapter) do
       arg :order, type: :sort_order, default_value: :asc
 
       # resolve dataloader(Radiator.AudioMeta, :chapters)
-      resolve &Resolvers.Editor.get_chapters/3
+      resolve &Resolvers.Editor.list_chapters/3
+    end
+
+    field :episodes, list_of(:episode) do
+      resolve &Resolvers.Editor.get_episodes/3
+    end
+
+    field :audio_files, list_of(:audio_file) do
+      resolve &Resolvers.Editor.get_audio_files/3
     end
   end
 

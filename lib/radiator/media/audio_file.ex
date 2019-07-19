@@ -31,6 +31,7 @@ defmodule Radiator.Media.AudioFile do
     # todo: determine byte length and mime type on file change, don't take them as attrs
   end
 
+  # fixme: auidofile.upload geht bei dom nicht mehr
   # not sure if this is the best way
   # via https://elixirforum.com/t/ecto-validating-belongs-to-association-is-not-nil/2665/13
   defp cast_or_constraint_assoc(changeset, name) do
