@@ -5,6 +5,8 @@ defmodule Radiator.Directory.Importer do
   alias Radiator.Auth
   alias Radiator.Media
 
+  alias Radiator.Task.TaskWorker
+
   require Logger
 
   def short_id_from_metalove_podcast(%Metalove.PodcastFeed{} = feed) do
@@ -62,6 +64,35 @@ defmodule Radiator.Directory.Importer do
 
   defp only_first_alphas(binary) do
     hd(Regex.run(~r/[\w]+/, hd(Regex.run(~r/[\D]+/, binary))))
+  end
+
+  def start_import_task(user = %Auth.User{}, network = %Network{}, url, opts \\ []) do
+    TaskWorker.start_link(fn task_worker ->
+      import_task(task_worker, user, network, url, opts)
+    end)
+  end
+
+  require Logger
+
+  defp import_task(task_worker, user = %Auth.User{}, network = %Network{}, url, opts) do
+    metalove_podcast = Metalove.get_podcast(url)
+
+    feed =
+      Metalove.PodcastFeed.get_by_feed_url_await_all_pages(
+        metalove_podcast.main_feed_url,
+        120_000
+      )
+
+    TaskWorker.increment_total(task_worker, length(feed.episodes))
+    TaskWorker.finish_setup(task_worker)
+
+    feed.episodes
+    |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
+    |> Enum.each(fn episode ->
+      :timer.sleep(2000)
+      TaskWorker.increment_progress(task_worker)
+      Logger.debug("Imported episode: #{episode.title}")
+    end)
   end
 
   def import_from_url(user = %Auth.User{}, network = %Network{}, url) do

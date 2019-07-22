@@ -40,8 +40,7 @@ defmodule RadiatorWeb.Api.TaskController do
       title: "Import of https://cre.fm",
       progress: %{
         completed: 4,
-        total: 10,
-        description: "Imported 4 of 10 Episodes"
+        total: 10
       },
       subject: %{
         id: 1,
