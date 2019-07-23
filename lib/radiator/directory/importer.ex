@@ -5,6 +5,8 @@ defmodule Radiator.Directory.Importer do
   alias Radiator.Auth
   alias Radiator.Media
 
+  import RadiatorWeb.FormatHelpers, only: [shorten_string: 3]
+
   require Logger
 
   def short_id_from_metalove_podcast(%Metalove.PodcastFeed{} = feed) do
@@ -64,6 +66,12 @@ defmodule Radiator.Directory.Importer do
     hd(Regex.run(~r/[\w]+/, hd(Regex.run(~r/[\D]+/, binary))))
   end
 
+  defp shortsafe_string(nil), do: nil
+
+  defp shortsafe_string(string) do
+    shorten_string(string, 200, "…")
+  end
+
   def import_from_url(user = %Auth.User{}, network = %Network{}, url) do
     metalove_podcast = Metalove.get_podcast(url)
 
@@ -79,7 +87,7 @@ defmodule Radiator.Directory.Importer do
     {:ok, podcast} =
       Editor.create_podcast(user, network, %{
         title: feed.title,
-        subtitle: feed.subtitle || feed.description,
+        subtitle: shortsafe_string(feed.subtitle || feed.description),
         summary: feed.summary,
         author: feed.author,
         image: feed.image_url,
@@ -100,7 +108,7 @@ defmodule Radiator.Directory.Importer do
           Editor.Manager.create_episode(podcast, %{
             guid: episode.guid,
             title: episode.title,
-            subtitle: episode.subtitle || episode.description,
+            subtitle: shortsafe_string(episode.subtitle || episode.description),
             summary: episode.summary || episode.description,
             summary_html: episode.content_encoded,
             published_at: episode.pub_date,
