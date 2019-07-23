@@ -1,26 +1,19 @@
 defmodule Radiator.Task.TaskWorker do
-  use GenServer
+  use GenServer, restart: :transient
 
-  defstruct id: nil,
-            total: 0,
-            progress: 0,
-            state: :setup,
-            description: %{},
-            start_time: DateTime.utc_now(),
-            end_time: nil,
+  defstruct task: %Radiator.Task{},
             spawned_pid: nil
 
-  def start_link(task_description, opts \\ []) do
+  def start_link({worker_fn, title, id}, opts \\ []) do
     GenServer.start_link(
       __MODULE__,
-      {task_description, %__MODULE__{}},
-      opts
+      {worker_fn, %__MODULE__{task: %Radiator.Task{id: id, description: %{title: title}}}},
+      [name: via_tuple(id)] ++ opts
     )
   end
 
-  @spec status(atom | pid | {atom, any} | {:via, atom, any}) :: any
-  def status(pid) do
-    GenServer.call(pid, :status)
+  def get_status(pid) do
+    GenServer.call(pid, :get_status)
   end
 
   def update_total(pid, update_fn) do
@@ -47,18 +40,24 @@ defmodule Radiator.Task.TaskWorker do
     GenServer.cast(pid, :stop)
   end
 
-  ## GenServer callbacks
-
-  def init({start_work_fun, initial_state = %__MODULE__{}}) do
-    Process.flag(:trap_exit, true)
-    my_pid = self()
-
-    %{initial_state | spawned_pid: spawn_link(fn -> start_work_fun.(my_pid) end)}
-    |> (&{:ok, &1}).()
+  defp via_tuple(task_id) do
+    {:via, Radiator.Task.TaskManager, task_id}
   end
 
-  def handle_call(:status, _from, state) do
-    result = state
+  ## GenServer callbacks
+
+  def init({worker_fn, initial_state = %__MODULE__{}}) do
+    Process.flag(:trap_exit, true)
+
+    with my_pid <- self(),
+         state <-
+           %{initial_state | spawned_pid: spawn_link(fn -> worker_fn.(my_pid) end)} do
+      {:ok, state}
+    end
+  end
+
+  def handle_call(:get_status, _from, state) do
+    result = state.task
     {:reply, result, state}
   end
 
@@ -75,19 +74,25 @@ defmodule Radiator.Task.TaskWorker do
 
   # handle the trapped exit call
   def handle_info({:EXIT, from, reason}, state = %__MODULE__{}) do
-    Logger.info("child exited #{inspect(from)} #{inspect(reason)} #{inspect(state)}")
+    Logger.info(
+      "child exited #{inspect(from)} #{inspect(reason)} #{inspect(state, pretty: true)}"
+    )
 
     spawned_pid = state.spawned_pid
 
     state =
       case from do
         ^spawned_pid ->
-          state = %{state | spawned_pid: nil, end_time: DateTime.utc_now()}
+          state = %{state | spawned_pid: nil, task: %{state.task | end_time: DateTime.utc_now()}}
 
-          case {state.progress, state.total} do
-            {a, a} -> %{state | state: :done}
-            _ -> %{state | state: :exited}
-          end
+          %{
+            state
+            | task:
+                case {state.task.progress, state.task.total} do
+                  {a, a} -> %{state.task | state: :done}
+                  _ -> %{state.task | state: :exited}
+                end
+          }
 
         _ ->
           {:stop, reason, state}

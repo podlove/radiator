@@ -11,7 +11,7 @@ defmodule Radiator.Application do
       Radiator.Repo,
       RadiatorWeb.Endpoint,
       Radiator.Tracking.Server,
-      Radiator.Task.TaskManager
+      Radiator.Task.Supervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
