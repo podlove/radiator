@@ -139,15 +139,9 @@ defmodule Radiator.Directory.Editor do
 
   """
   def list_podcasts(actor = %Auth.User{}) do
-    query =
-      from n in Podcast,
-        join: p in "podcasts_perm",
-        where: n.id == p.subject_id,
-        where: p.user_id == ^actor.id,
-        order_by: n.title
-
-    query
+    Podcast
     |> Repo.all()
+    |> Enum.filter(fn podcast -> has_permission(actor, podcast, :readonly) end)
   end
 
   defp list_podcast_query(actor = %Auth.User{}, network = %Network{}) do
