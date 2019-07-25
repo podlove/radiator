@@ -2,7 +2,7 @@ defmodule RadiatorWeb.Api.TaskView do
   use RadiatorWeb, :view
   alias __MODULE__
   alias HAL.{Document, Link}
-  alias Radiator.Directory.Network
+  alias Radiator.Directory.Podcast
 
   def render("show.json", assigns) do
     render(TaskView, "podcast_feed_import_task.json", assigns)
@@ -22,10 +22,10 @@ defmodule RadiatorWeb.Api.TaskView do
 
     document =
       case task.description[:subject] do
-        {Network, network_id} ->
+        {Podcast, podcast_id} ->
           Document.add_link(document, %Link{
             rel: "rad:subject",
-            href: Routes.api_network_path(conn, :show, network_id)
+            href: Routes.api_podcast_path(conn, :show, podcast_id)
           })
 
         _ ->

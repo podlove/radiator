@@ -2,7 +2,8 @@ defmodule Radiator.Directory.Importer do
   alias Radiator.Directory.{
     Editor,
     Network,
-    Podcast
+    Podcast,
+    Episode
   }
 
   alias Radiator.Auth
@@ -115,7 +116,7 @@ defmodule Radiator.Directory.Importer do
     total =
       case opt_map.limit do
         :unlimited -> episode_count
-        limit -> limit
+        limit -> min(limit, episode_count)
       end
 
     short_id =
@@ -126,19 +127,152 @@ defmodule Radiator.Directory.Importer do
 
     TaskWorker.increment_total(task_worker, total)
 
-    TaskWorker.set_in_description(task_worker, :subject, {Podcast, Podcast.id()})
+    {:ok, podcast} = create_podcast(user, network, feed, short_id)
+
+    ## TODO: publishing needs to work differently here and as a separate step eventually
+    {:ok, podcast} = Editor.publish_podcast(user, podcast)
+
+    TaskWorker.set_in_description(task_worker, :subject, {Podcast, podcast.id()})
 
     TaskWorker.finish_setup(task_worker)
 
     ## end of setup
 
     feed.episodes
+    |> Enum.take(total)
     |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
     |> Enum.each(fn episode ->
-      :timer.sleep(:timer.seconds(2))
+      {:ok, radiator_episode} =
+        Editor.Manager.create_episode(podcast, %{
+          guid: episode.guid,
+          title: episode.title,
+          subtitle: shortsafe_string(episode.subtitle || episode.description),
+          summary: episode.summary || episode.description,
+          summary_html: episode.content_encoded,
+          published_at: episode.pub_date,
+          number: episode.episode,
+          short_id: Episode.generate_short_id(short_id, episode.episode)
+        })
+
+      {:ok, audio} =
+        Editor.Manager.create_audio(radiator_episode, %{
+          title: episode.title,
+          published_at: episode.pub_date,
+          duration: episode.duration && parse_chapter_time(episode.duration)
+        })
+
+      Media.AudioFileUpload.sideload(episode.enclosure.url, audio)
+
+      case episode.chapters do
+        chapters = [_ | _] ->
+          chapters
+          |> Enum.each(fn chapter ->
+            attrs = %{
+              start: parse_chapter_time(chapter.start),
+              title: chapter.title,
+              link: Map.get(chapter, :href),
+              image: Map.get(chapter, :image)
+            }
+
+            Radiator.AudioMeta.create_chapter(audio, attrs)
+          end)
+
+        _no_chapters ->
+          ## try to get chapters from scraped metadata info
+          ## TODO: implement better support for incremental metadata loading in metalove
+
+          enclosure = episode.enclosure
+
+          enclosure =
+            case Metalove.Enclosure.fetch_metadata(enclosure) do
+              ^enclosure ->
+                enclosure
+
+              enclosure ->
+                # update existing episode with found metadata
+                Metalove.Episode.get_by_episode_id({:episode, episode.feed_url, episode.guid})
+                |> Map.put(:enclosure, enclosure)
+                |> Metalove.Episode.store()
+
+                enclosure
+            end
+
+          create_chapters_from_metadata(audio, enclosure.metadata)
+      end
+
+      with url when not is_nil(url) <- episode.image_url do
+        Editor.update_episode(user, radiator_episode, %{image: url})
+        Editor.update_audio(user, audio, %{image: url})
+      end
+
       TaskWorker.increment_progress(task_worker)
-      Logger.debug("Imported episode: #{episode.title}")
+
+      Logger.info("Imported episode: #{episode.title}")
     end)
+  end
+
+  defp create_chapters_from_metadata(audio, metadata) do
+    with %{chapters: chapters} <- metadata do
+      Radiator.AudioMeta.delete_chapters(audio)
+
+      chapters
+      |> Enum.with_index(1)
+      |> Enum.each(fn {chapter, index} ->
+        attrs = %{
+          start: parse_chapter_time(chapter.start),
+          title: chapter.title,
+          link: Map.get(chapter, :href)
+        }
+
+        with {:ok, radiator_chapter} <-
+               Radiator.AudioMeta.create_chapter(audio, attrs) do
+          case Map.get(chapter, :image) do
+            %{
+              data: binary_data,
+              type: mime_type
+            } ->
+              extension = hd(:mimerl.mime_to_exts(mime_type))
+
+              # TODO: make a nice wrapper around this temporary file creation
+              upload = %Plug.Upload{
+                content_type: mime_type,
+                filename: "Chapter_#{index}.#{extension}",
+                path: Plug.Upload.random_file!("chapter")
+              }
+
+              File.write(upload.path, binary_data)
+
+              {:ok, radiator_chapter} =
+                Radiator.AudioMeta.update_chapter(radiator_chapter, %{image: upload})
+
+              File.rm(upload.path)
+              radiator_chapter
+
+            _ ->
+              radiator_chapter
+          end
+        else
+          failure ->
+            Logger.debug(
+              "Failed to create chapter #{index} with attributes: #{inspect(attrs, pretty: true)} - result: #{
+                inspect(failure)
+              }"
+            )
+        end
+      end)
+    end
+  end
+
+  defp create_podcast(user, network, feed, short_id) do
+    Editor.create_podcast(user, network, %{
+      title: feed.title,
+      subtitle: shortsafe_string(feed.subtitle || feed.description),
+      summary: feed.summary,
+      author: feed.author,
+      image: feed.image_url,
+      language: feed.language,
+      short_id: short_id
+    })
   end
 
   def import_from_url(user = %Auth.User{}, network = %Network{}, url) do
@@ -153,16 +287,7 @@ defmodule Radiator.Directory.Importer do
     # deduce short_id
     short_id = short_id_from_metalove_podcast(feed)
 
-    {:ok, podcast} =
-      Editor.create_podcast(user, network, %{
-        title: feed.title,
-        subtitle: shortsafe_string(feed.subtitle || feed.description),
-        summary: feed.summary,
-        author: feed.author,
-        image: feed.image_url,
-        language: feed.language,
-        short_id: short_id
-      })
+    {:ok, podcast} = create_podcast(user, network, feed, short_id)
 
     {:ok, podcast} = Editor.publish_podcast(user, podcast)
 
@@ -213,18 +338,6 @@ defmodule Radiator.Directory.Importer do
     {:ok, %{podcast: podcast, episodes: episodes, metalove: %{feed: feed}}}
   end
 
-  # temporary workaround for a metalove bug with fanboys episode FAN362
-  defp sanitize_metalove_chaptertitle(title, _) when is_binary(title), do: title
-
-  defp sanitize_metalove_chaptertitle(tuple, _) when is_tuple(tuple) do
-    Tuple.to_list(tuple)
-    |> Enum.drop(1)
-    |> Enum.map(&to_string/1)
-    |> Enum.join()
-  end
-
-  defp sanitize_metalove_chaptertitle(_, index), do: "Chapter #{index}"
-
   defp parse_chapter_time(time) when is_binary(time) do
     Chapters.Parsers.Normalplaytime.Parser.parse_total_ms(time) || 0
   end
@@ -254,73 +367,21 @@ defmodule Radiator.Directory.Importer do
     |> Enum.each(fn metalove_episode ->
       Logger.info("Import:  Episode #{metalove_episode.title}")
 
-      {:ok, podlove_episode} =
+      {:ok, radiator_episode} =
         Editor.get_episode_by_podcast_id_and_guid(user, podcast.id, metalove_episode.guid)
 
-      case metalove_episode.enclosure.metadata do
-        %{chapters: chapters} ->
-          Radiator.AudioMeta.delete_chapters(podlove_episode.audio)
-
-          chapters
-          |> Enum.with_index(1)
-          |> Enum.each(fn {chapter, index} ->
-            attrs = %{
-              start: parse_chapter_time(chapter.start),
-              title: sanitize_metalove_chaptertitle(chapter.title, index),
-              link: Map.get(chapter, :href)
-            }
-
-            with {:ok, radiator_chapter} <-
-                   Radiator.AudioMeta.create_chapter(podlove_episode.audio, attrs) do
-              case Map.get(chapter, :image) do
-                %{
-                  data: binary_data,
-                  type: mime_type
-                } ->
-                  extension = hd(:mimerl.mime_to_exts(mime_type))
-
-                  # TODO: make a nice wrapper around this temporary file creation
-                  upload = %Plug.Upload{
-                    content_type: mime_type,
-                    filename: "Chapter_#{index}.#{extension}",
-                    path: Plug.Upload.random_file!("chapter")
-                  }
-
-                  File.write(upload.path, binary_data)
-
-                  {:ok, radiator_chapter} =
-                    Radiator.AudioMeta.update_chapter(radiator_chapter, %{image: upload})
-
-                  File.rm(upload.path)
-                  radiator_chapter
-
-                _ ->
-                  radiator_chapter
-              end
-            else
-              failure ->
-                Logger.debug(
-                  "Failed to create chapter #{index} with attributes: #{
-                    inspect(attrs, pretty: true)
-                  } - result: #{inspect(failure)}"
-                )
-            end
-          end)
-
-        _ ->
-          nil
-      end
+      create_chapters_from_metadata(radiator_episode.audio, metalove_episode.enclosure.metadata)
 
       case metalove_episode.image_url do
         nil ->
           nil
 
         url ->
-          Editor.update_episode(user, podlove_episode, %{image: url})
-          Editor.update_audio(user, podlove_episode.audio, %{image: url})
+          Editor.update_episode(user, radiator_episode, %{image: url})
+          Editor.update_audio(user, radiator_episode.audio, %{image: url})
       end
 
-      Media.AudioFileUpload.sideload(metalove_episode.enclosure.url, podlove_episode.audio)
+      Media.AudioFileUpload.sideload(metalove_episode.enclosure.url, radiator_episode.audio)
     end)
   end
 end

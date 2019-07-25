@@ -13,8 +13,15 @@ defmodule RadiatorWeb.Api.TaskController do
       import_feed_params
       |> Map.take(["enclosure_types", "short_id", "limit"])
       |> Enum.map(fn
-        {"limit", limit_string} ->
-          {:limit, String.to_integer(limit_string)}
+        {"limit", limit} ->
+          {:limit,
+           case limit do
+             string when is_binary(string) ->
+               String.to_integer(string)
+
+             int when is_integer(int) ->
+               int
+           end}
 
         {key, value} ->
           {String.to_existing_atom(key), value}

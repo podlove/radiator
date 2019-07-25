@@ -143,6 +143,18 @@ defmodule Radiator.Directory.Episode do
     end
   end
 
+  def generate_short_id(short_id_base, number) when is_integer(number) do
+    generate_short_id(short_id_base, to_string(number))
+  end
+
+  def generate_short_id(short_id_base, number) when is_binary(number) do
+    "#{short_id_base}#{String.pad_leading(number, 3, "0")}"
+  end
+
+  def generate_short_id(short_id_base, _) do
+    generate_short_id("#{short_id_base}_t", :random.uniform(1000))
+  end
+
   def regenerate_guid(changeset) do
     put_change(changeset, :guid, UUID.uuid4())
   end
