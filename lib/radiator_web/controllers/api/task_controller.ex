@@ -24,7 +24,7 @@ defmodule RadiatorWeb.Api.TaskController do
          {:ok, network} <- Editor.get_network(user, import_feed_params["network_id"]),
          feed_url when is_binary(feed_url) <- import_feed_params["feed_url"],
          metalove_podcast = %Metalove.Podcast{} <- Metalove.get_podcast(feed_url),
-         {:ok, task_id} <- Importer.import_from_url(user, network, feed_url, import_opts),
+         {:ok, task_id} <- Importer.start_import_task(user, network, feed_url, import_opts),
          task <- TaskManager.get_task(task_id) do
       IO.inspect(metalove_podcast)
 
@@ -34,24 +34,20 @@ defmodule RadiatorWeb.Api.TaskController do
   end
 
   def show(conn, %{"id" => task_id}) do
-    with task <- TaskManager.get_task(task_id) do
+    with task = %Radiator.Task{} <- TaskManager.get_task(task_id) do
       conn
       |> render("show.json", task: task)
+    else
+      _ -> @not_found_match
     end
   end
 
-  defp dummy_task(id) do
-    %{
-      id: id,
-      title: "Import of https://cre.fm",
-      progress: %{
-        completed: 4,
-        total: 10
-      },
-      subject: %{
-        id: 1,
-        type: :Podcast
-      }
-    }
+  def delete(conn, %{"id" => task_id}) do
+    with {:ended, _task} <- TaskManager.end_task(task_id) do
+      send_delete_resp(conn)
+    else
+      @not_found_match -> send_delete_resp(conn)
+      error -> error
+    end
   end
 end

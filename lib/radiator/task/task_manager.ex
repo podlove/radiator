@@ -3,6 +3,10 @@ defmodule Radiator.Task.TaskManager do
 
   @task_manager __MODULE__
 
+  alias Radiator.Task.TaskWorker
+
+  ## TODO: add timer to sweep and delete old tasks automatically
+
   @moduledoc """
   Registry and Manager for Radiator Tasks with Progress.
   """
@@ -21,7 +25,7 @@ defmodule Radiator.Task.TaskManager do
   def start_task(worker_fn, title) do
     id = GenServer.call(@task_manager, :get_next_id)
 
-    {:ok, pid} =
+    {:ok, _pid} =
       Radiator.Task.WorkerSupervisor.start_task_worker(
         worker_fn,
         title,
@@ -35,13 +39,26 @@ defmodule Radiator.Task.TaskManager do
   Returns Radiator.Task.t() if it exists, nil otherwise.
   """
 
-  def get_task(task_id) do
-    case get(task_id) do
-      {:found, pid} ->
-        Radiator.Task.TaskWorker.get_status(pid)
-    end
+  def get_task(task_id) when is_binary(task_id), do: get_task(String.to_integer(task_id))
 
-    %Radiator.Task{id: task_id}
+  def get_task(task_id) when is_integer(task_id) do
+    with {:found, pid} <- get(task_id) do
+      TaskWorker.get_status(pid)
+    else
+      _ -> nil
+    end
+  end
+
+  def end_task(task_id) when is_binary(task_id), do: end_task(String.to_integer(task_id))
+
+  def end_task(task_id) when is_integer(task_id) do
+    with {:found, pid} <- get(task_id) do
+      task = TaskWorker.get_status(pid)
+      TaskWorker.stop(pid)
+      {:ended, task}
+    else
+      _ -> {:error, :not_found}
+    end
   end
 
   def get(key) do

@@ -1,11 +1,17 @@
 defmodule Radiator.Directory.Importer do
-  alias Radiator.Directory.Editor
-  alias Radiator.Directory.Network
-  alias Radiator.Directory.Podcast
+  alias Radiator.Directory.{
+    Editor,
+    Network,
+    Podcast
+  }
+
   alias Radiator.Auth
   alias Radiator.Media
 
-  alias Radiator.Task.TaskWorker
+  alias Radiator.Task.{
+    TaskWorker,
+    TaskManager
+  }
 
   require Logger
 
@@ -67,14 +73,27 @@ defmodule Radiator.Directory.Importer do
   end
 
   def start_import_task(user = %Auth.User{}, network = %Network{}, url, opts \\ []) do
-    TaskWorker.start_link(fn task_worker ->
-      import_task(task_worker, user, network, url, opts)
-    end)
+    title = "Import '#{url}' into #{network.title}"
+
+    TaskManager.start_task(
+      fn task_worker ->
+        import_task(task_worker, user, network, url, opts)
+      end,
+      title
+    )
   end
 
   require Logger
 
   defp import_task(task_worker, user = %Auth.User{}, network = %Network{}, url, opts) do
+    ## setup task
+    opt_map =
+      Enum.into(opts, %{
+        limit: :unlimited,
+        short_id: :deduce,
+        enclosure_types: :all
+      })
+
     metalove_podcast = Metalove.get_podcast(url)
 
     feed =
@@ -83,13 +102,32 @@ defmodule Radiator.Directory.Importer do
         120_000
       )
 
-    TaskWorker.increment_total(task_worker, length(feed.episodes))
+    episode_count = length(feed.episodes)
+
+    total =
+      case opt_map.limit do
+        :unlimited -> episode_count
+        limit -> limit
+      end
+
+    short_id =
+      case opt_map.short_id do
+        :deduce -> short_id_from_metalove_podcast(feed)
+        short_id when is_binary(short_id) -> short_id
+      end
+
+    TaskWorker.increment_total(task_worker, total)
+
+    TaskWorker.set_in_description(task_worker, :subject, {Podcast, Podcast.id()})
+
     TaskWorker.finish_setup(task_worker)
+
+    ## end of setup
 
     feed.episodes
     |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
     |> Enum.each(fn episode ->
-      :timer.sleep(2000)
+      :timer.sleep(:timer.seconds(2))
       TaskWorker.increment_progress(task_worker)
       Logger.debug("Imported episode: #{episode.title}")
     end)

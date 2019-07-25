@@ -12,6 +12,10 @@ defmodule Radiator.Task.TaskWorker do
     )
   end
 
+  def set_in_description(pid, key, value) do
+    GenServer.cast(pid, {:set_in_description, key, value})
+  end
+
   def get_status(pid) do
     GenServer.call(pid, :get_status)
   end
@@ -66,7 +70,16 @@ defmodule Radiator.Task.TaskWorker do
   end
 
   def handle_cast({:update, key, update_fn}, state = %__MODULE__{}) do
-    state = update_in(state, [Access.key!(key)], update_fn)
+    state = update_in(state, [Access.key!(:task), Access.key!(key)], update_fn)
+    {:noreply, state}
+  end
+
+  def handle_cast({:set_in_description, key, value}, state = %__MODULE__{}) do
+    state =
+      update_in(state, [Access.key!(:task), Access.key!(:description)], fn description ->
+        Map.put(description, key, value)
+      end)
+
     {:noreply, state}
   end
 
