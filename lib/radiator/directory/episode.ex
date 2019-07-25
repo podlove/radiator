@@ -152,7 +152,7 @@ defmodule Radiator.Directory.Episode do
   end
 
   def generate_short_id(short_id_base, _) do
-    generate_short_id("#{short_id_base}_t", :random.uniform(1000))
+    generate_short_id("#{short_id_base}_t", :rand.uniform(1000))
   end
 
   def regenerate_guid(changeset) do

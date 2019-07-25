@@ -11,7 +11,7 @@ defmodule Radiator.Task.TaskManager do
   Registry and Manager for Radiator Tasks with Progress.
   """
   defstruct table_name: :radiator_tasks,
-            id_sequence: :random.uniform(1000),
+            id_sequence: :rand.uniform(1000),
             log_limit: 1_000_000
 
   def start_link(opts \\ []) do
@@ -113,7 +113,7 @@ defmodule Radiator.Task.TaskManager do
   @impl true
   def handle_call(:get_next_id, _from, state = %__MODULE__{}) do
     id = state.id_sequence
-    state = %{state | id_sequence: id + :random.uniform(33)}
+    state = %{state | id_sequence: id + :rand.uniform(33)}
 
     {:reply, id, state}
   end
