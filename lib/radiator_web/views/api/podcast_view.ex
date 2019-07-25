@@ -1,6 +1,6 @@
 defmodule RadiatorWeb.Api.PodcastView do
   use RadiatorWeb, :view
-  alias RadiatorWeb.Api.PodcastView
+  alias __MODULE__
   alias HAL.{Document, Link, Embed}
   import RadiatorWeb.ContentHelpers
 

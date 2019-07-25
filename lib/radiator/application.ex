@@ -10,7 +10,8 @@ defmodule Radiator.Application do
     children = [
       Radiator.Repo,
       RadiatorWeb.Endpoint,
-      Radiator.Tracking.Server
+      Radiator.Tracking.Server,
+      Radiator.Task.Supervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

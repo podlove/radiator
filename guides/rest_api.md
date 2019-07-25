@@ -1,58 +1,64 @@
 # REST API
 
-- [API Usage](#API-Usage)
-- [Authentication](#Authentication)
-  - [Login](#Login)
-    - [Parameters](#Parameters)
-    - [Response](#Response)
-  - [Prolong Session](#Prolong-Session)
-    - [Response](#Response-1)
-- [Networks](#Networks)
-  - [Parameters for Create & Update](#Parameters-for-Create--Update)
-  - [Create](#Create)
-  - [Read](#Read)
-  - [Update](#Update)
-  - [Delete](#Delete)
-- [Network Collaborators](#Network-Collaborators)
-  - [Parameters for Create & Update](#Parameters-for-Create--Update-1)
-    - [Read](#Read-1)
-    - [Create](#Create-1)
-    - [Update](#Update-1)
-    - [Delete](#Delete-1)
-- [Podcasts](#Podcasts)
-  - [Parameters for Create & Update](#Parameters-for-Create--Update-2)
-  - [Create](#Create-2)
-  - [Read](#Read-2)
-  - [Update](#Update-2)
-  - [Delete](#Delete-2)
-- [Podcasts Collaborators](#Podcasts-Collaborators)
-  - [Parameters for Create & Update](#Parameters-for-Create--Update-3)
-    - [Read](#Read-3)
-    - [Create](#Create-3)
-    - [Update](#Update-3)
-    - [Delete](#Delete-3)
-- [Episodes](#Episodes)
-  - [Parameters for Create & Update](#Parameters-for-Create--Update-4)
-  - [Create](#Create-4)
-  - [Read](#Read-4)
-  - [Update](#Update-4)
-  - [Delete](#Delete-4)
-- [Audio](#Audio)
-  - [Parameters for Create & Update](#Parameters-for-Create--Update-5)
-  - [Create](#Create-5)
-  - [Read](#Read-5)
-  - [Update](#Update-5)
-  - [Delete](#Delete-5)
-- [Audio File](#Audio-File)
-  - [Parameters for Create](#Parameters-for-Create)
-  - [Create](#Create-6)
-  - [Read](#Read-6)
-- [Audio Chapters](#Audio-Chapters)
-  - [Parameters for Create & Update](#Parameters-for-Create--Update-6)
-  - [Create](#Create-7)
-  - [Read](#Read-7)
-  - [Update](#Update-6)
-  - [Delete](#Delete-6)
+- [API Usage](#api-usage)
+- [Authentication](#authentication)
+  - [Login](#login)
+    - [Parameters](#parameters)
+    - [Response](#response)
+  - [Prolong Session](#prolong-session)
+    - [Response](#response-1)
+- [Networks](#networks)
+  - [Parameters for Create & Update](#parameters-for-create--update)
+  - [Create](#create)
+  - [Read](#read)
+  - [Update](#update)
+  - [Delete](#delete)
+- [Network Collaborators](#network-collaborators)
+  - [Parameters for Create & Update](#parameters-for-create--update-1)
+    - [Read](#read-1)
+    - [Create](#create-1)
+    - [Update](#update-1)
+    - [Delete](#delete-1)
+- [Podcasts](#podcasts)
+  - [Parameters for Create & Update](#parameters-for-create--update-2)
+  - [Create](#create-2)
+  - [Read](#read-2)
+  - [Update](#update-2)
+  - [Delete](#delete-2)
+- [Podcasts Collaborators](#podcasts-collaborators)
+  - [Parameters for Create & Update](#parameters-for-create--update-3)
+    - [Read](#read-3)
+    - [Create](#create-3)
+    - [Update](#update-3)
+    - [Delete](#delete-3)
+- [Episodes](#episodes)
+  - [Parameters for Create & Update](#parameters-for-create--update-4)
+  - [Create](#create-4)
+  - [Read](#read-4)
+  - [Update](#update-4)
+  - [Delete](#delete-4)
+- [Audio](#audio)
+  - [Parameters for Create & Update](#parameters-for-create--update-5)
+  - [Create](#create-5)
+  - [Read](#read-5)
+  - [Update](#update-5)
+  - [Delete](#delete-5)
+- [Audio File](#audio-file)
+  - [Parameters for Create](#parameters-for-create)
+  - [Create](#create-6)
+  - [Read](#read-6)
+- [Audio Chapters](#audio-chapters)
+  - [Parameters for Create & Update](#parameters-for-create--update-6)
+  - [Create](#create-7)
+  - [Read](#read-7)
+  - [Update](#update-6)
+  - [Delete](#delete-6)
+- [Tasks](#tasks)
+  - [Parameters for Create](#parameters-for-create-1)
+    - [Import podcast feed](#import-podcast-feed)
+  - [Create](#create-8)
+  - [Read](#read-8)
+  - [Delete](#delete-7)
 
 ## API Usage
 
@@ -402,4 +408,69 @@ PATCH /api/rest/v1/audios/:audio_id/chapters/:start
 
 ```
 DELETE /api/rest/v1/audios/:audio_id/chapters/:start
+```
+
+## Tasks
+
+### Parameters for Create
+
+#### Import podcast feed
+
+| Name                                   | Type                | Description                                                                                                                                            |
+| -------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `import_podcast_feed[network_id]`      | `integer`           | Network ID. (required).                                                                                                                                |
+| `import_podcast_feed[feed_url]`        | `string`            | feed or show url (check availablity and extent with GraphQL query `feedInfo`                                                                           |
+| `import_podcast_feed[enclosure_types]` | `array` of `string` | Optional. E.g. `["audio/mpeg","audio/mp4"]` or [] for none. Defaults to all available enclosures (not implemented yet, currently only mp3 is imported) |
+| `import_podcast_feed[short_id]`        | `string`            | Short ID for the podcast. E.g. `"CRE"`, `"FAN"`, `"FG"`.                                                                                               |
+| `import_podcast_feed[limit]`           | `integer`           | Limits the amount of episodes to import. Optional, Defaults to all found.                                                                              |
+
+
+### Create
+
+```
+POST /api/rest/v1/tasks
+```
+
+### Read
+
+```
+GET /api/rest/v1/tasks/:id
+```
+
+Example:
+```json
+{
+  "end_time": "2019-07-25T12:18:40.810667Z",
+  "id": 543,
+  "progress": 4,
+  "start_time": "2019-07-25T10:55:38.521178Z",
+  "state": "exited",
+  "title": "Import 'freakshow.fm' into ACME",
+  "total": 8,
+  "_links": {
+    "rad:subject": {
+      "href": "/api/rest/v1/podcasts/14"
+    },
+    "self": {
+      "href": "/api/rest/v1/tasks/543"
+    }
+  }
+}
+```
+
+| Name         | Type                                         | Description                                      |
+| ------------ | -------------------------------------------- | ------------------------------------------------ |
+| `state`      | one of `setup`,`running`,`finished`,`exited` |
+| `progress`   | `integer`                                    | amount of items finished                         |
+| `total`      | `integer`                                    | total amount of items                            |
+| `title`      | `string`                                     | Human readable english title describing the task |
+| `start_time` | `timestamp`                                  |
+| `end_time`   | `timestamp`                                  | can be nil. time the task `finished` or `exited` |
+
+### Delete
+
+You should delete a task after it is done. Eventually done tasks will clear out on their own too (not implemented yet)
+
+```
+DELETE /api/rest/v1/tasks/:id
 ```
