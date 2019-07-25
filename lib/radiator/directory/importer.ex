@@ -181,23 +181,27 @@ defmodule Radiator.Directory.Importer do
           ## try to get chapters from scraped metadata info
           ## TODO: implement better support for incremental metadata loading in metalove
 
-          enclosure = episode.enclosure
+          try do
+            enclosure = episode.enclosure
 
-          enclosure =
-            case Metalove.Enclosure.fetch_metadata(enclosure) do
-              ^enclosure ->
-                enclosure
+            enclosure =
+              case Metalove.Enclosure.fetch_metadata(enclosure) do
+                ^enclosure ->
+                  enclosure
 
-              enclosure ->
-                # update existing episode with found metadata
-                Metalove.Episode.get_by_episode_id({:episode, episode.feed_url, episode.guid})
-                |> Map.put(:enclosure, enclosure)
-                |> Metalove.Episode.store()
+                enclosure ->
+                  # update existing episode with found metadata
+                  Metalove.Episode.get_by_episode_id({:episode, episode.feed_url, episode.guid})
+                  |> Map.put(:enclosure, enclosure)
+                  |> Metalove.Episode.store()
 
-                enclosure
-            end
+                  enclosure
+              end
 
-          create_chapters_from_metadata(audio, enclosure.metadata)
+            create_chapters_from_metadata(audio, enclosure.metadata)
+          rescue
+            _ -> nil
+          end
       end
 
       with url when not is_nil(url) <- episode.image_url do
