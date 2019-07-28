@@ -18,7 +18,8 @@ defmodule RadiatorWeb.Api.NetworkView do
     |> Document.add_properties(%{
       id: network.id,
       title: network.title,
-      image: Network.image_url(network)
+      image: Network.image_url(network),
+      slug: network.slug
     })
   end
 end

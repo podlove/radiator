@@ -62,7 +62,7 @@
 
 ## API Usage
 
-All requests need to be authenticated. See [Authentication](#Authentication) below for details.
+All requests need to be authenticated. See [Authentication](#authentication) below for details.
 
 The documentation will often write parameters like this: `network[title]`. This indicates hierarchical parameter keys.
 
@@ -136,6 +136,7 @@ POST /api/rest/v1/auth/prolong
 | ---------------- | -------- | ------------------------------- |
 | `network[title]` | `string` | **Required.** Network title.    |
 | `network[image]` | `file`   | Image representing the Network. |
+| `network[slug]`  | `string` | Slug for this network           |
 
 ### Create
 
