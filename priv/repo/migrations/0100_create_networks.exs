@@ -5,7 +5,7 @@ defmodule Radiator.Repo.Migrations.CreateNetworks do
     create table(:networks) do
       add :title, :text
       add :image, :text
-      add :slug, :string
+      add :slug, :text
 
       timestamps()
     end

@@ -30,9 +30,9 @@ defmodule Radiator.Contribution.Person do
     field :display_name, :string
     field :nick, :string
     field :email, :string
-    field :uri, :string
+    field :link, :string
 
-    field :avatar, Media.PersonAvatar.Type
+    field :image, Media.PersonAvatar.Type
 
     belongs_to :user, User
     belongs_to :network, Network

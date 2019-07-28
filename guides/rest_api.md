@@ -37,28 +37,34 @@
   - [Read](#read-4)
   - [Update](#update-4)
   - [Delete](#delete-4)
-- [Audio](#audio)
+- [People](#people)
   - [Parameters for Create & Update](#parameters-for-create--update-5)
   - [Create](#create-5)
   - [Read](#read-5)
   - [Update](#update-5)
   - [Delete](#delete-5)
-- [Audio File](#audio-file)
-  - [Parameters for Create](#parameters-for-create)
+- [Audio](#audio)
+  - [Parameters for Create & Update](#parameters-for-create--update-6)
   - [Create](#create-6)
   - [Read](#read-6)
-- [Audio Chapters](#audio-chapters)
-  - [Parameters for Create & Update](#parameters-for-create--update-6)
-  - [Create](#create-7)
-  - [Read](#read-7)
   - [Update](#update-6)
   - [Delete](#delete-6)
+- [Audio File](#audio-file)
+  - [Parameters for Create](#parameters-for-create)
+  - [Create](#create-7)
+  - [Read](#read-7)
+- [Audio Chapters](#audio-chapters)
+  - [Parameters for Create & Update](#parameters-for-create--update-7)
+  - [Create](#create-8)
+  - [Read](#read-8)
+  - [Update](#update-7)
+  - [Delete](#delete-7)
 - [Tasks](#tasks)
   - [Parameters for Create](#parameters-for-create-1)
     - [Import podcast feed](#import-podcast-feed)
-  - [Create](#create-8)
-  - [Read](#read-8)
-  - [Delete](#delete-7)
+  - [Create](#create-9)
+  - [Read](#read-9)
+  - [Delete](#delete-8)
 
 ## API Usage
 
@@ -311,6 +317,42 @@ PATCH /api/rest/v1/episodes/:id
 
 ```
 DELETE /api/rest/v1/episodes/:id
+```
+
+## People
+
+### Parameters for Create & Update
+
+| Name                   | Type      | Description                                           |
+| ---------------------- | --------- | ----------------------------------------------------- |
+| `person[network_id]`   | `integer` | **Required.**                                         |
+| `person[name]`         | `string`  | Full name of that person                              |
+| `person[display_name]` | `string`  | Name to be used in all public pages, defaults to nick |
+| `person[nick]`         | `string`  | Nick name of that person                              |
+| `person[image]`        | `Image`   | Avatar Image                                          |
+
+### Create
+
+```
+POST /api/rest/v1/people
+```
+
+### Read
+
+```
+GET /api/rest/v1/people/:id
+```
+
+### Update
+
+```
+PATCH /api/rest/v1/people/:id
+```
+
+### Delete
+
+```
+DELETE /api/rest/v1/people/:id
 ```
 
 ## Audio
