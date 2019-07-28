@@ -13,8 +13,9 @@ defmodule Radiator.Directory.Audio do
   import Arc.Ecto.Changeset
   import Ecto.Query, warn: false
 
+  alias __MODULE__
   alias Radiator.Media
-  alias Radiator.Directory.{Episode, Network}
+  alias Radiator.Directory.{Episode, Podcast, Network}
   alias Radiator.AudioMeta.Chapter
   alias Radiator.Contribution
 
@@ -46,5 +47,24 @@ defmodule Radiator.Directory.Audio do
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
 
     # todo: validate it belongs to _something_ / not a zombie
+  end
+
+  @doc """
+  Convenience accessor for image URL.
+  Use `podcast: podcast` to get podcast image if there is no audio image
+  """
+  def image_url(audio = %Audio{}, opts \\ []) do
+    with url when is_binary(url) <- Media.AudioImage.url({audio.image, audio}) do
+      url
+    else
+      _ ->
+        case opts[:podcast] do
+          podcast = %Podcast{} ->
+            Podcast.image_url(podcast)
+
+          _ ->
+            nil
+        end
+    end
   end
 end
