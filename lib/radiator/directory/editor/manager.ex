@@ -34,7 +34,7 @@ defmodule Radiator.Directory.Editor.Manager do
     Logger.debug("creating podcast --- #{inspect(attrs)}")
 
     # we need the podcast to have an id before we can save the image
-    {update_attrs, insert_attrs} = Map.split(attrs, [:image])
+    {update_attrs, insert_attrs} = Map.split(attrs, [:image, "image"])
 
     insert =
       %Podcast{network_id: network.id}
@@ -364,6 +364,11 @@ defmodule Radiator.Directory.Editor.Manager do
       nil -> 0
       value -> value
     end
+  end
+
+  def delete_person(%Person{} = subject) do
+    subject
+    |> Repo.delete()
   end
 
   # TODO

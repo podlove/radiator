@@ -1,6 +1,8 @@
 defmodule RadiatorWeb.SharedPartialsView do
   use RadiatorWeb, :view
 
+  import RadiatorWeb.ContentHelpers
+
   use Radiator.Constants, :permissions
 
   def permission_select_values do

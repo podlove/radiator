@@ -8,7 +8,7 @@ defmodule Radiator.Repo.Migrations.CreateChapters do
       add :start, :integer, primary_key: true
       add :title, :text
       add :link, :text
-      add :image, :string
+      add :image, :text
     end
   end
 end
