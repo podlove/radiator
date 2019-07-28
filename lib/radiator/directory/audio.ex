@@ -15,9 +15,14 @@ defmodule Radiator.Directory.Audio do
 
   alias __MODULE__
   alias Radiator.Media
-  alias Radiator.Directory.{Episode, Podcast, Network}
   alias Radiator.AudioMeta.Chapter
   alias Radiator.Contribution
+
+  alias Radiator.Directory.{
+    Episode,
+    Podcast,
+    AudioPublication
+  }
 
   schema "audios" do
     field :title, :string
@@ -26,11 +31,10 @@ defmodule Radiator.Directory.Audio do
     field :image, Media.AudioImage.Type
 
     has_many :episodes, Episode
+    belongs_to :audio_publication, AudioPublication
 
     has_many :contributions, Contribution.AudioContribution
     has_many :contributors, through: [:contributions, :person]
-
-    belongs_to :network, Network
 
     has_many :audio_files, Media.AudioFile
     has_many :chapters, Chapter
