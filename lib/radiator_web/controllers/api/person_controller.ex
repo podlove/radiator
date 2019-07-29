@@ -14,7 +14,7 @@ defmodule RadiatorWeb.Api.PersonController do
 
   def index(conn, params, user) do
     with network_id <- params["person"]["network_id"],
-         {:ok, people} <- Editor.get_people(user, %Network{id: network_id}) do
+         {:ok, people} <- Editor.list_people(user, %Network{id: network_id}) do
       conn
       |> render("index.json", %{people: people})
     else

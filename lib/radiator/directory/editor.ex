@@ -686,9 +686,7 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  @spec get_people(Radiator.Auth.User.t(), Radiator.Directory.Network.t()) ::
-          {:error, :not_authorized} | {:ok, any}
-  def get_people(actor = %Auth.User{}, subject = %Network{}) do
+  def list_people(actor = %Auth.User{}, subject = %Network{}) do
     if has_permission(actor, subject, :readonly) do
       people =
         Ecto.assoc(subject, :people)
@@ -700,6 +698,7 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  @spec create_person(Radiator.Auth.User.t(), Radiator.Directory.Network.t(), any) :: any
   def create_person(actor = %Auth.User{}, network = %Network{}, attrs) do
     if has_permission(actor, network, :edit) do
       Editor.Editor.create_person(network, attrs)

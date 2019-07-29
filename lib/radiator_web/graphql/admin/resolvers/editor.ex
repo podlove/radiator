@@ -5,7 +5,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   alias Radiator.Directory.{Episode, Podcast, Network, Audio}
   alias Radiator.AudioMeta
   alias Radiator.AudioMeta.Chapter
-  alias Radiator.Media
   alias Radiator.Auth.User
   alias Radiator.Contribution.Person
   import RadiatorWeb.FormatHelpers, only: [format_normal_playtime: 1]
@@ -150,6 +149,13 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def list_collaborators(%Network{id: id}, _args, %{context: %{current_user: user}}) do
     with_network user, id do
       fn network -> Editor.list_collaborators(user, network) end
+    end
+  end
+
+  @spec list_people(Radiator.Directory.Network.t(), any, %{context: %{current_user: any}}) :: any
+  def list_people(%Network{id: id}, _args, %{context: %{current_user: user}}) do
+    with_network user, id do
+      fn network -> Editor.list_people(user, network) end
     end
   end
 
@@ -316,22 +322,18 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, format_normal_playtime(time)}
   end
 
-  def get_image_url(episode = %Episode{}, _, _) do
-    {:ok, Media.EpisodeImage.url({episode.image, episode})}
-  end
-
-  def get_image_url(podcast = %Podcast{}, _, _) do
-    {:ok, Podcast.image_url(podcast)}
-  end
-
-  def get_image_url(network = %Network{}, _, _) do
-    {:ok, Media.NetworkImage.url({network.image, network})}
-  end
+  @spec get_image_url(Network.t() | Podcast.t() | Episode.t() | Audio.t() | Chapter.t(), any, any) ::
+          {:ok, String.t()}
+  def get_image_url(subject, _, _)
 
   def get_image_url(%User{} = user, _, _) do
     user = user |> Radiator.Repo.preload(:person)
 
     {:ok, Person.image_url(user.person)}
+  end
+
+  def get_image_url(%type{} = subject, _, _) do
+    {:ok, type.image_url(subject)}
   end
 
   def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{current_user: user}}) do

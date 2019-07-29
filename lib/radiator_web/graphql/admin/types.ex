@@ -33,15 +33,53 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
   end
 
-  @desc "A radiator instance user"
+  @desc "A radiator instance user accessible to admins and yourself"
   object :user do
     field :username, :string do
       resolve fn user, _, _ -> {:ok, user.name} end
     end
 
     field :display_name, :string
+    field :email, :string
 
-    field :avatar, :string do
+    field :image, :string do
+      resolve &Resolvers.Editor.get_image_url/3
+    end
+  end
+
+  @desc "A radiator instance user accessible to others"
+  object :public_user do
+    field :username, :string do
+      resolve fn user, _, _ -> {:ok, user.name} end
+    end
+
+    field :display_name, :string
+
+    field :image, :string do
+      resolve &Resolvers.Editor.get_image_url/3
+    end
+  end
+
+  @desc "A radiator instance person"
+  object :person do
+    field :display_name, :string
+    field :name, :string
+    field :nick, :string
+    field :email, :string
+    field :link, :string
+
+    field :image, :string do
+      resolve &Resolvers.Editor.get_image_url/3
+    end
+  end
+
+  @desc "A radiator instance person accessible to everyone"
+  object :public_person do
+    field :display_name, :string
+    field :email, :string
+    field :link, :string
+
+    field :image, :string do
       resolve &Resolvers.Editor.get_image_url/3
     end
   end
@@ -63,6 +101,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :audios, list_of(:audio) do
       description "Audios attached directly to the network."
       resolve &Resolvers.Editor.list_audios/3
+    end
+
+    field :people, list_of(:person) do
+      resolve &Resolvers.Editor.list_people/3
     end
 
     field :collaborators, list_of(:collaborator) do
@@ -170,6 +212,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
     field :duration_string, :string do
       resolve &Resolvers.Editor.get_duration_string/3
+    end
+
+    field :image, :string do
+      resolve &Resolvers.Editor.get_image_url/3
     end
 
     field :published_at, :datetime
