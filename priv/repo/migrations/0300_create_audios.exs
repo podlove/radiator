@@ -5,7 +5,7 @@ defmodule Radiator.Repo.Migrations.CreateAudios do
     create table(:audios) do
       add :title, :text
       add :duration, :integer
-      add :image, :string
+      add :image, :text
       add :published_at, :utc_datetime
 
       add :network_id, references(:networks, on_delete: :nothing)

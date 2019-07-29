@@ -19,6 +19,7 @@ type Audio {
   durationString: String
   episodes: [Episode]
   id: ID!
+  image: String
   publishedAt: DateTime
   title: String
 }
@@ -105,6 +106,7 @@ type Network {
   collaborators: [Collaborator]
   id: ID!
   image: String
+  people: [Person]
   podcasts: [Podcast]
   slug: String
   title: String
@@ -133,6 +135,16 @@ enum Permission {
 
 """A subject for permissions / user roles. E.g. a Network, Podcast, etc."""
 union PermissionSubject = Network | Podcast
+
+"""A radiator instance person"""
+type Person {
+  displayName: String
+  email: String
+  image: String
+  link: String
+  name: String
+  nick: String
+}
 
 """A podcast"""
 type Podcast {
@@ -371,10 +383,11 @@ Represents an uploaded file.
 """
 scalar Upload
 
-"""A radiator instance user"""
+"""A radiator instance user accessible to admins and yourself"""
 type User {
-  avatar: String
   displayName: String
+  email: String
+  image: String
   username: String
 }
 

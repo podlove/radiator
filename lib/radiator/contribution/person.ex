@@ -30,9 +30,9 @@ defmodule Radiator.Contribution.Person do
     field :display_name, :string
     field :nick, :string
     field :email, :string
-    field :uri, :string
+    field :link, :string
 
-    field :avatar, Media.PersonAvatar.Type
+    field :image, Media.PersonAvatar.Type
 
     belongs_to :user, User
     belongs_to :network, Network
@@ -43,14 +43,14 @@ defmodule Radiator.Contribution.Person do
   @doc false
   def changeset(chapter, attrs) do
     chapter
-    |> cast(attrs, [:name, :display_name, :nick, :uri, :email])
-    |> cast_attachments(attrs, [:avatar], allow_paths: true, allow_urls: true)
+    |> cast(attrs, [:name, :display_name, :nick, :link, :email])
+    |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
   end
 
   @doc """
   Convenience accessor for image URL.
   """
   def image_url(%__MODULE__{} = subject) do
-    Media.PersonAvatar.url({subject.avatar, subject})
+    Media.PersonAvatar.url({subject.image, subject})
   end
 end

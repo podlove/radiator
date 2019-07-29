@@ -4,7 +4,6 @@ defmodule Radiator.Directory.Editor.Permission do
   use Radiator.Constants
 
   alias Radiator.Repo
-  alias Radiator.AudioMeta.Chapter
   alias Radiator.Auth
   alias Radiator.Perm.Permission
   alias Radiator.Directory.{Network, Podcast, Episode, Audio}

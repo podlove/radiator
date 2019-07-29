@@ -58,7 +58,7 @@ defmodule Radiator.Auth.Register do
 
   # TODO: we want to always have a person associated with a user but can we do it without coupling the logic here?
   def create_user(attrs \\ %{}) do
-    {person_attrs, user_attrs} = Map.split(attrs, [:nick, :avatar])
+    {person_attrs, user_attrs} = Map.split(attrs, [:nick, :image, "nick", "image"])
 
     changeset =
       %User{}

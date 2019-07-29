@@ -68,7 +68,7 @@ defmodule Radiator.AudioMeta do
   end
 
   def create_chapter(%Audio{} = audio, attrs) do
-    {update_attrs, insert_attrs} = Map.split(attrs, [:image])
+    {update_attrs, insert_attrs} = Map.split(attrs, [:image, "image"])
 
     insert =
       %Chapter{}

@@ -55,7 +55,7 @@ Images are referenced in the schemas they are used as they are 1:1 relationships
 
 They are:
 
-- `Radiator.Auth.User` field `:avatar`
+- `Radiator.Auth.User` field `:image`
 - `Radiator.Directory.Network` field `:image`
 - `Radiator.Directory.Podcast` field `:image`
 - `Radiator.Directory.Episode` field `:image`

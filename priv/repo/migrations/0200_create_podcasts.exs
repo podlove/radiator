@@ -6,16 +6,16 @@ defmodule Radiator.Repo.Migrations.CreatePodcasts do
       add :short_id, :string
 
       add :title, :text
-      add :subtitle, :string
+      add :subtitle, :text
       add :summary, :text
-      add :author, :string
-      add :image, :string
+      add :author, :text
+      add :image, :text
 
       add :language, :string
       add :last_built_at, :utc_datetime
-      add :owner_name, :string
-      add :owner_email, :string
-      add :slug, :string
+      add :owner_name, :text
+      add :owner_email, :text
+      add :slug, :text
 
       add :main_color, :string, size: 7
       add :is_using_short_id, :boolean

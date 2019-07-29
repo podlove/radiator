@@ -3,10 +3,10 @@ defmodule Radiator.Repo.Migrations.CreateAudioFile do
 
   def change do
     create table(:audio_files) do
-      add :title, :string
+      add :title, :text
       add :mime_type, :string
       add :byte_length, :integer
-      add :file, :string
+      add :file, :text
 
       add :audio_id, references(:audios, on_delete: :delete_all)
 

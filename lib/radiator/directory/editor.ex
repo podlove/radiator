@@ -18,6 +18,8 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.Directory
   alias Radiator.Directory.{Network, Podcast, Episode, Editor, Audio, Collaborator}
 
+  alias Radiator.Contribution.Person
+
   @doc """
   Returns a list of networks the actor has at least `:readonly` permissions on.
 
@@ -679,6 +681,57 @@ defmodule Radiator.Directory.Editor do
         :ok -> {:ok, collaborator}
         other -> other
       end
+    else
+      @not_authorized_match
+    end
+  end
+
+  def list_people(actor = %Auth.User{}, subject = %Network{}) do
+    if has_permission(actor, subject, :readonly) do
+      people =
+        Ecto.assoc(subject, :people)
+        |> Repo.all()
+
+      {:ok, people}
+    else
+      @not_authorized_match
+    end
+  end
+
+  @spec create_person(Radiator.Auth.User.t(), Radiator.Directory.Network.t(), any) :: any
+  def create_person(actor = %Auth.User{}, network = %Network{}, attrs) do
+    if has_permission(actor, network, :edit) do
+      Editor.Editor.create_person(network, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def get_person(actor = %Auth.User{}, id) do
+    case Repo.get(Person, id) do
+      nil ->
+        @not_found_match
+
+      person = %Person{} ->
+        if has_permission(actor, %Network{id: person.network_id}, :readonly) do
+          {:ok, person}
+        else
+          @not_authorized_match
+        end
+    end
+  end
+
+  def update_person(actor = %Auth.User{}, person = %Person{}, attrs) do
+    if has_permission(actor, %Network{id: person.network_id}, :edit) do
+      Editor.Editor.update_person(person, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def delete_person(actor = %Auth.User{}, person = %Person{}) do
+    if has_permission(actor, %Network{id: person.network_id}, :manage) do
+      Editor.Manager.delete_person(person)
     else
       @not_authorized_match
     end

@@ -1,8 +1,6 @@
 defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
   alias Radiator.Directory
   alias Radiator.Directory.{Episode, Podcast, Network}
-  alias Radiator.AudioMeta.Chapter
-  alias Radiator.Media
 
   def list_networks(_parent, _args, _resolution) do
     {:ok, Directory.list_networks()}
@@ -51,20 +49,8 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
     {:ok, episode.audio}
   end
 
-  def get_image_url(episode = %Episode{}, _, _) do
-    {:ok, Media.EpisodeImage.url({episode.image, episode})}
-  end
-
-  def get_image_url(podcast = %Podcast{}, _, _) do
-    {:ok, Media.PodcastImage.url({podcast.image, podcast})}
-  end
-
-  def get_image_url(network = %Network{}, _, _) do
-    {:ok, Media.NetworkImage.url({network.image, network})}
-  end
-
-  def get_image_url(chapter = %Chapter{}, _, _) do
-    {:ok, Media.ChapterImage.url({chapter.image, chapter})}
+  def get_image_url(subject, args, resolution) do
+    RadiatorWeb.GraphQL.Admin.Resolvers.Editor.get_image_url(subject, args, resolution)
   end
 
   def get_episodes_count(%Podcast{id: podcast_id}, _, _) do
