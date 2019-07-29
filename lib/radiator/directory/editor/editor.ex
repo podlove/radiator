@@ -4,18 +4,11 @@ defmodule Radiator.Directory.Editor.Editor do
   the :edit permission to the entity.
   """
   import Ecto.Query, warn: false
-
   alias Ecto.Multi
 
   alias Radiator.Repo
-
-  alias Radiator.Directory.{
-    Network
-  }
-
-  alias Radiator.Contribution.{
-    Person
-  }
+  alias Radiator.Directory.Network
+  alias Radiator.Contribution.Person
 
   require Logger
 
