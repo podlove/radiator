@@ -2,7 +2,6 @@ defmodule Radiator.Directory.Episode do
   use Ecto.Schema
 
   import Ecto.Changeset
-  import Arc.Ecto.Changeset
   import Ecto.Query, warn: false
 
   alias __MODULE__
@@ -21,7 +20,6 @@ defmodule Radiator.Directory.Episode do
     field :summary, :string
     field :summary_html, :string
     field :summary_source, :string
-    field :image, Media.EpisodeImage.Type
 
     field :number, :integer
     field :published_at, :utc_datetime
@@ -56,7 +54,6 @@ defmodule Radiator.Directory.Episode do
       :podcast_id,
       :enclosure
     ])
-    |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
     |> validate_required([:title])
     |> set_guid_if_missing()
     |> create_audio_from_enclosure()
@@ -125,21 +122,14 @@ defmodule Radiator.Directory.Episode do
   end
 
   @doc """
-  Convenience accessor for image URL. Use `podcast: podcast` to get podcast image if ther is no special episode image
+  Convenience accessor for image URL.
+  Use `podcast: podcast` to get podcast image if there is no episode audio image
   """
-  def image_url(%Episode{} = episode, opts \\ []) do
-    case Media.EpisodeImage.url({episode.image, episode}) do
-      nil ->
-        case opts[:podcast] do
-          podcast = %Podcast{} ->
-            Podcast.image_url(podcast)
-
-          _ ->
-            nil
-        end
-
-      url ->
-        url
+  def image_url(%Episode{audio: audio}, opts \\ []) do
+    if Ecto.assoc_loaded?(audio) do
+      Audio.image_url(audio, opts)
+    else
+      nil
     end
   end
 

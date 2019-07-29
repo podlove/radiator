@@ -11,7 +11,6 @@ defmodule Radiator.Repo.Migrations.CreateEpisodes do
       add :summary_html, :text
       add :summary_source, :text
 
-      add :image, :string
       add :number, :integer
       add :published_at, :utc_datetime
 
