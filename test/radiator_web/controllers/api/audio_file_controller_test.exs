@@ -16,7 +16,8 @@ defmodule RadiatorWeb.Api.AudioFileControllerTest do
 
   describe "create audio file" do
     test "renders audio file when data is valid", %{conn: conn, user: user} do
-      audio = insert(:audio) |> owned_by(user)
+      audio_publication = insert(:audio_publication) |> owned_by(user)
+      audio = insert(:audio, audio_publication: audio_publication)
 
       conn =
         post(conn, Routes.api_audio_file_path(conn, :create),

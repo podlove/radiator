@@ -298,7 +298,7 @@ defmodule Radiator.Directory.Editor do
   List episodes for audio that given user can see.
   """
   def list_episodes(actor = %Auth.User{}, audio = %Audio{}) do
-    if has_permission(actor, audio, :readonly) do
+    if can_access_audio(actor, audio, :readonly) do
       audio
       |> Ecto.assoc(:episodes)
       |> Repo.all()
@@ -309,7 +309,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   def list_audio_files(actor = %Auth.User{}, audio = %Audio{}) do
-    if has_permission(actor, audio, :readonly) do
+    if can_access_audio(actor, audio, :readonly) do
       audio
       |> Ecto.assoc(:audio_files)
       |> Repo.all()
@@ -444,7 +444,7 @@ defmodule Radiator.Directory.Editor do
         @not_found_match
 
       chapter = %Chapter{} ->
-        if has_permission(actor, audio, :readonly) do
+        if can_access_audio(actor, audio, :readonly) do
           {:ok, chapter}
         else
           @not_authorized_match
@@ -453,7 +453,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   def create_chapter(actor = %Auth.User{}, audio, attrs) do
-    if has_permission(actor, audio, :edit) do
+    if can_access_audio(actor, audio, :edit) do
       AudioMeta.create_chapter(audio, attrs)
     else
       @not_authorized_match
@@ -461,7 +461,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   def update_chapter(actor = %Auth.User{}, chapter = %Chapter{}, attrs) do
-    if has_permission(actor, %Audio{id: chapter.audio_id}, :edit) do
+    if can_access_audio(actor, %Audio{id: chapter.audio_id}, :edit) do
       AudioMeta.update_chapter(chapter, attrs)
     else
       @not_authorized_match
@@ -469,7 +469,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   def delete_chapter(actor = %Auth.User{}, chapter = %Chapter{}) do
-    if has_permission(actor, %Audio{id: chapter.audio_id}, :own) do
+    if can_access_audio(actor, %Audio{id: chapter.audio_id}, :own) do
       AudioMeta.delete_chapter(chapter)
     else
       @not_authorized_match
@@ -484,7 +484,7 @@ defmodule Radiator.Directory.Editor do
         @not_found_match
 
       audio = %Audio{} ->
-        if has_permission(actor, audio, :readonly) do
+        if can_access_audio(actor, audio, :readonly) do
           {:ok, audio}
         else
           @not_authorized_match
@@ -517,7 +517,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   def update_audio(actor = %Auth.User{}, audio = %Audio{}, attrs) do
-    if has_permission(actor, audio, :edit) do
+    if can_access_audio(actor, audio, :edit) do
       Editor.Manager.update_audio(audio, attrs)
     else
       @not_authorized_match
@@ -525,11 +525,35 @@ defmodule Radiator.Directory.Editor do
   end
 
   def delete_audio(actor = %Auth.User{}, audio = %Audio{}) do
-    if has_permission(actor, audio, :own) do
+    if can_access_audio(actor, audio, :own) do
       Editor.Manager.delete_audio(audio)
     else
       @not_authorized_match
     end
+  end
+
+  # thought: we need this logic somewhere, shouldn't it be in the
+  # permission context as the general logic is already there?
+  # I feel like it makes more sense bringing objects without permissions,
+  # like Audio, into the permissions module, than handling permission
+  # logic here.
+  # But that would mean supporting has_permission/3 on subjects
+  # that do not actually have their own permissions.
+  defp can_access_audio(actor, audio, permission) do
+    Enum.any?(get_audio_parents(audio), fn parent ->
+      has_permission(actor, parent, permission)
+    end)
+  end
+
+  defp get_audio_parents(audio) do
+    network =
+      audio
+      |> Ecto.assoc(:audio_publication)
+      |> Repo.one()
+
+    episodes = audio |> Ecto.assoc(:episodes) |> Repo.all()
+
+    if network, do: [network | episodes], else: episodes
   end
 
   ## User Permission Management

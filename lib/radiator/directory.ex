@@ -293,12 +293,8 @@ defmodule Radiator.Directory do
   def is_published(%Episode{published_at: date}),
     do: Support.DateTime.before_utc_now?(date)
 
-  # fixme: ensure all entities above are published as well
-  #   applies to all is_published implementations
-  def is_published(%Audio{published_at: date}),
-    do: Support.DateTime.before_utc_now?(date)
-
-  def is_published(_), do: false
+  # fixme: implementation missing for AudioPublication
+  def is_published(_), do: true
 
   def get_audio(id) do
     Audio

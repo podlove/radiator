@@ -27,11 +27,10 @@ defmodule Radiator.Directory.Audio do
   schema "audios" do
     field :title, :string
     field :duration, :integer
-    field :published_at, :utc_datetime
     field :image, Media.AudioImage.Type
 
     has_many :episodes, Episode
-    belongs_to :audio_publication, AudioPublication
+    has_one :audio_publication, AudioPublication
 
     has_many :contributions, Contribution.AudioContribution
     has_many :contributors, through: [:contributions, :person]
@@ -39,15 +38,13 @@ defmodule Radiator.Directory.Audio do
     has_many :audio_files, Media.AudioFile
     has_many :chapters, Chapter
 
-    has_many :permissions, {"audios_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
-
     timestamps()
   end
 
   @doc false
   def changeset(audio, attrs) do
     audio
-    |> cast(attrs, [:title, :duration, :published_at])
+    |> cast(attrs, [:title, :duration])
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
 
     # todo: validate it belongs to _something_ / not a zombie

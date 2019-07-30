@@ -18,8 +18,7 @@ defmodule RadiatorWeb.Api.AudioView do
       id: audio.id,
       title: audio.title,
       duration: audio.duration,
-      duration_string: audio.duration && format_normal_playtime(audio.duration),
-      published_at: audio.published_at
+      duration_string: audio.duration && format_normal_playtime(audio.duration)
     })
   end
 end

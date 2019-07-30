@@ -15,6 +15,9 @@ defmodule Radiator.Directory.AudioPublication do
     belongs_to :network, Network
     belongs_to :audio, Audio
 
+    has_many :permissions, {"audio_publications_perm", Radiator.Perm.Permission},
+      foreign_key: :subject_id
+
     timestamps()
   end
 

@@ -26,25 +26,26 @@ defmodule Radiator.Directory.Editor.PermissionTest do
     refute Permission.has_permission(user_other, podcast, :own)
   end
 
-  test "has_permission/3 for audio via parent network" do
+  test "has_permission/3 for audio publication" do
     user = insert(:user)
     user_other = insert(:user)
 
     network = insert(:network) |> owned_by(user)
-    audio = insert(:audio, network: network)
+    audio = insert(:audio)
 
-    assert Permission.has_permission(user, audio, :own)
-    refute Permission.has_permission(user_other, audio, :own)
+    audio_publication = insert(:audio_publication, network: network, audio: audio)
+
+    assert Permission.has_permission(user, audio_publication, :own)
+    refute Permission.has_permission(user_other, audio_publication, :own)
   end
 
-  test "has_permission/3 for audio via parent episode" do
+  test "has_permission/3 for episode" do
     user = insert(:user)
     user_other = insert(:user)
 
     episode = insert(:episode) |> owned_by(user)
-    audio = insert(:audio, episodes: [episode])
 
-    assert Permission.has_permission(user, audio, :own)
-    refute Permission.has_permission(user_other, audio, :own)
+    assert Permission.has_permission(user, episode, :own)
+    refute Permission.has_permission(user_other, episode, :own)
   end
 end

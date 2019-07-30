@@ -7,7 +7,7 @@ defmodule Radiator.Constants do
       defguard is_permission(p) when p in @permission_values
 
       @type permission() :: :readonly | :edit | :manage | :own
-      @type permission_subject() :: Podcast.t() | Network.t() | Episode.t() | Audio.t()
+      @type permission_subject() :: Podcast.t() | Network.t() | Episode.t() | AudioPublication.t()
     end
   end
 
