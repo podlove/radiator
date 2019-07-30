@@ -13,7 +13,7 @@ defmodule Radiator.Feed.Common do
     )
   end
 
-  def contributor_uri(%Person{uri: uri}) when byte_size(uri) > 0,
+  def contributor_uri(%Person{link: uri}) when byte_size(uri) > 0,
     do: element(:"atom:uri", uri)
 
   def contributor_uri(_), do: nil

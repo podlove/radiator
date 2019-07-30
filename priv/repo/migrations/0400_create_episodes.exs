@@ -3,10 +3,10 @@ defmodule Radiator.Repo.Migrations.CreateEpisodes do
 
   def change do
     create table(:episodes) do
-      add :guid, :string
+      add :guid, :text
       add :short_id, :string
-      add :title, :string
-      add :subtitle, :string
+      add :title, :text
+      add :subtitle, :text
       add :summary, :text
       add :summary_html, :text
       add :summary_source, :text

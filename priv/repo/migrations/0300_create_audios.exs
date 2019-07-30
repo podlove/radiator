@@ -5,7 +5,7 @@ defmodule Radiator.Repo.Migrations.CreateAudios do
     create table(:audios) do
       add :title, :text
       add :duration, :integer
-      add :image, :string
+      add :image, :text
 
       timestamps()
     end
