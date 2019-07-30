@@ -8,8 +8,8 @@
 	- Podcast
 		- Episode
 			- Audio
-	- Audio
-
+	- AudioPublication
+		- Audio
 
 
 ### Network
