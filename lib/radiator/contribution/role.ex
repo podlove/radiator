@@ -4,6 +4,7 @@ defmodule Radiator.Contribution.Role do
 
   schema "contribution_roles" do
     field :title, :string
+    field :public?, :boolean, source: :is_public, default: true
 
     timestamps()
   end

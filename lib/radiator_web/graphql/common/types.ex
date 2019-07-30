@@ -30,4 +30,14 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
     field :token, :string
     field :expires_at, :datetime
   end
+
+  @desc "A Contribution Role"
+  object :contribution_role do
+    field :id, non_null(:id)
+    field :title, :string
+
+    field :is_public, :boolean do
+      resolve fn %Radiator.Contribution.Role{public?: result}, _, _ -> {:ok, result} end
+    end
+  end
 end

@@ -339,4 +339,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{current_user: user}}) do
     Editor.get_episodes_count_for_podcast!(user, podcast_id)
   end
+
+  def list_contribution_roles(_, _, _) do
+    Editor.list_contribution_roles()
+  end
 end

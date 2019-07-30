@@ -44,7 +44,4 @@ if Mix.env() != :test do
     })
 
   Editor.Permission.set_permission(foo, network2, :readonly)
-
-  Repo.insert(%Role{title: "Guest"})
-  Repo.insert(%Role{title: "Moderator"})
 end

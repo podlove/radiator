@@ -736,4 +736,8 @@ defmodule Radiator.Directory.Editor do
       @not_authorized_match
     end
   end
+
+  def list_contribution_roles() do
+    {:ok, Repo.all(Radiator.Contribution.Role)}
+  end
 end

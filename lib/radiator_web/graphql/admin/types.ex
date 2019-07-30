@@ -62,20 +62,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   @desc "A radiator instance person"
   object :person do
+    field :id, non_null(:id)
     field :display_name, :string
     field :name, :string
     field :nick, :string
-    field :email, :string
-    field :link, :string
-
-    field :image, :string do
-      resolve &Resolvers.Editor.get_image_url/3
-    end
-  end
-
-  @desc "A radiator instance person accessible to everyone"
-  object :public_person do
-    field :display_name, :string
     field :email, :string
     field :link, :string
 
