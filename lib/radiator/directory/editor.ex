@@ -534,20 +534,13 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  # thought: we need this logic somewhere, shouldn't it be in the
-  # permission context as the general logic is already there?
-  # I feel like it makes more sense bringing objects without permissions,
-  # like Audio, into the permissions module, than handling permission
-  # logic here.
-  # But that would mean supporting has_permission/3 on subjects
-  # that do not actually have their own permissions.
   defp can_access_audio(actor, audio, permission) do
-    Enum.any?(get_audio_parents(audio), fn parent ->
+    Enum.any?(get_audio_publication_parents(audio), fn parent ->
       has_permission(actor, parent, permission)
     end)
   end
 
-  defp get_audio_parents(audio) do
+  defp get_audio_publication_parents(audio) do
     network =
       audio
       |> Ecto.assoc(:audio_publication)
