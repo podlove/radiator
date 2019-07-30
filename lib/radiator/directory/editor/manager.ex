@@ -84,9 +84,19 @@ defmodule Radiator.Directory.Editor.Manager do
   end
 
   def create_audio(network = %Network{}, attrs) do
-    Ecto.build_assoc(network, :audios)
-    |> Audio.changeset(attrs)
-    |> Repo.insert()
+    Multi.new()
+    |> Multi.insert(:audio_publication, fn _ ->
+      Ecto.build_assoc(network, :audio_publications)
+    end)
+    |> Multi.insert(:audio, fn %{audio_publication: audio_publication} ->
+      Ecto.build_assoc(audio_publication, :audio)
+      |> Audio.changeset(attrs)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{audio: audio}} -> {:ok, audio}
+      something -> something
+    end
   end
 
   def update_audio(%Audio{} = audio, attrs) do

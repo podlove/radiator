@@ -4,7 +4,7 @@ defmodule Radiator.Factory do
   import Radiator.Directory.Editor.Permission
 
   alias Radiator.Auth.User
-  alias Radiator.Directory.{Network, Podcast, Episode, Audio}
+  alias Radiator.Directory.{Network, Podcast, Episode, AudioPublication}
   alias Radiator.Contribution.Person
 
   def user_factory do
@@ -43,7 +43,7 @@ defmodule Radiator.Factory do
   @spec owned_by(
           %{
             __struct__:
-              Radiator.Directory.Audio
+              Radiator.Directory.AudioPublication
               | Radiator.Directory.Episode
               | Radiator.Directory.Network
               | Radiator.Directory.Podcast
@@ -51,7 +51,7 @@ defmodule Radiator.Factory do
           Radiator.Auth.User.t()
         ) :: %{
           __struct__:
-            Radiator.Directory.Audio
+            Radiator.Directory.AudioPublication
             | Radiator.Directory.Episode
             | Radiator.Directory.Network
             | Radiator.Directory.Podcast
@@ -71,9 +71,9 @@ defmodule Radiator.Factory do
     episode
   end
 
-  def owned_by(audio = %Audio{}, user = %User{}) do
-    :ok = set_permission(user, audio, :own)
-    audio
+  def owned_by(audio_publication = %AudioPublication{}, user = %User{}) do
+    :ok = set_permission(user, audio_publication, :own)
+    audio_publication
   end
 
   def network_factory do
@@ -132,10 +132,16 @@ defmodule Radiator.Factory do
     }
   end
 
+  def audio_publication_factory do
+    %Radiator.Directory.AudioPublication{
+      network: build(:network),
+      audio: build(:audio)
+    }
+  end
+
   def audio_factory do
     %Radiator.Directory.Audio{
       duration: 3_723_000,
-      published_at: DateTime.utc_now() |> DateTime.add(-3600, :second),
       audio_files: [build(:audio_file)]
     }
   end

@@ -35,6 +35,7 @@ A **Collaboaraor** defines the permissions of one **User** for one **Network**, 
           * Audio
           * Contribution
    * AudioPublication
+      * Audio
    * Person
 
 

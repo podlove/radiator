@@ -16,7 +16,8 @@ defmodule RadiatorWeb.Api.ChaptersControllerTest do
 
   describe "create chapter" do
     test "renders chapter when data is valid", %{conn: conn, user: user} do
-      audio = insert(:audio) |> owned_by(user)
+      audio_publication = insert(:audio_publication) |> owned_by(user)
+      audio = audio_publication.audio
 
       conn =
         post(conn, Routes.api_audio_chapters_path(conn, :create, audio.id),
@@ -41,7 +42,8 @@ defmodule RadiatorWeb.Api.ChaptersControllerTest do
 
   describe "update chapter" do
     test "updates and renders chapter", %{conn: conn, user: user} do
-      audio = insert(:audio) |> owned_by(user)
+      audio_publication = insert(:audio_publication) |> owned_by(user)
+      audio = audio_publication.audio
       chapter = insert(:chapter, audio: audio)
 
       conn =
@@ -54,7 +56,8 @@ defmodule RadiatorWeb.Api.ChaptersControllerTest do
   end
 
   test "delete chapter", %{conn: conn, user: user} do
-    audio = insert(:audio) |> owned_by(user)
+    audio_publication = insert(:audio_publication) |> owned_by(user)
+    audio = audio_publication.audio
     chapter = insert(:chapter, audio: audio)
 
     conn = delete(conn, Routes.api_audio_chapters_path(conn, :delete, audio.id, chapter.start))

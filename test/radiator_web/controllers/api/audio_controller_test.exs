@@ -50,7 +50,8 @@ defmodule RadiatorWeb.Api.AudioControllerTest do
 
   describe "show audio" do
     test "renders a audio", %{conn: conn, user: user} do
-      audio = insert(:audio) |> owned_by(user)
+      audio_publication = insert(:audio_publication) |> owned_by(user)
+      audio = audio_publication.audio
 
       conn = get(conn, Routes.api_audio_path(conn, :show, audio.id))
 
@@ -70,7 +71,8 @@ defmodule RadiatorWeb.Api.AudioControllerTest do
 
   describe "update audio" do
     test "renders audio", %{conn: conn, user: user} do
-      audio = insert(:audio) |> owned_by(user)
+      audio_publication = insert(:audio_publication) |> owned_by(user)
+      audio = audio_publication.audio
 
       conn = put(conn, Routes.api_audio_path(conn, :update, audio.id), %{audio: %{title: "new"}})
 
@@ -78,7 +80,8 @@ defmodule RadiatorWeb.Api.AudioControllerTest do
     end
 
     # test "renders error on invalid data", %{conn: conn, user: user} do
-    #   audio = insert(:audio) |> owned_by(user)
+    # audio_publication = insert(:audio_publication) |> owned_by(user)
+    # audio = audio_publication.audio
 
     #   conn =
     #     put(conn, Routes.api_audio_path(conn, :update, audio.id), %{
@@ -91,7 +94,8 @@ defmodule RadiatorWeb.Api.AudioControllerTest do
 
   describe "delete audio" do
     test "delete audio", %{conn: conn, user: user} do
-      audio = insert(:audio) |> owned_by(user)
+      audio_publication = insert(:audio_publication) |> owned_by(user)
+      audio = audio_publication.audio
 
       conn = delete(conn, Routes.api_audio_path(conn, :delete, audio.id))
 
@@ -99,7 +103,9 @@ defmodule RadiatorWeb.Api.AudioControllerTest do
     end
 
     test "deletes associated audio files", %{conn: conn, user: user} do
-      audio = insert(:audio) |> owned_by(user)
+      audio_publication = insert(:audio_publication) |> owned_by(user)
+      audio = audio_publication.audio
+
       _file1 = insert(:audio_file, audio: audio)
       _file2 = insert(:audio_file, audio: audio)
 

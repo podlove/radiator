@@ -9,9 +9,9 @@ Files are managed by [arc] with [arc_ecto].
          |  +---------+ |
          |              |
     +----+----+         |
-    | Podcast |         |
-    +----+----+         |
-         |              |
+    | Podcast |     +---+--------------+
+    +----+----+     | AudioPublication |
+         |          +---+--------------+
          |              |
          |              |
     +----+----+    +----+--+    +-----------+
@@ -23,6 +23,7 @@ Files are managed by [arc] with [arc_ecto].
                   +-----+----+ +-----+------+
                   | Chapters | | Transcript |
                   +----------+ +------------+
+
 
 `Radiator.Directory.Audio` is the central container. It can stand on its own and supply a web player with metadata. An `Audio` exists either in a `Radiator.Directory.Network`, or attached to one or more `Radiator.Directory.Episode`s. `Audio` contains one or more `AudioFile`s. If there is more than one `Radiator.Media.AudioFile`, each file is a different file format of the same audio track. Complex audio metadata like chapters and transcripts (tbd) belong to `Audio`. `Episode` represents the connection between `Audio` and `Radiator.Directory.Podcast`, while enriching it with episode-specific metadata (e.g. episode number).
 
