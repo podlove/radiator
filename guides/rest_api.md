@@ -40,31 +40,39 @@
 - [People](#people)
   - [Parameters for Create & Update](#parameters-for-create--update-5)
   - [Create](#create-5)
+  - [Index](#index)
   - [Read](#read-5)
   - [Update](#update-5)
   - [Delete](#delete-5)
-- [Audio](#audio)
+- [Contributions](#contributions)
   - [Parameters for Create & Update](#parameters-for-create--update-6)
   - [Create](#create-6)
+  - [Index](#index-1)
   - [Read](#read-6)
   - [Update](#update-6)
   - [Delete](#delete-6)
-- [Audio File](#audio-file)
-  - [Parameters for Create](#parameters-for-create)
+- [Audio](#audio)
+  - [Parameters for Create & Update](#parameters-for-create--update-7)
   - [Create](#create-7)
   - [Read](#read-7)
-- [Audio Chapters](#audio-chapters)
-  - [Parameters for Create & Update](#parameters-for-create--update-7)
-  - [Create](#create-8)
-  - [Read](#read-8)
   - [Update](#update-7)
   - [Delete](#delete-7)
+- [Audio File](#audio-file)
+  - [Parameters for Create](#parameters-for-create)
+  - [Create](#create-8)
+  - [Read](#read-8)
+- [Audio Chapters](#audio-chapters)
+  - [Parameters for Create & Update](#parameters-for-create--update-8)
+  - [Create](#create-9)
+  - [Read](#read-9)
+  - [Update](#update-8)
+  - [Delete](#delete-8)
 - [Tasks](#tasks)
   - [Parameters for Create](#parameters-for-create-1)
     - [Import podcast feed](#import-podcast-feed)
-  - [Create](#create-9)
-  - [Read](#read-9)
-  - [Delete](#delete-8)
+  - [Create](#create-10)
+  - [Read](#read-10)
+  - [Delete](#delete-9)
 
 ## API Usage
 
@@ -336,6 +344,14 @@ DELETE /api/rest/v1/episodes/:id
 POST /api/rest/v1/people
 ```
 
+### Index
+
+Needs `person[network_id]` parmaters.
+
+```
+GET /api/rest/v1/people
+```
+
 ### Read
 
 ```
@@ -353,6 +369,53 @@ PATCH /api/rest/v1/people/:id
 ```
 DELETE /api/rest/v1/people/:id
 ```
+
+## Contributions
+
+### Parameters for Create & Update
+
+| Name                                 | Type      | Description                                               |
+| ------------------------------------ | --------- | --------------------------------------------------------- |
+| `contribution[podcast_id]`           | `integer` | **Required.**  Either podcast_id or audio_id can be given |
+| `contribution[audio_id]`             | `integer` | **Required.**                                             |
+| `contribution[contribution_role_id]` | `integer` | **Required.**                                             |
+| `contribution[person_id]`            | `integer` | **Required.**                                             |
+| `contribution[position]`             | `float`   | Sort order inside contributions                           |
+
+Possible values for the `contribution_role_id` can be fetched with the GraphQL query `contributionRoles`
+
+### Create
+
+```
+POST /api/rest/v1/contributions
+```
+
+### Index
+
+Needs parameters, either `contribution[podcast_id]` or `contribution[audio_id]` 
+
+```
+GET /api/rest/v1/contributions
+```
+
+### Read
+
+```
+GET /api/rest/v1/contributions/:id
+```
+
+### Update
+
+```
+PATCH /api/rest/v1/contributions/:id
+```
+
+### Delete
+
+```
+DELETE /api/rest/v1/contributions/:id
+```
+
 
 ## Audio
 

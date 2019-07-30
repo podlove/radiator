@@ -15,6 +15,7 @@ schema {
 type Audio {
   audioFiles: [AudioFile]
   chapters(order: SortOrder = ASC): [Chapter]
+  contributions: [Contribution]
   duration: Int
   durationString: String
   episodes: [Episode]
@@ -45,6 +46,21 @@ type Collaborator {
   permission: Permission
   subject: PermissionSubject
   user: User
+}
+
+"""A record of a Person having contributed"""
+type Contribution {
+  contributionRole: ContributionRole
+  id: ID!
+  person: Person
+  position: Float
+}
+
+"""A Contribution Role"""
+type ContributionRole {
+  id: ID!
+  isPublic: Boolean
+  title: String
 }
 
 """
@@ -140,6 +156,7 @@ union PermissionSubject = Network | Podcast
 type Person {
   displayName: String
   email: String
+  id: ID!
   image: String
   link: String
   name: String
@@ -149,6 +166,7 @@ type Person {
 """A podcast"""
 type Podcast {
   author: String
+  contributions: [Contribution]
   episodes(itemsPerPage: Int = 10, order: SortOrder = DESC, orderBy: EpisodeOrder = PUBLISHED_AT, page: Int = 1, published: Published = ANY): [Episode]
   episodesCount: Int
   id: ID!
@@ -321,6 +339,9 @@ type RootMutationType {
 type RootQueryType {
   """Get one audio"""
   audio(id: ID!): Audio
+
+  """Get all possible contribution roles"""
+  contributionRoles: [ContributionRole]
 
   """Get one episode"""
   episode(id: ID!): Episode

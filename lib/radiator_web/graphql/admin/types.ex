@@ -146,6 +146,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :episodes_count, :integer do
       resolve &Resolvers.Editor.get_episodes_count/3
     end
+
+    field :contributions, list_of(:contribution) do
+      resolve &Resolvers.Editor.get_contributions/3
+    end
   end
 
   @desc "The input for a podcast"
@@ -223,6 +227,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
     field :audio_files, list_of(:audio_file) do
       resolve &Resolvers.Editor.get_audio_files/3
+    end
+
+    field :contributions, list_of(:contribution) do
+      resolve &Resolvers.Editor.get_contributions/3
     end
   end
 
