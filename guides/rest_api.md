@@ -346,7 +346,7 @@ POST /api/rest/v1/people
 
 ### Index
 
-Needs `person[network_id]` parmaters.
+Needs `person[network_id]` parameter.
 
 ```
 GET /api/rest/v1/people
