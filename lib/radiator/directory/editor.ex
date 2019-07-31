@@ -323,16 +323,6 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  def list_audio_files(actor = %Auth.User{}, audio = %Audio{}) do
-    if can_access_audio(actor, audio, :readonly) do
-      audio
-      |> Ecto.assoc(:audio_files)
-      |> Repo.all()
-    else
-      @not_authorized_match
-    end
-  end
-
   def create_episode(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
     if has_permission(actor, podcast, :manage) do
       Editor.Manager.create_episode(podcast, attrs)
@@ -565,6 +555,14 @@ defmodule Radiator.Directory.Editor do
   end
 
   ## Audio File
+
+  def list_audio_files(actor = %Auth.User{}, audio = %Audio{}) do
+    if can_access_audio(actor, audio, :readonly) do
+      Editor.Manager.list_audio_files(audio)
+    else
+      @not_authorized_match
+    end
+  end
 
   def get_audio_file(actor = %Auth.User{}, id) do
     case Repo.get(AudioFile, id) do

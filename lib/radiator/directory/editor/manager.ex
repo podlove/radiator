@@ -100,6 +100,13 @@ defmodule Radiator.Directory.Editor.Manager do
     end
   end
 
+  def list_audio_files(audio = %Audio{}) do
+    audio
+    |> Ecto.assoc(:audio_files)
+    |> Repo.all()
+    |> (&{:ok, &1}).()
+  end
+
   def create_audio_file(audio, attrs \\ %{}) do
     Ecto.build_assoc(audio, :audio_files)
     |> AudioFile.changeset(attrs)

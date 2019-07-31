@@ -9,6 +9,15 @@ defmodule RadiatorWeb.Api.AudioFileController do
     apply(__MODULE__, action_name(conn), args)
   end
 
+  def index(conn, %{"audio_id" => audio_id}, user) do
+    with {:ok, audio} <- Editor.get_audio(user, audio_id),
+         {:ok, audio_files} <- Editor.list_audio_files(user, audio) do
+      conn
+      |> assign(:audio_files, audio_files)
+      |> render("index.json")
+    end
+  end
+
   def create(conn, %{"audio_id" => audio_id, "audio_file" => audio_file_params}, user) do
     with {:ok, audio} <- Editor.get_audio(user, audio_id),
          {:ok, audio_file} <- Editor.create_audio_file(user, audio, audio_file_params) do

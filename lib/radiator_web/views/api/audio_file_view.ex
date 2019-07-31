@@ -1,8 +1,16 @@
 defmodule RadiatorWeb.Api.AudioFileView do
   use RadiatorWeb, :view
 
-  alias HAL.{Document, Link}
+  alias HAL.{Document, Link, Embed}
   alias Radiator.Media.AudioFile
+
+  def render("index.json", assigns = %{audio_files: audio_files}) do
+    %Document{}
+    |> Document.add_embed(%Embed{
+      resource: "rad:audio_file",
+      embed: render_many(audio_files, __MODULE__, "audio_file.json", assigns)
+    })
+  end
 
   def render("show.json", assigns) do
     render(__MODULE__, "audio_file.json", assigns)
