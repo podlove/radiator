@@ -25,8 +25,10 @@ defmodule Radiator.Directory.AudioPublication do
   def changeset(audio_publication, attrs) do
     audio_publication
     |> cast(attrs, [
-      :publish_state
+      :publish_state,
+      :audio_id
     ])
+    |> validate_publish_state()
     |> maybe_set_published_at()
   end
 
@@ -39,5 +41,6 @@ defmodule Radiator.Directory.AudioPublication do
       :publish_state,
       :published_at
     ])
+    |> validate_publish_state()
   end
 end

@@ -1,4 +1,6 @@
 defmodule Radiator.Directory.Publication do
+  use Radiator.Constants
+
   import Ecto.Changeset
 
   @doc """
@@ -16,5 +18,11 @@ defmodule Radiator.Directory.Publication do
       _ ->
         changeset
     end
+  end
+
+  def validate_publish_state(changeset) do
+    validate_inclusion(changeset, :publish_state, @publish_states,
+      message: "is invalid. must be one of: #{Enum.join(@publish_states, ", ")}"
+    )
   end
 end

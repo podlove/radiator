@@ -65,6 +65,20 @@ defmodule Radiator.Directory.Editor.Manager do
     end
   end
 
+  def list_audio_publications(network = %Network{}) do
+    network
+    |> Ecto.assoc(:audio_publications)
+    |> order_by(desc_nulls_first: :published_at)
+    |> Repo.all()
+    |> (&{:ok, &1}).()
+  end
+
+  def update_audio_publication(%AudioPublication{} = audio_publication, attrs) do
+    audio_publication
+    |> AudioPublication.changeset(attrs)
+    |> Repo.update()
+  end
+
   def list_audios(network = %Network{}) do
     network
     |> Ecto.assoc(:audios)
@@ -102,9 +116,15 @@ defmodule Radiator.Directory.Editor.Manager do
       Ecto.build_assoc(audio_publication, :audio)
       |> Audio.changeset(attrs)
     end)
+    |> Multi.update(:audio_publication_with_audio, fn %{
+                                                        audio_publication: audio_publication,
+                                                        audio: audio
+                                                      } ->
+      AudioPublication.changeset(audio_publication, %{audio_id: audio.id})
+    end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{audio: audio}} -> {:ok, audio}
+      {:ok, %{audio: audio}} -> {:ok, audio |> Repo.preload(:audio_publication)}
       something -> something
     end
   end
@@ -117,6 +137,12 @@ defmodule Radiator.Directory.Editor.Manager do
 
   def delete_audio(%Audio{} = audio) do
     Repo.delete(audio)
+  end
+
+  def create_audio_publication(network = %Network{}, attrs) do
+    Ecto.build_assoc(network, :audio_publications)
+    |> AudioPublication.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """

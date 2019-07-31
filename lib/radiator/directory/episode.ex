@@ -61,11 +61,10 @@ defmodule Radiator.Directory.Episode do
     |> validate_required([:title])
     |> set_guid_if_missing()
     |> create_audio_from_enclosure()
+    |> validate_publish_state()
     |> maybe_set_published_at()
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()
-
-    # todo: episode cannot be published without audio
   end
 
   def public_url(%Episode{} = episode), do: public_url(episode, episode.podcast)

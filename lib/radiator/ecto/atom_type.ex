@@ -14,6 +14,7 @@ defmodule Radiator.Ecto.AtomType do
   def type, do: :string
 
   def cast(value) when is_atom(value), do: {:ok, value}
+  def cast(value) when is_binary(value), do: {:ok, String.to_existing_atom(value)}
   def cast(_), do: :error
 
   def load(value), do: {:ok, String.to_existing_atom(value)}
