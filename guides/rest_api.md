@@ -455,26 +455,43 @@ DELETE /api/rest/v1/audios/:id
 
 ## Audio File
 
-> ⚠️ An [Audio](#Audio) must exist before an Audio File can be created.
-
 ### Parameters for Create
 
-| Name                   | Type      | Description                                                 |
-| ---------------------- | --------- | ----------------------------------------------------------- |
-| `audio_file[audio_id]` | `integer` | **Required.** File is attached to Audio object of given ID. |
-| `audio_file[file]`     | `file`    | audio file to upload                                        |
-| `audio_file[title]`    | `string`  | file title                                                  |
+| Name                      | Type      | Description          |
+| ------------------------- | --------- | -------------------- |
+| `audio_file[file]`        | `file`    | audio file to upload |
+| `audio_file[title]`       | `string`  | file title           |
+| `audio_file[mime_type]`   | `string`  | file mime type       |
+| `audio_file[byte_length]` | `integer` | file lenght in bytes |
+
+### Index
+
+```
+GET /api/rest/v1/audios/:audio_id/audio_file
+```
 
 ### Create
 
 ```
-POST /api/rest/v1/audio_file
+POST /api/rest/v1/audios/:audio_id/audio_file
 ```
 
 ### Read
 
 ```
-GET /api/rest/v1/audio_file/:id
+GET /api/rest/v1/audios/:audio_id/audio_file/:id
+```
+
+### Update
+
+```
+PATCH /api/rest/v1/audios/:audio_id/audio_file/:id
+```
+
+### Delete
+
+```
+DELETE /api/rest/v1/audios/:audio_id/audio_file/:id
 ```
 
 ## Audio Chapters
