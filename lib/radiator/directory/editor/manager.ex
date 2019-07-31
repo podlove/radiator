@@ -70,6 +70,7 @@ defmodule Radiator.Directory.Editor.Manager do
     |> Ecto.assoc(:audio_publications)
     |> order_by(desc_nulls_first: :published_at)
     |> Repo.all()
+    |> Repo.preload(:audio)
     |> (&{:ok, &1}).()
   end
 
@@ -77,13 +78,6 @@ defmodule Radiator.Directory.Editor.Manager do
     audio_publication
     |> AudioPublication.changeset(attrs)
     |> Repo.update()
-  end
-
-  def list_audios(network = %Network{}) do
-    network
-    |> Ecto.assoc(:audios)
-    |> Repo.all()
-    |> (&{:ok, &1}).()
   end
 
   # todo: this raises if used on an episode that already has an associated audio.

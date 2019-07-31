@@ -1,8 +1,15 @@
 defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   use Radiator.Constants
 
-  alias Radiator.Directory.Editor
-  alias Radiator.Directory.{Episode, Podcast, Network, Audio}
+  alias Radiator.Directory.{
+    Editor,
+    Episode,
+    Podcast,
+    Network,
+    Audio,
+    AudioPublication
+  }
+
   alias Radiator.AudioMeta
   alias Radiator.AudioMeta.Chapter
   alias Radiator.Auth.User
@@ -300,8 +307,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, Radiator.Directory.list_audio_files(audio)}
   end
 
-  def list_audios(%Network{} = network, _args, %{context: %{current_user: actor}}) do
-    Editor.list_audios(actor, network)
+  def find_audio(%AudioPublication{} = audio_publication, _args, %{
+        context: %{current_user: _user}
+      }) do
+    {:ok, audio_publication.audio}
   end
 
   def find_audio(%Episode{} = episode, _args, %{context: %{current_user: _user}}) do
@@ -338,5 +347,15 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{current_user: user}}) do
     Editor.get_episodes_count_for_podcast!(user, podcast_id)
+  end
+
+  def get_audio_publication(%Audio{audio_publication: audio_publication}, _, _) do
+    {:ok, audio_publication}
+  end
+
+  def list_audio_publications(%Network{id: id}, _, %{context: %{current_user: user}}) do
+    with_network user, id do
+      fn network -> Editor.Manager.list_audio_publications(network) end
+    end
   end
 end
