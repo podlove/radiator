@@ -16,6 +16,7 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.AudioMeta
   alias Radiator.AudioMeta.Chapter
   alias Radiator.Directory
+  alias Radiator.Media.AudioFile
 
   alias Radiator.Directory.{
     Network,
@@ -561,6 +562,54 @@ defmodule Radiator.Directory.Editor do
     episodes = audio |> Ecto.assoc(:episodes) |> Repo.all()
 
     if network, do: [network | episodes], else: episodes
+  end
+
+  ## Audio File
+
+  def get_audio_file(actor = %Auth.User{}, id) do
+    case Repo.get(AudioFile, id) do
+      nil ->
+        @not_found_match
+
+      audio_file = %AudioFile{} ->
+        if can_access_audio_file(actor, audio_file, :readonly) do
+          {:ok, audio_file}
+        else
+          @not_authorized_match
+        end
+    end
+  end
+
+  def create_audio_file(actor = %Auth.User{}, audio = %Audio{}, attrs \\ %{}) do
+    if can_access_audio(actor, audio, :manage) do
+      Editor.Manager.create_audio_file(audio, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def update_audio_file(actor = %Auth.User{}, audio_file = %AudioFile{}, attrs) do
+    if can_access_audio_file(actor, audio_file, :edit) do
+      Editor.Editor.update_audio_file(audio_file, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def delete_audio_file(actor = %Auth.User{}, audio_file = %AudioFile{}) do
+    if can_access_audio_file(actor, audio_file, :own) do
+      Editor.Owner.delete_audio_file(audio_file)
+    else
+      @not_authorized_match
+    end
+  end
+
+  defp can_access_audio_file(actor, audio_file, permission) do
+    with audio = %Audio{} <- audio_file |> Ecto.assoc(:audio) |> Repo.one() do
+      can_access_audio(actor, audio, permission)
+    else
+      _ -> false
+    end
   end
 
   ## User Permission Management
