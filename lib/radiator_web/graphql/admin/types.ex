@@ -189,6 +189,9 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :number, :integer
     field :published_at, :datetime
 
+    @desc "drafted, scheduled, published, depublished"
+    field :publish_state, :string
+
     field :slug, :string
 
     field :is_published, :boolean do

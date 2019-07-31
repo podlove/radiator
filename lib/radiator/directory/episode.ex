@@ -3,6 +3,7 @@ defmodule Radiator.Directory.Episode do
 
   import Ecto.Changeset
   import Ecto.Query, warn: false
+  import Radiator.Directory.Publication
 
   alias __MODULE__
   alias Radiator.Media
@@ -22,6 +23,8 @@ defmodule Radiator.Directory.Episode do
     field :summary_source, :string
 
     field :number, :integer
+
+    field :publish_state, Radiator.Ecto.AtomType, default: :drafted
     field :published_at, :utc_datetime
 
     field :slug, TitleSlug.Type
@@ -48,6 +51,7 @@ defmodule Radiator.Directory.Episode do
       :summary_source,
       :guid,
       :number,
+      :publish_state,
       :published_at,
       :slug,
       :short_id,
@@ -57,6 +61,7 @@ defmodule Radiator.Directory.Episode do
     |> validate_required([:title])
     |> set_guid_if_missing()
     |> create_audio_from_enclosure()
+    |> maybe_set_published_at()
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()
 

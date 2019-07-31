@@ -293,6 +293,7 @@ DELETE /api/rest/v1/podcasts/:id/collaborators/:username
 | `episode[summary_html]`   | `text`    | Multiline description, html. Will be put in `content:encoded` in a feed |
 | `episode[summary_source]` | `text`    | Multiline description, arbitrary format chosen by frontends.            |
 | `episode[number]`         | `integer` | Episode "Track" number, will be put in `itunes:episode` in the feed     |
+| `episode[publish_state]`  | `string`  | Publication state. "drafted", "scheduled", "published" or "unpublished".     |
 
 ### Create
 

@@ -6,12 +6,22 @@ defmodule Radiator.Directory.Editor.Manager do
   import Ecto.Query, warn: false
 
   alias Ecto.Multi
-
-  alias Radiator.Support
   alias Radiator.Repo
+  alias Radiator.Support
 
-  alias Radiator.Directory.{Network, Podcast, Episode, Audio}
-  alias Radiator.Contribution.{AudioContribution, PodcastContribution, Person}
+  alias Radiator.Directory.{
+    Network,
+    Podcast,
+    Episode,
+    Audio,
+    AudioPublication
+  }
+
+  alias Radiator.Contribution.{
+    AudioContribution,
+    PodcastContribution,
+    Person
+  }
 
   @doc """
   Creates a podcast.
@@ -209,7 +219,7 @@ defmodule Radiator.Directory.Editor.Manager do
       {:error, %Ecto.Changeset{}}
   """
   def publish_episode(%Episode{} = episode) do
-    update_episode(episode, %{published_at: DateTime.utc_now()})
+    publish(episode)
   end
 
   @doc """
@@ -224,7 +234,7 @@ defmodule Radiator.Directory.Editor.Manager do
       {:error, %Ecto.Changeset{}}
   """
   def depublish_episode(%Episode{} = episode) do
-    update_episode(episode, %{published_at: nil})
+    depublish(episode)
   end
 
   @doc """
@@ -237,16 +247,53 @@ defmodule Radiator.Directory.Editor.Manager do
 
       iex> schedule_episode(bad_value, datetime)
       {:error, %Ecto.Changeset{}}
-
-      iex> schedule_episode(episode, past_datetime)
-      {:error, :datetime_not_future}
   """
   def schedule_episode(episode = %Episode{}, datetime = %DateTime{}) do
+    schedule(episode, datetime)
+  end
+
+  def publish(subject = %AudioPublication{}) do
+    subject
+    |> AudioPublication.changeset(%{publish_state: :published})
+    |> Repo.update()
+  end
+
+  def publish(subject = %Episode{}) do
+    subject
+    |> Episode.changeset(%{publish_state: :published})
+    |> Repo.update()
+  end
+
+  def schedule(subject = %AudioPublication{}, datetime = %DateTime{}) do
     if Support.DateTime.after_utc_now?(datetime) do
-      update_episode(episode, %{published_at: datetime})
+      subject
+      |> AudioPublication.changeset(%{publish_state: :scheduled, published_at: datetime})
+      |> Repo.update()
     else
       {:error, :datetime_not_future}
     end
+  end
+
+  def schedule(subject = %Episode{}, datetime = %DateTime{}) do
+    if Support.DateTime.after_utc_now?(datetime) do
+      subject
+      |> Episode.changeset(%{publish_state: :scheduled, published_at: datetime})
+      |> Repo.update()
+    else
+      {:error, :datetime_not_future}
+    end
+  end
+
+  def depublish(subject = %AudioPublication{}) do
+    subject
+    |> AudioPublication.changeset(%{publish_state: :depublished})
+    |> Repo.update()
+  end
+
+  def depublish(subject = %Episode{}) do
+    subject
+    |> Episode.changeset(%{publish_state: :depublished})
+    |> Repo.update()
   end
 
   @doc """

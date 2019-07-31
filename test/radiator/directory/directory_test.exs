@@ -238,6 +238,7 @@ defmodule Radiator.DirectoryTest do
       episode = insert(:episode, published_at: nil)
 
       assert {:ok, %Episode{} = published_episode} = Editor.Manager.publish_episode(episode)
+      assert published_episode.publish_state == :published
       assert published_episode.published_at != nil
       assert :gt == DateTime.compare(DateTime.utc_now(), published_episode.published_at)
     end
@@ -283,29 +284,6 @@ defmodule Radiator.DirectoryTest do
         |> Editor.Manager.publish_episode()
 
       assert published_episode3.slug == "#{existing_episode.slug}-3"
-    end
-
-    test "publish_episode/1 with invalid data returns error changeset" do
-      episode = insert(:unpublished_episode)
-
-      assert {:error, %Ecto.Changeset{}} =
-               Editor.Manager.publish_episode(%{episode | :title => nil})
-    end
-
-    test "depublish_episode/1 removes an episodes published_at date" do
-      episode = insert(:episode, published_at: DateTime.utc_now())
-
-      assert {:ok, %Episode{published_at: nil}} = Editor.Manager.depublish_episode(episode)
-    end
-
-    test "depublish_episode/1 with invalid data returns error changeset" do
-      episode = insert(:episode, published_at: DateTime.utc_now())
-      published_at = episode.published_at
-
-      assert {:error, %Ecto.Changeset{}} =
-               Editor.Manager.depublish_episode(%{episode | :title => nil})
-
-      assert %Episode{published_at: ^published_at} = Directory.get_episode(episode.id)
     end
   end
 

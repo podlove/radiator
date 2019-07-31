@@ -106,13 +106,11 @@ defmodule Radiator.Directory.EpisodeQuery do
   end
 
   def filter_by_published(query, true) do
-    now = DateTime.utc_now()
-    from(e in query, where: e.published_at <= ^now)
+    from(e in query, where: e.publish_state == "published")
   end
 
   def filter_by_published(query, false) do
-    now = DateTime.utc_now()
-    from(e in query, where: e.published_at > ^now or is_nil(e.published_at))
+    from(e in query, where: e.publish_state != "published")
   end
 
   def filter_by_published(query, :any) do

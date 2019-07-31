@@ -12,6 +12,8 @@ defmodule Radiator.Repo.Migrations.CreateEpisodes do
       add :summary_source, :text
 
       add :number, :integer
+
+      add :publish_state, :string
       add :published_at, :utc_datetime
 
       add :slug, :string
