@@ -115,6 +115,11 @@ defmodule RadiatorWeb.GraphQL.Schema do
       resolve &Admin.Resolvers.Editor.find_users/3
     end
 
+    @desc "Get all possible contribution roles"
+    field :contribution_roles, list_of(:contribution_role) do
+      resolve &Admin.Resolvers.Editor.list_contribution_roles/3
+    end
+
     @desc "Get all podcasts"
     field :podcasts, list_of(:podcast) do
       middleware Middleware.RequireAuthentication

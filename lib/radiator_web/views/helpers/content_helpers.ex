@@ -4,7 +4,8 @@ defmodule RadiatorWeb.ContentHelpers do
   alias Radiator.Directory.{
     Network,
     Podcast,
-    Episode
+    Episode,
+    Audio
   }
 
   ## public image urls
@@ -27,6 +28,10 @@ defmodule RadiatorWeb.ContentHelpers do
 
   def episode_image_url(episode, podcast) do
     Episode.image_url(episode, podcast: podcast)
+  end
+
+  def audio_image_url(audio = %Audio{}) do
+    Audio.image_url(audio)
   end
 
   def chapter_image_url(chapter) do

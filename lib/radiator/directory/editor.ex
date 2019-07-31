@@ -16,9 +16,21 @@ defmodule Radiator.Directory.Editor do
   alias Radiator.AudioMeta
   alias Radiator.AudioMeta.Chapter
   alias Radiator.Directory
-  alias Radiator.Directory.{Network, Podcast, Episode, Editor, Audio, Collaborator}
 
-  alias Radiator.Contribution.Person
+  alias Radiator.Directory.{
+    Network,
+    Podcast,
+    Episode,
+    Editor,
+    Audio,
+    Collaborator
+  }
+
+  alias Radiator.Contribution.{
+    Person,
+    AudioContribution,
+    PodcastContribution
+  }
 
   @doc """
   Returns a list of networks the actor has at least `:readonly` permissions on.
@@ -749,6 +761,90 @@ defmodule Radiator.Directory.Editor do
   def delete_person(actor = %Auth.User{}, person = %Person{}) do
     if has_permission(actor, %Network{id: person.network_id}, :manage) do
       Editor.Manager.delete_person(person)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def list_contribution_roles() do
+    {:ok, Repo.all(Radiator.Contribution.Role)}
+  end
+
+  def list_contributions(actor, _subject = %Podcast{id: id}) do
+    with {:ok, subject} <- get_podcast(actor, id) do
+      {:ok, preloaded_contributions(Ecto.assoc(subject, :contributions))}
+    end
+  end
+
+  def list_contributions(actor, _subject = %Audio{id: id}) do
+    with {:ok, subject} <- get_audio(actor, id) do
+      {:ok, preloaded_contributions(Ecto.assoc(subject, :contributions))}
+    end
+  end
+
+  defp preloaded_contributions(query) do
+    from(c in query,
+      preload: [:person, :role]
+    )
+    |> Repo.all()
+    |> Enum.sort(fn a, b ->
+      cond do
+        a.role_id == b.role_id ->
+          a.position < b.position
+
+        true ->
+          a.role_id < b.role_id
+      end
+    end)
+  end
+
+  def create_contribution(actor, subject, attrs) do
+    with :ok <- with_permission(actor, subject, :edit) do
+      Editor.Editor.create_contribution(subject, attrs)
+    end
+  end
+
+  def get_contribution(actor, id) do
+    with {:ok, contribution, subject} <- get_contribution_and_subject(actor, id),
+         :ok <- with_permission(actor, subject, :readonly) do
+      {:ok, contribution}
+    end
+  end
+
+  def delete_contribution(actor, id) do
+    with {:ok, contribution, subject} <- get_contribution_and_subject(actor, id),
+         :ok <- with_permission(actor, subject, :edit) do
+      Repo.delete(contribution)
+    end
+  end
+
+  defp get_contribution_and_subject(actor, id) do
+    case Repo.get(AudioContribution, id) || Repo.get(PodcastContribution, id) do
+      nil ->
+        @not_found_match
+
+      contribution ->
+        with {:ok, subject} <- get_contribution_subject(actor, contribution) do
+          {:ok, contribution, subject}
+        end
+    end
+  end
+
+  defp get_contribution_subject(actor, %AudioContribution{audio_id: id}), do: get_audio(actor, id)
+
+  defp get_contribution_subject(actor, %PodcastContribution{podcast_id: id}),
+    do: get_podcast(actor, id)
+
+  def update_contribution(actor, id, attrs) do
+    with {:ok, contribution, subject} <- get_contribution_and_subject(actor, id),
+         :ok <- with_permission(actor, subject, :edit) do
+      Editor.Editor.update_contribution(contribution, attrs)
+    end
+  end
+
+  defp with_permission(actor, subject, permission) when is_permission(permission) do
+    if has_permission(actor, subject, permission) do
+      :ok
     else
       @not_authorized_match
     end

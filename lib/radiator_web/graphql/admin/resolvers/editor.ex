@@ -233,6 +233,14 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, Editor.list_episodes(user, audio)}
   end
 
+  def get_contributions(podcast = %Podcast{}, _, %{context: %{current_user: user}}) do
+    Editor.list_contributions(user, podcast)
+  end
+
+  def get_contributions(audio = %Audio{}, _, %{context: %{current_user: user}}) do
+    Editor.list_contributions(user, audio)
+  end
+
   def create_episode(_parent, %{podcast_id: podcast_id, episode: args}, %{
         context: %{current_user: user}
       }) do
@@ -338,5 +346,9 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{current_user: user}}) do
     Editor.get_episodes_count_for_podcast!(user, podcast_id)
+  end
+
+  def list_contribution_roles(_, _, _) do
+    Editor.list_contribution_roles()
   end
 end
