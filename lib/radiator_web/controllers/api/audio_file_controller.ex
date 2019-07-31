@@ -3,24 +3,25 @@ defmodule RadiatorWeb.Api.AudioFileController do
 
   alias Radiator.Directory.Editor
 
+  plug :assign_audio when action in [:index, :create]
+
   # TODO: move this into :rest_controller for all rest controllers
   def action(conn, _) do
     args = [conn, conn.params, current_user(conn)]
     apply(__MODULE__, action_name(conn), args)
   end
 
-  def index(conn, %{"audio_id" => audio_id}, user) do
-    with {:ok, audio} <- Editor.get_audio(user, audio_id),
-         {:ok, audio_files} <- Editor.list_audio_files(user, audio) do
+  def index(conn, _, user) do
+    with {:ok, audio_files} <- Editor.list_audio_files(user, conn.assigns[:audio]) do
       conn
       |> assign(:audio_files, audio_files)
       |> render("index.json")
     end
   end
 
-  def create(conn, %{"audio_id" => audio_id, "audio_file" => audio_file_params}, user) do
-    with {:ok, audio} <- Editor.get_audio(user, audio_id),
-         {:ok, audio_file} <- Editor.create_audio_file(user, audio, audio_file_params) do
+  def create(conn, %{"audio_file" => audio_file_params}, user) do
+    with {:ok, audio_file} <-
+           Editor.create_audio_file(user, conn.assigns[:audio], audio_file_params) do
       conn
       |> put_status(:created)
       |> put_resp_header(
@@ -51,6 +52,24 @@ defmodule RadiatorWeb.Api.AudioFileController do
     else
       @not_found_match -> send_delete_resp(conn)
       error -> error
+    end
+  end
+
+  defp assign_audio(conn, _) do
+    with {:ok, audio} <-
+           conn
+           |> current_user()
+           |> Editor.get_audio(conn.params["audio_id"]) do
+      conn
+      |> assign(:audio, audio)
+    else
+      response -> apply_action_fallback(conn, response)
+    end
+  end
+
+  defp apply_action_fallback(conn, response) do
+    case @phoenix_fallback do
+      {:module, module} -> apply(module, :call, [conn, response]) |> halt()
     end
   end
 end
