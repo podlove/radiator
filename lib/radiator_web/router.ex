@@ -105,6 +105,8 @@ defmodule RadiatorWeb.Router do
     resources "/people", PersonController, only: [:index, :show, :create, :update, :delete]
 
     resources "/audios", AudioController, only: [:show, :create, :update, :delete] do
+      resources "/audio_files", AudioFileController, only: [:show, :create], as: :file
+
       resources "/chapters", ChaptersController,
         param: "start",
         only: [:show, :create, :update, :delete]
@@ -112,9 +114,6 @@ defmodule RadiatorWeb.Router do
 
     resources "/contributions", ContributionController,
       only: [:index, :show, :create, :update, :delete]
-
-    # todo: pluralize
-    resources "/audio_file", AudioFileController, only: [:show, :create]
 
     resources "/tasks", TaskController, only: [:show, :create, :delete]
   end

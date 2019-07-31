@@ -12,7 +12,7 @@ defmodule RadiatorWeb.Api.AudioFileView do
     %Document{}
     |> Document.add_link(%Link{
       rel: "self",
-      href: Routes.api_audio_file_path(conn, :show, audio_file.id)
+      href: Routes.api_audio_file_path(conn, :show, audio_file.audio_id, audio_file.id)
     })
     |> Document.add_properties(%{
       id: audio_file.id,
