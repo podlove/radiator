@@ -16,7 +16,7 @@ A **User** has one **Person** for its public metadata
 
 ### Collaborator
 
-A **Collaboaraor** defines the permissions of one **User** for one **Network**, **Podcast**, **Episode** or  **AudioPublication**
+A **Collaborator** defines the permissions of one **User** for one **Network**, **Podcast**, **Episode** or  **AudioPublication**
 
  Field | Type | Description 
    --: | :--  | :--
@@ -158,15 +158,18 @@ Field | Type | Description
 
 ### Contribution
 
-A **Contribution** references a Person and either one **Audio** or one **Podcast**
+A **Contribution** references a Person, a Contribution Role and either one **Audio** or one **Podcast**
 
- Field | Type | Description 
-   --: | :--  | :--
- `role` | `String` | A contribution role for that person. E.g. `on_air` or `support`
- 
- Discussion:
- 
- * How much should we formalize this? Currently this is just a text string. I think we should at least make a list of suggestions for the default roles we imagine, that can be offered in frontends and given a good correspondence in the feed metadata too.
+Field | Type | Description 
+  --: | :--  | :--
+`position` | `Float` | Sort position to use when displaying Contributions of the same role
+
+### Contribution Role
+Field | Type | Description 
+  --: | :--  | :--
+`title` | `String` | Title of this role. E.g. `On Air` or `Support`                                                                  
+`isPublic` | `boolean` | true if this role will be shown in published information                                                                   
+                                                                              
 
 
 #### Feed Specs

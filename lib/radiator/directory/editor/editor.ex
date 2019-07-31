@@ -7,8 +7,18 @@ defmodule Radiator.Directory.Editor.Editor do
   alias Ecto.Multi
 
   alias Radiator.Repo
-  alias Radiator.Directory.Network
-  alias Radiator.Contribution.Person
+
+  alias Radiator.Directory.{
+    Network,
+    Podcast,
+    Audio
+  }
+
+  alias Radiator.Contribution.{
+    Person,
+    AudioContribution,
+    PodcastContribution
+  }
 
   require Logger
 
@@ -40,6 +50,30 @@ defmodule Radiator.Directory.Editor.Editor do
   def update_person(%Person{} = subject, attrs) do
     subject
     |> Person.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def create_contribution(%Podcast{} = parent, attrs) do
+    %PodcastContribution{podcast_id: parent.id}
+    |> PodcastContribution.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def create_contribution(%Audio{} = parent, attrs) do
+    %AudioContribution{audio_id: parent.id}
+    |> AudioContribution.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_contribution(%PodcastContribution{} = subject, attrs) do
+    subject
+    |> PodcastContribution.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def update_contribution(%AudioContribution{} = subject, attrs) do
+    subject
+    |> AudioContribution.changeset(attrs)
     |> Repo.update()
   end
 end

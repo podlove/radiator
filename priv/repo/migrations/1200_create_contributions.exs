@@ -11,7 +11,8 @@ defmodule Radiator.Repo.Migrations.CreateAudioContributions do
       timestamps()
     end
 
-    create table(:podcast_contributions) do
+    create table(:podcast_contributions, primary_key: false) do
+      add :id, :id, [:primary_key, default: fragment("nextval('audio_contributions_id_seq')")]
       add :position, :float
       add :person_id, references(:people, on_delete: :delete_all)
       add :podcast_id, references(:podcasts, on_delete: :delete_all)

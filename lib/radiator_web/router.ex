@@ -113,6 +113,9 @@ defmodule RadiatorWeb.Router do
         only: [:show, :create, :update, :delete]
     end
 
+    resources "/contributions", ContributionController,
+      only: [:index, :show, :create, :update, :delete]
+
     # todo: pluralize
     resources "/audio_file", AudioFileController, only: [:show, :create]
 
