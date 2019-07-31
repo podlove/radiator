@@ -16,7 +16,7 @@ A **User** has one **Person** for its public metadata
 
 ### Collaborator
 
-A **Collabottator** defines the permissions of one **User** for one **Network**, **Podcast**, **Episode** or  **AudioPublication**
+A **Collaborator** defines the permissions of one **User** for one **Network**, **Podcast**, **Episode** or  **AudioPublication**
 
  Field | Type | Description 
    --: | :--  | :--
@@ -157,7 +157,7 @@ Field | Type | Description
 
 ### Contribution
 
-A **Contribution** references a Person, a Contribtuion Role and either one **Audio** or one **Podcast**
+A **Contribution** references a Person, a Contribution Role and either one **Audio** or one **Podcast**
 
 Field | Type | Description 
   --: | :--  | :--
