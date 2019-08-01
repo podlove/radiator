@@ -94,9 +94,6 @@ defmodule RadiatorWeb.Router do
 
     resources "/networks", NetworkController, only: [:show, :create, :update, :delete] do
       resources "/collaborators", CollaboratorController, only: [:show, :create, :update, :delete]
-
-      resources "/audio_publications", AudioPublicationController,
-        only: [:index, :show, :update, :delete]
     end
 
     resources "/podcasts", PodcastController, only: [:show, :create, :update, :delete] do
@@ -104,6 +101,9 @@ defmodule RadiatorWeb.Router do
     end
 
     resources "/episodes", EpisodeController, only: [:show, :create, :update, :delete]
+
+    resources "/audio_publications", AudioPublicationController,
+      only: [:index, :show, :update, :delete]
 
     resources "/people", PersonController, only: [:index, :show, :create, :update, :delete]
 

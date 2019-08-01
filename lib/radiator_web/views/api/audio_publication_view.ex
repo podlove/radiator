@@ -25,10 +25,9 @@ defmodule RadiatorWeb.Api.AudioPublicationView do
     |> Document.add_link(%Link{
       rel: "self",
       href:
-        Routes.api_network_audio_publication_path(
+        Routes.api_audio_publication_path(
           assigns.conn,
           :show,
-          assigns.network.id,
           audio_publication.id
         )
     })

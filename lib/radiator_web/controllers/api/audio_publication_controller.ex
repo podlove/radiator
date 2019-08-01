@@ -3,20 +3,26 @@ defmodule RadiatorWeb.Api.AudioPublicationController do
 
   alias Radiator.Directory.Editor
 
-  plug :assign_network
-
   # TODO: move this into :rest_controller for all rest controllers
   def action(conn, _) do
     args = [conn, conn.params, current_user(conn)]
     apply(__MODULE__, action_name(conn), args)
   end
 
-  def index(conn, _, user) do
-    with {:ok, audio_publications} <- Editor.list_audio_publications(user, conn.assigns[:network]) do
+  def index(conn, %{"network_id" => network_id}, user) do
+    with {:ok, network} <- Editor.get_network(user, network_id),
+         {:ok, audio_publications} <- Editor.list_audio_publications(user, network) do
       conn
+      |> assign(:network, network)
       |> assign(:audio_publications, audio_publications)
       |> render("index.json")
     end
+  end
+
+  def index(conn, _, _) do
+    conn
+    |> put_status(422)
+    |> json(%{"errors" => %{"network_id" => "network_id parameter must be present."}})
   end
 
   def show(conn, %{"id" => id}, user) do
@@ -44,23 +50,6 @@ defmodule RadiatorWeb.Api.AudioPublicationController do
     else
       @not_found_match -> send_delete_resp(conn)
       error -> error
-    end
-  end
-
-  defp assign_network(conn, _) do
-    with {:ok, network} <-
-           conn
-           |> current_user()
-           |> Editor.get_network(conn.params["network_id"]) do
-      assign(conn, :network, network)
-    else
-      response -> apply_action_fallback(conn, response)
-    end
-  end
-
-  defp apply_action_fallback(conn, response) do
-    case @phoenix_fallback do
-      {:module, module} -> apply(module, :call, [conn, response]) |> halt()
     end
   end
 end

@@ -351,7 +351,7 @@ Represents an Audio in a Network
 ### Index
 
 ```
-GET /api/rest/v1/networks/:network_id/audio_publications
+GET /api/rest/v1/audio_publications?network_id=:network_id
 ```
 
 ### Create
@@ -361,19 +361,19 @@ Use "Create Audio" instead with network parameter.
 ### Read
 
 ```
-GET /api/rest/v1/networks/:network_id/audio_publications/:id
+GET /api/rest/v1/audio_publications/:id
 ```
 
 ### Update
 
 ```
-PATCH /api/rest/v1/networks/:network_id/audio_publications/:id
+PATCH /api/rest/v1/audio_publications/:id
 ```
 
 ### Delete
 
 ```
-DELETE /api/rest/v1/networks/:network_id/audio_publications/:id
+DELETE /api/rest/v1/audio_publications/:id
 ```
 
 ## People
