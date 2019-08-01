@@ -14,6 +14,7 @@ schema {
 """An audio object"""
 type Audio {
   audioFiles: [AudioFile]
+  audioPublication: AudioPublication
   chapters(order: SortOrder = ASC): [Chapter]
   contributions: [Contribution]
   duration: Int
@@ -21,14 +22,24 @@ type Audio {
   episodes: [Episode]
   id: ID!
   image: String
-  publishedAt: DateTime
   title: String
 }
 
 """Audio File"""
 type AudioFile {
   byteLength: Int
+  id: Int
   mimeType: String
+  title: String
+}
+
+type AudioPublication {
+  audio: Audio
+
+  """drafted, scheduled, published, depublished"""
+  id: Int
+  publishState: String
+  publishedAt: DateTime
   title: String
 }
 
@@ -80,6 +91,9 @@ type Episode {
   isPublished: Boolean
   number: Int
   podcast: Podcast
+
+  """drafted, scheduled, published, depublished"""
+  publishState: String
   publishedAt: DateTime
   shortId: String
   slug: String
@@ -117,8 +131,7 @@ type FeedInfo {
 
 """A network"""
 type Network {
-  """Audios attached directly to the network."""
-  audios: [Audio]
+  audioPublications: [AudioPublication]
   collaborators: [Collaborator]
   id: ID!
   image: String
@@ -226,6 +239,13 @@ input PodcastInput {
   ownerName: String
   subtitle: String
   title: String!
+}
+
+"""A radiator instance user accessible to others"""
+type PublicUser {
+  displayName: String
+  image: String
+  username: String
 }
 
 enum Published {
@@ -383,7 +403,7 @@ type RootQueryType {
   user: User
 
   """Find users of this instance"""
-  users(query: String!): [User]
+  users(query: String!): [PublicUser]
 }
 
 """A user API session"""

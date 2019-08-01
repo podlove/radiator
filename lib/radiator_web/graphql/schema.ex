@@ -108,7 +108,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
     end
 
     @desc "Find users of this instance"
-    field :users, list_of(:user) do
+    field :users, list_of(:public_user) do
       arg :query, non_null(:string)
 
       middleware Middleware.RequireAuthentication
