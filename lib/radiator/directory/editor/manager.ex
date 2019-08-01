@@ -9,6 +9,8 @@ defmodule Radiator.Directory.Editor.Manager do
   alias Radiator.Repo
   alias Radiator.Support
 
+  alias Radiator.Media.AudioFile
+
   alias Radiator.Directory.{
     Network,
     Podcast,
@@ -121,6 +123,19 @@ defmodule Radiator.Directory.Editor.Manager do
       {:ok, %{audio: audio}} -> {:ok, audio |> Repo.preload(:audio_publication)}
       something -> something
     end
+  end
+
+  def list_audio_files(audio = %Audio{}) do
+    audio
+    |> Ecto.assoc(:audio_files)
+    |> Repo.all()
+    |> (&{:ok, &1}).()
+  end
+
+  def create_audio_file(audio, attrs \\ %{}) do
+    Ecto.build_assoc(audio, :audio_files)
+    |> AudioFile.changeset(attrs)
+    |> Repo.insert()
   end
 
   def update_audio(%Audio{} = audio, attrs) do

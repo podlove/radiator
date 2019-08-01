@@ -66,20 +66,23 @@
   - [Delete](#delete-8)
 - [Audio File](#audio-file)
   - [Parameters for Create](#parameters-for-create)
+  - [Index](#index-3)
   - [Create](#create-9)
   - [Read](#read-9)
+  - [Update](#update-9)
+  - [Delete](#delete-9)
 - [Audio Chapters](#audio-chapters)
   - [Parameters for Create & Update](#parameters-for-create--update-9)
   - [Create](#create-10)
   - [Read](#read-10)
-  - [Update](#update-9)
-  - [Delete](#delete-9)
+  - [Update](#update-10)
+  - [Delete](#delete-10)
 - [Tasks](#tasks)
   - [Parameters for Create](#parameters-for-create-1)
     - [Import podcast feed](#import-podcast-feed)
   - [Create](#create-11)
   - [Read](#read-11)
-  - [Delete](#delete-10)
+  - [Delete](#delete-11)
 
 ## API Usage
 
@@ -505,26 +508,43 @@ DELETE /api/rest/v1/audios/:id
 
 ## Audio File
 
-> ⚠️ An [Audio](#Audio) must exist before an Audio File can be created.
-
 ### Parameters for Create
 
-| Name                   | Type      | Description                                                 |
-| ---------------------- | --------- | ----------------------------------------------------------- |
-| `audio_file[audio_id]` | `integer` | **Required.** File is attached to Audio object of given ID. |
-| `audio_file[file]`     | `file`    | audio file to upload                                        |
-| `audio_file[title]`    | `string`  | file title                                                  |
+| Name                      | Type      | Description          |
+| ------------------------- | --------- | -------------------- |
+| `audio_file[file]`        | `file`    | audio file to upload |
+| `audio_file[title]`       | `string`  | file title           |
+| `audio_file[mime_type]`   | `string`  | file mime type       |
+| `audio_file[byte_length]` | `integer` | file lenght in bytes |
+
+### Index
+
+```
+GET /api/rest/v1/audios/:audio_id/audio_files
+```
 
 ### Create
 
 ```
-POST /api/rest/v1/audio_file
+POST /api/rest/v1/audios/:audio_id/audio_files
 ```
 
 ### Read
 
 ```
-GET /api/rest/v1/audio_file/:id
+GET /api/rest/v1/audio_files/:id
+```
+
+### Update
+
+```
+PATCH /api/rest/v1/audio_files/:id
+```
+
+### Delete
+
+```
+DELETE /api/rest/v1/audio_files/:id
 ```
 
 ## Audio Chapters

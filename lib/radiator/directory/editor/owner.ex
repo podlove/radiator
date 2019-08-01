@@ -16,6 +16,7 @@ defmodule Radiator.Directory.Editor.Owner do
 
   alias Radiator.Auth
   alias Radiator.Perm.Permission
+  alias Radiator.Media.AudioFile
 
   use Radiator.Constants
 
@@ -112,6 +113,10 @@ defmodule Radiator.Directory.Editor.Owner do
   """
   def change_network(%Network{} = network) do
     Network.changeset(network, %{})
+  end
+
+  def delete_audio_file(audio_file = %AudioFile{}) do
+    Repo.delete(audio_file)
   end
 
   def delete_audio_publication(audio_publication = %AudioPublication{}) do
