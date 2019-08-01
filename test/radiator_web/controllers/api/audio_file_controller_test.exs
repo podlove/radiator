@@ -21,7 +21,7 @@ defmodule RadiatorWeb.Api.AudioFileControllerTest do
 
       conn =
         post(conn, Routes.api_audio_file_path(conn, :create, audio),
-          audio_file: %{title: "example", audio_id: audio.id}
+          audio_file: %{title: "example"}
         )
 
       assert %{"title" => "example"} = json_response(conn, 201)

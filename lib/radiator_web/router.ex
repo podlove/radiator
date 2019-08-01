@@ -109,13 +109,15 @@ defmodule RadiatorWeb.Router do
 
     resources "/audios", AudioController, only: [:show, :create, :update, :delete] do
       resources "/audio_files", AudioFileController,
-        only: [:index, :show, :create, :update, :delete],
+        only: [:index, :create],
         as: :file
 
       resources "/chapters", ChaptersController,
         param: "start",
         only: [:show, :create, :update, :delete]
     end
+
+    resources "/audio_files", AudioFileController, only: [:show, :update, :delete]
 
     resources "/contributions", ContributionController,
       only: [:index, :show, :create, :update, :delete]

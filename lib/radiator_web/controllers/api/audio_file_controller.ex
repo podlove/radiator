@@ -26,7 +26,7 @@ defmodule RadiatorWeb.Api.AudioFileController do
       |> put_status(:created)
       |> put_resp_header(
         "location",
-        Routes.api_audio_file_path(conn, :show, audio_file.audio_id, audio_file)
+        Routes.api_audio_file_path(conn, :show, audio_file)
       )
       |> render("show.json", audio_file: audio_file)
     end
