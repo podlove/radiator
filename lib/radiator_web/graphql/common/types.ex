@@ -19,6 +19,7 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
 
   @desc "Audio File"
   object :audio_file do
+    field :id, :integer
     field :mime_type, :string
     field :byte_length, :integer
     field :title, :string

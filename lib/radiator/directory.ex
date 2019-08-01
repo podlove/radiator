@@ -9,7 +9,6 @@ defmodule Radiator.Directory do
 
   alias Radiator.Support
   alias Radiator.Repo
-  alias Radiator.Media
   alias Radiator.Media.AudioFile
   alias Radiator.Directory.{Network, Episode, Podcast, Audio}
   alias Radiator.Directory.{PodcastQuery, EpisodeQuery, AudioQuery}
@@ -307,7 +306,7 @@ defmodule Radiator.Directory do
   def get_audio_file(audio_file_id) do
     with {:get, audio = %AudioFile{}} <-
            {:get,
-            Media.get_audio_file(audio_file_id)
+            Repo.get(AudioFile, audio_file_id)
             |> Repo.preload(audio: :episodes)},
          {:published, published} when published <-
            {:published, is_published(hd(audio.audio.episodes))} do

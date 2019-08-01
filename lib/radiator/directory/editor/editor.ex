@@ -7,6 +7,7 @@ defmodule Radiator.Directory.Editor.Editor do
   alias Ecto.Multi
 
   alias Radiator.Repo
+  alias Radiator.Media.AudioFile
 
   alias Radiator.Directory.{
     Network,
@@ -74,6 +75,12 @@ defmodule Radiator.Directory.Editor.Editor do
   def update_contribution(%AudioContribution{} = subject, attrs) do
     subject
     |> AudioContribution.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def update_audio_file(audio_file = %AudioFile{}, attrs) do
+    audio_file
+    |> AudioFile.changeset(attrs)
     |> Repo.update()
   end
 end
