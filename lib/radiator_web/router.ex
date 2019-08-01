@@ -130,7 +130,7 @@ defmodule RadiatorWeb.Router do
 
     resources "/tasks", TaskController, only: [:show, :create, :delete]
 
-    post "/preview/chapters", Preview.ChaptersImportController, :preview
+    post "/convert/chapters", Preview.ChaptersImportController, :convert
   end
 
   scope "/api" do

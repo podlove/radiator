@@ -84,7 +84,7 @@
   - [Create](#create-10)
   - [Read](#read-11)
   - [Delete](#delete-11)
-- [Chapters Import](#chapters-import)
+- [Convert Chapters](#convert-chapters)
 
 ## API Usage
 
@@ -658,15 +658,36 @@ You should delete a task after it is done. Eventually done tasks will clear out 
 DELETE /api/rest/v1/tasks/:id
 ```
 
-## Chapters Import
+## Convert Chapters
 
-The chapters import endpoint takes a string of one of the following formats:
+
+```
+POST /api/rest/v1/convert/chapters
+```
+
+The chapters converter endpoint takes a string of one of the following formats:
 
 - PSC (Podlove Simple Chapters)
 - mp4chaps
 - JSON
 
-The format is detected automatically. The output is a list of chapters in JSON format and the following keys:
+The input format is detected automatically.
+
+**Parameters**
+
+| Name            | Type     | Description                          |
+| --------------- | -------- | ------------------------------------ |
+| `data`          | `string` | **Required.** raw chapters content   |
+| `output_format` | `string` | json, psc or mp4chaps. default: json |
+
+
+The response content type depends on the chosen `output_format`. In case of errors, the response is JSON.
+
+**json**
+
+Content Type: `application/json; charset=utf-8`
+
+The output is a list of chapters with the following keys:
 
 | Name    | Type      | Description                        |
 | ------- | --------- | ---------------------------------- |
@@ -675,6 +696,10 @@ The format is detected automatically. The output is a list of chapters in JSON f
 | `start` | `integer` | chapter start time in milliseconds |
 | `title` | `string`  | chapter title                      |
 
-```
-POST /api/rest/v1/preview/chapters
-```
+**psc**
+
+Content Type: `application/xml; charset=utf-8`
+
+**mp4chaps**
+
+Content Type: `application/json; charset=utf-8`
