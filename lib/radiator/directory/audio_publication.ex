@@ -10,6 +10,7 @@ defmodule Radiator.Directory.AudioPublication do
   }
 
   schema "audio_publications" do
+    field :title, :string
     field :publish_state, Radiator.Ecto.AtomType, default: :drafted
     field :published_at, :utc_datetime
 

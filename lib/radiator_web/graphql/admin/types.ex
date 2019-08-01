@@ -240,6 +240,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   object :audio_publication do
     @desc "drafted, scheduled, published, depublished"
+    field :id, :integer
+    field :title, :string
     field :publish_state, :string
     field :published_at, :datetime
 
