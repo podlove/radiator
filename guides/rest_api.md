@@ -60,27 +60,28 @@
   - [Delete](#delete-7)
 - [Audio](#audio)
   - [Parameters for Create & Update](#parameters-for-create--update-8)
-  - [Create](#create-8)
+  - [Create (in network / audio publication)](#create-in-network--audio-publication)
+  - [Create (in podcast / episode)](#create-in-podcast--episode)
   - [Read](#read-8)
   - [Update](#update-8)
   - [Delete](#delete-8)
 - [Audio File](#audio-file)
   - [Parameters for Create](#parameters-for-create)
   - [Index](#index-3)
-  - [Create](#create-9)
+  - [Create](#create-8)
   - [Read](#read-9)
   - [Update](#update-9)
   - [Delete](#delete-9)
 - [Audio Chapters](#audio-chapters)
   - [Parameters for Create & Update](#parameters-for-create--update-9)
-  - [Create](#create-10)
+  - [Create](#create-9)
   - [Read](#read-10)
   - [Update](#update-10)
   - [Delete](#delete-10)
 - [Tasks](#tasks)
   - [Parameters for Create](#parameters-for-create-1)
     - [Import podcast feed](#import-podcast-feed)
-  - [Create](#create-11)
+  - [Create](#create-10)
   - [Read](#read-11)
   - [Delete](#delete-11)
 
@@ -474,18 +475,24 @@ DELETE /api/rest/v1/contributions/:id
 
 ### Parameters for Create & Update
 
-| Name                | Type      | Description                                                |
-| ------------------- | --------- | ---------------------------------------------------------- |
-| `audio[network_id]` | `integer` | Network ID. Either network ID or episode ID must be given. |
-| `audio[episode_id]` | `integer` | Episode ID. Either network ID or episode ID must be given. |
-| `audio[title]`      | `string`  |                                                            |
-| `audio[image]`      | `file`    | Audio image.                                               |
-| `audio[duration]`   | `integer` | Audio duration in milliseconds                             |
+| Name                | Type      | Description                    |
+| ------------------- | --------- | ------------------------------ |
+| `audio[network_id]` | `integer` | Network ID. (readonly)         |
+| `audio[episode_id]` | `integer` | Episode ID. (readonly)         |
+| `audio[title]`      | `string`  |                                |
+| `audio[image]`      | `file`    | Audio image.                   |
+| `audio[duration]`   | `integer` | Audio duration in milliseconds |
 
-### Create
+### Create (in network / audio publication)
 
 ```
-POST /api/rest/v1/audios
+POST /api/rest/v1/networks/:network_id/audios
+```
+
+### Create (in podcast / episode)
+
+```
+POST /api/rest/v1/episodes/:episode_id/audios
 ```
 
 ### Read

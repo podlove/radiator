@@ -3,7 +3,7 @@ defmodule RadiatorWeb.Api.AudioController do
 
   alias Radiator.Directory.Editor
 
-  def create(conn, %{"audio" => params = %{"network_id" => network_id}}) do
+  def create(conn, %{"network_id" => network_id, "audio" => params}) do
     with user = current_user(conn),
          {:ok, network} <- Editor.get_network(user, network_id),
          {:ok, audio} <- Editor.create_audio(user, network, params) do
@@ -14,7 +14,7 @@ defmodule RadiatorWeb.Api.AudioController do
     end
   end
 
-  def create(conn, %{"audio" => params = %{"episode_id" => episode_id}}) do
+  def create(conn, %{"episode_id" => episode_id, "audio" => params}) do
     with user = current_user(conn),
          {:ok, episode} <- Editor.get_episode(user, episode_id),
          {:ok, audio} <- Editor.create_audio(user, episode, params) do
@@ -23,12 +23,6 @@ defmodule RadiatorWeb.Api.AudioController do
       |> put_resp_header("location", Routes.api_audio_path(conn, :show, audio))
       |> render("show.json", %{audio: audio})
     end
-  end
-
-  def create(conn, %{"audio" => _}) do
-    conn
-    |> put_status(422)
-    |> json(%{"errors" => %{"assignment" => "Either episode_id or network_id must be present."}})
   end
 
   def show(conn, %{"id" => id}) do

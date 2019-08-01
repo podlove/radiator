@@ -19,30 +19,20 @@ defmodule RadiatorWeb.Api.AudioControllerTest do
       network = insert(:network) |> owned_by(user)
 
       conn =
-        post(conn, Routes.api_audio_path(conn, :create),
-          audio: %{title: "example", network_id: network.id}
+        post(conn, Routes.api_network_audio_path(conn, :create, network.id),
+          audio: %{title: "example"}
         )
 
       assert %{"title" => "example"} = json_response(conn, 201)
     end
 
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.api_audio_path(conn, :create), audio: %{})
+    test "renders errors no user is present", %{conn: conn, user: user} do
+      network = insert(:network) |> owned_by(user)
 
-      assert %{"errors" => %{"assignment" => _error}} = json_response(conn, 422)
-    end
-
-    test "renders errors when no network is given", %{conn: conn} do
-      conn = post(conn, Routes.api_audio_path(conn, :create), audio: %{title: "pod"})
-
-      assert response(conn, 422)
-    end
-
-    test "renders errors no user is present", %{conn: conn} do
       conn =
         conn
         |> delete_req_header("authorization")
-        |> post(Routes.api_audio_path(conn, :create), audio: %{})
+        |> post(Routes.api_network_audio_path(conn, :create, network.id), audio: %{})
 
       assert "Unauthorized" = json_response(conn, 401)
     end
