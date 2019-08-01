@@ -76,6 +76,11 @@ defmodule Radiator.Factory do
     audio_publication
   end
 
+  def publish(episode = %Episode{}) do
+    {:ok, episode} = Radiator.Directory.Editor.Manager.publish(episode)
+    episode
+  end
+
   def network_factory do
     title = sequence(:title, &"Network ##{&1}")
 
@@ -107,6 +112,7 @@ defmodule Radiator.Factory do
     struct!(
       episode_factory(),
       %{
+        publish_state: :drafted,
         published_at: DateTime.utc_now() |> DateTime.add(3600, :second)
       }
     )
@@ -117,6 +123,7 @@ defmodule Radiator.Factory do
     struct!(
       episode_factory(),
       %{
+        publish_state: :published,
         published_at: DateTime.utc_now() |> DateTime.add(-3600, :second)
       }
     )

@@ -95,13 +95,13 @@ defmodule Radiator.Directory.TitleSlugTest do
         insert(:episode, %{
           title: "Sequential Episode Slug Test",
           slug: "sequential-episode-slug-test",
-          published_at: DateTime.utc_now()
+          publish_state: :published
         })
 
       changeset =
-        insert(:episode, title: existing_episode.title)
+        insert(:episode, title: existing_episode.title, publish_state: :drafted)
         |> Episode.changeset(%{
-          published_at: DateTime.utc_now(),
+          publish_state: :published,
           podcast_id: existing_episode.podcast_id
         })
 

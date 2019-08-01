@@ -9,7 +9,10 @@ defmodule Radiator.Directory.Editor.Owner do
 
   alias Radiator.Repo
 
-  alias Radiator.Directory.Network
+  alias Radiator.Directory.{
+    AudioPublication,
+    Network
+  }
 
   alias Radiator.Auth
   alias Radiator.Perm.Permission
@@ -109,5 +112,9 @@ defmodule Radiator.Directory.Editor.Owner do
   """
   def change_network(%Network{} = network) do
     Network.changeset(network, %{})
+  end
+
+  def delete_audio_publication(audio_publication = %AudioPublication{}) do
+    Repo.delete(audio_publication)
   end
 end
