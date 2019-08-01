@@ -9,7 +9,10 @@ defmodule Radiator.Directory.Editor.Owner do
 
   alias Radiator.Repo
 
-  alias Radiator.Directory.Network
+  alias Radiator.Directory.{
+    AudioPublication,
+    Network
+  }
 
   alias Radiator.Auth
   alias Radiator.Perm.Permission
@@ -114,5 +117,9 @@ defmodule Radiator.Directory.Editor.Owner do
 
   def delete_audio_file(audio_file = %AudioFile{}) do
     Repo.delete(audio_file)
+  end
+
+  def delete_audio_publication(audio_publication = %AudioPublication{}) do
+    Repo.delete(audio_publication)
   end
 end

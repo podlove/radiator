@@ -150,6 +150,7 @@ defmodule Radiator.Directory.Importer do
           summary: episode.summary || episode.description,
           summary_html: episode.content_encoded,
           published_at: episode.pub_date,
+          publish_state: :published,
           number: episode.episode,
           short_id: Episode.generate_short_id(short_id, episode.episode)
         })
@@ -310,6 +311,7 @@ defmodule Radiator.Directory.Importer do
             summary: episode.summary || episode.description,
             summary_html: episode.content_encoded,
             published_at: episode.pub_date,
+            publish_state: :published,
             number: episode.episode
           })
 

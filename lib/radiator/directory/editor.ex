@@ -24,6 +24,7 @@ defmodule Radiator.Directory.Editor do
     Episode,
     Editor,
     Audio,
+    AudioPublication,
     Collaborator
   }
 
@@ -323,6 +324,56 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def get_audio_publication(actor = %Auth.User{}, id) do
+    case Repo.get(AudioPublication, id) do
+      nil ->
+        @not_found_match
+
+      audio_publication = %AudioPublication{} ->
+        if can_access_audio_publication(actor, audio_publication, :readonly) do
+          {:ok, audio_publication}
+        else
+          @not_authorized_match
+        end
+    end
+  end
+
+  def list_audio_publications(actor = %Auth.User{}, network = %Network{}) do
+    if has_permission(actor, network, :readonly) do
+      Editor.Manager.list_audio_publications(network)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def update_audio_publication(
+        actor = %Auth.User{},
+        audio_publication = %AudioPublication{},
+        params
+      ) do
+    if can_access_audio_publication(actor, audio_publication, :manage) do
+      Editor.Manager.update_audio_publication(audio_publication, params)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def delete_audio_publication(actor = %Auth.User{}, audio_publication = %AudioPublication{}) do
+    if can_access_audio_publication(actor, audio_publication, :own) do
+      Editor.Owner.delete_audio_publication(audio_publication)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def create_audio_publication(actor = %Auth.User{}, network = %Network{}, attrs) do
+    if has_permission(actor, network, :manage) do
+      Editor.Manager.create_audio_publication(network, attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
   def create_episode(actor = %Auth.User{}, podcast = %Podcast{}, attrs) do
     if has_permission(actor, podcast, :manage) do
       Editor.Manager.create_episode(podcast, attrs)
@@ -497,14 +548,6 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  def list_audios(actor = %Auth.User{}, network = %Network{}) do
-    if has_permission(actor, network, :readonly) do
-      Editor.Manager.list_audios(network)
-    else
-      @not_authorized_match
-    end
-  end
-
   def create_audio(actor = %Auth.User{}, episode = %Episode{}, attrs) do
     if has_permission(actor, episode, :edit) do
       Editor.Manager.create_audio(episode, attrs)
@@ -534,6 +577,14 @@ defmodule Radiator.Directory.Editor do
       Editor.Manager.delete_audio(audio)
     else
       @not_authorized_match
+    end
+  end
+
+  defp can_access_audio_publication(actor, audio_publication, permission) do
+    with network = %Network{} <- Repo.get(Network, audio_publication.network_id) do
+      has_permission(actor, network, permission)
+    else
+      _ -> false
     end
   end
 

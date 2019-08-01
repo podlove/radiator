@@ -2,6 +2,7 @@ defmodule Radiator.Directory.AudioPublication do
   use Ecto.Schema
 
   import Ecto.Changeset
+  import Radiator.Directory.Publication
 
   alias Radiator.Directory.{
     Network,
@@ -9,7 +10,8 @@ defmodule Radiator.Directory.AudioPublication do
   }
 
   schema "audio_publications" do
-    field :publish_state, :string
+    field :title, :string
+    field :publish_state, Radiator.Ecto.AtomType, default: :drafted
     field :published_at, :utc_datetime
 
     belongs_to :network, Network
@@ -24,8 +26,10 @@ defmodule Radiator.Directory.AudioPublication do
   def changeset(audio_publication, attrs) do
     audio_publication
     |> cast(attrs, [
-      :publish_state
+      :publish_state,
+      :audio_id
     ])
+    |> validate_publish_state()
     |> maybe_set_published_at()
   end
 
@@ -38,16 +42,6 @@ defmodule Radiator.Directory.AudioPublication do
       :publish_state,
       :published_at
     ])
-  end
-
-  defp maybe_set_published_at(changeset) do
-    {
-      get_field(changeset, :publish_state),
-      get_field(changeset, :published_at)
-    }
-    |> case do
-      {:publish, nil} -> put_change(changeset, :published_at, DateTime.utc_now())
-      _ -> changeset
-    end
+    |> validate_publish_state()
   end
 end

@@ -27,10 +27,18 @@ defmodule Radiator.Constants do
     end
   end
 
+  def publish_states do
+    quote do
+      @publish_states [:drafted, :scheduled, :published, :depublished]
+
+      defguard is_publish_state(s) when s in @publish_states
+    end
+  end
+
   @doc """
   When used, dispatch to the appropriate subset. When adding a new category, make sure to also add it to the attribute
   """
-  @categories [:permissions, :general]
+  @categories [:permissions, :general, :publish_states]
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, [])
   end

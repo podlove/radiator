@@ -5,7 +5,7 @@ defmodule Radiator.Directory.Audio do
   An Audio contains all data required to generate a web player: file references
   and audio metadata.
 
-  An Audio belongs to one or many episodes, or stand on its own in a network.
+  An Audio belongs to one or many episodes, or stand on its own in a network via AudioPublication.
   """
   use Ecto.Schema
 
@@ -46,8 +46,6 @@ defmodule Radiator.Directory.Audio do
     audio
     |> cast(attrs, [:title, :duration])
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
-
-    # todo: validate it belongs to _something_ / not a zombie
   end
 
   @doc """

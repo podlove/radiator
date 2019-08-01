@@ -26,29 +26,6 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
   }
   """
 
-  test "createEpisode creates an episode", %{conn: conn, user: user} do
-    podcast = insert(:podcast) |> owned_by(user)
-    episode = params_for(:episode)
-
-    conn =
-      post conn, "/api/graphql",
-        query: @create_query,
-        variables: %{"episode" => episode, "podcast_id" => podcast.id}
-
-    title = episode[:title]
-
-    assert %{
-             "data" => %{
-               "createEpisode" => %{
-                 "title" => ^title,
-                 "id" => id
-               }
-             }
-           } = json_response(conn, 200)
-
-    refute is_nil(id)
-  end
-
   test "createEpisode returns errors when missing data", %{conn: conn, user: user} do
     podcast = insert(:podcast) |> owned_by(user)
 
@@ -64,17 +41,6 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
            } = json_response(conn, 200)
 
     assert msg =~ ~r/Argument "episode" has invalid value \$episode/
-  end
-
-  test "createEpisode returns errors when podcast_id is wrong", %{conn: conn, user: _user} do
-    episode = params_for(:episode)
-
-    conn =
-      post conn, "/api/graphql",
-        query: @create_query,
-        variables: %{"episode" => episode, "podcast_id" => -1}
-
-    assert %{"errors" => [%{"message" => "Entity not found"}]} = json_response(conn, 200)
   end
 
   @update_query """
@@ -212,6 +178,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
     depublishEpisode(id: $id) {
       id
       publishedAt
+      publishState
     }
   }
   """
@@ -230,7 +197,7 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.EpisodesTest do
              "data" => %{
                "depublishEpisode" => %{
                  "id" => ^id,
-                 "publishedAt" => nil
+                 "publishState" => "depublished"
                }
              }
            } = json_response(conn, 200)

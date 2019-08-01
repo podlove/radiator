@@ -102,6 +102,9 @@ defmodule RadiatorWeb.Router do
 
     resources "/episodes", EpisodeController, only: [:show, :create, :update, :delete]
 
+    resources "/audio_publications", AudioPublicationController,
+      only: [:index, :show, :update, :delete]
+
     resources "/people", PersonController, only: [:index, :show, :create, :update, :delete]
 
     resources "/audios", AudioController, only: [:show, :create, :update, :delete] do

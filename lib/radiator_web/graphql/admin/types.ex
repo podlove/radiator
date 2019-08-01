@@ -88,9 +88,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       resolve &Resolvers.Editor.list_podcasts/3
     end
 
-    field :audios, list_of(:audio) do
-      description "Audios attached directly to the network."
-      resolve &Resolvers.Editor.list_audios/3
+    field :audio_publications, list_of(:audio_publication) do
+      resolve &Resolvers.Editor.list_audio_publications/3
     end
 
     field :people, list_of(:person) do
@@ -181,6 +180,9 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :number, :integer
+
+    @desc "drafted, scheduled, published, depublished"
+    field :publish_state, :string
     field :published_at, :datetime
 
     field :slug, :string
@@ -212,8 +214,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       resolve &Resolvers.Editor.get_image_url/3
     end
 
-    field :published_at, :datetime
-
     field :chapters, list_of(:chapter) do
       arg :order, type: :sort_order, default_value: :asc
 
@@ -225,12 +225,28 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       resolve &Resolvers.Editor.get_episodes/3
     end
 
+    field :audio_publication, :audio_publication do
+      resolve &Resolvers.Editor.get_audio_publication/3
+    end
+
     field :audio_files, list_of(:audio_file) do
       resolve &Resolvers.Editor.get_audio_files/3
     end
 
     field :contributions, list_of(:contribution) do
       resolve &Resolvers.Editor.get_contributions/3
+    end
+  end
+
+  object :audio_publication do
+    @desc "drafted, scheduled, published, depublished"
+    field :id, :integer
+    field :title, :string
+    field :publish_state, :string
+    field :published_at, :datetime
+
+    field :audio, :audio do
+      resolve &Resolvers.Editor.find_audio/3
     end
   end
 

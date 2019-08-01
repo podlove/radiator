@@ -37,42 +37,49 @@
   - [Read](#read-4)
   - [Update](#update-4)
   - [Delete](#delete-4)
-- [People](#people)
+- [AudioPublications](#audiopublications)
   - [Parameters for Create & Update](#parameters-for-create--update-5)
-  - [Create](#create-5)
   - [Index](#index)
+  - [Create](#create-5)
   - [Read](#read-5)
   - [Update](#update-5)
   - [Delete](#delete-5)
-- [Contributions](#contributions)
+- [People](#people)
   - [Parameters for Create & Update](#parameters-for-create--update-6)
   - [Create](#create-6)
   - [Index](#index-1)
   - [Read](#read-6)
   - [Update](#update-6)
   - [Delete](#delete-6)
-- [Audio](#audio)
+- [Contributions](#contributions)
   - [Parameters for Create & Update](#parameters-for-create--update-7)
   - [Create](#create-7)
+  - [Index](#index-2)
   - [Read](#read-7)
   - [Update](#update-7)
   - [Delete](#delete-7)
-- [Audio File](#audio-file)
-  - [Parameters for Create](#parameters-for-create)
+- [Audio](#audio)
+  - [Parameters for Create & Update](#parameters-for-create--update-8)
   - [Create](#create-8)
   - [Read](#read-8)
-- [Audio Chapters](#audio-chapters)
-  - [Parameters for Create & Update](#parameters-for-create--update-8)
-  - [Create](#create-9)
-  - [Read](#read-9)
   - [Update](#update-8)
   - [Delete](#delete-8)
+- [Audio File](#audio-file)
+  - [Parameters for Create](#parameters-for-create)
+  - [Create](#create-9)
+  - [Read](#read-9)
+- [Audio Chapters](#audio-chapters)
+  - [Parameters for Create & Update](#parameters-for-create--update-9)
+  - [Create](#create-10)
+  - [Read](#read-10)
+  - [Update](#update-9)
+  - [Delete](#delete-9)
 - [Tasks](#tasks)
   - [Parameters for Create](#parameters-for-create-1)
     - [Import podcast feed](#import-podcast-feed)
-  - [Create](#create-10)
-  - [Read](#read-10)
-  - [Delete](#delete-9)
+  - [Create](#create-11)
+  - [Read](#read-11)
+  - [Delete](#delete-10)
 
 ## API Usage
 
@@ -290,17 +297,18 @@ DELETE /api/rest/v1/podcasts/:id/collaborators/:username
 
 ### Parameters for Create & Update
 
-| Name                      | Type      | Description                                                             |
-| ------------------------- | --------- | ----------------------------------------------------------------------- |
-| `episode[title]`          | `string`  | **Required.**                                                           |
-| `episode[podcast_id]`     | `integer` | **Required.**                                                           |
-| `episode[short_id]`       | `string`  | Full combined short id, usually short_id + Number                       |
-| `episode[guid]`           | `string`  | guid, prefilled on publish if unspecified                               |
-| `episode[subtitle]`       | `string`  | One line description of the episode                                     |
-| `episode[summary]`        | `text`    | Multiline description, plain text only                                  |
-| `episode[summary_html]`   | `text`    | Multiline description, html. Will be put in `content:encoded` in a feed |
-| `episode[summary_source]` | `text`    | Multiline description, arbitrary format chosen by frontends.            |
-| `episode[number]`         | `integer` | Episode "Track" number, will be put in `itunes:episode` in the feed     |
+| Name                      | Type      | Description                                                              |
+| ------------------------- | --------- | ------------------------------------------------------------------------ |
+| `episode[title]`          | `string`  | **Required.**                                                            |
+| `episode[podcast_id]`     | `integer` | **Required.**                                                            |
+| `episode[short_id]`       | `string`  | Full combined short id, usually short_id + Number                        |
+| `episode[guid]`           | `string`  | guid, prefilled on publish if unspecified                                |
+| `episode[subtitle]`       | `string`  | One line description of the episode                                      |
+| `episode[summary]`        | `text`    | Multiline description, plain text only                                   |
+| `episode[summary_html]`   | `text`    | Multiline description, html. Will be put in `content:encoded` in a feed  |
+| `episode[summary_source]` | `text`    | Multiline description, arbitrary format chosen by frontends.             |
+| `episode[number]`         | `integer` | Episode "Track" number, will be put in `itunes:episode` in the feed      |
+| `episode[publish_state]`  | `string`  | Publication state. "drafted", "scheduled", "published" or "unpublished". |
 
 ### Create
 
@@ -324,6 +332,48 @@ PATCH /api/rest/v1/episodes/:id
 
 ```
 DELETE /api/rest/v1/episodes/:id
+```
+
+## AudioPublications
+
+Represents an Audio in a Network
+
+### Parameters for Create & Update
+
+| Name                               | Type       | Description                                                              |
+| ---------------------------------- | ---------- | ------------------------------------------------------------------------ |
+| `audio_publication[publish_state]` | `string`   | Publication state. "drafted", "scheduled", "published" or "unpublished". |
+| `audio_publication[published_at]`  | `datetime` | publication date (readonly, is set automatically on first publication)   |
+| `audio_publication[network_id]`    | `string`   | network id (readonly)                                                    |
+| `audio_publication[audio_id]`      | `string`   | audio id (readonly)                                                      |
+
+
+### Index
+
+```
+GET /api/rest/v1/audio_publications?network_id=:network_id
+```
+
+### Create
+
+Use "Create Audio" instead with network parameter.
+
+### Read
+
+```
+GET /api/rest/v1/audio_publications/:id
+```
+
+### Update
+
+```
+PATCH /api/rest/v1/audio_publications/:id
+```
+
+### Delete
+
+```
+DELETE /api/rest/v1/audio_publications/:id
 ```
 
 ## People
