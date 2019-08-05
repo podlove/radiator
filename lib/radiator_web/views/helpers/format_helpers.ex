@@ -33,6 +33,9 @@ defmodule RadiatorWeb.FormatHelpers do
     |> String.slice(0..-5)
   end
 
+  # Since we are display formatting only, allow for nil
+  def format_normal_playtime(nil), do: format_normal_playtime(0)
+
   def format_normal_playtime(time) do
     time
     |> Chapters.Formatters.Normalplaytime.Formatter.format()
