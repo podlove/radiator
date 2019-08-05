@@ -23,6 +23,10 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
     field :mime_type, :string
     field :byte_length, :integer
     field :title, :string
+
+    field :file, :string do
+      resolve &RadiatorWeb.GraphQL.Admin.Resolvers.Editor.get_file_url/3
+    end
   end
 
   @desc "A user API session"

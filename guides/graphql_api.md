@@ -28,6 +28,7 @@ type Audio {
 """Audio File"""
 type AudioFile {
   byteLength: Int
+  file: String
   id: Int
   mimeType: String
   title: String
@@ -104,16 +105,6 @@ type Episode {
   title: String
 }
 
-"""The input for an episode in a podcast"""
-input EpisodeInput {
-  content: String
-  description: String
-  image: Upload
-  number: Int
-  subtitle: String
-  title: String!
-}
-
 enum EpisodeOrder {
   PUBLISHED_AT
   TITLE
@@ -139,12 +130,6 @@ type Network {
   podcasts: [Podcast]
   slug: String
   title: String
-}
-
-"""The input for a network"""
-input NetworkInput {
-  image: Upload
-  title: String!
 }
 
 """A type of access permission."""
@@ -230,17 +215,6 @@ type PodcastFeedEpisode {
   title: String
 }
 
-"""The input for a podcast"""
-input PodcastInput {
-  description: String
-  image: Upload
-  language: String
-  ownerEmail: String
-  ownerName: String
-  subtitle: String
-  title: String!
-}
-
 """A radiator instance user accessible to others"""
 type PublicUser {
   displayName: String
@@ -304,20 +278,8 @@ type RootMutationType {
   """Request an authenticated session"""
   authenticatedSession(password: String!, usernameOrEmail: String!): Session
 
-  """Create an episode"""
-  createEpisode(episode: EpisodeInput!, podcastId: ID!): Episode
-
-  """Create a network (Authenticated)"""
-  createNetwork(network: NetworkInput!): Network
-
-  """Create a podcast"""
-  createPodcast(networkId: Int!, podcast: PodcastInput!): Podcast
-
   """Delete an episode"""
   deleteEpisode(id: ID!): Episode
-
-  """Delete a podcast"""
-  deletePodcast(id: ID!): Podcast
 
   """Depublish episode"""
   depublishEpisode(id: ID!): Episode
@@ -328,26 +290,11 @@ type RootMutationType {
   """Prolong an authenticated session"""
   prolongSession: Session
 
-  """Publish episode"""
-  publishEpisode(id: ID!): Episode
-
   """Publish podcast"""
   publishPodcast(id: ID!): Podcast
 
   """Schedule episode"""
   scheduleEpisode(datetime: DateTime!, id: ID!): Episode
-
-  """Update an episode"""
-  updateEpisode(episode: EpisodeInput!, id: ID!): Episode
-
-  """Update a network"""
-  updateNetwork(id: ID!, network: NetworkInput!): Network
-
-  """Update a podcast"""
-  updatePodcast(id: ID!, podcast: PodcastInput!): Podcast
-
-  """Upload audio file to audio object"""
-  uploadAudioFile(audioId: Int!, file: Upload): AudioFile
 
   """Request resend of verification email (need auth)"""
   userResendVerificationEmail: Boolean
@@ -417,12 +364,6 @@ enum SortOrder {
   ASC
   DESC
 }
-
-"""
-Represents an uploaded file.
-
-"""
-scalar Upload
 
 """A radiator instance user accessible to admins and yourself"""
 type User {

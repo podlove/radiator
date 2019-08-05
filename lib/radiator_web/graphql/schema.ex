@@ -192,35 +192,6 @@ defmodule RadiatorWeb.GraphQL.Schema do
       resolve &Admin.Resolvers.Session.prolong_authenticated_session/3
     end
 
-    @desc "Create a network (Authenticated)"
-    field :create_network, type: :network do
-      arg :network, non_null(:network_input)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.create_network/3
-      middleware Middleware.TranslateChangeset
-    end
-
-    @desc "Update a network"
-    field :update_network, type: :network do
-      arg :id, non_null(:id)
-      arg :network, non_null(:network_input)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.update_network/3
-      middleware Middleware.TranslateChangeset
-    end
-
-    @desc "Create a podcast"
-    field :create_podcast, type: :podcast do
-      arg :podcast, non_null(:podcast_input)
-      arg :network_id, non_null(:integer)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.create_podcast/3
-      middleware Middleware.TranslateChangeset
-    end
-
     @desc "Publish podcast"
     field :publish_podcast, type: :podcast do
       arg :id, non_null(:id)
@@ -235,61 +206,6 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
       middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.depublish_podcast/3
-    end
-
-    @desc "Update a podcast"
-    field :update_podcast, type: :podcast do
-      arg :id, non_null(:id)
-      arg :podcast, non_null(:podcast_input)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.update_podcast/3
-      middleware Middleware.TranslateChangeset
-    end
-
-    @desc "Delete a podcast"
-    field :delete_podcast, type: :podcast do
-      arg :id, non_null(:id)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.delete_podcast/3
-    end
-
-    @desc "Upload audio file to audio object"
-    field :upload_audio_file, type: :audio_file do
-      arg :audio_id, non_null(:integer)
-      arg :file, :upload
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Storage.upload_audio_file/3
-    end
-
-    @desc "Create an episode"
-    field :create_episode, type: :episode do
-      arg :podcast_id, non_null(:id)
-      arg :episode, non_null(:episode_input)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.create_episode/3
-      middleware Middleware.TranslateChangeset
-    end
-
-    @desc "Update an episode"
-    field :update_episode, type: :episode do
-      arg :id, non_null(:id)
-      arg :episode, non_null(:episode_input)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.update_episode/3
-      middleware Middleware.TranslateChangeset
-    end
-
-    @desc "Publish episode"
-    field :publish_episode, type: :episode do
-      arg :id, non_null(:id)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.publish_episode/3
     end
 
     @desc "Depublish episode"
