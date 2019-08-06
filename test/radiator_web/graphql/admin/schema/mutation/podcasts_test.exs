@@ -143,13 +143,4 @@ defmodule RadiatorWeb.GraphQL.Schema.Mutation.PodcastsTest do
 
     assert %{"errors" => [%{"message" => "Entity not found"}]} = json_response(conn, 200)
   end
-
-  @delete_query """
-  mutation ($id: ID!) {
-    deletePodcast(id: $id) {
-      id
-      title
-    }
-  }
-  """
 end
