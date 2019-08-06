@@ -33,11 +33,11 @@ defmodule RadiatorWeb.TrackingController do
   end
 
   def track_audio_publication_file(conn, %{
-        "audio_publication_id" => audio_publication_id,
+        "audio_publication_slug" => audio_publication_slug,
         "file_id" => file_id
       }) do
     with audio_publication = %AudioPublication{} <-
-           Directory.get_audio_publication(audio_publication_id),
+           Directory.get_audio_publication_by_slug(audio_publication_slug),
          {:ok, audio_file} <- Directory.get_audio_file(file_id) do
       conn
       |> track_download(audio_publication: audio_publication, audio_file: audio_file)

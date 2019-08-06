@@ -157,7 +157,8 @@ defmodule Radiator.Directory do
 
   def get_audio_publication_by_slug(slug) do
     AudioPublication
-    |> where(slug: ^slug)
+    |> where(slug: ^slug, publish_state: "published")
+    |> preload(:network)
     |> Repo.one()
   end
 
