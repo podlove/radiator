@@ -1,6 +1,9 @@
 defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
   alias Radiator.Directory
   alias Radiator.Directory.{Episode, Podcast, Network}
+  alias Radiator.AudioMeta.Chapter
+
+  import RadiatorWeb.FormatHelpers, only: [format_normal_playtime: 1]
 
   def list_networks(_parent, _args, _resolution) do
     {:ok, Directory.list_networks()}
@@ -57,5 +60,13 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
     episodes_count = Directory.get_episodes_count_for_podcast!(podcast_id)
 
     {:ok, episodes_count}
+  end
+
+  def get_chapter_duration(chapter = %Chapter{}, _, _) do
+    {:ok, Chapter.duration(chapter)}
+  end
+
+  def get_chapter_duration_string(chapter = %Chapter{}, _, _) do
+    {:ok, format_normal_playtime(Chapter.duration(chapter))}
   end
 end

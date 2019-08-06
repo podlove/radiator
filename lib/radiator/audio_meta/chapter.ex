@@ -6,6 +6,7 @@ defmodule Radiator.AudioMeta.Chapter do
   import Ecto.Query, warn: false
 
   alias Radiator.Directory.Audio
+  alias Radiator.AudioMeta
   alias Radiator.Media
 
   @primary_key false
@@ -47,5 +48,24 @@ defmodule Radiator.AudioMeta.Chapter do
 
   def ordered_query do
     from c in __MODULE__, order_by: c.start
+  end
+
+  @doc """
+  Get chapter duration in milliseconds.
+
+  Returns nil if unknown.
+  """
+  def duration(chapter = %__MODULE__{}) do
+    next_chapter = AudioMeta.get_next_chapter(chapter)
+
+    if next_chapter == nil do
+      if Ecto.assoc_loaded?(chapter.audio) do
+        chapter.audio.duration - chapter.start
+      else
+        nil
+      end
+    else
+      next_chapter.start - chapter.start
+    end
   end
 end

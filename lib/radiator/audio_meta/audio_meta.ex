@@ -34,9 +34,20 @@ defmodule Radiator.AudioMeta do
     from(
       c in Chapter,
       where: c.audio_id == ^audio.id,
-      order_by: [asc: c.start]
+      order_by: [asc: c.start],
+      preload: [:audio]
     )
     |> Repo.all()
+  end
+
+  def get_next_chapter(chapter = %Chapter{}) do
+    from(
+      c in Chapter,
+      where: c.audio_id == ^chapter.audio_id and c.start > ^chapter.start,
+      order_by: [asc: c.start],
+      limit: 1
+    )
+    |> Repo.one()
   end
 
   def delete_chapter(chapter = %Chapter{}) do

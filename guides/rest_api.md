@@ -74,6 +74,7 @@
   - [Delete](#delete-9)
 - [Audio Chapters](#audio-chapters)
   - [Parameters for Create & Update](#parameters-for-create--update-9)
+  - [Index](#index-4)
   - [Create](#create-9)
   - [Read](#read-10)
   - [Update](#update-10)
@@ -84,6 +85,7 @@
   - [Create](#create-10)
   - [Read](#read-11)
   - [Delete](#delete-11)
+- [Convert Chapters](#convert-chapters)
 
 ## API Usage
 
@@ -100,8 +102,8 @@ data.append("network[title]", "Example Network");
 
 // using nested JSON
 var data = JSON.stringify({
-  "network": {
-    "title": "Example Network"
+  network: {
+    title: "Example Network"
   }
 });
 ```
@@ -196,29 +198,30 @@ DELETE /api/rest/v1/networks/:id
 | `username`   | `string` | **Required.** Name of user to modify                             |
 | `permission` | `string` | **Required.** one of `"own"`, `"manage"`, `"edit"`, `"readonly"` |
 
-
 #### Read
 
 use GraphQL API to list them
 
 ```
-GET /api/rest/v1/networks/:id/collaborators/:username 
+GET /api/rest/v1/networks/:id/collaborators/:username
 ```
 
 #### Create
+
 ```
-POST /api/rest/v1/networks/:id/collaborators 
+POST /api/rest/v1/networks/:id/collaborators
 ```
 
-#### Update 
+#### Update
+
 ```
-PATCH /api/rest/v1/networks/:id/collaborators/:username 
+PATCH /api/rest/v1/networks/:id/collaborators/:username
 ```
 
 #### Delete
 
 ```
-DELETE /api/rest/v1/networks/:id/collaborators/:username 
+DELETE /api/rest/v1/networks/:id/collaborators/:username
 ```
 
 ## Podcasts
@@ -272,29 +275,30 @@ DELETE /api/rest/v1/podcasts/:id
 | `username`   | `string` | **Required.** Name of user to modify                             |
 | `permission` | `string` | **Required.** one of `"own"`, `"manage"`, `"edit"`, `"readonly"` |
 
-
 #### Read
 
 use GraphQL API to list them
 
 ```
-GET /api/rest/v1/podcasts/:id/collaborators/:username 
+GET /api/rest/v1/podcasts/:id/collaborators/:username
 ```
 
 #### Create
+
 ```
-POST /api/rest/v1/podcasts/:id/collaborators 
+POST /api/rest/v1/podcasts/:id/collaborators
 ```
 
-#### Update 
+#### Update
+
 ```
-PATCH /api/rest/v1/podcasts/:id/collaborators/:username 
+PATCH /api/rest/v1/podcasts/:id/collaborators/:username
 ```
 
 #### Delete
 
 ```
-DELETE /api/rest/v1/podcasts/:id/collaborators/:username 
+DELETE /api/rest/v1/podcasts/:id/collaborators/:username
 ```
 
 ## Episodes
@@ -350,7 +354,6 @@ Represents an Audio in a Network
 | `audio_publication[published_at]`  | `datetime` | publication date (readonly, is set automatically on first publication)   |
 | `audio_publication[network_id]`    | `string`   | network id (readonly)                                                    |
 | `audio_publication[audio_id]`      | `string`   | audio id (readonly)                                                      |
-
 
 ### Index
 
@@ -428,13 +431,13 @@ DELETE /api/rest/v1/people/:id
 
 ### Parameters for Create & Update
 
-| Name                                 | Type      | Description                                               |
-| ------------------------------------ | --------- | --------------------------------------------------------- |
-| `contribution[podcast_id]`           | `integer` | **Required.**  Either podcast_id or audio_id can be given |
-| `contribution[audio_id]`             | `integer` | **Required.**                                             |
-| `contribution[contribution_role_id]` | `integer` | **Required.**                                             |
-| `contribution[person_id]`            | `integer` | **Required.**                                             |
-| `contribution[position]`             | `float`   | Sort order inside contributions                           |
+| Name                                 | Type      | Description                                              |
+| ------------------------------------ | --------- | -------------------------------------------------------- |
+| `contribution[podcast_id]`           | `integer` | **Required.** Either podcast_id or audio_id can be given |
+| `contribution[audio_id]`             | `integer` | **Required.**                                            |
+| `contribution[contribution_role_id]` | `integer` | **Required.**                                            |
+| `contribution[person_id]`            | `integer` | **Required.**                                            |
+| `contribution[position]`             | `float`   | Sort order inside contributions                          |
 
 Possible values for the `contribution_role_id` can be fetched with the GraphQL query `contributionRoles`
 
@@ -446,7 +449,7 @@ POST /api/rest/v1/contributions
 
 ### Index
 
-Needs parameters, either `contribution[podcast_id]` or `contribution[audio_id]` 
+Needs parameters, either `contribution[podcast_id]` or `contribution[audio_id]`
 
 ```
 GET /api/rest/v1/contributions
@@ -469,7 +472,6 @@ PATCH /api/rest/v1/contributions/:id
 ```
 DELETE /api/rest/v1/contributions/:id
 ```
-
 
 ## Audio
 
@@ -566,7 +568,13 @@ DELETE /api/rest/v1/audio_files/:id
 | `chapter[start]`    | `integer` | **Required.** chapter start time in milliseconds               |
 | `chapter[title]`    | `string`  | chapter title                                                  |
 | `chapter[link]`     | `string`  | chapter link                                                   |
-| `chapter[file]`     | `image`   | chapter image                                                  |
+| `chapter[image]`    | `file`    | chapter image                                                  |
+
+### Index
+
+```
+GET /api/rest/v1/audios/:audio_id/chapters[?format=rest|json|psc|mp4chaps]
+```
 
 ### Create
 
@@ -606,7 +614,6 @@ DELETE /api/rest/v1/audios/:audio_id/chapters/:start
 | `import_podcast_feed[short_id]`        | `string`            | Short ID for the podcast. E.g. `"CRE"`, `"FAN"`, `"FG"`.                                                                                               |
 | `import_podcast_feed[limit]`           | `integer`           | Limits the amount of episodes to import. Optional, Defaults to all found.                                                                              |
 
-
 ### Create
 
 ```
@@ -620,6 +627,7 @@ GET /api/rest/v1/tasks/:id
 ```
 
 Example:
+
 ```json
 {
   "end_time": "2019-07-25T12:18:40.810667Z",
@@ -656,3 +664,23 @@ You should delete a task after it is done. Eventually done tasks will clear out 
 ```
 DELETE /api/rest/v1/tasks/:id
 ```
+
+## Convert Chapters
+
+```
+POST /api/rest/v1/convert/chapters
+```
+
+The chapters converter endpoint takes a string of one of the following formats:
+
+- PSC (Podlove Simple Chapters)
+- mp4chaps
+- JSON
+
+The input format is detected automatically.
+
+**Parameters**
+
+| Name   | Type     | Description                        |
+| ------ | -------- | ---------------------------------- |
+| `data` | `string` | **Required.** raw chapters content |

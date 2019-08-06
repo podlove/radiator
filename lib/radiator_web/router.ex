@@ -117,7 +117,7 @@ defmodule RadiatorWeb.Router do
 
       resources "/chapters", ChaptersController,
         param: "start",
-        only: [:show, :create, :update, :delete]
+        only: [:index, :show, :create, :update, :delete]
     end
 
     resources "/audio_files", AudioFileController, only: [:show, :update, :delete]
@@ -126,6 +126,8 @@ defmodule RadiatorWeb.Router do
       only: [:index, :show, :create, :update, :delete]
 
     resources "/tasks", TaskController, only: [:show, :create, :delete]
+
+    post "/convert/chapters", Preview.ChaptersImportController, :convert
   end
 
   scope "/api" do
