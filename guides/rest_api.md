@@ -568,7 +568,7 @@ DELETE /api/rest/v1/audio_files/:id
 | `chapter[start]`    | `integer` | **Required.** chapter start time in milliseconds               |
 | `chapter[title]`    | `string`  | chapter title                                                  |
 | `chapter[link]`     | `string`  | chapter link                                                   |
-| `chapter[file]`     | `image`   | chapter image                                                  |
+| `chapter[image]`    | `file`    | chapter image                                                  |
 
 ### Index
 
