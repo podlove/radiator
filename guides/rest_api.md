@@ -681,30 +681,6 @@ The input format is detected automatically.
 
 **Parameters**
 
-| Name            | Type     | Description                          |
-| --------------- | -------- | ------------------------------------ |
-| `data`          | `string` | **Required.** raw chapters content   |
-| `output_format` | `string` | json, psc or mp4chaps. default: json |
-
-The response content type depends on the chosen `output_format`. In case of errors, the response is JSON.
-
-**json**
-
-Content Type: `application/json; charset=utf-8`
-
-The output is a list of chapters with the following keys:
-
-| Name    | Type      | Description                        |
-| ------- | --------- | ---------------------------------- |
-| `image` | `string`  | chapter image URL. null if empty   |
-| `link`  | `string`  | null if empty                      |
-| `start` | `integer` | chapter start time in milliseconds |
-| `title` | `string`  | chapter title                      |
-
-**psc**
-
-Content Type: `application/xml; charset=utf-8`
-
-**mp4chaps**
-
-Content Type: `application/json; charset=utf-8`
+| Name   | Type     | Description                        |
+| ------ | -------- | ---------------------------------- |
+| `data` | `string` | **Required.** raw chapters content |
