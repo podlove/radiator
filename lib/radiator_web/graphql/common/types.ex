@@ -1,19 +1,29 @@
 defmodule RadiatorWeb.GraphQL.Common.Types do
   use Absinthe.Schema.Notation
 
+  alias RadiatorWeb.GraphQL
+
   @desc "A chapter in an episode"
   object :chapter do
     field :start, :integer
 
     field :start_string, :string do
-      resolve &RadiatorWeb.GraphQL.Admin.Resolvers.Editor.get_duration_string/3
+      resolve &GraphQL.Admin.Resolvers.Editor.get_duration_string/3
+    end
+
+    field :duration, :integer do
+      resolve &GraphQL.Public.Resolvers.Directory.get_chapter_duration/3
+    end
+
+    field :duration_string, :string do
+      resolve &GraphQL.Public.Resolvers.Directory.get_chapter_duration_string/3
     end
 
     field :title, :string
     field :link, :string
 
     field :image, :string do
-      resolve &RadiatorWeb.GraphQL.Public.Resolvers.Directory.get_image_url/3
+      resolve &GraphQL.Public.Resolvers.Directory.get_image_url/3
     end
   end
 
@@ -25,7 +35,7 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
     field :title, :string
 
     field :file, :string do
-      resolve &RadiatorWeb.GraphQL.Admin.Resolvers.Editor.get_file_url/3
+      resolve &GraphQL.Admin.Resolvers.Editor.get_file_url/3
     end
   end
 

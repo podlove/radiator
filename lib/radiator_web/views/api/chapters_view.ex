@@ -18,6 +18,8 @@ defmodule RadiatorWeb.Api.ChaptersView do
   end
 
   def render("chapter.json", %{conn: conn, chapter: chapter, audio: audio}) do
+    duration = Chapter.duration(chapter)
+
     %Document{}
     |> Document.add_link(%Link{
       rel: "self",
@@ -27,6 +29,8 @@ defmodule RadiatorWeb.Api.ChaptersView do
       audio_id: chapter.audio_id,
       start: chapter.start,
       start_string: format_normal_playtime(chapter.start),
+      duration: duration,
+      duration_string: format_normal_playtime(duration),
       title: chapter.title,
       link: chapter.link,
       image: Chapter.image_url(chapter)
