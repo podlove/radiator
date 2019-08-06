@@ -6,12 +6,14 @@ defmodule Radiator.Directory.AudioPublication do
 
   alias Radiator.Directory.{
     Network,
-    Audio
+    Audio,
+    TitleSlug
   }
 
-  # todo: needs a slug, like episodes
   schema "audio_publications" do
     field :title, :string
+    field :slug, TitleSlug.Type
+
     field :publish_state, Radiator.Ecto.AtomType, default: :drafted
     field :published_at, :utc_datetime
 
@@ -28,10 +30,14 @@ defmodule Radiator.Directory.AudioPublication do
     audio_publication
     |> cast(attrs, [
       :publish_state,
-      :audio_id
+      :audio_id,
+      :title,
+      :slug
     ])
     |> validate_publish_state()
     |> maybe_set_published_at()
+    |> TitleSlug.maybe_generate_slug()
+    |> TitleSlug.unique_constraint()
   end
 
   @doc """

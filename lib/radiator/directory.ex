@@ -155,6 +155,12 @@ defmodule Radiator.Directory do
     |> Repo.one()
   end
 
+  def get_audio_publication_by_slug(slug) do
+    AudioPublication
+    |> where(slug: ^slug)
+    |> Repo.one()
+  end
+
   @doc """
   Gets a single episode by its slug.
 
