@@ -481,7 +481,6 @@ DELETE /api/rest/v1/contributions/:id
 | ------------------- | --------- | ------------------------------ |
 | `audio[network_id]` | `integer` | Network ID. (readonly)         |
 | `audio[episode_id]` | `integer` | Episode ID. (readonly)         |
-| `audio[title]`      | `string`  |                                |
 | `audio[image]`      | `file`    | Audio image.                   |
 | `audio[duration]`   | `integer` | Audio duration in milliseconds |
 

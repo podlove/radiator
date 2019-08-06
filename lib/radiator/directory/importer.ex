@@ -157,7 +157,6 @@ defmodule Radiator.Directory.Importer do
 
       {:ok, audio} =
         Editor.Manager.create_audio(radiator_episode, %{
-          title: episode.title,
           published_at: episode.pub_date,
           duration: episode.duration && parse_chapter_time(episode.duration)
         })
@@ -317,7 +316,6 @@ defmodule Radiator.Directory.Importer do
 
         {:ok, audio} =
           Editor.Manager.create_audio(new_episode, %{
-            title: episode.title,
             published_at: episode.pub_date,
             duration: episode.duration && parse_chapter_time(episode.duration)
           })

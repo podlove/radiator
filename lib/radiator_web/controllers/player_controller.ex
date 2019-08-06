@@ -55,7 +55,6 @@ defmodule RadiatorWeb.PlayerController do
 
   def config(conn, %{audio: audio}) do
     %{
-      title: audio.title,
       duration: audio.duration,
       audio: audio_files(audio),
       chapters: chapters(audio),

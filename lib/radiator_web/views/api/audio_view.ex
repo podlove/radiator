@@ -16,7 +16,6 @@ defmodule RadiatorWeb.Api.AudioView do
     })
     |> Document.add_properties(%{
       id: audio.id,
-      title: audio.title,
       duration: audio.duration,
       duration_string: audio.duration && format_normal_playtime(audio.duration)
     })
