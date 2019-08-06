@@ -2,20 +2,31 @@ defmodule RadiatorWeb.TrackingController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
+
+  alias Radiator.Directory.{
+    Podcast,
+    Episode
+  }
+
   alias Radiator.Media.AudioFile
 
   require Logger
 
-  # todo: "show" is not a suitable name for this, need to come up with a better name
-  def show(conn, %{"id" => id}) do
-    case Directory.get_audio_file(id) do
-      {:ok, audio} ->
-        conn
-        |> track_download(audio)
-        |> put_status(301)
-        |> redirect(external: AudioFile.url({audio.file, audio}))
-
-      {:error, _} ->
+  def track_episode_file(conn, %{
+        "podcast_slug" => podcast_slug,
+        "episode_slug" => episode_slug,
+        "file_id" => file_id
+      }) do
+    with podcast = %Podcast{} <- Directory.get_podcast_by_slug(podcast_slug),
+         episode = %Episode{} <- Directory.get_episode_by_slug(podcast.id, episode_slug),
+         {:ok, audio_file} <- Directory.get_audio_file(file_id) do
+      # todo: verify audio file belongs to episode
+      conn
+      |> track_download(podcast: podcast, episode: episode, audio_file: audio_file)
+      |> put_status(301)
+      |> redirect(external: AudioFile.url({audio_file.file, audio_file}))
+    else
+      _ ->
         send_resp(conn, 404, "Not found")
     end
   end
@@ -24,9 +35,11 @@ defmodule RadiatorWeb.TrackingController do
     conn
   end
 
-  defp track_download(conn, file = %AudioFile{}) do
+  defp track_download(conn, podcast: podcast, episode: episode, audio_file: audio_file) do
     Radiator.Tracking.Server.track_download(
-      file: file,
+      podcast: podcast,
+      episode: episode,
+      audio_file: audio_file,
       remote_ip: remote_ip(conn),
       user_agent: user_agent(conn),
       time: DateTime.utc_now(),

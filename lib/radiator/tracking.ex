@@ -6,7 +6,13 @@ defmodule Radiator.Tracking do
   require Logger
 
   alias Radiator.Repo
-  alias Radiator.Directory.{Network, Episode, Audio}
+
+  alias Radiator.Directory.{
+    Podcast,
+    Episode,
+    AudioPublication
+  }
+
   alias Radiator.Tracking.Download
   alias Radiator.Media.AudioFile
 
@@ -23,24 +29,19 @@ defmodule Radiator.Tracking do
   - `time`: time of request
   - `http_range`: raw HTTP RANGE header from request
 
-  _Either_ network _or_ episode must be given, depending on where the audio is attached to.
-
-  - `network`: `Radiator.Directory.Network` or
-  - `episode`: `Radiator.Directory.Episode`
-
   """
   def track_download(params)
 
   def track_download(
-        file: %AudioFile{} = file,
-        episode: %Episode{} = episode,
+        podcast: podcast = %Podcast{},
+        episode: episode = %Episode{},
+        audio_file: audio_file = %AudioFile{},
         remote_ip: remote_ip,
         user_agent: user_agent_string,
         time: time,
         http_range: http_range
       ) do
-    file = Repo.preload(file, :audio)
-    podcast = episode.podcast
+    audio_file = Repo.preload(audio_file, :audio)
     network = podcast.network
     user_agent = parse_user_agent(user_agent_string)
 
@@ -62,43 +63,8 @@ defmodule Radiator.Tracking do
       |> Ecto.Changeset.put_assoc(:network, network)
       |> Ecto.Changeset.put_assoc(:podcast, podcast)
       |> Ecto.Changeset.put_assoc(:episode, episode)
-      |> Ecto.Changeset.put_assoc(:audio, file.audio)
-      |> Ecto.Changeset.put_assoc(:file, file)
-      |> Repo.insert()
-    else
-      {:ok, :skipped_because_not_clean}
-    end
-  end
-
-  def track_download(
-        file: %AudioFile{} = file,
-        network: %Network{} = network,
-        remote_ip: remote_ip,
-        user_agent: user_agent_string,
-        time: time,
-        http_range: http_range
-      ) do
-    file = Repo.preload(file, :audio)
-    user_agent = parse_user_agent(user_agent_string)
-
-    if download_looks_clean(Map.get(user_agent, :bot), http_range) do
-      %Download{}
-      |> Download.changeset(%{
-        request_id: request_id(remote_ip, user_agent_string),
-        accessed_at: time,
-        clean: true,
-        http_range: http_range,
-        user_agent: user_agent_string,
-        client_name: Map.get(user_agent, :client_name),
-        client_type: Map.get(user_agent, :client_type),
-        device_model: Map.get(user_agent, :device_model),
-        device_type: Map.get(user_agent, :device_type),
-        os_name: Map.get(user_agent, :os_name),
-        hours_since_published: hours_since_published(file.audio, time)
-      })
-      |> Ecto.Changeset.put_assoc(:network, network)
-      |> Ecto.Changeset.put_assoc(:audio, file.audio)
-      |> Ecto.Changeset.put_assoc(:file, file)
+      |> Ecto.Changeset.put_assoc(:audio, audio_file.audio)
+      |> Ecto.Changeset.put_assoc(:file, audio_file)
       |> Repo.insert()
     else
       {:ok, :skipped_because_not_clean}
@@ -106,7 +72,11 @@ defmodule Radiator.Tracking do
   end
 
   def track_download(params) do
-    Logger.warn("[Tracking] Unable to track request given params: #{inspect(params)}")
+    Logger.warn(
+      "[Tracking] Unable to track request given params. param keys: #{
+        inspect(Keyword.keys(params))
+      } params: #{inspect(params, pretty: true, limit: :infinity, printable_limit: :infinity)}"
+    )
   end
 
   defp parse_user_agent(user_agent_string) do
@@ -119,11 +89,11 @@ defmodule Radiator.Tracking do
       result = %UAInspector.Result{} ->
         %{
           bot: false,
-          client_name: to_ua_field(result.client.name),
-          client_type: to_ua_field(result.client.type),
-          device_model: to_ua_field(result.device.model),
-          device_type: to_ua_field(result.device.type),
-          os_name: to_ua_field(result.os.name)
+          client_name: to_ua_field(result.client, :name),
+          client_type: to_ua_field(result.client, :type),
+          device_model: to_ua_field(result.device, :model),
+          device_type: to_ua_field(result.device, :type),
+          os_name: to_ua_field(result.os, :name)
         }
     end
   end
@@ -143,16 +113,21 @@ defmodule Radiator.Tracking do
   def download_looks_clean(_, "bytes=0-0"), do: false
   def download_looks_clean(_, _), do: true
 
+  defp to_ua_field(:unknown, _), do: nil
+
+  defp to_ua_field(result_group, key) do
+    to_ua_field(Map.get(result_group, key))
+  end
+
   defp to_ua_field(:unknown), do: nil
   defp to_ua_field(value) when is_binary(value), do: value
 
-  # fixme: handle AudioPublication
-  defp hours_since_published(_audio = %Audio{}, _time = %DateTime{}) do
-    0
-  end
-
   defp hours_since_published(episode = %Episode{}, time = %DateTime{}) do
     trunc(DateTime.diff(time, episode.published_at, :second) / 3600)
+  end
+
+  defp hours_since_published(audio_publication = %AudioPublication{}, time = %DateTime{}) do
+    trunc(DateTime.diff(time, audio_publication.published_at, :second) / 3600)
   end
 
   defp request_id(remote_ip, user_agent) do

@@ -9,6 +9,7 @@ defmodule Radiator.Directory.AudioPublication do
     Audio
   }
 
+  # todo: needs a slug, like episodes
   schema "audio_publications" do
     field :title, :string
     field :publish_state, Radiator.Ecto.AtomType, default: :drafted
