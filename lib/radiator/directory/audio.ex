@@ -25,7 +25,6 @@ defmodule Radiator.Directory.Audio do
   }
 
   schema "audios" do
-    field :title, :string
     field :duration, :integer
     field :image, Media.AudioImage.Type
 
@@ -44,7 +43,7 @@ defmodule Radiator.Directory.Audio do
   @doc false
   def changeset(audio, attrs) do
     audio
-    |> cast(attrs, [:title, :duration])
+    |> cast(attrs, [:duration])
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
   end
 

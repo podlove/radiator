@@ -19,11 +19,9 @@ defmodule RadiatorWeb.Api.AudioControllerTest do
       network = insert(:network) |> owned_by(user)
 
       conn =
-        post(conn, Routes.api_network_audio_path(conn, :create, network.id),
-          audio: %{title: "example"}
-        )
+        post(conn, Routes.api_network_audio_path(conn, :create, network.id), audio: %{duration: 5})
 
-      assert %{"title" => "example"} = json_response(conn, 201)
+      assert %{"duration" => 5} = json_response(conn, 201)
     end
 
     test "renders errors no user is present", %{conn: conn, user: user} do
@@ -47,7 +45,6 @@ defmodule RadiatorWeb.Api.AudioControllerTest do
 
       assert response = json_response(conn, 200)
       assert Map.get(response, "id") == audio.id
-      assert Map.get(response, "title") == audio.title
     end
 
     test "renders an error if permissions missing", %{conn: conn} do
@@ -64,9 +61,9 @@ defmodule RadiatorWeb.Api.AudioControllerTest do
       audio_publication = insert(:audio_publication) |> owned_by(user)
       audio = audio_publication.audio
 
-      conn = put(conn, Routes.api_audio_path(conn, :update, audio.id), %{audio: %{title: "new"}})
+      conn = put(conn, Routes.api_audio_path(conn, :update, audio.id), %{audio: %{duration: 3}})
 
-      assert %{"title" => "new"} = json_response(conn, 200)
+      assert %{"duration" => 3} = json_response(conn, 200)
     end
 
     # test "renders error on invalid data", %{conn: conn, user: user} do

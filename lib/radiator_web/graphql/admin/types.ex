@@ -203,7 +203,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   @desc "An audio object"
   object :audio do
     field :id, non_null(:id)
-    field :title, :string
     field :duration, :integer
 
     field :duration_string, :string do

@@ -3,7 +3,6 @@ defmodule Radiator.Repo.Migrations.CreateAudios do
 
   def change do
     create table(:audios) do
-      add :title, :text
       add :duration, :integer
       add :image, :text
 
