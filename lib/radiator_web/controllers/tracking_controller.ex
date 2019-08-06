@@ -4,6 +4,7 @@ defmodule RadiatorWeb.TrackingController do
   alias Radiator.Directory
 
   alias Radiator.Directory.{
+    AudioPublication,
     Podcast,
     Episode
   }
@@ -31,6 +32,23 @@ defmodule RadiatorWeb.TrackingController do
     end
   end
 
+  def track_audio_publication_file(conn, %{
+        "audio_publication_id" => audio_publication_id,
+        "file_id" => file_id
+      }) do
+    with audio_publication = %AudioPublication{} <-
+           Directory.get_audio_publication(audio_publication_id),
+         {:ok, audio_file} <- Directory.get_audio_file(file_id) do
+      conn
+      |> track_download(audio_publication: audio_publication, audio_file: audio_file)
+      |> put_status(301)
+      |> redirect(external: AudioFile.url({audio_file.file, audio_file}))
+    else
+      _ ->
+        send_resp(conn, 404, "Not found")
+    end
+  end
+
   defp track_download(conn = %Plug.Conn{private: %{is_head: true}}, _) do
     conn
   end
@@ -39,6 +57,19 @@ defmodule RadiatorWeb.TrackingController do
     Radiator.Tracking.Server.track_download(
       podcast: podcast,
       episode: episode,
+      audio_file: audio_file,
+      remote_ip: remote_ip(conn),
+      user_agent: user_agent(conn),
+      time: DateTime.utc_now(),
+      http_range: http_range(conn)
+    )
+
+    conn
+  end
+
+  defp track_download(conn, audio_publication: audio_publication, audio_file: audio_file) do
+    Radiator.Tracking.Server.track_download(
+      audio_publication: audio_publication,
       audio_file: audio_file,
       remote_ip: remote_ip(conn),
       user_agent: user_agent(conn),

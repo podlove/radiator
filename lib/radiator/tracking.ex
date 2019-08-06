@@ -71,6 +71,43 @@ defmodule Radiator.Tracking do
     end
   end
 
+  def track_download(
+        audio_publication: audio_publication = %AudioPublication{},
+        audio_file: audio_file = %AudioFile{},
+        remote_ip: remote_ip,
+        user_agent: user_agent_string,
+        time: time,
+        http_range: http_range
+      ) do
+    audio_file = Repo.preload(audio_file, :audio)
+    network = audio_publication.network
+    user_agent = parse_user_agent(user_agent_string)
+
+    if download_looks_clean(Map.get(user_agent, :bot), http_range) do
+      %Download{}
+      |> Download.changeset(%{
+        request_id: request_id(remote_ip, user_agent_string),
+        accessed_at: time,
+        clean: true,
+        http_range: http_range,
+        user_agent: user_agent_string,
+        client_name: Map.get(user_agent, :client_name),
+        client_type: Map.get(user_agent, :client_type),
+        device_model: Map.get(user_agent, :device_model),
+        device_type: Map.get(user_agent, :device_type),
+        os_name: Map.get(user_agent, :os_name),
+        hours_since_published: hours_since_published(audio_publication, time)
+      })
+      |> Ecto.Changeset.put_assoc(:network, network)
+      |> Ecto.Changeset.put_assoc(:audio_publication, audio_publication)
+      |> Ecto.Changeset.put_assoc(:audio, audio_file.audio)
+      |> Ecto.Changeset.put_assoc(:file, audio_file)
+      |> Repo.insert()
+    else
+      {:ok, :skipped_because_not_clean}
+    end
+  end
+
   def track_download(params) do
     Logger.warn(
       "[Tracking] Unable to track request given params. param keys: #{

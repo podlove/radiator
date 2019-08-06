@@ -81,7 +81,7 @@ defmodule RadiatorWeb.Router do
     get "/:podcast_slug/:episode_slug/file/:file_id", TrackingController, :track_episode_file
 
     # get "/:audio_publication_slug/file/:file_id", TrackingController, :track_audio_publication_file
-    # get "/:audio_publication_id/file/:file_id", TrackingController, :track_audio_publication_file
+    get "/:audio_publication_id/file/:file_id", TrackingController, :track_audio_publication_file
   end
 
   scope "/api/rest/v1", RadiatorWeb.Api, as: :api do

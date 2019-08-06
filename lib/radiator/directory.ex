@@ -10,7 +10,7 @@ defmodule Radiator.Directory do
   alias Radiator.Support
   alias Radiator.Repo
   alias Radiator.Media.AudioFile
-  alias Radiator.Directory.{Network, Episode, Podcast, Audio}
+  alias Radiator.Directory.{Network, Episode, Podcast, Audio, AudioPublication}
   alias Radiator.Directory.{PodcastQuery, EpisodeQuery, AudioQuery}
   alias Radiator.Contribution.{PodcastContribution, AudioContribution}
 
@@ -146,6 +146,13 @@ defmodule Radiator.Directory do
     |> PodcastQuery.find_by_slug(slug)
     |> Repo.one()
     |> preload_for_podcast()
+  end
+
+  def get_audio_publication(id) do
+    AudioPublication
+    |> where(id: ^id, publish_state: "published")
+    |> preload(:network)
+    |> Repo.one()
   end
 
   @doc """
