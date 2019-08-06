@@ -14,6 +14,7 @@ schema {
 """An audio object"""
 type Audio {
   audioFiles: [AudioFile]
+  audioPublication: AudioPublication
   chapters(order: SortOrder = ASC): [Chapter]
   contributions: [Contribution]
   duration: Int
@@ -21,14 +22,25 @@ type Audio {
   episodes: [Episode]
   id: ID!
   image: String
-  publishedAt: DateTime
   title: String
 }
 
 """Audio File"""
 type AudioFile {
   byteLength: Int
+  file: String
+  id: Int
   mimeType: String
+  title: String
+}
+
+type AudioPublication {
+  audio: Audio
+
+  """drafted, scheduled, published, depublished"""
+  id: Int
+  publishState: String
+  publishedAt: DateTime
   title: String
 }
 
@@ -80,6 +92,9 @@ type Episode {
   isPublished: Boolean
   number: Int
   podcast: Podcast
+
+  """drafted, scheduled, published, depublished"""
+  publishState: String
   publishedAt: DateTime
   shortId: String
   slug: String
@@ -88,16 +103,6 @@ type Episode {
   summaryHtml: String
   summarySource: String
   title: String
-}
-
-"""The input for an episode in a podcast"""
-input EpisodeInput {
-  content: String
-  description: String
-  image: Upload
-  number: Int
-  subtitle: String
-  title: String!
 }
 
 enum EpisodeOrder {
@@ -117,8 +122,7 @@ type FeedInfo {
 
 """A network"""
 type Network {
-  """Audios attached directly to the network."""
-  audios: [Audio]
+  audioPublications: [AudioPublication]
   collaborators: [Collaborator]
   id: ID!
   image: String
@@ -126,12 +130,6 @@ type Network {
   podcasts: [Podcast]
   slug: String
   title: String
-}
-
-"""The input for a network"""
-input NetworkInput {
-  image: Upload
-  title: String!
 }
 
 """A type of access permission."""
@@ -217,15 +215,11 @@ type PodcastFeedEpisode {
   title: String
 }
 
-"""The input for a podcast"""
-input PodcastInput {
-  description: String
-  image: Upload
-  language: String
-  ownerEmail: String
-  ownerName: String
-  subtitle: String
-  title: String!
+"""A radiator instance user accessible to others"""
+type PublicUser {
+  displayName: String
+  image: String
+  username: String
 }
 
 enum Published {
@@ -284,20 +278,8 @@ type RootMutationType {
   """Request an authenticated session"""
   authenticatedSession(password: String!, usernameOrEmail: String!): Session
 
-  """Create an episode"""
-  createEpisode(episode: EpisodeInput!, podcastId: ID!): Episode
-
-  """Create a network (Authenticated)"""
-  createNetwork(network: NetworkInput!): Network
-
-  """Create a podcast"""
-  createPodcast(networkId: Int!, podcast: PodcastInput!): Podcast
-
   """Delete an episode"""
   deleteEpisode(id: ID!): Episode
-
-  """Delete a podcast"""
-  deletePodcast(id: ID!): Podcast
 
   """Depublish episode"""
   depublishEpisode(id: ID!): Episode
@@ -308,26 +290,11 @@ type RootMutationType {
   """Prolong an authenticated session"""
   prolongSession: Session
 
-  """Publish episode"""
-  publishEpisode(id: ID!): Episode
-
   """Publish podcast"""
   publishPodcast(id: ID!): Podcast
 
   """Schedule episode"""
   scheduleEpisode(datetime: DateTime!, id: ID!): Episode
-
-  """Update an episode"""
-  updateEpisode(episode: EpisodeInput!, id: ID!): Episode
-
-  """Update a network"""
-  updateNetwork(id: ID!, network: NetworkInput!): Network
-
-  """Update a podcast"""
-  updatePodcast(id: ID!, podcast: PodcastInput!): Podcast
-
-  """Upload audio file to audio object"""
-  uploadAudioFile(audioId: Int!, file: Upload): AudioFile
 
   """Request resend of verification email (need auth)"""
   userResendVerificationEmail: Boolean
@@ -383,7 +350,7 @@ type RootQueryType {
   user: User
 
   """Find users of this instance"""
-  users(query: String!): [User]
+  users(query: String!): [PublicUser]
 }
 
 """A user API session"""
@@ -397,12 +364,6 @@ enum SortOrder {
   ASC
   DESC
 }
-
-"""
-Represents an uploaded file.
-
-"""
-scalar Upload
 
 """A radiator instance user accessible to admins and yourself"""
 type User {

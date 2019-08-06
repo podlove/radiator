@@ -14,6 +14,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   alias Radiator.AudioMeta.Chapter
   alias Radiator.Auth.User
   alias Radiator.Contribution.Person
+  alias Radiator.Media.AudioFile
   import RadiatorWeb.FormatHelpers, only: [format_normal_playtime: 1]
 
   @doc """
@@ -308,7 +309,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def get_audio_files(audio = %Audio{}, _args, %{context: %{current_user: user}}) do
-    {:ok, Editor.list_audio_files(user, audio)}
+    Editor.list_audio_files(user, audio)
   end
 
   def get_audio_files(audio = %Audio{}, _args, _resolution) do
@@ -337,6 +338,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def get_duration_string(%Chapter{start: time}, _, _) do
     {:ok, format_normal_playtime(time)}
+  end
+
+  def get_file_url(audio_file = %AudioFile{}, _, _) do
+    {:ok, AudioFile.public_url(audio_file)}
   end
 
   @spec get_image_url(Network.t() | Podcast.t() | Episode.t() | Audio.t() | Chapter.t(), any, any) ::
