@@ -362,8 +362,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     Editor.get_episodes_count_for_podcast!(user, podcast_id)
   end
 
-  def get_audio_publication(%Audio{audio_publication: audio_publication}, _, _) do
-    {:ok, audio_publication}
+  def get_audio_publication(audio = %Audio{audio_publication: audio_publication}, _, _) do
+    if Ecto.assoc_loaded?(audio_publication) do
+      {:ok, audio_publication}
+    else
+      {:ok, Ecto.assoc(audio, :audio_publication) |> Radiator.Repo.one()}
+    end
   end
 
   def list_audio_publications(%Network{id: id}, _, %{context: %{current_user: user}}) do
