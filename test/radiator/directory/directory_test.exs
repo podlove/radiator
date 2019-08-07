@@ -204,8 +204,8 @@ defmodule Radiator.DirectoryTest do
       assert episode.title == "some updated title"
     end
 
-    test "update_episode/2 doesn't generate slug when published_at is not set" do
-      episode = insert(:episode)
+    test "update_episode/2 doesn't generate slug when episode is not published" do
+      episode = insert(:episode, publish_state: :drafted)
 
       {:ok, updated_episode} =
         Editor.Manager.update_episode(episode, %{title: "some updated episode title"})
@@ -213,7 +213,10 @@ defmodule Radiator.DirectoryTest do
       assert updated_episode.slug == nil
 
       {:ok, published_episode} =
-        Editor.Manager.update_episode(updated_episode, %{published_at: DateTime.utc_now()})
+        Editor.Manager.update_episode(updated_episode, %{
+          publish_state: :published,
+          published_at: DateTime.utc_now()
+        })
 
       assert String.length(published_episode.slug) > 0
     end
