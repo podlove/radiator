@@ -55,7 +55,7 @@ defmodule Radiator.MixProject do
       {:arc_ecto, github: "podlove/arc_ecto"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
-      {:ecto_autoslug_field, "~> 1.0"},
+      {:ecto_autoslug_field, "~> 2.0"},
       # for ex_aws
       {:hackney, "~> 1.15"},
       {:sweet_xml, "~> 0.6.5"},
@@ -70,7 +70,7 @@ defmodule Radiator.MixProject do
       {:timex, "~> 3.5"},
       {:cors_plug, "~> 2.0"},
       # authentication
-      {:guardian, "~> 1.2"},
+      {:guardian, "~> 2.0"},
       {:argon2_elixir, "~> 2.0"},
       # mail
       {:bamboo_smtp, "~> 1.6"},
