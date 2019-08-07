@@ -85,16 +85,17 @@ defmodule Radiator.Directory.Editor.Manager do
   # todo: this raises if used on an episode that already has an associated audio.
   #       we need to define a way, maybe even a separate API,
   #       to remove or replace an episode audio.
-  def create_audio(episode = %Episode{}, attrs) do
+  def create_audio(episode = %Episode{}, audio_attrs, episode_attrs) do
     Multi.new()
     |> Multi.insert(:audio, fn _ ->
-      %Audio{} |> Audio.changeset(attrs)
+      %Audio{} |> Audio.changeset(audio_attrs)
     end)
     |> Multi.update(:episode, fn %{audio: audio} ->
       episode
       |> Repo.preload(:audio)
       |> Ecto.Changeset.change()
       |> Ecto.Changeset.put_assoc(:audio, audio)
+      |> Episode.changeset(episode_attrs)
     end)
     |> Repo.transaction()
     |> case do
@@ -103,14 +104,15 @@ defmodule Radiator.Directory.Editor.Manager do
     end
   end
 
-  def create_audio(network = %Network{}, attrs) do
+  def create_audio(network = %Network{}, audio_attrs, audio_publication_attrs) do
     Multi.new()
     |> Multi.insert(:audio_publication, fn _ ->
       Ecto.build_assoc(network, :audio_publications)
+      |> AudioPublication.changeset(audio_publication_attrs)
     end)
     |> Multi.insert(:audio, fn %{audio_publication: audio_publication} ->
       Ecto.build_assoc(audio_publication, :audio)
-      |> Audio.changeset(attrs)
+      |> Audio.changeset(audio_attrs)
     end)
     |> Multi.update(:audio_publication_with_audio, fn %{
                                                         audio_publication: audio_publication,

@@ -484,6 +484,18 @@ DELETE /api/rest/v1/contributions/:id
 | `audio[image]`      | `file`    | Audio image.                   |
 | `audio[duration]`   | `integer` | Audio duration in milliseconds |
 
+When creating, you can send parameters for the audio publication or episode in the same request.
+
+| Name                       | Type     | Description |
+| -------------------------- | -------- | ----------- |
+| `audio_publication[title]` | `string` | Title       |
+
+| Name                                    | Type     | Description |
+| --------------------------------------- | -------- | ----------- |
+| `episode[title]`                        | `string` | Title       |
+| `episode[subtitle]`                     | `string` | Subtitle    |
+| see [Episodes](#episodes) for full list | ...      | ...         |
+
 ### Create (in network / audio publication)
 
 ```
