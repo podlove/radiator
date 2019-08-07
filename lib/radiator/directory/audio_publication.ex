@@ -10,9 +10,14 @@ defmodule Radiator.Directory.AudioPublication do
     TitleSlug
   }
 
-  schema "audio_publications" do
+  schema "episodes" do
     field :title, :string
     field :slug, TitleSlug.Type
+
+    field :subtitle, :string
+    field :summary, :string
+    field :summary_html, :string
+    field :summary_source, :string
 
     field :publish_state, Radiator.Ecto.AtomType, default: :drafted
     field :published_at, :utc_datetime
@@ -20,8 +25,7 @@ defmodule Radiator.Directory.AudioPublication do
     belongs_to :network, Network
     belongs_to :audio, Audio
 
-    has_many :permissions, {"audio_publications_perm", Radiator.Perm.Permission},
-      foreign_key: :subject_id
+    has_many :permissions, {"episodes_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
 
     timestamps()
   end
@@ -29,10 +33,15 @@ defmodule Radiator.Directory.AudioPublication do
   def changeset(audio_publication, attrs) do
     audio_publication
     |> cast(attrs, [
-      :publish_state,
-      :audio_id,
       :title,
-      :slug
+      :slug,
+      :subtitle,
+      :summary,
+      :summary_html,
+      :summary_source,
+      :publish_state,
+      :published_at,
+      :audio_id
     ])
     |> validate_publish_state()
     |> maybe_set_published_at()

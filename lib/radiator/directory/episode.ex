@@ -5,17 +5,19 @@ defmodule Radiator.Directory.Episode do
   import Ecto.Query, warn: false
   import Radiator.Directory.Publication
 
-  alias __MODULE__
   alias Radiator.Media
-  alias Radiator.Directory.{Episode, Podcast, Audio, TitleSlug}
+
+  alias Radiator.Directory.{
+    Episode,
+    Podcast,
+    Audio,
+    TitleSlug
+  }
 
   alias RadiatorWeb.Router.Helpers, as: Routes
   alias Radiator.Media.AudioFileUpload
 
   schema "episodes" do
-    field :guid, :string
-    field :short_id, :string
-
     field :title, :string
     field :slug, TitleSlug.Type
 
@@ -24,18 +26,22 @@ defmodule Radiator.Directory.Episode do
     field :summary_html, :string
     field :summary_source, :string
 
-    field :number, :integer
-
     field :publish_state, Radiator.Ecto.AtomType, default: :drafted
     field :published_at, :utc_datetime
-
-    # use enclosure form field to upload audio file
-    field :enclosure, :map, virtual: true
 
     belongs_to :podcast, Podcast
     belongs_to :audio, Audio
 
     has_many :permissions, {"episodes_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
+
+    # podcast episode specific:
+
+    field :guid, :string
+    field :short_id, :string
+    field :number, :integer
+
+    # use enclosure form field to upload audio file
+    field :enclosure, :map, virtual: true
 
     timestamps()
   end
@@ -45,17 +51,17 @@ defmodule Radiator.Directory.Episode do
     episode
     |> cast(attrs, [
       :title,
+      :slug,
       :subtitle,
       :summary,
       :summary_html,
       :summary_source,
-      :guid,
-      :number,
       :publish_state,
       :published_at,
-      :slug,
-      :short_id,
       :podcast_id,
+      :guid,
+      :short_id,
+      :number,
       :enclosure
     ])
     |> validate_required([:title])
