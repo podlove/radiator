@@ -51,4 +51,15 @@ defmodule Radiator.Directory.AudioPublication do
     ])
     |> validate_publish_state()
   end
+
+  @doc """
+  Convenience accessor for image URL.
+  """
+  def image_url(%__MODULE__{audio: audio}) do
+    if Ecto.assoc_loaded?(audio) do
+      Audio.image_url(audio)
+    else
+      nil
+    end
+  end
 end

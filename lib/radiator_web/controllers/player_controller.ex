@@ -68,7 +68,7 @@ defmodule RadiatorWeb.PlayerController do
       title: audio_publication.title,
       # subtitle: audio_publication.subtitle,
       # summary: audio_publication.summary_html || audio_publication.summary,
-      # poster: Episode.image_url(audio_publication, %{podcast: podcast}),
+      poster: AudioPublication.image_url(audio_publication),
       # link: Episode.public_url(audio_publication, podcast),
       publicationDate: DateTime.to_iso8601(audio_publication.published_at),
       # show: %{
