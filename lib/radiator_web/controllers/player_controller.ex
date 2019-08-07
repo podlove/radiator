@@ -2,7 +2,14 @@ defmodule RadiatorWeb.PlayerController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
-  alias Radiator.Directory.{Audio, Episode, Podcast}
+
+  alias Radiator.Directory.{
+    AudioPublication,
+    Audio,
+    Episode,
+    Podcast
+  }
+
   alias Radiator.Media.AudioFile
   alias Radiator.AudioMeta.Chapter
 
@@ -17,9 +24,11 @@ defmodule RadiatorWeb.PlayerController do
     end
   end
 
-  def audio_config(conn, %{"audio_id" => audio_id}) do
-    with audio = %Audio{} <- Directory.get_audio(audio_id) do
-      json(conn, config(conn, %{audio: audio}))
+  def audio_publication_config(conn, %{"audio_publication_id" => audio_publication_id}) do
+    with audio_publication = %AudioPublication{} <-
+           Directory.get_audio_publication(audio_publication_id),
+         audio <- audio_publication.audio do
+      json(conn, config(conn, %{audio: audio, audio_publication: audio_publication}))
     else
       _ -> {:error, :not_found}
     end
@@ -28,7 +37,7 @@ defmodule RadiatorWeb.PlayerController do
   def config(conn, %{audio: audio, episode: episode}) do
     podcast = episode.podcast
 
-    config(conn, %{audio: audio})
+    audio_config(conn, %{audio: audio, episode: episode})
     |> Map.merge(%{
       title: episode.title,
       subtitle: episode.subtitle,
@@ -53,23 +62,62 @@ defmodule RadiatorWeb.PlayerController do
     })
   end
 
-  def config(conn, %{audio: audio}) do
+  def config(conn, %{audio: audio, audio_publication: audio_publication}) do
+    audio_config(conn, %{audio: audio, audio_publication: audio_publication})
+    |> Map.merge(%{
+      title: audio_publication.title,
+      # subtitle: audio_publication.subtitle,
+      # summary: audio_publication.summary_html || audio_publication.summary,
+      # poster: Episode.image_url(audio_publication, %{podcast: podcast}),
+      # link: Episode.public_url(audio_publication, podcast),
+      publicationDate: DateTime.to_iso8601(audio_publication.published_at),
+      # show: %{
+      #   title: podcast.title,
+      #   subtitle: podcast.subtitle,
+      #   summary: podcast.summary,
+      #   poster: Podcast.image_url(podcast),
+      #   link: Podcast.public_url(podcast)
+      # },
+      reference: %{
+        config: Routes.player_url(conn, :audio_publication_config, audio_publication.id),
+        share: "//cdn.podlove.org/web-player/share.html"
+      }
+      # theme: %{
+      #   main: podcast.main_color
+      # }
+    })
+  end
+
+  def audio_config(conn, %{audio: audio, audio_publication: audio_publication}) do
     %{
       title: audio.title,
       duration: audio.duration,
-      audio: audio_files(audio),
+      audio: audio_files(audio, audio_publication),
       chapters: chapters(audio),
       reference: %{
-        config: Routes.player_url(conn, :audio_config, audio.id),
+        config: Routes.player_url(conn, :audio_publication_config, audio_publication.id),
         share: "//cdn.podlove.org/web-player/share.html"
       }
     }
   end
 
-  def audio_files(%Audio{audio_files: files}) do
+  def audio_config(conn, %{audio: audio, episode: episode}) do
+    %{
+      title: audio.title,
+      duration: audio.duration,
+      audio: audio_files(audio, episode),
+      chapters: chapters(audio),
+      reference: %{
+        config: Routes.player_url(conn, :episode_config, episode.id),
+        share: "//cdn.podlove.org/web-player/share.html"
+      }
+    }
+  end
+
+  def audio_files(%Audio{audio_files: files}, context) do
     Enum.map(files, fn file ->
       %{
-        url: AudioFile.public_url(file),
+        url: AudioFile.public_url(file, context),
         mimeType: file.mime_type,
         size: file.byte_length,
         title: file.mime_type

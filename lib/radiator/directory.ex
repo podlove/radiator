@@ -151,7 +151,7 @@ defmodule Radiator.Directory do
   def get_audio_publication(id) do
     AudioPublication
     |> where(id: ^id, publish_state: "published")
-    |> preload(:network)
+    |> preload([:network, audio: [:audio_files, :chapters]])
     |> Repo.one()
   end
 
