@@ -83,9 +83,11 @@ defmodule Radiator.Factory do
 
   def network_factory do
     title = sequence(:title, &"Network ##{&1}")
+    slug = sequence(:slug, &"network-#{&1}")
 
     %Radiator.Directory.Network{
-      title: title
+      title: title,
+      slug: slug
     }
   end
 
