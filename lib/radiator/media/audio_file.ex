@@ -59,7 +59,7 @@ defmodule Radiator.Media.AudioFile do
   """
   def public_url(audio_file = %AudioFile{}) do
     audio_file
-    |> Radiator.Repo.preload(audio: [:audio_publication, episodes: :podcast])
+    |> Radiator.Repo.preload(audio: [audio_publication: :network, episodes: :podcast])
     |> case do
       %AudioFile{audio: %Audio{episodes: [episode | _]}} ->
         public_url(audio_file, episode)
