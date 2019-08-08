@@ -276,7 +276,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
           _ ->
             items
         end
-        |> Radiator.Directory.preload_for_gql_episode()
 
       {:ok, items}
     end)
@@ -361,10 +360,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
         context: %{current_user: _user}
       }) do
     {:ok, audio_publication.audio}
-  end
-
-  def find_audio(%Episode{} = episode, _args, %{context: %{current_user: _user}}) do
-    {:ok, episode.audio}
   end
 
   def find_audio(_parent, %{id: id}, %{context: %{current_user: user}}) do

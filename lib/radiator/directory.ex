@@ -10,6 +10,7 @@ defmodule Radiator.Directory do
   alias Radiator.Support
   alias Radiator.Repo
   alias Radiator.Media.AudioFile
+  alias Radiator.AudioMeta.Chapter
   alias Radiator.Directory.{Network, Episode, Podcast, Audio}
   alias Radiator.Directory.{PodcastQuery, EpisodeQuery, AudioQuery}
   alias Radiator.Contribution.{PodcastContribution, AudioContribution}
@@ -25,13 +26,13 @@ defmodule Radiator.Directory do
     |> episodes_query()
   end
 
-  def query(queryable, _) do
-    queryable
+  def query(Chapter, _args) do
+    Chapter
+    |> order_by(asc: :start)
   end
 
-  def preload_for_gql_episode(episodes) do
-    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
-    Repo.preload(episodes, [:podcast, audio: [chapters: chapter_query, audio_files: []]])
+  def query(queryable, _) do
+    queryable
   end
 
   defp published_networks_query do

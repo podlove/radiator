@@ -197,7 +197,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :audio, :audio do
-      resolve &Resolvers.Editor.find_audio/3
+      resolve dataloader(Directory)
     end
   end
 
@@ -217,8 +217,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :chapters, list_of(:chapter) do
       arg :order, type: :sort_order, default_value: :asc
 
-      # resolve dataloader(Radiator.AudioMeta, :chapters)
-      resolve &Resolvers.Editor.list_chapters/3
+      resolve dataloader(Directory, :chapters)
     end
 
     field :episodes, list_of(:episode) do
@@ -230,11 +229,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :audio_files, list_of(:audio_file) do
-      resolve &Resolvers.Editor.get_audio_files/3
+      resolve dataloader(Directory)
     end
 
     field :contributions, list_of(:contribution) do
-      resolve &Resolvers.Editor.get_contributions/3
+      resolve dataloader(Directory)
     end
   end
 
