@@ -15,6 +15,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   alias Radiator.Auth.User
   alias Radiator.Contribution.Person
   alias Radiator.Media.AudioFile
+
+  import Absinthe.Resolution.Helpers
   import RadiatorWeb.FormatHelpers, only: [format_normal_playtime: 1]
 
   @doc """
@@ -239,6 +241,45 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def get_episodes(audio = %Audio{}, _, %{context: %{current_user: user}}) do
     {:ok, Editor.list_episodes(user, audio)}
+  end
+
+  # Performance considerations.
+  #
+  # The performance critical use case is: “In a list of podcasts, list the
+  # first X episodes matching the given criteria”. This is hard simply because
+  # it’s difficult to construct an SQL query for this. `LIMIT` is global, not per podcast.
+  #
+  # Options:
+  #
+  # 1) Use Dataloader, but don’t limit/paginate results in the query but _after_
+  #    Dataloader is done. This fetches _all_ (filtered) episodes per podcast but
+  #    should be fine except for podcasts with hundreds of episodes.
+  #
+  # 2) Skip Dataloader and make one paginated SQL query per podcast.
+  #    Better for podcasts with many episodes but worse if there are many podcasts.
+  #
+  # 3) Explore generating custom SQL via advanced postgresql features (lateral joins,
+  #    window functions)
+  #
+  # Current choice: 1
+  def get_episodes(podcast = %Podcast{}, args, %{context: %{loader: loader, current_user: _user}}) do
+    loader
+    |> Dataloader.load(Radiator.Directory, {:episodes, args}, podcast)
+    |> on_load(fn loader ->
+      items = Dataloader.get(loader, Radiator.Directory, {:episodes, args}, podcast)
+
+      items =
+        case {Map.get(args, :items_per_page), Map.get(args, :page)} do
+          {items_per_page, page} when items_per_page > 0 and page > 0 ->
+            Enum.slice(items, (page - 1) * items_per_page, items_per_page)
+
+          _ ->
+            items
+        end
+        |> Radiator.Directory.preload_for_gql_episode()
+
+      {:ok, items}
+    end)
   end
 
   def get_contributions(podcast = %Podcast{}, _, %{context: %{current_user: user}}) do

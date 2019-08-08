@@ -19,14 +19,19 @@ defmodule Radiator.Directory do
   end
 
   def query(Episode, args) do
-    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
-
-    episodes_query(args)
-    |> preload([:podcast, audio: [chapters: ^chapter_query, audio_files: []]])
+    args
+    # pagination for gql is handled in resolver
+    |> Map.put(:items_per_page, :unlimited)
+    |> episodes_query()
   end
 
   def query(queryable, _) do
     queryable
+  end
+
+  def preload_for_gql_episode(episodes) do
+    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
+    Repo.preload(episodes, [:podcast, audio: [chapters: chapter_query, audio_files: []]])
   end
 
   defp published_networks_query do

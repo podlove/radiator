@@ -5,6 +5,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   alias RadiatorWeb.GraphQL.Admin.Resolvers
 
+  alias Radiator.Directory
   alias Radiator.Directory.{Network, Podcast}
 
   @desc "A type of access permission."
@@ -139,7 +140,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       arg :order_by, type: :episode_order, default_value: :published_at
       arg :order, type: :sort_order, default_value: :desc
 
-      resolve dataloader(Radiator.Directory, :episodes)
+      resolve &Resolvers.Editor.get_episodes/3
     end
 
     field :episodes_count, :integer do
