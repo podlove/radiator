@@ -81,7 +81,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     end
 
     field :audio, :audio do
-      resolve &Resolvers.Directory.find_audio/3
+      resolve dataloader(Radiator.Directory)
     end
   end
 
