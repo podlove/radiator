@@ -3,7 +3,7 @@ name: default
 
 steps:
   - name: setup-minio
-    image: minio/mc
+    image: minio/mc:RELEASE.2019-07-31T19-17-35Z
     commands:
       - sleep 5
       - mc config host add radiator http://minio:9000 IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
