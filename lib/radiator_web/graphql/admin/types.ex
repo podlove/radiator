@@ -217,7 +217,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :chapters, list_of(:chapter) do
       arg :order, type: :sort_order, default_value: :asc
 
-      resolve dataloader(Directory, :chapters)
+      resolve dataloader(Radiator.AudioMeta, :chapters)
     end
 
     field :episodes, list_of(:episode) do

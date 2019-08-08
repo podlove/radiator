@@ -10,30 +10,9 @@ defmodule Radiator.Directory do
   alias Radiator.Support
   alias Radiator.Repo
   alias Radiator.Media.AudioFile
-  alias Radiator.AudioMeta.Chapter
   alias Radiator.Directory.{Network, Episode, Podcast, Audio}
   alias Radiator.Directory.{PodcastQuery, EpisodeQuery, AudioQuery}
   alias Radiator.Contribution.{PodcastContribution, AudioContribution}
-
-  def data() do
-    Dataloader.Ecto.new(Repo, query: &query/2)
-  end
-
-  def query(Episode, args) do
-    args
-    # pagination for gql is handled in resolver
-    |> Map.put(:items_per_page, :unlimited)
-    |> episodes_query()
-  end
-
-  def query(Chapter, _args) do
-    Chapter
-    |> order_by(asc: :start)
-  end
-
-  def query(queryable, _) do
-    queryable
-  end
 
   defp published_networks_query do
     published_podcasts_query = PodcastQuery.filter_by_published(Podcast)
@@ -194,7 +173,7 @@ defmodule Radiator.Directory do
     |> Repo.preload([:person, :role])
   end
 
-  defp episodes_query(args) when is_map(args) do
+  def episodes_query(args) when is_map(args) do
     args
     |> Map.put(:published, true)
     |> EpisodeQuery.build()
