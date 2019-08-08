@@ -4,6 +4,7 @@ defmodule RadiatorWeb.TrackingController do
   alias Radiator.Directory
 
   alias Radiator.Directory.{
+    Network,
     AudioPublication,
     Podcast,
     Episode
@@ -20,8 +21,8 @@ defmodule RadiatorWeb.TrackingController do
       }) do
     with podcast = %Podcast{} <- Directory.get_podcast_by_slug(podcast_slug),
          episode = %Episode{} <- Directory.get_episode_by_slug(podcast.id, episode_slug),
-         {:ok, audio_file} <- Directory.get_audio_file(file_id) do
-      # todo: verify audio file belongs to episode
+         {:ok, audio_file} <- Directory.get_audio_file(file_id),
+         true <- audio_file.audio_id == episode.audio.id do
       conn
       |> track_download(podcast: podcast, episode: episode, audio_file: audio_file)
       |> put_status(301)
@@ -33,12 +34,15 @@ defmodule RadiatorWeb.TrackingController do
   end
 
   def track_audio_publication_file(conn, %{
+        "network_slug" => network_slug,
         "audio_publication_slug" => audio_publication_slug,
         "file_id" => file_id
       }) do
-    with audio_publication = %AudioPublication{} <-
+    with network = %Network{} <- Directory.get_network_by_slug(network_slug),
+         audio_publication = %AudioPublication{} <-
            Directory.get_audio_publication_by_slug(audio_publication_slug),
-         {:ok, audio_file} <- Directory.get_audio_file(file_id) do
+         {:ok, audio_file} <- Directory.get_audio_file(file_id),
+         true <- network.id == audio_publication.network_id do
       conn
       |> track_download(audio_publication: audio_publication, audio_file: audio_file)
       |> put_status(301)

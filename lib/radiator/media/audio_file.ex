@@ -87,10 +87,14 @@ defmodule Radiator.Media.AudioFile do
     )
   end
 
-  def tracking_url(audio_file = %__MODULE__{}, audio_publication = %AudioPublication{}) do
+  def tracking_url(
+        audio_file = %__MODULE__{},
+        audio_publication = %AudioPublication{network: network}
+      ) do
     RadiatorWeb.Router.Helpers.tracking_url(
       RadiatorWeb.Endpoint,
       :track_audio_publication_file,
+      network.slug,
       audio_publication.slug,
       audio_file.id
     )

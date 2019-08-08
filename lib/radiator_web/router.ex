@@ -78,9 +78,9 @@ defmodule RadiatorWeb.Router do
   end
 
   scope "/download", RadiatorWeb do
-    get "/:podcast_slug/:episode_slug/file/:file_id", TrackingController, :track_episode_file
+    get "/p/:podcast_slug/:episode_slug/file/:file_id", TrackingController, :track_episode_file
 
-    get "/:audio_publication_slug/file/:file_id",
+    get "/n/:network_slug/:audio_publication_slug/file/:file_id",
         TrackingController,
         :track_audio_publication_file
   end
