@@ -556,17 +556,27 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  def create_audio(actor = %Auth.User{}, episode = %Episode{}, attrs) do
+  def create_audio(
+        actor = %Auth.User{},
+        episode = %Episode{},
+        audio_attrs,
+        episode_attrs
+      ) do
     if has_permission(actor, episode, :edit) do
-      Editor.Manager.create_audio(episode, attrs)
+      Editor.Manager.create_audio(episode, audio_attrs, episode_attrs)
     else
       @not_authorized_match
     end
   end
 
-  def create_audio(actor = %Auth.User{}, network = %Network{}, attrs) do
+  def create_audio(
+        actor = %Auth.User{},
+        network = %Network{},
+        audio_attrs,
+        audio_publication_attrs
+      ) do
     if has_permission(actor, network, :edit) do
-      Editor.Manager.create_audio(network, attrs)
+      Editor.Manager.create_audio(network, audio_attrs, audio_publication_attrs)
     else
       @not_authorized_match
     end

@@ -3,10 +3,16 @@ defmodule RadiatorWeb.Api.AudioController do
 
   alias Radiator.Directory.Editor
 
-  def create(conn, %{"network_id" => network_id, "audio" => params}) do
+  def create(conn, params = %{"network_id" => network_id}) do
     with user = current_user(conn),
          {:ok, network} <- Editor.get_network(user, network_id),
-         {:ok, audio} <- Editor.create_audio(user, network, params) do
+         {:ok, audio} <-
+           Editor.create_audio(
+             user,
+             network,
+             Map.get(params, "audio"),
+             Map.get(params, "audio_publication", %{})
+           ) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.api_audio_path(conn, :show, audio))
@@ -14,10 +20,16 @@ defmodule RadiatorWeb.Api.AudioController do
     end
   end
 
-  def create(conn, %{"episode_id" => episode_id, "audio" => params}) do
+  def create(conn, params = %{"episode_id" => episode_id}) do
     with user = current_user(conn),
          {:ok, episode} <- Editor.get_episode(user, episode_id),
-         {:ok, audio} <- Editor.create_audio(user, episode, params) do
+         {:ok, audio} <-
+           Editor.create_audio(
+             user,
+             episode,
+             Map.get(params, "audio"),
+             Map.get(params, "episode", %{})
+           ) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", Routes.api_audio_path(conn, :show, audio))

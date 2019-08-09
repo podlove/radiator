@@ -26,6 +26,7 @@ defmodule Radiator.Directory.AudioPublication do
   def changeset(audio_publication, attrs) do
     audio_publication
     |> cast(attrs, [
+      :title,
       :publish_state,
       :audio_id
     ])
@@ -39,6 +40,7 @@ defmodule Radiator.Directory.AudioPublication do
   def import_changeset(audio_publication, attrs) do
     audio_publication
     |> cast(attrs, [
+      :title,
       :publish_state,
       :published_at
     ])
