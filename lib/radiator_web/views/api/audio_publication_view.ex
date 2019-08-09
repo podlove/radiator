@@ -33,6 +33,7 @@ defmodule RadiatorWeb.Api.AudioPublicationView do
     })
     |> Document.add_properties(%{
       id: audio_publication.id,
+      title: audio_publication.title,
       publish_state: audio_publication.publish_state,
       published_at: audio_publication.published_at,
       audio_id: audio_publication.audio_id,
