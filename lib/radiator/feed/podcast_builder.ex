@@ -25,10 +25,11 @@ defmodule Radiator.Feed.PodcastBuilder do
     |> add(subtitle(podcast))
     |> add(link(Podcast.public_url(podcast)))
     |> add(description(podcast))
+    |> add(language(podcast))
     |> add(element(:generator, "Podlove Radiator"))
     |> add(self_reference(feed_data))
     |> add(contributors(podcast))
-    |> add(publication_date(podcast))
+    |> add(owner(podcast))
     # |> add(last_build_date())
     |> Enum.reverse()
     |> Enum.concat(paging_elements(feed_data, opts))
@@ -106,10 +107,15 @@ defmodule Radiator.Feed.PodcastBuilder do
 
   defp subtitle(_), do: nil
 
-  defp description(%Podcast{description: description}) when set?(description),
+  defp description(%Podcast{summary: description}) when set?(description),
     do: element(:description, description)
 
   defp description(_), do: nil
+
+  defp language(%Podcast{language: language}) when set?(language),
+    do: element(:language, language)
+
+  defp language(_), do: nil
 
   defp contributors(%Podcast{contributions: contributions}) do
     if Ecto.assoc_loaded?(contributions) do
@@ -125,6 +131,13 @@ defmodule Radiator.Feed.PodcastBuilder do
 
   defp contributors(_), do: nil
 
-  defp publication_date(%Podcast{published_at: published_at}),
-    do: element(:pubDate, Timex.format!(published_at, "{RFC822}"))
+  defp owner(%Podcast{owner_name: name, owner_email: email}) when set?(name) or set?(email) do
+    subelements =
+      [element("itunes:name", name), element("itunes:email", email)]
+      |> Enum.filter(fn {_tag, _attribs, content} -> content end)
+
+    element("itunes:owner", subelements)
+  end
+
+  defp owner(_), do: nil
 end

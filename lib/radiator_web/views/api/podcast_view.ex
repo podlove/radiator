@@ -1,14 +1,15 @@
 defmodule RadiatorWeb.Api.PodcastView do
   use RadiatorWeb, :view
-  alias RadiatorWeb.Api.PodcastView
+  alias __MODULE__
   alias HAL.{Document, Link, Embed}
+  import RadiatorWeb.ContentHelpers
 
   def render("index.json", assigns = %{podcasts: podcasts}) do
     %Document{}
-    |> Document.add_link(%Link{
-      rel: "self",
-      href: Routes.api_podcast_path(assigns.conn, :index)
-    })
+    # |> Document.add_link(%Link{
+    #   rel: "self",
+    #   href: Routes.api_podcast_path(assigns.conn, :index)
+    # })
     |> Document.add_embed(%Embed{
       resource: "rad:podcast",
       embed: render_many(podcasts, PodcastView, "podcast.json", assigns)
@@ -31,16 +32,18 @@ defmodule RadiatorWeb.Api.PodcastView do
     # })
     |> Document.add_properties(%{
       id: podcast.id,
+      short_id: podcast.short_id,
       title: podcast.title,
       subtitle: podcast.subtitle,
-      description: podcast.description,
-      image: podcast.image,
+      summary: podcast.summary,
       author: podcast.author,
+      image: podcast_image_url(podcast),
+      language: podcast.language,
+      last_built_at: podcast.last_built_at,
       owner_name: podcast.owner_name,
       owner_email: podcast.owner_email,
-      language: podcast.language,
       published_at: podcast.published_at,
-      last_built_at: podcast.last_built_at
+      slug: podcast.slug
     })
   end
 end

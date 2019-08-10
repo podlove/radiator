@@ -38,14 +38,14 @@ defmodule Radiator.TrackingTest do
     end
 
     test "track_download/1 tracks an audio download within a network, without episode association" do
-      network = insert(:network)
-      audio = insert(:audio, network: network)
+      audio_publication = insert(:audio_publication)
+      audio = audio_publication.audio
       [file] = audio.audio_files
 
       {:ok, download} =
         Tracking.track_download(
           file: file,
-          network: network,
+          network: audio_publication.network,
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),

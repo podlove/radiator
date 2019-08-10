@@ -6,12 +6,24 @@ defmodule Radiator.Directory.Editor.Manager do
   import Ecto.Query, warn: false
 
   alias Ecto.Multi
-
-  alias Radiator.Support
   alias Radiator.Repo
+  alias Radiator.Support
 
-  alias Radiator.Directory.{Network, Podcast, Episode, Audio}
-  alias Radiator.Contribution.{AudioContribution, PodcastContribution, Person}
+  alias Radiator.Media.AudioFile
+
+  alias Radiator.Directory.{
+    Network,
+    Podcast,
+    Episode,
+    Audio,
+    AudioPublication
+  }
+
+  alias Radiator.Contribution.{
+    AudioContribution,
+    PodcastContribution,
+    Person
+  }
 
   @doc """
   Creates a podcast.
@@ -34,7 +46,7 @@ defmodule Radiator.Directory.Editor.Manager do
     Logger.debug("creating podcast --- #{inspect(attrs)}")
 
     # we need the podcast to have an id before we can save the image
-    {update_attrs, insert_attrs} = Map.split(attrs, [:image])
+    {update_attrs, insert_attrs} = Map.split(attrs, [:image, "image"])
 
     insert =
       %Podcast{network_id: network.id}
@@ -55,9 +67,74 @@ defmodule Radiator.Directory.Editor.Manager do
     end
   end
 
-  def create_audio(attrs \\ %{}) do
-    %Audio{}
-    |> Audio.changeset(attrs)
+  def list_audio_publications(network = %Network{}) do
+    network
+    |> Ecto.assoc(:audio_publications)
+    |> order_by(desc_nulls_first: :published_at)
+    |> Repo.all()
+    |> Repo.preload(:audio)
+    |> (&{:ok, &1}).()
+  end
+
+  def update_audio_publication(%AudioPublication{} = audio_publication, attrs) do
+    audio_publication
+    |> AudioPublication.changeset(attrs)
+    |> Repo.update()
+  end
+
+  # todo: this raises if used on an episode that already has an associated audio.
+  #       we need to define a way, maybe even a separate API,
+  #       to remove or replace an episode audio.
+  def create_audio(episode = %Episode{}, attrs) do
+    Multi.new()
+    |> Multi.insert(:audio, fn _ ->
+      %Audio{} |> Audio.changeset(attrs)
+    end)
+    |> Multi.update(:episode, fn %{audio: audio} ->
+      episode
+      |> Repo.preload(:audio)
+      |> Ecto.Changeset.change()
+      |> Ecto.Changeset.put_assoc(:audio, audio)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{audio: audio}} -> {:ok, audio}
+      something -> something
+    end
+  end
+
+  def create_audio(network = %Network{}, attrs) do
+    Multi.new()
+    |> Multi.insert(:audio_publication, fn _ ->
+      Ecto.build_assoc(network, :audio_publications)
+    end)
+    |> Multi.insert(:audio, fn %{audio_publication: audio_publication} ->
+      Ecto.build_assoc(audio_publication, :audio)
+      |> Audio.changeset(attrs)
+    end)
+    |> Multi.update(:audio_publication_with_audio, fn %{
+                                                        audio_publication: audio_publication,
+                                                        audio: audio
+                                                      } ->
+      AudioPublication.changeset(audio_publication, %{audio_id: audio.id})
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{audio: audio}} -> {:ok, audio |> Repo.preload(:audio_publication)}
+      something -> something
+    end
+  end
+
+  def list_audio_files(audio = %Audio{}) do
+    audio
+    |> Ecto.assoc(:audio_files)
+    |> Repo.all()
+    |> (&{:ok, &1}).()
+  end
+
+  def create_audio_file(audio, attrs \\ %{}) do
+    Ecto.build_assoc(audio, :audio_files)
+    |> AudioFile.changeset(attrs)
     |> Repo.insert()
   end
 
@@ -65,6 +142,16 @@ defmodule Radiator.Directory.Editor.Manager do
     audio
     |> Audio.changeset(attrs)
     |> Repo.update()
+  end
+
+  def delete_audio(%Audio{} = audio) do
+    Repo.delete(audio)
+  end
+
+  def create_audio_publication(network = %Network{}, attrs) do
+    Ecto.build_assoc(network, :audio_publications)
+    |> AudioPublication.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -167,7 +254,7 @@ defmodule Radiator.Directory.Editor.Manager do
       {:error, %Ecto.Changeset{}}
   """
   def publish_episode(%Episode{} = episode) do
-    update_episode(episode, %{published_at: DateTime.utc_now()})
+    publish(episode)
   end
 
   @doc """
@@ -182,7 +269,7 @@ defmodule Radiator.Directory.Editor.Manager do
       {:error, %Ecto.Changeset{}}
   """
   def depublish_episode(%Episode{} = episode) do
-    update_episode(episode, %{published_at: nil})
+    depublish(episode)
   end
 
   @doc """
@@ -195,16 +282,53 @@ defmodule Radiator.Directory.Editor.Manager do
 
       iex> schedule_episode(bad_value, datetime)
       {:error, %Ecto.Changeset{}}
-
-      iex> schedule_episode(episode, past_datetime)
-      {:error, :datetime_not_future}
   """
   def schedule_episode(episode = %Episode{}, datetime = %DateTime{}) do
+    schedule(episode, datetime)
+  end
+
+  def publish(subject = %AudioPublication{}) do
+    subject
+    |> AudioPublication.changeset(%{publish_state: :published})
+    |> Repo.update()
+  end
+
+  def publish(subject = %Episode{}) do
+    subject
+    |> Episode.changeset(%{publish_state: :published})
+    |> Repo.update()
+  end
+
+  def schedule(subject = %AudioPublication{}, datetime = %DateTime{}) do
     if Support.DateTime.after_utc_now?(datetime) do
-      update_episode(episode, %{published_at: datetime})
+      subject
+      |> AudioPublication.changeset(%{publish_state: :scheduled, published_at: datetime})
+      |> Repo.update()
     else
       {:error, :datetime_not_future}
     end
+  end
+
+  def schedule(subject = %Episode{}, datetime = %DateTime{}) do
+    if Support.DateTime.after_utc_now?(datetime) do
+      subject
+      |> Episode.changeset(%{publish_state: :scheduled, published_at: datetime})
+      |> Repo.update()
+    else
+      {:error, :datetime_not_future}
+    end
+  end
+
+  def depublish(subject = %AudioPublication{}) do
+    subject
+    |> AudioPublication.changeset(%{publish_state: :depublished})
+    |> Repo.update()
+  end
+
+  def depublish(subject = %Episode{}) do
+    subject
+    |> Episode.changeset(%{publish_state: :depublished})
+    |> Repo.update()
   end
 
   @doc """
@@ -332,6 +456,11 @@ defmodule Radiator.Directory.Editor.Manager do
       nil -> 0
       value -> value
     end
+  end
+
+  def delete_person(%Person{} = subject) do
+    subject
+    |> Repo.delete()
   end
 
   # TODO

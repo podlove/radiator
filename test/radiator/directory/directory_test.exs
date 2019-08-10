@@ -238,6 +238,7 @@ defmodule Radiator.DirectoryTest do
       episode = insert(:episode, published_at: nil)
 
       assert {:ok, %Episode{} = published_episode} = Editor.Manager.publish_episode(episode)
+      assert published_episode.publish_state == :published
       assert published_episode.published_at != nil
       assert :gt == DateTime.compare(DateTime.utc_now(), published_episode.published_at)
     end
@@ -284,29 +285,6 @@ defmodule Radiator.DirectoryTest do
 
       assert published_episode3.slug == "#{existing_episode.slug}-3"
     end
-
-    test "publish_episode/1 with invalid data returns error changeset" do
-      episode = insert(:unpublished_episode)
-
-      assert {:error, %Ecto.Changeset{}} =
-               Editor.Manager.publish_episode(%{episode | :title => nil})
-    end
-
-    test "depublish_episode/1 removes an episodes published_at date" do
-      episode = insert(:episode, published_at: DateTime.utc_now())
-
-      assert {:ok, %Episode{published_at: nil}} = Editor.Manager.depublish_episode(episode)
-    end
-
-    test "depublish_episode/1 with invalid data returns error changeset" do
-      episode = insert(:episode, published_at: DateTime.utc_now())
-      published_at = episode.published_at
-
-      assert {:error, %Ecto.Changeset{}} =
-               Editor.Manager.depublish_episode(%{episode | :title => nil})
-
-      assert %Episode{published_at: ^published_at} = Directory.get_episode(episode.id)
-    end
   end
 
   describe "networks" do
@@ -319,32 +297,35 @@ defmodule Radiator.DirectoryTest do
     def network_fixture(attrs \\ %{}) do
       testuser = Radiator.TestEntries.user()
 
-      {:ok, %{network: network}} =
-        Editor.Owner.create_network(testuser, Enum.into(attrs, @valid_attrs))
+      {:ok, network} = Editor.Owner.create_network(testuser, Enum.into(attrs, @valid_attrs))
 
       network
     end
 
     test "list_networks/0 returns all networks" do
       network = network_fixture()
+      insert(:podcast, network: network)
       assert Directory.list_networks() == [network]
     end
 
     test "get_network!/1 returns the network with given id" do
       network = network_fixture()
+      insert(:podcast, network: network)
+
       assert Directory.get_network!(network.id) == network
     end
 
     test "get_network_by_slug/1 returns the network with given slug" do
       network = insert(:network, slug: "network-foo-bar-baz")
+      insert(:podcast, network: network)
+
       assert Directory.get_network_by_slug(network.slug) == network
     end
 
     test "create_network/1 with valid data creates a network" do
       testuser = Radiator.TestEntries.user()
 
-      assert {:ok, %{network: %Network{} = network}} =
-               Editor.Owner.create_network(testuser, @valid_attrs)
+      assert {:ok, network} = Editor.Owner.create_network(testuser, @valid_attrs)
 
       assert network.title == "some title"
     end
@@ -352,8 +333,7 @@ defmodule Radiator.DirectoryTest do
     test "create_network/1 generates a slug from the new networks title" do
       testuser = Radiator.TestEntries.user()
 
-      assert {:ok, %{network: %Network{} = network}} =
-               Editor.Owner.create_network(testuser, %{title: "Network Slug Test"})
+      assert {:ok, network} = Editor.Owner.create_network(testuser, %{title: "Network Slug Test"})
 
       assert network.slug == "network-slug-test"
     end
@@ -361,8 +341,7 @@ defmodule Radiator.DirectoryTest do
     test "create_network/1 with invalid data returns error changeset" do
       testuser = Radiator.TestEntries.user()
 
-      assert {:error, :network, %Ecto.Changeset{}, _} =
-               Editor.Owner.create_network(testuser, @invalid_attrs)
+      assert {:error, network_changeset} = Editor.Owner.create_network(testuser, @invalid_attrs)
     end
 
     test "update_network/2 with valid data updates the network" do
@@ -373,6 +352,8 @@ defmodule Radiator.DirectoryTest do
 
     test "update_network/2 with invalid data returns error changeset" do
       network = network_fixture()
+      insert(:podcast, network: network)
+
       assert {:error, %Ecto.Changeset{}} = Editor.Owner.update_network(network, @invalid_attrs)
       assert network == Directory.get_network!(network.id)
     end

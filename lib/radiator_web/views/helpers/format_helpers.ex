@@ -3,6 +3,8 @@ defmodule RadiatorWeb.FormatHelpers do
   General formatting view helpers that should be readily available
   """
 
+  use Radiator.Constants, :permissions
+
   def format_bytes(number, precision \\ 2)
 
   def format_bytes(nil, _) do
@@ -22,15 +24,25 @@ defmodule RadiatorWeb.FormatHelpers do
   end
 
   def format_chapter_time(time) do
-    time = round(time / 1_000) * 1_000
+    format_normal_playtime_round_to_seconds(time)
+  end
 
+  def format_normal_playtime_round_to_seconds(time) do
+    (round(time / 1_000) * 1_000)
+    |> format_normal_playtime()
+    |> String.slice(0..-5)
+  end
+
+  # Since we are display formatting only, allow for nil
+  def format_normal_playtime(nil), do: format_normal_playtime(0)
+
+  def format_normal_playtime(time) do
     time
     |> Chapters.Formatters.Normalplaytime.Formatter.format()
     |> case do
       "00:" <> rest -> rest
       sth -> sth
     end
-    |> String.slice(0..-5)
   end
 
   def shorten_string(s, max_length, ellipsis \\ "...")
@@ -55,5 +67,14 @@ defmodule RadiatorWeb.FormatHelpers do
         {:halt, prev_string <> ellipsis}
       end
     end)
+  end
+
+  def format_permission(perm) when is_permission(perm) do
+    case perm do
+      :own -> "owner"
+      :manage -> "manager"
+      :edit -> "editor"
+      :readonly -> "viewer"
+    end
   end
 end

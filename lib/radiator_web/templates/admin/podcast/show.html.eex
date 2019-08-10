@@ -18,10 +18,20 @@
 
 
         <h1 class="text-3xl font-bold mb-1 mt-2 text-blue-900 mr-4">
-          <%= @podcast.title %>
+          <%= @podcast.title %> <span class="text-sm"><%= @podcast.language %></span>
         </h1>
         <p class="text-gray-600 font-normal text-lg mb-2">
           <%= @podcast.subtitle %>
+        </p>
+        <%= if @podcast.image do %>
+          <img src="<%= podcast_image_url(@podcast) %>" class="w-32 h-32 ml-2 mr-6 float-right clear" />
+        <% end %>
+
+        <p class="text-gray-600 font-normal mb-2">
+          <%= @podcast.author %> <span class="text-sm">( <%= @podcast.owner_name %> <%= @podcast.owner_email %>)</span>
+        </p>
+        <p class="text-gray-600 font-sm text-sm mb-2">
+          <%= @podcast.summary %>
         </p>
         <%= if @podcast.published_at && @podcast.slug do %>
           <p>
@@ -39,10 +49,17 @@
 
       </div>
 
-      
-
     </div>
 </div>
+
+  <%= if has_manage_permission_for_podcast(@current_user, @podcast), 
+      do: render_shared_partial("_collaborator_list.html", 
+            Map.merge(assigns, %{ subject: @podcast, 
+                                  add_action_route: Routes.admin_network_podcast_collaborator_path(@conn, :create, @podcast.network_id, @podcast.id),
+                                  delete_route_builder: delete_collaborator_route_builder(@conn, @podcast)
+                                })
+          ) %>
+
 
   <hr class="border-b border-secondary" />
 
@@ -51,7 +68,7 @@
   <%= for episode <- @draft_episodes do %>
     <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-highlight" do %>
       <div class="flex">
-        <%= if episode.image do %>
+        <%= if episode.audio.image do %>
           <img src="<%= episode_image_url(episode) %>" class="w-24 h-24 mr-6" />
         <% else %>
           <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='24' height='24' style='fill:rgb(200,200,200)' /%3E%3C/svg%3E" class="w-24 h-24 mr-6" />
@@ -67,6 +84,7 @@
     <% end %>
   <% end %>
 
+
   <hr class="border-b border-secondary" />
 
   <h2 class="text-gray-700 text-xl font-bold mb-2">Published</h2>
@@ -74,7 +92,7 @@
   <%= for episode <- @published_episodes do %>
     <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-highlight" do %>
       <div class="flex">
-        <%= if episode.image do %>
+        <%= if episode.audio.image do %>
           <img src="<%= episode_image_url(episode) %>" class="w-24 h-24 mr-6" />
         <% else %>
           <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='24' height='24' style='fill:rgb(200,200,200)' /%3E%3C/svg%3E" class="w-24 h-24 mr-6" />

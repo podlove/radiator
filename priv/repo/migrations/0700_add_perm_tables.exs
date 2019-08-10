@@ -26,24 +26,20 @@ defmodule Radiator.Repo.Migrations.AddPermTables do
       timestamps()
     end
 
-    create table(:audios_perm, primary_key: false) do
+    create table(:audio_publications_perm, primary_key: false) do
       add :user_id, references("auth_users", on_delete: :delete_all), primary_key: true
-      add :subject_id, references("audios", on_delete: :delete_all), primary_key: true
+      add :subject_id, references("audio_publications", on_delete: :delete_all), primary_key: true
       add :permission, :string, size: 16, null: false
 
       timestamps()
     end
 
     flush()
-
-    Radiator.Repo.insert(Radiator.Auth.User.reserved_user(:public))
   end
 
   def down do
     drop table(:episodes_perm)
     drop table(:podcasts_perm)
     drop table(:networks_perm)
-
-    Radiator.Repo.delete(Radiator.Auth.User.reserved_user(:public))
   end
 end

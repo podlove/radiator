@@ -9,10 +9,14 @@ defmodule Radiator.Directory.Editor.Owner do
 
   alias Radiator.Repo
 
-  alias Radiator.Directory.Network
+  alias Radiator.Directory.{
+    AudioPublication,
+    Network
+  }
 
   alias Radiator.Auth
   alias Radiator.Perm.Permission
+  alias Radiator.Media.AudioFile
 
   use Radiator.Constants
 
@@ -38,18 +42,30 @@ defmodule Radiator.Directory.Editor.Owner do
   """
 
   def create_network(user = %Auth.User{}, attrs) when is_map(attrs) do
-    network =
+    # we need the network to have an id before we can save the image
+    {update_attrs, insert_attrs} = Map.split(attrs, [:image, "image"])
+
+    insert =
       %Network{}
-      |> Network.creation_changeset(attrs)
+      |> Network.creation_changeset(insert_attrs)
 
     Multi.new()
-    |> Multi.insert(:network, network)
+    |> Multi.insert(:network, insert)
+    |> Multi.update(:network_updated, fn %{network: network} ->
+      Network.changeset(network, update_attrs)
+    end)
     |> Multi.insert(:permission, fn %{network: network} ->
       Ecto.build_assoc(network, :permissions)
       |> Permission.changeset(%{permission: :own})
       |> Ecto.Changeset.put_assoc(:user, user)
     end)
     |> Repo.transaction()
+    |> case do
+      {:ok, %{network_updated: network}} -> {:ok, network}
+      {:error, :network, changeset, _map} -> {:error, changeset}
+      {:error, :network_update, changeset, _map} -> {:error, changeset}
+      error -> error
+    end
   end
 
   @doc """
@@ -97,5 +113,13 @@ defmodule Radiator.Directory.Editor.Owner do
   """
   def change_network(%Network{} = network) do
     Network.changeset(network, %{})
+  end
+
+  def delete_audio_file(audio_file = %AudioFile{}) do
+    Repo.delete(audio_file)
+  end
+
+  def delete_audio_publication(audio_publication = %AudioPublication{}) do
+    Repo.delete(audio_publication)
   end
 end

@@ -5,7 +5,7 @@ defmodule Radiator.Directory.Audio do
   An Audio contains all data required to generate a web player: file references
   and audio metadata.
 
-  An Audio belongs to one or many episodes, or stand on its own in a network.
+  An Audio belongs to one or many episodes, or stand on its own in a network via AudioPublication.
   """
   use Ecto.Schema
 
@@ -13,28 +13,29 @@ defmodule Radiator.Directory.Audio do
   import Arc.Ecto.Changeset
   import Ecto.Query, warn: false
 
+  alias __MODULE__
   alias Radiator.Media
-  alias Radiator.Directory.{Episode, Network}
   alias Radiator.AudioMeta.Chapter
   alias Radiator.Contribution
 
+  alias Radiator.Directory.{
+    Episode,
+    Podcast,
+    AudioPublication
+  }
+
   schema "audios" do
-    field :title, :string
-    field :duration, :string
-    field :published_at, :utc_datetime
+    field :duration, :integer
     field :image, Media.AudioImage.Type
 
     has_many :episodes, Episode
+    has_one :audio_publication, AudioPublication
 
     has_many :contributions, Contribution.AudioContribution
     has_many :contributors, through: [:contributions, :person]
 
-    belongs_to :network, Network
-
     has_many :audio_files, Media.AudioFile
     has_many :chapters, Chapter
-
-    has_many :permissions, {"audios_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
 
     timestamps()
   end
@@ -42,9 +43,26 @@ defmodule Radiator.Directory.Audio do
   @doc false
   def changeset(audio, attrs) do
     audio
-    |> cast(attrs, [:title, :duration, :published_at])
+    |> cast(attrs, [:duration])
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
+  end
 
-    # todo: validate it belongs to _something_ / not a zombie
+  @doc """
+  Convenience accessor for image URL.
+  Use `podcast: podcast` to get podcast image if there is no audio image
+  """
+  def image_url(audio = %Audio{}, opts \\ []) do
+    with url when is_binary(url) <- Media.AudioImage.url({audio.image, audio}) do
+      url
+    else
+      _ ->
+        case opts[:podcast] do
+          podcast = %Podcast{} ->
+            Podcast.image_url(podcast)
+
+          _ ->
+            nil
+        end
+    end
   end
 end

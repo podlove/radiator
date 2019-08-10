@@ -34,9 +34,25 @@ defmodule Radiator.AudioMeta do
     from(
       c in Chapter,
       where: c.audio_id == ^audio.id,
-      order_by: [asc: c.start]
+      order_by: [asc: c.start],
+      preload: [:audio]
     )
     |> Repo.all()
+  end
+
+  def get_next_chapter(chapter = %Chapter{}) do
+    from(
+      c in Chapter,
+      where: c.audio_id == ^chapter.audio_id and c.start > ^chapter.start,
+      order_by: [asc: c.start],
+      limit: 1
+    )
+    |> Repo.one()
+  end
+
+  def delete_chapter(chapter = %Chapter{}) do
+    delete_chapter_image(chapter)
+    Repo.delete(chapter)
   end
 
   def delete_chapters(%Audio{} = audio) do
@@ -63,7 +79,7 @@ defmodule Radiator.AudioMeta do
   end
 
   def create_chapter(%Audio{} = audio, attrs) do
-    {update_attrs, insert_attrs} = Map.split(attrs, [:image])
+    {update_attrs, insert_attrs} = Map.split(attrs, [:image, "image"])
 
     insert =
       %Chapter{}
@@ -97,9 +113,9 @@ defmodule Radiator.AudioMeta do
     chapters
     |> Enum.each(fn chapter ->
       create_chapter(audio, %{
-        start: chapter.time,
+        start: chapter.start,
         title: chapter.title,
-        link: chapter.url,
+        link: chapter.href,
         image: chapter.image
       })
     end)

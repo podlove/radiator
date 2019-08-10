@@ -5,25 +5,71 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   alias RadiatorWeb.GraphQL.Admin.Resolvers
 
-  @desc "The authenticated User"
+  alias Radiator.Directory.{Network, Podcast}
+
+  @desc "A type of access permission."
+  enum :permission do
+    value :readonly, description: "viewer"
+    value :edit, description: "editor"
+    value :manage, description: "manager"
+    value :own, description: "owner"
+  end
+
+  @desc "A radiator instance user that is allowed to work on this subject"
+  object :collaborator do
+    field :user, :user
+    field :subject, :permission_subject
+    field :permission, :permission
+  end
+
+  union :permission_subject do
+    description "A subject for permissions / user roles. E.g. a Network, Podcast, etc."
+
+    types [:network, :podcast]
+
+    resolve_type fn
+      %Network{}, _ -> :network
+      %Podcast{}, _ -> :podcast
+    end
+  end
+
+  @desc "A radiator instance user accessible to admins and yourself"
   object :user do
-    field :name, :string
+    field :username, :string do
+      resolve fn user, _, _ -> {:ok, user.name} end
+    end
+
+    field :display_name, :string
     field :email, :string
-    field :status, :string
 
-    field :display_name, :string do
-      resolve fn user, _, _ -> {:ok, user.person.display_name} end
+    field :image, :string do
+      resolve &Resolvers.Editor.get_image_url/3
+    end
+  end
+
+  @desc "A radiator instance user accessible to others"
+  object :public_user do
+    field :username, :string do
+      resolve fn user, _, _ -> {:ok, user.name} end
     end
 
-    field :nick, :string do
-      resolve fn user, _, _ -> {:ok, user.person.nick} end
-    end
+    field :display_name, :string
 
-    field :gender, :string do
-      resolve fn user, _, _ -> {:ok, user.person.gender} end
+    field :image, :string do
+      resolve &Resolvers.Editor.get_image_url/3
     end
+  end
 
-    field :avatar, :string do
+  @desc "A radiator instance person"
+  object :person do
+    field :id, non_null(:id)
+    field :display_name, :string
+    field :name, :string
+    field :nick, :string
+    field :email, :string
+    field :link, :string
+
+    field :image, :string do
       resolve &Resolvers.Editor.get_image_url/3
     end
   end
@@ -41,6 +87,18 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :podcasts, list_of(:podcast) do
       resolve &Resolvers.Editor.list_podcasts/3
     end
+
+    field :audio_publications, list_of(:audio_publication) do
+      resolve &Resolvers.Editor.list_audio_publications/3
+    end
+
+    field :people, list_of(:person) do
+      resolve &Resolvers.Editor.list_people/3
+    end
+
+    field :collaborators, list_of(:collaborator) do
+      resolve &Resolvers.Editor.list_collaborators/3
+    end
   end
 
   @desc "The input for a network"
@@ -52,9 +110,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   @desc "A podcast"
   object :podcast do
     field :id, non_null(:id)
+    field :short_id, :string
     field :title, :string
+    field :subtitle, :string
+    field :summary, :string
+
     field :author, :string
-    field :description, :string
 
     field :image, :string do
       resolve &Resolvers.Editor.get_image_url/3
@@ -65,9 +126,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :owner_email, :string
     field :owner_name, :string
     field :published_at, :datetime
-    field :subtitle, :string
     field :slug, :string
-    field :short_id, :string
 
     field :is_published, :boolean do
       resolve &Resolvers.Editor.is_published/3
@@ -86,6 +145,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :episodes_count, :integer do
       resolve &Resolvers.Editor.get_episodes_count/3
     end
+
+    field :contributions, list_of(:contribution) do
+      resolve &Resolvers.Editor.get_contributions/3
+    end
   end
 
   @desc "The input for a podcast"
@@ -102,23 +165,26 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   @desc "An episode in a podcast"
   object :episode do
     field :id, non_null(:id)
-    field :content, :string
-    field :description, :string
-
-    field :duration, :string do
-      resolve &Resolvers.Editor.get_duration/3
-    end
 
     field :guid, :string
+    field :short_id, :string
+    field :title, :string
+    field :subtitle, :string
+
+    field :summary, :string
+    field :summary_html, :string
+    field :summary_source, :string
 
     field :image, :string do
       resolve &Resolvers.Editor.get_image_url/3
     end
 
     field :number, :integer
+
+    @desc "drafted, scheduled, published, depublished"
+    field :publish_state, :string
     field :published_at, :datetime
-    field :subtitle, :string
-    field :title, :string
+
     field :slug, :string
 
     field :is_published, :boolean do
@@ -129,10 +195,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       resolve &Resolvers.Editor.find_podcast/3
     end
 
-    field :enclosure, :enclosure do
-      resolve &Resolvers.Editor.get_enclosure/3
-    end
-
     field :audio, :audio do
       resolve &Resolvers.Editor.find_audio/3
     end
@@ -141,15 +203,49 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   @desc "An audio object"
   object :audio do
     field :id, non_null(:id)
-    field :title, :string
-    field :duration, :string
-    field :published_at, :datetime
+    field :duration, :integer
+
+    field :duration_string, :string do
+      resolve &Resolvers.Editor.get_duration_string/3
+    end
+
+    field :image, :string do
+      resolve &Resolvers.Editor.get_image_url/3
+    end
 
     field :chapters, list_of(:chapter) do
       arg :order, type: :sort_order, default_value: :asc
 
       # resolve dataloader(Radiator.AudioMeta, :chapters)
-      resolve &Resolvers.Editor.get_chapters/3
+      resolve &Resolvers.Editor.list_chapters/3
+    end
+
+    field :episodes, list_of(:episode) do
+      resolve &Resolvers.Editor.get_episodes/3
+    end
+
+    field :audio_publication, :audio_publication do
+      resolve &Resolvers.Editor.get_audio_publication/3
+    end
+
+    field :audio_files, list_of(:audio_file) do
+      resolve &Resolvers.Editor.get_audio_files/3
+    end
+
+    field :contributions, list_of(:contribution) do
+      resolve &Resolvers.Editor.get_contributions/3
+    end
+  end
+
+  object :audio_publication do
+    @desc "drafted, scheduled, published, depublished"
+    field :id, :integer
+    field :title, :string
+    field :publish_state, :string
+    field :published_at, :datetime
+
+    field :audio, :audio do
+      resolve &Resolvers.Editor.find_audio/3
     end
   end
 

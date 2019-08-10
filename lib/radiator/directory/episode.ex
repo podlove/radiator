@@ -2,8 +2,8 @@ defmodule Radiator.Directory.Episode do
   use Ecto.Schema
 
   import Ecto.Changeset
-  import Arc.Ecto.Changeset
   import Ecto.Query, warn: false
+  import Radiator.Directory.Publication
 
   alias __MODULE__
   alias Radiator.Media
@@ -13,16 +13,21 @@ defmodule Radiator.Directory.Episode do
   alias Radiator.Media.AudioFileUpload
 
   schema "episodes" do
-    field :content, :string
-    field :description, :string
     field :guid, :string
-    field :image, Media.EpisodeImage.Type
-    field :number, :integer
-    field :published_at, :utc_datetime
-    field :subtitle, :string
-    field :title, :string
-    field :slug, TitleSlug.Type
     field :short_id, :string
+
+    field :title, :string
+    field :subtitle, :string
+    field :summary, :string
+    field :summary_html, :string
+    field :summary_source, :string
+
+    field :number, :integer
+
+    field :publish_state, Radiator.Ecto.AtomType, default: :drafted
+    field :published_at, :utc_datetime
+
+    field :slug, TitleSlug.Type
 
     # use enclosure form field to upload audio file
     field :enclosure, :map, virtual: true
@@ -41,24 +46,25 @@ defmodule Radiator.Directory.Episode do
     |> cast(attrs, [
       :title,
       :subtitle,
-      :description,
-      :content,
+      :summary,
+      :summary_html,
+      :summary_source,
       :guid,
       :number,
+      :publish_state,
       :published_at,
       :slug,
       :short_id,
       :podcast_id,
       :enclosure
     ])
-    |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
     |> validate_required([:title])
     |> set_guid_if_missing()
     |> create_audio_from_enclosure()
+    |> validate_publish_state()
+    |> maybe_set_published_at()
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()
-
-    # todo: episode cannot be published without audio
   end
 
   def public_url(%Episode{} = episode), do: public_url(episode, episode.podcast)
@@ -120,22 +126,27 @@ defmodule Radiator.Directory.Episode do
   end
 
   @doc """
-  Convenience accessor for image URL. Use `podcast: podcast` to get podcast image if ther is no special episode image
+  Convenience accessor for image URL.
+  Use `podcast: podcast` to get podcast image if there is no episode audio image
   """
-  def image_url(%Episode{} = episode, opts \\ []) do
-    case Media.EpisodeImage.url({episode.image, episode}) do
-      nil ->
-        case opts[:podcast] do
-          podcast = %Podcast{} ->
-            Podcast.image_url(podcast)
-
-          _ ->
-            nil
-        end
-
-      url ->
-        url
+  def image_url(%Episode{audio: audio}, opts \\ []) do
+    if Ecto.assoc_loaded?(audio) do
+      Audio.image_url(audio, opts)
+    else
+      nil
     end
+  end
+
+  def generate_short_id(short_id_base, number) when is_integer(number) do
+    generate_short_id(short_id_base, to_string(number))
+  end
+
+  def generate_short_id(short_id_base, number) when is_binary(number) do
+    "#{short_id_base}#{String.pad_leading(number, 3, "0")}"
+  end
+
+  def generate_short_id(short_id_base, _) do
+    generate_short_id("#{short_id_base}_t", :rand.uniform(1000))
   end
 
   def regenerate_guid(changeset) do

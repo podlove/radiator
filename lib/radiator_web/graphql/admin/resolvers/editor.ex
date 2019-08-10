@@ -1,12 +1,21 @@
 defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   use Radiator.Constants
 
-  alias Radiator.Directory.Editor
-  alias Radiator.Directory.{Episode, Podcast, Network, Audio}
+  alias Radiator.Directory.{
+    Editor,
+    Episode,
+    Podcast,
+    Network,
+    Audio,
+    AudioPublication
+  }
+
   alias Radiator.AudioMeta
-  alias Radiator.Media
+  alias Radiator.AudioMeta.Chapter
   alias Radiator.Auth.User
   alias Radiator.Contribution.Person
+  alias Radiator.Media.AudioFile
+  import RadiatorWeb.FormatHelpers, only: [format_normal_playtime: 1]
 
   @doc """
   Get network with user and do something with it or return error.
@@ -105,7 +114,13 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   end
 
   def find_user(_, _, %{context: %{current_user: user}}) do
-    {:ok, user}
+    user
+    |> Radiator.Repo.preload(:person)
+    |> (&{:ok, &1}).()
+  end
+
+  def find_users(_, %{query: query_string}, _) do
+    {:ok, Radiator.Auth.Register.find_users(query_string)}
   end
 
   def list_networks(_parent, _args, %{context: %{current_user: user}}) do
@@ -136,6 +151,19 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
           {:ok, network} -> {:ok, network}
         end
       end
+    end
+  end
+
+  def list_collaborators(%Network{id: id}, _args, %{context: %{current_user: user}}) do
+    with_network user, id do
+      fn network -> Editor.list_collaborators(user, network) end
+    end
+  end
+
+  @spec list_people(Radiator.Directory.Network.t(), any, %{context: %{current_user: any}}) :: any
+  def list_people(%Network{id: id}, _args, %{context: %{current_user: user}}) do
+    with_network user, id do
+      fn network -> Editor.list_people(user, network) end
     end
   end
 
@@ -209,6 +237,18 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
+  def get_episodes(audio = %Audio{}, _, %{context: %{current_user: user}}) do
+    {:ok, Editor.list_episodes(user, audio)}
+  end
+
+  def get_contributions(podcast = %Podcast{}, _, %{context: %{current_user: user}}) do
+    Editor.list_contributions(user, podcast)
+  end
+
+  def get_contributions(audio = %Audio{}, _, %{context: %{current_user: user}}) do
+    Editor.list_contributions(user, audio)
+  end
+
   def create_episode(_parent, %{podcast_id: podcast_id, episode: args}, %{
         context: %{current_user: user}
       }) do
@@ -268,52 +308,75 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, AudioMeta.list_chapters(audio)}
   end
 
-  def set_episode_chapters(_parent, %{id: id, chapters: chapters, type: type}, %{
-        context: %{current_user: user}
+  def get_audio_files(audio = %Audio{}, _args, %{context: %{current_user: user}}) do
+    Editor.list_audio_files(user, audio)
+  end
+
+  def get_audio_files(audio = %Audio{}, _args, _resolution) do
+    {:ok, Radiator.Directory.list_audio_files(audio)}
+  end
+
+  def find_audio(%AudioPublication{} = audio_publication, _args, %{
+        context: %{current_user: _user}
       }) do
-    with_audio user, id do
-      fn audio ->
-        AudioMeta.set_chapters(audio, chapters, String.to_existing_atom(type))
-      end
-    end
+    {:ok, audio_publication.audio}
   end
 
   def find_audio(%Episode{} = episode, _args, %{context: %{current_user: _user}}) do
     {:ok, episode.audio}
   end
 
-  def get_enclosure(%Episode{} = episode, _args, %{context: %{current_user: _user}}) do
-    {:ok, Episode.enclosure(episode)}
+  def find_audio(_parent, %{id: id}, %{context: %{current_user: user}}) do
+    with_audio user, id do
+      fn audio -> {:ok, audio} end
+    end
   end
 
-  def get_chapters(%Audio{} = audio, _, _) do
-    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
-    audio = Radiator.Repo.preload(audio, chapters: chapter_query)
-
-    {:ok, audio.chapters}
+  def get_duration_string(%Audio{duration: time}, _, _) do
+    {:ok, format_normal_playtime(time)}
   end
 
-  def get_duration(%Episode{audio: audio}, _, _) do
-    {:ok, audio.duration}
+  def get_duration_string(%Chapter{start: time}, _, _) do
+    {:ok, format_normal_playtime(time)}
   end
 
-  def get_image_url(episode = %Episode{}, _, _) do
-    {:ok, Media.EpisodeImage.url({episode.image, episode})}
+  def get_file_url(audio_file = %AudioFile{}, _, _) do
+    {:ok, AudioFile.public_url(audio_file)}
   end
 
-  def get_image_url(podcast = %Podcast{}, _, _) do
-    {:ok, Podcast.image_url(podcast)}
+  @spec get_image_url(Network.t() | Podcast.t() | Episode.t() | Audio.t() | Chapter.t(), any, any) ::
+          {:ok, String.t()}
+  def get_image_url(subject, _, _)
+
+  def get_image_url(%User{} = user, _, _) do
+    user = user |> Radiator.Repo.preload(:person)
+
+    {:ok, Person.image_url(user.person)}
   end
 
-  def get_image_url(network = %Network{}, _, _) do
-    {:ok, Media.NetworkImage.url({network.image, network})}
-  end
-
-  def get_image_url(%User{person: person}, _, _) do
-    {:ok, Person.image_url(person)}
+  def get_image_url(%type{} = subject, _, _) do
+    {:ok, type.image_url(subject)}
   end
 
   def get_episodes_count(%Podcast{id: podcast_id}, _, %{context: %{current_user: user}}) do
     Editor.get_episodes_count_for_podcast!(user, podcast_id)
+  end
+
+  def get_audio_publication(audio = %Audio{audio_publication: audio_publication}, _, _) do
+    if Ecto.assoc_loaded?(audio_publication) do
+      {:ok, audio_publication}
+    else
+      {:ok, Ecto.assoc(audio, :audio_publication) |> Radiator.Repo.one()}
+    end
+  end
+
+  def list_audio_publications(%Network{id: id}, _, %{context: %{current_user: user}}) do
+    with_network user, id do
+      fn network -> Editor.Manager.list_audio_publications(network) end
+    end
+  end
+
+  def list_contribution_roles(_, _, _) do
+    Editor.list_contribution_roles()
   end
 end

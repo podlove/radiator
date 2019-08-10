@@ -24,7 +24,9 @@ defmodule Radiator.Media.AudioFileUpload do
   alias Ecto.Multi
   alias Radiator.Repo
   alias Radiator.Media.AudioFile
-  alias Radiator.Directory.{Audio, Editor}
+  alias Radiator.Directory.Audio
+
+  require Logger
 
   @doc """
   Upload audio file and attach it to audio object.
@@ -33,30 +35,22 @@ defmodule Radiator.Media.AudioFileUpload do
   """
   @spec upload(any(), Audio.t()) :: {:ok, AudioFile.t()} | {:error, :failed}
   def upload(upload, audio = %Audio{}) do
-    {:ok, audio_file} = upload(upload)
-
-    audio
-    |> Editor.attach_audio_file(audio_file)
-    |> case do
-      {:ok, audio_file} -> {:ok, audio_file}
-      _ -> {:error, :failed}
-    end
-  end
-
-  @spec upload(Plug.Upload.t()) :: {:ok, Radiator.Media.AudioFile.t()} | {:error, atom()}
-  defp upload(upload) do
     Multi.new()
-    |> Multi.insert(:create_audio_file, create_audio_file_changeset())
+    |> Multi.insert(:create_audio_file, create_audio_file_changeset(audio))
     |> Multi.update(:audio_file, add_audio_file_changeset(upload))
     |> Repo.transaction()
     |> case do
-      {:ok, %{audio_file: audio_file}} -> {:ok, audio_file}
-      {:error, _, _, _} -> {:error, :upload_failed}
+      {:ok, %{audio_file: audio_file}} ->
+        {:ok, audio_file}
+
+      {:error, _, _, _} = error ->
+        Logger.debug("Upload failure: #{inspect(error, pretty: true)}")
+        {:error, :failed}
     end
   end
 
-  defp create_audio_file_changeset do
-    AudioFile.changeset(%AudioFile{}, %{})
+  defp create_audio_file_changeset(audio) do
+    AudioFile.changeset(%AudioFile{}, %{audio_id: audio.id})
   end
 
   defp add_audio_file_changeset(upload = %Plug.Upload{path: path, filename: filename})
@@ -64,8 +58,8 @@ defmodule Radiator.Media.AudioFileUpload do
     {:ok, %File.Stat{size: size}} = File.lstat(path)
     mime_type = MIME.from_path(path) |> fix_mime_type()
 
-    fn %{create_audio_file: audio} ->
-      AudioFile.changeset(audio, %{
+    fn %{create_audio_file: audio_file} ->
+      AudioFile.changeset(audio_file, %{
         "title" => filename,
         "file" => upload,
         "mime_type" => mime_type,
@@ -79,8 +73,10 @@ defmodule Radiator.Media.AudioFileUpload do
 
     # todo: get byte_length _after_ storing
 
-    fn %{create_audio: audio} ->
-      AudioFile.changeset(audio, %{
+    fn %{create_audio_file: audio_file} ->
+      audio_file = Repo.preload(audio_file, :audio)
+
+      AudioFile.changeset(audio_file, %{
         # "title" => filename,
         "file" => upload,
         "mime_type" => mime_type
@@ -134,12 +130,16 @@ defmodule Radiator.Media.AudioFileUpload do
     end
   end
 
+  require Logger
+
   # hakney :connect_timeout - timeout used when establishing a connection, in milliseconds
   # hakney :recv_timeout - timeout used when receiving from a connection, in milliseconds
   # poison :timeout - timeout to establish a connection, in milliseconds
   # :backoff_max - maximum backoff time, in milliseconds
   # :backoff_factor - a backoff factor to apply between attempts, in milliseconds
   defp get_remote_path(remote_path) do
+    Logger.debug("get remote: #{remote_path}")
+
     options = [
       follow_redirect: true,
       recv_timeout: Application.get_env(:arc, :recv_timeout, 5_000),
@@ -147,14 +147,22 @@ defmodule Radiator.Media.AudioFileUpload do
       timeout: Application.get_env(:arc, :timeout, 10_000),
       max_retries: Application.get_env(:arc, :max_retries, 3),
       backoff_factor: Application.get_env(:arc, :backoff_factor, 1000),
-      backoff_max: Application.get_env(:arc, :backoff_max, 30_000)
+      backoff_max: Application.get_env(:arc, :backoff_max, 30_000),
+
+      # disable cert verification for sideloading for now, as we got spurious {bad_cert,invalid_key_usage}
+      ssl_options: [verify: :verify_none]
     ]
 
     request(remote_path, options)
   end
 
+  defp request_headers do
+    # TODO: unify with metalove
+    [{"User-Agent", "RadiatorImportBot/1.0 (https://github.com/podlove/radiator)"}]
+  end
+
   defp request(remote_path, options, tries \\ 0) do
-    case :hackney.get(URI.to_string(remote_path), [], "", options) do
+    case :hackney.get(URI.to_string(remote_path), request_headers(), "", options) do
       {:ok, 200, _headers, client_ref} ->
         :hackney.body(client_ref)
 

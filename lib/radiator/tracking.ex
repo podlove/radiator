@@ -146,8 +146,9 @@ defmodule Radiator.Tracking do
   defp to_ua_field(:unknown), do: nil
   defp to_ua_field(value) when is_binary(value), do: value
 
-  defp hours_since_published(audio = %Audio{}, time = %DateTime{}) do
-    trunc(DateTime.diff(time, audio.published_at, :second) / 3600)
+  # fixme: handle AudioPublication
+  defp hours_since_published(_audio = %Audio{}, _time = %DateTime{}) do
+    0
   end
 
   defp hours_since_published(episode = %Episode{}, time = %DateTime{}) do

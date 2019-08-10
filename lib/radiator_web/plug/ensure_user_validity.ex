@@ -33,13 +33,13 @@ defmodule RadiatorWeb.Plug.EnsureUserValidity do
           ]
         )
         |> Phoenix.Controller.redirect(to: Routes.login_path(conn, :index))
-        |> Plug.Conn.halt()
+        |> halt()
 
       %Radiator.Auth.User{status: :suspended} = user ->
         conn
         |> Phoenix.Controller.put_flash(:error, "Account #{user.name} is suspended.")
         |> Phoenix.Controller.redirect(to: Routes.login_path(conn, :index))
-        |> Plug.Conn.halt()
+        |> halt()
     end
   end
 end

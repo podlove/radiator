@@ -25,7 +25,21 @@ defmodule RadiatorWeb do
       import RadiatorWeb.Gettext
       import RadiatorWeb.Helpers.AuthHelpers, only: [current_user: 1]
 
+      import RadiatorWeb.Helpers.AdminResourceHelpers,
+        only: [current_network: 1, current_podcast: 1]
+
       alias RadiatorWeb.Router.Helpers, as: Routes
+    end
+  end
+
+  def rest_controller do
+    quote do
+      unquote(do: controller())
+
+      import RadiatorWeb.Helpers.RestApiHelpers
+      use Radiator.Constants
+
+      action_fallback RadiatorWeb.Api.FallbackController
     end
   end
 
@@ -46,6 +60,10 @@ defmodule RadiatorWeb do
       import RadiatorWeb.FormatHelpers
 
       alias RadiatorWeb.Router.Helpers, as: Routes
+
+      def render_shared_partial(template, assigns \\ []) do
+        render(RadiatorWeb.SharedPartialsView, template, assigns)
+      end
     end
   end
 

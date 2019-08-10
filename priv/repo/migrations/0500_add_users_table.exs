@@ -3,9 +3,9 @@ defmodule Radiator.Repo.Migrations.AddUsersTable do
 
   def change do
     create table(:auth_users) do
-      add :name, :string
-      add :email, :string
-      add :display_name, :string
+      add :name, :text
+      add :email, :text
+      add :display_name, :text
       add :password_hash, :binary
       add :status, :string, null: false, size: 40
 

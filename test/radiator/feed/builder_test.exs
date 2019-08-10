@@ -173,7 +173,8 @@ defmodule Radiator.BuilderTest do
         insert(:published_episode,
           title: "Ep 001",
           subtitle: "sub",
-          description: "desc",
+          summary: "summary",
+          summary_html: "summary_html",
           slug: "ep001",
           podcast: podcast
         )
@@ -183,7 +184,8 @@ defmodule Radiator.BuilderTest do
 
       assert "Ep 001" == xpath(rss, ~x"//item/title/text()"s)
       assert "sub" == xpath(rss, ~x"//item/itunes:subtitle/text()"s)
-      assert "desc" == xpath(rss, ~x"//item/description/text()"s)
+      assert "summary" == xpath(rss, ~x"//item/itunes:summary/text()"s)
+      assert "summary_html" == xpath(rss, ~x"//item/content:encoded/text()"s)
 
       [enclosure] = episode.audio.audio_files
 

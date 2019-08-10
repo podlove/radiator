@@ -7,12 +7,12 @@
     <div class="flex justify-center md:justify-start flex-wrap">
       <%= for network <- @networks do %>
       <div class="w-48 flex flex-col mr-8 mb-10">
-        <%= link to: Routes.admin_network_podcast_path(@conn, :index, network.id),
+        <%= link to: Routes.admin_network_path(@conn, :show, network.id),
         class: "no-underline text-black w-48 bg-white rounded flex flex-col shadow mr-8 mb-8" do %>
           
           <div
             class="w-48 h-48 bg-cover shadow-inner"
-            style="background-image: url(<%= network.image %>)"
+            style="background-image: url(<%= network_image_url(network) %>)"
           ></div>
 
           <div class="p-3 h-32">

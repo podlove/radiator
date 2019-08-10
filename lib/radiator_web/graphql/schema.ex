@@ -41,9 +41,11 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
   import_types RadiatorWeb.GraphQL.Public.Types
   import_types RadiatorWeb.GraphQL.Admin.Types
+  import_types RadiatorWeb.GraphQL.FeedInfo.Types
 
   alias RadiatorWeb.GraphQL.Public
   alias RadiatorWeb.GraphQL.Admin
+  alias RadiatorWeb.GraphQL.FeedInfo
 
   alias RadiatorWeb.GraphQL.Admin.Schema.Middleware
 
@@ -81,12 +83,41 @@ defmodule RadiatorWeb.GraphQL.Schema do
       resolve &Public.Resolvers.Directory.list_networks/3
     end
 
+    # Metalove queries (probably should move to admin eventually to avoid abuse)
+
+    @desc "Get podcast feed info for an url"
+    field :feed_info, :feed_info do
+      arg :url, non_null(:string)
+
+      resolve &FeedInfo.Resolvers.Metalove.get_feed_info/3
+    end
+
+    @desc "Get the content of a feed url"
+    field :podcast_feed, :podcast_feed do
+      arg :url, non_null(:string)
+
+      resolve &FeedInfo.Resolvers.Metalove.get_feed_content/3
+    end
+
     # Admin queries
 
     @desc "Get current user"
     field :user, :user do
       middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.find_user/3
+    end
+
+    @desc "Find users of this instance"
+    field :users, list_of(:public_user) do
+      arg :query, non_null(:string)
+
+      middleware Middleware.RequireAuthentication
+      resolve &Admin.Resolvers.Editor.find_users/3
+    end
+
+    @desc "Get all possible contribution roles"
+    field :contribution_roles, list_of(:contribution_role) do
+      resolve &Admin.Resolvers.Editor.list_contribution_roles/3
     end
 
     @desc "Get all podcasts"
@@ -124,6 +155,14 @@ defmodule RadiatorWeb.GraphQL.Schema do
       middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.list_networks/3
     end
+
+    @desc "Get one audio"
+    field :audio, :audio do
+      arg :id, non_null(:id)
+
+      middleware Middleware.RequireAuthentication
+      resolve &Admin.Resolvers.Editor.find_audio/3
+    end
   end
 
   mutation do
@@ -153,35 +192,6 @@ defmodule RadiatorWeb.GraphQL.Schema do
       resolve &Admin.Resolvers.Session.prolong_authenticated_session/3
     end
 
-    @desc "Create a network (Authenticated)"
-    field :create_network, type: :network do
-      arg :network, non_null(:network_input)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.create_network/3
-      middleware Middleware.TranslateChangeset
-    end
-
-    @desc "Update a network"
-    field :update_network, type: :network do
-      arg :id, non_null(:id)
-      arg :network, non_null(:network_input)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.update_network/3
-      middleware Middleware.TranslateChangeset
-    end
-
-    @desc "Create a podcast"
-    field :create_podcast, type: :podcast do
-      arg :podcast, non_null(:podcast_input)
-      arg :network_id, non_null(:integer)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.create_podcast/3
-      middleware Middleware.TranslateChangeset
-    end
-
     @desc "Publish podcast"
     field :publish_podcast, type: :podcast do
       arg :id, non_null(:id)
@@ -196,61 +206,6 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
       middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.depublish_podcast/3
-    end
-
-    @desc "Update a podcast"
-    field :update_podcast, type: :podcast do
-      arg :id, non_null(:id)
-      arg :podcast, non_null(:podcast_input)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.update_podcast/3
-      middleware Middleware.TranslateChangeset
-    end
-
-    @desc "Delete a podcast"
-    field :delete_podcast, type: :podcast do
-      arg :id, non_null(:id)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.delete_podcast/3
-    end
-
-    @desc "Upload audio file to audio object"
-    field :upload_audio_file, type: :audio_file do
-      arg :audio_id, non_null(:integer)
-      arg :file, :upload
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Storage.upload_audio_file/3
-    end
-
-    @desc "Create an episode"
-    field :create_episode, type: :episode do
-      arg :podcast_id, non_null(:id)
-      arg :episode, non_null(:episode_input)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.create_episode/3
-      middleware Middleware.TranslateChangeset
-    end
-
-    @desc "Update an episode"
-    field :update_episode, type: :episode do
-      arg :id, non_null(:id)
-      arg :episode, non_null(:episode_input)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.update_episode/3
-      middleware Middleware.TranslateChangeset
-    end
-
-    @desc "Publish episode"
-    field :publish_episode, type: :episode do
-      arg :id, non_null(:id)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.publish_episode/3
     end
 
     @desc "Depublish episode"
@@ -276,16 +231,6 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
       middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Editor.delete_episode/3
-    end
-
-    @desc "Set chapters for an episode"
-    field :set_chapters, type: :audio do
-      arg :id, non_null(:id)
-      arg :chapters, non_null(:string)
-      arg :type, non_null(:string)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.set_episode_chapters/3
     end
   end
 end

@@ -16,7 +16,7 @@
   </div>
     <div class="w-full mb-4">
       <div class="text-black font-normal episode-description">
-        <%= raw @episode.description %>
+        <%= @episode.summary %>
       </div>
     </div>
 
@@ -30,5 +30,5 @@
 
 </div>
 <div class="container mx-auto mb-6 px-8 content-encoded">
-<%= raw(@episode.content) %>
+<%= raw(@episode.summary_html) %>
 </div>

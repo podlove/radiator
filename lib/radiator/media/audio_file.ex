@@ -24,10 +24,24 @@ defmodule Radiator.Media.AudioFile do
   @doc false
   def changeset(audio_file = %__MODULE__{}, attrs) do
     audio_file
-    |> cast(attrs, [:title, :mime_type, :byte_length])
+    |> cast(attrs, [:title, :mime_type, :byte_length, :audio_id])
+    #    |> cast_or_constraint_assoc(:audio)
     |> cast_attachments(attrs, [:file], allow_paths: true, allow_urls: true)
 
     # todo: determine byte length and mime type on file change, don't take them as attrs
+  end
+
+  # fixme: auidofile.upload geht bei dom nicht mehr
+  # not sure if this is the best way
+  # via https://elixirforum.com/t/ecto-validating-belongs-to-association-is-not-nil/2665/13
+  defp cast_or_constraint_assoc(changeset, name) do
+    {:assoc, %{owner_key: key}} = changeset.types[name]
+
+    if changeset.changes[key] do
+      assoc_constraint(changeset, name)
+    else
+      cast_assoc(changeset, name, required: true)
+    end
   end
 
   def public_url(audio_file = %__MODULE__{}) do

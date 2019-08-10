@@ -2,10 +2,11 @@
 <img src="<%= episode_image_url(@episode, @podcast) %>" class="w-24 h-24 mr-6" />
 <div>
 <%= if @episode.number do %>
-<div class="text-gray-700 text-sm uppercase tracking-wider mb-2">Episode <%= @episode.number %></div>
+<div class="text-gray-700 text-sm uppercase tracking-wider float-right">Episode <%= @episode.number %></div>
 <% end %>
-<div class="font-bold text-black"><%= @episode.title %></div>
-<div class="text-gray-700 text-sm mb-2"><%= @episode.subtitle %></div>
+<div class="font-bold text-black mb-2"><%= @episode.title %></div>
+<div class="text-gray-700 mb-2"><%= @episode.subtitle %></div>
+<div class="text-gray-700 text-sm mb-2"><%= @episode.summary %></div>
 <p class="text-gray-900 text-xs"><%= format_date(@episode.published_at) %> - <%= @episode.audio.duration %></p> 
 </div>
 </div>

@@ -3,16 +3,10 @@ defmodule Radiator.Repo.Migrations.CreateAudios do
 
   def change do
     create table(:audios) do
-      add :title, :text
-      add :duration, :text
-      add :image, :string
-      add :published_at, :utc_datetime
-
-      add :network_id, references(:networks, on_delete: :nothing)
+      add :duration, :integer
+      add :image, :text
 
       timestamps()
     end
-
-    create index(:audios, [:network_id])
   end
 end
