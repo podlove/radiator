@@ -35,6 +35,11 @@ services:
       - STORAGE_ASSET_HOST=http://localhost:9000/radiator
       - STORAGE_ACCESS_KEY_ID="IEKAZMUY3KX32CRJPE9R"
       - STORAGE_ACCESS_KEY="tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN"
+      - SMTP_SERVER=localhost
+      - SMTP_HOSTNAME=localhost
+      - SMTP_PORT=2525
+      - SMTP_USERNAME=xxx
+      - SMTP_PASSWORD=xxx
 
 volumes:
   minio_data:

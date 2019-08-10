@@ -2,7 +2,7 @@ import Config
 
 config :radiator, RadiatorWeb.Endpoint,
   http: [:inet6, port: System.fetch_env!("PORT")],
-  url: [host: System.fetch_env!("HOST"), port: 80]
+  url: [host: System.fetch_env!("HOST"), port: System.fetch_env!("PORT")]
 
 config :radiator, Radiator.Repo,
   username: System.fetch_env!("POSTGRES_USER"),
@@ -22,4 +22,9 @@ config :ex_aws, :s3,
   host: System.fetch_env!("STORAGE_HOST"),
   port: System.fetch_env!("STORAGE_PORT")
 
-#  fixme: SMTP Settings
+config :radiator, Radiator.Mailer,
+  server: System.fetch_env!("SMTP_SERVER"),
+  hostname: System.fetch_env!("SMTP_HOSTNAME"),
+  port: System.fetch_env!("SMTP_PORT"),
+  username: System.fetch_env!("SMTP_USERNAME"),
+  password: System.fetch_env!("SMTP_PASSWORD")

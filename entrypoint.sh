@@ -16,8 +16,8 @@
 ./mc config host add radiator http://minio:9000 IEKAZMUY3KX32CRJPE9R tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
 ./mc mb radiator/radiator
 ./mc mb radiator/radiator-test
-./mc policy public radiator/radiator
-./mc policy public radiator/radiator-test
+./mc policy set public radiator/radiator
+./mc policy set public radiator/radiator-test
 
 # Start the Phoenix server
 ./prod/rel/radiator/bin/radiator start
