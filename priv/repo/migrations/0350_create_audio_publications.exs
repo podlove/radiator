@@ -4,6 +4,7 @@ defmodule Radiator.Repo.Migrations.CreateAudioPublications do
   def change do
     create table(:audio_publications) do
       add :title, :text
+      add :slug, :text
       add :publish_state, :string
       add :published_at, :utc_datetime
 

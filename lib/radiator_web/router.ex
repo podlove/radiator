@@ -78,7 +78,11 @@ defmodule RadiatorWeb.Router do
   end
 
   scope "/download", RadiatorWeb do
-    get "/audio/:id", TrackingController, :show
+    get "/p/:podcast_slug/:episode_slug/file/:file_id", TrackingController, :track_episode_file
+
+    get "/n/:network_slug/:audio_publication_slug/file/:file_id",
+        TrackingController,
+        :track_audio_publication_file
   end
 
   scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
@@ -142,7 +146,10 @@ defmodule RadiatorWeb.Router do
 
     get "/", PageController, :index
 
-    get "/audio/:audio_id/player.json", PlayerController, :audio_config
+    get "/audio_publication/:audio_publication_id/player.json",
+        PlayerController,
+        :audio_publication_config
+
     get "/episode/:episode_id/player.json", PlayerController, :episode_config
 
     get "/login/request_verification/:token", LoginController, :resend_verification_mail

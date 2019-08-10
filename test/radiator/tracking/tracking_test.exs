@@ -18,8 +18,9 @@ defmodule Radiator.TrackingTest do
 
       {:ok, download} =
         Tracking.track_download(
-          file: file,
+          podcast: episode.podcast,
           episode: episode,
+          audio_file: file,
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),
@@ -37,15 +38,15 @@ defmodule Radiator.TrackingTest do
       assert download.file_id == file.id
     end
 
-    test "track_download/1 tracks an audio download within a network, without episode association" do
+    test "track_download/1 tracks an audio publication download" do
       audio_publication = insert(:audio_publication)
       audio = audio_publication.audio
       [file] = audio.audio_files
 
       {:ok, download} =
         Tracking.track_download(
-          file: file,
-          network: audio_publication.network,
+          audio_publication: audio_publication,
+          audio_file: file,
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),
@@ -62,8 +63,9 @@ defmodule Radiator.TrackingTest do
 
       {:ok, response} =
         Tracking.track_download(
-          file: file,
+          podcast: episode.podcast,
           episode: episode,
+          audio_file: file,
           remote_ip: @valid_ip,
           user_agent: "Googlebot",
           time: DateTime.utc_now(),
@@ -80,8 +82,9 @@ defmodule Radiator.TrackingTest do
 
       {:ok, response} =
         Tracking.track_download(
-          file: file,
+          podcast: episode.podcast,
           episode: episode,
+          audio_file: file,
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),
@@ -104,8 +107,9 @@ defmodule Radiator.TrackingTest do
 
       {:ok, download} =
         Tracking.track_download(
-          file: file,
+          podcast: episode.podcast,
           episode: episode,
+          audio_file: file,
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),

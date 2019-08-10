@@ -83,9 +83,11 @@ defmodule Radiator.Factory do
 
   def network_factory do
     title = sequence(:title, &"Network ##{&1}")
+    slug = sequence(:slug, &"network-#{&1}")
 
     %Radiator.Directory.Network{
-      title: title
+      title: title,
+      slug: slug
     }
   end
 
@@ -140,9 +142,16 @@ defmodule Radiator.Factory do
   end
 
   def audio_publication_factory do
+    title = sequence(:title, &"Publication ##{&1}")
+    slug = sequence(:slug, &"publication-#{&1}")
+
     %Radiator.Directory.AudioPublication{
       network: build(:network),
-      audio: build(:audio)
+      audio: build(:audio),
+      publish_state: :published,
+      published_at: DateTime.utc_now() |> DateTime.add(-3600, :second),
+      title: title,
+      slug: slug
     }
   end
 
