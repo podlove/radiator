@@ -14,21 +14,6 @@ defmodule Radiator.Directory do
   alias Radiator.Directory.{PodcastQuery, EpisodeQuery, AudioQuery}
   alias Radiator.Contribution.{PodcastContribution, AudioContribution}
 
-  def data() do
-    Dataloader.Ecto.new(Repo, query: &query/2)
-  end
-
-  def query(Episode, args) do
-    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
-
-    episodes_query(args)
-    |> preload([:podcast, audio: [chapters: ^chapter_query, audio_files: []]])
-  end
-
-  def query(queryable, _) do
-    queryable
-  end
-
   defp published_networks_query do
     published_podcasts_query = PodcastQuery.filter_by_published(Podcast)
 
@@ -188,7 +173,7 @@ defmodule Radiator.Directory do
     |> Repo.preload([:person, :role])
   end
 
-  defp episodes_query(args) when is_map(args) do
+  def episodes_query(args) when is_map(args) do
     args
     |> Map.put(:published, true)
     |> EpisodeQuery.build()

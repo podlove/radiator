@@ -10,8 +10,8 @@ defmodule RadiatorWeb.GraphQL.Schema do
     alias Radiator.Directory
 
     Dataloader.new()
-    |> Dataloader.add_source(AudioMeta, AudioMeta.data())
-    |> Dataloader.add_source(Directory, Directory.data())
+    |> Dataloader.add_source(AudioMeta, AudioMeta.DataloaderProvider.data())
+    |> Dataloader.add_source(Directory, Directory.DataloaderProvider.data())
   end
 
   def context(ctx) do
