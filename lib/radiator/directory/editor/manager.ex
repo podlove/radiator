@@ -82,6 +82,9 @@ defmodule Radiator.Directory.Editor.Manager do
     |> Repo.update()
   end
 
+  @spec create_audio(Episode.t() | Network.t, map, map) :: {:error, any} | {:ok, Audio.t}
+  def create_audio(subject, audio_attrs, subject_attrs \\ %{})
+
   # todo: this raises if used on an episode that already has an associated audio.
   #       we need to define a way, maybe even a separate API,
   #       to remove or replace an episode audio.
