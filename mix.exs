@@ -79,7 +79,7 @@ defmodule Radiator.MixProject do
       {:chapters, "~> 1.0"},
       {:dataloader, "~> 1.0"},
       {:mime, "~> 1.2"},
-      {:remote_ip, "~> 0.1.4"},
+      {:remote_ip, github: "eteubert/remote_ip"},
       {:ua_inspector, "~> 1.0"}
     ]
   end
