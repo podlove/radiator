@@ -33,10 +33,10 @@ html {
  *
  * @import "tailwindcss/utilities";
  */
- @tailwind utilities;
+@tailwind utilities;
 
 
- /* used in svg icons that have 2 colors */
+/* used in svg icons that have 2 colors */
 .primary {
   fill: theme("colors.tertiary");
 }
@@ -147,15 +147,16 @@ html {
   @apply truncate;
   position: relative;
 }
+
 .truncate-fade:after {
-  pointer-events:none;
+  pointer-events: none;
   position: absolute;
   content: "";
   height: 100%;
   bottom: 0;
   right: 0;
   width: 2em;
-  background: linear-gradient(to right,theme("colors.primarytransparent"), theme("colors.primary"));
+  background: linear-gradient(to right, theme("colors.primarytransparent"), theme("colors.primary"));
 }
 
 /**
