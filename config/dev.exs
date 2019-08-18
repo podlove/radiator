@@ -1,5 +1,7 @@
 use Mix.Config
 
+default_host = "localhost"
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -21,6 +23,18 @@ config :radiator, RadiatorWeb.Endpoint,
       cd: Path.expand("../assets", __DIR__)
     ]
   ]
+
+config :arc,
+  asset_host: System.get_env("STORAGE_ASSET_HOST") || "http://#{default_host}:9000/radiator"
+
+config :ex_aws,
+  access_key_id: "IEKAZMUY3KX32CRJPE9R",
+  secret_access_key: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN"
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: System.get_env("STORAGE_HOST") || default_host,
+  port: 9000
 
 # ## SSL Support
 #

@@ -52,21 +52,11 @@ config :radiator, Radiator.Mailer,
   auth: :if_available
 
 config :arc,
-  # or Arc.Storage.Local
   storage: Arc.Storage.S3,
-  # if using Amazon S3
-  bucket: "radiator",
-  asset_host: System.get_env("STORAGE_ASSET_HOST") || "http://#{default_host}:9000/radiator"
+  bucket: "radiator"
 
 config :ex_aws,
-  access_key_id: "IEKAZMUY3KX32CRJPE9R",
-  secret_access_key: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN",
   json_codec: Jason
-
-config :ex_aws, :s3,
-  scheme: "http://",
-  host: System.get_env("STORAGE_HOST") || default_host,
-  port: 9000
 
 config :ex_aws, :hackney_opts,
   follow_redirect: true,

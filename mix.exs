@@ -26,7 +26,7 @@ defmodule Radiator.MixProject do
   def application do
     [
       mod: {Radiator.Application, []},
-      extra_applications: [:logger, :runtime_tools, :bamboo, :bamboo_smtp]
+      extra_applications: [:logger, :runtime_tools, :bamboo, :bamboo_smtp, :inet_cidr]
     ]
   end
 
