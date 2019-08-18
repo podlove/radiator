@@ -24,22 +24,22 @@ services:
       - db
       - minio
     environment:
-      - PORT=4000
-      - HOST=localhost
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DATABASE=radiator_prod
-      - POSTGRES_HOST=db
-      - STORAGE_HOST=minio
-      - STORAGE_PORT=9000
-      - STORAGE_ASSET_HOST=http://localhost:9000/radiator
-      - STORAGE_ACCESS_KEY_ID="IEKAZMUY3KX32CRJPE9R"
-      - STORAGE_ACCESS_KEY="tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN"
-      - SMTP_SERVER=localhost
-      - SMTP_HOSTNAME=localhost
-      - SMTP_PORT=2525
-      - SMTP_USERNAME=xxx
-      - SMTP_PASSWORD=xxx
+      PORT: 4000
+      HOST: localhost
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DATABASE: radiator_prod
+      POSTGRES_HOST: db
+      STORAGE_HOST: minio
+      STORAGE_PORT: 9000
+      STORAGE_ASSET_HOST: http://localhost:9000/radiator
+      STORAGE_ACCESS_KEY_ID: IEKAZMUY3KX32CRJPE9R
+      STORAGE_ACCESS_KEY: tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
+      SMTP_SERVER: smtp.mailtrap.io
+      SMTP_HOSTNAME: smtp.mailtrap.io
+      SMTP_PORT: 2525
+      SMTP_USERNAME: xxx
+      SMTP_PASSWORD: xxx
 
 volumes:
   minio_data:
