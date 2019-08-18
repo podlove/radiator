@@ -26,8 +26,6 @@ steps:
       - name: mix
         path: /root/.mix
     environment:
-      STORAGE_ACCESS_KEY_ID: IEKAZMUY3KX32CRJPE9R
-      STORAGE_ACCESS_KEY: tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
       STORAGE_ASSET_HOST: "http://minio:9000/radiator"
       STORAGE_HOST: "minio"
       STORAGE_PORT: 9000
