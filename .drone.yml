@@ -11,7 +11,7 @@ steps:
       - mc policy set public radiator/radiator-test
 
   - name: install
-    image: elixir:1.8
+    image: elixir:1.9
     volumes:
       - name: mix
         path: /root/.mix
@@ -21,7 +21,7 @@ steps:
       - mix deps.get
 
   - name: test
-    image: elixir:1.8
+    image: elixir:1.9
     volumes:
       - name: mix
         path: /root/.mix

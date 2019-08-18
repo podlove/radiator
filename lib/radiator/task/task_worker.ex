@@ -66,6 +66,11 @@ defmodule Radiator.Task.TaskWorker do
   end
 
   def handle_cast(:stop, state) do
+    case state.spawned_pid do
+      nil -> nil
+      pid -> Process.exit(pid, :kill)
+    end
+
     {:stop, :normal, state}
   end
 

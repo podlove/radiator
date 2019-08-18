@@ -5,6 +5,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   alias RadiatorWeb.GraphQL.Admin.Resolvers
 
+  alias Radiator.Directory
   alias Radiator.Directory.{Network, Podcast}
 
   @desc "A type of access permission."
@@ -139,7 +140,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       arg :order_by, type: :episode_order, default_value: :published_at
       arg :order, type: :sort_order, default_value: :desc
 
-      resolve dataloader(Radiator.Directory, :episodes)
+      resolve &Resolvers.Editor.get_episodes/3
     end
 
     field :episodes_count, :integer do
@@ -196,7 +197,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :audio, :audio do
-      resolve &Resolvers.Editor.find_audio/3
+      resolve dataloader(Directory)
     end
   end
 
@@ -216,8 +217,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :chapters, list_of(:chapter) do
       arg :order, type: :sort_order, default_value: :asc
 
-      # resolve dataloader(Radiator.AudioMeta, :chapters)
-      resolve &Resolvers.Editor.list_chapters/3
+      resolve dataloader(Radiator.AudioMeta, :chapters)
     end
 
     field :episodes, list_of(:episode) do
@@ -229,11 +229,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :audio_files, list_of(:audio_file) do
-      resolve &Resolvers.Editor.get_audio_files/3
+      resolve dataloader(Directory)
     end
 
     field :contributions, list_of(:contribution) do
-      resolve &Resolvers.Editor.get_contributions/3
+      resolve dataloader(Directory)
     end
   end
 

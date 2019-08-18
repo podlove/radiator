@@ -2,6 +2,9 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
   use Absinthe.Schema.Notation
 
   alias RadiatorWeb.GraphQL
+  alias Radiator.Directory
+
+  import Absinthe.Resolution.Helpers
 
   @desc "A chapter in an episode"
   object :chapter do
@@ -54,11 +57,11 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
     field :position, :float
 
     field :person, :person do
-      resolve fn sub, _, _ -> {:ok, sub.person} end
+      resolve dataloader(Directory)
     end
 
     field :contribution_role, :contribution_role do
-      resolve fn sub, _, _ -> {:ok, sub.role} end
+      resolve dataloader(Directory, :role)
     end
   end
 

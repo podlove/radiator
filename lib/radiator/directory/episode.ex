@@ -17,6 +17,8 @@ defmodule Radiator.Directory.Episode do
     field :short_id, :string
 
     field :title, :string
+    field :slug, TitleSlug.Type
+
     field :subtitle, :string
     field :summary, :string
     field :summary_html, :string
@@ -26,8 +28,6 @@ defmodule Radiator.Directory.Episode do
 
     field :publish_state, Radiator.Ecto.AtomType, default: :drafted
     field :published_at, :utc_datetime
-
-    field :slug, TitleSlug.Type
 
     # use enclosure form field to upload audio file
     field :enclosure, :map, virtual: true

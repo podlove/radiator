@@ -10,24 +10,9 @@ defmodule Radiator.Directory do
   alias Radiator.Support
   alias Radiator.Repo
   alias Radiator.Media.AudioFile
-  alias Radiator.Directory.{Network, Episode, Podcast, Audio}
+  alias Radiator.Directory.{Network, Episode, Podcast, Audio, AudioPublication}
   alias Radiator.Directory.{PodcastQuery, EpisodeQuery, AudioQuery}
   alias Radiator.Contribution.{PodcastContribution, AudioContribution}
-
-  def data() do
-    Dataloader.Ecto.new(Repo, query: &query/2)
-  end
-
-  def query(Episode, args) do
-    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
-
-    episodes_query(args)
-    |> preload([:podcast, audio: [chapters: ^chapter_query, audio_files: []]])
-  end
-
-  def query(queryable, _) do
-    queryable
-  end
 
   defp published_networks_query do
     published_podcasts_query = PodcastQuery.filter_by_published(Podcast)
@@ -148,6 +133,20 @@ defmodule Radiator.Directory do
     |> preload_for_podcast()
   end
 
+  def get_audio_publication(id) do
+    AudioPublication
+    |> where(id: ^id, publish_state: "published")
+    |> preload([:network, audio: [:audio_files, :chapters]])
+    |> Repo.one()
+  end
+
+  def get_audio_publication_by_slug(slug) do
+    AudioPublication
+    |> where(slug: ^slug, publish_state: "published")
+    |> preload(:network)
+    |> Repo.one()
+  end
+
   @doc """
   Gets a single episode by its slug.
 
@@ -188,7 +187,7 @@ defmodule Radiator.Directory do
     |> Repo.preload([:person, :role])
   end
 
-  defp episodes_query(args) when is_map(args) do
+  def episodes_query(args) when is_map(args) do
     args
     |> Map.put(:published, true)
     |> EpisodeQuery.build()
@@ -248,7 +247,7 @@ defmodule Radiator.Directory do
       PodcastContribution
       |> order_by(asc: :position)
 
-    Repo.preload(podcast, contributions: {contributions_query, [:person, :role]})
+    Repo.preload(podcast, [:network, contributions: {contributions_query, [:person, :role]}])
   end
 
   # fixme: this is currently identical to `Editor.preloaded_episode/1`,
@@ -304,13 +303,13 @@ defmodule Radiator.Directory do
 
   # todo: missing verification that podcast (& network?) is published
   def get_audio_file(audio_file_id) do
-    with {:get, audio = %AudioFile{}} <-
+    with {:get, audio_file = %AudioFile{}} <-
            {:get,
             Repo.get(AudioFile, audio_file_id)
             |> Repo.preload(audio: :episodes)},
          {:published, published} when published <-
-           {:published, is_published(hd(audio.audio.episodes))} do
-      {:ok, audio}
+           {:published, is_published(hd(audio_file.audio.episodes))} do
+      {:ok, audio_file}
     else
       {:get, _} -> {:error, :not_found}
       {:published, _} -> {:error, :unpublished}

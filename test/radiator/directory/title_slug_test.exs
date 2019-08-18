@@ -15,15 +15,15 @@ defmodule Radiator.Directory.TitleSlugTest do
     test "extracts the title of a given Podcast changeset, when published_at is set" do
       podcast = insert(:podcast)
       title = podcast.title
-      changeset = Podcast.changeset(podcast, %{published_at: DateTime.utc_now()})
+      changeset = Podcast.changeset(podcast, %{publish_state: :published})
 
       assert [^title] = TitleSlug.get_sources(changeset, [])
     end
 
-    test "extracts the title of a given Episode changeset, when published_at is set" do
+    test "extracts the title of a given Episode changeset, when publish_state is published" do
       episode = insert(:episode)
       title = episode.title
-      changeset = Episode.changeset(episode, %{published_at: DateTime.utc_now()})
+      changeset = Episode.changeset(episode, %{publish_state: :published})
 
       assert [^title] = TitleSlug.get_sources(changeset, [])
     end
@@ -46,7 +46,7 @@ defmodule Radiator.Directory.TitleSlugTest do
 
     test "generates a slug from the given sources and Podcast changeset" do
       podcast = insert(:podcast, title: "Podcast Slug Test")
-      changeset = Podcast.changeset(podcast, %{published_at: DateTime.utc_now()})
+      changeset = Podcast.changeset(podcast, %{publish_state: :published})
       sources = TitleSlug.get_sources(changeset, [])
 
       assert "podcast-slug-test" == TitleSlug.build_slug(sources, changeset)
@@ -54,7 +54,7 @@ defmodule Radiator.Directory.TitleSlugTest do
 
     test "generates a slug from the given sources and Episode changeset" do
       episode = insert(:episode, title: "Episode Slug Test")
-      changeset = Episode.changeset(episode, %{published_at: DateTime.utc_now()})
+      changeset = Episode.changeset(episode, %{publish_state: :published})
       sources = TitleSlug.get_sources(changeset, [])
 
       assert "episode-slug-test" == TitleSlug.build_slug(sources, changeset)

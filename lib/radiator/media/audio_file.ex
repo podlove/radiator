@@ -8,7 +8,13 @@ defmodule Radiator.Media.AudioFile do
   import Arc.Ecto.Changeset
 
   alias Radiator.Media
-  alias Radiator.Directory.Audio
+  alias Radiator.Media.AudioFile
+
+  alias Radiator.Directory.{
+    Episode,
+    AudioPublication,
+    Audio
+  }
 
   schema "audio_files" do
     field(:file, Media.AudioFile.Type)
@@ -44,12 +50,54 @@ defmodule Radiator.Media.AudioFile do
     end
   end
 
-  def public_url(audio_file = %__MODULE__{}) do
-    tracking_url(audio_file)
+  @doc """
+  Public URL
+
+  Prefer public_url/2 whenever possible. However there are cases where
+  an audio file is viewed without context, then a "healthy guess" is made
+  which episode or audio publication the file is accessed with.
+  """
+  def public_url(audio_file = %AudioFile{}) do
+    audio_file
+    |> Radiator.Repo.preload(audio: [audio_publication: :network, episodes: :podcast])
+    |> case do
+      %AudioFile{audio: %Audio{episodes: [episode | _]}} ->
+        public_url(audio_file, episode)
+
+      %AudioFile{audio: %Audio{audio_publication: audio_publication}} ->
+        public_url(audio_file, audio_publication)
+    end
   end
 
-  def tracking_url(audio_file = %__MODULE__{}) do
-    RadiatorWeb.Router.Helpers.tracking_url(RadiatorWeb.Endpoint, :show, audio_file.id)
+  def public_url(audio_file = %AudioFile{}, episode = %Episode{}) do
+    tracking_url(audio_file, episode)
+  end
+
+  def public_url(audio_file = %AudioFile{}, audio_publication = %AudioPublication{}) do
+    tracking_url(audio_file, audio_publication)
+  end
+
+  def tracking_url(audio_file = %AudioFile{}, episode = %Episode{}) do
+    RadiatorWeb.Router.Helpers.tracking_url(
+      RadiatorWeb.Endpoint,
+      :track_episode_file,
+      episode.podcast.slug,
+      episode.slug,
+      audio_file.id
+    )
+  end
+
+  def tracking_url(
+        audio_file = %__MODULE__{},
+        audio_publication = %AudioPublication{network: network}
+      ) do
+    RadiatorWeb.Router.Helpers.tracking_url(
+      RadiatorWeb.Endpoint,
+      :track_audio_publication_file,
+      network.slug,
+      audio_publication.slug,
+      audio_file.id
+    )
   end
 
   def internal_url(audio_file = %__MODULE__{}) do
