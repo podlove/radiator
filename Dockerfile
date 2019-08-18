@@ -34,7 +34,9 @@ RUN mkdir /app/priv
 # COPY priv/cert ./priv/cert
 COPY priv/repo ./priv/repo
 
-RUN mix ua_inspector.download --force
+# this starts the application which sucks because there is no db when building?
+# RUN mix ua_inspector.download --force
+RUN mix run --no-start -e "UAInspector.Downloader.download()"
 
 # ---- Node/Asset Stage ----
 FROM node:10.16-stretch AS node_builder
