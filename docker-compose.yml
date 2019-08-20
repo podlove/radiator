@@ -23,6 +23,7 @@ services:
     depends_on:
       - db
       - minio
+      - email
     environment:
       PORT: 4000
       HOST: localhost
@@ -35,11 +36,16 @@ services:
       STORAGE_ASSET_HOST: http://localhost:9000/radiator
       STORAGE_ACCESS_KEY_ID: IEKAZMUY3KX32CRJPE9R
       STORAGE_ACCESS_KEY: tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN
-      SMTP_SERVER: smtp.mailtrap.io
-      SMTP_HOSTNAME: smtp.mailtrap.io
-      SMTP_PORT: 2525
-      SMTP_USERNAME: xxx
-      SMTP_PASSWORD: xxx
+      SMTP_SERVER: email
+      SMTP_HOSTNAME: email
+      SMTP_PORT: 1025
+      SMTP_USERNAME: ""
+      SMTP_PASSWORD: ""
+  email:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025
+      - 8025:8025
 
 volumes:
   minio_data:
