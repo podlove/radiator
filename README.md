@@ -27,6 +27,15 @@ cd radiator
 docker-compose up
 ```
 
+Then access the following services:
+
+| Service  | URL                                |
+| -------- | ---------------------------------- |
+| Radiator | http://localhost:4000              |
+| Minio    | http://localhost:9000              |
+| MailHog  | http://localhost:8025              |
+| GraphiQL | http://localhost:4000/api/graphiql |
+
 **Minio Setup**
 
 - [Install minio][minio-setup]
