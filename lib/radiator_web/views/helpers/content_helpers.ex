@@ -5,10 +5,17 @@ defmodule RadiatorWeb.ContentHelpers do
     Network,
     Podcast,
     Episode,
-    Audio
+    Audio,
+    UserProfile
   }
 
+  alias Radiator.Auth.User
+
   ## public image urls
+
+  def user_image_url(%User{profile: profile}) do
+    UserProfile.image_url(profile)
+  end
 
   def person_image_url(person = %Person{}) do
     Person.image_url(person)

@@ -693,7 +693,7 @@ defmodule Radiator.Directory.Editor do
           on: p.user_id == u.id,
           join: s in Network,
           on: s.id == p.subject_id,
-          preload: [user: {u, [:person]}]
+          preload: [user: {u, [:profile]}]
 
       network_perm_query
       |> Repo.all()
