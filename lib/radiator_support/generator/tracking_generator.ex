@@ -165,4 +165,15 @@ defmodule RadiatorSupport.TrackingGenerator do
   def get_random_http_range() do
     ""
   end
+
+  defp time_remaining(seconds) when seconds < 60 do
+    "#{seconds}s"
+  end
+
+  defp time_remaining(seconds) do
+    minutes = trunc(seconds / 60)
+    seconds = Integer.mod(seconds, 60)
+
+    "#{minutes}m #{seconds}s"
+  end
 end
