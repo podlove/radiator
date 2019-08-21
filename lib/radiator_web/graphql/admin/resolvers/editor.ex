@@ -7,13 +7,13 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     Podcast,
     Network,
     Audio,
-    AudioPublication
+    AudioPublication,
+    UserProfile
   }
 
   alias Radiator.AudioMeta
   alias Radiator.AudioMeta.Chapter
   alias Radiator.Auth.User
-  alias Radiator.Contribution.Person
   alias Radiator.Media.AudioFile
 
   import Absinthe.Resolution.Helpers
@@ -117,7 +117,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def find_user(_, _, %{context: %{current_user: user}}) do
     user
-    |> Radiator.Repo.preload(:person)
+    |> Radiator.Repo.preload(:profile)
     |> (&{:ok, &1}).()
   end
 
@@ -385,9 +385,9 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def get_image_url(subject, _, _)
 
   def get_image_url(%User{} = user, _, _) do
-    user = user |> Radiator.Repo.preload(:person)
+    user = user |> Radiator.Repo.preload(:profile)
 
-    {:ok, Person.image_url(user.person)}
+    {:ok, UserProfile.image_url(user.profile)}
   end
 
   def get_image_url(%type{} = subject, _, _) do

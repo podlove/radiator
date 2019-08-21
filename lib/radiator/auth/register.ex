@@ -56,24 +56,14 @@ defmodule Radiator.Auth.Register do
     |> Repo.all()
   end
 
-  # TODO: we want to always have a person associated with a user but can we do it without coupling the logic here?
+  # TODO: we want to always have a profile associated with a user but can we do it without coupling the logic here?
   def create_user(attrs \\ %{}) do
-    {person_attrs, user_attrs} = Map.split(attrs, [:nick, :image, "nick", "image"])
+    {profile_attrs, user_attrs} =
+      Map.split(attrs, [:display_name, :image, "display_name", "image"])
 
-    changeset =
-      %User{}
-      |> User.changeset(user_attrs)
-
-    display_name = Ecto.Changeset.get_field(changeset, :display_name)
-
-    person_attrs =
-      Map.merge(
-        %{display_name: display_name, name: display_name},
-        person_attrs
-      )
-
-    changeset
-    |> Ecto.Changeset.put_assoc(:person, person_attrs)
+    %User{}
+    |> User.changeset(user_attrs)
+    |> Ecto.Changeset.put_assoc(:profile, profile_attrs)
     |> Repo.insert()
   end
 

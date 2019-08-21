@@ -9,14 +9,14 @@ defmodule Radiator.Auth.User do
   schema "auth_users" do
     field :name, :string
     field :email, :string
-    field :display_name, :string
     field :password_hash, :binary
     field :password, :string, virtual: true
     field :password_confirmation, :string, virtual: true
     field :status, Radiator.Auth.Ecto.UserStatusType, default: :unverified
     # unverified, active, suspended
 
-    has_one :person, Radiator.Contribution.Person
+    has_many :people, Radiator.Contribution.Person
+    has_one :profile, Radiator.Directory.UserProfile
 
     timestamps()
   end
@@ -29,7 +29,7 @@ defmodule Radiator.Auth.User do
   @doc false
   def changeset(%User{} = user, attrs) do
     user
-    |> cast(attrs, [:name, :display_name, :email, :password, :password_hash, :status])
+    |> cast(attrs, [:name, :email, :password, :password_hash, :status])
     |> unique_constraint(:name, name: :auth_users__lower_name_index)
     |> unique_constraint(:email, name: :auth_users__lower_email_index)
     |> validate_format(:name, ~r/^[^\s ]+$/)
@@ -37,7 +37,6 @@ defmodule Radiator.Auth.User do
     |> validate_length(:name, min: 2, max: 99)
     |> validate_length(:password, min: 2)
     |> validate_required([:email, :name])
-    |> ensure_display_name()
     |> encrypt_password
     |> validate_required([:password_hash])
   end
@@ -53,15 +52,6 @@ defmodule Radiator.Auth.User do
   end
 
   ## Changeset Pipeline
-
-  defp ensure_display_name(changeset) do
-    if is_nil(get_field(changeset, :display_name)) do
-      changeset
-      |> put_change(:display_name, get_field(changeset, :name))
-    else
-      changeset
-    end
-  end
 
   defp password_and_confirmation_matches(changeset) do
     password = get_change(changeset, :password)
@@ -134,7 +124,7 @@ defmodule Radiator.Auth.User do
 
     from u in User,
       where: fragment("lower(?)", u.email) == ^email_downcase,
-      preload: [:person]
+      preload: [:profile]
   end
 
   def by_name_query(name) do
@@ -142,6 +132,6 @@ defmodule Radiator.Auth.User do
 
     from u in User,
       where: fragment("lower(?)", u.name) == ^name_downcase,
-      preload: [:person]
+      preload: [:profile]
   end
 end

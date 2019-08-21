@@ -4,14 +4,28 @@ defmodule Radiator.Factory do
   import Radiator.Directory.Editor.Permission
 
   alias Radiator.Auth.User
-  alias Radiator.Directory.{Network, Podcast, Episode, AudioPublication}
+
+  alias Radiator.Directory.{
+    Network,
+    Podcast,
+    Episode,
+    AudioPublication,
+    UserProfile
+  }
+
   alias Radiator.Contribution.Person
 
   def user_factory do
     %User{
       name: sequence(:name, &"me-#{&1}"),
       email: sequence(:email, &"me-#{&1}@foo.com"),
-      person: build(:person)
+      profile: build(:profile)
+    }
+  end
+
+  def profile_factory do
+    %UserProfile{
+      display_name: sequence(:display_name, &"Me-#{&1}")
     }
   end
 
