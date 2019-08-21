@@ -66,8 +66,9 @@ defmodule RadiatorSupport.TrackingGenerator do
 
       progress_log = IO.ANSI.blue() <> "[#{progress_string}%]" <> IO.ANSI.reset()
 
-      seconds_to_finish_log =
-        IO.ANSI.yellow() <> "time remaining: #{remaining_seconds}s" <> IO.ANSI.reset()
+      time_to_finish_log =
+        IO.ANSI.yellow() <>
+          "time remaining: #{time_remaining(remaining_seconds)}" <> IO.ANSI.reset()
 
       per_second_log = IO.ANSI.green() <> "(#{per_second}/s)" <> IO.ANSI.reset()
 
@@ -81,7 +82,7 @@ defmodule RadiatorSupport.TrackingGenerator do
           " Generated #{chunk_length} in #{time_spent}ms " <>
           per_second_log <>
           ", " <>
-          seconds_to_finish_log
+          time_to_finish_log
       )
     end)
     |> Stream.run()
@@ -147,5 +148,16 @@ defmodule RadiatorSupport.TrackingGenerator do
 
   def get_random_http_range() do
     ""
+  end
+
+  defp time_remaining(seconds) when seconds < 60 do
+    "#{seconds}s"
+  end
+
+  defp time_remaining(seconds) do
+    minutes = trunc(seconds / 60)
+    seconds = Integer.mod(seconds, 60)
+
+    "#{minutes}m #{seconds}s"
   end
 end
