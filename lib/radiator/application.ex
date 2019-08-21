@@ -10,6 +10,7 @@ defmodule Radiator.Application do
     children = [
       Radiator.Repo,
       RadiatorWeb.Endpoint,
+      {Oban, Application.get_env(:radiator, Oban)},
       Radiator.Tracking.Server,
       Radiator.Task.Supervisor
     ]

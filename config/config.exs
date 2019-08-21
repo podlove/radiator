@@ -70,6 +70,13 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :radiator, Oban,
+  repo: Radiator.Repo,
+  queues: [default: 1],
+  prune: {:maxage, 60 * 60 * 24 * 7},
+  prune_interval: 60 * 60 * 1000,
+  verbose: false
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

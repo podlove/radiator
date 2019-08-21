@@ -10,17 +10,22 @@ defmodule Radiator.Tracking.Cleaner do
 
   require Logger
 
+  @doc """
+  Clean all downloads.
+  """
   def clean_all do
     with total_start when not is_nil(total_start) <-
            from(d in Download, select: min(d.accessed_at)) |> Repo.one(),
          total_end when not is_nil(total_end) <-
            from(d in Download, select: max(d.accessed_at)) |> Repo.one() do
       Date.range(DateTime.to_date(total_start), DateTime.to_date(total_end))
-      |> Enum.each(&clean_day/1)
+      |> Enum.each(&Radiator.Tracking.CleanerWorker.enqueue/1)
     end
   end
 
-  # todo: move each clean_day into an Oban job
+  @doc """
+  Clean downloads for given day.
+  """
   def clean_day(date = %Date{}) do
     query_for_duplicates(date)
     |> Repo.all(timeout: :timer.minutes(1))
