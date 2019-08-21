@@ -28,6 +28,7 @@ defmodule RadiatorSupport.TrackingGenerator do
     opts =
       opts
       |> Keyword.put_new(:verbose, false)
+      |> Keyword.put_new(:animated, false)
 
     if Keyword.get(opts, :verbose) do
       Logger.configure(level: :debug)
@@ -59,10 +60,27 @@ defmodule RadiatorSupport.TrackingGenerator do
       progress = Float.round(index / total_chunks * 100, 1)
       progress_string = progress |> Float.to_string() |> String.pad_leading(5, " ")
 
+      remaining_seconds =
+        Float.round((total_chunks - index) * @chunk_size / per_second) |> trunc()
+
+      progress_log = IO.ANSI.blue() <> "[#{progress_string}%]" <> IO.ANSI.reset()
+
+      seconds_to_finish_log =
+        IO.ANSI.yellow() <> "time remaining: #{remaining_seconds}s" <> IO.ANSI.reset()
+
+      per_second_log = IO.ANSI.green() <> "(#{per_second}/s)" <> IO.ANSI.reset()
+
+      if Keyword.get(opts, :animated) do
+        IO.write(IO.ANSI.clear())
+        IO.write(IO.ANSI.home())
+      end
+
       Logger.info(
-        "[#{progress_string}%] Generated #{chunk_length} in #{time_spent} #{:millisecond} (#{
-          per_second
-        }/s)"
+        progress_log <>
+          " Generated #{chunk_length} in #{time_spent}ms " <>
+          per_second_log <>
+          ", " <>
+          seconds_to_finish_log
       )
     end)
     |> Stream.run()
