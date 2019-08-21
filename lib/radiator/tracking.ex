@@ -50,7 +50,6 @@ defmodule Radiator.Tracking do
         |> Download.changeset(%{
           request_id: request_id(remote_ip, user_agent_string),
           accessed_at: time,
-          clean: true,
           http_range: http_range,
           user_agent: user_agent_string,
           client_name: Map.get(user_agent, :client_name),
@@ -89,7 +88,6 @@ defmodule Radiator.Tracking do
       |> Download.changeset(%{
         request_id: request_id(remote_ip, user_agent_string),
         accessed_at: time,
-        clean: true,
         http_range: http_range,
         user_agent: user_agent_string,
         client_name: Map.get(user_agent, :client_name),
