@@ -40,7 +40,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       resolve fn user, _, _ -> {:ok, user.name} end
     end
 
-    field :display_name, :string
+    field :display_name, :string do
+      resolve fn user, _, _ -> {:ok, user.profile.display_name} end
+    end
+
     field :email, :string
 
     field :image, :string do
@@ -54,7 +57,9 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       resolve fn user, _, _ -> {:ok, user.name} end
     end
 
-    field :display_name, :string
+    field :display_name, :string do
+      resolve fn user, _, _ -> {:ok, user.profile.display_name} end
+    end
 
     field :image, :string do
       resolve &Resolvers.Editor.get_image_url/3
