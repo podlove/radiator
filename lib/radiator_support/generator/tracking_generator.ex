@@ -40,6 +40,7 @@ defmodule RadiatorSupport.TrackingGenerator do
       Directory.list_episodes(%{
         items_per_page: :unlimited
       })
+      |> Enum.filter(fn episode -> length(episode.audio.audio_files) > 0 end)
       |> Repo.preload(podcast: :network)
 
     total_chunks = Float.ceil(count / @chunk_size) |> trunc
