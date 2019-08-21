@@ -157,4 +157,12 @@ defmodule RadiatorSupport.TrackingGenerator do
 
     "#{minutes}m #{seconds}s"
   end
+
+  def get_random_remote_ip() do
+    "127.0.0.1"
+  end
+
+  def get_random_http_range() do
+    ""
+  end
 end
