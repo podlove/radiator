@@ -1,6 +1,8 @@
 defmodule Radiator.Tracking.Cleaner do
   @moduledoc """
   Cleans downloads, removes duplicate requests by same IP+UserAgent per day.
+
+  Idempotent (can be run multiple times on same dataset)
   """
 
   import Ecto.Query, warn: false

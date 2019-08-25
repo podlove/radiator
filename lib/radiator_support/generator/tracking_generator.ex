@@ -16,9 +16,7 @@ defmodule RadiatorSupport.TrackingGenerator do
 
   require Logger
 
-  # file with one user agent per line
-  # maybe store it externally and download? don't feel like versioning such a potentially big file
-  @user_agents_file "lib/radiator_support/generator/data/user_agents.csv"
+  @user_agents_file "lib/radiator_support/generator/data/user_agents.txt"
   @chunk_size 100
 
   @doc """
@@ -34,6 +32,10 @@ defmodule RadiatorSupport.TrackingGenerator do
       Logger.configure(level: :debug)
     else
       Logger.configure(level: :info)
+    end
+
+    if !File.exists?(@user_agents_file) do
+      RadiatorSupport.UserAgentsDownloader.download()
     end
 
     episodes =
@@ -139,7 +141,6 @@ defmodule RadiatorSupport.TrackingGenerator do
     |> String.trim()
     |> String.split("\n")
     |> Enum.random()
-    |> String.replace("\\;", ";")
   end
 
   def get_random_remote_ip() do
