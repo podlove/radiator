@@ -11,6 +11,7 @@ defmodule Radiator.Application do
       Radiator.Repo,
       RadiatorWeb.Endpoint,
       {Oban, Application.get_env(:radiator, Oban)},
+      Radiator.Scheduler,
       Radiator.Tracking.Server,
       Radiator.Task.Supervisor
     ]

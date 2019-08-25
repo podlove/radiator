@@ -9,6 +9,7 @@ defmodule Radiator.Tracking.Cleaner do
 
   alias Radiator.Repo
   alias Radiator.Tracking.Download
+  alias Radiator.Tracking.CleanerWorker
 
   require Logger
 
@@ -33,6 +34,23 @@ defmodule Radiator.Tracking.Cleaner do
     |> Repo.all(timeout: :timer.minutes(1))
     |> Enum.reduce([], &get_duplicate_ids/2)
     |> delete_duplicates()
+  end
+
+  @doc """
+  Convenience function to start job for cleaning the previous day.
+  """
+  def clean_yesterday do
+    Timex.today()
+    |> Timex.subtract(Timex.Duration.from_days(1))
+    |> CleanerWorker.enqueue()
+  end
+
+  @doc """
+  Convenience function to start job for cleaning the current day.
+  """
+  def clean_today do
+    Timex.today()
+    |> CleanerWorker.enqueue()
   end
 
   defp get_duplicate_ids(%{ids: ids}, acc) do
