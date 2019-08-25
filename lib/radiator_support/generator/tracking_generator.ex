@@ -34,6 +34,10 @@ defmodule RadiatorSupport.TrackingGenerator do
       Logger.configure(level: :info)
     end
 
+    if !File.exists?(@user_agents_file) do
+      RadiatorSupport.UserAgentsDownloader.download()
+    end
+
     episodes =
       Directory.list_episodes(%{
         items_per_page: :unlimited
