@@ -51,6 +51,8 @@ alias Radiator.Contribution.Person
 alias Radiator.Perm.Ecto.PermissionType
 alias Radiator.Perm.Permission
 
+alias Radiator.Reporting.Report
+
 defmodule H do
   def create_episode_audio(episode) do
     upload = %Plug.Upload{
