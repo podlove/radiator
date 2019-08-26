@@ -46,17 +46,6 @@ defmodule Radiator.Reporting.Report do
     |> validate_required([:uid, :subject_type, :subject, :time_type, :downloads])
   end
 
-  # think about the general steps we have for all reports:
-  # - calculate: calculates and returns requested value
-  # - generate: calculates and persists requested value
-  # - either "generate" is only available as a job or there needs to be
-  #   another container for generate, but as a job
-  #
-  # this already looks very repetitive but needs macros to DRY up.
-  # needs some thought how far into DRYness we want to push this
-  # using macro magic. Any action taken should improve maintainability,
-  # readability and/or flexibility.
-
   @doc """
   Generate all total downloads numbers.
 
@@ -150,26 +139,50 @@ defmodule Radiator.Reporting.Report do
     )
   end
 
-  def calculate({:podcast, podcast_id}, :total, :downloads) do
-    from(d in Download, where: d.podcast_id == ^podcast_id, select: count(d.id))
-    |> Repo.one()
+  def calculate({:podcast, podcast_id}, time, metric) do
+    from(d in Download, where: d.podcast_id == ^podcast_id)
+    |> do_calculate(time, metric)
   end
 
-  def calculate({:network, network_id}, :total, :downloads) do
-    from(d in Download, where: d.network_id == ^network_id, select: count(d.id))
-    |> Repo.one()
+  def calculate({:network, network_id}, time, metric) do
+    from(d in Download, where: d.network_id == ^network_id)
+    |> do_calculate(time, metric)
   end
 
-  def calculate({:episode, episode_id}, :total, :downloads) do
-    from(d in Download, where: d.episode_id == ^episode_id, select: count(d.id))
-    |> Repo.one()
+  def calculate({:episode, episode_id}, time, metric) do
+    from(d in Download, where: d.episode_id == ^episode_id)
+    |> do_calculate(time, metric)
   end
 
-  def calculate({:audio_publication, audio_publication_id}, :total, :downloads) do
-    from(d in Download,
-      where: d.audio_publication_id == ^audio_publication_id,
-      select: count(d.id)
+  def calculate({:audio_publication, audio_publication_id}, time, metric) do
+    from(d in Download, where: d.audio_publication_id == ^audio_publication_id)
+    |> do_calculate(time, metric)
+  end
+
+  defp do_calculate(query, :total, metric) do
+    do_calculate(query, metric)
+  end
+
+  defp do_calculate(query, {:month, date}, metric) do
+    do_calculate(for_month(query, date), metric)
+  end
+
+  defp do_calculate(query, :downloads) do
+    from(d in query, select: count(d.id)) |> Repo.one()
+  end
+
+  defp do_calculate(query, :listeners) do
+    subquery = from(d in query, group_by: :request_id, select: d.request_id)
+    from(x in subquery(subquery), select: count(x.request_id)) |> Repo.one()
+  end
+
+  def for_month(query, date = %Date{}) do
+    time = NaiveDateTime.from_iso8601!("#{Date.to_iso8601(date)}T00:00:00.000Z")
+    beginning_of_month = Timex.beginning_of_month(time)
+    end_of_month = beginning_of_month |> Timex.end_of_month()
+
+    from(d in query,
+      where: d.accessed_at >= ^beginning_of_month and d.accessed_at <= ^end_of_month
     )
-    |> Repo.one()
   end
 end
