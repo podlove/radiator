@@ -12,7 +12,7 @@ defmodule Radiator.Repo.Migrations.CreateReports do
 
       add :downloads, :integer
       add :listeners, :integer
-      add :location, :text
+      add :location, :map
       add :user_agents, :map
 
       timestamps()

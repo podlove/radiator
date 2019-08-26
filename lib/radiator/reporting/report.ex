@@ -34,7 +34,7 @@ defmodule Radiator.Reporting.Report do
     # metrics
     field :downloads, :integer
     field :listeners, :integer
-    field :location, :string
+    field :location, :map
     field :user_agents, :map
 
     timestamps()
