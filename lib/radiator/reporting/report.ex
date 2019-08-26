@@ -6,7 +6,11 @@ defmodule Radiator.Reporting.Report do
 
   alias Radiator.Repo
   alias Radiator.Tracking.Download
-  alias Radiator.Reporting.Report
+
+  alias Radiator.Reporting.{
+    Report,
+    ReportWorker
+  }
 
   alias Radiator.Directory.{
     Network,
@@ -71,7 +75,14 @@ defmodule Radiator.Reporting.Report do
       Repo.all(AudioPublication) |> Enum.map(&{:audio_publication, &1.id})
     ]
     |> List.flatten()
-    |> Enum.each(fn subject -> generate(subject, :total, :downloads) end)
+    |> Enum.each(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :total,
+        metric: :downloads
+      })
+    end)
   end
 
   def generate({:podcast, podcast_id}, :total, :downloads) do
@@ -132,6 +143,8 @@ defmodule Radiator.Reporting.Report do
 
   def insert_report(changeset) do
     Repo.insert(changeset,
+      # FIXME: I probably don't want :replace_all here but only the currently updated value?
+      #        Needs testing. Then maybe I need a custom Repo.insert in every `generate`.
       on_conflict: :replace_all,
       conflict_target: [:uid]
     )
