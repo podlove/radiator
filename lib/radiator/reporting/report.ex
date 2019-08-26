@@ -8,6 +8,15 @@ defmodule Radiator.Reporting.Report do
   alias Radiator.Tracking.Download
   alias Radiator.Reporting.Report
 
+  alias Radiator.Directory.{
+    Network,
+    Podcast,
+    Episode,
+    AudioPublication
+  }
+
+  # TODO: use jobs (in generate I think) before I postpone it for too long
+
   @primary_key {:uid, :string, autogenerate: false}
   schema "reports" do
     # network, podcast, episode, audio_publication
@@ -44,6 +53,25 @@ defmodule Radiator.Reporting.Report do
   # using macro magic. Any action taken should improve maintainability,
   # readability and/or flexibility.
 
+  @doc """
+  Generate all total downloads numbers.
+
+  For:
+    - all Networks
+    - all Podcasts
+    - all Episodes
+    - all AudioPublications
+
+  """
+  def generate_all_total_downloads do
+    [
+      Repo.all(Network) |> Enum.map(&{:network, &1.id}),
+      Repo.all(Podcast) |> Enum.map(&{:podcast, &1.id}),
+      Repo.all(Episode) |> Enum.map(&{:episode, &1.id}),
+      Repo.all(AudioPublication) |> Enum.map(&{:audio_publication, &1.id})
+    ]
+    |> List.flatten()
+    |> Enum.each(fn subject -> generate(subject, :total, :downloads) end)
   end
 
   def generate({:podcast, podcast_id}, :total, :downloads) do
