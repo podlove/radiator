@@ -57,13 +57,7 @@ defmodule Radiator.Reporting.Report do
 
   """
   def generate_all_total_downloads do
-    [
-      Repo.all(Network) |> Enum.map(&{:network, &1.id}),
-      Repo.all(Podcast) |> Enum.map(&{:podcast, &1.id}),
-      Repo.all(Episode) |> Enum.map(&{:episode, &1.id}),
-      Repo.all(AudioPublication) |> Enum.map(&{:audio_publication, &1.id})
-    ]
-    |> List.flatten()
+    fetch_entities()
     |> Enum.each(fn {subject_type, subject} ->
       ReportWorker.enqueue(%{
         subject_type: subject_type,
@@ -74,60 +68,126 @@ defmodule Radiator.Reporting.Report do
     end)
   end
 
-  def generate({:podcast, podcast_id}, :total, :downloads) do
-    value = calculate({:podcast, podcast_id}, :total, :downloads)
+  @doc """
+  Generate all monthly dowanloads for given month.
 
-    %Report{}
-    |> Report.downloads_changeset(%{
-      subject_type: "podcast",
-      subject: podcast_id,
-      time_type: "total",
-      downloads: value,
-      uid: "pod-#{podcast_id}-tot-dow"
-    })
-    |> insert_report()
+  For:
+    - all Networks
+    - all Podcasts
+    - all Episodes
+    - all AudioPublications
+
+  TODO(perf): only fetch entities published on or after given month
+  """
+  def generate_all_monthly_downloads(month = %Date{}) do
+    fetch_entities()
+    |> Enum.each(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :month,
+        time: month,
+        metric: :downloads
+      })
+    end)
   end
 
-  def generate({:network, network_id}, :total, :downloads) do
-    value = calculate({:network, network_id}, :total, :downloads)
+  defp fetch_entities do
+    [
+      Repo.all(Network) |> Enum.map(&{:network, &1.id}),
+      Repo.all(Podcast) |> Enum.map(&{:podcast, &1.id}),
+      Repo.all(Episode) |> Enum.map(&{:episode, &1.id}),
+      Repo.all(AudioPublication) |> Enum.map(&{:audio_publication, &1.id})
+    ]
+    |> List.flatten()
+  end
 
-    %Report{}
-    |> Report.downloads_changeset(%{
+  @spec generate(
+          {:network | :podcast | :episode | :audio_publication, pos_integer()},
+          :total | {:month, any()},
+          atom()
+        ) :: :ok
+  def generate(subject, time, metric) do
+    value = calculate(subject, time, metric)
+    do_generate(subject, time, metric, value)
+  end
+
+  defp do_generate({:network, network_id}, time, metric, value) do
+    %{
       subject_type: "network",
-      subject: network_id,
-      time_type: "total",
-      downloads: value,
-      uid: "net-#{network_id}-tot-dow"
-    })
-    |> insert_report()
+      subject: network_id
+    }
+    |> do_generate(time, metric, value)
   end
 
-  def generate({:episode, episode_id}, :total, :downloads) do
-    value = calculate({:episode, episode_id}, :total, :downloads)
+  defp do_generate({:podcast, podcast_id}, time, metric, value) do
+    %{
+      subject_type: "podcast",
+      subject: podcast_id
+    }
+    |> do_generate(time, metric, value)
+  end
 
-    %Report{}
-    |> Report.downloads_changeset(%{
+  defp do_generate({:episode, episode_id}, time, metric, value) do
+    %{
       subject_type: "episode",
-      subject: episode_id,
-      time_type: "total",
-      downloads: value,
-      uid: "epi-#{episode_id}-tot-dow"
-    })
-    |> insert_report()
+      subject: episode_id
+    }
+    |> do_generate(time, metric, value)
   end
 
-  def generate({:audio_publication, audio_publication_id}, :total, :downloads) do
-    value = calculate({:audio_publication, audio_publication_id}, :total, :downloads)
-
-    %Report{}
-    |> Report.downloads_changeset(%{
+  defp do_generate({:audio_publication, audio_publication_id}, time, metric, value) do
+    %{
       subject_type: "audio_publication",
-      subject: audio_publication_id,
-      time_type: "total",
-      downloads: value,
-      uid: "aup-#{audio_publication_id}-tot-dow"
-    })
+      subject: audio_publication_id
+    }
+    |> do_generate(time, metric, value)
+  end
+
+  defp do_generate(args, :total, metric, value) when is_map(args) do
+    args
+    |> Map.put(:time_type, "total")
+    |> do_generate(metric, value)
+  end
+
+  defp do_generate(args, {:month, month}, metric, value) when is_map(args) do
+    args
+    |> Map.put(:time_type, "month")
+    |> Map.put(:time, month |> Date.to_iso8601() |> format_month())
+    |> do_generate(metric, value)
+  end
+
+  defp do_generate(args, :downloads, value) when is_map(args) do
+    args = Map.put(args, :downloads, value)
+    args = Map.put(args, :uid, uid(args, :downloads))
+
+    # todo: only insert if value > 0?
+    %Report{}
+    |> Report.downloads_changeset(args)
     |> insert_report()
+
+    :ok
+  end
+
+  def uid(args, :downloads) do
+    args
+    |> Enum.reduce([], fn
+      {:subject_type, "network"}, acc -> ["net#{Map.get(args, :subject)}" | acc]
+      {:subject_type, "podcast"}, acc -> ["pod#{Map.get(args, :subject)}" | acc]
+      {:subject_type, "episode"}, acc -> ["epi#{Map.get(args, :subject)}" | acc]
+      {:subject_type, "audio_publication"}, acc -> ["aup#{Map.get(args, :subject)}" | acc]
+      {:subject, _}, acc -> acc
+      {:time_type, "total"}, acc -> ["t" | acc]
+      {:time_type, "month"}, acc -> ["m#{Map.get(args, :time) |> format_month()}" | acc]
+      {:time, _}, acc -> acc
+      {:downloads, _}, acc -> ["dow" | acc]
+    end)
+    |> Enum.reverse()
+    |> Enum.join("-")
+  end
+
+  defp format_month(date) when is_binary(date) do
+    date |> String.split("-") |> Enum.take(2) |> Enum.join("-")
   end
 
   def insert_report(changeset) do
