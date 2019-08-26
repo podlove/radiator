@@ -46,6 +46,12 @@ defmodule Radiator.Reporting.Report do
     |> validate_required([:uid, :subject_type, :subject, :time_type, :downloads])
   end
 
+  def listeners_changeset(report, attrs) do
+    report
+    |> cast(attrs, [:uid, :subject_type, :subject, :time_type, :time, :listeners])
+    |> validate_required([:uid, :subject_type, :subject, :time_type, :listeners])
+  end
+
   @doc """
   Generate all total downloads numbers.
 
@@ -64,6 +70,20 @@ defmodule Radiator.Reporting.Report do
         subject: subject,
         time_type: :total,
         metric: :downloads
+      })
+    end)
+  end
+
+  # I think "total listeners" is a nonsensical number because it can only
+  # be calculared for a shorter amount of time?
+  def generate_all_total_listeners do
+    fetch_entities()
+    |> Enum.each(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :total,
+        metric: :listeners
       })
     end)
   end
@@ -88,6 +108,22 @@ defmodule Radiator.Reporting.Report do
         time_type: :month,
         time: month,
         metric: :downloads
+      })
+    end)
+  end
+
+  # even monthly listeners should not be calculated like this. Is there a "standard"?
+  # my suggestion is: calculate daily listeners, then take either the max of each month
+  # or average (have to look at actual data to see which one gives more realistic numbers)
+  def generate_all_monthly_listeners(month = %Date{}) do
+    fetch_entities()
+    |> Enum.each(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :month,
+        time: month,
+        metric: :listeners
       })
     end)
   end
@@ -159,28 +195,44 @@ defmodule Radiator.Reporting.Report do
 
   defp do_generate(args, :downloads, value) when is_map(args) do
     args = Map.put(args, :downloads, value)
-    args = Map.put(args, :uid, uid(args, :downloads))
+    args = Map.put(args, :uid, uid(args))
 
     # todo: only insert if value > 0?
     %Report{}
     |> Report.downloads_changeset(args)
-    |> insert_report()
+    |> Repo.insert(
+      on_conflict: [set: [downloads: value]],
+      conflict_target: [:uid]
+    )
 
     :ok
   end
 
-  def uid(args, :downloads) do
+  defp do_generate(args, :listeners, value) when is_map(args) do
+    args = Map.put(args, :listeners, value)
+    args = Map.put(args, :uid, uid(args))
+
+    # todo: only insert if value > 0?
+    %Report{}
+    |> Report.listeners_changeset(args)
+    |> Repo.insert(
+      on_conflict: [set: [listeners: value]],
+      conflict_target: [:uid]
+    )
+
+    :ok
+  end
+
+  def uid(args) do
     args
     |> Enum.reduce([], fn
       {:subject_type, "network"}, acc -> ["net#{Map.get(args, :subject)}" | acc]
       {:subject_type, "podcast"}, acc -> ["pod#{Map.get(args, :subject)}" | acc]
       {:subject_type, "episode"}, acc -> ["epi#{Map.get(args, :subject)}" | acc]
       {:subject_type, "audio_publication"}, acc -> ["aup#{Map.get(args, :subject)}" | acc]
-      {:subject, _}, acc -> acc
       {:time_type, "total"}, acc -> ["t" | acc]
       {:time_type, "month"}, acc -> ["m#{Map.get(args, :time) |> format_month()}" | acc]
-      {:time, _}, acc -> acc
-      {:downloads, _}, acc -> ["dow" | acc]
+      _, acc -> acc
     end)
     |> Enum.reverse()
     |> Enum.join("-")
