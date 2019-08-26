@@ -8,6 +8,7 @@ defmodule Radiator.Reporting.Report do
   alias Radiator.Tracking.Download
   alias Radiator.Reporting.Report
 
+  @primary_key {:uid, :string, autogenerate: false}
   schema "reports" do
     # network, podcast, episode, audio_publication
     field :subject_type, :string
@@ -28,8 +29,8 @@ defmodule Radiator.Reporting.Report do
 
   def downloads_changeset(report, attrs) do
     report
-    |> cast(attrs, [:subject_type, :subject, :time_type, :time, :downloads])
-    |> validate_required([:subject_type, :subject, :time_type, :downloads])
+    |> cast(attrs, [:uid, :subject_type, :subject, :time_type, :time, :downloads])
+    |> validate_required([:uid, :subject_type, :subject, :time_type, :downloads])
   end
 
   # think about the general steps we have for all reports:
@@ -42,6 +43,71 @@ defmodule Radiator.Reporting.Report do
   # needs some thought how far into DRYness we want to push this
   # using macro magic. Any action taken should improve maintainability,
   # readability and/or flexibility.
+
+  end
+
+  def generate({:podcast, podcast_id}, :total, :downloads) do
+    value = calculate({:podcast, podcast_id}, :total, :downloads)
+
+    %Report{}
+    |> Report.downloads_changeset(%{
+      subject_type: "podcast",
+      subject: podcast_id,
+      time_type: "total",
+      downloads: value,
+      uid: "pod-#{podcast_id}-tot-dow"
+    })
+    |> insert_report()
+  end
+
+  def generate({:network, network_id}, :total, :downloads) do
+    value = calculate({:network, network_id}, :total, :downloads)
+
+    %Report{}
+    |> Report.downloads_changeset(%{
+      subject_type: "network",
+      subject: network_id,
+      time_type: "total",
+      downloads: value,
+      uid: "net-#{network_id}-tot-dow"
+    })
+    |> insert_report()
+  end
+
+  def generate({:episode, episode_id}, :total, :downloads) do
+    value = calculate({:episode, episode_id}, :total, :downloads)
+
+    %Report{}
+    |> Report.downloads_changeset(%{
+      subject_type: "episode",
+      subject: episode_id,
+      time_type: "total",
+      downloads: value,
+      uid: "epi-#{episode_id}-tot-dow"
+    })
+    |> insert_report()
+  end
+
+  def generate({:audio_publication, audio_publication_id}, :total, :downloads) do
+    value = calculate({:audio_publication, audio_publication_id}, :total, :downloads)
+
+    %Report{}
+    |> Report.downloads_changeset(%{
+      subject_type: "audio_publication",
+      subject: audio_publication_id,
+      time_type: "total",
+      downloads: value,
+      uid: "aup-#{audio_publication_id}-tot-dow"
+    })
+    |> insert_report()
+  end
+
+  def insert_report(changeset) do
+    Repo.insert(changeset,
+      on_conflict: :replace_all,
+      conflict_target: [:uid]
+    )
+  end
 
   def calculate({:podcast, podcast_id}, :total, :downloads) do
     from(d in Download, where: d.podcast_id == ^podcast_id, select: count(d.id))
@@ -64,57 +130,5 @@ defmodule Radiator.Reporting.Report do
       select: count(d.id)
     )
     |> Repo.one()
-  end
-
-  def generate({:podcast, podcast_id}, :total, :downloads) do
-    value = calculate({:podcast, podcast_id}, :total, :downloads)
-
-    %Report{}
-    |> Report.downloads_changeset(%{
-      subject_type: "podcast",
-      subject: podcast_id,
-      time_type: "total",
-      downloads: value
-    })
-    |> Repo.insert()
-  end
-
-  def generate({:network, network_id}, :total, :downloads) do
-    value = calculate({:network, network_id}, :total, :downloads)
-
-    %Report{}
-    |> Report.downloads_changeset(%{
-      subject_type: "network",
-      subject: network_id,
-      time_type: "total",
-      downloads: value
-    })
-    |> Repo.insert()
-  end
-
-  def generate({:episode, episode_id}, :total, :downloads) do
-    value = calculate({:episode, episode_id}, :total, :downloads)
-
-    %Report{}
-    |> Report.downloads_changeset(%{
-      subject_type: "episode",
-      subject: episode_id,
-      time_type: "total",
-      downloads: value
-    })
-    |> Repo.insert()
-  end
-
-  def generate({:audio_publication, audio_publication_id}, :total, :downloads) do
-    value = calculate({:audio_publication, audio_publication_id}, :total, :downloads)
-
-    %Report{}
-    |> Report.downloads_changeset(%{
-      subject_type: "audio_publication",
-      subject: audio_publication_id,
-      time_type: "total",
-      downloads: value
-    })
-    |> Repo.insert()
   end
 end
