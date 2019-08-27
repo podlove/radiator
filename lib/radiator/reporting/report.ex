@@ -9,8 +9,6 @@ defmodule Radiator.Reporting.Report do
 
   alias Radiator.Reporting.Report
 
-  # TODO: use jobs (in generate I think) before I postpone it for too long
-
   @primary_key {:uid, :string, autogenerate: false}
   schema "reports" do
     # network, podcast, episode, audio_publication
@@ -101,7 +99,6 @@ defmodule Radiator.Reporting.Report do
     args = Map.put(args, :downloads, value)
     args = Map.put(args, :uid, uid(args))
 
-    # todo: only insert if value > 0?
     %Report{}
     |> Report.downloads_changeset(args)
     |> Repo.insert(
@@ -116,7 +113,6 @@ defmodule Radiator.Reporting.Report do
     args = Map.put(args, :listeners, value)
     args = Map.put(args, :uid, uid(args))
 
-    # todo: only insert if value > 0?
     %Report{}
     |> Report.listeners_changeset(args)
     |> Repo.insert(
