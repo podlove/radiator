@@ -29,6 +29,23 @@ defmodule Radiator.Reporting.ReportWorker do
         %{
           "subject_type" => subject_type,
           "subject" => subject,
+          "time_type" => :day,
+          "time" => month,
+          "metric" => metric
+        },
+        _job
+      ) do
+    apply(Report, :generate, [
+      {subject_type, subject},
+      {:day, Date.from_iso8601!(month)},
+      metric
+    ])
+  end
+
+  def perform(
+        %{
+          "subject_type" => subject_type,
+          "subject" => subject,
           "time_type" => :month,
           "time" => month,
           "metric" => metric

@@ -42,13 +42,15 @@ defmodule Radiator.Reporting.Report do
 
   @spec generate(
           {:network | :podcast | :episode | :audio_publication, pos_integer()},
-          :total | {:month, any()},
+          :total | {:month, Date.t()} | {:day, Date.t()},
           atom()
         ) :: :ok
   def generate(subject, time, metric) do
     value = calculate(subject, time, metric)
     do_generate(subject, time, metric, value)
   end
+
+  ## generate -- handle subject
 
   defp do_generate({:network, network_id}, time, metric, value) do
     %{
@@ -82,6 +84,8 @@ defmodule Radiator.Reporting.Report do
     |> do_generate(time, metric, value)
   end
 
+  ## generate -- handle time span
+
   defp do_generate(args, :total, metric, value) when is_map(args) do
     args
     |> Map.put(:time_type, "total")
@@ -94,6 +98,15 @@ defmodule Radiator.Reporting.Report do
     |> Map.put(:time, month |> Date.to_iso8601() |> format_month())
     |> do_generate(metric, value)
   end
+
+  defp do_generate(args, {:day, day}, metric, value) when is_map(args) do
+    args
+    |> Map.put(:time_type, "day")
+    |> Map.put(:time, day |> Date.to_iso8601())
+    |> do_generate(metric, value)
+  end
+
+  ## generate -- handle metric
 
   defp do_generate(args, :downloads, value) when is_map(args) do
     args = Map.put(args, :downloads, value)
@@ -151,6 +164,8 @@ defmodule Radiator.Reporting.Report do
     )
   end
 
+  ## calculate -- handle subject
+
   def calculate({:podcast, podcast_id}, time, metric) do
     from(d in Download, where: d.podcast_id == ^podcast_id)
     |> do_calculate(time, metric)
@@ -171,6 +186,8 @@ defmodule Radiator.Reporting.Report do
     |> do_calculate(time, metric)
   end
 
+  ## calculate -- handle time span
+
   defp do_calculate(query, :total, metric) do
     do_calculate(query, metric)
   end
@@ -178,6 +195,12 @@ defmodule Radiator.Reporting.Report do
   defp do_calculate(query, {:month, date}, metric) do
     do_calculate(for_month(query, date), metric)
   end
+
+  defp do_calculate(query, {:day, date}, metric) do
+    do_calculate(for_day(query, date), metric)
+  end
+
+  ## calculate -- handle metric
 
   defp do_calculate(query, :downloads) do
     from(d in query, select: count(d.id)) |> Repo.one()
@@ -195,6 +218,16 @@ defmodule Radiator.Reporting.Report do
 
     from(d in query,
       where: d.accessed_at >= ^beginning_of_month and d.accessed_at <= ^end_of_month
+    )
+  end
+
+  def for_day(query, date = %Date{}) do
+    time = NaiveDateTime.from_iso8601!("#{Date.to_iso8601(date)}T00:00:00.000Z")
+    beginning_of_day = Timex.beginning_of_day(time)
+    end_of_day = beginning_of_day |> Timex.end_of_day()
+
+    from(d in query,
+      where: d.accessed_at >= ^beginning_of_day and d.accessed_at <= ^end_of_day
     )
   end
 end

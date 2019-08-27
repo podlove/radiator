@@ -91,6 +91,32 @@ defmodule Radiator.Reporting.ReportGenerator do
     end)
   end
 
+  def generate_all_daily_downloads(day = %Date{}) do
+    fetch_entities()
+    |> Enum.each(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :day,
+        time: day,
+        metric: :downloads
+      })
+    end)
+  end
+
+  def generate_all_daily_listeners(day = %Date{}) do
+    fetch_entities()
+    |> Enum.each(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :day,
+        time: day,
+        metric: :listeners
+      })
+    end)
+  end
+
   defp fetch_entities do
     [
       Repo.all(Network) |> Enum.map(&{:network, &1.id}),
