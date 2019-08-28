@@ -28,22 +28,25 @@ defmodule Radiator.Reporting.Report do
     timestamps()
   end
 
+  @base_changeset_fields [:uid, :subject_type, :subject, :time_type, :time]
+  @base_changeset_required [:uid, :subject_type, :subject, :time_type]
+
   def downloads_changeset(report, attrs) do
     report
-    |> cast(attrs, [:uid, :subject_type, :subject, :time_type, :time, :downloads])
-    |> validate_required([:uid, :subject_type, :subject, :time_type, :downloads])
+    |> cast(attrs, [:downloads | @base_changeset_fields])
+    |> validate_required([:downloads | @base_changeset_required])
   end
 
   def listeners_changeset(report, attrs) do
     report
-    |> cast(attrs, [:uid, :subject_type, :subject, :time_type, :time, :listeners])
-    |> validate_required([:uid, :subject_type, :subject, :time_type, :listeners])
+    |> cast(attrs, [:listeners | @base_changeset_fields])
+    |> validate_required([:listeners | @base_changeset_required])
   end
 
   def user_agents_changeset(report, attrs) do
     report
-    |> cast(attrs, [:uid, :subject_type, :subject, :time_type, :time, :user_agents])
-    |> validate_required([:uid, :subject_type, :subject, :time_type, :user_agents])
+    |> cast(attrs, [:user_agents | @base_changeset_fields])
+    |> validate_required([:user_agents | @base_changeset_required])
   end
 
   @spec generate(
