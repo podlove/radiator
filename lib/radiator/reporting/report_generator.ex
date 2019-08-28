@@ -51,6 +51,18 @@ defmodule Radiator.Reporting.ReportGenerator do
     end)
   end
 
+  def generate_all_total_user_agents do
+    fetch_entities()
+    |> Enum.each(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :total,
+        metric: :user_agents
+      })
+    end)
+  end
+
   @doc """
   Generate all monthly dowanloads for given month.
 
