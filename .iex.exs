@@ -65,6 +65,8 @@ alias Radiator.Reporting.{
   ReportWorker
 }
 
+alias Radiator.Tracking.Download
+
 defmodule H do
   def create_episode_audio(episode) do
     upload = %Plug.Upload{

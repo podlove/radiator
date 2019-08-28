@@ -40,6 +40,12 @@ defmodule Radiator.Reporting.Report do
     |> validate_required([:uid, :subject_type, :subject, :time_type, :listeners])
   end
 
+  def user_agents_changeset(report, attrs) do
+    report
+    |> cast(attrs, [:uid, :subject_type, :subject, :time_type, :time, :user_agents])
+    |> validate_required([:uid, :subject_type, :subject, :time_type, :user_agents])
+  end
+
   @spec generate(
           {:network | :podcast | :episode | :audio_publication, pos_integer()},
           :total | {:month, Date.t()} | {:day, Date.t()},
@@ -115,7 +121,7 @@ defmodule Radiator.Reporting.Report do
     %Report{}
     |> Report.downloads_changeset(args)
     |> Repo.insert(
-      on_conflict: [set: [downloads: value]],
+      on_conflict: [set: [downloads: value, updated_at: NaiveDateTime.utc_now()]],
       conflict_target: [:uid]
     )
 
@@ -129,7 +135,21 @@ defmodule Radiator.Reporting.Report do
     %Report{}
     |> Report.listeners_changeset(args)
     |> Repo.insert(
-      on_conflict: [set: [listeners: value]],
+      on_conflict: [set: [listeners: value, updated_at: NaiveDateTime.utc_now()]],
+      conflict_target: [:uid]
+    )
+
+    :ok
+  end
+
+  defp do_generate(args, :user_agents, value) when is_map(args) do
+    args = Map.put(args, :user_agents, value)
+    args = Map.put(args, :uid, uid(args))
+
+    %Report{}
+    |> Report.user_agents_changeset(args)
+    |> Repo.insert(
+      on_conflict: [set: [user_agents: value, updated_at: NaiveDateTime.utc_now()]],
       conflict_target: [:uid]
     )
 
@@ -196,6 +216,14 @@ defmodule Radiator.Reporting.Report do
     do_calculate(for_month(query, date), metric)
   end
 
+  defp do_calculate(_query, {:day, _}, :user_agents) do
+    # I'd say user agents on a daily basis, no matter what subject, are pointless.
+    # So unless we decide otherwise I'm going to explicitly forbid it by raising
+    # because if we end up accidentally generating it, it will use up big
+    # chunks of data (~1kb per day per episode?)
+    raise "calculation of user agents per day is not allowed"
+  end
+
   defp do_calculate(query, {:day, date}, metric) do
     do_calculate(for_day(query, date), metric)
   end
@@ -209,6 +237,62 @@ defmodule Radiator.Reporting.Report do
   defp do_calculate(query, :listeners) do
     subquery = from(d in query, group_by: :request_id, select: d.request_id)
     from(x in subquery(subquery), select: count(x.request_id)) |> Repo.one()
+  end
+
+  @user_agent_limit 20
+  defp do_calculate(query, :user_agents) do
+    total = do_calculate(query, :downloads)
+
+    prepend_percentage = fn list ->
+      Enum.map(list, fn data = [count | _] -> [Float.round(100 * count / total, 2) | data] end)
+    end
+
+    client_name =
+      from(d in query,
+        group_by: d.client_name,
+        order_by: [desc: 1],
+        limit: @user_agent_limit,
+        select: [count(d.id), d.client_name]
+      )
+      |> Repo.all()
+      |> prepend_percentage.()
+
+    client_type =
+      from(d in query,
+        group_by: d.client_type,
+        order_by: [desc: 1],
+        limit: @user_agent_limit,
+        select: [count(d.id), d.client_type]
+      )
+      |> Repo.all()
+      |> prepend_percentage.()
+
+    os_name =
+      from(d in query,
+        group_by: d.os_name,
+        order_by: [desc: 1],
+        limit: @user_agent_limit,
+        select: [count(d.id), d.os_name]
+      )
+      |> Repo.all()
+      |> prepend_percentage.()
+
+    device_type =
+      from(d in query,
+        group_by: d.device_type,
+        order_by: [desc: 1],
+        limit: @user_agent_limit,
+        select: [count(d.id), d.device_type]
+      )
+      |> Repo.all()
+      |> prepend_percentage.()
+
+    %{
+      client_name: client_name,
+      client_type: client_type,
+      os_name: os_name,
+      device_type: device_type
+    }
   end
 
   def for_month(query, date = %Date{}) do
