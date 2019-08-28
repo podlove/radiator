@@ -246,56 +246,60 @@ defmodule Radiator.Reporting.Report do
   defp do_calculate(query, :user_agents) do
     total = do_calculate(query, :downloads)
 
-    prepend_percentage = fn list ->
-      Enum.map(list, fn data = [count | _] -> [Float.round(100 * count / total, 2) | data] end)
+    if total > 0 do
+      prepend_percentage = fn list ->
+        Enum.map(list, fn data = [count | _] -> [Float.round(100 * count / total, 2) | data] end)
+      end
+
+      client_name =
+        from(d in query,
+          group_by: d.client_name,
+          order_by: [desc: 1],
+          limit: @user_agent_limit,
+          select: [count(d.id), d.client_name]
+        )
+        |> Repo.all()
+        |> prepend_percentage.()
+
+      client_type =
+        from(d in query,
+          group_by: d.client_type,
+          order_by: [desc: 1],
+          limit: @user_agent_limit,
+          select: [count(d.id), d.client_type]
+        )
+        |> Repo.all()
+        |> prepend_percentage.()
+
+      os_name =
+        from(d in query,
+          group_by: d.os_name,
+          order_by: [desc: 1],
+          limit: @user_agent_limit,
+          select: [count(d.id), d.os_name]
+        )
+        |> Repo.all()
+        |> prepend_percentage.()
+
+      device_type =
+        from(d in query,
+          group_by: d.device_type,
+          order_by: [desc: 1],
+          limit: @user_agent_limit,
+          select: [count(d.id), d.device_type]
+        )
+        |> Repo.all()
+        |> prepend_percentage.()
+
+      %{
+        client_name: client_name,
+        client_type: client_type,
+        os_name: os_name,
+        device_type: device_type
+      }
+    else
+      nil
     end
-
-    client_name =
-      from(d in query,
-        group_by: d.client_name,
-        order_by: [desc: 1],
-        limit: @user_agent_limit,
-        select: [count(d.id), d.client_name]
-      )
-      |> Repo.all()
-      |> prepend_percentage.()
-
-    client_type =
-      from(d in query,
-        group_by: d.client_type,
-        order_by: [desc: 1],
-        limit: @user_agent_limit,
-        select: [count(d.id), d.client_type]
-      )
-      |> Repo.all()
-      |> prepend_percentage.()
-
-    os_name =
-      from(d in query,
-        group_by: d.os_name,
-        order_by: [desc: 1],
-        limit: @user_agent_limit,
-        select: [count(d.id), d.os_name]
-      )
-      |> Repo.all()
-      |> prepend_percentage.()
-
-    device_type =
-      from(d in query,
-        group_by: d.device_type,
-        order_by: [desc: 1],
-        limit: @user_agent_limit,
-        select: [count(d.id), d.device_type]
-      )
-      |> Repo.all()
-      |> prepend_percentage.()
-
-    %{
-      client_name: client_name,
-      client_type: client_type,
-      os_name: os_name,
-      device_type: device_type
-    }
   end
 
   def for_month(query, date = %Date{}) do
