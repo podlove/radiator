@@ -3,6 +3,11 @@ defmodule Radiator.Tracking.Cleaner do
   Cleans downloads, removes duplicate requests by same IP+UserAgent per day.
 
   Idempotent (can be run multiple times on same dataset)
+
+  TODO: Here's a thought. Can't I add a unique index on
+        [file_id, request_id, YYYYMMDD], then postgres takes care of
+        all cleaning needs for me by simply not accepting duplicates?
+        Takes us one step closer to real time reporting with accurate numbers.
   """
 
   import Ecto.Query, warn: false
