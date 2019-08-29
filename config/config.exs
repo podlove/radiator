@@ -87,9 +87,9 @@ config :radiator, Radiator.Scheduler,
       schedule: "0 2 * * *",
       task: {Radiator.Tracking.Cleaner, :clean_yesterday, []}
     ],
-    clean_downloads_today: [
+    reporting_hourly: [
       schedule: "@hourly",
-      task: {Radiator.Tracking.Cleaner, :clean_today, []}
+      task: {Radiator.Reporting.ReportGenerator, :hourly_report, []}
     ]
   ]
 

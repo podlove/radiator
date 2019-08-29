@@ -7,6 +7,7 @@ defmodule Radiator.Reporting.ReportGenerator do
 
   alias Radiator.Repo
   alias Radiator.Reporting.ReportWorker
+  alias Radiator.Tracking.Cleaner
 
   alias Radiator.Directory.{
     Network,
@@ -14,6 +15,52 @@ defmodule Radiator.Reporting.ReportGenerator do
     Episode,
     AudioPublication
   }
+
+  @doc """
+  Does hourly reporting.
+
+    - clean what is necessary (current day or even just previous hour)
+    - downloads daily, monthly and total for all subjects
+  """
+  def hourly_report do
+    Cleaner.clean_today()
+
+    day = Date.utc_today()
+
+    fetch_entities()
+    |> Enum.map(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :day,
+        time: day,
+        metric: :downloads
+      })
+
+      {subject_type, subject}
+    end)
+    |> Enum.map(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :month,
+        time: day,
+        metric: :downloads
+      })
+
+      {subject_type, subject}
+    end)
+    |> Enum.map(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :total,
+        metric: :downloads
+      })
+
+      {subject_type, subject}
+    end)
+  end
 
   @doc """
   Generate all total downloads numbers.
@@ -24,6 +71,8 @@ defmodule Radiator.Reporting.ReportGenerator do
     - all Episodes
     - all AudioPublications
 
+  # FIXME: all _total_ calculations must work on already done reporting data,
+           because historic raw data will be purged
   """
   def generate_all_total_downloads do
     fetch_entities()
