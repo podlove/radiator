@@ -58,5 +58,9 @@ defmodule Radiator.Tracking.Download do
       :request_id,
       :accessed_at
     ])
+    |> unique_constraint(
+      :request_id,
+      name: :downloads_daily_unique_request_index
+    )
   end
 end
