@@ -7,7 +7,6 @@ defmodule Radiator.Reporting.ReportGenerator do
 
   alias Radiator.Repo
   alias Radiator.Reporting.ReportWorker
-  alias Radiator.Tracking.Cleaner
 
   alias Radiator.Directory.{
     Network,
@@ -23,8 +22,6 @@ defmodule Radiator.Reporting.ReportGenerator do
     - downloads daily, monthly and total for all subjects
   """
   def hourly_report do
-    Cleaner.clean_today()
-
     day = Date.utc_today()
 
     fetch_entities()
