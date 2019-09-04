@@ -70,6 +70,29 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :radiator, Oban,
+  repo: Radiator.Repo,
+  queues: [default: 1],
+  prune: {:maxage, 60 * 60 * 24 * 7},
+  prune_interval: 60 * 60 * 1000,
+  verbose: false
+
+config :radiator, Radiator.Scheduler,
+  # one scheduler per cluster
+  global: true,
+  # prevent next job from being executed if previous job is still running
+  overlap: false,
+  jobs: [
+    clean_downloads_yesterday: [
+      schedule: "0 2 * * *",
+      task: {Radiator.Tracking.Cleaner, :clean_yesterday, []}
+    ],
+    clean_downloads_today: [
+      schedule: "@hourly",
+      task: {Radiator.Tracking.Cleaner, :clean_today, []}
+    ]
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

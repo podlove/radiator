@@ -35,3 +35,5 @@ config :ex_aws, :s3,
   port: 9000
 
 config :radiator, Radiator.Mailer, adapter: Radiator.Email.Console
+
+config :radiator, Oban, queues: false, prune: :disabled

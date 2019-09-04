@@ -5,7 +5,6 @@ defmodule Radiator.Repo.Migrations.CreateDownloads do
     create table(:downloads) do
       add :request_id, :string
       add :accessed_at, :utc_datetime
-      add :clean, :boolean, default: false, null: false
       add :httprange, :string
       add :context, :string
 

@@ -16,7 +16,6 @@ defmodule Radiator.Tracking.Download do
   schema "downloads" do
     field :request_id, :string
     field :accessed_at, :utc_datetime
-    field :clean, :boolean, default: true
     field :httprange, :string
     field :context, :string
 
@@ -47,7 +46,6 @@ defmodule Radiator.Tracking.Download do
       :accessed_at,
       :context,
       :httprange,
-      :clean,
       :user_agent,
       :client_name,
       :client_type,
@@ -58,8 +56,7 @@ defmodule Radiator.Tracking.Download do
     ])
     |> validate_required([
       :request_id,
-      :accessed_at,
-      :clean
+      :accessed_at
     ])
   end
 end

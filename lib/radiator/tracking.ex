@@ -8,6 +8,7 @@ defmodule Radiator.Tracking do
   alias Radiator.Repo
 
   alias Radiator.Directory.{
+    Network,
     Podcast,
     Episode,
     AudioPublication
@@ -38,36 +39,35 @@ defmodule Radiator.Tracking do
         audio_file: audio_file = %AudioFile{},
         remote_ip: remote_ip,
         user_agent: user_agent_string,
-        time: time,
+        time: time = %DateTime{},
         http_range: http_range
       ) do
-    audio_file = Repo.preload(audio_file, :audio)
-    network = podcast.network
-    user_agent = parse_user_agent(user_agent_string)
-
-    if download_looks_clean(Map.get(user_agent, :bot), http_range) do
-      %Download{}
-      |> Download.changeset(%{
-        request_id: request_id(remote_ip, user_agent_string),
-        accessed_at: time,
-        clean: true,
-        http_range: http_range,
-        user_agent: user_agent_string,
-        client_name: Map.get(user_agent, :client_name),
-        client_type: Map.get(user_agent, :client_type),
-        device_model: Map.get(user_agent, :device_model),
-        device_type: Map.get(user_agent, :device_type),
-        os_name: Map.get(user_agent, :os_name),
-        hours_since_published: hours_since_published(episode, time)
-      })
-      |> Ecto.Changeset.put_assoc(:network, network)
-      |> Ecto.Changeset.put_assoc(:podcast, podcast)
-      |> Ecto.Changeset.put_assoc(:episode, episode)
-      |> Ecto.Changeset.put_assoc(:audio, audio_file.audio)
-      |> Ecto.Changeset.put_assoc(:file, audio_file)
-      |> Repo.insert()
-    else
-      {:ok, :skipped_because_not_clean}
+    with audio_file <- Repo.preload(audio_file, :audio),
+         network = %Network{} <- podcast.network,
+         user_agent = %{} <- parse_user_agent(user_agent_string) do
+      if download_looks_clean(Map.get(user_agent, :bot), http_range) do
+        %Download{}
+        |> Download.changeset(%{
+          request_id: request_id(remote_ip, user_agent_string),
+          accessed_at: time,
+          http_range: http_range,
+          user_agent: user_agent_string,
+          client_name: Map.get(user_agent, :client_name),
+          client_type: Map.get(user_agent, :client_type),
+          device_model: Map.get(user_agent, :device_model),
+          device_type: Map.get(user_agent, :device_type),
+          os_name: Map.get(user_agent, :os_name),
+          hours_since_published: hours_since_published(episode, time)
+        })
+        |> Ecto.Changeset.put_assoc(:network, network)
+        |> Ecto.Changeset.put_assoc(:podcast, podcast)
+        |> Ecto.Changeset.put_assoc(:episode, episode)
+        |> Ecto.Changeset.put_assoc(:audio, audio_file.audio)
+        |> Ecto.Changeset.put_assoc(:file, audio_file)
+        |> Repo.insert()
+      else
+        {:ok, :skipped_because_not_clean}
+      end
     end
   end
 
@@ -88,7 +88,6 @@ defmodule Radiator.Tracking do
       |> Download.changeset(%{
         request_id: request_id(remote_ip, user_agent_string),
         accessed_at: time,
-        clean: true,
         http_range: http_range,
         user_agent: user_agent_string,
         client_name: Map.get(user_agent, :client_name),
