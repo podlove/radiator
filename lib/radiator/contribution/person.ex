@@ -41,9 +41,10 @@ defmodule Radiator.Contribution.Person do
   end
 
   @doc false
-  def changeset(chapter, attrs) do
-    chapter
+  def changeset(person, attrs) do
+    person
     |> cast(attrs, [:name, :display_name, :nick, :link, :email])
+    |> validate_required([:display_name])
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
   end
 
