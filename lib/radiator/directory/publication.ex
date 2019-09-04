@@ -25,4 +25,7 @@ defmodule Radiator.Directory.Publication do
       message: "is invalid. must be one of: #{Enum.join(@publish_states, ", ")}"
     )
   end
+
+  def published?(%{publish_state: :published}), do: true
+  def published?(_), do: false
 end

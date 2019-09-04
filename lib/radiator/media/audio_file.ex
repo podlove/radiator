@@ -13,7 +13,8 @@ defmodule Radiator.Media.AudioFile do
   alias Radiator.Directory.{
     Episode,
     AudioPublication,
-    Audio
+    Audio,
+    Publication
   }
 
   schema "audio_files" do
@@ -55,12 +56,24 @@ defmodule Radiator.Media.AudioFile do
     end
   end
 
+  # tracking URL can only be generated once publications is published
+  # (before publication the slug may be missing)
   def public_url(audio_file = %AudioFile{}, episode = %Episode{}) do
-    tracking_url(audio_file, episode)
+    if Publication.published?(episode) do
+      tracking_url(audio_file, episode)
+    else
+      ""
+    end
   end
 
+  # tracking URL can only be generated once publications is published
+  # (before publication the slug may be missing)
   def public_url(audio_file = %AudioFile{}, audio_publication = %AudioPublication{}) do
-    tracking_url(audio_file, audio_publication)
+    if Publication.published?(audio_publication) do
+      tracking_url(audio_file, audio_publication)
+    else
+      ""
+    end
   end
 
   def tracking_url(audio_file = %AudioFile{}, episode = %Episode{}) do
