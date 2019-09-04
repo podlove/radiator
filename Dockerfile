@@ -81,7 +81,7 @@ FROM debian:stretch AS app
 ENV LANG=C.UTF-8
 
 # Install openssl
-RUN apt-get update && apt-get install -y openssl wget imagemagick
+RUN apt-get update && apt-get install -y openssl wget imagemagick ffmpeg
 
 # Copy over the build artifact from the previous step and create a non root user
 RUN useradd --create-home app
