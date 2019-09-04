@@ -308,6 +308,7 @@ defmodule Radiator.Directory.Editor do
 
     query
     |> Repo.all()
+    |> Directory.preload_for_episode()
   end
 
   @doc """
