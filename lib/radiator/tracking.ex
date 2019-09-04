@@ -30,6 +30,16 @@ defmodule Radiator.Tracking do
   - `time`: time of request
   - `http_range`: raw HTTP RANGE header from request
 
+  ## Data Quality
+
+  Download requests with _any_ of the following attributes are discarded:
+
+  - it is a HEAD request
+  - it is a known bot (via user agent)
+  - only the first byte is requested (via HTTP_RANGE header)
+  - it is not unique: a download request counts as duplicate if the same ip
+    with the same user agent is used to request the same file in the same day
+
   """
   def track_download(params)
 
