@@ -32,6 +32,8 @@ defmodule Radiator.Directory.Episode do
     # use enclosure form field to upload audio file
     field :enclosure, :map, virtual: true
 
+    field :downloads_total, :integer, virtual: true
+
     belongs_to :podcast, Podcast
     belongs_to :audio, Audio
 
@@ -65,6 +67,16 @@ defmodule Radiator.Directory.Episode do
     |> maybe_set_published_at()
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()
+  end
+
+  # WIP: not sure where this belongs, probably not here because Episode should not have to know about Reports?
+  # but it kind of has to to include total downloads? Hm.
+  def with_total_downloads(query) do
+    from(e in query,
+      join: r in Radiator.Reporting.Report,
+      on: r.subject_type == "episode" and r.time_type == "total" and r.subject == e.id,
+      select_merge: %{downloads_total: r.downloads}
+    )
   end
 
   def public_url(%Episode{} = episode), do: public_url(episode, episode.podcast)
