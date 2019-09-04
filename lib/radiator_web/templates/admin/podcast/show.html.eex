@@ -61,55 +61,22 @@
           ) %>
 
 
-  <hr class="border-b border-secondary" />
 
-  <h2 class="text-gray-700 text-xl font-bold mb-2">Drafts</h2>
+  <h2 class="text-gray-700 text-xl font-bold mb-2 mt-16">Drafts</h2>
 
   <%= for episode <- @draft_episodes do %>
     <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-highlight" do %>
-      <div class="flex">
-        <%= if episode.audio.image do %>
-          <img src="<%= episode_image_url(episode) %>" class="w-24 h-24 mr-6" />
-        <% else %>
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='24' height='24' style='fill:rgb(200,200,200)' /%3E%3C/svg%3E" class="w-24 h-24 mr-6" />
-        <% end %>
-        <div>
-          <%= if episode.number do %>
-            <div class="text-gray-700 text-sm uppercase tracking-wider mb-2">Episode <%= episode.number %></div>
-          <% end %>
-          <div class="font-bold text-black"><%= episode.title %></div>
-          <div class="text-gray-700 text-sm mb-2"><%= episode.subtitle %></div>        
-        </div>
-      </div>
+      <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
     <% end %>
   <% end %>
 
 
-  <hr class="border-b border-secondary" />
 
-  <h2 class="text-gray-700 text-xl font-bold mb-2">Published</h2>
+  <h2 class="text-gray-700 text-xl font-bold mb-2 mt-16">Published</h2>
 
   <%= for episode <- @published_episodes do %>
     <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-highlight" do %>
-      <div class="flex">
-        <%= if episode.audio && episode.audio.image do %>
-          <img src="<%= episode_image_url(episode) %>" class="w-24 h-24 mr-6" />
-        <% else %>
-          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='24' height='24' style='fill:rgb(200,200,200)' /%3E%3C/svg%3E" class="w-24 h-24 mr-6" />
-          <% end %>
-        <div>
-          <%= if episode.number do %>
-            <div class="text-gray-700 text-sm uppercase tracking-wider mb-2">Episode <%= episode.number %></div>
-          <% end %>
-          <div class="font-bold text-black"><%= episode.title %></div>
-          <div class="text-gray-700 text-sm mb-2"><%= episode.subtitle %></div>        
-
-          <div class="flex items-center border-gray-500 border-solid text-xs text-gray-600">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-4 mr-1 opacity-75 icon-trending-up"><path class="primary" d="M3.7 20.7a1 1 0 1 1-1.4-1.4l6-6a1 1 0 0 1 1.4 0l3.3 3.29 4.3-4.3a1 1 0 0 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0L9 15.4l-5.3 5.3z"></path><path class="secondary" d="M16.59 8l-2.3-2.3A1 1 0 0 1 15 4h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1.7.7L18 9.42l-4.3 4.3a1 1 0 0 1-1.4 0L9 10.4l-5.3 5.3a1 1 0 1 1-1.4-1.42l6-6a1 1 0 0 1 1.4 0l3.3 3.3L16.59 8z"></path></svg>
-            <span>42.230 Downloads</span>
-          </div>
-        </div>
-      </div>
+      <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
     <% end %>
   <% end %>
 
