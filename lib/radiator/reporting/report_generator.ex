@@ -16,18 +16,27 @@ defmodule Radiator.Reporting.ReportGenerator do
   }
 
   @doc """
-  Does hourly reporting.
-
-  work in progress
-
-  TODO: specify what needs to be generated in what intervals
-
-    - downloads daily, monthly and total for all subjects
+  Hourly reporting, calculating current day's download reports.
   """
   def hourly_report do
-    day = Date.utc_today()
+    Date.utc_today() |> do_report_for_day([:downloads])
+  end
 
-    fetch_entities()
+  @doc """
+  Daily reporting, calculating previous day's reports.
+  """
+  def daily_report do
+    Date.utc_today() |> Date.add(-1) |> do_report_for_day([:downloads, :listeners, :user_agents])
+  end
+
+  defp do_report_for_day(day = %Date{}, metrics) do
+    entities = fetch_entities()
+
+    for metric <- metrics, do: do_report(entities, day, metric)
+  end
+
+  defp do_report(entities, day, :downloads) do
+    entities
     |> Enum.map(fn {subject_type, subject} ->
       ReportWorker.enqueue(%{
         subject_type: subject_type,
@@ -56,6 +65,56 @@ defmodule Radiator.Reporting.ReportGenerator do
         subject: subject,
         time_type: :total,
         metric: :downloads
+      })
+
+      {subject_type, subject}
+    end)
+  end
+
+  defp do_report(entities, day, :listeners) do
+    entities
+    |> Enum.map(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :day,
+        time: day,
+        metric: :listeners
+      })
+
+      {subject_type, subject}
+    end)
+    |> Enum.map(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :month,
+        time: day,
+        metric: :listeners
+      })
+
+      {subject_type, subject}
+    end)
+    |> Enum.map(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :total,
+        metric: :listeners
+      })
+
+      {subject_type, subject}
+    end)
+  end
+
+  defp do_report(entities, _day, :user_agents) do
+    entities
+    |> Enum.map(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :total,
+        metric: :user_agents
       })
 
       {subject_type, subject}

@@ -86,6 +86,11 @@ config :radiator, Radiator.Scheduler,
     reporting_hourly: [
       schedule: "@hourly",
       task: {Radiator.Reporting.ReportGenerator, :hourly_report, []}
+    ],
+    reporting_daily: [
+      # every day 00:30
+      schedule: "30 * * * *",
+      task: {Radiator.Reporting.ReportGenerator, :daily_report, []}
     ]
   ]
 
