@@ -144,7 +144,7 @@ defmodule RadiatorSupport.TrackingGenerator do
   end
 
   def get_random_remote_ip() do
-    "127.0.0.1"
+    "#{Enum.random(11..171)}.#{Enum.random(0..255)}.#{Enum.random(0..255)}.#{Enum.random(0..255)}"
   end
 
   def get_random_http_range() do
