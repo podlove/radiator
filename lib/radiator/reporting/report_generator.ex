@@ -18,7 +18,10 @@ defmodule Radiator.Reporting.ReportGenerator do
   @doc """
   Does hourly reporting.
 
-    - clean what is necessary (current day or even just previous hour)
+  work in progress
+
+  TODO: specify what needs to be generated in what intervals
+
     - downloads daily, monthly and total for all subjects
   """
   def hourly_report do
