@@ -168,6 +168,7 @@ defmodule Radiator.Reporting.Report do
       {:subject_type, "audio_publication"}, acc -> ["aup#{Map.get(args, :subject)}" | acc]
       {:time_type, "total"}, acc -> ["t" | acc]
       {:time_type, "month"}, acc -> ["m#{Map.get(args, :time) |> format_month()}" | acc]
+      {:time_type, "day"}, acc -> ["d#{Map.get(args, :time)}" | acc]
       _, acc -> acc
     end)
     |> Enum.reverse()
