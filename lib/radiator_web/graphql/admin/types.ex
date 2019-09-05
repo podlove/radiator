@@ -155,6 +155,39 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :contributions, list_of(:contribution) do
       resolve &Resolvers.Editor.get_contributions/3
     end
+
+    field :statistics, :statistics do
+      resolve &Resolvers.Statistics.get_statistics/3
+    end
+  end
+
+  object :statistics do
+    field :downloads, :statistic_metric
+  end
+
+  object :statistic_metric do
+    field :total, :integer do
+      resolve &Resolvers.Statistics.get_total_statistics/3
+    end
+
+    field :monthly, list_of(:statistic_entry) do
+      arg :from, type: :string, default_value: :unlimited
+      arg :until, type: :string, default_value: :unlimited
+
+      resolve &Resolvers.Statistics.get_monthly_statistics/3
+    end
+
+    field :daily, list_of(:statistic_entry) do
+      arg :from, type: :string, default_value: :unlimited
+      arg :until, type: :string, default_value: :unlimited
+
+      resolve &Resolvers.Statistics.get_daily_statistics/3
+    end
+  end
+
+  object :statistic_entry do
+    field :date, :string
+    field :value, :integer
   end
 
   @desc "The input for a podcast"
