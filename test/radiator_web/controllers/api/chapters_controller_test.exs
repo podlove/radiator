@@ -28,6 +28,18 @@ defmodule RadiatorWeb.Api.ChaptersControllerTest do
                json_response(conn, 201)
     end
 
+    test "can have a start time of 0", %{conn: conn, user: user} do
+      audio_publication = insert(:audio_publication) |> owned_by(user)
+      audio = audio_publication.audio
+
+      conn =
+        post(conn, Routes.api_audio_chapters_path(conn, :create, audio.id),
+          chapter: %{title: "example", start: 0}
+        )
+
+      assert %{"title" => "example", "start" => 0} = json_response(conn, 201)
+    end
+
     test "renders error when permissions are invalid", %{conn: conn} do
       audio = insert(:audio)
 
