@@ -29,7 +29,7 @@ defmodule Radiator.Reporting.ReportGenerator do
     Date.utc_today() |> Date.add(-1) |> do_report_for_day([:downloads, :listeners, :user_agents])
   end
 
-  defp do_report_for_day(day = %Date{}, metrics) do
+  def do_report_for_day(day = %Date{}, metrics) do
     entities = fetch_entities()
 
     for metric <- metrics, do: do_report(entities, day, metric)
@@ -207,6 +207,19 @@ defmodule Radiator.Reporting.ReportGenerator do
         time_type: :month,
         time: month,
         metric: :listeners
+      })
+    end)
+  end
+
+  def generate_all_monthly_user_agents(month = %Date{}) do
+    fetch_entities()
+    |> Enum.each(fn {subject_type, subject} ->
+      ReportWorker.enqueue(%{
+        subject_type: subject_type,
+        subject: subject,
+        time_type: :month,
+        time: month,
+        metric: :user_agents
       })
     end)
   end

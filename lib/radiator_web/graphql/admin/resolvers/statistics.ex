@@ -8,19 +8,42 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Statistics do
   def get_statistics(subject, _, _) do
     {:ok,
      %{
-       downloads: {subject, :downloads}
+       downloads: {subject, :downloads},
+       listeners: {subject, :listeners},
+       user_agents: {subject, :user_agents}
      }}
   end
 
-  def get_total_statistics({subject, :downloads}, _args, _) do
-    {:ok, Reporting.Statistics.get_total_downloads(subject)}
+  def get_total_statistics({subject, metric}, _args, _) do
+    {:ok,
+     Reporting.Statistics.get(%{
+       subject: subject,
+       metric: metric,
+       time_type: :total
+     })}
   end
 
-  def get_monthly_statistics({subject, :downloads}, args, _) do
-    {:ok, Reporting.Statistics.get_monthly_downloads(subject, args)}
+  def get_monthly_statistics({subject, metric}, args, _) do
+    {:ok,
+     Reporting.Statistics.get(
+       %{
+         subject: subject,
+         metric: metric,
+         time_type: :month
+       }
+       |> Map.merge(args)
+     )}
   end
 
-  def get_daily_statistics({subject, :downloads}, args, _) do
-    {:ok, Reporting.Statistics.get_daily_downloads(subject, args)}
+  def get_daily_statistics({subject, metric}, args, _) do
+    {:ok,
+     Reporting.Statistics.get(
+       %{
+         subject: subject,
+         metric: metric,
+         time_type: :day
+       }
+       |> Map.merge(args)
+     )}
   end
 end

@@ -105,6 +105,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :collaborators, list_of(:collaborator) do
       resolve &Resolvers.Editor.list_collaborators/3
     end
+
+    field :statistics, :statistics do
+      resolve &Resolvers.Statistics.get_statistics/3
+    end
   end
 
   @desc "The input for a network"
@@ -163,6 +167,21 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   object :statistics do
     field :downloads, :statistic_metric
+    field :listeners, :statistic_metric
+    field :user_agents, :statistic_agent_metric
+  end
+
+  object :statistic_agent_metric do
+    field :total, :user_agent_metrics do
+      resolve &Resolvers.Statistics.get_total_statistics/3
+    end
+
+    field :monthly, list_of(:statistic_agent_time_values) do
+      arg :from, type: :string, default_value: :unlimited
+      arg :until, type: :string, default_value: :unlimited
+
+      resolve &Resolvers.Statistics.get_monthly_statistics/3
+    end
   end
 
   object :statistic_metric do
@@ -170,14 +189,16 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       resolve &Resolvers.Statistics.get_total_statistics/3
     end
 
-    field :monthly, list_of(:statistic_entry) do
+    field :monthly, list_of(:statistic_time_values) do
+      # TODO define date as YYYY-MM or "unlimited"
       arg :from, type: :string, default_value: :unlimited
       arg :until, type: :string, default_value: :unlimited
 
       resolve &Resolvers.Statistics.get_monthly_statistics/3
     end
 
-    field :daily, list_of(:statistic_entry) do
+    field :daily, list_of(:statistic_time_values) do
+      # TODO define date as YYYY-MM or "unlimited"
       arg :from, type: :string, default_value: :unlimited
       arg :until, type: :string, default_value: :unlimited
 
@@ -185,9 +206,27 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
   end
 
-  object :statistic_entry do
+  object :statistic_time_values do
     field :date, :string
     field :value, :integer
+  end
+
+  object :statistic_agent_time_values do
+    field :date, :string
+    field :value, :user_agent_metrics
+  end
+
+  object :user_agent_metrics do
+    field :client_name, list_of(:user_agent_ranked_item)
+    field :client_type, list_of(:user_agent_ranked_item)
+    field :device_type, list_of(:user_agent_ranked_item)
+    field :os_name, list_of(:user_agent_ranked_item)
+  end
+
+  object :user_agent_ranked_item do
+    field :absolute, :integer
+    field :percent, :float
+    field :title, :string
   end
 
   @desc "The input for a podcast"
