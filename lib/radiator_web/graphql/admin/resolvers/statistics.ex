@@ -1,8 +1,6 @@
 defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Statistics do
   use Radiator.Constants
 
-  import Absinthe.Resolution.Helpers
-
   alias Radiator.Reporting
 
   def get_statistics(subject, _, _) do

@@ -177,8 +177,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :monthly, list_of(:statistic_agent_time_values) do
-      arg :from, type: :string, default_value: :unlimited
-      arg :until, type: :string, default_value: :unlimited
+      arg :from, type: :simple_month, default_value: nil
+      arg :until, type: :simple_month, default_value: nil
 
       resolve &Resolvers.Statistics.get_monthly_statistics/3
     end
@@ -190,17 +190,15 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :monthly, list_of(:statistic_time_values) do
-      # TODO define date as YYYY-MM or "unlimited"
-      arg :from, type: :string, default_value: :unlimited
-      arg :until, type: :string, default_value: :unlimited
+      arg :from, type: :simple_month, default_value: nil
+      arg :until, type: :simple_month, default_value: nil
 
       resolve &Resolvers.Statistics.get_monthly_statistics/3
     end
 
     field :daily, list_of(:statistic_time_values) do
-      # TODO define date as YYYY-MM or "unlimited"
-      arg :from, type: :string, default_value: :unlimited
-      arg :until, type: :string, default_value: :unlimited
+      arg :from, type: :simple_day, default_value: nil
+      arg :until, type: :simple_day, default_value: nil
 
       resolve &Resolvers.Statistics.get_daily_statistics/3
     end

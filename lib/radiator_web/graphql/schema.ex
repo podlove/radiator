@@ -37,6 +37,8 @@ defmodule RadiatorWeb.GraphQL.Schema do
   import_types Absinthe.Type.Custom
   import_types Absinthe.Plug.Types
 
+  import_types RadiatorWeb.GraphQL.Types.SimpleMonth
+  import_types RadiatorWeb.GraphQL.Types.SimpleDay
   import_types RadiatorWeb.GraphQL.Common.Types
 
   import_types RadiatorWeb.GraphQL.Public.Types
