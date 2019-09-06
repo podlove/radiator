@@ -69,13 +69,37 @@ defmodule Radiator.Reporting.Statistics do
         |> format_single_result()
 
       _ ->
-        Repo.all(query)
-        |> List.wrap()
-        |> Enum.map(fn
-          %{downloads: value, time: date} -> %{date: date, value: format_user_agent_data(value)}
-          %{listeners: value, time: date} -> %{date: date, value: format_user_agent_data(value)}
-          %{user_agents: value, time: date} -> %{date: date, value: format_user_agent_data(value)}
-        end)
+        results =
+          query
+          |> Repo.all()
+          |> List.wrap()
+
+        results =
+          case Map.get(args, :metric) do
+            :downloads ->
+              Enum.map(results, fn %{downloads: value, time: date} ->
+                %{date: date, value: value}
+              end)
+
+            :listeners ->
+              Enum.map(results, fn %{listeners: value, time: date} ->
+                %{date: date, value: value}
+              end)
+
+            :user_agents ->
+              Enum.map(results, fn
+                %{downloads: value, time: date} ->
+                  %{date: date, value: format_user_agent_data(value)}
+
+                %{listeners: value, time: date} ->
+                  %{date: date, value: format_user_agent_data(value)}
+
+                %{user_agents: value, time: date} ->
+                  %{date: date, value: format_user_agent_data(value)}
+              end)
+          end
+
+        results
     end
   end
 
