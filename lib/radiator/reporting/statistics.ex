@@ -72,16 +72,23 @@ defmodule Radiator.Reporting.Statistics do
         Repo.all(query)
         |> List.wrap()
         |> Enum.map(fn
-          %{downloads: value, time: date} -> %{date: date, value: value}
-          %{listeners: value, time: date} -> %{date: date, value: value}
-          %{user_agents: value, time: date} -> %{date: date, value: value}
+          %{downloads: value, time: date} -> %{date: date, value: format_user_agent_data(value)}
+          %{listeners: value, time: date} -> %{date: date, value: format_user_agent_data(value)}
+          %{user_agents: value, time: date} -> %{date: date, value: format_user_agent_data(value)}
         end)
     end
   end
 
   def format_single_result(%{user_agents: user_agents}) do
-    user_agents
-    |> Enum.reduce(%{}, fn {key, values}, acc ->
+    user_agents |> format_user_agent_data()
+  end
+
+  def format_single_result(value) do
+    value
+  end
+
+  def format_user_agent_data(data) when is_map(data) do
+    Enum.reduce(data, %{}, fn {key, values}, acc ->
       Map.put(
         acc,
         String.to_existing_atom(key),
@@ -96,8 +103,8 @@ defmodule Radiator.Reporting.Statistics do
     end)
   end
 
-  def format_single_result(value) do
-    value
+  def format_user_agent_data(nil) do
+    nil
   end
 
   def format_title(nil), do: "Unknown"
@@ -105,7 +112,7 @@ defmodule Radiator.Reporting.Statistics do
 
   defp maybe_limit_from_time(query, from_boundary) do
     case from_boundary do
-      :unlimited ->
+      nil ->
         query
 
       time ->
@@ -115,7 +122,7 @@ defmodule Radiator.Reporting.Statistics do
 
   defp maybe_limit_until_time(query, until_boundary) do
     case until_boundary do
-      :unlimited ->
+      nil ->
         query
 
       time ->
