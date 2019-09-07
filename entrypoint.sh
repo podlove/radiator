@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # Reference: https://medium.com/@hex337/running-a-phoenix-1-3-project-with-docker-compose-d82ab55e43cf
 
 # FIXME: find out why psql wait script is not working

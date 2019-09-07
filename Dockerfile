@@ -1,8 +1,8 @@
-FROM elixir:1.9-slim AS elixir_prep
+FROM elixir:1.9-alpine AS elixir_prep
 
 # git: git dependency in mix.exs
 # make gcc libc-dev: argon2_elixir
-RUN apt-get update && apt-get install -y git make gcc libc-dev
+RUN apk update && apk add git make gcc libc-dev
 
 # Set environment variables for building the application
 ENV MIX_ENV=prod \
@@ -39,7 +39,22 @@ COPY priv/repo ./priv/repo
 RUN mix run --no-start -e "UAInspector.Downloader.download()"
 
 # ---- Node/Asset Stage ----
-FROM node:10.16-stretch AS node_builder
+FROM node:10.16-alpine AS node_builder
+
+# fix for Error: could not get uid/gid
+# https://stackoverflow.com/questions/52196518/could-not-get-uid-gid-when-building-node-docker
+
+# Add the patch fix
+COPY docker-fixes/stack-fix.c /lib/
+
+# Prepare the libraries packages
+RUN set -ex \
+  && apk add --no-cache  --virtual .build-deps build-base \
+  && gcc  -shared -fPIC /lib/stack-fix.c -o /lib/stack-fix.so \
+  && apk del .build-deps
+
+# export the environment variable of LD_PRELOAD
+ENV LD_PRELOAD /lib/stack-fix.so
 
 RUN npm install -g webpack webpack-cli
 
@@ -76,16 +91,32 @@ RUN mix phx.digest
 RUN mix release
 
 # ---- Application Stage ----
-FROM debian:stretch AS app
+FROM alpine:3.9 as app
 
 ENV LANG=C.UTF-8
 
 # Install openssl
-RUN apt-get update && apt-get install -y openssl wget imagemagick ffmpeg
+RUN apk update && apk add openssl wget imagemagick ffmpeg
+
+# Create non root user in a canonical cross linux way (was for debian: RUN useradd --create-home app)
+# https://stackoverflow.com/questions/49955097/how-do-i-add-a-user-when-im-using-alpine-as-a-base-image
+ENV USER=app
+ENV UID=12345
+ENV GID=23456
+ENV USER_HOME=/home/app
+
+RUN addgroup --gid "$GID" "$USER" \
+  && adduser \
+  --disabled-password \
+  --gecos "" \
+  --home "$(pwd)" \
+  --ingroup "$USER" \
+  --uid "$UID" \
+  "$USER"
+
 
 # Copy over the build artifact from the previous step and create a non root user
-RUN useradd --create-home app
-WORKDIR /home/app
+WORKDIR $USER_HOME
 
 # Install minio client
 RUN wget --quiet https://dl.minio.io/client/mc/release/linux-amd64/mc
@@ -97,6 +128,7 @@ RUN chown -R app: ./prod
 RUN chown -R app: ./priv
 USER app
 
-COPY entrypoint.sh .
 
-ENTRYPOINT [ "/bin/bash", "entrypoint.sh" ]
+
+COPY entrypoint.sh .
+ENTRYPOINT [ "./entrypoint.sh" ]
