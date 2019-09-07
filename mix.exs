@@ -83,7 +83,7 @@ defmodule Radiator.MixProject do
       {:remote_ip, "~> 0.1.5"},
       {:ua_inspector, "~> 1.0"},
       # job processor
-      {:oban, github: "sorentwo/oban"},
+      {:oban, "~> 0.8"},
       # cron-like job scheduler
       {:quantum, "~> 2.3"}
     ]
