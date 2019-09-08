@@ -23,7 +23,7 @@ If you just want to take a look at the project, you can deploy a ready-to-run st
 
 ```shell
 git clone https://github.com/podlove/radiator
-cd radiator
+cd radiator/docker-compose
 docker-compose up
 ```
 
@@ -35,6 +35,8 @@ Then access the following services:
 | Minio    | http://localhost:9000              |
 | MailHog  | http://localhost:8025              |
 | GraphiQL | http://localhost:4000/api/graphiql |
+
+For full deployment and options please see [radiator-deploy](https://github.com/podlove/radiator-deploy)
 
 **Minio Setup**
 

@@ -1,0 +1,45 @@
+# note: base environment values are in the hidden and secertly named ".env" file
+
+version: "3"
+services:
+  minio:
+    image: minio/minio
+    # Note: the docker image internally always uses 9000 so for this setup it is not really a configuration option
+    ports: 
+      - "$STORAGE_PORT:9000"
+    environment:
+      # These are the default keys as you would find them in config/config.exs
+      MINIO_ACCESS_KEY: $STORAGE_ACCESS_KEY_ID
+      MINIO_SECRET_KEY: $STORAGE_ACCESS_KEY
+    volumes:
+      - minio_data:/data
+      - minio_config:/root/.minio
+    command: minio server /data
+  db:
+    image: postgres:alpine
+    env_file:
+      .env
+    volumes:
+      - psql_db:/var/lib/postgresql/data
+  radiator:
+    build: ..
+    ports:
+      - "$RADIATOR_PORT:$RADIATOR_PORT"
+    depends_on:
+      - db
+      - minio
+      - email
+    env_file:
+      .env
+    environment:
+      PORT: $RADIATOR_PORT
+      PUBLIC_PORT: $RADIATOR_PORT
+  email:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+
+volumes:
+  minio_data:
+  minio_config:
+  psql_db:
