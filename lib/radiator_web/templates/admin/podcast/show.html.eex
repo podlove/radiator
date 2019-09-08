@@ -92,17 +92,15 @@
   <h2 class="text-gray-700 text-xl font-bold mb-2 mt-16">Drafts</h2>
 
   <%= for episode <- @draft_episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-highlight" do %>
+    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-4 hover:bg-highlight" do %>
       <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
     <% end %>
   <% end %>
 
-
-
   <h2 class="text-gray-700 text-xl font-bold mb-2 mt-16">Published</h2>
 
   <%= for episode <- @published_episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-1 hover:bg-highlight" do %>
+    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-4 hover:bg-highlight" do %>
       <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
     <% end %>
   <% end %>
