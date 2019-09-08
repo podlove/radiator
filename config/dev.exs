@@ -25,7 +25,7 @@ config :radiator, RadiatorWeb.Endpoint,
   ]
 
 config :arc,
-  asset_host: System.get_env("STORAGE_ASSET_HOST") || "http://#{default_host}:9000/radiator"
+  asset_host: System.get_env("STORAGE_ASSET_HOST", "http://#{default_host}:9000/radiator")
 
 config :ex_aws,
   access_key_id: "IEKAZMUY3KX32CRJPE9R",
@@ -33,8 +33,8 @@ config :ex_aws,
 
 config :ex_aws, :s3,
   scheme: "http://",
-  host: System.get_env("STORAGE_HOST") || default_host,
-  port: 9000
+  host: System.get_env("STORAGE_HOST", default_host),
+  port: System.get_env("STORAGE_PORT", 9000)
 
 # ## SSL Support
 #
@@ -86,7 +86,7 @@ config :radiator, Radiator.Repo,
   username: "postgres",
   password: "postgres",
   database: "radiator_dev",
-  hostname: System.get_env("POSTGRES_HOST") || "localhost",
+  hostname: System.get_env("POSTGRES_HOST", default_host),
   pool_size: 10
 
 config :radiator, Radiator.Mailer, adapter: Radiator.Email.Console

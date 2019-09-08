@@ -109,7 +109,7 @@ RUN addgroup --gid "$GID" "$USER" \
   && adduser \
   --disabled-password \
   --gecos "" \
-  --home "$(pwd)" \
+  --home "$USER_HOME" \
   --ingroup "$USER" \
   --uid "$UID" \
   "$USER"
@@ -121,6 +121,8 @@ WORKDIR $USER_HOME
 # Install minio client
 RUN wget --quiet https://dl.minio.io/client/mc/release/linux-amd64/mc
 RUN chmod +x mc
+# Make sure we are allowed to write in our own home
+RUN chown $USER $USER_HOME
 
 COPY --from=elixir_builder /app/_build .
 COPY --from=elixir_builder /app/priv ./priv
@@ -128,7 +130,8 @@ RUN chown -R app: ./prod
 RUN chown -R app: ./priv
 USER app
 
-
-
 COPY entrypoint.sh .
 ENTRYPOINT [ "./entrypoint.sh" ]
+
+# expose our default port
+EXPOSE 4000
