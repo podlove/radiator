@@ -65,15 +65,15 @@
       <span class="text-gray-700 font-normal text-lg mb-4">Chapters</span>
       <%= for {chapter, index} <- (@episode.audio.chapters |> Enum.with_index(1)) do %>
         <div class="border-1-b border-blue-900 mb-3 flex justify-between">
-        <div>
-        <%= if chapter.image, do: img_tag(chapter_image_url(chapter)) %>
-        <%= content_tag(:span, "#{index}. ") %>
-        <%= content_tag(:span, chapter.title) %>
-        <%= if chapter.link, do: link("(url)", to: chapter.link, target: "_blank" )%>
-        </div>
-        <div>
-        <%= content_tag(:span, format_chapter_time(chapter.start), class: "text-gray-900") %>
-        </div>
+          <div class="flex items-center">
+            <%= if chapter.image, do: img_tag(chapter_image_url(chapter), class: "w-12 h-12 mr-4") %>
+            <%= content_tag(:span, "#{index}. ", class: "mr-2") %>
+            <%= content_tag(:span, chapter.title, class: "mr-2") %>
+            <%= if chapter.link, do: link("(url)", to: chapter.link, target: "_blank" )%>
+          </div>
+          <div class="font-mono" style="min-width: 70px; text-align: right">
+           <%= content_tag(:span, format_chapter_time(chapter.start), class: "text-gray-900") %>
+          </div>
         </div>
       <% end %>
     </div>
