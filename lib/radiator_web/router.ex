@@ -8,6 +8,13 @@ defmodule RadiatorWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+
+    plug Cldr.Plug.SetLocale,
+      apps: [:cldr],
+      cldr: Radiator.Cldr
+
+    plug Cldr.Plug.AcceptLanguage,
+      cldr_backend: Radiator.Cldr
   end
 
   pipeline :public_browser do
