@@ -34,7 +34,7 @@ config :ex_aws,
 config :ex_aws, :s3,
   scheme: "http://",
   host: System.get_env("STORAGE_HOST", default_host),
-  port: System.get_env("STORAGE_PORT", 9000)
+  port: System.get_env("STORAGE_PORT", "9000")
 
 # ## SSL Support
 #
