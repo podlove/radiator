@@ -107,6 +107,10 @@ defmodule Radiator.Reporting.Statistics do
     user_agents |> format_user_agent_data()
   end
 
+  def format_single_result(%{downloads: downloads}) do
+    downloads
+  end
+
   def format_single_result(value) do
     value
   end

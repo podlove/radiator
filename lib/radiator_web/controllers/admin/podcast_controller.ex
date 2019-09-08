@@ -4,6 +4,7 @@ defmodule RadiatorWeb.Admin.PodcastController do
   alias Radiator.Directory
   alias Radiator.Directory.Podcast
   alias Radiator.Directory.Editor
+  alias Radiator.Reporting.Statistics
 
   action_fallback RadiatorWeb.FallbackController
 
@@ -38,6 +39,13 @@ defmodule RadiatorWeb.Admin.PodcastController do
           _ -> []
         end
 
+      total_downloads =
+        Statistics.get(%{
+          subject: podcast,
+          time_type: :total,
+          metric: :downloads
+        })
+
       # FIXME: only draft episodes, probably bring over the directory options semantic
       draft_episodes = Editor.list_episodes(user, podcast)
 
@@ -58,6 +66,7 @@ defmodule RadiatorWeb.Admin.PodcastController do
 
       render(conn, "show.html",
         podcast: podcast,
+        total_downloads: total_downloads,
         published_episodes: published_episodes,
         draft_episodes: draft_episodes,
         collaborators: collaborators
