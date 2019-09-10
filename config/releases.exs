@@ -32,3 +32,7 @@ config :radiator, Radiator.Mailer,
   port: System.fetch_env!("SMTP_PORT"),
   username: System.fetch_env!("SMTP_USERNAME"),
   password: System.fetch_env!("SMTP_PASSWORD")
+
+config :radiator, :auth,
+  email_from_name: System.get_env("EMAIL_FROM_NAME", "Radiator-Instance"),
+  email_from_email: System.get_env("EMAIL_FROM_ADDRESS", "do_not_reply@radiator.local")
