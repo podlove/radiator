@@ -2,7 +2,11 @@ import Config
 
 config :radiator, RadiatorWeb.Endpoint,
   http: [:inet6, port: System.fetch_env!("PORT")],
-  url: [host: System.fetch_env!("HOST"), port: System.fetch_env!("PUBLIC_PORT")]
+  url: [
+    host: System.fetch_env!("HOST"),
+    port: System.fetch_env!("PUBLIC_PORT"),
+    scheme: System.fetch_env!("PUBLIC_SCHEME")
+  ]
 
 config :radiator, Radiator.Repo,
   username: System.fetch_env!("POSTGRES_USER"),

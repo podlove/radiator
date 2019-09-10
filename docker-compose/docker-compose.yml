@@ -32,8 +32,10 @@ services:
     env_file:
       .env
     environment:
+      HOST: $RADIATOR_HOST
       PORT: $RADIATOR_PORT
       PUBLIC_PORT: $RADIATOR_PORT
+      PUBLIC_SCHEME: $RADIATOR_PUBLIC_SCHEME
   email:
     image: mailhog/mailhog
     ports:
