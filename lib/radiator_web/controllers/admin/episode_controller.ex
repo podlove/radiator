@@ -6,6 +6,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   alias Radiator.Storage
   alias Radiator.Directory
   alias Radiator.Directory.{Editor, Episode}
+  alias Radiator.Reporting.Statistics
 
   plug :assign_podcast when action in [:new, :create, :update]
 
@@ -56,7 +57,14 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
     episode = episode |> Directory.preload_for_episode()
 
-    render(conn, "show.html", episode: episode)
+    total_downloads =
+      Statistics.get(%{
+        subject: episode,
+        time_type: :total,
+        metric: :downloads
+      })
+
+    render(conn, "show.html", episode: episode, total_downloads: total_downloads)
   end
 
   def edit(conn, %{"id" => id}) do

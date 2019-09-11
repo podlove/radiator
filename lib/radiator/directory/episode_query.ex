@@ -94,7 +94,21 @@ defmodule Radiator.Directory.EpisodeQuery do
 
       {:short_id, short_id}, query ->
         find_by_short_id(query, short_id)
+
+      {:include_downloads, true}, query ->
+        include_downloads(query)
+
+      {:include_downloads, _}, query ->
+        query
     end)
+  end
+
+  def include_downloads(query) do
+    from(e in query,
+      join: r in Radiator.Reporting.Report,
+      on: r.subject_type == "episode" and r.time_type == "total" and r.subject == e.id,
+      select_merge: %{downloads_total: r.downloads}
+    )
   end
 
   def filter_by_podcast(query, podcast_id) when is_integer(podcast_id) do
