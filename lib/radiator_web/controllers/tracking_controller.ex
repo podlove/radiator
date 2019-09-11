@@ -14,13 +14,17 @@ defmodule RadiatorWeb.TrackingController do
 
   require Logger
 
-  def track_episode_file(conn, %{
-        "podcast_slug" => podcast_slug,
-        "episode_slug" => episode_slug,
-        "file_id" => file_id
-      }) do
-    with podcast = %Podcast{} <- Directory.get_podcast_by_slug(podcast_slug),
-         episode = %Episode{} <- Directory.get_episode_by_slug(podcast.id, episode_slug),
+  def track_episode_file(
+        conn,
+        %{
+          "podcast_slug" => podcast_slug,
+          "episode_slug" => episode_slug,
+          "file_id" => file_id
+        }
+      ) do
+    with {:p, podcast = %Podcast{}} <- {:p, Directory.get_podcast_by_slug(podcast_slug)},
+         {:e, episode = %Episode{}} <-
+           {:e, Directory.get_episode_by_slug(podcast.id, episode_slug)},
          {:ok, audio_file} <- Directory.get_audio_file(file_id),
          true <- audio_file.audio_id == episode.audio.id do
       conn
@@ -28,6 +32,12 @@ defmodule RadiatorWeb.TrackingController do
       |> put_status(301)
       |> redirect(external: AudioFile.url({audio_file.file, audio_file}))
     else
+      {:p, _} ->
+        send_resp(conn, 404, "Podcast not found")
+
+      {:e, _} ->
+        send_resp(conn, 404, "Episode not found")
+
       _ ->
         send_resp(conn, 404, "Not found")
     end
