@@ -34,6 +34,10 @@ defmodule RadiatorSupport.TrackingGenerator do
       Logger.configure(level: :info)
     end
 
+    if !File.exists?(@user_agents_file) do
+      RadiatorSupport.UserAgentsDownloader.download()
+    end
+
     episodes =
       Directory.list_episodes(%{
         items_per_page: :unlimited
@@ -137,6 +141,25 @@ defmodule RadiatorSupport.TrackingGenerator do
     |> String.trim()
     |> String.split("\n")
     |> Enum.random()
+  end
+
+  def get_random_remote_ip() do
+    "#{Enum.random(11..171)}.#{Enum.random(0..255)}.#{Enum.random(0..255)}.#{Enum.random(0..255)}"
+  end
+
+  def get_random_http_range() do
+    ""
+  end
+
+  defp time_remaining(seconds) when seconds < 60 do
+    "#{seconds}s"
+  end
+
+  defp time_remaining(seconds) do
+    minutes = trunc(seconds / 60)
+    seconds = Integer.mod(seconds, 60)
+
+    "#{minutes}m #{seconds}s"
   end
 
   def get_random_remote_ip() do

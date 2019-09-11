@@ -31,5 +31,11 @@ defmodule Radiator.Repo.Migrations.CreateDownloads do
     create index(:downloads, [:podcast_id])
     create index(:downloads, [:episode_id])
     create index(:downloads, [:audio_publication_id])
+
+    create unique_index(
+             :downloads,
+             [:file_id, :request_id, "(accessed_at::date)"],
+             name: :downloads_daily_unique_request_index
+           )
   end
 end
