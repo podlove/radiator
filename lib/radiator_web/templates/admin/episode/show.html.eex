@@ -37,7 +37,7 @@
          </div>
        </div>
      </div>        
-     <div class="bg-blue-100 p-6 relative">
+     <div class="bg-blue-100 p-6 relative" style="min-height: 120px;">
 
         <%= if @episode.audio && @episode.audio.image do %>
           <img src="<%= episode_image_url(@episode) %>" class="w-32 h-32 absolute shadow" style="top: -32px" />
