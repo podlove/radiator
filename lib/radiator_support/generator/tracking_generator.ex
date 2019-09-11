@@ -161,23 +161,4 @@ defmodule RadiatorSupport.TrackingGenerator do
 
     "#{minutes}m #{seconds}s"
   end
-
-  def get_random_remote_ip() do
-    "127.0.0.1"
-  end
-
-  def get_random_http_range() do
-    ""
-  end
-
-  defp time_remaining(seconds) when seconds < 60 do
-    "#{seconds}s"
-  end
-
-  defp time_remaining(seconds) do
-    minutes = trunc(seconds / 60)
-    seconds = Integer.mod(seconds, 60)
-
-    "#{minutes}m #{seconds}s"
-  end
 end
