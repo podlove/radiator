@@ -1,6 +1,6 @@
 defmodule Radiator.Cldr do
   use Cldr,
     locales: ["de", "en"],
-    efault_locale: "de",
+    default_locale: "de",
     providers: [Cldr.Number]
 end
