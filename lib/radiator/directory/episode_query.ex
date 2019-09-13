@@ -105,7 +105,7 @@ defmodule Radiator.Directory.EpisodeQuery do
 
   def include_downloads(query) do
     from(e in query,
-      join: r in Radiator.Reporting.Report,
+      left_join: r in Radiator.Reporting.Report,
       on: r.subject_type == "episode" and r.time_type == "total" and r.subject == e.id,
       select_merge: %{downloads_total: r.downloads}
     )
