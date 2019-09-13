@@ -7,6 +7,15 @@
       button: render("_publication_button.html", assigns)
     ) 
     %>
+   <% else %>
+    <%= if not Radiator.Directory.Editor.is_published(@episode.podcast) do %>
+      <%= render_shared_partial(
+        "_warning_alert.html", 
+        content: render(RadiatorWeb.Admin.PodcastView, "_publication_text.html"), 
+        button: render(RadiatorWeb.Admin.PodcastView, "_publication_button.html", assigns |> Map.put(:podcast, @episode.podcast))
+      ) 
+      %>
+    <% end %>   
    <% end %>
 
    <div class="bg-white rounded shadow-lg mb-8">
