@@ -1,0 +1,6 @@
+<%= if get_flash(@conn, :info) do %>
+  <%= render RadiatorWeb.LayoutView, "_flash.html", color: "yellow", title: "Info", content: get_flash(@conn, :info) %>
+<% end %>
+<%= if get_flash(@conn, :error) do %>
+  <%= render RadiatorWeb.LayoutView, "_flash.html", color: "red", title: "Error", content: get_flash(@conn, :error) %>
+<% end %>
