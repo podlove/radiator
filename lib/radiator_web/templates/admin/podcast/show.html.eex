@@ -96,22 +96,40 @@
                                 })
           ) %>
 
+  <div class="bg-white rounded shadow mt-8">
+    <h3 class="text-gray-700 text-xl p-6">Drafts</h3>
 
-
-  <h2 class="text-gray-700 text-xl font-bold mb-2 mt-16">Drafts</h2>
-
-  <%= for episode <- @draft_episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-4 hover:bg-highlight" do %>
-      <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
+    <%= for episode <- @draft_episodes do %>
+      <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), 
+               class: "block no-underline bg-white p-6 hover:bg-highlight border-t border-gray-400" do %>
+        <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
+      <% end %>
     <% end %>
-  <% end %>
 
-  <h2 class="text-gray-700 text-xl font-bold mb-2 mt-16">Published</h2>
-
-  <%= for episode <- @published_episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-4 hover:bg-highlight" do %>
-      <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
+    <%= if length(@draft_episodes) == 0 do %>
+      <div class="block no-underline bg-white p-6 border-t border-gray-400">
+        You have not drafted episodes.
+      </div>
     <% end %>
-  <% end %>
+
+  </div>
+
+  <div class="bg-white rounded shadow mt-8">
+    <h3 class="text-gray-700 text-xl p-6">Published</h3>
+   
+    <%= for episode <- @published_episodes do %>
+      <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), 
+               class: "block no-underline bg-white p-6 hover:bg-highlight border-t border-gray-400" do %>
+        <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
+      <% end %>
+    <% end %>  
+
+    <%= if length(@published_episodes) == 0 do %>
+      <div class="block no-underline bg-white p-6 hover:bg-highlight border-t border-gray-400">
+        You have not published episodes.
+      </div>
+    <% end %>
+
+  </div>
 
 </div>
