@@ -108,7 +108,9 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
     end
 
     test "is true for a published episode", %{conn: conn, user: user} do
-      episode = insert(:episode, published_at: DateTime.utc_now()) |> owned_by(user)
+      episode =
+        insert(:episode, publish_state: :published, published_at: DateTime.utc_now())
+        |> owned_by(user)
 
       conn =
         get conn, "/api/graphql", query: @is_published_query, variables: %{"id" => episode.id}
