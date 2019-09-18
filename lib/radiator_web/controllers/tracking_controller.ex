@@ -65,7 +65,8 @@ defmodule RadiatorWeb.TrackingController do
       remote_ip: remote_ip(conn),
       user_agent: user_agent(conn),
       time: DateTime.utc_now(),
-      http_range: http_range(conn)
+      http_range: http_range(conn),
+      referer: referer(conn)
     )
 
     conn
@@ -78,7 +79,8 @@ defmodule RadiatorWeb.TrackingController do
       remote_ip: remote_ip(conn),
       user_agent: user_agent(conn),
       time: DateTime.utc_now(),
-      http_range: http_range(conn)
+      http_range: http_range(conn),
+      referer: referer(conn)
     )
 
     conn
@@ -90,6 +92,16 @@ defmodule RadiatorWeb.TrackingController do
     |> List.first()
     |> case do
       user_agent when is_binary(user_agent) and byte_size(user_agent) > 0 -> user_agent
+      _ -> ""
+    end
+  end
+
+  defp referer(conn) do
+    conn
+    |> get_req_header("referer")
+    |> List.first()
+    |> case do
+      referer when is_binary(referer) and byte_size(referer) > 0 -> referer
       _ -> ""
     end
   end
