@@ -7,6 +7,7 @@ defmodule Radiator.Repo.Migrations.CreateDownloads do
       add :accessed_at, :utc_datetime
       add :httprange, :string
       add :context, :string
+      add :referer, :text
 
       add :user_agent, :text
       add :client_name, :string

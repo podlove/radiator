@@ -24,7 +24,8 @@ defmodule Radiator.TrackingTest do
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),
-          http_range: @valid_http_range
+          http_range: @valid_http_range,
+          referer: ""
         )
 
       assert Repo.get(Download, download.id)
@@ -50,7 +51,8 @@ defmodule Radiator.TrackingTest do
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),
-          http_range: @valid_http_range
+          http_range: @valid_http_range,
+          referer: ""
         )
 
       assert Repo.get(Download, download.id)
@@ -69,7 +71,8 @@ defmodule Radiator.TrackingTest do
           remote_ip: @valid_ip,
           user_agent: "Googlebot",
           time: DateTime.utc_now(),
-          http_range: @valid_http_range
+          http_range: @valid_http_range,
+          referer: ""
         )
 
       assert response == :skipped_because_not_clean
@@ -88,7 +91,8 @@ defmodule Radiator.TrackingTest do
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),
-          http_range: "bytes=0-1"
+          http_range: "bytes=0-1",
+          referer: ""
         )
 
       assert response == :skipped_because_not_clean
@@ -113,7 +117,8 @@ defmodule Radiator.TrackingTest do
           remote_ip: @valid_ip,
           user_agent: @valid_user_agent,
           time: DateTime.utc_now(),
-          http_range: @valid_http_range
+          http_range: @valid_http_range,
+          referer: ""
         )
 
       assert download.hours_since_published == @hours

@@ -50,7 +50,8 @@ defmodule Radiator.Tracking do
         remote_ip: remote_ip,
         user_agent: user_agent_string,
         time: time = %DateTime{},
-        http_range: http_range
+        http_range: http_range,
+        referer: referer
       ) do
     with audio_file <- Repo.preload(audio_file, :audio),
          network = %Network{} <- podcast.network,
@@ -67,7 +68,8 @@ defmodule Radiator.Tracking do
           device_model: Map.get(user_agent, :device_model),
           device_type: Map.get(user_agent, :device_type),
           os_name: Map.get(user_agent, :os_name),
-          hours_since_published: hours_since_published(episode, time)
+          hours_since_published: hours_since_published(episode, time),
+          referer: referer
         })
         |> Ecto.Changeset.put_assoc(:network, network)
         |> Ecto.Changeset.put_assoc(:podcast, podcast)
@@ -87,7 +89,8 @@ defmodule Radiator.Tracking do
         remote_ip: remote_ip,
         user_agent: user_agent_string,
         time: time,
-        http_range: http_range
+        http_range: http_range,
+        referer: referer
       ) do
     audio_file = Repo.preload(audio_file, :audio)
     network = audio_publication.network
@@ -105,7 +108,8 @@ defmodule Radiator.Tracking do
         device_model: Map.get(user_agent, :device_model),
         device_type: Map.get(user_agent, :device_type),
         os_name: Map.get(user_agent, :os_name),
-        hours_since_published: hours_since_published(audio_publication, time)
+        hours_since_published: hours_since_published(audio_publication, time),
+        referer: referer
       })
       |> Ecto.Changeset.put_assoc(:network, network)
       |> Ecto.Changeset.put_assoc(:audio_publication, audio_publication)
