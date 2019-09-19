@@ -16,10 +16,11 @@ services:
       - minio_config:/root/.minio
     command: minio server /data
   db:
-    image: postgres:alpine
+    image: postgres:11-alpine
     env_file:
       .env
     volumes:
+      # note that the postgres image defines this volume, so the exact path on the right is important
       - psql_db:/var/lib/postgresql/data
   radiator:
     build: ..
