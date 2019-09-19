@@ -29,9 +29,6 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
     case Editor.Manager.create_episode(podcast, episode_params) do
       {:ok, episode} ->
-        # temporary: publish immediately
-        Editor.Manager.publish_episode(episode)
-
         conn
         |> put_flash(:info, "episode created successfully.")
         |> redirect(

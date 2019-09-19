@@ -7,15 +7,23 @@
     </div>
   <% end %>
 
+
     <div class="mb-6">
       <%= text_input f, :title, class: "input font-bold", placeholder: "Episode Title" %>
       <%= error_tag f, :title %>
     </div>
+
+    <div class="mb-6">
+      <%= number_input f, :number, class: "input", placeholder: "Episode Number" %>
+      <%= error_tag f, :number %>
+    </div>
+
     <div class="mb-6">
       <%= label f, :subtitle, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
       <%= text_input f, :subtitle, class: "input", placeholder: "One-liner to grab the listener's attention" %>
       <%= error_tag f, :subtitle %>
     </div>
+
     <div class="mb-6">
       <%= label f, :summary, class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
       <%= textarea f, :summary, rows: 3, class: "input", placeholder: "Multiline description aka 'show notes'" %>

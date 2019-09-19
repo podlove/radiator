@@ -480,6 +480,9 @@ defmodule Radiator.Directory.Editor do
     Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files]])
   end
 
+  def is_published(%{publish_state: :drafted}), do: false
+  def is_published(%{publish_state: :scheduled}), do: false
+  def is_published(%{publish_state: :depublished}), do: false
   def is_published(%Podcast{published_at: nil}), do: false
   def is_published(%Episode{published_at: nil}), do: false
 
@@ -717,7 +720,7 @@ defmodule Radiator.Directory.Editor do
           on: p.user_id == u.id,
           join: s in Podcast,
           on: s.id == p.subject_id,
-          preload: [user: {u, [:person]}]
+          preload: [user: {u, [:profile]}]
 
       podcast_perm_query
       |> Repo.all()

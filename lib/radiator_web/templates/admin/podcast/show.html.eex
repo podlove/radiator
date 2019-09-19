@@ -1,5 +1,14 @@
 <div class="container mx-auto mb-6 px-8">
 
+   <%= if not Radiator.Directory.Editor.is_published(@podcast) do %>
+    <%= render_shared_partial(
+      "_warning_alert.html", 
+      content: render("_publication_text.html"), 
+      button: render("_publication_button.html", assigns)
+    ) 
+    %>
+   <% end %>
+
    <div class="bg-white rounded shadow-lg mb-8">
      
      <div class="p-6 flex justify-between flex-col sm:flex-row">
@@ -45,7 +54,7 @@
          </div>
        </div>
      </div>        
-     <div class="bg-blue-100 p-6 relative">
+     <div class="bg-blue-100 p-6 relative"  style="min-height: 120px;">
      <%= if @podcast.image do %>
        <img src="<%= podcast_image_url(@podcast) %>" class="w-32 h-32 absolute shadow" style="top: -32px"/>
      <% end %>
@@ -79,30 +88,49 @@
     <% end %>   
   </div>
 
+  <div class="bg-white rounded shadow mt-8">
+    <h3 class="text-gray-700 text-xl p-6">Drafts</h3>
+
+    <%= for episode <- @draft_episodes do %>
+      <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), 
+               class: "block no-underline bg-white p-6 hover:bg-highlight border-t border-gray-400" do %>
+        <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
+      <% end %>
+    <% end %>
+
+    <%= if length(@draft_episodes) == 0 do %>
+      <div class="block no-underline bg-white p-6 border-t border-gray-400">
+        You have not drafted episodes.
+      </div>
+    <% end %>
+
+  </div>
+
+  <div class="bg-white rounded shadow mt-8">
+    <h3 class="text-gray-700 text-xl p-6">Published</h3>
+   
+    <%= for episode <- @published_episodes do %>
+      <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), 
+               class: "block no-underline bg-white p-6 hover:bg-highlight border-t border-gray-400" do %>
+        <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
+      <% end %>
+    <% end %>  
+
+    <%= if length(@published_episodes) == 0 do %>
+      <div class="block no-underline bg-white p-6 hover:bg-highlight border-t border-gray-400">
+        You have not published episodes.
+      </div>
+    <% end %>
+
+  </div>
+
+
   <%= if has_manage_permission_for_podcast(@current_user, @podcast), 
       do: render_shared_partial("_collaborator_list.html", 
             Map.merge(assigns, %{ subject: @podcast, 
                                   add_action_route: Routes.admin_network_podcast_collaborator_path(@conn, :create, @podcast.network_id, @podcast.id),
                                   delete_route_builder: delete_collaborator_route_builder(@conn, @podcast)
                                 })
-          ) %>
-
-
-
-  <h2 class="text-gray-700 text-xl font-bold mb-2 mt-16">Drafts</h2>
-
-  <%= for episode <- @draft_episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-4 hover:bg-highlight" do %>
-      <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
-    <% end %>
-  <% end %>
-
-  <h2 class="text-gray-700 text-xl font-bold mb-2 mt-16">Published</h2>
-
-  <%= for episode <- @published_episodes do %>
-    <%= link to: Routes.admin_network_podcast_episode_path(@conn, :show, @podcast.network_id, @podcast, episode), class: "block no-underline card mb-4 hover:bg-highlight" do %>
-      <%= render RadiatorWeb.Admin.EpisodeView, "_card.html", episode: episode %>
-    <% end %>
-  <% end %>
+          ) %>  
 
 </div>
