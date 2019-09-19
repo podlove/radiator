@@ -83,13 +83,14 @@ config :radiator, Radiator.Scheduler,
   # prevent next job from being executed if previous job is still running
   overlap: false,
   jobs: [
-    clean_downloads_yesterday: [
-      schedule: "0 2 * * *",
-      task: {Radiator.Tracking.Cleaner, :clean_yesterday, []}
-    ],
-    clean_downloads_today: [
+    reporting_hourly: [
       schedule: "@hourly",
-      task: {Radiator.Tracking.Cleaner, :clean_today, []}
+      task: {Radiator.Reporting.ReportGenerator, :hourly_report, []}
+    ],
+    reporting_daily: [
+      # every day 00:30
+      schedule: "30 * * * *",
+      task: {Radiator.Reporting.ReportGenerator, :daily_report, []}
     ]
   ]
 

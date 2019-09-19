@@ -4,6 +4,7 @@ defmodule Radiator.Directory.Podcast do
   import Ecto.Changeset
   import Arc.Ecto.Changeset
   import Ecto.Query, warn: false
+  import Radiator.Directory.Publication
 
   alias Radiator.Directory.{Episode, Podcast, Network, TitleSlug}
   alias Radiator.Media.PodcastImage
@@ -40,8 +41,9 @@ defmodule Radiator.Directory.Podcast do
 
     has_many :permissions, {"podcasts_perm", Radiator.Perm.Permission}, foreign_key: :subject_id
 
-    # TODO: remove and have a better way to determine published state
+    field :publish_state, Radiator.Ecto.AtomType, default: :drafted
     field :published_at, :utc_datetime
+
     timestamps()
   end
 
@@ -57,6 +59,7 @@ defmodule Radiator.Directory.Podcast do
       :owner_name,
       :owner_email,
       :language,
+      :publish_state,
       :published_at,
       :last_built_at,
       :slug,
@@ -67,6 +70,8 @@ defmodule Radiator.Directory.Podcast do
     |> validate_required([:title])
     |> validate_color(:main_color)
     |> postprocess_short_id()
+    |> validate_publish_state()
+    |> maybe_set_published_at()
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()
   end

@@ -1,11 +1,11 @@
-<div class="mb-6">
-    <h2 class="text-xl font-bold mb-3 text-blue-900">Collborators</h2>
+<div class="bg-white rounded shadow mt-8">
+    <h3 class="text-gray-700 text-xl p-6">Collaborators</h3>
 
-    <div class="flex-vertical">
+    <div class="flex flex-col block no-underline bg-white">
     <%= for collaborator <- @collaborators do %>
-        <div class="flex px-2 justify-begin h-12 border-primary border-b items-center <%= unless @current_user == collaborator.user, do: "hover:bg-highlight" %>">
-            <%= img_tag(user_image_url(collaborator.user), alt: "Avatar of #{collaborator.user.name}", class: "w-8 h-8 rounded-full bg-tertiary mr-2") %>
-            <div class="text-left mx-4 flex-shrink-0">
+        <div class="flex p-6  border-t border-gray-400 justify-begin items-center <%= unless @current_user == collaborator.user, do: "hover:bg-highlight" %>">
+            <%= img_tag(user_image_url(collaborator.user), alt: "Avatar of #{collaborator.user.name}", class: "w-12 h-12 flex-shrink-0 rounded-full bg-tertiary") %>
+            <div class="text-left mx-6 flex-shrink-0">
             <%= content_tag(:span, collaborator.user.name, class: "font-bold") %><br/>
             <%= content_tag(:span, collaborator.user.profile.display_name, class: "text-sm") %>
             </div>
@@ -18,12 +18,12 @@
             </div>
         </div>
     <% end %>
-        <div class="flex px-2 justify-begin h-12 border-primary items-center">
+        <div class="flex p-6 justify-begin border-t border-gray-400 items-center">
             <%= form_for @conn, @add_action_route, [as: :collaborator], fn f -> %>
                 <%= text_input f, :name, class: "inline-input font-bold", placeholder: "username" %>
                 <%= select f, :permission, permission_select_values() , class: "inline-select" %>
                 <%= submit "Add", class: "btn" %>
             <% end %>
         </div>
-    <div>
+    </div>
 </div>

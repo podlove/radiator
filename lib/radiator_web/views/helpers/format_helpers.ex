@@ -5,6 +5,26 @@ defmodule RadiatorWeb.FormatHelpers do
 
   use Radiator.Constants, :permissions
 
+  def format_date_relative(date) do
+    with {:ok, result} <- Timex.format(date, "{relative}", :relative) do
+      result
+    else
+      _ -> "-"
+    end
+  end
+
+  def format_number(number, opts \\ [])
+
+  def format_number(nil, _) do
+    "-"
+  end
+
+  def format_number(number, opts) do
+    with {:ok, result} <- Radiator.Cldr.Number.to_string(number, opts) do
+      result
+    end
+  end
+
   def format_bytes(number, precision \\ 2)
 
   def format_bytes(nil, _) do

@@ -32,6 +32,8 @@ defmodule Radiator.Directory.Episode do
     # use enclosure form field to upload audio file
     field :enclosure, :map, virtual: true
 
+    field :downloads_total, :integer, virtual: true
+
     belongs_to :podcast, Podcast
     belongs_to :audio, Audio
 

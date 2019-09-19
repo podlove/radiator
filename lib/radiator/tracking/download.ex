@@ -18,6 +18,7 @@ defmodule Radiator.Tracking.Download do
     field :accessed_at, :utc_datetime
     field :httprange, :string
     field :context, :string
+    field :referer, :string
 
     field :user_agent, :string
     field :client_name, :string
@@ -45,6 +46,7 @@ defmodule Radiator.Tracking.Download do
       :request_id,
       :accessed_at,
       :context,
+      :referer,
       :httprange,
       :user_agent,
       :client_name,
@@ -58,5 +60,9 @@ defmodule Radiator.Tracking.Download do
       :request_id,
       :accessed_at
     ])
+    |> unique_constraint(
+      :request_id,
+      name: :downloads_daily_unique_request_index
+    )
   end
 end

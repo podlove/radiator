@@ -10,4 +10,8 @@ defmodule Radiator.Media.NetworkImage do
   def storage_dir(_version, {_file, network}) do
     "network/#{network.id}"
   end
+
+  def default_url(_, network) do
+    "https://robohash.org/#{network.id}?size=200x200&set=set4"
+  end
 end

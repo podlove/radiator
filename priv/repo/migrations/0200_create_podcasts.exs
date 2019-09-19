@@ -20,6 +20,7 @@ defmodule Radiator.Repo.Migrations.CreatePodcasts do
       add :main_color, :string, size: 7
       add :is_using_short_id, :boolean
 
+      add :publish_state, :string
       add :published_at, :utc_datetime
 
       add :network_id, references(:networks, on_delete: :delete_all)

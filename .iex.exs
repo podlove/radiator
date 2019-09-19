@@ -33,7 +33,15 @@ import Ecto.Query, warn: false
 alias RadiatorWeb.Router.Helpers, as: Routes
 
 alias Radiator.{Directory, Repo, Storage}
-alias Radiator.Directory.{Audio, Episode, Podcast, Network, Editor}
+
+alias Radiator.Directory.{
+  Network,
+  Podcast,
+  Episode,
+  AudioPublication,
+  Audio,
+  Editor
+}
 
 alias Radiator.Media
 alias Radiator.Media.AudioFile
@@ -50,6 +58,14 @@ alias Radiator.Contribution.Person
 
 alias Radiator.Perm.Ecto.PermissionType
 alias Radiator.Perm.Permission
+
+alias Radiator.Reporting.{
+  Report,
+  ReportGenerator,
+  ReportWorker
+}
+
+alias Radiator.Tracking.Download
 
 defmodule H do
   def create_episode_audio(episode) do

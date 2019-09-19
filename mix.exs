@@ -83,9 +83,11 @@ defmodule Radiator.MixProject do
       {:remote_ip, "~> 0.1.5"},
       {:ua_inspector, "~> 1.0"},
       # job processor
-      {:oban, "~> 0.7"},
+      {:oban, "~> 0.8"},
       # cron-like job scheduler
-      {:quantum, "~> 2.3"}
+      {:quantum, "~> 2.3"},
+      # locale aware number formatting
+      {:ex_cldr_numbers, "~> 2.0"}
     ]
   end
 

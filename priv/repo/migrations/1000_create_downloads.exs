@@ -7,6 +7,7 @@ defmodule Radiator.Repo.Migrations.CreateDownloads do
       add :accessed_at, :utc_datetime
       add :httprange, :string
       add :context, :string
+      add :referer, :text
 
       add :user_agent, :text
       add :client_name, :string
@@ -31,5 +32,11 @@ defmodule Radiator.Repo.Migrations.CreateDownloads do
     create index(:downloads, [:podcast_id])
     create index(:downloads, [:episode_id])
     create index(:downloads, [:audio_publication_id])
+
+    create unique_index(
+             :downloads,
+             [:file_id, :request_id, "(accessed_at::date)"],
+             name: :downloads_daily_unique_request_index
+           )
   end
 end

@@ -14,13 +14,17 @@ defmodule RadiatorWeb.TrackingController do
 
   require Logger
 
-  def track_episode_file(conn, %{
-        "podcast_slug" => podcast_slug,
-        "episode_slug" => episode_slug,
-        "file_id" => file_id
-      }) do
-    with podcast = %Podcast{} <- Directory.get_podcast_by_slug(podcast_slug),
-         episode = %Episode{} <- Directory.get_episode_by_slug(podcast.id, episode_slug),
+  def track_episode_file(
+        conn,
+        %{
+          "podcast_slug" => podcast_slug,
+          "episode_slug" => episode_slug,
+          "file_id" => file_id
+        }
+      ) do
+    with {:p, podcast = %Podcast{}} <- {:p, Directory.get_podcast_by_slug(podcast_slug)},
+         {:e, episode = %Episode{}} <-
+           {:e, Directory.get_episode_by_slug(podcast.id, episode_slug)},
          {:ok, audio_file} <- Directory.get_audio_file(file_id),
          true <- audio_file.audio_id == episode.audio.id do
       conn
@@ -28,6 +32,12 @@ defmodule RadiatorWeb.TrackingController do
       |> put_status(301)
       |> redirect(external: AudioFile.url({audio_file.file, audio_file}))
     else
+      {:p, _} ->
+        send_resp(conn, 404, "Podcast not found")
+
+      {:e, _} ->
+        send_resp(conn, 404, "Episode not found")
+
       _ ->
         send_resp(conn, 404, "Not found")
     end
@@ -65,7 +75,8 @@ defmodule RadiatorWeb.TrackingController do
       remote_ip: remote_ip(conn),
       user_agent: user_agent(conn),
       time: DateTime.utc_now(),
-      http_range: http_range(conn)
+      http_range: http_range(conn),
+      referer: referer(conn)
     )
 
     conn
@@ -78,7 +89,8 @@ defmodule RadiatorWeb.TrackingController do
       remote_ip: remote_ip(conn),
       user_agent: user_agent(conn),
       time: DateTime.utc_now(),
-      http_range: http_range(conn)
+      http_range: http_range(conn),
+      referer: referer(conn)
     )
 
     conn
@@ -90,6 +102,16 @@ defmodule RadiatorWeb.TrackingController do
     |> List.first()
     |> case do
       user_agent when is_binary(user_agent) and byte_size(user_agent) > 0 -> user_agent
+      _ -> ""
+    end
+  end
+
+  defp referer(conn) do
+    conn
+    |> get_req_header("referer")
+    |> List.first()
+    |> case do
+      referer when is_binary(referer) and byte_size(referer) > 0 -> referer
       _ -> ""
     end
   end

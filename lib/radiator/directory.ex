@@ -282,13 +282,20 @@ defmodule Radiator.Directory do
     }
   end
 
+  def is_published(%{publish_state: :drafted}), do: false
+  def is_published(%{publish_state: :scheduled}), do: false
+  def is_published(%{publish_state: :depublished}), do: false
   def is_published(%Podcast{published_at: nil}), do: false
   def is_published(%Episode{published_at: nil}), do: false
+  def is_published(%AudioPublication{published_at: nil}), do: false
 
   def is_published(%Podcast{published_at: date}),
     do: Support.DateTime.before_utc_now?(date)
 
   def is_published(%Episode{published_at: date}),
+    do: Support.DateTime.before_utc_now?(date)
+
+  def is_published(%AudioPublication{published_at: date}),
     do: Support.DateTime.before_utc_now?(date)
 
   # fixme: implementation missing for AudioPublication
