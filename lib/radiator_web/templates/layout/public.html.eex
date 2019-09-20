@@ -37,10 +37,8 @@
     }
     </style>
   </head>
-  <body class="font-sans bg-purple-100 antialiased">
-    <main class="pt-6">
+  <body class="font-sans bg-gray-100 antialiased">
     <%= render @view_module, @view_template, assigns %>
-    </main>
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </body>
 </html>

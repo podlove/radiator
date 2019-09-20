@@ -27,7 +27,7 @@ defmodule Radiator.Directory.Podcast do
     field :owner_name, :string
 
     field :use_short_id?, :boolean, source: :is_using_short_id, default: true
-    field :main_color, :string, default: "#68b360"
+    field :main_color, :string, default: "#1a202d"
 
     field :slug, TitleSlug.Type
 
