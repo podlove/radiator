@@ -47,6 +47,10 @@ defmodule RadiatorWeb.FormatHelpers do
     format_normal_playtime_round_to_seconds(time)
   end
 
+  def format_normal_playtime_round_to_seconds(nil) do
+    ""
+  end
+
   def format_normal_playtime_round_to_seconds(time) do
     (round(time / 1_000) * 1_000)
     |> format_normal_playtime()
@@ -96,5 +100,9 @@ defmodule RadiatorWeb.FormatHelpers do
       :edit -> "editor"
       :readonly -> "viewer"
     end
+  end
+
+  def looks_like_html(binary) do
+    Regex.match?(~r/\<\/?(br|ul|li|p|a)\s*?\/?>/, binary)
   end
 end
