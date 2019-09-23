@@ -1,6 +1,6 @@
 use Mix.Config
 
-default_host = "localhost"
+default_host = System.get_env("DEFAULT_HOST", "localhost")
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -28,8 +28,9 @@ config :arc,
   asset_host: System.get_env("STORAGE_ASSET_HOST", "http://#{default_host}:9000/radiator")
 
 config :ex_aws,
-  access_key_id: "IEKAZMUY3KX32CRJPE9R",
-  secret_access_key: "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN"
+  access_key_id: System.get_env("STORAGE_ACCESS_KEY_ID", "IEKAZMUY3KX32CRJPE9R"),
+  secret_access_key:
+    System.get_env("STORAGE_ACCESS_KEY", "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN")
 
 config :ex_aws, :s3,
   scheme: "http://",
@@ -83,8 +84,8 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Configure your database
 config :radiator, Radiator.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: System.get_env("POSTGRES_USER", "postgres"),
+  password: System.get_env("POSTGRES_PASSWORD", "postgres"),
   database: "radiator_dev",
   hostname: System.get_env("POSTGRES_HOST", default_host),
   pool_size: 10
