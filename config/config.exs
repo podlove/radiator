@@ -94,6 +94,9 @@ config :radiator, Radiator.Scheduler,
     ]
   ]
 
+config :ua_inspector,
+  http_opts: [ssl_options: [honor_cipher_order: :undefined]]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"
