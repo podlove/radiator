@@ -17,10 +17,11 @@ services:
       - minio_config:/root/.minio
     command: minio server /data
   db:
-    image: postgres:alpine
+    image: postgres:11-alpine
     env_file:
       .env
     volumes:
+      # note that the postgres image defines this volume, so the exact path on the right is important
       - psql_db:/var/lib/postgresql/data
   radiator:
     build: ..
@@ -33,8 +34,10 @@ services:
     env_file:
       .env
     environment:
+      HOST: $RADIATOR_HOST
       PORT: $RADIATOR_PORT
       PUBLIC_PORT: $RADIATOR_PORT
+      PUBLIC_SCHEME: $RADIATOR_PUBLIC_SCHEME
       # make sure that local environment variables overwrite the .env based ones
       # docker compose has this weird precedence of .env file over local var
       # but env variables used here on the right hand side will be pulled in from the current environment

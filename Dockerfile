@@ -1,4 +1,4 @@
-FROM elixir:1.9-alpine AS elixir_prep
+FROM beardedeagle/alpine-elixir-builder:1.9.1 AS elixir_prep
 
 # git: git dependency in mix.exs
 # make gcc libc-dev: argon2_elixir

@@ -2,7 +2,11 @@ import Config
 
 config :radiator, RadiatorWeb.Endpoint,
   http: [:inet6, port: System.fetch_env!("PORT")],
-  url: [host: System.fetch_env!("HOST"), port: System.fetch_env!("PUBLIC_PORT")]
+  url: [
+    host: System.fetch_env!("HOST"),
+    port: System.fetch_env!("PUBLIC_PORT"),
+    scheme: System.fetch_env!("PUBLIC_SCHEME")
+  ]
 
 config :radiator, Radiator.Repo,
   username: System.fetch_env!("POSTGRES_USER"),
@@ -28,3 +32,7 @@ config :radiator, Radiator.Mailer,
   port: System.fetch_env!("SMTP_PORT"),
   username: System.fetch_env!("SMTP_USERNAME"),
   password: System.fetch_env!("SMTP_PASSWORD")
+
+config :radiator, :auth,
+  email_from_name: System.get_env("EMAIL_FROM_NAME", "Radiator-Instance"),
+  email_from_email: System.get_env("EMAIL_FROM_ADDRESS", "do_not_reply@radiator.local")
