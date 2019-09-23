@@ -7,10 +7,11 @@ services:
     # Note: the docker image internally always uses 9000 so for this setup it is not really a configuration option
     ports: 
       - "$STORAGE_PORT:9000"
+    env_file: 
+      .env
     environment:
-      # These are the default keys as you would find them in config/config.exs
-      MINIO_ACCESS_KEY: $STORAGE_ACCESS_KEY_ID
-      MINIO_SECRET_KEY: $STORAGE_ACCESS_KEY
+      MINIO_ACCESS_KEY: "$STORAGE_ACCESS_KEY_ID"
+      MINIO_SECRET_KEY: "$STORAGE_ACCESS_KEY"
     volumes:
       - minio_data:/data
       - minio_config:/root/.minio
@@ -37,6 +38,11 @@ services:
       PORT: $RADIATOR_PORT
       PUBLIC_PORT: $RADIATOR_PORT
       PUBLIC_SCHEME: $RADIATOR_PUBLIC_SCHEME
+      # make sure that local environment variables overwrite the .env based ones
+      # docker compose has this weird precedence of .env file over local var
+      # but env variables used here on the right hand side will be pulled in from the current environment
+      STORAGE_ACCESS_KEY_ID: "$STORAGE_ACCESS_KEY_ID"
+      STORAGE_ACCESS_KEY: "$STORAGE_ACCESS_KEY"
   email:
     image: mailhog/mailhog
     ports:

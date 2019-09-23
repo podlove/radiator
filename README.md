@@ -38,6 +38,8 @@ Then access the following services:
 
 For full deployment and options please see [radiator-deploy](https://github.com/podlove/radiator-deploy)
 
+This compose file stores its persistent data in docker volumes, so to cleanly reset you need to delete them after a `docker-compose down` with `docker volume rm rad_minio_config rad_minio_data rad_psql_db`
+
 **Minio Setup**
 
 - [Install minio][minio-setup]
