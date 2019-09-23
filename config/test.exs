@@ -16,7 +16,7 @@ config :radiator, Radiator.Repo,
   username: System.get_env("POSTGRES_USER", "postgres"),
   password: System.get_env("POSTGRES_PASSWORD", "postgres"),
   database: "radiator_test",
-  hostname: System.get_env("POSTGRES_HOST", default_host),
+  hostname: System.get_env("POSTGRES_HOST", System.get_env("DB_HOST", default_host)),
   pool: Ecto.Adapters.SQL.Sandbox
 
 # Speed up password hashing during test
