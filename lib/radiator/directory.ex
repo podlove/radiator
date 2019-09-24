@@ -238,6 +238,10 @@ defmodule Radiator.Directory do
     |> preload_for_episode()
   end
 
+  def get_any_episode(%Podcast{} = podcast) do
+    list_episodes(%{podcast: podcast, order_by: :published_at, order: :desc, items_per_page: 1})
+  end
+
   def preload_for_podcast(nil) do
     nil
   end

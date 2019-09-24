@@ -69,4 +69,32 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
   def get_chapter_duration_string(chapter = %Chapter{}, _, _) do
     {:ok, format_normal_playtime(Chapter.duration(chapter))}
   end
+
+  @spec get_public_page(Episode.t() | Podcast.t(), any, any) :: {:ok, String.t()}
+  def get_public_page(subject, _, _)
+
+  def get_public_page(%Podcast{} = subject, _args, _resolution) do
+    {:ok, Podcast.public_url(subject)}
+  end
+
+  def get_public_page(%Episode{} = subject, _args, _resolution) do
+    {:ok, Episode.public_url(subject)}
+  end
+
+  def get_public_feeds(%Podcast{} = podcast, _args, _resolution) do
+    enclosure_mime_type =
+      case Directory.get_any_episode(podcast) do
+        [%Episode{} = episode] -> Episode.enclosure_mime_type(episode)
+        _ -> "audio/mpeg"
+      end
+
+    feedlist = [
+      %{
+        feed_url: Podcast.feed_url(podcast),
+        enclosure_mime_type: enclosure_mime_type
+      }
+    ]
+
+    {:ok, feedlist}
+  end
 end

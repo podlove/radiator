@@ -3,7 +3,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   import Absinthe.Resolution.Helpers
 
-  alias RadiatorWeb.GraphQL.Admin.Resolvers
+  alias RadiatorWeb.GraphQL.Admin.Resolvers, as: AdminResolvers
+  alias RadiatorWeb.GraphQL.Public.Resolvers, as: PublicResolvers
 
   alias Radiator.Directory
   alias Radiator.Directory.{Network, Podcast}
@@ -47,7 +48,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :email, :string
 
     field :image, :string do
-      resolve &Resolvers.Editor.get_image_url/3
+      resolve &AdminResolvers.Editor.get_image_url/3
     end
   end
 
@@ -62,7 +63,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :image, :string do
-      resolve &Resolvers.Editor.get_image_url/3
+      resolve &AdminResolvers.Editor.get_image_url/3
     end
   end
 
@@ -76,7 +77,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :link, :string
 
     field :image, :string do
-      resolve &Resolvers.Editor.get_image_url/3
+      resolve &AdminResolvers.Editor.get_image_url/3
     end
   end
 
@@ -87,27 +88,27 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :slug, :string
 
     field :image, :string do
-      resolve &Resolvers.Editor.get_image_url/3
+      resolve &AdminResolvers.Editor.get_image_url/3
     end
 
     field :podcasts, list_of(:podcast) do
-      resolve &Resolvers.Editor.list_podcasts/3
+      resolve &AdminResolvers.Editor.list_podcasts/3
     end
 
     field :audio_publications, list_of(:audio_publication) do
-      resolve &Resolvers.Editor.list_audio_publications/3
+      resolve &AdminResolvers.Editor.list_audio_publications/3
     end
 
     field :people, list_of(:person) do
-      resolve &Resolvers.Editor.list_people/3
+      resolve &AdminResolvers.Editor.list_people/3
     end
 
     field :collaborators, list_of(:collaborator) do
-      resolve &Resolvers.Editor.list_collaborators/3
+      resolve &AdminResolvers.Editor.list_collaborators/3
     end
 
     field :statistics, :statistics do
-      resolve &Resolvers.Statistics.get_statistics/3
+      resolve &AdminResolvers.Statistics.get_statistics/3
     end
   end
 
@@ -128,7 +129,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :author, :string
 
     field :image, :string do
-      resolve &Resolvers.Editor.get_image_url/3
+      resolve &AdminResolvers.Editor.get_image_url/3
     end
 
     field :language, :string
@@ -139,7 +140,15 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :slug, :string
 
     field :is_published, :boolean do
-      resolve &Resolvers.Editor.is_published/3
+      resolve &AdminResolvers.Editor.is_published/3
+    end
+
+    field :public_page, :string do
+      resolve &PublicResolvers.Directory.get_public_page/3
+    end
+
+    field :published_feeds, list_of(:published_podcast_feed_info) do
+      resolve &PublicResolvers.Directory.get_public_feeds/3
     end
 
     field :episodes, list_of(:episode) do
@@ -149,19 +158,19 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
       arg :order_by, type: :episode_order, default_value: :published_at
       arg :order, type: :sort_order, default_value: :desc
 
-      resolve &Resolvers.Editor.get_episodes/3
+      resolve &AdminResolvers.Editor.get_episodes/3
     end
 
     field :episodes_count, :integer do
-      resolve &Resolvers.Editor.get_episodes_count/3
+      resolve &AdminResolvers.Editor.get_episodes_count/3
     end
 
     field :contributions, list_of(:contribution) do
-      resolve &Resolvers.Editor.get_contributions/3
+      resolve &AdminResolvers.Editor.get_contributions/3
     end
 
     field :statistics, :statistics do
-      resolve &Resolvers.Statistics.get_statistics/3
+      resolve &AdminResolvers.Statistics.get_statistics/3
     end
   end
 
@@ -173,34 +182,34 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
   object :statistic_agent_metric do
     field :total, :user_agent_metrics do
-      resolve &Resolvers.Statistics.get_total_statistics/3
+      resolve &AdminResolvers.Statistics.get_total_statistics/3
     end
 
     field :monthly, list_of(:statistic_agent_time_values) do
       arg :from, type: :simple_month, default_value: nil
       arg :until, type: :simple_month, default_value: nil
 
-      resolve &Resolvers.Statistics.get_monthly_statistics/3
+      resolve &AdminResolvers.Statistics.get_monthly_statistics/3
     end
   end
 
   object :statistic_metric do
     field :total, :integer do
-      resolve &Resolvers.Statistics.get_total_statistics/3
+      resolve &AdminResolvers.Statistics.get_total_statistics/3
     end
 
     field :monthly, list_of(:statistic_time_values) do
       arg :from, type: :simple_month, default_value: nil
       arg :until, type: :simple_month, default_value: nil
 
-      resolve &Resolvers.Statistics.get_monthly_statistics/3
+      resolve &AdminResolvers.Statistics.get_monthly_statistics/3
     end
 
     field :daily, list_of(:statistic_time_values) do
       arg :from, type: :simple_day, default_value: nil
       arg :until, type: :simple_day, default_value: nil
 
-      resolve &Resolvers.Statistics.get_daily_statistics/3
+      resolve &AdminResolvers.Statistics.get_daily_statistics/3
     end
   end
 
@@ -252,7 +261,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :summary_source, :string
 
     field :image, :string do
-      resolve &Resolvers.Editor.get_image_url/3
+      resolve &AdminResolvers.Editor.get_image_url/3
     end
 
     field :number, :integer
@@ -263,12 +272,16 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
     field :slug, :string
 
+    field :public_page, :string do
+      resolve &PublicResolvers.Directory.get_public_page/3
+    end
+
     field :is_published, :boolean do
-      resolve &Resolvers.Editor.is_published/3
+      resolve &AdminResolvers.Editor.is_published/3
     end
 
     field :podcast, :podcast do
-      resolve &Resolvers.Editor.find_podcast/3
+      resolve &AdminResolvers.Editor.find_podcast/3
     end
 
     field :audio, :audio do
@@ -282,11 +295,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :duration, :integer
 
     field :duration_string, :string do
-      resolve &Resolvers.Editor.get_duration_string/3
+      resolve &AdminResolvers.Editor.get_duration_string/3
     end
 
     field :image, :string do
-      resolve &Resolvers.Editor.get_image_url/3
+      resolve &AdminResolvers.Editor.get_image_url/3
     end
 
     field :chapters, list_of(:chapter) do
@@ -296,11 +309,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :episodes, list_of(:episode) do
-      resolve &Resolvers.Editor.get_episodes/3
+      resolve &AdminResolvers.Editor.get_episodes/3
     end
 
     field :audio_publication, :audio_publication do
-      resolve &Resolvers.Editor.get_audio_publication/3
+      resolve &AdminResolvers.Editor.get_audio_publication/3
     end
 
     field :audio_files, list_of(:audio_file) do
@@ -320,7 +333,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :published_at, :datetime
 
     field :audio, :audio do
-      resolve &Resolvers.Editor.find_audio/3
+      resolve &AdminResolvers.Editor.find_audio/3
     end
   end
 

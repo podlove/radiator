@@ -3,7 +3,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
 
   import Absinthe.Resolution.Helpers
 
-  alias RadiatorWeb.GraphQL.Public.Resolvers
+  alias RadiatorWeb.GraphQL.Public.Resolvers, as: PublicResolvers
 
   @desc "A published network"
   object :published_network do
@@ -12,11 +12,11 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :slug, :string
 
     field :image, :string do
-      resolve &Resolvers.Directory.get_image_url/3
+      resolve &PublicResolvers.Directory.get_image_url/3
     end
 
     field :podcasts, list_of(:published_podcast) do
-      resolve &Resolvers.Directory.list_podcasts/3
+      resolve &PublicResolvers.Directory.list_podcasts/3
     end
   end
 
@@ -31,7 +31,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :author, :string
 
     field :image, :string do
-      resolve &Resolvers.Directory.get_image_url/3
+      resolve &PublicResolvers.Directory.get_image_url/3
     end
 
     field :language, :string
@@ -40,6 +40,14 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :owner_name, :string
     field :published_at, :datetime
     field :slug, :string
+
+    field :public_page, :string do
+      resolve &PublicResolvers.Directory.get_public_page/3
+    end
+
+    field :published_feeds, list_of(:published_podcast_feed_info) do
+      resolve &PublicResolvers.Directory.get_public_feeds/3
+    end
 
     field :episodes, list_of(:published_episode) do
       arg :page, type: :integer, default_value: 1
@@ -51,7 +59,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     end
 
     field :published_episodes_count, :integer do
-      resolve &Resolvers.Directory.get_episodes_count/3
+      resolve &PublicResolvers.Directory.get_episodes_count/3
     end
   end
 
@@ -68,7 +76,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :summary_source, :string
 
     field :image, :string do
-      resolve &Resolvers.Directory.get_image_url/3
+      resolve &PublicResolvers.Directory.get_image_url/3
     end
 
     field :number, :integer
@@ -76,8 +84,12 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :published_at, :datetime
     field :slug, :string
 
+    field :public_page, :string do
+      resolve &PublicResolvers.Directory.get_public_page/3
+    end
+
     field :podcast, :published_podcast do
-      resolve &Resolvers.Directory.find_podcast/3
+      resolve &PublicResolvers.Directory.find_podcast/3
     end
 
     field :audio, :audio do
@@ -93,7 +105,7 @@ defmodule RadiatorWeb.GraphQL.Public.Types do
     field :link, :string
 
     field :image, :string do
-      resolve &Resolvers.Directory.get_image_url/3
+      resolve &PublicResolvers.Directory.get_image_url/3
     end
   end
 end

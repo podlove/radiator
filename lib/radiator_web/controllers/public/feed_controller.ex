@@ -2,6 +2,7 @@ defmodule RadiatorWeb.Public.FeedController do
   use RadiatorWeb, :controller
 
   alias Radiator.Directory
+  alias Radiator.Directory.Podcast
   alias Radiator.Feed.Builder
 
   @items_per_page 50
@@ -26,7 +27,8 @@ defmodule RadiatorWeb.Public.FeedController do
       # I don't gain much.
       #  - View Layer? That's too late in the stack I think?
 
-      Logger.debug("I am here")
+      # TODO: multpile feeds per podcast, we need to know who we are
+      feed_url = Podcast.feed_url(podcast)
 
       xml =
         Builder.new(
@@ -34,9 +36,9 @@ defmodule RadiatorWeb.Public.FeedController do
             podcast: podcast,
             episodes: episodes,
             urls: %{
-              main: self_url(conn, podcast),
-              self: self_url(conn, podcast),
-              page_template: page_url_template(conn, podcast)
+              main: feed_url,
+              self: feed_url,
+              page_template: page_url_template(feed_url)
             }
           },
           items_per_page: @items_per_page,
@@ -54,12 +56,8 @@ defmodule RadiatorWeb.Public.FeedController do
   # todo: enforce canonical URL when ?page=1 is set
   def show(conn, params, assigns), do: show(conn, Map.put(params, "page", "1"), assigns)
 
-  defp self_url(conn, podcast) do
-    Routes.feed_url(conn, :show, podcast.slug)
-  end
-
-  defp page_url_template(conn, podcast) do
-    self_url(conn, podcast)
+  defp page_url_template(feed_url) do
+    feed_url
     |> URI.parse()
     |> Map.put(:query, "page=:page:")
     |> URI.to_string()
