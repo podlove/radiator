@@ -22,7 +22,6 @@ type Audio {
   episodes: [Episode]
   id: ID!
   image: String
-  title: String
 }
 
 """Audio File"""
@@ -46,6 +45,8 @@ type AudioPublication {
 
 """A chapter in an episode"""
 type Chapter {
+  duration: Int
+  durationString: String
   image: String
   link: String
   start: Int
@@ -92,6 +93,7 @@ type Episode {
   isPublished: Boolean
   number: Int
   podcast: Podcast
+  publicPage: String
 
   """drafted, scheduled, published, depublished"""
   publishState: String
@@ -129,6 +131,7 @@ type Network {
   people: [Person]
   podcasts: [Podcast]
   slug: String
+  statistics: Statistics
   title: String
 }
 
@@ -174,9 +177,12 @@ type Podcast {
   lastBuiltAt: DateTime
   ownerEmail: String
   ownerName: String
+  publicPage: String
   publishedAt: DateTime
+  publishedFeeds: [PublishedPodcastFeedInfo]
   shortId: String
   slug: String
+  statistics: Statistics
   subtitle: String
   summary: String
   title: String
@@ -236,6 +242,7 @@ type PublishedEpisode {
   image: String
   number: Int
   podcast: PublishedPodcast
+  publicPage: String
   publishedAt: DateTime
   shortId: String
   slug: String
@@ -265,13 +272,21 @@ type PublishedPodcast {
   lastBuiltAt: DateTime
   ownerEmail: String
   ownerName: String
+  publicPage: String
   publishedAt: DateTime
   publishedEpisodesCount: Int
+  publishedFeeds: [PublishedPodcastFeedInfo]
   shortId: String
   slug: String
   subtitle: String
   summary: String
   title: String
+}
+
+"""Information about a radiator published rss-feed"""
+type PublishedPodcastFeedInfo {
+  enclosureMimeType: String
+  feedUrl: String
 }
 
 type RootMutationType {
@@ -360,9 +375,48 @@ type Session {
   username: String
 }
 
+"""
+The `SimpleDay` scalar type represents a date with day precision in form YYYY-MM-DD.
+Example: "2019-03-28"
+"""
+scalar SimpleDay
+
+"""
+The `SimpleMonth` scalar type represents a date with only month precision.
+Example: "2019-03"
+"""
+scalar SimpleMonth
+
 enum SortOrder {
   ASC
   DESC
+}
+
+type StatisticAgentMetric {
+  monthly(from: SimpleMonth, until: SimpleMonth): [StatisticAgentTimeValues]
+  total: UserAgentMetrics
+}
+
+type StatisticAgentTimeValues {
+  date: String
+  value: UserAgentMetrics
+}
+
+type StatisticMetric {
+  daily(from: SimpleDay, until: SimpleDay): [StatisticTimeValues]
+  monthly(from: SimpleMonth, until: SimpleMonth): [StatisticTimeValues]
+  total: Int
+}
+
+type Statistics {
+  downloads: StatisticMetric
+  listeners: StatisticMetric
+  userAgents: StatisticAgentMetric
+}
+
+type StatisticTimeValues {
+  date: String
+  value: Int
 }
 
 """A radiator instance user accessible to admins and yourself"""
@@ -371,6 +425,19 @@ type User {
   email: String
   image: String
   username: String
+}
+
+type UserAgentMetrics {
+  clientName: [UserAgentRankedItem]
+  clientType: [UserAgentRankedItem]
+  deviceType: [UserAgentRankedItem]
+  osName: [UserAgentRankedItem]
+}
+
+type UserAgentRankedItem {
+  absolute: Int
+  percent: Float
+  title: String
 }
 
 ```

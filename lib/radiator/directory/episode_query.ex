@@ -101,6 +101,8 @@ defmodule Radiator.Directory.EpisodeQuery do
       {:include_downloads, _}, query ->
         query
     end)
+    # force preloading of podcast for now as we need it most of the time anyways
+    |> preload([e], [:podcast])
   end
 
   def include_downloads(query) do

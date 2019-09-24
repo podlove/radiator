@@ -108,6 +108,11 @@ defmodule Radiator.Directory.Podcast do
     Routes.episode_url(RadiatorWeb.Endpoint, :index, podcast.slug)
   end
 
+  # TODO: more than one feed per podcast
+  def feed_url(%Podcast{} = podcast) do
+    Routes.feed_url(RadiatorWeb.Endpoint, :show, podcast.slug)
+  end
+
   defp validate_color(changeset, field) do
     changeset
     |> update_change(field, fn value ->

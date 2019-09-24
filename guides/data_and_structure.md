@@ -61,7 +61,7 @@ A **Podcast** belongs to exactly one **Network**
 `shortId` | `String` | Short basis to identify a podcast in an URL, hashtag, etc. Also for easy referring to episodes. E.g. `FS` for freakshow, so an episode becomes `FS130`. Typically between 2 and 5 letters, and has to be unique inside a network as it is used for URL slugs as well.
  `title` | `String` | The name of the podcast
  `image` | `Image`  | An cover image for the podcast
- `link` | `String` | URL of the public page of the episode. defaults to `<radiator_instance_url>/<podcast_slug>` - appears as `link` in the feed.
+ `publicPage` | `String` | URL of the public page of the episode. defaults to `<radiator_instance_url>/<podcast_slug>` - appears as `link` in the feed.
  `subtitle` | `String` | The subtitle line. Is put in `description` and `itunes:subtitle` in the feed. Usually used as one line description display in podcast directories. Currently doesn't appear in iTunes anywhere prominently.
  `summary` | `String` | A longer description of the podcast. Is put in `itunes:summary` in the feed. Is displayed in the iTunes Podcast preview.
 `author` | `String` | The Author of this podcast. Prominently displayed by all directories and live players. Put in `itunes:author` for the channel.
@@ -93,7 +93,7 @@ A **Episode** belongs to exactly one **Podcast**
  `slug` | `String` | short name that usually looks good in the title of an URL. Defaults to the shortID but can be customized.
  `publishedAt` | `DateTime` | Time of publishing. Currently also used to determine if the episode has been published and is public.
  `number` | `Integer` | "Track" number of the episode in the podcast. aka `episodeNumber` will be put in `itunes:episode` in the feed, and used to generate `shortId` and `guid`
- `link` | String | URL of the public page of the episode. defaults to `<radiator_instance_url>/<podcast_slug>/<episode_slug>` - appears as `link` in the item part of the feed.
+ `publicPage` | String | URL of the public page of the episode. defaults to `<radiator_instance_url>/<podcast_slug>/<episode_slug>` - appears as `link` in the item part of the feed.
  
  
 Potential fields open for discussion:  

@@ -6,6 +6,12 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
 
   import Absinthe.Resolution.Helpers
 
+  @desc "Information about a radiator published rss-feed"
+  object :published_podcast_feed_info do
+    field :feed_url, :string
+    field :enclosure_mime_type, :string
+  end
+
   @desc "A chapter in an episode"
   object :chapter do
     field :start, :integer
