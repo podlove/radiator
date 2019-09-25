@@ -11,7 +11,7 @@ defmodule Radiator.Auth.Guardian do
   """
   def api_session_token(%Auth.User{} = user) do
     {:ok, token, _claims} =
-      encode_and_sign(user, %{}, ttl: {45, :minutes}, token_type: :api_session)
+      encode_and_sign(user, %{}, ttl: {60 * 5, :minutes}, token_type: :api_session)
 
     token
   end
