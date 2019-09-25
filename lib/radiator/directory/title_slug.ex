@@ -36,19 +36,20 @@ defmodule Radiator.Directory.TitleSlug do
   end
 
   def build_slug(sources, changeset) do
+    # FIXME: all lookup fns must use Directory.Editor.Editor to ignore published state
     lookup_fn =
       case changeset.data do
         %AudioPublication{} ->
           &Directory.get_audio_publication_by_slug/1
 
         %Podcast{} ->
-          &Directory.get_podcast_by_slug/1
+          &Directory.Editor.Editor.get_podcast_by_slug/1
 
         %Episode{} ->
           {_change_or_data, podcast_id} = Ecto.Changeset.fetch_field(changeset, :podcast_id)
 
           fn slug ->
-            Directory.get_episode_by_slug(podcast_id, slug)
+            Directory.Editor.Editor.get_episode_by_slug(podcast_id, slug)
           end
 
         %Network{} ->
