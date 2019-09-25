@@ -226,8 +226,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     Editor.list_contributions(user, audio)
   end
 
-  def is_published(entity, _, _), do: {:ok, Editor.is_published(entity)}
-
   def list_chapters(%Audio{} = audio, _args, _resolution) do
     {:ok, AudioMeta.list_chapters(audio)}
   end

@@ -136,12 +136,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :last_built_at, :datetime
     field :owner_email, :string
     field :owner_name, :string
-    field :published_at, :datetime
-    field :slug, :string
 
-    field :is_published, :boolean do
-      resolve &AdminResolvers.Editor.is_published/3
-    end
+    @desc "drafted, scheduled, published, depublished"
+    field :publish_state, :string
+    field :published_at, :datetime
+
+    field :slug, :string
 
     field :public_page, :string do
       resolve &PublicResolvers.Directory.get_public_page/3
@@ -274,10 +274,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
 
     field :public_page, :string do
       resolve &PublicResolvers.Directory.get_public_page/3
-    end
-
-    field :is_published, :boolean do
-      resolve &AdminResolvers.Editor.is_published/3
     end
 
     field :podcast, :podcast do

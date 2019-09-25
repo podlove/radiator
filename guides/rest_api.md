@@ -241,6 +241,7 @@ DELETE /api/rest/v1/networks/:id/collaborators/:username
 | `podcast[owner_name]`  | `string`  |                                                                                       |
 | `podcast[owner_email]` | `string`  |                                                                                       |
 | `podcast[slug]`        | `string`  |                                                                                       |
+| `podcast[publish_state]`  | `string`  | Publication state. "drafted", "scheduled", "published" or "unpublished". |
 
 ### Create
 
