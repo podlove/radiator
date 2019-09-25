@@ -111,7 +111,8 @@ defmodule Radiator.Factory do
     %Radiator.Directory.Podcast{
       network: build(:network),
       title: title,
-      published_at: DateTime.utc_now() |> DateTime.add(-3600, :second)
+      published_at: DateTime.utc_now() |> DateTime.add(-3600, :second),
+      publish_state: :published
     }
   end
 
@@ -119,7 +120,8 @@ defmodule Radiator.Factory do
     struct!(
       podcast_factory(),
       %{
-        published_at: DateTime.utc_now() |> DateTime.add(3600, :second)
+        published_at: DateTime.utc_now() |> DateTime.add(3600, :second),
+        publish_state: :drafted
       }
     )
   end

@@ -12,6 +12,7 @@ defmodule RadiatorWeb.GraphQL.Schema do
     Dataloader.new()
     |> Dataloader.add_source(AudioMeta, AudioMeta.DataloaderProvider.data())
     |> Dataloader.add_source(Directory, Directory.DataloaderProvider.data())
+    |> Dataloader.add_source(Directory.Editor, Directory.Editor.DataloaderProvider.data())
   end
 
   def context(ctx) do
@@ -192,47 +193,6 @@ defmodule RadiatorWeb.GraphQL.Schema do
     field :prolong_session, :session do
       middleware Middleware.RequireAuthentication
       resolve &Admin.Resolvers.Session.prolong_authenticated_session/3
-    end
-
-    @desc "Publish podcast"
-    field :publish_podcast, type: :podcast do
-      arg :id, non_null(:id)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.publish_podcast/3
-    end
-
-    @desc "Depublish podcast"
-    field :depublish_podcast, type: :podcast do
-      arg :id, non_null(:id)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.depublish_podcast/3
-    end
-
-    @desc "Depublish episode"
-    field :depublish_episode, type: :episode do
-      arg :id, non_null(:id)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.depublish_episode/3
-    end
-
-    @desc "Schedule episode"
-    field :schedule_episode, type: :episode do
-      arg :id, non_null(:id)
-      arg :datetime, non_null(:datetime)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.schedule_episode/3
-    end
-
-    @desc "Delete an episode"
-    field :delete_episode, type: :episode do
-      arg :id, non_null(:id)
-
-      middleware Middleware.RequireAuthentication
-      resolve &Admin.Resolvers.Editor.delete_episode/3
     end
   end
 end
