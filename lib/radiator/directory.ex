@@ -148,6 +148,24 @@ defmodule Radiator.Directory do
   end
 
   @doc """
+  Returns entity if it (and all encestors) is public, otherwise nil
+  """
+  def ensure_publication(entity)
+
+  def ensure_publication(nil) do
+    nil
+  end
+
+  def ensure_publication(episode = %Episode{podcast: podcast}) do
+    with true <- is_published(episode),
+         true <- is_published(podcast) do
+      episode
+    else
+      _ -> nil
+    end
+  end
+
+  @doc """
   Gets a single episode by its slug.
 
   ## Examples
@@ -159,6 +177,7 @@ defmodule Radiator.Directory do
     episodes_query(%{podcast: podcast_id, slug: slug})
     |> Repo.one()
     |> preload_for_episode()
+    |> ensure_publication()
   end
 
   def get_episode_by_slug(%Podcast{} = podcast, slug) do
@@ -169,6 +188,7 @@ defmodule Radiator.Directory do
     episodes_query(%{short_id: short_id})
     |> Repo.one()
     |> preload_for_episode()
+    |> ensure_publication()
   end
 
   def get_podcast_contributions(podcast = %Podcast{}) do
@@ -286,6 +306,7 @@ defmodule Radiator.Directory do
     }
   end
 
+  def is_published(nil), do: false
   def is_published(%{publish_state: :drafted}), do: false
   def is_published(%{publish_state: :scheduled}), do: false
   def is_published(%{publish_state: :depublished}), do: false
