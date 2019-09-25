@@ -104,8 +104,8 @@ defmodule Radiator.Media.AudioFile do
   end
 
   # arc override
-  def storage_dir(_version, {_file, audio}) do
-    "audio/#{audio.id}"
+  def storage_dir(_version, {_file, audio_file}) do
+    "audio/#{audio_file.audio_id}"
   end
 
   # arc override

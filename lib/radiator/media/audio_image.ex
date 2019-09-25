@@ -5,7 +5,7 @@ defmodule Radiator.Media.AudioImage do
 
   @versions [:original, :thumbnail]
 
-  def filename(version, {_file, _episode}) do
+  def filename(version, {_file, _audio}) do
     "cover_#{version}"
   end
 

@@ -89,11 +89,19 @@ defmodule Radiator.Directory.Editor.Manager do
   #       we need to define a way, maybe even a separate API,
   #       to remove or replace an episode audio.
   def create_audio(episode = %Episode{}, audio_attrs, episode_attrs) do
+    # we need the audio to have an id before we can save the image
+    {update_attrs, insert_attrs} = Map.split(audio_attrs, [:image, "image"])
+
     Multi.new()
     |> Multi.insert(:audio, fn _ ->
-      %Audio{} |> Audio.changeset(audio_attrs)
+      %Audio{}
+      |> Audio.changeset(insert_attrs)
     end)
-    |> Multi.update(:episode, fn %{audio: audio} ->
+    |> Multi.update(:audio_updated, fn %{audio: audio} ->
+      audio
+      |> Audio.changeset(update_attrs)
+    end)
+    |> Multi.update(:episode, fn %{audio_updated: audio} ->
       episode
       |> Repo.preload(:audio)
       |> Ecto.Changeset.change()
@@ -102,7 +110,7 @@ defmodule Radiator.Directory.Editor.Manager do
     end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{audio: audio}} -> {:ok, audio}
+      {:ok, %{audio_updated: audio}} -> {:ok, audio}
       something -> something
     end
   end
@@ -138,7 +146,7 @@ defmodule Radiator.Directory.Editor.Manager do
   end
 
   def create_audio_file(audio, attrs \\ %{}) do
-    Ecto.build_assoc(audio, :audio_files)
+    %AudioFile{audio_id: audio.id}
     |> AudioFile.changeset(attrs)
     |> Repo.insert()
   end

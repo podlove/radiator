@@ -11,7 +11,7 @@
         <%= @episode.summary %>
       </div>
     <% end %>
-    <p class="text-gray-900 text-xs"><%= format_date(@episode.published_at) %> - <%= format_normal_playtime_round_to_seconds @episode.audio.duration %></p> 
+    <p class="text-gray-900 text-xs"><%= format_date(@episode.published_at) %> - <%= if @episode.audio != nil and @episode.audio.duration != nil, do: format_normal_playtime_round_to_seconds(@episode.audio.duration) %></p> 
   </div>
 </div>
 
