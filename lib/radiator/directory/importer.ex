@@ -129,9 +129,6 @@ defmodule Radiator.Directory.Importer do
 
     {:ok, podcast} = create_podcast(user, network, feed, short_id)
 
-    ## TODO: publishing needs to work differently here and as a separate step eventually
-    {:ok, podcast} = Editor.publish_podcast(user, podcast)
-
     TaskWorker.set_in_description(task_worker, :subject, {Podcast, podcast.id()})
 
     TaskWorker.finish_setup(task_worker)
@@ -150,7 +147,7 @@ defmodule Radiator.Directory.Importer do
           summary: episode.summary || episode.description,
           summary_html: episode.content_encoded,
           published_at: episode.pub_date,
-          publish_state: :published,
+          publish_state: :drafted,
           number: episode.episode,
           short_id: Episode.generate_short_id(short_id, episode.episode)
         })
