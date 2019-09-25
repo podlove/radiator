@@ -139,14 +139,16 @@ defmodule Radiator.DirectoryTest do
       assert {:ok, %Podcast{published_at: nil}} = Editor.get_podcast(user, podcast.id)
     end
 
-    test "depublish_podcast/1 removes a podcasts published_at date" do
-      podcast = insert(:unpublished_podcast, published_at: DateTime.utc_now())
+    test "depublish_podcast/1 keeps podcast published_at date" do
+      podcast = insert(:podcast)
+      published_at = podcast.published_at
 
-      assert {:ok, %Podcast{published_at: nil}} = Editor.Manager.depublish_podcast(podcast)
+      assert {:ok, %Podcast{published_at: ^published_at, publish_state: :depublished}} =
+               Editor.Manager.depublish_podcast(podcast)
     end
 
     test "depublish_podcast/1 with invalid data returns error changeset" do
-      podcast = insert(:unpublished_podcast, published_at: DateTime.utc_now())
+      podcast = insert(:podcast)
       published_at = podcast.published_at
 
       assert {:error, %Ecto.Changeset{}} =

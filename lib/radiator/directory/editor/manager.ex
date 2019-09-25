@@ -410,7 +410,7 @@ defmodule Radiator.Directory.Editor.Manager do
       {:error, %Ecto.Changeset{}}
   """
   def depublish_podcast(%Podcast{} = podcast) do
-    update_podcast(podcast, %{published_at: nil})
+    update_podcast(podcast, %{publish_state: :depublished})
   end
 
   @doc """
