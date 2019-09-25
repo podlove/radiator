@@ -285,7 +285,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :audio, :audio do
-      resolve dataloader(Directory)
+      resolve dataloader(Directory.Editor)
     end
   end
 
@@ -317,11 +317,11 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     end
 
     field :audio_files, list_of(:audio_file) do
-      resolve dataloader(Directory)
+      resolve dataloader(Directory.Editor)
     end
 
     field :contributions, list_of(:contribution) do
-      resolve dataloader(Directory)
+      resolve dataloader(Directory.Editor)
     end
   end
 

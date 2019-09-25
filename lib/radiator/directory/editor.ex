@@ -476,9 +476,17 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
-  defp preloaded_episode(episode) do
+  def preloaded_episode(episode) do
     chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
     Repo.preload(episode, [:podcast, audio: [chapters: chapter_query, audio_files: []]])
+  end
+
+  def preloaded_podcast(podcast) do
+    contributions_query =
+      PodcastContribution
+      |> order_by(asc: :position)
+
+    Repo.preload(podcast, [:network, contributions: {contributions_query, [:person, :role]}])
   end
 
   def is_published(%{publish_state: :drafted}), do: false

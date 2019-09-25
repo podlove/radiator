@@ -7,9 +7,11 @@ defmodule Radiator.Directory.Editor.Editor do
   alias Ecto.Multi
 
   alias Radiator.Repo
+  alias Radiator.Directory
   alias Radiator.Media.AudioFile
 
   alias Radiator.Directory.{
+    PodcastQuery,
     Network,
     Podcast,
     Audio
@@ -22,6 +24,39 @@ defmodule Radiator.Directory.Editor.Editor do
   }
 
   require Logger
+
+  @doc """
+  Gets a single podcast by its slug.
+
+  ## Examples
+
+      iex> get_podcast_by_slug(slug)
+      %Podcast{}
+  """
+  def get_podcast_by_slug(slug) do
+    Podcast
+    |> PodcastQuery.find_by_slug(slug)
+    |> Repo.one()
+    |> Directory.Editor.preloaded_podcast()
+  end
+
+  @doc """
+  Gets a single episode by its slug.
+
+  ## Examples
+
+      iex> get_episode_by_slug(podcast, slug)
+      %Episode{}
+  """
+  def get_episode_by_slug(podcast_id, slug) when is_integer(podcast_id) do
+    Directory.episodes_query(%{podcast: podcast_id, slug: slug})
+    |> Repo.one()
+    |> Directory.Editor.preloaded_episode()
+  end
+
+  def get_episode_by_slug(%Podcast{} = podcast, slug) do
+    get_episode_by_slug(podcast.id, slug)
+  end
 
   def create_person(%Network{id: network_id}, attrs) do
     Logger.debug("creating person --- #{inspect(attrs)}")

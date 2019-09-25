@@ -1,4 +1,4 @@
-defmodule Radiator.Directory.DataloaderProvider do
+defmodule Radiator.Directory.Editor.DataloaderProvider do
   import Ecto.Query, warn: false
 
   alias Radiator.Repo
@@ -12,7 +12,7 @@ defmodule Radiator.Directory.DataloaderProvider do
     args
     # pagination for gql is handled in resolver
     |> Map.put(:items_per_page, :unlimited)
-    |> Map.put(:published, true)
+    |> Map.put(:published, :any)
     |> EpisodeQuery.build()
   end
 

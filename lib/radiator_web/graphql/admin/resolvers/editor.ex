@@ -135,27 +135,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     end
   end
 
-  def create_network(_parent, %{network: args}, %{context: %{current_user: user}}) do
-    case Editor.create_network(user, args) do
-      {:ok, network} -> {:ok, network}
-      @not_authorized_match -> @not_authorized_response
-      _ -> {:error, "Could not create network with #{args}"}
-    end
-  end
-
-  def update_network(_parent, %{id: id, network: args}, %{context: %{current_user: user}}) do
-    with_network user, id do
-      fn network ->
-        Editor.update_network(user, network, args)
-        |> case do
-          @not_authorized_match -> @not_authorized_response
-          {:error, changeset = %Ecto.Changeset{}} -> {:error, changeset}
-          {:ok, network} -> {:ok, network}
-        end
-      end
-    end
-  end
-
   def list_collaborators(%Network{id: id}, _args, %{context: %{current_user: user}}) do
     with_network user, id do
       fn network -> Editor.list_collaborators(user, network) end
@@ -188,48 +167,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   def find_podcast(_parent, %{id: id}, %{context: %{current_user: user}}) do
     with_podcast user, id do
       fn podcast -> {:ok, podcast} end
-    end
-  end
-
-  def create_podcast(_parent, %{podcast: args, network_id: network_id}, %{
-        context: %{current_user: user}
-      }) do
-    with_network user, network_id do
-      fn network ->
-        Editor.create_podcast(user, network, args)
-      end
-    end
-  end
-
-  def update_podcast(_parent, %{id: id, podcast: args}, %{context: %{current_user: user}}) do
-    with_podcast user, id do
-      fn podcast ->
-        Editor.update_podcast(user, podcast, args)
-      end
-    end
-  end
-
-  def publish_podcast(_parent, %{id: id}, %{context: %{current_user: user}}) do
-    with_podcast user, id do
-      fn podcast ->
-        Editor.publish_podcast(user, podcast)
-      end
-    end
-  end
-
-  def depublish_podcast(_parent, %{id: id}, %{context: %{current_user: user}}) do
-    with_podcast user, id do
-      fn podcast ->
-        Editor.depublish_podcast(user, podcast)
-      end
-    end
-  end
-
-  def delete_podcast(_parent, %{id: id}, %{context: %{current_user: user}}) do
-    with_podcast user, id do
-      fn podcast ->
-        Editor.delete_podcast(user, podcast)
-      end
     end
   end
 
@@ -287,59 +224,6 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
 
   def get_contributions(audio = %Audio{}, _, %{context: %{current_user: user}}) do
     Editor.list_contributions(user, audio)
-  end
-
-  def create_episode(_parent, %{podcast_id: podcast_id, episode: args}, %{
-        context: %{current_user: user}
-      }) do
-    with_podcast user, podcast_id do
-      fn podcast ->
-        Editor.create_episode(user, podcast, args)
-      end
-    end
-  end
-
-  def update_episode(_parent, %{id: id, episode: args}, %{context: %{current_user: user}}) do
-    with_episode user, id do
-      fn episode ->
-        Editor.update_episode(user, episode, args)
-      end
-    end
-  end
-
-  def publish_episode(_parent, %{id: id}, %{context: %{current_user: user}}) do
-    with_episode user, id do
-      fn episode ->
-        Editor.publish_episode(user, episode)
-      end
-    end
-  end
-
-  def depublish_episode(_parent, %{id: id}, %{context: %{current_user: user}}) do
-    with_episode user, id do
-      fn episode ->
-        Editor.depublish_episode(user, episode)
-      end
-    end
-  end
-
-  def schedule_episode(_parent, %{id: id, datetime: datetime}, %{
-        context: %{current_user: user}
-      }) do
-    with_episode user, id do
-      fn episode ->
-        Editor.schedule_episode(user, episode, datetime)
-      end
-    end
-  end
-
-  # todo: do not use Manager context here
-  def delete_episode(_parent, %{id: id}, %{context: %{current_user: user}}) do
-    with_episode user, id do
-      fn episode ->
-        Editor.delete_episode(user, episode)
-      end
-    end
   end
 
   def is_published(entity, _, _), do: {:ok, Editor.is_published(entity)}
