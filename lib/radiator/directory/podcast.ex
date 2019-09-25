@@ -104,14 +104,18 @@ defmodule Radiator.Directory.Podcast do
     PodcastImage.url({podcast.image, podcast})
   end
 
-  def public_url(%Podcast{} = podcast) do
-    Routes.episode_url(RadiatorWeb.Endpoint, :index, podcast.slug)
+  def public_url(%Podcast{slug: pod_slug}) when is_binary(pod_slug) do
+    Routes.episode_url(RadiatorWeb.Endpoint, :index, pod_slug)
   end
 
+  def public_url(%Podcast{}), do: nil
+
   # TODO: more than one feed per podcast
-  def feed_url(%Podcast{} = podcast) do
-    Routes.feed_url(RadiatorWeb.Endpoint, :show, podcast.slug)
+  def feed_url(%Podcast{slug: pod_slug}) when is_binary(pod_slug) do
+    Routes.feed_url(RadiatorWeb.Endpoint, :show, pod_slug)
   end
+
+  def feed_url(%Podcast{}), do: nil
 
   defp validate_color(changeset, field) do
     changeset

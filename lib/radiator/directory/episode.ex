@@ -71,9 +71,12 @@ defmodule Radiator.Directory.Episode do
 
   def public_url(%Episode{} = episode), do: public_url(episode, episode.podcast)
 
-  def public_url(%Episode{} = episode, %Podcast{} = podcast) do
-    Routes.episode_url(RadiatorWeb.Endpoint, :show, podcast.slug, episode.slug)
+  def public_url(%Episode{slug: ep_slug}, %Podcast{slug: pod_slug})
+      when is_binary(ep_slug) and is_binary(pod_slug) do
+    Routes.episode_url(RadiatorWeb.Endpoint, :show, pod_slug, ep_slug)
   end
+
+  def public_url(_, _), do: nil
 
   def construct_short_id(%Episode{} = episode, %Podcast{} = podcast) do
     podcast.short_id <>

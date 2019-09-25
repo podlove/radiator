@@ -1,6 +1,6 @@
 defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
   alias Radiator.Directory
-  alias Radiator.Directory.{Episode, Podcast, Network}
+  alias Radiator.Directory.{Episode, Podcast, Network, Audio}
   alias Radiator.AudioMeta.Chapter
 
   import RadiatorWeb.FormatHelpers, only: [format_normal_playtime: 1]
@@ -84,8 +84,11 @@ defmodule RadiatorWeb.GraphQL.Public.Resolvers.Directory do
   def get_public_feeds(%Podcast{} = podcast, _args, _resolution) do
     enclosure_mime_type =
       case Directory.get_any_episode(podcast) do
-        [%Episode{} = episode] -> Episode.enclosure_mime_type(episode)
-        _ -> "audio/mpeg"
+        [%Episode{audio: %Audio{audio_files: [_enclosure]}} = episode] ->
+          Episode.enclosure_mime_type(episode)
+
+        _ ->
+          "audio/mpeg"
       end
 
     feedlist = [
