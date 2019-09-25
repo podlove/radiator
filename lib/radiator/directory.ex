@@ -263,12 +263,14 @@ defmodule Radiator.Directory do
       AudioContribution
       |> order_by(asc: :position)
 
+    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
+
     Repo.preload(episode, [
       :podcast,
       audio: [
-        :chapters,
-        :audio_files,
-        :contributors,
+        chapters: chapter_query,
+        audio_files: [],
+        contributors: [],
         contributions: {contributions_query, [:person, :role]}
       ]
     ])
