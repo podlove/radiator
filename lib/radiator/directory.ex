@@ -118,7 +118,7 @@ defmodule Radiator.Directory do
   end
 
   @doc """
-  Gets a single podcast by its slug.
+  Gets a single published podcast by its slug.
 
   ## Examples
 
@@ -166,7 +166,7 @@ defmodule Radiator.Directory do
   end
 
   @doc """
-  Gets a single episode by its slug.
+  Gets a single published episode by its slug.
 
   ## Examples
 
