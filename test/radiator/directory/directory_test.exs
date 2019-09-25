@@ -89,70 +89,68 @@ defmodule Radiator.DirectoryTest do
       assert %Ecto.Changeset{} = Editor.Manager.change_podcast(podcast)
     end
 
-    test "publish_podcast/1 sets a published_at date" do
+    test "publish/1 sets a published_at date" do
       podcast = insert(:podcast, published_at: nil)
 
-      assert {:ok, %Podcast{} = published_podcast} = Editor.Manager.publish_podcast(podcast)
+      assert {:ok, %Podcast{} = published_podcast} = Editor.Manager.publish(podcast)
       assert published_podcast.published_at != nil
       assert :gt == DateTime.compare(DateTime.utc_now(), published_podcast.published_at)
     end
 
-    test "publish_podcast/1 generates a slug from title" do
+    test "publish/1 generates a slug from title" do
       podcast = insert(:podcast, published_at: nil)
 
-      {:ok, published_podcast} = Editor.Manager.publish_podcast(podcast)
+      {:ok, published_podcast} = Editor.Manager.publish(podcast)
       assert is_binary(published_podcast.slug)
       assert String.length(published_podcast.slug) > 0
     end
 
-    test "publish_podcast/1 generates sequential slugs" do
+    test "publish/1 generates sequential slugs" do
       {:ok, existing_podcast} =
         insert(:podcast)
-        |> Editor.Manager.publish_podcast()
+        |> Editor.Manager.publish()
 
       {:ok, published_podcast1} =
         insert(:podcast, title: existing_podcast.title)
-        |> Editor.Manager.publish_podcast()
+        |> Editor.Manager.publish()
 
       assert published_podcast1.slug == "#{existing_podcast.slug}-1"
 
       {:ok, published_podcast2} =
         insert(:podcast, title: existing_podcast.title)
-        |> Editor.Manager.publish_podcast()
+        |> Editor.Manager.publish()
 
       assert published_podcast2.slug == "#{existing_podcast.slug}-2"
 
       {:ok, published_podcast3} =
         insert(:podcast, title: existing_podcast.title)
-        |> Editor.Manager.publish_podcast()
+        |> Editor.Manager.publish()
 
       assert published_podcast3.slug == "#{existing_podcast.slug}-3"
     end
 
-    test "publish_podcast/1 with invalid data returns error changeset" do
+    test "publish/1 with invalid data returns error changeset" do
       podcast = insert(:unpublished_podcast, published_at: nil)
       user = insert(:user) |> make_owner(podcast)
 
-      assert {:error, %Ecto.Changeset{}} =
-               Editor.Manager.publish_podcast(%{podcast | :title => nil})
+      assert {:error, %Ecto.Changeset{}} = Editor.Manager.publish(%{podcast | :title => nil})
 
       assert {:ok, %Podcast{published_at: nil}} = Editor.get_podcast(user, podcast.id)
     end
 
-    test "depublish_podcast/1 keeps podcast published_at date" do
+    test "depublish/1 sets podcasts state to :depublished" do
       podcast = insert(:podcast)
       published_at = podcast.published_at
 
       assert {:ok, %Podcast{published_at: ^published_at, publish_state: :depublished}} =
-               Editor.Manager.depublish_podcast(podcast)
+               Editor.Manager.depublish(podcast)
     end
 
     test "depublish_podcast/1 with invalid data returns error changeset" do
       podcast = insert(:podcast)
       published_at = podcast.published_at
 
-      assert {:error, %Ecto.Changeset{}} =
-               Editor.Manager.depublish_podcast(%{podcast | :title => nil})
+      assert {:error, %Ecto.Changeset{}} = Editor.Manager.depublish(%{podcast | :title => nil})
 
       assert %Podcast{published_at: ^published_at} = Directory.get_podcast(podcast.id)
     end
@@ -242,7 +240,7 @@ defmodule Radiator.DirectoryTest do
     test "publish_episode/1 sets a published_at date" do
       episode = insert(:episode, published_at: nil)
 
-      assert {:ok, %Episode{} = published_episode} = Editor.Manager.publish_episode(episode)
+      assert {:ok, %Episode{} = published_episode} = Editor.Manager.publish(episode)
       assert published_episode.publish_state == :published
       assert published_episode.published_at != nil
       assert :gt == DateTime.compare(DateTime.utc_now(), published_episode.published_at)
@@ -251,7 +249,7 @@ defmodule Radiator.DirectoryTest do
     test "publish_episode/1 generates a slug from title" do
       episode = insert(:episode, published_at: nil)
 
-      {:ok, published_episode} = Editor.Manager.publish_episode(episode)
+      {:ok, published_episode} = Editor.Manager.publish(episode)
       assert is_binary(published_episode.slug)
       assert String.length(published_episode.slug) > 0
     end
@@ -261,14 +259,14 @@ defmodule Radiator.DirectoryTest do
 
       {:ok, existing_episode} =
         insert(:episode, %{podcast: podcast})
-        |> Editor.Manager.publish_episode()
+        |> Editor.Manager.publish()
 
       {:ok, published_episode1} =
         insert(:episode,
           title: existing_episode.title,
           podcast: podcast
         )
-        |> Editor.Manager.publish_episode()
+        |> Editor.Manager.publish()
 
       assert published_episode1.slug == "#{existing_episode.slug}-1"
 
@@ -277,7 +275,7 @@ defmodule Radiator.DirectoryTest do
           title: existing_episode.title,
           podcast: podcast
         )
-        |> Editor.Manager.publish_episode()
+        |> Editor.Manager.publish()
 
       assert published_episode2.slug == "#{existing_episode.slug}-2"
 
@@ -286,7 +284,7 @@ defmodule Radiator.DirectoryTest do
           title: existing_episode.title,
           podcast: podcast
         )
-        |> Editor.Manager.publish_episode()
+        |> Editor.Manager.publish()
 
       assert published_episode3.slug == "#{existing_episode.slug}-3"
     end

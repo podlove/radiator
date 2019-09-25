@@ -206,7 +206,7 @@ defmodule Radiator.Directory.Editor do
 
   def publish_podcast(actor = %Auth.User{}, podcast = %Podcast{}) do
     if has_permission(actor, podcast, :manage) do
-      Editor.Manager.publish_podcast(podcast)
+      Editor.Manager.publish(podcast)
     else
       @not_authorized_match
     end
@@ -214,7 +214,7 @@ defmodule Radiator.Directory.Editor do
 
   def depublish_podcast(actor = %Auth.User{}, podcast = %Podcast{}) do
     if has_permission(actor, podcast, :manage) do
-      Editor.Manager.depublish_podcast(podcast)
+      Editor.Manager.depublish(podcast)
     else
       @not_authorized_match
     end
@@ -393,7 +393,7 @@ defmodule Radiator.Directory.Editor do
 
   def publish_episode(actor = %Auth.User{}, episode = %Episode{}) do
     if has_permission(actor, episode, :manage) do
-      Editor.Manager.publish_episode(episode)
+      Editor.Manager.publish(episode)
     else
       @not_authorized_match
     end
@@ -401,7 +401,7 @@ defmodule Radiator.Directory.Editor do
 
   def depublish_episode(actor = %Auth.User{}, episode = %Episode{}) do
     if has_permission(actor, episode, :manage) do
-      Editor.Manager.depublish_episode(episode)
+      Editor.Manager.depublish(episode)
     else
       @not_authorized_match
     end
@@ -409,7 +409,7 @@ defmodule Radiator.Directory.Editor do
 
   def schedule_episode(actor = %Auth.User{}, episode = %Episode{}, datetime = %DateTime{}) do
     if has_permission(actor, episode, :manage) do
-      Editor.Manager.schedule_episode(episode, datetime)
+      Editor.Manager.schedule(episode, datetime)
     else
       @not_authorized_match
     end
@@ -477,7 +477,8 @@ defmodule Radiator.Directory.Editor do
   end
 
   def preloaded_episode(episode) do
-    Repo.preload(episode, [:podcast, audio: [:chapters, :audio_files]])
+    chapter_query = Radiator.AudioMeta.Chapter.ordered_query()
+    Repo.preload(episode, [:podcast, audio: [chapters: chapter_query, audio_files: []]])
   end
 
   def preloaded_podcast(podcast) do

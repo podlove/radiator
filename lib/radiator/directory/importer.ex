@@ -129,9 +129,6 @@ defmodule Radiator.Directory.Importer do
 
     {:ok, podcast} = create_podcast(user, network, feed, short_id)
 
-    ## TODO: publishing needs to work differently here and as a separate step eventually
-    {:ok, podcast} = Editor.publish_podcast(user, podcast)
-
     TaskWorker.set_in_description(task_worker, :subject, {Podcast, podcast.id()})
 
     TaskWorker.finish_setup(task_worker)
@@ -150,7 +147,7 @@ defmodule Radiator.Directory.Importer do
           summary: episode.summary || episode.description,
           summary_html: episode.content_encoded,
           published_at: episode.pub_date,
-          publish_state: :published,
+          publish_state: :drafted,
           number: episode.episode,
           short_id: Episode.generate_short_id(short_id, episode.episode)
         })
@@ -277,69 +274,6 @@ defmodule Radiator.Directory.Importer do
       language: feed.language,
       short_id: short_id
     })
-  end
-
-  def import_from_url(user = %Auth.User{}, network = %Network{}, url) do
-    metalove_podcast = Metalove.get_podcast(url)
-
-    feed =
-      Metalove.PodcastFeed.get_by_feed_url_await_all_pages(
-        metalove_podcast.main_feed_url,
-        120_000
-      )
-
-    # deduce short_id
-    short_id = short_id_from_metalove_podcast(feed)
-
-    {:ok, podcast} = create_podcast(user, network, feed, short_id)
-
-    {:ok, podcast} = Editor.publish_podcast(user, podcast)
-
-    metalove_episodes =
-      feed.episodes
-      |> Enum.map(fn episode_id -> Metalove.Episode.get_by_episode_id(episode_id) end)
-
-    episodes =
-      metalove_episodes
-      |> Enum.map(fn episode ->
-        {:ok, new_episode} =
-          Editor.Manager.create_episode(podcast, %{
-            guid: episode.guid,
-            title: episode.title,
-            subtitle: shortsafe_string(episode.subtitle || episode.description),
-            summary: episode.summary || episode.description,
-            summary_html: episode.content_encoded,
-            published_at: episode.pub_date,
-            publish_state: :published,
-            number: episode.episode
-          })
-
-        {:ok, audio} =
-          Editor.Manager.create_audio(new_episode, %{
-            published_at: episode.pub_date,
-            duration: episode.duration && parse_chapter_time(episode.duration)
-          })
-
-        if episode.chapters do
-          Enum.each(episode.chapters, fn chapter ->
-            attrs = %{
-              start: parse_chapter_time(chapter.start),
-              title: chapter.title,
-              link: Map.get(chapter, :href),
-              image: Map.get(chapter, :image)
-            }
-
-            Radiator.AudioMeta.create_chapter(audio, attrs)
-          end)
-        end
-
-        new_episode
-      end)
-
-    # TODO: make optional, better structured, report progress and stuff
-    spawn(__MODULE__, :import_enclosures, [user, podcast, feed])
-
-    {:ok, %{podcast: podcast, episodes: episodes, metalove: %{feed: feed}}}
   end
 
   defp parse_chapter_time(time) when is_binary(time) do

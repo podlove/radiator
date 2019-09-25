@@ -248,92 +248,59 @@ defmodule Radiator.Directory.Editor.Manager do
   end
 
   @doc """
-  Publishes a single episode by giving it a `published_at` date.
+  Publishes a `Podcast`, `Episode` or `AudioPublication`, sets `publication_date` to now if not set.
 
   ## Examples
 
-      iex> publish_episode(episode)
+      iex> publish(episode)
       {:ok, %Episode{}}
 
-      iex> publish_episode(bad_value)
+      iex> publish(bad_value)
       {:error, %Ecto.Changeset{}}
   """
-  def publish_episode(%Episode{} = episode) do
-    publish(episode)
-  end
-
-  @doc """
-  Depublishes a single episode by removing its `published_at` date.
-
-  ## Examples
-
-      iex> depublish_episode(episode)
-      {:ok, %Episode{}}
-
-      iex> depublish_episode(bad_value)
-      {:error, %Ecto.Changeset{}}
-  """
-  def depublish_episode(%Episode{} = episode) do
-    depublish(episode)
-  end
-
-  @doc """
-  Shedules episode for publication by giving it a future `published_at` date.
-
-  ## Examples
-
-      iex> schedule_episode(episode, datetime)
-      {:ok, %Episode{}}
-
-      iex> schedule_episode(bad_value, datetime)
-      {:error, %Ecto.Changeset{}}
-  """
-  def schedule_episode(episode = %Episode{}, datetime = %DateTime{}) do
-    schedule(episode, datetime)
-  end
-
-  def publish(subject = %AudioPublication{}) do
+  def publish(subject = %type{}) when type in [Podcast, Episode, AudioPublication] do
     subject
-    |> AudioPublication.changeset(%{publish_state: :published})
+    |> type.changeset(%{publish_state: :published})
     |> Repo.update()
   end
 
-  def publish(subject = %Episode{}) do
+  @doc """
+  Depublishes a `Podcast`, `Episode` or `AudioPublication`.
+
+  ## Examples
+
+      iex> depublish(episode)
+      {:ok, %Episode{}}
+
+      iex> depublish(bad_value)
+      {:error, %Ecto.Changeset{}}
+  """
+  def depublish(subject = %type{}) when type in [Podcast, Episode, AudioPublication] do
     subject
-    |> Episode.changeset(%{publish_state: :published})
+    |> type.changeset(%{publish_state: :depublished})
     |> Repo.update()
   end
 
-  def schedule(subject = %AudioPublication{}, datetime = %DateTime{}) do
+  @doc """
+  Shedules `Podcast`, `Episode` or `AudioPublication` for publication by giving it a future `published_at` date.
+
+  ## Examples
+
+      iex> schedule(episode, datetime)
+      {:ok, %Episode{}}
+
+      iex> schedule(bad_value, datetime)
+      {:error, %Ecto.Changeset{}}
+  """
+  def schedule(subject = %type{}, datetime = %DateTime{})
+      when type in [Podcast, Episode, AudioPublication] do
     if Support.DateTime.after_utc_now?(datetime) do
       subject
-      |> AudioPublication.changeset(%{publish_state: :scheduled, published_at: datetime})
+      |> type.changeset(%{publish_state: :scheduled, published_at: datetime})
       |> Repo.update()
     else
       {:error, :datetime_not_future}
     end
-  end
-
-  def schedule(subject = %Episode{}, datetime = %DateTime{}) do
-    if Support.DateTime.after_utc_now?(datetime) do
-      subject
-      |> Episode.changeset(%{publish_state: :scheduled, published_at: datetime})
-      |> Repo.update()
-    else
-      {:error, :datetime_not_future}
-    end
-  end
-
-  def depublish(subject = %AudioPublication{}) do
-    subject
-    |> AudioPublication.changeset(%{publish_state: :depublished})
-    |> Repo.update()
-  end
-
-  def depublish(subject = %Episode{}) do
-    subject
-    |> Episode.changeset(%{publish_state: :depublished})
-    |> Repo.update()
   end
 
   @doc """
@@ -381,36 +348,6 @@ defmodule Radiator.Directory.Editor.Manager do
   """
   def change_podcast(%Podcast{} = podcast) do
     Podcast.changeset(podcast, %{})
-  end
-
-  @doc """
-  Publishes a single podcast by giving it a `published_at` date.
-
-  ## Examples
-
-      iex> publish_podcast(podcast)
-      {:ok, %Podcast{}}
-
-      iex> publish_podcast(bad_value)
-      {:error, %Ecto.Changeset{}}
-  """
-  def publish_podcast(%Podcast{} = podcast) do
-    update_podcast(podcast, %{published_at: DateTime.utc_now()})
-  end
-
-  @doc """
-  Depublishes a single podcast by removing its `published_at` date.
-
-  ## Examples
-
-      iex> depublish_podcast(podcast)
-      {:ok, %Podcast{}}
-
-      iex> depublish_podcast(bad_value)
-      {:error, %Ecto.Changeset{}}
-  """
-  def depublish_podcast(%Podcast{} = podcast) do
-    update_podcast(podcast, %{publish_state: :depublished})
   end
 
   @doc """

@@ -52,7 +52,7 @@ defmodule RadiatorWeb.Api.ContributionController do
 
   def create(_, _, _), do: @not_found_match
 
-  defp do_create(conn, subject, params, user) do
+  defp do_create(conn, subject = %type{}, params, user) when type in [Podcast, Audio] do
     params = map_contribution_params(params)
 
     with {:ok, contribution} <- Editor.create_contribution(user, subject, params) do
