@@ -201,9 +201,9 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
   # Current choice: 1
   def get_episodes(podcast = %Podcast{}, args, %{context: %{loader: loader, current_user: _user}}) do
     loader
-    |> Dataloader.load(Radiator.Directory, {:episodes, args}, podcast)
+    |> Dataloader.load(Radiator.Directory.Editor, {:episodes, args}, podcast)
     |> on_load(fn loader ->
-      items = Dataloader.get(loader, Radiator.Directory, {:episodes, args}, podcast)
+      items = Dataloader.get(loader, Radiator.Directory.Editor, {:episodes, args}, podcast)
 
       items =
         case {Map.get(args, :items_per_page), Map.get(args, :page)} do
@@ -236,6 +236,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     Editor.list_audio_files(user, audio)
   end
 
+  # TODO: determine if this is needed here
   def get_audio_files(audio = %Audio{}, _args, _resolution) do
     {:ok, Radiator.Directory.list_audio_files(audio)}
   end
