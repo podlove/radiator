@@ -134,11 +134,21 @@ defmodule Radiator.Directory.Episode do
   Convenience accessor for image URL.
   Use `podcast: podcast` to get podcast image if there is no episode audio image
   """
-  def image_url(%Episode{audio: audio}, opts \\ []) do
-    if Ecto.assoc_loaded?(audio) do
+  def image_url(episode, opts \\ [])
+
+  def image_url(nil, opts) do
+    with podcast = %Podcast{} <- opts[:podcast] do
+      Podcast.image_url(podcast)
+    else
+      _ -> nil
+    end
+  end
+
+  def image_url(%Episode{audio: audio}, opts) do
+    if not is_nil(audio) and Ecto.assoc_loaded?(audio) do
       Audio.image_url(audio, opts)
     else
-      nil
+      image_url(nil, opts)
     end
   end
 
