@@ -13,7 +13,7 @@ defmodule Radiator.Directory.EpisodeQuery do
 
   * `:slug` - find the episode with a given slug
 
-  * `:short_id` - find the episode with a given short_id
+  * `:short_id` - filter episodes by short_id
 
   **Ordering**
 
