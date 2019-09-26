@@ -27,10 +27,15 @@ type Audio {
 """Audio File"""
 type AudioFile {
   byteLength: Int
-  file: String
+
+  """Direct URL to file"""
+  directUrl: String
   id: Int
   mimeType: String
   title: String
+
+  """Public URL for end users"""
+  url: String
 }
 
 type AudioPublication {
@@ -87,10 +92,11 @@ scalar DateTime
 """An episode in a podcast"""
 type Episode {
   audio: Audio
+
+  """Globally unique ID."""
   guid: String
   id: ID!
   image: String
-  isPublished: Boolean
   number: Int
   podcast: Podcast
   publicPage: String
@@ -98,6 +104,8 @@ type Episode {
   """drafted, scheduled, published, depublished"""
   publishState: String
   publishedAt: DateTime
+
+  """Short ID for this episode. Not unique."""
   shortId: String
   slug: String
   subtitle: String
@@ -172,14 +180,18 @@ type Podcast {
   episodesCount: Int
   id: ID!
   image: String
-  isPublished: Boolean
   language: String
   lastBuiltAt: DateTime
   ownerEmail: String
   ownerName: String
   publicPage: String
+
+  """drafted, scheduled, published, depublished"""
+  publishState: String
   publishedAt: DateTime
   publishedFeeds: [PublishedPodcastFeedInfo]
+
+  """Short ID for this podcast. Not unique."""
   shortId: String
   slug: String
   statistics: Statistics
@@ -293,23 +305,8 @@ type RootMutationType {
   """Request an authenticated session"""
   authenticatedSession(password: String!, usernameOrEmail: String!): Session
 
-  """Delete an episode"""
-  deleteEpisode(id: ID!): Episode
-
-  """Depublish episode"""
-  depublishEpisode(id: ID!): Episode
-
-  """Depublish podcast"""
-  depublishPodcast(id: ID!): Podcast
-
   """Prolong an authenticated session"""
   prolongSession: Session
-
-  """Publish podcast"""
-  publishPodcast(id: ID!): Podcast
-
-  """Schedule episode"""
-  scheduleEpisode(datetime: DateTime!, id: ID!): Episode
 
   """Request resend of verification email (need auth)"""
   userResendVerificationEmail: Boolean
@@ -360,12 +357,17 @@ type RootQueryType {
 
   """Get all published podcasts"""
   publishedPodcasts: [PublishedPodcast]
+  sandboxMode: SandboxMode
 
   """Get current user"""
   user: User
 
   """Find users of this instance"""
   users(query: String!): [PublicUser]
+}
+
+type SandboxMode {
+  enabled: Boolean
 }
 
 """A user API session"""
