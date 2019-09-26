@@ -92,4 +92,4 @@ config :radiator, Radiator.Repo,
 
 config :radiator, Radiator.Mailer, adapter: Radiator.Email.Console
 
-config :radiator, :sandbox_mode, enabled: true
+config :radiator, :sandbox_mode, enabled: System.get_env("SANDBOX_MODE_ENABLED", "true")

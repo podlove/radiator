@@ -13,7 +13,7 @@ defmodule Radiator.SandboxMode do
   config :radiator, :sandbox_mode, enabled: false
   ```
 
-  Or in releases per ENV by setting `SANDBOX_MODE_ENABLED` to true.
+  Or in releases per ENV by setting `SANDBOX_MODE_ENABLED` to "true".
 
   Status can be queried by clients:
 
@@ -26,6 +26,6 @@ defmodule Radiator.SandboxMode do
   ```
   """
   def enabled? do
-    Application.get_env(:radiator, :sandbox_mode)[:enabled] == true
+    Application.get_env(:radiator, :sandbox_mode)[:enabled] == "true"
   end
 end

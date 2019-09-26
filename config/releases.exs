@@ -37,6 +37,6 @@ config :radiator, :auth,
   email_from_name: System.get_env("EMAIL_FROM_NAME", "Radiator-Instance"),
   email_from_email: System.get_env("EMAIL_FROM_ADDRESS", "do_not_reply@radiator.local")
 
-config :radiator, :sandbox_mode, enabled: System.get_env("SANDBOX_MODE_ENABLED", false)
+config :radiator, :sandbox_mode, enabled: System.get_env("SANDBOX_MODE_ENABLED", "false")
 
-config :radiator, :instance_config, base_admin_url: System.get_env("BASE_ADMIN_URL", nil)
+config :radiator, :instance_config, base_admin_url: System.get_env("BASE_ADMIN_URL")
