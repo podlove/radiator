@@ -259,11 +259,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Resolvers.Editor do
     {:ok, format_normal_playtime(time)}
   end
 
-  def get_internal_file_url(audio_file = %AudioFile{}, _, _) do
-    {:ok, AudioFile.internal_url(audio_file)}
-  end
-
-  def get_public_file_url(audio_file = %AudioFile{}, _, _) do
+  def get_file_url(audio_file = %AudioFile{}, _, _) do
     {:ok, AudioFile.public_url(audio_file)}
   end
 
