@@ -43,6 +43,7 @@ defmodule RadiatorWeb.Api.PodcastView do
       owner_name: podcast.owner_name,
       owner_email: podcast.owner_email,
       published_at: podcast.published_at,
+      publish_state: podcast.publish_state,
       slug: podcast.slug
     })
   end
