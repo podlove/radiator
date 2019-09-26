@@ -26,7 +26,7 @@ config :radiator, Radiator.Auth.Guardian,
 config :radiator,
   storage_bucket: "radiator"
 
-config :radiator, :demo_mode, enabled: false
+config :radiator, :sandbox_mode, enabled: false
 
 config :radiator, :auth,
   email_from_name: "Radiator-Instance",

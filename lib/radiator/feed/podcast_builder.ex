@@ -4,6 +4,7 @@ defmodule Radiator.Feed.PodcastBuilder do
   import Radiator.Feed.Guards
   import Radiator.Feed.Common
 
+  alias Radiator.SandboxMode
   alias Radiator.Directory.Podcast
   alias Radiator.Feed.EpisodeBuilder
   alias Radiator.Feed.PagingMeta
@@ -143,7 +144,7 @@ defmodule Radiator.Feed.PodcastBuilder do
   defp owner(_), do: nil
 
   defp itunes_block() do
-    if Radiator.DemoMode.enabled?() do
+    if SandboxMode.enabled?() do
       element("itunes:block", "Yes")
     else
       nil

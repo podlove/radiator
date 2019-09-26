@@ -1,11 +1,13 @@
 defmodule RadiatorWeb.Public.RobotsTxtController do
   use RadiatorWeb, :controller
 
+  alias Radiator.SandboxMode
+
   def show(conn, _) do
-    text(conn, content(demo_mode: Radiator.DemoMode.enabled?()))
+    text(conn, content(sandbox_mode: SandboxMode.enabled?()))
   end
 
-  defp content(demo_mode: true) do
+  defp content(sandbox_mode: true) do
     """
     User-agent: *
     Disallow: /
