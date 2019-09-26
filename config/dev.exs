@@ -91,3 +91,5 @@ config :radiator, Radiator.Repo,
   pool_size: 10
 
 config :radiator, Radiator.Mailer, adapter: Radiator.Email.Console
+
+# config :radiator, :demo_mode, enabled: true
