@@ -232,7 +232,7 @@ DELETE /api/rest/v1/networks/:id/collaborators/:username
 | ---------------------- | --------- | ------------------------------------------------------------------------------------- |
 | `podcast[title]`       | `string`  | **Required.**                                                                         |
 | `podcast[network_id]`  | `integer` | **Required.**                                                                         |
-| `podcast[short_id]`    | `string`  | Short ID for this podcast, also used as slug. 2-5 characters usually, e.g. FS,FAN,ATP |
+| `podcast[short_id]`    | `string`  | Short ID for this podcast, also used as slug. Not unique. 2-5 characters usually, e.g. FS,FAN,ATP |
 | `podcast[subtitle]`    | `string`  | Attention grabbing one liner appearing in lists/directories                           |
 | `podcast[summary]`     | `string`  | Short multiline description, appears in iTunes Preview                                |
 | `podcast[image]`       | `Image`   | Cover Image                                                                           |
@@ -310,7 +310,7 @@ DELETE /api/rest/v1/podcasts/:id/collaborators/:username
 | ------------------------- | --------- | ------------------------------------------------------------------------ |
 | `episode[title]`          | `string`  | **Required.**                                                            |
 | `episode[podcast_id]`     | `integer` | **Required.**                                                            |
-| `episode[short_id]`       | `string`  | Full combined short id, usually short_id + Number                        |
+| `episode[short_id]`       | `string`  | Full combined short id, usually short_id + Number. Not unique.                        |
 | `episode[guid]`           | `string`  | guid, prefilled on publish if unspecified                                |
 | `episode[subtitle]`       | `string`  | One line description of the episode                                      |
 | `episode[summary]`        | `text`    | Multiline description, plain text only                                   |

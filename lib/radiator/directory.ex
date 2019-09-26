@@ -184,13 +184,6 @@ defmodule Radiator.Directory do
     get_episode_by_slug(podcast.id, slug)
   end
 
-  def get_episode_by_short_id(short_id) do
-    episodes_query(%{short_id: short_id})
-    |> Repo.one()
-    |> preload_for_episode()
-    |> ensure_publication()
-  end
-
   def get_podcast_contributions(podcast = %Podcast{}) do
     podcast
     |> Ecto.assoc(:contributions)

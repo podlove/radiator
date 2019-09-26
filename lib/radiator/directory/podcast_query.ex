@@ -26,7 +26,7 @@ defmodule Radiator.Directory.PodcastQuery do
     from(p in query, where: fragment("lower(?)", p.slug) == ^slug)
   end
 
-  def find_by_short_id(query, short_id) do
+  def filter_by_short_id(query, short_id) do
     short_id = short_id |> String.downcase()
     from(p in query, where: fragment("lower(?)", p.short_id) == ^short_id)
   end
