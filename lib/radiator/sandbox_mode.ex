@@ -4,8 +4,8 @@ defmodule Radiator.SandboxMode do
 
   The following changes apply to a system in sandbox mode:
 
-    - all feeds contain `<itunes:block>Yes</itunes:block>`
-    - a robots.txt is generated disallowing all requests
+  - all feeds contain `<itunes:block>Yes</itunes:block>`
+  - a robots.txt is generated disallowing all requests
 
   Set via config
 
