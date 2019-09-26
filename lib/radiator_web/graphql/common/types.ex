@@ -43,8 +43,14 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
     field :byte_length, :integer
     field :title, :string
 
-    field :file, :string do
-      resolve &GraphQL.Admin.Resolvers.Editor.get_file_url/3
+    @desc "Direct URL to file"
+    field :direct_url, :string do
+      resolve &GraphQL.Admin.Resolvers.Editor.get_internal_file_url/3
+    end
+
+    @desc "Public URL for end users"
+    field :url, :string do
+      resolve &GraphQL.Admin.Resolvers.Editor.get_public_file_url/3
     end
   end
 
