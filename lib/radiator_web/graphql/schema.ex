@@ -104,6 +104,12 @@ defmodule RadiatorWeb.GraphQL.Schema do
 
     # Admin queries
 
+    field :sandbox_mode, :sandbox_mode do
+      resolve fn _, _ ->
+        {:ok, Radiator.SandboxMode}
+      end
+    end
+
     @desc "Get current user"
     field :user, :user do
       middleware Middleware.RequireAuthentication

@@ -342,4 +342,12 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
     field :image, :upload
     field :number, :integer
   end
+
+  object :sandbox_mode do
+    field :enabled, :boolean do
+      resolve fn mode, _, _ ->
+        {:ok, mode.enabled?()}
+      end
+    end
+  end
 end
