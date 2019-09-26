@@ -3,6 +3,8 @@ defmodule RadiatorWeb.LoginController do
 
   alias Radiator.Auth
 
+  alias Radiator.InstanceConfig
+
   def index(conn, _params) do
     render(conn, "index.html", user_changeset: Auth.Register.change_user(%Auth.User{}))
   end
@@ -117,10 +119,11 @@ defmodule RadiatorWeb.LoginController do
         case user.status do
           :unverified ->
             case Auth.Register.activate_user(user) do
-              {:ok, user} ->
+              {:ok, _user = %Auth.User{}} ->
                 conn
                 |> put_flash(:info, "Email verified.")
-                |> sign_in_valid_user(user, "Welcome #{user.name}!")
+                |> Auth.Guardian.Plug.sign_in(user)
+                |> redirect(external: InstanceConfig.base_admin_url())
             end
 
           _ ->

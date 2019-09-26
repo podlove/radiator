@@ -32,6 +32,8 @@ config :radiator, :auth,
   email_from_name: "Radiator-Instance",
   email_from_email: "do_not_reply@radiator.local"
 
+config :radiator, :instance_config, base_admin_url: System.get_env("BASE_ADMIN_URL", nil)
+
 config :radiator, Radiator.Mailer,
   adapter: Bamboo.SMTPAdapter,
   server: "smtp.domain",
