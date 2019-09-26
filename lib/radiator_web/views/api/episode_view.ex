@@ -43,7 +43,8 @@ defmodule RadiatorWeb.Api.EpisodeView do
       summary_source: episode.summary_source,
       image: episode_image_url(episode),
       number: episode.number,
-      published_at: episode.published_at
+      published_at: episode.published_at,
+      publish_state: episode.publish_state
     })
     |> maybe_embed_podcast(episode.podcast, assigns)
   end
