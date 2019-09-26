@@ -4,6 +4,7 @@ defmodule Radiator.Feed.PodcastBuilder do
   import Radiator.Feed.Guards
   import Radiator.Feed.Common
 
+  alias Radiator.SandboxMode
   alias Radiator.Directory.Podcast
   alias Radiator.Feed.EpisodeBuilder
   alias Radiator.Feed.PagingMeta
@@ -30,6 +31,7 @@ defmodule Radiator.Feed.PodcastBuilder do
     |> add(self_reference(feed_data))
     |> add(contributors(podcast))
     |> add(owner(podcast))
+    |> add(itunes_block())
     # |> add(last_build_date())
     |> Enum.reverse()
     |> Enum.concat(paging_elements(feed_data, opts))
@@ -140,4 +142,12 @@ defmodule Radiator.Feed.PodcastBuilder do
   end
 
   defp owner(_), do: nil
+
+  defp itunes_block() do
+    if SandboxMode.enabled?() do
+      element("itunes:block", "Yes")
+    else
+      nil
+    end
+  end
 end

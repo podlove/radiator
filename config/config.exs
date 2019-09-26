@@ -26,6 +26,8 @@ config :radiator, Radiator.Auth.Guardian,
 config :radiator,
   storage_bucket: "radiator"
 
+config :radiator, :sandbox_mode, enabled: false
+
 config :radiator, :auth,
   email_from_name: "Radiator-Instance",
   email_from_email: "do_not_reply@radiator.local"

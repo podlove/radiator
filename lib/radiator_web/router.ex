@@ -176,6 +176,7 @@ defmodule RadiatorWeb.Router do
   scope "/", RadiatorWeb.Public do
     pipe_through :public_browser
 
+    get "/robots.txt", RobotsTxtController, :show
     get "/:podcast_slug/feed.xml", FeedController, :show
     get "/:podcast_slug/:episode_slug", EpisodeController, :show
     get "/:podcast_slug", EpisodeController, :index
