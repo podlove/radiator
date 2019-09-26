@@ -77,7 +77,12 @@ module.exports = (env, options) => ({
       extractors: [{
         extractor: TailwindExtractor,
         extensions: ["html", "vue", "eex", "ex"]
-      }]
+      }],
+      whitelist: [
+        // because _flash.html.eex uses dynamic classes
+        'bg-yellow-200', 'border-yellow-400', 'text-yellow-900',
+        'bg-red-200', 'border-red-400', 'text-red-900'
+      ]
     }),
     new CopyWebpackPlugin([{
       from: 'static/',
