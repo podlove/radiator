@@ -121,6 +121,8 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   @desc "A podcast"
   object :podcast do
     field :id, non_null(:id)
+
+    @desc "Short ID for this podcast. Not unique."
     field :short_id, :string
     field :title, :string
     field :subtitle, :string
@@ -251,7 +253,10 @@ defmodule RadiatorWeb.GraphQL.Admin.Types do
   object :episode do
     field :id, non_null(:id)
 
+    @desc "Globally unique ID."
     field :guid, :string
+
+    @desc "Short ID for this episode. Not unique."
     field :short_id, :string
     field :title, :string
     field :subtitle, :string

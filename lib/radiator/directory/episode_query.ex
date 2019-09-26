@@ -13,7 +13,7 @@ defmodule Radiator.Directory.EpisodeQuery do
 
   * `:slug` - find the episode with a given slug
 
-  * `:short_id` - find the episode with a given short_id
+  * `:short_id` - filter episodes by short_id
 
   **Ordering**
 
@@ -93,7 +93,7 @@ defmodule Radiator.Directory.EpisodeQuery do
         find_by_slug(query, slug)
 
       {:short_id, short_id}, query ->
-        find_by_short_id(query, short_id)
+        filter_by_short_id(query, short_id)
 
       {:include_downloads, true}, query ->
         include_downloads(query)
@@ -167,7 +167,7 @@ defmodule Radiator.Directory.EpisodeQuery do
     from(e in query, where: fragment("lower(?)", e.slug) == ^slug)
   end
 
-  def find_by_short_id(query, short_id) do
+  def filter_by_short_id(query, short_id) do
     short_id = short_id |> String.downcase()
     from(e in query, where: fragment("lower(?)", e.short_id) == ^short_id)
   end
