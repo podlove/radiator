@@ -16,6 +16,7 @@ steps:
       - name: mix
         path: /root/.mix
     commands:
+      - apt install ffmpeg
       - mix local.rebar --force
       - mix local.hex --force
       - mix deps.get
