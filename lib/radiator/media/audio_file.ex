@@ -18,10 +18,12 @@ defmodule Radiator.Media.AudioFile do
   }
 
   schema "audio_files" do
-    field(:file, Media.AudioFile.Type)
-    field(:title, :string)
-    field(:mime_type, :string)
-    field(:byte_length, :integer)
+    field :file, Media.AudioFile.Type
+    field :title, :string
+    field :mime_type, :string
+    field :byte_length, :integer
+    field :duration, :integer
+    field :audio_format, :string
 
     belongs_to(:audio, Audio)
 
@@ -31,10 +33,16 @@ defmodule Radiator.Media.AudioFile do
   @doc false
   def changeset(audio_file = %__MODULE__{}, attrs) do
     audio_file
-    |> cast(attrs, [:title, :mime_type, :byte_length, :audio_id])
-    |> cast_attachments(attrs, [:file], allow_paths: true, allow_urls: true)
+    |> cast(attrs, [:title, :mime_type, :byte_length, :audio_id, :duration, :audio_format])
+    |> cast_attachments(attrs, [:file], allow_paths: true, allow_urls: false)
 
     # todo: determine byte length and mime type on file change, don't take them as attrs
+  end
+
+  @doc false
+  def rest_api_update_changeset(audio_file = %__MODULE__{}, attrs) do
+    audio_file
+    |> cast(attrs, [:title])
   end
 
   @doc """
