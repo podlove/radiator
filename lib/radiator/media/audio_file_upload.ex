@@ -81,7 +81,7 @@ defmodule Radiator.Media.AudioFileUpload do
           attrs
           |> Map.merge(additional_attrs)
 
-        stuff ->
+        _ ->
           attrs
       end
 

@@ -40,7 +40,7 @@ defmodule Radiator.Media.AudioFile do
   end
 
   @doc false
-  def rest_api_update_changeset(audio_file = %__MODULE__{}, attrs) do
+  def metadata_update_changeset(audio_file = %__MODULE__{}, attrs) do
     audio_file
     |> cast(attrs, [:title])
   end

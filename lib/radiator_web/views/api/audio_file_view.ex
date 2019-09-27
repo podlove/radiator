@@ -27,6 +27,8 @@ defmodule RadiatorWeb.Api.AudioFileView do
       title: audio_file.title,
       byte_length: audio_file.byte_length,
       mime_type: audio_file.mime_type,
+      duration: audio_file.duration,
+      audio_format: audio_file.audio_format,
       url: AudioFile.internal_url(audio_file),
       public_url: AudioFile.public_url(audio_file)
     })

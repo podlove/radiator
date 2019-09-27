@@ -113,9 +113,9 @@ defmodule Radiator.Directory.Editor.Editor do
     |> Repo.update()
   end
 
-  def update_audio_file(audio_file = %AudioFile{}, attrs) do
+  def update_audio_file_metadata(audio_file = %AudioFile{}, attrs) do
     audio_file
-    |> AudioFile.changeset(attrs)
+    |> AudioFile.metadata_update_changeset(attrs)
     |> Repo.update()
   end
 end

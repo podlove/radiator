@@ -228,20 +228,20 @@ DELETE /api/rest/v1/networks/:id/collaborators/:username
 
 ### Parameters for Create & Update
 
-| Name                   | Type      | Description                                                                           |
-| ---------------------- | --------- | ------------------------------------------------------------------------------------- |
-| `podcast[title]`       | `string`  | **Required.**                                                                         |
-| `podcast[network_id]`  | `integer` | **Required.**                                                                         |
-| `podcast[short_id]`    | `string`  | Short ID for this podcast, also used as slug. Not unique. 2-5 characters usually, e.g. FS,FAN,ATP |
-| `podcast[subtitle]`    | `string`  | Attention grabbing one liner appearing in lists/directories                           |
-| `podcast[summary]`     | `string`  | Short multiline description, appears in iTunes Preview                                |
-| `podcast[image]`       | `Image`   | Cover Image                                                                           |
-| `podcast[author]`      | `string`  | One line description of publisher                                                     |
-| `podcast[language]`    | `string`  | ISO 639-1                                                                             |
-| `podcast[owner_name]`  | `string`  |                                                                                       |
-| `podcast[owner_email]` | `string`  |                                                                                       |
-| `podcast[slug]`        | `string`  |                                                                                       |
-| `podcast[publish_state]`  | `string`  | Publication state. "drafted", "scheduled", "published" or "unpublished". |
+| Name                     | Type      | Description                                                                                       |
+| ------------------------ | --------- | ------------------------------------------------------------------------------------------------- |
+| `podcast[title]`         | `string`  | **Required.**                                                                                     |
+| `podcast[network_id]`    | `integer` | **Required.**                                                                                     |
+| `podcast[short_id]`      | `string`  | Short ID for this podcast, also used as slug. Not unique. 2-5 characters usually, e.g. FS,FAN,ATP |
+| `podcast[subtitle]`      | `string`  | Attention grabbing one liner appearing in lists/directories                                       |
+| `podcast[summary]`       | `string`  | Short multiline description, appears in iTunes Preview                                            |
+| `podcast[image]`         | `Image`   | Cover Image                                                                                       |
+| `podcast[author]`        | `string`  | One line description of publisher                                                                 |
+| `podcast[language]`      | `string`  | ISO 639-1                                                                                         |
+| `podcast[owner_name]`    | `string`  |                                                                                                   |
+| `podcast[owner_email]`   | `string`  |                                                                                                   |
+| `podcast[slug]`          | `string`  |                                                                                                   |
+| `podcast[publish_state]` | `string`  | Publication state. "drafted", "scheduled", "published" or "unpublished".                          |
 
 ### Create
 
@@ -310,7 +310,7 @@ DELETE /api/rest/v1/podcasts/:id/collaborators/:username
 | ------------------------- | --------- | ------------------------------------------------------------------------ |
 | `episode[title]`          | `string`  | **Required.**                                                            |
 | `episode[podcast_id]`     | `integer` | **Required.**                                                            |
-| `episode[short_id]`       | `string`  | Full combined short id, usually short_id + Number. Not unique.                        |
+| `episode[short_id]`       | `string`  | Full combined short id, usually short_id + Number. Not unique.           |
 | `episode[guid]`           | `string`  | guid, prefilled on publish if unspecified                                |
 | `episode[subtitle]`       | `string`  | One line description of the episode                                      |
 | `episode[summary]`        | `text`    | Multiline description, plain text only                                   |
@@ -478,12 +478,12 @@ DELETE /api/rest/v1/contributions/:id
 
 ### Parameters for Create & Update
 
-| Name                | Type      | Description                    |
-| ------------------- | --------- | ------------------------------ |
-| `audio[network_id]` | `integer` | Network ID. (readonly)         |
-| `audio[episode_id]` | `integer` | Episode ID. (readonly)         |
-| `audio[image]`      | `file`    | Audio image.                   |
-| `audio[duration]`   | `integer` | Audio duration in milliseconds |
+| Name                | Type      | Description                                                  |
+| ------------------- | --------- | ------------------------------------------------------------ |
+| `audio[network_id]` | `integer` | Network ID. (readonly)                                       |
+| `audio[episode_id]` | `integer` | Episode ID. (readonly)                                       |
+| `audio[image]`      | `file`    | Audio image.                                                 |
+| `audio[duration]`   | `integer` | Audio duration in milliseconds, will be set by an audio file |
 
 When creating, you can send parameters for the audio publication or episode in the same request.
 
@@ -531,12 +531,10 @@ DELETE /api/rest/v1/audios/:id
 
 ### Parameters for Create
 
-| Name                      | Type      | Description          |
-| ------------------------- | --------- | -------------------- |
-| `audio_file[file]`        | `file`    | audio file to upload |
-| `audio_file[title]`       | `string`  | file title           |
-| `audio_file[mime_type]`   | `string`  | file mime type       |
-| `audio_file[byte_length]` | `integer` | file lenght in bytes |
+| Name                | Type     | Description                                            |
+| ------------------- | -------- | ------------------------------------------------------ |
+| `audio_file[file]`  | `file`   | audio file to upload                                   |
+| `audio_file[title]` | `string` | file title (deduced from upload filename if not given) |
 
 ### Index
 
@@ -557,6 +555,8 @@ GET /api/rest/v1/audio_files/:id
 ```
 
 ### Update
+
+*Only title is supported for update!*
 
 ```
 PATCH /api/rest/v1/audio_files/:id

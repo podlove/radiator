@@ -670,7 +670,7 @@ defmodule Radiator.Directory.Editor do
 
   def update_audio_file(actor = %Auth.User{}, audio_file = %AudioFile{}, attrs) do
     if can_access_audio_file(actor, audio_file, :edit) do
-      Editor.Editor.update_audio_file(audio_file, attrs)
+      Editor.Editor.update_audio_file_metadata(audio_file, attrs)
     else
       @not_authorized_match
     end
