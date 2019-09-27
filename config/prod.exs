@@ -7,3 +7,7 @@ config :radiator, RadiatorWeb.Endpoint,
 config :logger, level: :info
 
 config :radiator, Radiator.Repo, pool_size: 10
+
+config :radiator, Radiator.Scheduler,
+  # one scheduler per cluster
+  global: true
