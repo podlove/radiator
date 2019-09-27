@@ -35,9 +35,15 @@ defmodule Radiator.Media.AudioFileUpload do
   """
   @spec upload(any(), Audio.t()) :: {:ok, AudioFile.t()} | {:error, :failed}
   def upload(upload, audio = %Audio{}) do
+    Logger.info("upload: #{inspect(upload)} audio: #{inspect(audio)}")
+
     Multi.new()
     |> Multi.insert(:create_audio_file, create_audio_file_changeset(audio))
     |> Multi.update(:audio_file, add_audio_file_changeset(upload))
+    |> Multi.update(:audio, fn %{audio_file: audio_file} ->
+      %Audio{id: audio.id}
+      |> Audio.changeset(%{duration: audio_file.duration})
+    end)
     |> Repo.transaction()
     |> case do
       {:ok, %{audio_file: audio_file}} ->
@@ -58,30 +64,74 @@ defmodule Radiator.Media.AudioFileUpload do
     {:ok, %File.Stat{size: size}} = File.lstat(path)
     mime_type = MIME.from_path(path) |> fix_mime_type()
 
+    attrs = %{
+      "title" => filename,
+      "file" => upload,
+      "mime_type" => mime_type,
+      "byte_length" => size,
+      # some rough approximated default
+      "duration" => ceil(size / 96)
+    }
+
+    attrs =
+      case probe_file(path) do
+        {:ok, additional_attrs} ->
+          Logger.info("additional attributes: #{inspect(additional_attrs)}")
+
+          attrs
+          |> Map.merge(additional_attrs)
+
+        _ ->
+          attrs
+      end
+
     fn %{create_audio_file: audio_file} ->
-      AudioFile.changeset(audio_file, %{
-        "title" => filename,
-        "file" => upload,
-        "mime_type" => mime_type,
-        "byte_length" => size
-      })
+      AudioFile.changeset(audio_file, attrs)
     end
   end
 
-  defp add_audio_file_changeset(upload) when is_binary(upload) do
-    mime_type = MIME.from_path(upload) |> fix_mime_type()
+  defp parse_k(string, suffix) when is_binary(string) do
+    case Float.parse(string) do
+      {float, _rest} ->
+        "#{float / 1_000.0}" <> suffix
 
-    # todo: get byte_length _after_ storing
+      _ ->
+        string
+    end
+  end
 
-    fn %{create_audio_file: audio_file} ->
-      audio_file = Repo.preload(audio_file, :audio)
+  def probe_file(path) do
+    with {:ok, streams} <- FFprobe.streams(path) do
+      stream =
+        streams
+        |> Enum.find(hd(streams), fn m -> m["codec_type"] == "audio" end)
 
-      AudioFile.changeset(audio_file, %{
-        # "title" => filename,
-        "file" => upload,
-        "mime_type" => mime_type
-        # "byte_length" => size
-      })
+      duration = ((Float.parse(stream["duration"]) |> elem(0)) * 1_000) |> ceil
+
+      audio_format =
+        ["codec_long_name", "bit_rate", "sample_rate"]
+        |> Enum.map(fn key -> {key, stream[key]} end)
+        |> Enum.reduce([], fn
+          {_, nil}, acc ->
+            acc
+
+          {"bit_rate", value}, acc ->
+            [parse_k(value, "kbps") | acc]
+
+          {"sample_rate", value}, acc ->
+            [parse_k(value, "kHz") | acc]
+
+          {_, value}, acc ->
+            [value | acc]
+        end)
+        |> Enum.reverse()
+        |> Enum.join(", ")
+
+      {:ok,
+       %{
+         "duration" => duration,
+         "audio_format" => audio_format
+       }}
     end
   end
 

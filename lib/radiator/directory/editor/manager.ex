@@ -145,10 +145,12 @@ defmodule Radiator.Directory.Editor.Manager do
     |> (&{:ok, &1}).()
   end
 
-  def create_audio_file(audio, attrs \\ %{}) do
-    %AudioFile{audio_id: audio.id}
-    |> AudioFile.changeset(attrs)
-    |> Repo.insert()
+  def create_audio_file(audio, %{"file" => file} = attrs) do
+    with {:ok, audio_file} <- Radiator.Media.AudioFileUpload.upload(file, audio) do
+      audio_file
+      |> AudioFile.metadata_update_changeset(attrs)
+      |> Repo.update()
+    end
   end
 
   def update_audio(%Audio{} = audio, attrs) do

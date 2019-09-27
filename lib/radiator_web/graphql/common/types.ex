@@ -42,6 +42,8 @@ defmodule RadiatorWeb.GraphQL.Common.Types do
     field :mime_type, :string
     field :byte_length, :integer
     field :title, :string
+    field :duration, :integer
+    field :audio_format, :string
 
     @desc "Direct URL to file"
     field :direct_url, :string do
