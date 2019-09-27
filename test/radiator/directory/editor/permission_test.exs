@@ -9,7 +9,7 @@ defmodule Radiator.Directory.Editor.PermissionTest do
     user = insert(:user)
     user_other = insert(:user)
 
-    podcast = insert(:podcast) |> owned_by(user)
+    podcast = insert(:podcast) |> publish() |> owned_by(user)
 
     assert Permission.has_permission(user, podcast, :own)
     refute Permission.has_permission(user_other, podcast, :own)
@@ -20,7 +20,7 @@ defmodule Radiator.Directory.Editor.PermissionTest do
     user_other = insert(:user)
 
     network = insert(:network) |> owned_by(user)
-    podcast = insert(:podcast, network: network)
+    podcast = insert(:podcast, network: network) |> publish()
 
     assert Permission.has_permission(user, podcast, :own)
     refute Permission.has_permission(user_other, podcast, :own)

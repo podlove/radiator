@@ -28,7 +28,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.PodcastsTest do
   """
 
   test "podcast returns a podcast", %{conn: conn, user: user} do
-    podcast = insert(:podcast, title: "Lorem") |> owned_by(user)
+    podcast = insert(:podcast, title: "Lorem") |> publish() |> owned_by(user)
 
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => podcast.id}
 

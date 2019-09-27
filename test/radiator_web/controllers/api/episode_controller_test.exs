@@ -16,7 +16,7 @@ defmodule RadiatorWeb.Api.EpisodeControllerTest do
 
   describe "create episode" do
     test "renders episode when data is valid", %{conn: conn, user: user} do
-      podcast = insert(:podcast) |> owned_by(user)
+      podcast = insert(:podcast) |> publish() |> owned_by(user)
 
       conn =
         post(conn, Routes.api_episode_path(conn, :create),
@@ -27,7 +27,7 @@ defmodule RadiatorWeb.Api.EpisodeControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do
-      podcast = insert(:podcast) |> owned_by(user)
+      podcast = insert(:podcast) |> publish() |> owned_by(user)
 
       conn =
         post(conn, Routes.api_episode_path(conn, :create), episode: %{podcast_id: podcast.id})

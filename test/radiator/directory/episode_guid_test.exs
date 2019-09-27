@@ -9,7 +9,7 @@ defmodule Radiator.GuidTest do
 
   describe "episodes" do
     test "generate a guid on create" do
-      podcast = insert(:podcast, %{})
+      podcast = insert(:podcast, %{}) |> publish()
       {:ok, episode} = Editor.Manager.create_episode(podcast, %{title: "foo"})
 
       assert is_binary(episode.guid)
@@ -17,7 +17,7 @@ defmodule Radiator.GuidTest do
     end
 
     test "generate no guid on create if it is provided" do
-      podcast = insert(:podcast, %{})
+      podcast = insert(:podcast, %{}) |> publish()
 
       {:ok, episode} =
         Directory.Editor.Manager.create_episode(podcast, %{title: "foo", guid: "provided"})
@@ -26,7 +26,7 @@ defmodule Radiator.GuidTest do
     end
 
     test "regenerates guid only on demand" do
-      podcast = insert(:podcast, %{})
+      podcast = insert(:podcast, %{}) |> publish()
 
       {:ok, episode = %Episode{guid: original_guid}} =
         Editor.Manager.create_episode(podcast, %{title: "foo"})

@@ -5,9 +5,9 @@ defmodule RadiatorWeb.FeedControllerTest do
 
   describe "#show" do
     test "renders the podcast feed" do
-      podcast = insert(:podcast, title: "ACME Cast", short_id: "ACME", slug: "acme")
+      podcast = insert(:podcast, title: "ACME Cast", short_id: "ACME", slug: "acme") |> publish()
 
-      episode = insert(:published_episode, title: "E001", podcast: podcast, slug: "e001")
+      episode = insert(:episode, title: "E001", podcast: podcast, slug: "e001") |> publish()
 
       conn = build_conn()
       conn = get(conn, Routes.feed_path(conn, :show, podcast.slug))
@@ -19,15 +19,16 @@ defmodule RadiatorWeb.FeedControllerTest do
     end
 
     test "shows not include episodes without enclosure" do
-      podcast = insert(:podcast, title: "ACME Cast", short_id: "ACME", slug: "acme")
+      podcast = insert(:podcast, title: "ACME Cast", short_id: "ACME", slug: "acme") |> publish()
 
       episode =
-        insert(:published_episode,
+        insert(:episode,
           title: "E001",
           podcast: podcast,
           audio: build(:empty_audio),
           slug: "e001"
         )
+        |> publish()
 
       conn = build_conn()
       conn = get(conn, Routes.feed_path(conn, :show, podcast.slug))

@@ -53,7 +53,7 @@ defmodule RadiatorWeb.Api.PodcastControllerTest do
 
   describe "show podcast" do
     test "renders a podcast", %{conn: conn, user: user} do
-      podcast = insert(:podcast) |> owned_by(user)
+      podcast = insert(:podcast) |> publish() |> owned_by(user)
 
       conn = get(conn, Routes.api_podcast_path(conn, :show, podcast.id))
 
@@ -63,7 +63,7 @@ defmodule RadiatorWeb.Api.PodcastControllerTest do
     end
 
     test "renders an error if permissions missing", %{conn: conn} do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
 
       conn = get(conn, Routes.api_podcast_path(conn, :show, podcast.id))
 
@@ -73,7 +73,7 @@ defmodule RadiatorWeb.Api.PodcastControllerTest do
 
   describe "update podcast" do
     test "renders podcast", %{conn: conn, user: user} do
-      podcast = insert(:podcast) |> owned_by(user)
+      podcast = insert(:podcast) |> publish() |> owned_by(user)
 
       conn =
         put(conn, Routes.api_podcast_path(conn, :update, podcast.id), %{podcast: %{title: "new"}})
@@ -82,7 +82,7 @@ defmodule RadiatorWeb.Api.PodcastControllerTest do
     end
 
     test "renders error on invalid data", %{conn: conn, user: user} do
-      podcast = insert(:podcast) |> owned_by(user)
+      podcast = insert(:podcast) |> publish() |> owned_by(user)
 
       conn =
         put(conn, Routes.api_podcast_path(conn, :update, podcast.id), %{podcast: %{title: ""}})
@@ -92,7 +92,7 @@ defmodule RadiatorWeb.Api.PodcastControllerTest do
   end
 
   test "delete podcast", %{conn: conn, user: user} do
-    podcast = insert(:podcast) |> owned_by(user)
+    podcast = insert(:podcast) |> publish() |> owned_by(user)
 
     conn = delete(conn, Routes.api_podcast_path(conn, :delete, podcast.id))
 

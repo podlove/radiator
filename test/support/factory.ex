@@ -6,6 +6,7 @@ defmodule Radiator.Factory do
   alias Radiator.Auth.User
 
   alias Radiator.Directory.{
+    Editor,
     Network,
     Podcast,
     Episode,
@@ -90,8 +91,23 @@ defmodule Radiator.Factory do
     audio_publication
   end
 
+  def publish(list) when is_list(list) do
+    Enum.map(list, &publish/1)
+  end
+
   def publish(episode = %Episode{}) do
-    {:ok, episode} = Radiator.Directory.Editor.Manager.publish(episode)
+    {:ok, episode} = Editor.Manager.publish(episode)
+    episode
+  end
+
+  def publish(podcast = %Podcast{}) do
+    {:ok, podcast} = Editor.Manager.publish(podcast)
+    podcast
+  end
+
+  def publish_all(episode = %Episode{podcast: podcast}) do
+    {:ok, episode} = Editor.Manager.publish(episode)
+    {:ok, _podcast} = Editor.Manager.publish(podcast)
     episode
   end
 
@@ -110,41 +126,8 @@ defmodule Radiator.Factory do
 
     %Radiator.Directory.Podcast{
       network: build(:network),
-      title: title,
-      published_at: DateTime.utc_now() |> DateTime.add(-3600, :second),
-      publish_state: :published
+      title: title
     }
-  end
-
-  def unpublished_podcast_factory do
-    struct!(
-      podcast_factory(),
-      %{
-        published_at: DateTime.utc_now() |> DateTime.add(3600, :second),
-        publish_state: :drafted
-      }
-    )
-  end
-
-  def unpublished_episode_factory do
-    struct!(
-      episode_factory(),
-      %{
-        publish_state: :drafted,
-        published_at: DateTime.utc_now() |> DateTime.add(3600, :second)
-      }
-    )
-  end
-
-  def published_episode_factory do
-    ## TODO: this needs to actually run through the publish machinery to generate the slug
-    struct!(
-      episode_factory(),
-      %{
-        publish_state: :published,
-        published_at: DateTime.utc_now() |> DateTime.add(-3600, :second)
-      }
-    )
   end
 
   def episode_factory() do

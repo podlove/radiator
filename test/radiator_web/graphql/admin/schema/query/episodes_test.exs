@@ -37,7 +37,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
   """
 
   test "episode returns an episode", %{conn: conn, user: user} do
-    podcast = insert(:podcast) |> owned_by(user)
+    podcast = insert(:podcast) |> publish() |> owned_by(user)
 
     upload = %Plug.Upload{
       path: "test/fixtures/image.jpg",
@@ -57,7 +57,7 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
     image_url = Media.ChapterImage.url({chapter.image, chapter})
 
     episode =
-      insert(:unpublished_episode,
+      insert(:episode,
         podcast: podcast,
         audio: audio
       )
@@ -95,29 +95,32 @@ defmodule RadiatorWeb.GraphQL.Admin.Schema.Query.EpisodesTest do
   """
 
   test "episodes in podcast are ordered, latest first", %{conn: conn, user: user} do
-    podcast = insert(:podcast) |> owned_by(user)
+    podcast = insert(:podcast) |> publish() |> owned_by(user)
     timestamp = 1_500_000_000
 
     _ep1 =
-      insert(:published_episode,
+      insert(:episode,
         title: "E001",
         published_at: DateTime.from_unix!(timestamp),
         podcast: podcast
       )
+      |> publish()
 
     _ep3 =
-      insert(:published_episode,
+      insert(:episode,
         title: "E003",
         published_at: DateTime.from_unix!(timestamp + 20),
         podcast: podcast
       )
+      |> publish()
 
     _ep2 =
-      insert(:published_episode,
+      insert(:episode,
         title: "E002",
         published_at: DateTime.from_unix!(timestamp + 10),
         podcast: podcast
       )
+      |> publish()
 
     conn =
       get conn, "/api/graphql",
