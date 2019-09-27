@@ -10,36 +10,36 @@ defmodule Radiator.DirectoryTest do
     alias Radiator.Directory.Podcast
 
     test "list_podcasts/0 returns only public podcasts" do
-      _podcast = insert(:unpublished_podcast)
-      podcast = insert(:podcast)
+      _podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
       assert Directory.list_podcasts() |> Repo.preload(:network) == [podcast]
     end
 
     test "get_podcast/1 returns the podcast with given id if it is public" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
 
       assert Directory.get_podcast(podcast.id) |> Repo.preload([:network, :contributions]) ==
                podcast |> Repo.preload([:network, :contributions])
 
-      podcast2 = insert(:unpublished_podcast)
+      podcast2 = insert(:podcast)
 
       assert is_nil(Directory.get_podcast(podcast2.id))
     end
 
     test "get_episodes_count_for_podcast!/1 return the number of episodes" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
 
       assert Directory.get_episodes_count_for_podcast!(podcast.id) == 0
 
-      _episode1 = insert(:published_episode, podcast: podcast)
-      _episode2 = insert(:published_episode, podcast: podcast)
-      _episode3 = insert(:unpublished_episode, podcast: podcast)
+      _episode1 = insert(:episode, podcast: podcast) |> publish()
+      _episode2 = insert(:episode, podcast: podcast) |> publish()
+      _episode3 = insert(:episode, podcast: podcast)
 
       assert Directory.get_episodes_count_for_podcast!(podcast.id) == 2
     end
 
     test "get_podcast_by_slug/1 returns the podcast with given slug" do
-      podcast = insert(:podcast, slug: "podcast-foo-bar-baz")
+      podcast = insert(:podcast, slug: "podcast-foo-bar-baz") |> publish()
 
       assert Directory.get_podcast_by_slug(podcast.slug)
              |> Repo.preload([:network, :contributions]) ==
@@ -61,7 +61,7 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "update_podcast/2 with valid data updates the podcast" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
 
       assert {:ok, %Podcast{} = podcast} =
                Editor.Manager.update_podcast(podcast, %{subtitle: "some updated subtitle"})
@@ -70,7 +70,7 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "update_podcast/2 with invalid data returns error changeset" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
 
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.update_podcast(podcast, %{title: nil})
 
@@ -79,13 +79,13 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "delete_podcast/1 deletes the podcast" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
       assert {:ok, %Podcast{}} = Editor.Manager.delete_podcast(podcast)
       assert is_nil(Directory.get_podcast(podcast.id))
     end
 
     test "change_podcast/1 returns a podcast changeset" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
       assert %Ecto.Changeset{} = Editor.Manager.change_podcast(podcast)
     end
 
@@ -108,6 +108,7 @@ defmodule Radiator.DirectoryTest do
     test "publish/1 generates sequential slugs" do
       {:ok, existing_podcast} =
         insert(:podcast)
+        |> publish()
         |> Editor.Manager.publish()
 
       {:ok, published_podcast1} =
@@ -130,7 +131,7 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "publish/1 with invalid data returns error changeset" do
-      podcast = insert(:unpublished_podcast, published_at: nil)
+      podcast = insert(:podcast, published_at: nil)
       user = insert(:user) |> make_owner(podcast)
 
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.publish(%{podcast | :title => nil})
@@ -139,7 +140,7 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "depublish/1 sets podcasts state to :depublished" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
       published_at = podcast.published_at
 
       assert {:ok, %Podcast{published_at: ^published_at, publish_state: :depublished}} =
@@ -147,7 +148,7 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "depublish_podcast/1 with invalid data returns error changeset" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
       published_at = podcast.published_at
 
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.depublish(%{podcast | :title => nil})
@@ -164,21 +165,21 @@ defmodule Radiator.DirectoryTest do
     @invalid_attrs %{title: nil}
 
     test "list_episodes/0 returns all episodes" do
-      episode = insert(:published_episode)
+      episode = insert(:episode) |> publish()
       episode_id = episode.id
 
       assert [%Episode{id: ^episode_id}] = Directory.list_episodes()
     end
 
     test "get_episode/1 returns the episode with given id" do
-      episode = insert(:published_episode)
+      episode = insert(:episode) |> publish()
       episode_id = episode.id
 
       assert %Episode{id: ^episode_id} = Directory.get_episode(episode.id)
     end
 
     test "get_episode_by_slug/1 returns the episode with given slug" do
-      episode = insert(:published_episode, slug: "episode-foo-bar-baz")
+      episode = insert(:episode, slug: "episode-foo-bar-baz") |> publish_all()
       episode_id = episode.id
 
       assert %Episode{id: ^episode_id} =
@@ -187,13 +188,13 @@ defmodule Radiator.DirectoryTest do
 
     test "create_episode/1 with valid data creates an episode" do
       assert {:ok, %Episode{} = episode} =
-               Editor.Manager.create_episode(insert(:podcast), @valid_attrs)
+               Editor.Manager.create_episode(insert(:podcast) |> publish(), @valid_attrs)
 
       assert episode.title == "some title"
     end
 
     test "create_episode/1 with invalid data returns error changeset" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
 
       assert {:error, %Ecto.Changeset{}} = Editor.Manager.create_episode(podcast, @invalid_attrs)
     end
@@ -255,7 +256,7 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "publish_episode/1 generates sequential slugs" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
 
       {:ok, existing_episode} =
         insert(:episode, %{podcast: podcast})
@@ -307,20 +308,20 @@ defmodule Radiator.DirectoryTest do
 
     test "list_networks/0 returns all networks" do
       network = network_fixture()
-      insert(:podcast, network: network)
+      insert(:podcast, network: network) |> publish()
       assert Directory.list_networks() == [network]
     end
 
     test "get_network!/1 returns the network with given id" do
       network = network_fixture()
-      insert(:podcast, network: network)
+      insert(:podcast, network: network) |> publish()
 
       assert Directory.get_network!(network.id) == network
     end
 
     test "get_network_by_slug/1 returns the network with given slug" do
       network = insert(:network, slug: "network-foo-bar-baz")
-      insert(:podcast, network: network)
+      insert(:podcast, network: network) |> publish()
 
       assert Directory.get_network_by_slug(network.slug) == network
     end
@@ -355,7 +356,7 @@ defmodule Radiator.DirectoryTest do
 
     test "update_network/2 with invalid data returns error changeset" do
       network = network_fixture()
-      insert(:podcast, network: network)
+      insert(:podcast, network: network) |> publish()
 
       assert {:error, %Ecto.Changeset{}} = Editor.Owner.update_network(network, @invalid_attrs)
       assert network == Directory.get_network!(network.id)
@@ -372,7 +373,7 @@ defmodule Radiator.DirectoryTest do
     alias Radiator.Media.AudioFile
 
     test "get_audio_file/1 returns audio file" do
-      episode = insert(:published_episode)
+      episode = insert(:episode) |> publish()
       audio = Ecto.assoc(episode, [:audio]) |> Repo.one()
       [audio_file] = Ecto.assoc(audio, :audio_files) |> Repo.all()
 
@@ -382,7 +383,7 @@ defmodule Radiator.DirectoryTest do
     end
 
     test "get_audio_file/1 errors when accessing unpublished audio file" do
-      episode = insert(:unpublished_episode)
+      episode = insert(:episode)
       audio = Ecto.assoc(episode, [:audio]) |> Repo.one()
       [audio_file] = Ecto.assoc(audio, :audio_files) |> Repo.all()
 

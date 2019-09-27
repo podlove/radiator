@@ -43,8 +43,7 @@ defmodule Radiator.BuilderTest do
 
   describe "Radiator.Feed.Builder" do
     test "builds an RSS feed" do
-      podcast =
-        insert(:podcast, title: "Hello World", slug: "hw", published_at: DateTime.utc_now())
+      podcast = insert(:podcast, title: "Hello World", slug: "hw") |> publish()
 
       insert_episode = fn number ->
         number_string =
@@ -79,8 +78,7 @@ defmodule Radiator.BuilderTest do
     end
 
     test "pages feeds" do
-      podcast =
-        insert(:podcast, title: "Hello World", slug: "hw", published_at: DateTime.utc_now())
+      podcast = insert(:podcast, title: "Hello World", slug: "hw") |> publish()
 
       insert_episode = fn number ->
         number_string =
@@ -167,10 +165,10 @@ defmodule Radiator.BuilderTest do
 
   describe "Radiator.Feed.EpisodeBuilder" do
     test "builds an item" do
-      podcast = insert(:podcast, slug: "pod", short_id: "POD")
+      podcast = insert(:podcast, slug: "pod", short_id: "POD") |> publish()
 
       episode =
-        insert(:published_episode,
+        insert(:episode,
           title: "Ep 001",
           subtitle: "sub",
           summary: "summary",
@@ -178,6 +176,7 @@ defmodule Radiator.BuilderTest do
           slug: "ep001",
           podcast: podcast
         )
+        |> publish()
         |> Directory.preload_for_episode()
 
       rss = build_episode_xml(%{}, episode)

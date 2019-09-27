@@ -13,7 +13,7 @@ defmodule Radiator.Directory.TitleSlugTest do
     end
 
     test "extracts the title of a given Podcast changeset, when published_at is set" do
-      podcast = insert(:podcast)
+      podcast = insert(:podcast) |> publish()
       title = podcast.title
       changeset = Podcast.changeset(podcast, %{publish_state: :published})
 

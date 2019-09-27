@@ -87,9 +87,7 @@ defmodule Radiator.MixProject do
       # job processor
       {:oban, "~> 0.8"},
       # cron-like job scheduler
-      {:quantum, "~> 2.3"},
-      # locale aware number formatting
-      {:ex_cldr_numbers, "~> 2.0"}
+      {:quantum, "~> 2.3"}
     ]
   end
 

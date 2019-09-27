@@ -42,10 +42,11 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
     image_url = Media.ChapterImage.url({chapter.image, chapter})
 
     episode =
-      insert(:published_episode,
+      insert(:episode,
         podcast: podcast,
         audio: audio
       )
+      |> publish()
 
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => episode.id}
 
@@ -78,7 +79,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
   end
 
   test "episode returns an error if not published", %{conn: conn} do
-    episode = insert(:unpublished_episode)
+    episode = insert(:episode)
 
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => episode.id}
 
@@ -97,29 +98,32 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.EpisodesTest do
   """
 
   test "episodes in podcast are ordered, latest first", %{conn: conn} do
-    podcast = insert(:podcast)
+    podcast = insert(:podcast) |> publish()
     timestamp = 1_500_000_000
 
     _ep1 =
-      insert(:published_episode,
+      insert(:episode,
         title: "E001",
         published_at: DateTime.from_unix!(timestamp),
         podcast: podcast
       )
+      |> publish()
 
     _ep3 =
-      insert(:published_episode,
+      insert(:episode,
         title: "E003",
         published_at: DateTime.from_unix!(timestamp + 20),
         podcast: podcast
       )
+      |> publish()
 
     _ep2 =
-      insert(:published_episode,
+      insert(:episode,
         title: "E002",
         published_at: DateTime.from_unix!(timestamp + 10),
         podcast: podcast
       )
+      |> publish()
 
     conn =
       get conn, "/api/graphql",

@@ -40,3 +40,5 @@ config :ex_aws, :s3,
 config :radiator, Radiator.Mailer, adapter: Radiator.Email.Console
 
 config :radiator, Oban, queues: false, prune: :disabled
+
+config :radiator, Radiator.Scheduler, global: false

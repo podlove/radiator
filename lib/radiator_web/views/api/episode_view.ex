@@ -37,6 +37,7 @@ defmodule RadiatorWeb.Api.EpisodeView do
       id: episode.id,
       guid: episode.guid,
       title: episode.title,
+      slug: episode.slug,
       subtitle: episode.subtitle,
       summary: episode.summary,
       summary_html: episode.summary_html,

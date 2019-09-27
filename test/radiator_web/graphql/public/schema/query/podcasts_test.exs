@@ -15,8 +15,8 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
   """
 
   test "podcasts returns a list of published podcasts", %{conn: conn} do
-    podcasts = insert_list(3, :podcast)
-    _podcast = insert(:unpublished_podcast)
+    podcasts = insert_list(3, :podcast) |> publish()
+    _podcast = insert(:podcast)
 
     conn = get conn, "/api/graphql", query: @list_query
 
@@ -50,7 +50,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
   """
 
   test "podcast returns a podcast", %{conn: conn} do
-    podcast = insert(:podcast)
+    podcast = insert(:podcast) |> publish()
 
     upload = %Plug.Upload{
       path: "test/fixtures/image.jpg",
@@ -70,10 +70,11 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
     image_url = Media.ChapterImage.url({chapter.image, chapter})
 
     episode =
-      insert(:published_episode,
+      insert(:episode,
         podcast: podcast,
         audio: audio
       )
+      |> publish()
 
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => podcast.id}
 
@@ -110,7 +111,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
   end
 
   test "podcast returns an error if not published", %{conn: conn} do
-    podcast = insert(:unpublished_podcast)
+    podcast = insert(:podcast)
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => podcast.id}
 
     assert %{"errors" => [%{"message" => message}]} = json_response(conn, 200)
@@ -131,9 +132,9 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
     """
 
     test "returns all published episodes of a podcast", %{conn: conn} do
-      podcast = insert(:podcast)
-      episode = insert(:published_episode, podcast: podcast)
-      _episode = insert(:unpublished_episode, podcast: podcast)
+      podcast = insert(:podcast) |> publish()
+      episode = insert(:episode, podcast: podcast) |> publish()
+      _episode = insert(:episode, podcast: podcast)
 
       conn =
         get conn, "/api/graphql", query: @with_episodes_query, variables: %{"id" => podcast.id}
@@ -162,10 +163,10 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.PodcastsTest do
     """
 
     test "returns the number of published episodes associated to a podcast", %{conn: conn} do
-      podcast = insert(:podcast)
-      _episode1 = insert(:published_episode, podcast: podcast)
-      _episode2 = insert(:published_episode, podcast: podcast)
-      _episode3 = insert(:unpublished_episode, podcast: podcast)
+      podcast = insert(:podcast) |> publish()
+      _episode1 = insert(:episode, podcast: podcast) |> publish()
+      _episode2 = insert(:episode, podcast: podcast) |> publish()
+      _episode3 = insert(:episode, podcast: podcast)
 
       conn =
         get conn, "/api/graphql",

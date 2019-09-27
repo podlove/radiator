@@ -14,7 +14,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
   test "network returns a network", %{conn: conn} do
     network = insert(:network)
 
-    insert(:podcast, network: network)
+    insert(:podcast, network: network) |> publish()
 
     conn = get conn, "/api/graphql", query: @single_query, variables: %{"id" => network.id}
 
@@ -48,10 +48,10 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
 
   test "network has embedded published podcasts", %{conn: conn} do
     network = insert(:network)
-    podcast_1 = insert(:podcast, network: network)
-    podcast_2 = insert(:podcast, network: network)
-    _podcast_3 = insert(:unpublished_podcast, network: network)
-    insert(:podcast)
+    podcast_1 = insert(:podcast, network: network) |> publish()
+    podcast_2 = insert(:podcast, network: network) |> publish()
+    _podcast_3 = insert(:podcast, network: network)
+    insert(:podcast) |> publish()
 
     conn =
       get conn, "/api/graphql",
@@ -83,7 +83,7 @@ defmodule RadiatorWeb.GraphQL.Public.Schema.Query.NetworksTest do
 
   test "networks returns list of networks", %{conn: conn} do
     network = insert(:network)
-    insert(:podcast, network: network)
+    insert(:podcast, network: network) |> publish()
 
     conn = get conn, "/api/graphql", query: @list_query
 

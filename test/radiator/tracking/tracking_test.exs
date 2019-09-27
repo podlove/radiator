@@ -13,7 +13,7 @@ defmodule Radiator.TrackingTest do
 
   describe "downloads" do
     test "track_download/1 tracks an episode download" do
-      episode = insert(:published_episode) |> Repo.preload(audio: :audio_files)
+      episode = insert(:episode) |> publish() |> Repo.preload(audio: :audio_files)
       [file] = episode.audio.audio_files
 
       {:ok, download} =
@@ -60,7 +60,7 @@ defmodule Radiator.TrackingTest do
     end
 
     test "track_download/1 discards bot requests" do
-      episode = insert(:published_episode) |> Repo.preload(audio: :audio_files)
+      episode = insert(:episode) |> publish() |> Repo.preload(audio: :audio_files)
       [file] = episode.audio.audio_files
 
       {:ok, response} =
@@ -80,7 +80,7 @@ defmodule Radiator.TrackingTest do
     end
 
     test "track_download/1 discards bot first-byte-requests" do
-      episode = insert(:published_episode) |> Repo.preload(audio: :audio_files)
+      episode = insert(:episode) |> publish() |> Repo.preload(audio: :audio_files)
       [file] = episode.audio.audio_files
 
       {:ok, response} =
@@ -102,9 +102,10 @@ defmodule Radiator.TrackingTest do
     @hours 3
     test "track_download/1 calculates hours since episode release" do
       episode =
-        insert(:published_episode, %{
+        insert(:episode, %{
           published_at: DateTime.utc_now() |> DateTime.add(-:timer.hours(@hours), :millisecond)
         })
+        |> publish()
         |> Repo.preload(audio: :audio_files)
 
       [file] = episode.audio.audio_files
