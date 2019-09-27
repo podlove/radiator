@@ -32,6 +32,8 @@ steps:
       DB_HOST: "database"
       MIX_ENV: "test"
     commands:
+      - apt update
+      - apt install -y ffmpeg
       - mix format --check-formatted
       - mix ua_inspector.download --force
       - mix test
