@@ -40,3 +40,6 @@ config :radiator, :auth,
 config :radiator, :sandbox_mode, enabled: System.get_env("SANDBOX_MODE_ENABLED", "false")
 
 config :radiator, :instance_config, base_admin_url: System.get_env("BASE_ADMIN_URL")
+
+config :ffmpex, ffmpeg_path: "/usr/bin/ffmpeg"
+config :ffmpex, ffprobe_path: "/usr/bin/ffprobe"
