@@ -40,6 +40,10 @@ defmodule Radiator.Media.AudioFileUpload do
     Multi.new()
     |> Multi.insert(:create_audio_file, create_audio_file_changeset(audio))
     |> Multi.update(:audio_file, add_audio_file_changeset(upload))
+    |> Multi.update(:audio, fn %{audio_file: audio_file} ->
+      %Audio{id: audio.id}
+      |> Audio.changeset(%{duration: audio_file.duration})
+    end)
     |> Repo.transaction()
     |> case do
       {:ok, %{audio_file: audio_file}} ->
