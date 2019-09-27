@@ -26,10 +26,12 @@ type Audio {
 
 """Audio File"""
 type AudioFile {
+  audioFormat: String
   byteLength: Int
 
   """Direct URL to file"""
   directUrl: String
+  duration: Int
   id: Int
   mimeType: String
   title: String
