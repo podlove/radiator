@@ -19,10 +19,11 @@ defmodule RadiatorWeb.FormatHelpers do
     "-"
   end
 
-  def format_number(number, opts) do
-    with {:ok, result} <- Radiator.Cldr.Number.to_string(number, opts) do
-      result
-    end
+  def format_number(number, _opts) do
+    number
+    # with {:ok, result} <- Radiator.Cldr.Number.to_string(number, opts) do
+    #   result
+    # end
   end
 
   def format_bytes(number, precision \\ 2)
