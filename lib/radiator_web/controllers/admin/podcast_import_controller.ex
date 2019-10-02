@@ -23,7 +23,7 @@ defmodule RadiatorWeb.Admin.PodcastImportController do
          feed_url when is_binary(feed_url) <- url,
          _metalove_podcast = %Metalove.Podcast{} <- Metalove.get_podcast(feed_url),
          {:ok, task_id} <- Importer.start_import_task(user, network, feed_url),
-         task <- busy_wait_on_task_setup(task_id, 5_000),
+         task <- busy_wait_on_task_setup(task_id, 30_000),
          {Podcast, podcast_id} <- task.description.subject,
          {:ok, podcast} <- Editor.get_podcast(user, podcast_id) do
       redirect(conn,
