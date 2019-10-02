@@ -91,7 +91,7 @@ defmodule Radiator.Feed.PodcastBuilder do
   end
 
   defp episode_items(feed_data = %{episodes: episodes}, opts) do
-    with start_index <- (opts[:paging].current_page - 1) * opts[:paging].total_pages do
+    with start_index <- (opts[:paging].current_page - 1) * opts[:paging].items_per_page do
       episodes
       |> Enum.slice(start_index, opts[:items_per_page])
       |> Enum.map(fn episode ->
