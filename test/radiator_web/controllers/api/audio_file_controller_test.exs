@@ -1,8 +1,6 @@
 defmodule RadiatorWeb.Api.AudioFileControllerTest do
   use RadiatorWeb.ConnCase
 
-  import Radiator.Factory
-
   def setup_user_and_conn(%{conn: conn}) do
     user = Radiator.TestEntries.user()
 
