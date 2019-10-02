@@ -52,6 +52,20 @@ steps:
       event:
         - push
 
+  - name: docker-dev
+    image: plugins/docker
+    settings:
+      username: podloveradiator
+      password:
+        from_secret: docker_password
+      repo: podlove/radiator
+      tags: develop
+    when:
+      branch:
+        - develop
+      event:
+        - push
+
 services:
   - name: database
     image: postgres:9-alpine
