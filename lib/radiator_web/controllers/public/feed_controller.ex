@@ -1,10 +1,7 @@
 defmodule RadiatorWeb.Public.FeedController do
   use RadiatorWeb, :controller
 
-  alias Radiator.Directory
-  alias Radiator.Directory.Podcast
-  alias Radiator.Feed.Builder
-  alias Radiator.Feed.Generator
+  alias Radiator.Feed
 
   action_fallback RadiatorWeb.FallbackController
 
@@ -16,11 +13,10 @@ defmodule RadiatorWeb.Public.FeedController do
   end
 
   def show(conn, %{"page" => page}, %{current_podcast: podcast}) do
-    with xml <- Generator.generate(podcast.id, page: String.to_integer(page)) do
-      conn
-      |> put_resp_content_type("text/xml")
-      |> send_resp(200, xml)
-    end
+    # todo: track request before redirecting
+    conn
+    |> put_status(307)
+    |> redirect(external: Feed.Storage.url(podcast_id: podcast.id, page: String.to_integer(page)))
   end
 
   def show(_, %{"page" => _page}, _), do: {:error, :not_found}

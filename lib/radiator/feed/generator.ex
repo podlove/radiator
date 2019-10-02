@@ -2,7 +2,7 @@ defmodule Radiator.Feed.Generator do
   @moduledoc """
   RSS Feed Generator.
 
-  Generates XML for given podcast id.
+  Generates list of XML documents (one per feed page) for given podcast id.
   """
 
   alias Radiator.Feed.Builder
@@ -16,29 +16,31 @@ defmodule Radiator.Feed.Generator do
   def generate(podcast_id, opts \\ []) do
     opts =
       opts
-      |> Keyword.put_new(:items_per_page, 50)
-      |> Keyword.put_new(:page, 1)
+      |> Keyword.put_new(:items_per_page, 25)
 
     with podcast <- Editor.Editor.get_podcast(podcast_id),
          episodes <- fetch_episodes(podcast) do
-
       # TODO: there will be multiple feeds per podcast
       feed_url = Podcast.feed_url(podcast)
+      page_count = ceil(length(episodes) / opts[:items_per_page])
 
-      Builder.new(
-        %{
-          podcast: podcast,
-          episodes: episodes,
-          urls: %{
-            main: feed_url,
-            self: feed_url,
-            page_template: page_url_template(feed_url)
-          }
-        },
-        items_per_page: opts[:items_per_page],
-        page: opts[:page]
-      )
-      |> Builder.render()
+      1..page_count
+      |> Enum.map(fn page ->
+        Builder.new(
+          %{
+            podcast: podcast,
+            episodes: episodes,
+            urls: %{
+              main: feed_url,
+              self: feed_url,
+              page_template: page_url_template(feed_url)
+            }
+          },
+          items_per_page: opts[:items_per_page],
+          page: page
+        )
+        |> Builder.render()
+      end)
     end
   end
 
