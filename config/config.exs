@@ -76,7 +76,7 @@ config :phoenix, :json_library, Jason
 
 config :radiator, Oban,
   repo: Radiator.Repo,
-  queues: [default: 1],
+  queues: [default: 1, feed: 1],
   prune: {:maxage, 60 * 60 * 24 * 7},
   prune_interval: 60 * 60 * 1000,
   verbose: false
