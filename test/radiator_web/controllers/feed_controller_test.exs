@@ -7,36 +7,12 @@ defmodule RadiatorWeb.FeedControllerTest do
     test "renders the podcast feed" do
       podcast = insert(:podcast, title: "ACME Cast", short_id: "ACME", slug: "acme") |> publish()
 
-      episode = insert(:episode, title: "E001", podcast: podcast, slug: "e001") |> publish()
+      _episode = insert(:episode, title: "E001", podcast: podcast, slug: "e001") |> publish()
 
       conn = build_conn()
       conn = get(conn, Routes.feed_path(conn, :show, podcast.slug))
 
-      response = response(conn, 200)
-
-      assert response =~ podcast.title
-      assert response =~ episode.title
-    end
-
-    test "shows not include episodes without enclosure" do
-      podcast = insert(:podcast, title: "ACME Cast", short_id: "ACME", slug: "acme") |> publish()
-
-      episode =
-        insert(:episode,
-          title: "E001",
-          podcast: podcast,
-          audio: build(:empty_audio),
-          slug: "e001"
-        )
-        |> publish()
-
-      conn = build_conn()
-      conn = get(conn, Routes.feed_path(conn, :show, podcast.slug))
-
-      response = response(conn, 200)
-
-      assert response =~ podcast.title
-      refute response =~ episode.title
+      assert redirected_to(conn, 307) =~ ".xml"
     end
   end
 end
