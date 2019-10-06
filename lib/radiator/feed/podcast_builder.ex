@@ -32,7 +32,7 @@ defmodule Radiator.Feed.PodcastBuilder do
     |> add(contributors(podcast))
     |> add(owner(podcast))
     |> add(itunes_block())
-    # |> add(last_build_date())
+    |> add(last_build_date())
     |> Enum.reverse()
     |> Enum.concat(paging_elements(feed_data, opts))
     |> Enum.concat(episode_items(feed_data, opts))
@@ -149,5 +149,9 @@ defmodule Radiator.Feed.PodcastBuilder do
     else
       nil
     end
+  end
+
+  defp last_build_date() do
+    element(:lastBuildDate, Timex.now() |> Timex.format!("{RFC822}"))
   end
 end
