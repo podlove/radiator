@@ -12,6 +12,18 @@ defmodule RadiatorWeb.Public.FeedController do
     apply(__MODULE__, action_name(conn), args)
   end
 
+  @doc """
+  FIXME: The controller doesn't know if the feed file is actually available.
+  And I think it shouldn't (a proper check before redirect would be expensive).
+  The way it should be is that a podcast is only really published/public once the
+  feed is available. Which means publications is a multi-step-process?
+
+  - generate the feed
+  - verify all is good
+  - set podcast status to published
+
+  If we don't enforce this there may be podcasts for a few seconds/minutes without a feed.
+  """
   def show(conn, %{"page" => page}, %{current_podcast: podcast}) do
     # todo: track request before redirecting
     conn
