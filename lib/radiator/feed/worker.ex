@@ -4,7 +4,7 @@ defmodule Radiator.Feed.Worker do
   """
   use Oban.Worker, queue: "feed", max_attempts: 2
 
-  alias Radiator.Feed.Generator
+  alias Radiator.Feed
 
   def enqueue(args) do
     args
@@ -13,6 +13,6 @@ defmodule Radiator.Feed.Worker do
   end
 
   def perform(%{"podcast_id" => podcast_id}, _job) do
-    Generator.generate(podcast_id)
+    Feed.Storage.generate(podcast_id)
   end
 end
