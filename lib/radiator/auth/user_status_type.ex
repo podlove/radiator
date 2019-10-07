@@ -1,6 +1,6 @@
 defmodule Radiator.Auth.Ecto.UserStatusType do
+  use Ecto.Type
   alias Ecto.Type
-  @behaviour Type
 
   use Radiator.Constants
 

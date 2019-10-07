@@ -9,7 +9,7 @@ defmodule Radiator.Ecto.AtomType do
   end
   """
 
-  @behaviour Ecto.Type
+  use Ecto.Type
 
   def type, do: :string
 

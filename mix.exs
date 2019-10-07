@@ -55,7 +55,11 @@ defmodule Radiator.MixProject do
       {:arc_ecto, github: "podlove/arc_ecto"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
-      {:ecto_autoslug_field, "~> 2.0"},
+      #      {:ecto_autoslug_field, "~> 2.0"},
+      #     for ecto 3.2 compatiblity without warnings (switch back to release as soon as they release)
+      {:ecto_autoslug_field,
+       git: "https://github.com/sobolevn/ecto_autoslug_field.git",
+       ref: "49dc8d53919bb80e9e188fcb3aa9dcfb34a8dea3"},
       # for ex_aws
       {:hackney, "~> 1.15"},
       {:sweet_xml, "~> 0.6.5"},
