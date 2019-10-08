@@ -1,6 +1,7 @@
 defmodule Radiator.Perm.Ecto.PermissionType do
+  use Ecto.Type
+
   alias Ecto.Type
-  @behaviour Type
 
   use Radiator.Constants
 
