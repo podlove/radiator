@@ -28,6 +28,18 @@ defmodule Radiator.Auth.Email do
     |> to(user.email)
   end
 
+  def email_reset_password_email(%User{} = user, reset_password_url) do
+    email_base()
+    |> subject(mail_subject("Password reset."))
+    |> assign(:username, user.name)
+    |> assign(
+      :reset_password_url,
+      reset_password_url
+    )
+    |> render("email_reset_password_email.text")
+    |> to(user.email)
+  end
+
   def email_base do
     new_email()
     |> from({Config.email_from_name(), Config.email_from_email()})

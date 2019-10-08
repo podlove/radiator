@@ -2,11 +2,14 @@
 
 - [API Usage](#api-usage)
 - [Authentication](#authentication)
-  - [Login](#login)
+  - [Signup](#signup)
     - [Parameters](#parameters)
     - [Response](#response)
-  - [Prolong Session](#prolong-session)
+  - [Login](#login)
+    - [Parameters](#parameters-1)
     - [Response](#response-1)
+  - [Prolong Session](#prolong-session)
+    - [Response](#response-2)
 - [Networks](#networks)
   - [Parameters for Create & Update](#parameters-for-create--update)
   - [Create](#create)
@@ -116,6 +119,32 @@ To make full use of the API you need to authenticate as an existing user. A succ
 
 > curl -H "Authorization: Bearer AUTH-TOKEN" http://localhost:4000/api/rest/v1/
 
+Obviously excempt from this are the Login Signup, ResetPassword and ResendVerificationEmail endpoints.
+
+### Signup
+
+```
+POST /api/rest/v1/auth/signup
+```
+
+#### Parameters
+
+| Name           | Type     | Description                                  |
+| -------------- | -------- | -------------------------------------------- |
+| `name`         | `string` | **Required.** Username.                      |
+| `email`        | `string` | **Required.** Email.                         |
+| `password`     | `string` | **Required.** Password.                      |
+| `display_name` | `string` | display name, optional, defaults to Username |
+| `image`        | `file`   | avatar image, optional                       |
+
+#### Response
+
+A user if successful. Error if username was already taken or arguments are missing.
+
+```json
+{…}
+```
+
 ### Login
 
 ```
@@ -138,6 +167,7 @@ POST /api/rest/v1/auth
   "username": "admin"
 }
 ```
+
 
 ### Prolong Session
 

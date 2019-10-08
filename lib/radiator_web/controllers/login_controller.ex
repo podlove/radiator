@@ -5,6 +5,8 @@ defmodule RadiatorWeb.LoginController do
 
   alias Radiator.InstanceConfig
 
+  alias RadiatorWeb.Helpers.EmailHelpers
+
   def index(conn, _params) do
     render(conn, "index.html", user_changeset: Auth.Register.change_user(%Auth.User{}))
   end
@@ -43,12 +45,8 @@ defmodule RadiatorWeb.LoginController do
         |> render("signup.html", changeset: Auth.Register.change_user(%Auth.User{}, user_map))
 
       true ->
-        case Auth.Register.create_user(user_map) do
+        case EmailHelpers.singup_user(user_map) do
           {:ok, user} ->
-            user
-            |> Auth.Email.welcome_email(email_configuration_url(conn, user))
-            |> Radiator.Mailer.deliver_later()
-
             conn
             |> sign_in_valid_user(
               user,
@@ -83,27 +81,14 @@ defmodule RadiatorWeb.LoginController do
     |> redirect(to: "/")
   end
 
-  def email_configuration_url(conn, %Auth.User{} = user) do
-    Routes.login_url(
-      conn,
-      :verify_email,
-      Auth.User.email_verification_token(user)
-    )
-  end
-
   def resend_verification_mail(conn, params) do
-    case Auth.User.validate_email_verification_request_token(params["token"]) do
-      {:ok, name} ->
-        user = Auth.Register.get_user_by_name(name)
-
-        user
-        |> Auth.Email.email_verification_email(email_configuration_url(conn, user))
-        |> Radiator.Mailer.deliver_later()
-
-        conn
-        |> put_flash(:info, "Verification email sent to #{user.email}!")
-        |> redirect(to: Routes.login_path(conn, :login_form, name_or_email: user.name))
-
+    with {:ok, name} <- Auth.User.validate_email_verification_request_token(params["token"]),
+         user <- Auth.Register.get_user_by_name(name),
+         :sent <- EmailHelpers.resend_verification_email_for_user(user) do
+      conn
+      |> put_flash(:info, "Verification email sent to #{user.email}!")
+      |> redirect(to: Routes.login_path(conn, :login_form, name_or_email: user.name))
+    else
       _ ->
         conn
         |> put_flash(:info, "Invalid request.")
