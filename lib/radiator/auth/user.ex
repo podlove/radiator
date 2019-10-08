@@ -134,4 +134,13 @@ defmodule Radiator.Auth.User do
       where: fragment("lower(?)", u.name) == ^name_downcase,
       preload: [:profile]
   end
+
+  def by_name_or_email_query(name_or_email) do
+    name_or_email_downcase = String.downcase(name_or_email)
+
+    from u in User,
+      where: fragment("lower(?)", u.name) == ^name_or_email_downcase,
+      or_where: fragment("lower(?)", u.email) == ^name_or_email_downcase,
+      preload: [:profile]
+  end
 end

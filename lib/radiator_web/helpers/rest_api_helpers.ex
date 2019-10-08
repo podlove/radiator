@@ -9,4 +9,9 @@ defmodule RadiatorWeb.Helpers.RestApiHelpers do
     conn
     |> send_resp(204, "")
   end
+
+  def send_single_message_success(conn, message \\ "ok") do
+    conn
+    |> Phoenix.Controller.json(%{result: message})
+  end
 end
