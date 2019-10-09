@@ -16,7 +16,7 @@ defmodule RadiatorWeb.Public.FeedController do
   FIXME: The controller doesn't know if the feed file is actually available.
   And I think it shouldn't (a proper check before redirect would be expensive).
   The way it should be is that a podcast is only really published/public once the
-  feed is available. Which means publications is a multi-step-process?
+  feed is available. Which means publication is a multi-step-process?
 
   - generate the feed
   - verify all is good
