@@ -34,6 +34,9 @@ RUN mkdir /app/priv
 # COPY priv/cert ./priv/cert
 COPY priv/repo ./priv/repo
 
+# compile and fail if there are any warnings
+RUN mix compile --warnings-as-errors
+
 # this starts the application which sucks because there is no db when building?
 # RUN mix ua_inspector.download --force
 RUN mix run --no-start -e "UAInspector.Downloader.download()"
