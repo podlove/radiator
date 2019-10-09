@@ -84,12 +84,6 @@ defmodule Radiator.Storage do
     {:ok, contents}
   end
 
-  def delete_feed(podcast_id) do
-    {:ok, _} = S3.delete_object(bucket(), "/feed/#{podcast_id}") |> ExAws.request()
-
-    {:ok, podcast_id}
-  end
-
   @doc """
   Full storage URL for a given file name
   """
