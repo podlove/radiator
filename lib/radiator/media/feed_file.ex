@@ -1,6 +1,10 @@
 defmodule Radiator.Media.FeedFile do
   use Arc.Definition
 
+  def filename(_version, {_file, [podcast_id: _podcast_id, page: 1]}) do
+    "feed.xml"
+  end
+
   def filename(_version, {_file, [podcast_id: _podcast_id, page: page]}) do
     "feed_page_#{page}.xml"
   end
