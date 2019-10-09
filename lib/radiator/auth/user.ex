@@ -76,7 +76,7 @@ defmodule Radiator.Auth.User do
     end
   end
 
-  ## PUblic API
+  ## Public API
 
   def check_password(%User{} = user, password) do
     Argon2.check_pass(user, password)
@@ -84,6 +84,8 @@ defmodule Radiator.Auth.User do
 
   @request_email_salt "34ercft gpaojrt[we"
   @email_verification_salt "q3480haspodfinp0284;a"
+  @request_reset_password_email_salt "0987unb23nfi"
+  @passwort_reset_salt "oiebibasdfiubp9u3//."
 
   def email_verification_request_token(%User{} = user) do
     Phoenix.Token.sign(RadiatorWeb.Endpoint, @request_email_salt, user.name)
@@ -93,7 +95,16 @@ defmodule Radiator.Auth.User do
     Phoenix.Token.verify(RadiatorWeb.Endpoint, @request_email_salt, token, max_age: 60 * 5)
   end
 
-  @spec email_verification_token(Radiator.Auth.User.t()) :: any()
+  def email_reset_password_request_token(%User{} = user) do
+    Phoenix.Token.sign(RadiatorWeb.Endpoint, @request_reset_password_email_salt, user.name)
+  end
+
+  def validate_email_reset_password_request_token(token) do
+    Phoenix.Token.verify(RadiatorWeb.Endpoint, @request_reset_password_email_salt, token,
+      max_age: 60 * 5
+    )
+  end
+
   def email_verification_token(%User{} = user) do
     Phoenix.Token.sign(
       RadiatorWeb.Endpoint,
@@ -106,6 +117,29 @@ defmodule Radiator.Auth.User do
     case Phoenix.Token.verify(RadiatorWeb.Endpoint, @email_verification_salt, token,
            max_age: 60 * 60 * 48
          ) do
+      {:ok, binary} ->
+        [name, email] = :binary.split(binary, " ")
+
+        case Radiator.Auth.Register.get_user_by_email(email) do
+          %User{name: ^name} = user -> {:ok, user}
+          _ -> {:error, :invalid}
+        end
+
+      result ->
+        result
+    end
+  end
+
+  def reset_password_token(%User{} = user) do
+    Phoenix.Token.sign(
+      RadiatorWeb.Endpoint,
+      @passwort_reset_salt,
+      "#{user.name} #{user.email}"
+    )
+  end
+
+  def validate_reset_password_token(token) do
+    case Phoenix.Token.verify(RadiatorWeb.Endpoint, @passwort_reset_salt, token, max_age: 60 * 60) do
       {:ok, binary} ->
         [name, email] = :binary.split(binary, " ")
 

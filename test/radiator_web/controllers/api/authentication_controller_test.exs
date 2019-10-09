@@ -41,5 +41,23 @@ defmodule RadiatorWeb.Api.AuthenticationControllerTest do
 
       assert %{"verification" => "sent"} = json_response(conn, 200)
     end
+
+    test "reset_password - endpoint responds", %{conn: conn} do
+      conn =
+        post(conn, Routes.api_authentication_path(conn, :signup),
+          name: "some_valid_username",
+          password: "password",
+          email: "mail@nowhere.it"
+        )
+
+      conn =
+        conn
+        |> recycle()
+        |> post(Routes.api_authentication_path(conn, :reset_password),
+          name_or_email: "some_valid_username"
+        )
+
+      assert %{"reset" => "sent"} = json_response(conn, 200)
+    end
   end
 end

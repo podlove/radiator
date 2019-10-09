@@ -8,8 +8,14 @@
   - [Login](#login)
     - [Parameters](#parameters-1)
     - [Response](#response-1)
-  - [Prolong Session](#prolong-session)
+  - [Resend Verification Email](#resend-verification-email)
+    - [Parameters](#parameters-2)
     - [Response](#response-2)
+  - [Send Reset Password Email](#send-reset-password-email)
+    - [Parameters](#parameters-3)
+    - [Response](#response-3)
+  - [Prolong Session](#prolong-session)
+    - [Response](#response-4)
 - [Networks](#networks)
   - [Parameters for Create & Update](#parameters-for-create--update)
   - [Create](#create)
@@ -165,6 +171,48 @@ POST /api/rest/v1/auth
   "expires_at": "2019-06-25T10:43:29Z",
   "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NjE0NTk0MDksImlzcyI6InJhZGlhdG9yIiwic3ViIjoiYWRtaW4iLCJ0eXAiOiJhcGlfc2Vzc2lvbiJ9.c1upk8TaENs-r5xZUXxUyZw4PEs5z7hpDusQtKDIwjJKZE1uKdbVs4mzcQdyJNHWHGdzSECwBtX1M4g_u-AhJg",
   "username": "admin"
+}
+```
+
+### Resend Verification Email
+
+```
+POST /api/rest/v1/auth/resend_verification_email
+```
+
+#### Parameters
+
+| Name            | Type     | Description                      |
+| --------------- | -------- | -------------------------------- |
+| `name_or_email` | `string` | **Required.** Username or email. |
+
+#### Response
+
+```json
+{
+  "name_or_email":  "whateveryousent",
+  "verification": "sent"
+}
+```
+
+### Send Reset Password Email
+
+```
+POST /api/rest/v1/auth/resend_verification_email
+```
+
+#### Parameters
+
+| Name            | Type     | Description                      |
+| --------------- | -------- | -------------------------------- |
+| `name_or_email` | `string` | **Required.** Username or email. |
+
+#### Response
+
+```json
+{
+  "name_or_email":  "whateveryousent",
+  "reset": "sent"
 }
 ```
 

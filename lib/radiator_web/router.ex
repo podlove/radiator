@@ -157,6 +157,9 @@ defmodule RadiatorWeb.Router do
 
     get "/login/request_verification/:token", LoginController, :resend_verification_mail
     get "/login/verify_email/:token", LoginController, :verify_email
+    get "/login/request_reset_password/:token", LoginController, :send_reset_password_mail
+    get "/login/reset_password_form", LoginController, :reset_password_form
+    post "/login/reset_password_form", LoginController, :reset_password
 
     get "/login", LoginController, :index
     post "/login", LoginController, :login

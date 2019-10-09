@@ -7,6 +7,8 @@ defmodule RadiatorWeb.LoginController do
 
   alias RadiatorWeb.Helpers.EmailHelpers
 
+  import Phoenix.HTML.Link
+
   def index(conn, _params) do
     render(conn, "index.html", user_changeset: Auth.Register.change_user(%Auth.User{}))
   end
@@ -25,8 +27,28 @@ defmodule RadiatorWeb.LoginController do
            params["password"]
          ) do
       nil ->
+        flash_content =
+          case Auth.Register.user_by_name_or_email(params["name_or_email"]) do
+            {:ok, user} ->
+              [
+                "Wrong Username/Password. (",
+                link("Request Password Reset",
+                  to:
+                    Routes.login_path(
+                      conn,
+                      :send_reset_password_mail,
+                      Radiator.Auth.User.email_reset_password_request_token(user)
+                    )
+                ),
+                ")"
+              ]
+
+            _ ->
+              "Wrong Username/Password."
+          end
+
         conn
-        |> put_flash(:error, "Wrong Username/Password.")
+        |> put_flash(:error, flash_content)
         |> render("login.html", Map.take(params, [:name_or_email]))
 
       valid_user ->
@@ -96,6 +118,21 @@ defmodule RadiatorWeb.LoginController do
     end
   end
 
+  def send_reset_password_mail(conn, params) do
+    with {:ok, name} <- Auth.User.validate_email_reset_password_request_token(params["token"]),
+         user <- Auth.Register.get_user_by_name(name),
+         :sent <- EmailHelpers.send_reset_password_email_for_user(user) do
+      conn
+      |> put_flash(:info, "Password Reset email sent!")
+      |> redirect(to: Routes.login_path(conn, :login_form, name_or_email: user.name))
+    else
+      _ ->
+        conn
+        |> put_flash(:info, "Invalid request.")
+        |> redirect(to: Routes.login_path(conn, :index))
+    end
+  end
+
   def verify_email(conn, params) do
     token = params["token"]
 
@@ -122,6 +159,58 @@ defmodule RadiatorWeb.LoginController do
         conn
         |> put_flash(:info, "Could not verify email address.")
         |> redirect(to: Routes.login_path(conn, :index))
+    end
+  end
+
+  def reset_password_form(conn, %{"token" => token}) do
+    with {:ok, user = %Auth.User{}} <- Auth.User.validate_reset_password_token(token) do
+      # TODO: burn token too
+      conn
+      |> put_session(:password_reset_token, token)
+      |> put_session(:password_reset_user_name, user.name)
+      |> configure_session(renew: true)
+      |> redirect(to: Routes.login_path(conn, :reset_password_form))
+    else
+      _ ->
+        conn
+        |> put_flash(:error, "Invalid request.")
+        |> redirect(to: Routes.login_path(conn, :index))
+    end
+  end
+
+  def reset_password_form(conn, _) do
+    token = get_session(conn, :password_reset_token)
+    username = get_session(conn, :password_reset_user_name)
+
+    conn
+    |> render("password_reset.html", token: token, username: username)
+  end
+
+  def reset_password(conn, params) do
+    token = get_session(conn, :password_reset_token)
+    username = get_session(conn, :password_reset_user_name)
+    new_password = params["password"]
+
+    cond do
+      new_password != "" and new_password == params["password_repeat"] ->
+        with {:ok, user = %Auth.User{}} <- Auth.User.validate_reset_password_token(token) do
+          Auth.Register.update_user(user, %{password: new_password})
+
+          conn
+          |> configure_session(drop: true)
+          |> redirect(to: Routes.login_path(conn, :login_form, name_or_email: user.name))
+        else
+          _ ->
+            conn
+            |> put_flash(:error, "Invalid request.")
+            |> configure_session(drop: true)
+            |> redirect(to: Routes.login_path(conn, :index))
+        end
+
+      true ->
+        conn
+        |> put_flash(:error, "Passwords need to match")
+        |> render("password_reset.html", token: token, username: username)
     end
   end
 end

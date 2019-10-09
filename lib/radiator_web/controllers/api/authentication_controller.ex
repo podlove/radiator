@@ -69,4 +69,17 @@ defmodule RadiatorWeb.Api.AuthenticationController do
         |> json(%{name_or_email: params["name_or_email"], verification: :not_sent})
     end
   end
+
+  def reset_password(conn, params) do
+    with name_or_email when is_binary(name_or_email) <- params["name_or_email"],
+         {:ok, user} <- Auth.Register.user_by_name_or_email(name_or_email),
+         :sent <- EmailHelpers.send_reset_password_email_for_user(user) do
+      conn
+      |> json(%{name_or_email: name_or_email, reset: :sent})
+    else
+      _ ->
+        conn
+        |> json(%{name_or_email: params["name_or_email"], reset: :not_sent})
+    end
+  end
 end
