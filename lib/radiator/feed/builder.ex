@@ -1,6 +1,8 @@
 defmodule Radiator.Feed.Builder do
   @moduledoc """
   RSS Feed Builder.
+
+  Generates XML from given data object.
   """
   import XmlBuilder
 

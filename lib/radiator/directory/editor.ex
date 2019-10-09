@@ -257,7 +257,7 @@ defmodule Radiator.Directory.Editor do
   end
 
   def get_podcast(actor = %Auth.User{}, id) do
-    case Repo.get(Podcast, id) do
+    case Editor.Editor.get_podcast(id) do
       nil ->
         @not_found_match
 

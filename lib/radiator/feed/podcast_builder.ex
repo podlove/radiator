@@ -32,7 +32,7 @@ defmodule Radiator.Feed.PodcastBuilder do
     |> add(contributors(podcast))
     |> add(owner(podcast))
     |> add(itunes_block())
-    # |> add(last_build_date())
+    |> add(last_build_date())
     |> Enum.reverse()
     |> Enum.concat(paging_elements(feed_data, opts))
     |> Enum.concat(episode_items(feed_data, opts))
@@ -91,7 +91,7 @@ defmodule Radiator.Feed.PodcastBuilder do
   end
 
   defp episode_items(feed_data = %{episodes: episodes}, opts) do
-    with start_index <- (opts[:paging].current_page - 1) * opts[:paging].total_pages do
+    with start_index <- (opts[:paging].current_page - 1) * opts[:paging].items_per_page do
       episodes
       |> Enum.slice(start_index, opts[:items_per_page])
       |> Enum.map(fn episode ->
@@ -149,5 +149,9 @@ defmodule Radiator.Feed.PodcastBuilder do
     else
       nil
     end
+  end
+
+  defp last_build_date() do
+    element(:lastBuildDate, Timex.now() |> Timex.format!("{RFC822}"))
   end
 end

@@ -16,7 +16,8 @@ defmodule Radiator.Directory.Editor.Manager do
     Podcast,
     Episode,
     Audio,
-    AudioPublication
+    AudioPublication,
+    Publication
   }
 
   alias Radiator.Contribution.{
@@ -196,10 +197,21 @@ defmodule Radiator.Directory.Editor.Manager do
     end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{episode_updated: episode}} -> {:ok, episode}
-      {:error, :episode, changeset, _map} -> {:error, changeset}
-      {:error, :episode_updates, changeset, _map} -> {:error, changeset}
-      something -> something
+      {:ok, %{episode_updated: episode}} ->
+        if Publication.published?(episode) do
+          refresh_feed_cache(podcast)
+        end
+
+        {:ok, episode}
+
+      {:error, :episode, changeset, _map} ->
+        {:error, changeset}
+
+      {:error, :episode_updates, changeset, _map} ->
+        {:error, changeset}
+
+      something ->
+        something
     end
   end
 
@@ -216,7 +228,9 @@ defmodule Radiator.Directory.Editor.Manager do
 
   """
   def delete_episode(%Episode{} = episode) do
-    Repo.delete(episode)
+    result = Repo.delete(episode)
+    refresh_feed_cache(episode)
+    result
   end
 
   @doc """
@@ -232,9 +246,26 @@ defmodule Radiator.Directory.Editor.Manager do
 
   """
   def update_episode(%Episode{} = episode, attrs) do
-    episode
-    |> Episode.changeset(attrs)
-    |> Repo.update()
+    result =
+      episode
+      |> Episode.changeset(attrs)
+      |> Repo.update()
+
+    refresh_feed_cache(episode)
+
+    result
+  end
+
+  defp refresh_feed_cache(%Episode{podcast_id: podcast_id}) do
+    Radiator.Feed.Worker.enqueue(%{"podcast_id" => podcast_id})
+  end
+
+  defp refresh_feed_cache(%Podcast{id: podcast_id}) do
+    Radiator.Feed.Worker.enqueue(%{"podcast_id" => podcast_id})
+  end
+
+  defp refresh_feed_cache(_) do
+    nil
   end
 
   def regenerate_episode_guid(episode) do
@@ -269,9 +300,14 @@ defmodule Radiator.Directory.Editor.Manager do
       {:error, %Ecto.Changeset{}}
   """
   def publish(subject = %type{}) when type in [Podcast, Episode, AudioPublication] do
-    subject
-    |> type.changeset(%{publish_state: :published})
-    |> Repo.update()
+    result =
+      subject
+      |> type.changeset(%{publish_state: :published})
+      |> Repo.update()
+
+    refresh_feed_cache(subject)
+
+    result
   end
 
   @doc """
@@ -286,9 +322,14 @@ defmodule Radiator.Directory.Editor.Manager do
       {:error, %Ecto.Changeset{}}
   """
   def depublish(subject = %type{}) when type in [Podcast, Episode, AudioPublication] do
-    subject
-    |> type.changeset(%{publish_state: :depublished})
-    |> Repo.update()
+    result =
+      subject
+      |> type.changeset(%{publish_state: :depublished})
+      |> Repo.update()
+
+    refresh_feed_cache(subject)
+
+    result
   end
 
   @doc """
@@ -326,9 +367,14 @@ defmodule Radiator.Directory.Editor.Manager do
 
   """
   def update_podcast(%Podcast{} = podcast, attrs) do
-    podcast
-    |> Podcast.changeset(attrs)
-    |> Repo.update()
+    result =
+      podcast
+      |> Podcast.changeset(attrs)
+      |> Repo.update()
+
+    refresh_feed_cache(podcast)
+
+    result
   end
 
   @doc """
@@ -344,7 +390,9 @@ defmodule Radiator.Directory.Editor.Manager do
 
   """
   def delete_podcast(%Podcast{} = podcast) do
-    Repo.delete(podcast)
+    result = Repo.delete(podcast)
+    refresh_feed_cache(podcast)
+    result
   end
 
   @doc """

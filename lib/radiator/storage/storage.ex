@@ -75,6 +75,15 @@ defmodule Radiator.Storage do
     {:ok, key}
   end
 
+  def list_feed_files(podcast_id) do
+    {:ok, %{status_code: 200, body: %{contents: contents}, headers: _headers}} =
+      S3.list_objects(bucket(), prefix: "feed/#{podcast_id}") |> ExAws.request()
+
+    contents = contents |> Enum.map(fn f -> {f.key, f.last_modified} end)
+
+    {:ok, contents}
+  end
+
   @doc """
   Full storage URL for a given file name
   """

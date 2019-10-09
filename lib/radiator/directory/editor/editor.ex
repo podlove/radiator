@@ -25,6 +25,12 @@ defmodule Radiator.Directory.Editor.Editor do
 
   require Logger
 
+  def get_podcast(id) do
+    Podcast
+    |> Repo.get(id)
+    |> Directory.Editor.preloaded_podcast()
+  end
+
   @doc """
   Gets a single podcast by its slug.
 
