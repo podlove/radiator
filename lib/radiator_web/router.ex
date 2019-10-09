@@ -39,7 +39,7 @@ defmodule RadiatorWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-    plug RadiatorWeb.Plug.ValidateAPIUser
+    plug RadiatorWeb.Plug.AssignAPIUser
   end
 
   pipeline :authenticated_api do
@@ -89,6 +89,9 @@ defmodule RadiatorWeb.Router do
     pipe_through :api
 
     post "/auth", AuthenticationController, :create
+    post "/auth/signup", AuthenticationController, :signup
+    post "/auth/reset_password", AuthenticationController, :reset_password
+    post "/auth/resend_verification_email", AuthenticationController, :resend_verification_email
   end
 
   scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
@@ -154,6 +157,9 @@ defmodule RadiatorWeb.Router do
 
     get "/login/request_verification/:token", LoginController, :resend_verification_mail
     get "/login/verify_email/:token", LoginController, :verify_email
+    get "/login/request_reset_password/:token", LoginController, :send_reset_password_mail
+    get "/login/reset_password_form", LoginController, :reset_password_form
+    post "/login/reset_password_form", LoginController, :reset_password
 
     get "/login", LoginController, :index
     post "/login", LoginController, :login

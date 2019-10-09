@@ -4,6 +4,8 @@ defmodule Radiator.Auth.Email do
   alias Radiator.Auth.Config
   alias Radiator.Auth.User
 
+  # TODO this is very dependent on phoenix and RadiatorWeb, probably shouldnt be eventually.
+
   def welcome_email(%User{} = user, confirmation_url) do
     email_base()
     |> subject(mail_subject("Welcome to Radiator!"))
@@ -25,6 +27,18 @@ defmodule Radiator.Auth.Email do
       confirmation_url
     )
     |> render("email_verification_email.text")
+    |> to(user.email)
+  end
+
+  def email_reset_password_email(%User{} = user, reset_password_url) do
+    email_base()
+    |> subject(mail_subject("Password reset."))
+    |> assign(:user, user)
+    |> assign(
+      :reset_password_url,
+      reset_password_url
+    )
+    |> render("email_reset_password_email.text")
     |> to(user.email)
   end
 

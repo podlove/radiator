@@ -309,12 +309,6 @@ type RootMutationType {
 
   """Prolong an authenticated session"""
   prolongSession: Session
-
-  """Request resend of verification email (need auth)"""
-  userResendVerificationEmail: Boolean
-
-  """Sign up a user"""
-  userSignup(email: String!, password: String!, username: String!): Session
 }
 
 type RootQueryType {

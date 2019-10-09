@@ -2,11 +2,20 @@
 
 - [API Usage](#api-usage)
 - [Authentication](#authentication)
-  - [Login](#login)
+  - [Signup](#signup)
     - [Parameters](#parameters)
     - [Response](#response)
-  - [Prolong Session](#prolong-session)
+  - [Login](#login)
+    - [Parameters](#parameters-1)
     - [Response](#response-1)
+  - [Resend Verification Email](#resend-verification-email)
+    - [Parameters](#parameters-2)
+    - [Response](#response-2)
+  - [Send Reset Password Email](#send-reset-password-email)
+    - [Parameters](#parameters-3)
+    - [Response](#response-3)
+  - [Prolong Session](#prolong-session)
+    - [Response](#response-4)
 - [Networks](#networks)
   - [Parameters for Create & Update](#parameters-for-create--update)
   - [Create](#create)
@@ -116,6 +125,32 @@ To make full use of the API you need to authenticate as an existing user. A succ
 
 > curl -H "Authorization: Bearer AUTH-TOKEN" http://localhost:4000/api/rest/v1/
 
+Obviously excempt from this are the Login Signup, ResetPassword and ResendVerificationEmail endpoints.
+
+### Signup
+
+```
+POST /api/rest/v1/auth/signup
+```
+
+#### Parameters
+
+| Name           | Type     | Description                                  |
+| -------------- | -------- | -------------------------------------------- |
+| `name`         | `string` | **Required.** Username.                      |
+| `email`        | `string` | **Required.** Email.                         |
+| `password`     | `string` | **Required.** Password.                      |
+| `display_name` | `string` | display name, optional, defaults to Username |
+| `image`        | `file`   | avatar image, optional                       |
+
+#### Response
+
+A user if successful. Error if username was already taken or arguments are missing.
+
+```json
+{…}
+```
+
 ### Login
 
 ```
@@ -138,6 +173,49 @@ POST /api/rest/v1/auth
   "username": "admin"
 }
 ```
+
+### Resend Verification Email
+
+```
+POST /api/rest/v1/auth/resend_verification_email
+```
+
+#### Parameters
+
+| Name            | Type     | Description                      |
+| --------------- | -------- | -------------------------------- |
+| `name_or_email` | `string` | **Required.** Username or email. |
+
+#### Response
+
+```json
+{
+  "name_or_email":  "whateveryousent",
+  "verification": "sent"
+}
+```
+
+### Send Reset Password Email
+
+```
+POST /api/rest/v1/auth/resend_verification_email
+```
+
+#### Parameters
+
+| Name            | Type     | Description                      |
+| --------------- | -------- | -------------------------------- |
+| `name_or_email` | `string` | **Required.** Username or email. |
+
+#### Response
+
+```json
+{
+  "name_or_email":  "whateveryousent",
+  "reset": "sent"
+}
+```
+
 
 ### Prolong Session
 

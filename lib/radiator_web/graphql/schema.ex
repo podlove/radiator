@@ -175,19 +175,6 @@ defmodule RadiatorWeb.GraphQL.Schema do
   end
 
   mutation do
-    @desc "Sign up a user"
-    field :user_signup, :session do
-      arg :username, non_null(:string)
-      arg :email, non_null(:string)
-      arg :password, non_null(:string)
-      resolve &Public.Resolvers.Session.user_signup/3
-    end
-
-    @desc "Request resend of verification email (need auth)"
-    field :user_resend_verification_email, :boolean do
-      resolve &Admin.Resolvers.User.resend_verification_email/3
-    end
-
     @desc "Request an authenticated session"
     field :authenticated_session, :session do
       arg :username_or_email, non_null(:string)
