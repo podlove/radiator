@@ -103,6 +103,10 @@ defmodule Radiator.Directory do
     |> preload_for_podcast()
   end
 
+  def get_podcast_by_hostname(hostname) do
+    from(p in Podcast, where: ilike(p.hostname, ^"%#{hostname}%")) |> Repo.one()
+  end
+
   @doc """
   Gets the number of episodes of the podcast with the given id.
 

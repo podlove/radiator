@@ -3,28 +3,28 @@ defmodule RadiatorWeb.Plug.CustomPublicURLs do
 
   import Plug.Conn
 
+  alias Radiator.Directory
+  alias Radiator.Directory.Podcast
+  alias Radiator.InstanceConfig
+
   @impl Plug
   def init(opts), do: opts
 
+  # todo: if host is custom but cannot be matched, show error page with explanation
   @impl Plug
   def call(conn = %Plug.Conn{host: host}, _opts) do
-    if instance_host() == host do
+    if InstanceConfig.hostname() == host do
       conn
     else
-      if host == "ukw.foobar.de" do
-        # actually: fetch podcast from db via host
-        podcast = Radiator.Directory.get_podcast(2) |> IO.inspect()
+      Directory.get_podcast_by_hostname(host)
+      |> case do
+        nil ->
+          conn
 
-        conn
-        |> assign(:custom_public_url, true)
-        |> assign(:current_podcast, podcast)
-      else
-        conn
+        podcast = %Podcast{} ->
+          conn
+          |> assign(:current_podcast, podcast)
       end
     end
-  end
-
-  defp instance_host do
-    Application.get_env(:radiator, RadiatorWeb.Endpoint) |> get_in([:url, :host])
   end
 end

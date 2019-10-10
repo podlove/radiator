@@ -33,6 +33,8 @@ defmodule Radiator.Directory.Podcast do
 
     field :episode_count, :integer, virtual: true
 
+    field :hostname, :string
+
     belongs_to :network, Network
     has_many :episodes, Episode
 
@@ -64,7 +66,8 @@ defmodule Radiator.Directory.Podcast do
       :last_built_at,
       :slug,
       :main_color,
-      :use_short_id?
+      :use_short_id?,
+      :hostname
     ])
     |> cast_attachments(attrs, [:image], allow_paths: true, allow_urls: true)
     |> validate_required([:title])
@@ -104,15 +107,29 @@ defmodule Radiator.Directory.Podcast do
     PodcastImage.url({podcast.image, podcast})
   end
 
-  def public_url(%Podcast{slug: pod_slug}) when is_binary(pod_slug) do
+  def public_url(%Podcast{slug: pod_slug, hostname: nil}) when is_binary(pod_slug) do
     Routes.episode_url(RadiatorWeb.Endpoint, :index, pod_slug)
+  end
+
+  def public_url(%Podcast{hostname: hostname}) do
+    hostname
+    |> URI.parse()
+    |> Map.put(:path, Routes.custom_hostname_episode_path(RadiatorWeb.Endpoint, :index))
+    |> URI.to_string()
   end
 
   def public_url(%Podcast{}), do: nil
 
   # TODO: more than one feed per podcast
-  def feed_url(%Podcast{slug: pod_slug}) when is_binary(pod_slug) do
+  def feed_url(%Podcast{slug: pod_slug, hostname: nil}) when is_binary(pod_slug) do
     Routes.feed_url(RadiatorWeb.Endpoint, :show, pod_slug)
+  end
+
+  def feed_url(%Podcast{hostname: hostname}) do
+    hostname
+    |> URI.parse()
+    |> Map.put(:path, Routes.custom_hostname_feed_path(RadiatorWeb.Endpoint, :show))
+    |> URI.to_string()
   end
 
   def feed_url(%Podcast{}), do: nil
