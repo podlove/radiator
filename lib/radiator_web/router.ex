@@ -27,7 +27,7 @@ defmodule RadiatorWeb.Router do
     plug :put_secure_browser_headers
 
     plug :put_layout, {RadiatorWeb.LayoutView, :public}
-    plug RadiatorWeb.Plug.AssignPodcastFromHostname
+    plug RadiatorWeb.Plug.AssignEpisodeFromPublicSlugs
   end
 
   @otp_app Mix.Project.config()[:app]

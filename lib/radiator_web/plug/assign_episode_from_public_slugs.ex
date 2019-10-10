@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.Plug.AssignPodcastFromHostname do
+defmodule RadiatorWeb.Plug.AssignEpisodeFromPublicSlugs do
   @behaviour Plug
 
   import Plug.Conn
