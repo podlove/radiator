@@ -47,5 +47,7 @@ defmodule RadiatorWeb.Endpoint do
     signing_salt: "ZRbumoaT"
 
   plug CORSPlug
+
+  plug RadiatorWeb.Plug.CustomPublicURLs
   plug RadiatorWeb.Router
 end
