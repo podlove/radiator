@@ -125,7 +125,7 @@ To make full use of the API you need to authenticate as an existing user. A succ
 
 > curl -H "Authorization: Bearer AUTH-TOKEN" http://localhost:4000/api/rest/v1/
 
-Obviously excempt from this are the Login Signup, ResetPassword and ResendVerificationEmail endpoints.
+Obviously excempt from this are the `logn`, `signup`, `reset_password` and `resend_verification_email` endpoints.
 
 ### Signup
 
@@ -135,13 +135,13 @@ POST /api/rest/v1/auth/signup
 
 #### Parameters
 
-| Name           | Type     | Description                                  |
-| -------------- | -------- | -------------------------------------------- |
-| `name`         | `string` | **Required.** Username.                      |
-| `email`        | `string` | **Required.** Email.                         |
-| `password`     | `string` | **Required.** Password.                      |
-| `display_name` | `string` | display name, optional, defaults to Username |
-| `image`        | `file`   | avatar image, optional                       |
+| Name           | Type     | Description                                                     |
+| -------------- | -------- | --------------------------------------------------------------- |
+| `name`         | `string` | **Required.** Username.                                         |
+| `email`        | `string` | **Required.** Email.                                            |
+| `password`     | `string` | **Required.** Password.                                         |
+| `display_name` | `string` | display name, optional, defaults to nil and that means use name |
+| `image`        | `file`   | avatar image, optional                                          |
 
 #### Response
 
@@ -198,7 +198,7 @@ POST /api/rest/v1/auth/resend_verification_email
 ### Send Reset Password Email
 
 ```
-POST /api/rest/v1/auth/resend_verification_email
+POST /api/rest/v1/auth/reset_password
 ```
 
 #### Parameters
@@ -218,6 +218,8 @@ POST /api/rest/v1/auth/resend_verification_email
 
 
 ### Prolong Session
+
+Needs an authenticated session. Is a `POST` but doesn't need a payload.
 
 ```
 POST /api/rest/v1/auth/prolong
