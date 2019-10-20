@@ -59,7 +59,7 @@ steps:
       password:
         from_secret: docker_password
       repo: podlove/radiator
-      tags: develop
+      tags: edge
     when:
       branch:
         - develop
