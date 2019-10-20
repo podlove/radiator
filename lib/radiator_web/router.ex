@@ -1,6 +1,8 @@
 defmodule RadiatorWeb.Router do
   use RadiatorWeb, :router
 
+  alias Radiator.InstanceConfig
+
   pipeline :browser do
     plug RadiatorWeb.Plug.BlockKnownPaths
     plug :accepts, ["html"]
@@ -16,8 +18,16 @@ defmodule RadiatorWeb.Router do
     plug :put_secure_browser_headers
 
     plug :put_layout, {RadiatorWeb.LayoutView, :public}
-
     plug RadiatorWeb.Plug.AssignFromPublicSlugs
+  end
+
+  pipeline :public_browser_custom_url do
+    plug RadiatorWeb.Plug.BlockKnownPaths
+    plug :accepts, ["html", "xml", "rss"]
+    plug :put_secure_browser_headers
+
+    plug :put_layout, {RadiatorWeb.LayoutView, :public}
+    plug RadiatorWeb.Plug.AssignEpisodeFromPublicSlugs
   end
 
   @otp_app Mix.Project.config()[:app]
@@ -56,7 +66,9 @@ defmodule RadiatorWeb.Router do
     plug RadiatorWeb.Plug.AssignCurrentUser
   end
 
-  scope "/admin", RadiatorWeb.Admin, as: :admin do
+  scope "/admin", RadiatorWeb.Admin,
+    host: InstanceConfig.hostname(),
+    as: :admin do
     pipe_through :browser
     pipe_through :authenticated_browser
 
@@ -77,7 +89,7 @@ defmodule RadiatorWeb.Router do
     put "/usersettings", UserSettingsController, :update
   end
 
-  scope "/download", RadiatorWeb do
+  scope "/download", RadiatorWeb, host: InstanceConfig.hostname() do
     get "/p/:podcast_slug/:episode_slug/file/:file_id", TrackingController, :track_episode_file
 
     get "/n/:network_slug/:audio_publication_slug/file/:file_id",
@@ -85,7 +97,7 @@ defmodule RadiatorWeb.Router do
         :track_audio_publication_file
   end
 
-  scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
+  scope "/api/rest/v1", RadiatorWeb.Api, host: InstanceConfig.hostname(), as: :api do
     pipe_through :api
 
     post "/auth", AuthenticationController, :create
@@ -94,7 +106,7 @@ defmodule RadiatorWeb.Router do
     post "/auth/resend_verification_email", AuthenticationController, :resend_verification_email
   end
 
-  scope "/api/rest/v1", RadiatorWeb.Api, as: :api do
+  scope "/api/rest/v1", RadiatorWeb.Api, host: InstanceConfig.hostname(), as: :api do
     pipe_through [:api, :authenticated_api]
 
     post "/auth/prolong", AuthenticationController, :prolong
@@ -137,14 +149,14 @@ defmodule RadiatorWeb.Router do
     post "/convert/chapters", Preview.ChaptersImportController, :convert
   end
 
-  scope "/api" do
+  scope "/api", host: InstanceConfig.hostname() do
     pipe_through :api
 
     forward "/graphql", Absinthe.Plug, schema: RadiatorWeb.GraphQL.Schema
     forward "/graphiql", Absinthe.Plug.GraphiQL, schema: RadiatorWeb.GraphQL.Schema
   end
 
-  scope "/", RadiatorWeb do
+  scope "/", RadiatorWeb, host: InstanceConfig.hostname() do
     pipe_through :browser
 
     get "/", PageController, :index
@@ -172,12 +184,22 @@ defmodule RadiatorWeb.Router do
     get "/logout", LoginController, :logout
   end
 
-  scope "/", RadiatorWeb.Public do
+  # todo: if a custom host is set, these should all redirect to the custom host
+  scope "/", RadiatorWeb.Public, host: InstanceConfig.hostname() do
     pipe_through :public_browser
 
     get "/robots.txt", RobotsTxtController, :show
     get "/:podcast_slug/feed.xml", FeedController, :show
     get "/:podcast_slug/:episode_slug", EpisodeController, :show
     get "/:podcast_slug", EpisodeController, :index
+  end
+
+  scope "/", RadiatorWeb.Public, as: :custom_hostname do
+    pipe_through :public_browser_custom_url
+
+    get "/robots.txt", RobotsTxtController, :show
+    get "/feed.xml", FeedController, :show
+    get "/:episode_slug", EpisodeController, :show
+    get "/", EpisodeController, :index
   end
 end

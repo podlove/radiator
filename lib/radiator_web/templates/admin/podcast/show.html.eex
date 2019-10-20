@@ -23,7 +23,7 @@
        <div class="mb-6 sm:mb-0" style="min-width: 130px;">
          <div class="text-sm mb-1">
            <%= if @podcast.published_at && @podcast.slug do %>
-             <%= link to: Routes.feed_path(@conn, :show, @podcast.slug), class: "txt-lnk flex flex-row items-center" do %>
+             <%= link to: Podcast.feed_url(@podcast), class: "txt-lnk flex flex-row items-center" do %>
              <svg class="w-6 h-6 mr-1 icon-view-visible" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="128px" height="128px" viewBox="0 0 128 128" enable-background="new 0 0 128 128" xml:space="preserve">
                <path class="secondary" fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" d="M88.096,97.551V90.91c0-1.123-0.102-2.219-0.248-3.305
                  c11.229-7.77,18.608-20.875,18.608-35.735c0-23.858-19.009-43.198-42.456-43.198S21.544,28.012,21.544,51.87
@@ -40,7 +40,7 @@
              <% end %>
            </div>
            <div class="text-sm mb-1">
-             <%= link to: Routes.episode_path(@conn, :index, @podcast.slug), class: "txt-lnk flex flex-row items-center", target: "_blank" do %>
+             <%= link to: Podcast.public_url(@podcast), class: "txt-lnk flex flex-row items-center", target: "_blank" do %>
                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 mr-1 icon-view-visible"><path class="primary" d="M17.56 17.66a8 8 0 0 1-11.32 0L1.3 12.7a1 1 0 0 1 0-1.42l4.95-4.95a8 8 0 0 1 11.32 0l4.95 4.95a1 1 0 0 1 0 1.42l-4.95 4.95zM11.9 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"></path><circle cx="12" cy="12" r="3" class="secondary"></circle></svg>
                Public Page
              <% end %>    

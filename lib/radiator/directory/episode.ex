@@ -71,9 +71,17 @@ defmodule Radiator.Directory.Episode do
 
   def public_url(%Episode{} = episode), do: public_url(episode, episode.podcast)
 
-  def public_url(%Episode{slug: ep_slug}, %Podcast{slug: pod_slug})
+  def public_url(%Episode{slug: ep_slug}, %Podcast{slug: pod_slug, hostname: nil})
       when is_binary(ep_slug) and is_binary(pod_slug) do
     Routes.episode_url(RadiatorWeb.Endpoint, :show, pod_slug, ep_slug)
+  end
+
+  def public_url(%Episode{slug: ep_slug}, %Podcast{hostname: hostname})
+      when is_binary(ep_slug) do
+    hostname
+    |> URI.parse()
+    |> Map.put(:path, Routes.custom_hostname_episode_path(RadiatorWeb.Endpoint, :show, ep_slug))
+    |> URI.to_string()
   end
 
   def public_url(_, _), do: nil

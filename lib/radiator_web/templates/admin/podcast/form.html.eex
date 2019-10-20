@@ -52,6 +52,13 @@
       <%= error_tag f, :owner_email %>
     </div>
 
+    <div class="mb-6">
+      <%= label f, "Custom Public URL", class: "font-bold text-sm text-gray-700 uppercase tracking-wider mb-2 block" %>
+      <%= text_input f, :hostname, class: "input", placeholder: "https://mypodcast.fm" %>
+      <p class="text-sm text-gray-700 my-1">Define a custom URL to serve the RSS feed and public pages from your own domain. Include the scheme (https). Subdomains and custom ports are allowed. Subdirectory is not supported.</p>
+      <%= error_tag f, :hostname %>
+    </div>
+
     <div class="flex">
       <%= submit @button_text, class: "btn" %>
       <%= if assigns[:cancel_url] do %>

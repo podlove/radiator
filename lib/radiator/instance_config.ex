@@ -20,4 +20,8 @@ defmodule Radiator.InstanceConfig do
     Application.get_env(:radiator, :instance_config)[:base_admin_url] ||
       Routes.admin_network_url(RadiatorWeb.Endpoint, :index)
   end
+
+  def hostname do
+    Application.get_env(:radiator, RadiatorWeb.Endpoint)[:url][:host]
+  end
 end
