@@ -86,7 +86,7 @@ defmodule Radiator.MixProject do
       {:dataloader, "~> 1.0"},
       {:mime, "~> 1.2"},
       # tracking / analytics
-      {:remote_ip, "~> 0.1.5"},
+      {:remote_ip, "~> 0.2.0"},
       {:ua_inspector, "~> 1.0"},
       # job processor
       {:oban, "~> 0.8"},
