@@ -11,7 +11,10 @@ defmodule Radiator.Media.NetworkImage do
     "network/#{network.id}"
   end
 
-  def default_url(_, network) do
-    "https://robohash.org/#{network.id}?size=200x200&set=set4"
+  def default_url(_, _network) do
+    RadiatorWeb.Endpoint.static_url()
+    |> URI.parse()
+    |> Map.put(:path, "/images/placeholder_icecream.png")
+    |> URI.to_string()
   end
 end
