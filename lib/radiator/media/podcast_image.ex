@@ -10,4 +10,11 @@ defmodule Radiator.Media.PodcastImage do
   def storage_dir(_version, {_file, podcast}) do
     "podcast/#{podcast.id}"
   end
+
+  def default_url(_, _) do
+    RadiatorWeb.Endpoint.static_url()
+    |> URI.parse()
+    |> Map.put(:path, "/images/placeholder_recording.png")
+    |> URI.to_string()
+  end
 end

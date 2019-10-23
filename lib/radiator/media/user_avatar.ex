@@ -13,7 +13,10 @@ defmodule Radiator.Media.UserAvatar do
     "user/#{id}"
   end
 
-  def default_url(_, profile) do
-    "https://robohash.org/#{profile.id}?size=200x200"
+  def default_url(_, _profile) do
+    RadiatorWeb.Endpoint.static_url()
+    |> URI.parse()
+    |> Map.put(:path, "/images/placeholder_female_avatar.png")
+    |> URI.to_string()
   end
 end
