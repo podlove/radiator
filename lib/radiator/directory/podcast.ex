@@ -61,8 +61,6 @@ defmodule Radiator.Directory.Podcast do
       :owner_name,
       :owner_email,
       :language,
-      :publish_state,
-      :published_at,
       :last_built_at,
       :slug,
       :main_color,
@@ -73,10 +71,18 @@ defmodule Radiator.Directory.Podcast do
     |> validate_required([:title])
     |> validate_color(:main_color)
     |> postprocess_short_id()
-    |> validate_publish_state()
-    |> maybe_set_published_at()
     |> TitleSlug.maybe_generate_slug()
     |> TitleSlug.unique_constraint()
+  end
+
+  def publication_changeset(podcast, attrs) do
+    podcast
+    |> cast(attrs, [
+      :publish_state,
+      :published_at
+    ])
+    |> validate_publish_state()
+    |> maybe_set_published_at()
   end
 
   @doc """

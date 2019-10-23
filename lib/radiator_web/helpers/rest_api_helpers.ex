@@ -6,8 +6,11 @@ defmodule RadiatorWeb.Helpers.RestApiHelpers do
   import Plug.Conn, only: [send_resp: 3]
 
   def send_delete_resp(conn) do
-    conn
-    |> send_resp(204, "")
+    send_no_content(conn)
+  end
+
+  def send_no_content(conn) do
+    send_resp(conn, 204, "")
   end
 
   def send_single_message_success(conn, message \\ "ok") do

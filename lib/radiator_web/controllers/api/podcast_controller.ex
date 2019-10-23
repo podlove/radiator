@@ -39,4 +39,20 @@ defmodule RadiatorWeb.Api.PodcastController do
       error -> error
     end
   end
+
+  def publish(conn, %{"id" => id}) do
+    with user = current_user(conn),
+         {:ok, podcast} <- Editor.get_podcast(user, id),
+         {:ok, _podcast} <- Editor.publish_podcast(user, podcast) do
+      send_no_content(conn)
+    end
+  end
+
+  def depublish(conn, %{"id" => id}) do
+    with user = current_user(conn),
+         {:ok, podcast} <- Editor.get_podcast(user, id),
+         {:ok, _podcast} <- Editor.depublish_podcast(user, podcast) do
+      send_no_content(conn)
+    end
+  end
 end
