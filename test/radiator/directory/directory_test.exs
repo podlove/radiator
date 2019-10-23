@@ -130,30 +130,12 @@ defmodule Radiator.DirectoryTest do
       assert published_podcast3.slug == "#{existing_podcast.slug}-3"
     end
 
-    test "publish/1 with invalid data returns error changeset" do
-      podcast = insert(:podcast, published_at: nil)
-      user = insert(:user) |> make_owner(podcast)
-
-      assert {:error, %Ecto.Changeset{}} = Editor.Manager.publish(%{podcast | :title => nil})
-
-      assert {:ok, %Podcast{published_at: nil}} = Editor.get_podcast(user, podcast.id)
-    end
-
     test "depublish/1 sets podcasts state to :depublished" do
       podcast = insert(:podcast) |> publish()
       published_at = podcast.published_at
 
       assert {:ok, %Podcast{published_at: ^published_at, publish_state: :depublished}} =
                Editor.Manager.depublish(podcast)
-    end
-
-    test "depublish_podcast/1 with invalid data returns error changeset" do
-      podcast = insert(:podcast) |> publish()
-      published_at = podcast.published_at
-
-      assert {:error, %Ecto.Changeset{}} = Editor.Manager.depublish(%{podcast | :title => nil})
-
-      assert %Podcast{published_at: ^published_at} = Directory.get_podcast(podcast.id)
     end
   end
 
@@ -213,11 +195,7 @@ defmodule Radiator.DirectoryTest do
 
       assert updated_episode.slug == nil
 
-      {:ok, published_episode} =
-        Editor.Manager.update_episode(updated_episode, %{
-          publish_state: :published,
-          published_at: DateTime.utc_now()
-        })
+      {:ok, published_episode} = Editor.Manager.publish(updated_episode)
 
       assert String.length(published_episode.slug) > 0
     end

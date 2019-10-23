@@ -53,8 +53,6 @@ defmodule Radiator.Directory.Episode do
       :summary_source,
       :guid,
       :number,
-      :publish_state,
-      :published_at,
       :slug,
       :short_id,
       :podcast_id,
@@ -63,6 +61,16 @@ defmodule Radiator.Directory.Episode do
     |> validate_required([:title])
     |> set_guid_if_missing()
     |> create_audio_from_enclosure()
+    |> TitleSlug.maybe_generate_slug()
+    |> TitleSlug.unique_constraint()
+  end
+
+  def publication_changeset(episode, attrs) do
+    episode
+    |> cast(attrs, [
+      :publish_state,
+      :published_at
+    ])
     |> validate_publish_state()
     |> maybe_set_published_at()
     |> TitleSlug.maybe_generate_slug()

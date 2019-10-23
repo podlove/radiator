@@ -83,6 +83,8 @@ defmodule Radiator.Directory.Podcast do
     ])
     |> validate_publish_state()
     |> maybe_set_published_at()
+    |> TitleSlug.maybe_generate_slug()
+    |> TitleSlug.unique_constraint()
   end
 
   @doc """

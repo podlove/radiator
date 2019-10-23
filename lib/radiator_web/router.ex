@@ -124,11 +124,17 @@ defmodule RadiatorWeb.Router do
     end
 
     resources "/episodes", EpisodeController, only: [:show, :create, :update, :delete] do
+      put "/publish", EpisodeController, :publish
+      put "/depublish", EpisodeController, :depublish
+
       resources "/audios", AudioController, only: [:create]
     end
 
     resources "/audio_publications", AudioPublicationController,
-      only: [:index, :show, :update, :delete]
+      only: [:index, :show, :update, :delete] do
+      put "/publish", AudioPublicationController, :publish
+      put "/depublish", AudioPublicationController, :depublish
+    end
 
     resources "/people", PersonController, only: [:index, :show, :create, :update, :delete]
 

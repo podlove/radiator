@@ -73,9 +73,16 @@ defmodule RadiatorWeb.Api.IntegrationTest do
       conn =
         conn
         |> recycle()
-        |> patch(Routes.api_episode_path(conn, :update, episode["id"]), %{
-          episode: %{publish_state: "published"}
-        })
+        |> put(Routes.api_episode_episode_path(conn, :publish, episode["id"]))
+
+      assert response(conn, :no_content)
+
+      # get episode
+
+      conn =
+        conn
+        |> recycle()
+        |> get(Routes.api_episode_path(conn, :show, episode["id"]))
 
       assert %{"publish_state" => "published", "published_at" => published_at, "slug" => slug} =
                json_response(conn, :ok)
