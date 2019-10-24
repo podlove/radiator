@@ -5,6 +5,8 @@ defmodule Radiator.Storage.File do
   import Arc.Ecto.Changeset
   import Ecto.Query, warn: false
 
+  alias Radiator.Directory.Network
+
   # FIXME: currently files have no owner/permission management
   # - at least keep track of who uploaded it
   # - simplest permission case: always scope to network and only
@@ -24,6 +26,8 @@ defmodule Radiator.Storage.File do
     field :name, :string
     field :extension, :string
     field :mime_type, :string
+
+    belongs_to :network, Network
 
     timestamps()
   end

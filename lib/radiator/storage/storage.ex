@@ -11,15 +11,21 @@ defmodule Radiator.Storage do
   alias ExAws.S3
   alias Ecto.Multi
 
-  alias Radiator.Repo
-  alias Radiator.Directory.Podcast
-  alias Radiator.Storage
+  alias Radiator.{
+    Repo,
+    Storage
+  }
 
-  def create_file(uploadable) do
+  alias Radiator.Directory.{
+    Network,
+    Podcast
+  }
+
+  def create_file(network = %Network{}, uploadable) do
     file_meta = Storage.File.extract_meta(uploadable)
 
     file =
-      %Storage.File{}
+      %Storage.File{network_id: network.id}
       |> Storage.File.create_changeset(file_meta)
 
     Multi.new()
