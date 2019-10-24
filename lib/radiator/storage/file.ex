@@ -17,22 +17,29 @@ defmodule Radiator.Storage.File do
   end
 
   @doc false
-  def changeset(file, attrs) do
+  def create_changeset(file, attrs) do
     file
     |> cast(attrs, [:size, :name, :extension, :mime_type])
+  end
+
+  @doc false
+  def upload_changeset(file, attrs) do
+    file
     |> cast_attachments(attrs, [:file], allow_paths: true, allow_urls: true)
   end
 
-  # todo: move to storage context
-  # todo: auto-detect name, size, ext, mime type
-  # gist: create without file first because we need the id for storage
-  def create(path) do
-    %__MODULE__{}
-    |> Radiator.Repo.insert()
-    |> elem(1)
-    |> __MODULE__.changeset(%{
-      file: path
-    })
-    |> Radiator.Repo.update()
+  def extract_meta(%Plug.Upload{path: path}) do
+    extract_meta(path)
+  end
+
+  def extract_meta(path) when is_binary(path) do
+    {:ok, %{size: size}} = File.lstat(path)
+
+    %{
+      size: size,
+      extension: path |> Path.extname() |> String.trim_leading("."),
+      name: Path.basename(path),
+      mime_type: MIME.from_path(path)
+    }
   end
 end

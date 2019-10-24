@@ -9,7 +9,34 @@ defmodule Radiator.Storage do
   """
 
   alias ExAws.S3
+  alias Ecto.Multi
+
+  alias Radiator.Repo
   alias Radiator.Directory.Podcast
+  alias Radiator.Storage
+
+  def create_file(uploadable) do
+    file_meta = Storage.File.extract_meta(uploadable)
+
+    file =
+      %Storage.File{}
+      |> Storage.File.create_changeset(file_meta)
+
+    Multi.new()
+    |> Multi.insert(:file, file)
+    |> Multi.update(:file_upload, fn %{file: file} ->
+      Storage.File.upload_changeset(file, %{file: uploadable})
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{file_upload: file}} -> {:ok, file}
+      {:error, _, changeset, _} -> {:error, changeset}
+    end
+  end
+
+  #####
+  ## below this is old utility code, needs cleanup.
+  #####
 
   def list_files() do
     {:ok, %{status_code: 200, body: %{contents: contents}, headers: _headers}} =
