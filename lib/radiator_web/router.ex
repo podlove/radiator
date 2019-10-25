@@ -142,6 +142,8 @@ defmodule RadiatorWeb.Router do
     resources "/people", PersonController, only: [:index, :show, :create, :update, :delete]
 
     resources "/audios", AudioController, only: [:show, :update, :delete] do
+      resources "/slots", FileSlotController, only: [:index], as: :slot
+
       resources "/audio_files", AudioFileController,
         only: [:index, :create],
         as: :file

@@ -40,6 +40,10 @@ defmodule Radiator.Directory.Audio do
     timestamps()
   end
 
+  def slots do
+    ~W(audio_mp3 audio_m4a audio_ogg audio_opus)a
+  end
+
   @doc false
   def changeset(audio, attrs) do
     audio
