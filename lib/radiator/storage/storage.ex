@@ -40,6 +40,10 @@ defmodule Radiator.Storage do
     end
   end
 
+  def get_file(id) do
+    {:ok, Repo.get(Storage.File, id)}
+  end
+
   #####
   ## below this is old utility code, needs cleanup.
   #####
@@ -66,7 +70,7 @@ defmodule Radiator.Storage do
   @doc """
   Return tuple `{:ok, file_content, headers}`.
   """
-  def get_file(key) do
+  def _get_file(key) do
     {:ok, %{status_code: 200, body: body, headers: headers}} =
       S3.get_object(bucket(), key) |> ExAws.request()
 

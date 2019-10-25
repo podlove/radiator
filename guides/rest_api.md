@@ -724,6 +724,30 @@ PATCH /api/rest/v1/audios/:audio_id/chapters/:start
 DELETE /api/rest/v1/audios/:audio_id/chapters/:start
 ```
 
+## Files
+
+File IDs are binary, not numeric.
+
+### Parameters for Create / Upload
+
+| Name    | Type     | Description    |
+| ------- | -------- | -------------- |
+| `file`  | `file`   | file to upload |
+
+### Create / Upload
+
+Files are uploaded in the scope of a network.
+
+```
+POST /api/rest/v1/networks/:network_id/files
+```
+
+### Read
+
+```
+GET /api/rest/v1/files/:id
+```
+
 ## Tasks
 
 ### Parameters for Create

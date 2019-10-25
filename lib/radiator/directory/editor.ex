@@ -708,6 +708,31 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  ## Files
+
+  def get_file(actor = %Auth.User{}, id) do
+    with {:ok, file} <- Radiator.Storage.get_file(id),
+         {:ok, network} <- get_network(actor, file.network_id),
+         true <- has_permission(actor, network, :readonly) do
+      {:ok, file}
+    else
+      _ -> @not_authorized_match
+    end
+  end
+
+  def create_file(
+        actor = %Auth.User{},
+        network = %Network{},
+        upload_attrs
+      ) do
+    # todo: maybe anyone who has _any_ edit rights _anywhere_ can upload?
+    if has_permission(actor, network, :edit) do
+      Radiator.Storage.create_file(network, upload_attrs)
+    else
+      @not_authorized_match
+    end
+  end
+
   ## User Permission Management
 
   # TODO: list all collaborators of underlying entities as well.
