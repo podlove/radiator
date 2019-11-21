@@ -29,6 +29,8 @@ defmodule Radiator.Storage.File do
 
     belongs_to :network, Network
 
+    has_many :file_slots, Radiator.Storage.FileSlot
+
     timestamps()
   end
 

@@ -8,6 +8,8 @@ defmodule Radiator.Storage do
   Can probably access S3 or any other S3 compatible API by changing configuration.
   """
 
+  import Ecto.Query, warn: false
+
   alias ExAws.S3
   alias Ecto.Multi
 
@@ -16,7 +18,10 @@ defmodule Radiator.Storage do
     Storage
   }
 
+  alias Radiator.Storage.FileSlot
+
   alias Radiator.Directory.{
+    Audio,
     Network,
     Podcast
   }
@@ -42,6 +47,49 @@ defmodule Radiator.Storage do
 
   def get_file(id) do
     {:ok, Repo.get(Storage.File, id)}
+  end
+
+  def list_slots(subject = %Audio{}) do
+    slot_names = Audio.slots() |> Enum.map(&to_string/1)
+
+    filled_slots =
+      from(slot in Storage.FileSlot,
+        where:
+          slot.slot in ^slot_names and
+            slot.subject_type == "audio" and
+            slot.subject_id == ^subject.id,
+        preload: :file
+      )
+      |> Repo.all()
+
+    slot_names
+    |> Enum.map(fn slot_name ->
+      %{
+        slot: slot_name,
+        file: maybe_file(slot_name, filled_slots)
+      }
+    end)
+  end
+
+  defp maybe_file(slot_name, filled_slots) do
+    Enum.filter(filled_slots, fn slot -> slot.slot == slot_name end)
+    |> case do
+      [] -> nil
+      [slot] -> slot.file
+    end
+  end
+
+  def fill_slot(subject = %Audio{}, slot, file) do
+    Ecto.build_assoc(file, :file_slots)
+    |> FileSlot.changeset(%{
+      slot: slot,
+      subject_type: "audio",
+      subject_id: subject.id
+    })
+    |> Repo.insert(
+      on_conflict: :replace_all,
+      conflict_target: [:slot, :subject_type, :subject_id]
+    )
   end
 
   #####

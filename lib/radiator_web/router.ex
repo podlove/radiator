@@ -143,6 +143,7 @@ defmodule RadiatorWeb.Router do
 
     resources "/audios", AudioController, only: [:show, :update, :delete] do
       resources "/slots", FileSlotController, only: [:index], as: :slot
+      post "/slots/:slot", FileSlotController, :fill, as: :fill_slot
 
       resources "/audio_files", AudioFileController,
         only: [:index, :create],

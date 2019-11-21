@@ -11,5 +11,11 @@ defmodule Radiator.Repo.Migrations.CreateFileSlots do
 
       timestamps()
     end
+
+    create unique_index(
+             :file_slots,
+             [:slot, :subject_type, :subject_id],
+             name: :file_slots_subject_index
+           )
   end
 end

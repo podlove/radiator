@@ -11,7 +11,7 @@ defmodule Radiator.Storage.FileSlot do
     field :subject_type, :string
     field :subject_id, :integer
 
-    belongs_to :file, Storage.File
+    belongs_to :file, Storage.File, type: :binary_id
 
     timestamps()
   end
@@ -24,5 +24,9 @@ defmodule Radiator.Storage.FileSlot do
     |> cast(attrs, [:slot, :subject_type, :subject_id])
     |> validate_inclusion(:slot, @valid_slots)
     |> validate_inclusion(:subject_type, @valid_subjects)
+    |> unique_constraint(
+      :slot,
+      name: :file_slots_subject_index
+    )
   end
 end
