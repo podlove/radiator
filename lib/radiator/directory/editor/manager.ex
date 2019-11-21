@@ -302,7 +302,7 @@ defmodule Radiator.Directory.Editor.Manager do
   def publish(subject = %type{}) when type in [Podcast, Episode, AudioPublication] do
     result =
       subject
-      |> type.changeset(%{publish_state: :published})
+      |> type.publication_changeset(%{publish_state: :published})
       |> Repo.update()
 
     refresh_feed_cache(subject)
@@ -324,7 +324,7 @@ defmodule Radiator.Directory.Editor.Manager do
   def depublish(subject = %type{}) when type in [Podcast, Episode, AudioPublication] do
     result =
       subject
-      |> type.changeset(%{publish_state: :depublished})
+      |> type.publication_changeset(%{publish_state: :depublished})
       |> Repo.update()
 
     refresh_feed_cache(subject)

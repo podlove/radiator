@@ -39,4 +39,20 @@ defmodule RadiatorWeb.Api.EpisodeController do
       error -> error
     end
   end
+
+  def publish(conn, %{"episode_id" => id}) do
+    with user = current_user(conn),
+         {:ok, episode} <- Editor.get_episode(user, id),
+         {:ok, _episode} <- Editor.publish_episode(user, episode) do
+      send_no_content(conn)
+    end
+  end
+
+  def depublish(conn, %{"episode_id" => id}) do
+    with user = current_user(conn),
+         {:ok, episode} <- Editor.get_episode(user, id),
+         {:ok, _episode} <- Editor.depublish_episode(user, episode) do
+      send_no_content(conn)
+    end
+  end
 end

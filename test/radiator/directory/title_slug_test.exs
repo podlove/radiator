@@ -23,7 +23,7 @@ defmodule Radiator.Directory.TitleSlugTest do
     test "extracts the title of a given Episode changeset, when publish_state is published" do
       episode = insert(:episode)
       title = episode.title
-      changeset = Episode.changeset(episode, %{publish_state: :published})
+      changeset = Episode.publication_changeset(episode, %{publish_state: :published})
 
       assert [^title] = TitleSlug.get_sources(changeset, [])
     end
@@ -54,7 +54,7 @@ defmodule Radiator.Directory.TitleSlugTest do
 
     test "generates a slug from the given sources and Episode changeset" do
       episode = insert(:episode, title: "Episode Slug Test")
-      changeset = Episode.changeset(episode, %{publish_state: :published})
+      changeset = Episode.publication_changeset(episode, %{publish_state: :published})
       sources = TitleSlug.get_sources(changeset, [])
 
       assert "episode-slug-test" == TitleSlug.build_slug(sources, changeset)
@@ -94,15 +94,16 @@ defmodule Radiator.Directory.TitleSlugTest do
       existing_episode =
         insert(:episode, %{
           title: "Sequential Episode Slug Test",
-          slug: "sequential-episode-slug-test",
-          publish_state: :published
+          slug: "sequential-episode-slug-test"
         })
+        |> publish()
+
+      podcast = existing_episode.podcast
 
       changeset =
-        insert(:episode, title: existing_episode.title, publish_state: :drafted)
-        |> Episode.changeset(%{
-          publish_state: :published,
-          podcast_id: existing_episode.podcast_id
+        insert(:episode, title: existing_episode.title, podcast: podcast, publish_state: :drafted)
+        |> Episode.publication_changeset(%{
+          publish_state: :published
         })
 
       sources = TitleSlug.get_sources(changeset, [])

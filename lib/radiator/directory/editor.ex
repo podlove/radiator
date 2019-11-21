@@ -359,6 +359,22 @@ defmodule Radiator.Directory.Editor do
     end
   end
 
+  def publish_audio_publication(actor = %Auth.User{}, audio_publication = %AudioPublication{}) do
+    if has_permission(actor, audio_publication, :manage) do
+      Editor.Manager.publish(audio_publication)
+    else
+      @not_authorized_match
+    end
+  end
+
+  def depublish_audio_publication(actor = %Auth.User{}, audio_publication = %AudioPublication{}) do
+    if has_permission(actor, audio_publication, :manage) do
+      Editor.Manager.depublish(audio_publication)
+    else
+      @not_authorized_match
+    end
+  end
+
   def delete_audio_publication(actor = %Auth.User{}, audio_publication = %AudioPublication{}) do
     if can_access_audio_publication(actor, audio_publication, :own) do
       Editor.Owner.delete_audio_publication(audio_publication)

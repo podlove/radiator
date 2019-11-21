@@ -308,20 +308,19 @@ DELETE /api/rest/v1/networks/:id/collaborators/:username
 
 ### Parameters for Create & Update
 
-| Name                     | Type      | Description                                                                                       |
-| ------------------------ | --------- | ------------------------------------------------------------------------------------------------- |
-| `podcast[title]`         | `string`  | **Required.**                                                                                     |
-| `podcast[network_id]`    | `integer` | **Required.**                                                                                     |
-| `podcast[short_id]`      | `string`  | Short ID for this podcast, also used as slug. Not unique. 2-5 characters usually, e.g. FS,FAN,ATP |
-| `podcast[subtitle]`      | `string`  | Attention grabbing one liner appearing in lists/directories                                       |
-| `podcast[summary]`       | `string`  | Short multiline description, appears in iTunes Preview                                            |
-| `podcast[image]`         | `Image`   | Cover Image                                                                                       |
-| `podcast[author]`        | `string`  | One line description of publisher                                                                 |
-| `podcast[language]`      | `string`  | ISO 639-1                                                                                         |
-| `podcast[owner_name]`    | `string`  |                                                                                                   |
-| `podcast[owner_email]`   | `string`  |                                                                                                   |
-| `podcast[slug]`          | `string`  |                                                                                                   |
-| `podcast[publish_state]` | `string`  | Publication state. "drafted", "scheduled", "published" or "unpublished".                          |
+| Name                   | Type      | Description                                                                                       |
+| ---------------------- | --------- | ------------------------------------------------------------------------------------------------- |
+| `podcast[title]`       | `string`  | **Required.**                                                                                     |
+| `podcast[network_id]`  | `integer` | **Required.**                                                                                     |
+| `podcast[short_id]`    | `string`  | Short ID for this podcast, also used as slug. Not unique. 2-5 characters usually, e.g. FS,FAN,ATP |
+| `podcast[subtitle]`    | `string`  | Attention grabbing one liner appearing in lists/directories                                       |
+| `podcast[summary]`     | `string`  | Short multiline description, appears in iTunes Preview                                            |
+| `podcast[image]`       | `Image`   | Cover Image                                                                                       |
+| `podcast[author]`      | `string`  | One line description of publisher                                                                 |
+| `podcast[language]`    | `string`  | ISO 639-1                                                                                         |
+| `podcast[owner_name]`  | `string`  |                                                                                                   |
+| `podcast[owner_email]` | `string`  |                                                                                                   |
+| `podcast[slug]`        | `string`  |                                                                                                   |
 
 ### Create
 
@@ -345,6 +344,18 @@ PATCH /api/rest/v1/podcasts/:id
 
 ```
 DELETE /api/rest/v1/podcasts/:id
+```
+
+### Publish
+
+```
+PUT /api/rest/v1/podcasts/:id/publish
+```
+
+### Depublish
+
+```
+PUT /api/rest/v1/podcasts/:id/depublish
 ```
 
 ## Podcasts Collaborators
@@ -386,18 +397,17 @@ DELETE /api/rest/v1/podcasts/:id/collaborators/:username
 
 ### Parameters for Create & Update
 
-| Name                      | Type      | Description                                                              |
-| ------------------------- | --------- | ------------------------------------------------------------------------ |
-| `episode[title]`          | `string`  | **Required.**                                                            |
-| `episode[podcast_id]`     | `integer` | **Required.**                                                            |
-| `episode[short_id]`       | `string`  | Full combined short id, usually short_id + Number. Not unique.           |
-| `episode[guid]`           | `string`  | guid, prefilled on publish if unspecified                                |
-| `episode[subtitle]`       | `string`  | One line description of the episode                                      |
-| `episode[summary]`        | `text`    | Multiline description, plain text only                                   |
-| `episode[summary_html]`   | `text`    | Multiline description, html. Will be put in `content:encoded` in a feed  |
-| `episode[summary_source]` | `text`    | Multiline description, arbitrary format chosen by frontends.             |
-| `episode[number]`         | `integer` | Episode "Track" number, will be put in `itunes:episode` in the feed      |
-| `episode[publish_state]`  | `string`  | Publication state. "drafted", "scheduled", "published" or "unpublished". |
+| Name                      | Type      | Description                                                             |
+| ------------------------- | --------- | ----------------------------------------------------------------------- |
+| `episode[title]`          | `string`  | **Required.**                                                           |
+| `episode[podcast_id]`     | `integer` | **Required.**                                                           |
+| `episode[short_id]`       | `string`  | Full combined short id, usually short_id + Number. Not unique.          |
+| `episode[guid]`           | `string`  | guid, prefilled on publish if unspecified                               |
+| `episode[subtitle]`       | `string`  | One line description of the episode                                     |
+| `episode[summary]`        | `text`    | Multiline description, plain text only                                  |
+| `episode[summary_html]`   | `text`    | Multiline description, html. Will be put in `content:encoded` in a feed |
+| `episode[summary_source]` | `text`    | Multiline description, arbitrary format chosen by frontends.            |
+| `episode[number]`         | `integer` | Episode "Track" number, will be put in `itunes:episode` in the feed     |
 
 ### Create
 
@@ -423,18 +433,28 @@ PATCH /api/rest/v1/episodes/:id
 DELETE /api/rest/v1/episodes/:id
 ```
 
+### Publish
+
+```
+PUT /api/rest/v1/episodes/:id/publish
+```
+
+### Depublish
+
+```
+PUT /api/rest/v1/episodes/:id/depublish
+```
+
 ## AudioPublications
 
 Represents an Audio in a Network
 
 ### Parameters for Create & Update
 
-| Name                               | Type       | Description                                                              |
-| ---------------------------------- | ---------- | ------------------------------------------------------------------------ |
-| `audio_publication[publish_state]` | `string`   | Publication state. "drafted", "scheduled", "published" or "unpublished". |
-| `audio_publication[published_at]`  | `datetime` | publication date (readonly, is set automatically on first publication)   |
-| `audio_publication[network_id]`    | `string`   | network id (readonly)                                                    |
-| `audio_publication[audio_id]`      | `string`   | audio id (readonly)                                                      |
+| Name                            | Type     | Description           |
+| ------------------------------- | -------- | --------------------- |
+| `audio_publication[network_id]` | `string` | network id (readonly) |
+| `audio_publication[audio_id]`   | `string` | audio id (readonly)   |
 
 ### Index
 
@@ -462,6 +482,18 @@ PATCH /api/rest/v1/audio_publications/:id
 
 ```
 DELETE /api/rest/v1/audio_publications/:id
+```
+
+### Publish
+
+```
+PUT /api/rest/v1/audio_publications/:id/publish
+```
+
+### Depublish
+
+```
+PUT /api/rest/v1/audio_publications/:id/depublish
 ```
 
 ## People

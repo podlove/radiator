@@ -30,10 +30,19 @@ defmodule Radiator.Directory.AudioPublication do
     audio_publication
     |> cast(attrs, [
       :title,
-      :publish_state,
       :audio_id,
       :title,
       :slug
+    ])
+    |> TitleSlug.maybe_generate_slug()
+    |> TitleSlug.unique_constraint()
+  end
+
+  def publication_changeset(audio_publication, attrs) do
+    audio_publication
+    |> cast(attrs, [
+      :publish_state,
+      :published_at
     ])
     |> validate_publish_state()
     |> maybe_set_published_at()
