@@ -71,6 +71,39 @@ defmodule Radiator.Storage do
     end)
   end
 
+  def get_slot(subject = %Audio{}, slot) when is_atom(slot) do
+    get_slot(subject, to_string(slot))
+  end
+
+  @doc """
+  Get file in slot from subject.
+  """
+  def get_slot(subject = %Audio{}, slot) do
+    with slot_names <- Audio.slots() |> Enum.map(&to_string/1),
+         true <- Enum.member?(slot_names, slot),
+         {:ok, file} <- get_file_in_slot(subject, slot) do
+      {:ok, file}
+    else
+      false -> {:error, :invalid_slot_name}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp get_file_in_slot(subject = %Audio{}, slot) do
+    from(slot in Storage.FileSlot,
+      where:
+        slot.subject_type == "audio" and
+          slot.subject_id == ^subject.id and
+          slot.slot == ^slot,
+      preload: :file
+    )
+    |> Repo.one()
+    |> case do
+      nil -> {:error, :not_found}
+      s -> {:ok, s.file}
+    end
+  end
+
   defp maybe_file(slot_name, filled_slots) do
     Enum.filter(filled_slots, fn slot -> slot.slot == slot_name end)
     |> case do
