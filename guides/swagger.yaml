@@ -1,0 +1,99 @@
+openapi: 3.0.0
+info:
+  description: "WIP Podlove Radiator REST API description for modifying data. GraphQL should be used for querying."
+  version: "1.0.0"
+  title: "Radiator Core"
+  license:
+    name: "MIT"
+    url: "https://opensource.org/licenses/MIT"
+servers:
+  - url: http://localhost:4000/api/rest/v1
+    description: local development server
+paths:
+  /networks/{network_id}/files:
+    post:
+      tags:
+        - file
+      parameters:
+        - name: network_id
+          in: path
+          description: "ID of network"
+          required: true
+          schema:
+            type: integer
+      responses:
+        201:
+          description: "successful creation"
+  /files/{file_id}:
+    get:
+      tags:
+        - file
+      parameters:
+        - name: file_id
+          in: path
+          description: "ID of file to return"
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/File"
+        "404":
+          description: "file not found"
+  /audios/{audio_id}/slots/{slot}:
+    post:
+      summary: Fill slot with file.
+      tags:
+        - file
+      parameters:
+        - name: audio_id
+          in: path
+          description: "ID of audio"
+          required: true
+          schema:
+            type: integer
+        - name: slot
+          in: path
+          description: "slot to fill"
+          required: true
+          schema:
+            type: string
+        - name: file_id
+          in: query
+          description: "ID of file"
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: "successful operation"
+components:
+  schemas:
+    File:
+      properties:
+        id:
+          type: string
+          example: "29072ca0-de43-4b72-8904-eb89ec6475e3"
+        name:
+          type: string
+          example: "acme001-fiat-lux.mp3"
+        size:
+          type: integer
+          example: 54734
+        mime_type:
+          type: string
+          example: "audio/mpeg"
+        extension:
+          type: string
+          example: "mp3"
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
