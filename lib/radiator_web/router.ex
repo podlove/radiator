@@ -205,6 +205,7 @@ defmodule RadiatorWeb.Router do
 
     get "/robots.txt", RobotsTxtController, :show
     get "/:podcast_slug/feed.xml", FeedController, :show
+    get "/:podcast_slug/:type/feed.xml", FeedController, :show
     get "/:podcast_slug/:episode_slug", EpisodeController, :show
     get "/:podcast_slug", EpisodeController, :index
   end
@@ -214,6 +215,7 @@ defmodule RadiatorWeb.Router do
 
     get "/robots.txt", RobotsTxtController, :show
     get "/feed.xml", FeedController, :show
+    get "/:type/feed.xml", FeedController, :show
     get "/:episode_slug", EpisodeController, :show
     get "/", EpisodeController, :index
   end

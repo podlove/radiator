@@ -15,7 +15,8 @@ defmodule Radiator.Tracking do
   }
 
   alias Radiator.Tracking.Download
-  alias Radiator.Media.AudioFile
+  alias Radiator.Media
+  alias Radiator.Storage
 
   @doc """
   Track Download
@@ -24,7 +25,7 @@ defmodule Radiator.Tracking do
 
   ## Parameters
 
-  - `file`: a `Radiator.Media.AudioFile`
+  - `file`: a `Radiator.Storage.File`
   - `remote_ip`: request IP string
   - `user_agent`: raw user agent string from request
   - `time`: time of request
@@ -46,14 +47,14 @@ defmodule Radiator.Tracking do
   def track_download(
         podcast: podcast = %Podcast{},
         episode: episode = %Episode{},
-        audio_file: audio_file = %AudioFile{},
+        slot: slot = %Storage.FileSlot{file: file},
         remote_ip: remote_ip,
         user_agent: user_agent_string,
         time: time = %DateTime{},
         http_range: http_range,
         referer: referer
       ) do
-    with audio_file <- Repo.preload(audio_file, :audio),
+    with slot <- Repo.preload(slot, :audio),
          network = %Network{} <- podcast.network,
          user_agent = %{} <- parse_user_agent(user_agent_string) do
       if download_looks_clean(Map.get(user_agent, :bot), http_range) do
@@ -74,8 +75,8 @@ defmodule Radiator.Tracking do
         |> Ecto.Changeset.put_assoc(:network, network)
         |> Ecto.Changeset.put_assoc(:podcast, podcast)
         |> Ecto.Changeset.put_assoc(:episode, episode)
-        |> Ecto.Changeset.put_assoc(:audio, audio_file.audio)
-        |> Ecto.Changeset.put_assoc(:file, audio_file)
+        |> Ecto.Changeset.put_assoc(:audio, slot.audio)
+        |> Ecto.Changeset.put_assoc(:file, file)
         |> Repo.insert()
       else
         {:ok, :skipped_because_not_clean}
@@ -85,14 +86,14 @@ defmodule Radiator.Tracking do
 
   def track_download(
         audio_publication: audio_publication = %AudioPublication{},
-        audio_file: audio_file = %AudioFile{},
+        slot: slot = %Storage.FileSlot{file: file},
         remote_ip: remote_ip,
         user_agent: user_agent_string,
         time: time,
         http_range: http_range,
         referer: referer
       ) do
-    audio_file = Repo.preload(audio_file, :audio)
+    slot = Repo.preload(slot, :audio)
     network = audio_publication.network
     user_agent = parse_user_agent(user_agent_string)
 
@@ -113,8 +114,8 @@ defmodule Radiator.Tracking do
       })
       |> Ecto.Changeset.put_assoc(:network, network)
       |> Ecto.Changeset.put_assoc(:audio_publication, audio_publication)
-      |> Ecto.Changeset.put_assoc(:audio, audio_file.audio)
-      |> Ecto.Changeset.put_assoc(:file, audio_file)
+      |> Ecto.Changeset.put_assoc(:audio, slot.audio)
+      |> Ecto.Changeset.put_assoc(:file, file)
       |> Repo.insert()
     else
       {:ok, :skipped_because_not_clean}

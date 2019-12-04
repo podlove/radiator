@@ -2,8 +2,14 @@ defmodule Radiator.Feed.Storage do
   alias Radiator.Feed.Generator
   alias Radiator.Media.FeedFile
 
+  def types do
+    ~W(mp3 m4a ogg opus)a
+  end
+
   @doc """
   Generates all feed pages and stores them.
+
+  FIXME: I don't think orphaned file deletion works since slots
   """
   def generate(podcast_id, opts \\ []) do
     # fetch old files
@@ -11,14 +17,17 @@ defmodule Radiator.Feed.Storage do
 
     # generate new files
     Generator.generate(podcast_id, opts)
-    |> Enum.with_index(1)
-    |> Enum.each(fn {xml, page} ->
-      {:ok, file_path} = Temp.path()
-      :ok = File.write(file_path, xml)
+    |> Enum.each(fn {:ok, type, pages} ->
+      pages
+      |> Enum.with_index(1)
+      |> Enum.each(fn {xml, page} ->
+        {:ok, file_path} = Temp.path()
+        :ok = File.write(file_path, xml)
 
-      store(file_path, podcast_id: podcast_id, page: page)
+        store(file_path, podcast_id: podcast_id, type: type, page: page)
 
-      File.rm(file_path)
+        File.rm(file_path)
+      end)
     end)
 
     # fetch new files
@@ -43,15 +52,16 @@ defmodule Radiator.Feed.Storage do
     end)
   end
 
-  def store(file_path, podcast_id: podcast_id, page: page) do
-    FeedFile.store({file_path, podcast_id: podcast_id, page: page})
+  def store(file_path, podcast_id: podcast_id, type: type, page: page) do
+    FeedFile.store({file_path, podcast_id: podcast_id, type: type, page: page})
   end
 
-  def url(podcast_id: podcast_id, page: page) do
+  def url(podcast_id: podcast_id, type: type, page: page) do
     FeedFile.url(
       {"",
        [
          podcast_id: podcast_id,
+         type: type,
          page: page
        ]}
     )

@@ -9,13 +9,15 @@ defmodule Radiator.Feed.EpisodeBuilder do
   alias Radiator.Directory.{Episode, Audio}
   alias Radiator.Contribution.Person
   alias Radiator.Contribution.AudioContribution
+  alias Radiator.Storage.FileSlot
+
   import RadiatorWeb.FormatHelpers, only: [format_normal_playtime_round_to_seconds: 1]
 
   def new(feed_data, episode) do
     element(:item, fields(feed_data, episode))
   end
 
-  def fields(_, episode) do
+  def fields(%{type: type}, episode) do
     []
     |> add(guid(episode))
     |> add(element(:title, episode.title))
@@ -25,7 +27,7 @@ defmodule Radiator.Feed.EpisodeBuilder do
     |> add(summary(episode))
     |> add(publication_date(episode))
     |> add(duration(episode.audio))
-    |> add(enclosure(episode))
+    |> add(enclosure(episode, type))
     |> add(contributors(episode))
     |> add(chapters(episode))
     |> add(content(episode))
@@ -53,24 +55,27 @@ defmodule Radiator.Feed.EpisodeBuilder do
 
   defp content(_), do: nil
 
-  # thought: it might be useful to build in validation while building.
-  # For example, either I return {:ok, element} or {:error, reason}.
-  # :ok tuples are added to the tree, errors and warnings are collected.
-  # For example, a missing enclosure URL is an error, but a subtitle that
-  # is too short is a notice or warning.
-  # However, maybe it's better if the builder focuses on building and
-  # a totally different module takes care of validation / hints.
-  # Well, the builder could focus only on hard RSS requirements,
-  # so either :ok or :error.
-  defp enclosure(%Episode{audio: %Audio{audio_files: [enclosure]}} = episode) do
-    element(:enclosure, %{
-      url: Episode.enclosure_url(episode),
-      type: enclosure.mime_type,
-      length: enclosure.byte_length
-    })
+  defp enclosure(episode = %Episode{audio: %Audio{files: files}}, type) do
+    files
+    |> Enum.find(fn file -> file.slot == type end)
+    |> case do
+      slot = %FileSlot{} ->
+        element(:enclosure, %{
+          url: Episode.enclosure_tracking_url(episode, type) |> IO.inspect(),
+          type: slot.file.mime_type,
+          length: slot.file.size
+        })
+
+      _ ->
+        Logger.warn(
+          "[Feed Builder] Episode \"#{episode.title}\" (##{episode.id}) has no #{type} enclosure"
+        )
+
+        nil
+    end
   end
 
-  defp enclosure(%Episode{id: id, title: title}) do
+  defp enclosure(%Episode{id: id, title: title}, _) do
     Logger.warn("[Feed Builder] Episode \"#{title}\" (##{id}) has no enclosure")
     nil
   end

@@ -11,7 +11,7 @@ defmodule Radiator.Tracking.Download do
     Audio
   }
 
-  alias Radiator.Media.AudioFile
+  alias Radiator.Storage
 
   schema "downloads" do
     field :request_id, :string
@@ -34,7 +34,7 @@ defmodule Radiator.Tracking.Download do
     belongs_to :episode, Episode
     belongs_to :audio_publication, AudioPublication
     belongs_to :audio, Audio
-    belongs_to :file, AudioFile
+    belongs_to :file, Storage.File, type: :binary_id
 
     timestamps()
   end

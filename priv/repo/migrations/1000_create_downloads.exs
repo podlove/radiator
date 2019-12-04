@@ -23,7 +23,7 @@ defmodule Radiator.Repo.Migrations.CreateDownloads do
       add :episode_id, references(:episodes, on_delete: :nothing)
       add :audio_publication_id, references(:audio_publications, on_delete: :nothing)
       add :audio_id, references(:audios, on_delete: :nothing)
-      add :file_id, references(:audio_files, on_delete: :nothing)
+      add :file_id, references(:files, type: :uuid, on_delete: :nothing)
 
       timestamps()
     end

@@ -188,6 +188,14 @@ defmodule Radiator.Directory do
     get_episode_by_slug(podcast.id, slug)
   end
 
+  def get_episode_file(%Episode{audio: %Audio{files: slots}}, file_id) do
+    Enum.find(slots, fn slot -> slot.file.id == file_id end)
+    |> case do
+      nil -> {:error, :not_found}
+      slot -> {:ok, slot.file, slot}
+    end
+  end
+
   def get_podcast_contributions(podcast = %Podcast{}) do
     podcast
     |> Ecto.assoc(:contributions)
@@ -233,7 +241,7 @@ defmodule Radiator.Directory do
   """
   def reject_invalid_episodes(episodes) when is_list(episodes) do
     Enum.filter(episodes, fn
-      %Episode{audio: %Audio{audio_files: [_ | _]}} -> true
+      %Episode{audio: %Audio{files: [_ | _]}} -> true
       _ -> false
     end)
   end
@@ -286,9 +294,11 @@ defmodule Radiator.Directory do
       :podcast,
       audio: [
         chapters: chapter_query,
+        # audio_files field is deprecated, use slots instead
         audio_files: [],
         contributors: [],
-        contributions: {contributions_query, [:person, :role]}
+        contributions: {contributions_query, [:person, :role]},
+        files: [:file]
       ]
     ])
   end

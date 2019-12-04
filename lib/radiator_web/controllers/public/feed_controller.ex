@@ -24,8 +24,28 @@ defmodule RadiatorWeb.Public.FeedController do
 
   If we don't enforce this there may be podcasts for a few seconds/minutes without a feed.
   """
+  def show(conn, %{"page" => page, "type" => type}, %{current_podcast: podcast}) do
+    with true <- Enum.member?(Feed.Storage.types() |> Enum.map(&to_string/1), type) do
+      # todo: track request before redirecting
+      conn
+      |> put_status(307)
+      |> redirect(
+        external:
+          Feed.Storage.url(
+            podcast_id: podcast.id,
+            type: type,
+            page: String.to_integer(page)
+          )
+      )
+    else
+      _ -> send_resp(conn, 400, "Invalid Feed Type")
+    end
+  end
+
   def show(conn, %{"page" => page}, %{current_podcast: podcast}) do
-    # todo: track request before redirecting
+    conn
+    |> redirect(to: Routes.feed_path(conn, :show, podcast.slug, "mp3"))
+
     conn
     |> put_status(307)
     |> redirect(external: Feed.Storage.url(podcast_id: podcast.id, page: String.to_integer(page)))

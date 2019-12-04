@@ -5,6 +5,7 @@ defmodule Radiator.Storage.FileSlot do
   import Ecto.Query, warn: false
 
   alias Radiator.Storage
+  alias Radiator.Directory
 
   schema "file_slots" do
     field :slot, :string
@@ -12,6 +13,7 @@ defmodule Radiator.Storage.FileSlot do
     field :subject_id, :integer
 
     belongs_to :file, Storage.File, type: :binary_id
+    belongs_to :audio, Directory.Audio, define_field: false, foreign_key: :subject_id
 
     timestamps()
   end

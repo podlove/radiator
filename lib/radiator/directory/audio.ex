@@ -37,6 +37,10 @@ defmodule Radiator.Directory.Audio do
     has_many :audio_files, Media.AudioFile
     has_many :chapters, Chapter
 
+    has_many :files, Radiator.Storage.FileSlot,
+      foreign_key: :subject_id,
+      where: [subject_type: "audio"]
+
     timestamps()
   end
 

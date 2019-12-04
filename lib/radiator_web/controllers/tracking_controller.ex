@@ -25,12 +25,11 @@ defmodule RadiatorWeb.TrackingController do
     with {:p, podcast = %Podcast{}} <- {:p, Directory.get_podcast_by_slug(podcast_slug)},
          {:e, episode = %Episode{}} <-
            {:e, Directory.get_episode_by_slug(podcast.id, episode_slug)},
-         {:ok, audio_file} <- Directory.get_audio_file(file_id),
-         true <- audio_file.audio_id == episode.audio.id do
+         {:ok, file, slot} <- Directory.get_episode_file(episode, file_id) do
       conn
-      |> track_download(podcast: podcast, episode: episode, audio_file: audio_file)
+      |> track_download(podcast: podcast, episode: episode, slot: slot)
       |> put_status(301)
-      |> redirect(external: AudioFile.url({audio_file.file, audio_file}))
+      |> redirect(external: Episode.enclosure_url(episode, slot.slot))
     else
       {:p, _} ->
         send_resp(conn, 404, "Podcast not found")
@@ -38,11 +37,13 @@ defmodule RadiatorWeb.TrackingController do
       {:e, _} ->
         send_resp(conn, 404, "Episode not found")
 
-      _ ->
+      o ->
+        IO.inspect(o)
         send_resp(conn, 404, "Not found")
     end
   end
 
+  # FIXME: slot rework
   def track_audio_publication_file(conn, %{
         "network_slug" => network_slug,
         "audio_publication_slug" => audio_publication_slug,
@@ -67,11 +68,11 @@ defmodule RadiatorWeb.TrackingController do
     conn
   end
 
-  defp track_download(conn, podcast: podcast, episode: episode, audio_file: audio_file) do
+  defp track_download(conn, podcast: podcast, episode: episode, slot: slot) do
     Radiator.Tracking.Server.track_download(
       podcast: podcast,
       episode: episode,
-      audio_file: audio_file,
+      slot: slot,
       remote_ip: remote_ip(conn),
       user_agent: user_agent(conn),
       time: DateTime.utc_now(),
@@ -82,10 +83,10 @@ defmodule RadiatorWeb.TrackingController do
     conn
   end
 
-  defp track_download(conn, audio_publication: audio_publication, audio_file: audio_file) do
+  defp track_download(conn, audio_publication: audio_publication, slot: slot) do
     Radiator.Tracking.Server.track_download(
       audio_publication: audio_publication,
-      audio_file: audio_file,
+      slot: slot,
       remote_ip: remote_ip(conn),
       user_agent: user_agent(conn),
       time: DateTime.utc_now(),

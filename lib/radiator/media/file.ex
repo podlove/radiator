@@ -2,7 +2,7 @@ defmodule Radiator.Media.File do
   use Arc.Definition
   use Arc.Ecto.Definition
 
-  def filename(_version, {%Arc.File{file_name: file_name}, _f}) do
+  def filename(_version, {%{file_name: file_name}, _f}) do
     file_name |> Path.rootname()
   end
 

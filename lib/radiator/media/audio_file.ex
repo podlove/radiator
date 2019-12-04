@@ -1,4 +1,7 @@
 defmodule Radiator.Media.AudioFile do
+  @moduledoc """
+  deprecated
+  """
   use Ecto.Schema
 
   use Arc.Definition

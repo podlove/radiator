@@ -34,6 +34,7 @@ defmodule Radiator.Feed.Builder do
     element(:rss, rss_attributes(), [PodcastBuilder.new(feed_data, opts)])
   end
 
+  @spec render(any()) :: binary()
   def render(xml) do
     xml
     |> document()

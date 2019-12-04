@@ -128,7 +128,17 @@ defmodule Radiator.Directory.Podcast do
 
   def public_url(%Podcast{}), do: nil
 
-  # TODO: more than one feed per podcast
+  def feed_url(%Podcast{slug: pod_slug, hostname: nil}, type) when is_binary(pod_slug) do
+    Routes.feed_url(RadiatorWeb.Endpoint, :show, pod_slug, type)
+  end
+
+  def feed_url(%Podcast{hostname: hostname}, type) do
+    hostname
+    |> URI.parse()
+    |> Map.put(:path, Routes.custom_hostname_feed_path(RadiatorWeb.Endpoint, :show, type))
+    |> URI.to_string()
+  end
+
   def feed_url(%Podcast{slug: pod_slug, hostname: nil}) when is_binary(pod_slug) do
     Routes.feed_url(RadiatorWeb.Endpoint, :show, pod_slug)
   end

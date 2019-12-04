@@ -7,6 +7,7 @@ defmodule Radiator.Directory.Episode do
 
   alias __MODULE__
   alias Radiator.Media
+  alias Radiator.Storage.FileSlot
   alias Radiator.Directory.{Episode, Podcast, Audio, TitleSlug}
 
   alias RadiatorWeb.Router.Helpers, as: Routes
@@ -101,35 +102,63 @@ defmodule Radiator.Directory.Episode do
        |> String.pad_leading(3, "0"))
   end
 
+  def enclosure(episode) do
+    enclosure(episode, "audio_mp3")
+  end
+
   @doc """
   Get enclosure data for episode.
   """
-  @spec enclosure(Episode.t()) :: %{url: binary(), type: binary(), length: integer()}
-  def enclosure(%Episode{} = episode) do
-    %{
-      url: enclosure_url(episode),
-      type: enclosure_mime_type(episode),
-      length: enclosure_byte_length(episode)
-    }
+  @spec enclosure(Episode.t(), binary()) ::
+          %{url: binary(), type: binary(), length: integer()} | nil
+  def enclosure(episode = %Episode{audio: %Audio{files: files}}, type) do
+    files
+    |> Enum.find(fn file -> file.slot == type end)
+    |> case do
+      slot = %FileSlot{} ->
+        %{
+          url: enclosure_url(episode, type),
+          type: slot.file.mime_type,
+          length: slot.file.size
+        }
+
+      _ ->
+        nil
+    end
+  end
+
+  def enclosure_url(episode) do
+    enclosure_url(episode, "audio_mp3")
   end
 
   @doc """
   Convenience accessor for enclosure URL.
   """
-  def enclosure_url(%Episode{audio: %Audio{audio_files: [enclosure]}}) do
-    Media.AudioFile.url({enclosure.file, enclosure})
+  def enclosure_url(%Episode{audio: %Audio{files: files}}, type) do
+    files
+    |> Enum.find(fn file -> file.slot == type end)
+    |> case do
+      %FileSlot{file: file} -> Media.File.url({file.file, file})
+      _ -> nil
+    end
   end
 
-  def enclosure_url(%Episode{audio: %Audio{audio_files: []}}) do
-    raise ArgumentError, "Audio without attached files"
-  end
+  def enclosure_tracking_url(episode = %Episode{audio: %Audio{files: files}}, type) do
+    files
+    |> Enum.find(fn file -> file.slot == type end)
+    |> case do
+      %FileSlot{file: file} ->
+        RadiatorWeb.Router.Helpers.tracking_url(
+          RadiatorWeb.Endpoint,
+          :track_episode_file,
+          episode.podcast.slug,
+          episode.slug,
+          file.id
+        )
 
-  def enclosure_url(%Episode{audio: %Audio{audio_files: [_enclosure | _more]}}) do
-    raise ArgumentError, "Audio without unexpected number of attached files (> 1)"
-  end
-
-  def enclosure_url(%Episode{audio: %Audio{audio_files: _}}) do
-    raise ArgumentError, "Audio needs preloaded audio_files"
+      _ ->
+        nil
+    end
   end
 
   @doc """
