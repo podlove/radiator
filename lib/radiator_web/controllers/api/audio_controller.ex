@@ -10,7 +10,7 @@ defmodule RadiatorWeb.Api.AudioController do
            Editor.create_audio(
              user,
              network,
-             Map.get(params, "audio"),
+             Map.get(params, "audio", %{}),
              Map.get(params, "audio_publication", %{})
            ) do
       conn
