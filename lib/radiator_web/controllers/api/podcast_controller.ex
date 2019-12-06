@@ -40,7 +40,7 @@ defmodule RadiatorWeb.Api.PodcastController do
     end
   end
 
-  def publish(conn, %{"id" => id}) do
+  def publish(conn, %{"podcast_id" => id}) do
     with user = current_user(conn),
          {:ok, podcast} <- Editor.get_podcast(user, id),
          {:ok, _podcast} <- Editor.publish_podcast(user, podcast) do
@@ -48,7 +48,7 @@ defmodule RadiatorWeb.Api.PodcastController do
     end
   end
 
-  def depublish(conn, %{"id" => id}) do
+  def depublish(conn, %{"podcast_id" => id}) do
     with user = current_user(conn),
          {:ok, podcast} <- Editor.get_podcast(user, id),
          {:ok, _podcast} <- Editor.depublish_podcast(user, podcast) do

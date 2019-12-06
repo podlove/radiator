@@ -53,17 +53,15 @@ defmodule RadiatorWeb.Api.AudioPublicationController do
     end
   end
 
-  def publish(conn, %{"id" => id}) do
-    with user = current_user(conn),
-         {:ok, audio_publication} <- Editor.get_audio_publication(user, id),
+  def publish(conn, %{"audio_publication_id" => id}, user) do
+    with {:ok, audio_publication} <- Editor.get_audio_publication(user, id),
          {:ok, _audio_publication} <- Editor.publish_audio_publication(user, audio_publication) do
       send_no_content(conn)
     end
   end
 
-  def depublish(conn, %{"id" => id}) do
-    with user = current_user(conn),
-         {:ok, audio_publication} <- Editor.get_audio_publication(user, id),
+  def depublish(conn, %{"audio_publication_id" => id}, user) do
+    with {:ok, audio_publication} <- Editor.get_audio_publication(user, id),
          {:ok, _audio_publication} <- Editor.depublish_audio_publication(user, audio_publication) do
       send_no_content(conn)
     end
