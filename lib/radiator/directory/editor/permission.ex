@@ -6,7 +6,14 @@ defmodule Radiator.Directory.Editor.Permission do
   alias Radiator.Repo
   alias Radiator.Auth
   alias Radiator.Perm.Permission
-  alias Radiator.Directory.{Network, Podcast, Episode, AudioPublication}
+
+  alias Radiator.Directory.{
+    Audio,
+    Network,
+    Podcast,
+    Episode,
+    AudioPublication
+  }
 
   alias Radiator.Perm.Ecto.PermissionType
 
@@ -21,6 +28,9 @@ defmodule Radiator.Directory.Editor.Permission do
 
   def get_permission(user = %Auth.User{}, subject = %Episode{}),
     do: do_get_permission(user, subject)
+
+  def get_permission(user = %Auth.User{}, subject = %Audio{}),
+    do: nil
 
   def get_permission(user = %Auth.User{}, subject = %AudioPublication{}),
     do: do_get_permission(user, subject)
@@ -56,6 +66,17 @@ defmodule Radiator.Directory.Editor.Permission do
       _ ->
         true
     end
+  end
+
+  defp parents(subject = %Audio{}) do
+    audio_publication =
+      subject
+      |> Ecto.assoc(:audio_publication)
+      |> Repo.one()
+
+    episodes = subject |> Ecto.assoc(:episodes) |> Repo.all()
+
+    if audio_publication, do: [audio_publication | episodes], else: episodes
   end
 
   defp parents(subject = %AudioPublication{}) do
