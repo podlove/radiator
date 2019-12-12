@@ -29,7 +29,7 @@ defmodule Radiator.Directory.Editor.Permission do
   def get_permission(user = %Auth.User{}, subject = %Episode{}),
     do: do_get_permission(user, subject)
 
-  def get_permission(user = %Auth.User{}, subject = %Audio{}),
+  def get_permission(_user = %Auth.User{}, _subject = %Audio{}),
     do: nil
 
   def get_permission(user = %Auth.User{}, subject = %AudioPublication{}),
