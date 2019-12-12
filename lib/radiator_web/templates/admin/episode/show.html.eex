@@ -68,6 +68,19 @@
 
 
 <%= if @episode.audio do %>
+
+  <div class="card">
+    <h3 class="text-gray-700 text-xl p-6">Audio Files</h3>
+    <%= for file_slot <- @episode.audio.files do %>
+        <div class="block no-underline bg-white p-6 border-t border-gray-400" href="/admin/networks/1/podcasts/11/episodes/204">
+          <%= link file_slot.file.name, to: Radiator.Media.File.url({file_slot.file.file, file_slot.file}), class: "font-semibold" %> 
+          <span class="text-gray-700"> · <%= format_bytes(file_slot.file.size) %></span>
+          <span class="text-sm font-semibold bg-gray-500 text-white py-1 px-2 mx-2 rounded-full"><%= file_slot.slot %></span>
+        </div>
+    <% end %>
+  </div>
+
+  <!-- old / deprecated -->
   <%= if length(@episode.audio.audio_files) > 0 do %>
     <script src="//cdn.podlove.org/web-player/embed.js"></script>
 

@@ -66,6 +66,11 @@ defmodule Radiator.Directory.Episode do
     |> TitleSlug.unique_constraint()
   end
 
+  def set_audio_changeset(episode, attrs) do
+    episode
+    |> cast(attrs, [:audio_id])
+  end
+
   def publication_changeset(episode, attrs) do
     episode
     |> cast(attrs, [

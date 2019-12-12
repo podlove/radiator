@@ -171,16 +171,9 @@ defmodule Radiator.Directory.Editor.Manager do
   end
 
   @doc """
-  Creates an episode.
+  deprecated
 
-  ## Examples
-
-      iex> create_episode(%Podcast{}, %{field: value})
-      {:ok, %Episode{}}
-
-      iex> create_episode(%Podcast{}, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
+  FIXME: use Radiator.Directory.Editor.EpisodeManager
   """
   def create_episode(%Podcast{} = podcast, attrs \\ %{}) do
     # todo: keys are sometimes atoms, sometimes binaries? why? can/should we enforce atoms?

@@ -27,8 +27,14 @@ defmodule RadiatorWeb.Admin.EpisodeController do
   def create(conn, %{"episode" => episode_params}) do
     podcast = conn.assigns[:podcast]
 
-    case Editor.Manager.create_episode(podcast, episode_params) do
-      {:ok, episode} ->
+    case Radiator.Directory.Editor.EpisodeManager.create_episode_with_upload(
+           podcast,
+           episode_params,
+           %{},
+           Map.get(episode_params, "enclosure"),
+           "audio_mp3"
+         ) do
+      {:ok, %{episode: episode}} ->
         conn
         |> put_flash(:info, "episode created successfully.")
         |> redirect(
