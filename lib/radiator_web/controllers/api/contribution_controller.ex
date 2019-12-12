@@ -38,6 +38,10 @@ defmodule RadiatorWeb.Api.ContributionController do
     @not_found_match
   end
 
+  def create(conn, %{"contribution" => %{"podcast_id" => _id1, "audio_id" => _id2}}, _user) do
+    send_resp(conn, 400, "podcast_id OR audio_id must be present, not both")
+  end
+
   def create(conn, %{"contribution" => params = %{"podcast_id" => id}}, user) do
     with {:ok, subject} <- Editor.get_podcast(user, id) do
       do_create(conn, subject, params, user)
@@ -48,6 +52,10 @@ defmodule RadiatorWeb.Api.ContributionController do
     with {:ok, subject} <- Editor.get_audio(user, id) do
       do_create(conn, subject, params, user)
     end
+  end
+
+  def create(conn, %{"contribution" => _}, _user) do
+    send_resp(conn, 400, "podcast_id or audio_id must be present")
   end
 
   def create(_, _, _), do: @not_found_match
