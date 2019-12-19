@@ -15,7 +15,6 @@ defmodule Radiator.Tracking do
   }
 
   alias Radiator.Tracking.Download
-  alias Radiator.Media
   alias Radiator.Storage
 
   @doc """

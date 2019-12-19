@@ -25,7 +25,7 @@ defmodule RadiatorWeb.TrackingController do
     with {:p, podcast = %Podcast{}} <- {:p, Directory.get_podcast_by_slug(podcast_slug)},
          {:e, episode = %Episode{}} <-
            {:e, Directory.get_episode_by_slug(podcast.id, episode_slug)},
-         {:ok, file, slot} <- Directory.get_episode_file(episode, file_id) do
+         {:ok, _file, slot} <- Directory.get_episode_file(episode, file_id) do
       conn
       |> track_download(podcast: podcast, episode: episode, slot: slot)
       |> put_status(301)
