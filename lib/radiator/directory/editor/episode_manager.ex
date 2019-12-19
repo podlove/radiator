@@ -7,6 +7,10 @@ defmodule Radiator.Directory.Editor.EpisodeManager do
   As it is now it could go up a layer.
 
   TODO: Refactor, possibly split up, move around. Document usage.
+  TODO: rename because "manager" here is confusing as hell
+  FIXME: auth!
+  FIXME: Radiator.Directory.Editor should be single point of entry for authed access,
+         so the controller should use functions _there_
 
   See RadiatorWeb.Admin.EpisodeController#create for example usage.
   """
@@ -82,7 +86,10 @@ defmodule Radiator.Directory.Editor.EpisodeManager do
   # but it's a good place to bootstrap it for the "create episode" use case
 
   def create_file_changeset(network = %Network{}, uploadable) do
-    file_meta = Storage.File.extract_meta(uploadable)
+    file_meta =
+      uploadable
+      |> Storage.File.extract_meta()
+      |> Map.put(:name, uploadable.filename)
 
     %Storage.File{network_id: network.id}
     |> Storage.File.create_changeset(file_meta)
