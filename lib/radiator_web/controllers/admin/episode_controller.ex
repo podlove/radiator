@@ -116,4 +116,21 @@ defmodule RadiatorWeb.Admin.EpisodeController do
       :noupload
     end
   end
+
+  def publish(conn, %{"network_id" => network_id, "episode_id" => id}) do
+    with user <- current_user(conn),
+         {:ok, episode} <- Editor.get_episode(user, id),
+         {:ok, _episode} <- Editor.publish_episode(user, episode) do
+      redirect(conn,
+        to:
+          Routes.admin_network_podcast_episode_path(
+            conn,
+            :show,
+            network_id,
+            episode.podcast_id,
+            episode
+          )
+      )
+    end
+  end
 end

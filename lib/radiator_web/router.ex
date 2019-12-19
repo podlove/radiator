@@ -76,9 +76,15 @@ defmodule RadiatorWeb.Router do
       resources "/collaborators", CollaboratorController, only: [:create, :update, :delete]
 
       resources "/podcasts", PodcastController do
+        put "/publish", PodcastController, :publish, as: :action
+        put "/depublish", PodcastController, :depublish, as: :action
+
         resources "/collaborators", CollaboratorController, only: [:create, :update, :delete]
 
-        resources "/episodes", EpisodeController
+        resources "/episodes", EpisodeController do
+          put "/publish", EpisodeController, :publish, as: :action
+          put "/depublish", EpisodeController, :depublish, as: :action
+        end
       end
 
       resources "/import", PodcastImportController, only: [:new, :create]

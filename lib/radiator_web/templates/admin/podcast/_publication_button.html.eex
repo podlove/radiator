@@ -1,4 +1,3 @@
-<%= form_for Radiator.Directory.Podcast.changeset(@podcast, %{}), Routes.admin_network_podcast_path(@conn, :update, @podcast.network_id, @podcast.id), fn f -> %>
-  <%= hidden_input f, :publish_state, value: "published" %>
+<%= form_for Radiator.Directory.Podcast.changeset(@podcast, %{}), Routes.admin_network_podcast_action_path(@conn, :publish, @podcast.network_id, @podcast.id), fn _f -> %>
   <input type="submit" value="Publish Podcast" class="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 border-b-4 border-green-700 hover:border-green-500 rounded">
 <% end %>
