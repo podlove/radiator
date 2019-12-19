@@ -5,7 +5,7 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   alias Radiator.Storage
   alias Radiator.Directory
-  alias Radiator.Directory.{Editor, Episode}
+  alias Radiator.Directory.{Editor, Episode, Audio}
   alias Radiator.Reporting.Statistics
 
   plug :assign_podcast when action in [:new, :create, :update]
@@ -26,13 +26,15 @@ defmodule RadiatorWeb.Admin.EpisodeController do
 
   def create(conn, %{"episode" => episode_params}) do
     podcast = conn.assigns[:podcast]
+    upload = Map.get(episode_params, "enclosure")
+    file_slot = Audio.slot_name_from_content_type(upload.content_type)
 
     case Radiator.Directory.Editor.EpisodeManager.create_episode_with_upload(
            podcast,
            episode_params,
            %{},
-           Map.get(episode_params, "enclosure"),
-           "audio_mp3"
+           upload,
+           file_slot
          ) do
       {:ok, %{episode: episode}} ->
         conn

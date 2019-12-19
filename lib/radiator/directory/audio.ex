@@ -48,6 +48,16 @@ defmodule Radiator.Directory.Audio do
     ~W(audio_mp3 audio_m4a audio_ogg audio_opus)a
   end
 
+  def slot_name_from_content_type(type) do
+    case type do
+      "audio/opus" -> "audio_opus"
+      "audio/ogg" -> "audio_ogg"
+      "video/ogg" -> "audio_ogg"
+      "audio/x-m4a" -> "audio_m4a"
+      _ -> "audio_mp3"
+    end
+  end
+
   @doc false
   def changeset(audio, attrs) do
     audio
