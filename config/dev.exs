@@ -25,7 +25,7 @@ config :radiator, RadiatorWeb.Endpoint,
   ]
 
 config :arc,
-  asset_host: System.get_env("STORAGE_ASSET_HOST", "http://#{default_host}:9000/radiator")
+  asset_host: System.get_env("STORAGE_ASSET_HOST", "http://#{default_host}:9001/radiator")
 
 config :ex_aws,
   access_key_id: System.get_env("STORAGE_ACCESS_KEY_ID", "IEKAZMUY3KX32CRJPE9R"),
