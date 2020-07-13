@@ -89,7 +89,7 @@ defmodule Radiator.MixProject do
       {:remote_ip, "~> 0.2.0"},
       {:ua_inspector, "~> 1.0"},
       # job processor
-      {:oban, "~> 0.8"},
+      {:oban, "~> 2.0"},
       # cron-like job scheduler
       {:quantum, "~> 2.3"},
       # create and use temporary files/directories
