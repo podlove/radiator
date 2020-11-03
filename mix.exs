@@ -87,7 +87,7 @@ defmodule Radiator.MixProject do
       {:mime, "~> 1.2"},
       # tracking / analytics
       {:remote_ip, "~> 0.2.0"},
-      {:ua_inspector, "~> 1.0"},
+      {:ua_inspector, "~> 2.2.0"},
       # job processor
       {:oban, "~> 0.8"},
       # cron-like job scheduler
