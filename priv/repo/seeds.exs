@@ -9,37 +9,3 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
-
-alias Radiator.Auth.Register
-alias Radiator.Directory.Editor
-
-if Mix.env() != :test do
-  {:ok, user} =
-    Register.create_user(%{
-      name: "admin",
-      email: "admin@example.com",
-      display_name: "admin",
-      password: "password",
-      status: :active
-    })
-
-  {:ok, foo} =
-    Register.create_user(%{
-      name: "foo",
-      email: "foo@bar.local",
-      display_name: "foobar",
-      password: "pass",
-      status: :active
-    })
-
-  Editor.create_network(user, %{
-    title: "ACME"
-  })
-
-  {:ok, network2} =
-    Editor.create_network(user, %{
-      title: "BCME"
-    })
-
-  Editor.Permission.set_permission(foo, network2, :readonly)
-end

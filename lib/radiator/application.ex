@@ -5,15 +5,19 @@ defmodule Radiator.Application do
 
   use Application
 
+  @impl true
   def start(_type, _args) do
-    # List all child processes to be supervised
     children = [
+      RadiatorWeb.Telemetry,
       Radiator.Repo,
-      RadiatorWeb.Endpoint,
-      {Oban, Application.get_env(:radiator, Oban)},
-      Radiator.Scheduler,
-      Radiator.Tracking.Server,
-      Radiator.Task.Supervisor
+      {DNSCluster, query: Application.get_env(:radiator, :dns_cluster_query) || :ignore},
+      {Phoenix.PubSub, name: Radiator.PubSub},
+      # Start the Finch HTTP client for sending emails
+      {Finch, name: Radiator.Finch},
+      # Start a worker by calling: Radiator.Worker.start_link(arg)
+      # {Radiator.Worker, arg},
+      # Start to serve requests, typically the last entry
+      RadiatorWeb.Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -24,6 +28,7 @@ defmodule Radiator.Application do
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
+  @impl true
   def config_change(changed, _new, removed) do
     RadiatorWeb.Endpoint.config_change(changed, removed)
     :ok

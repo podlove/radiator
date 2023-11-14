@@ -1,41 +1,33 @@
-use Mix.Config
+import Config
 
-default_host = System.get_env("DEFAULT_HOST", "localhost")
+# Configure your database
+config :radiator, Radiator.Repo,
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  database: "radiator_dev",
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
 # The watchers configuration can be used to run external
-# watchers to your application. For example, we use it
-# with webpack to recompile .js and .css sources.
+# watchers to your application. For example, we can use it
+# to bundle .js and .css sources.
 config :radiator, RadiatorWeb.Endpoint,
-  http: [port: 4000],
-  debug_errors: true,
-  code_reloader: true,
+  # Binding to loopback ipv4 address prevents access from other machines.
+  # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
+  http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
+  code_reloader: true,
+  debug_errors: true,
+  secret_key_base: "mSDRsGewRUaXZ4KWZlQOy8BjCUExlnr/LnvGfVOAMCxpqEYQRIWRM0aKF7FI1PRA",
   watchers: [
-    node: [
-      "node_modules/webpack/bin/webpack.js",
-      "--mode",
-      "development",
-      "--watch-stdin",
-      "--color",
-      cd: Path.expand("../assets", __DIR__)
-    ]
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
-
-config :arc,
-  asset_host: System.get_env("STORAGE_ASSET_HOST", "http://#{default_host}:9000/radiator")
-
-config :ex_aws,
-  access_key_id: System.get_env("STORAGE_ACCESS_KEY_ID", "IEKAZMUY3KX32CRJPE9R"),
-  secret_access_key:
-    System.get_env("STORAGE_ACCESS_KEY", "tXNYsfJyb8ctDgZSaIOYpndQwxOv8T+E+U0Rq3mN")
-
-config :ex_aws, :s3,
-  scheme: "http://",
-  host: System.get_env("STORAGE_HOST", default_host),
-  port: System.get_env("STORAGE_PORT", "9000")
 
 # ## SSL Support
 #
@@ -45,7 +37,6 @@ config :ex_aws, :s3,
 #
 #     mix phx.gen.cert
 #
-# Note that this task requires Erlang/OTP 20 or later.
 # Run `mix help phx.gen.cert` for more information.
 #
 # The `http:` config above can be replaced with:
@@ -65,12 +56,14 @@ config :ex_aws, :s3,
 config :radiator, RadiatorWeb.Endpoint,
   live_reload: [
     patterns: [
-      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
-      ~r{priv/gettext/.*(po)$},
-      ~r{lib/radiator_web/views/.*(ex)$},
-      ~r{lib/radiator_web/templates/.*(eex)$}
+      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
+      ~r"priv/gettext/.*(po)$",
+      ~r"lib/radiator_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
+
+# Enable dev routes for dashboard and mailbox
+config :radiator, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
@@ -82,16 +75,8 @@ config :phoenix, :stacktrace_depth, 20
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
 
-# Configure your database
-config :radiator, Radiator.Repo,
-  username: System.get_env("POSTGRES_USER", "postgres"),
-  password: System.get_env("POSTGRES_PASSWORD", "postgres"),
-  database: "radiator_dev",
-  hostname: System.get_env("POSTGRES_HOST", default_host),
-  pool_size: 10
+# Include HEEx debug annotations as HTML comments in rendered markup
+config :phoenix_live_view, :debug_heex_annotations, true
 
-config :radiator, Radiator.Mailer, adapter: Radiator.Email.Console
-
-config :radiator, :sandbox_mode, enabled: System.get_env("SANDBOX_MODE_ENABLED", "true")
-
-config :radiator, Radiator.Scheduler, global: false
+# Disable swoosh api client as it is only required for production adapters.
+config :swoosh, :api_client, false

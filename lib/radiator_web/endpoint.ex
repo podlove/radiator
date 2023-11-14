@@ -1,11 +1,17 @@
 defmodule RadiatorWeb.Endpoint do
-  use Radiator.Constants
-  use Phoenix.Endpoint, otp_app: @otp_app
-  use Absinthe.Phoenix.Endpoint
+  use Phoenix.Endpoint, otp_app: :radiator
 
-  socket "/socket", RadiatorWeb.UserSocket,
-    websocket: true,
-    longpoll: false
+  # The session will be stored in the cookie and signed,
+  # this means its contents can be read but not tampered with.
+  # Set :encryption_salt if you would also like to encrypt it.
+  @session_options [
+    store: :cookie,
+    key: "_radiator_key",
+    signing_salt: "dT0kSa2V",
+    same_site: "Lax"
+  ]
+
+  socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -15,7 +21,7 @@ defmodule RadiatorWeb.Endpoint do
     at: "/",
     from: :radiator,
     gzip: false,
-    only: ~w(css fonts images js favicon.ico robots.txt)
+    only: RadiatorWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
@@ -23,32 +29,23 @@ defmodule RadiatorWeb.Endpoint do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
     plug Phoenix.CodeReloader
-    plug Phoenix.Ecto.CheckRepoStatus, otp_app: @otp_app
+    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :radiator
   end
 
-  plug RemoteIp
+  plug Phoenix.LiveDashboard.RequestLogger,
+    param_key: "request_logger",
+    cookie_key: "request_logger"
+
   plug Plug.RequestId
-  plug Plug.Logger
+  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
   plug Plug.Parsers,
-    parsers: [:urlencoded, {:multipart, length: 200_000_000}, :json, Absinthe.Plug.Parser],
+    parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
 
   plug Plug.MethodOverride
-  plug Plug.MemorizeHead
   plug Plug.Head
-
-  # The session will be stored in the cookie and signed,
-  # this means its contents can be read but not tampered with.
-  # Set :encryption_salt if you would also like to encrypt it.
-  plug Plug.Session,
-    store: :cookie,
-    key: "_radiator_key",
-    signing_salt: "ZRbumoaT"
-
-  plug CORSPlug
-
-  plug RadiatorWeb.Plug.CustomPublicURLs
+  plug Plug.Session, @session_options
   plug RadiatorWeb.Router
 end

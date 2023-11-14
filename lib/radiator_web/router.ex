@@ -1,214 +1,44 @@
 defmodule RadiatorWeb.Router do
   use RadiatorWeb, :router
 
-  alias Radiator.InstanceConfig
-
   pipeline :browser do
-    plug RadiatorWeb.Plug.BlockKnownPaths
     plug :accepts, ["html"]
     plug :fetch_session
-    plug :fetch_flash
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {RadiatorWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
 
-  pipeline :public_browser do
-    plug RadiatorWeb.Plug.BlockKnownPaths
-    plug :accepts, ["html", "xml", "rss"]
-    plug :put_secure_browser_headers
-
-    plug :put_layout, {RadiatorWeb.LayoutView, :public}
-    plug RadiatorWeb.Plug.AssignFromPublicSlugs
-  end
-
-  pipeline :public_browser_custom_url do
-    plug RadiatorWeb.Plug.BlockKnownPaths
-    plug :accepts, ["html", "xml", "rss"]
-    plug :put_secure_browser_headers
-
-    plug :put_layout, {RadiatorWeb.LayoutView, :public}
-    plug RadiatorWeb.Plug.AssignEpisodeFromPublicSlugs
-  end
-
-  @otp_app Mix.Project.config()[:app]
-
-  pipeline :authenticated_browser do
-    plug Guardian.Plug.Pipeline,
-      otp_app: @otp_app,
-      module: Radiator.Auth.Guardian,
-      error_handler: RadiatorWeb.GuardianErrorHandler
-
-    plug Guardian.Plug.VerifySession, claims: %{"typ" => "access"}
-    plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
-    plug Guardian.Plug.EnsureAuthenticated
-    plug Guardian.Plug.LoadResource
-
-    plug RadiatorWeb.Plug.EnsureUserValidity
-    plug RadiatorWeb.Plug.AssignCurrentAdminResources
-  end
-
   pipeline :api do
     plug :accepts, ["json"]
-    plug RadiatorWeb.Plug.AssignAPIUser
   end
 
-  pipeline :authenticated_api do
-    plug Guardian.Plug.Pipeline,
-      otp_app: @otp_app,
-      module: Radiator.Auth.Guardian,
-      error_handler: RadiatorWeb.GuardianApiErrorHandler
-
-    plug Guardian.Plug.VerifySession, claims: %{"typ" => "api_session"}
-    plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "api_session"}
-    plug Guardian.Plug.EnsureAuthenticated
-    plug Guardian.Plug.LoadResource
-
-    plug RadiatorWeb.Plug.AssignCurrentUser
-  end
-
-  scope "/admin", RadiatorWeb.Admin,
-    host: InstanceConfig.hostname(),
-    as: :admin do
-    pipe_through :browser
-    pipe_through :authenticated_browser
-
-    resources "/networks", NetworkController do
-      resources "/collaborators", CollaboratorController, only: [:create, :update, :delete]
-
-      resources "/podcasts", PodcastController do
-        resources "/collaborators", CollaboratorController, only: [:create, :update, :delete]
-
-        resources "/episodes", EpisodeController
-      end
-
-      resources "/import", PodcastImportController, only: [:new, :create]
-    end
-
-    get "/usersettings", UserSettingsController, :index
-    post "/usersettings", UserSettingsController, :update
-    put "/usersettings", UserSettingsController, :update
-  end
-
-  scope "/download", RadiatorWeb, host: InstanceConfig.hostname() do
-    get "/p/:podcast_slug/:episode_slug/file/:file_id", TrackingController, :track_episode_file
-
-    get "/n/:network_slug/:audio_publication_slug/file/:file_id",
-        TrackingController,
-        :track_audio_publication_file
-  end
-
-  scope "/api/rest/v1", RadiatorWeb.Api, host: InstanceConfig.hostname(), as: :api do
-    pipe_through :api
-
-    post "/auth", AuthenticationController, :create
-    post "/auth/signup", AuthenticationController, :signup
-    post "/auth/reset_password", AuthenticationController, :reset_password
-    post "/auth/resend_verification_email", AuthenticationController, :resend_verification_email
-  end
-
-  scope "/api/rest/v1", RadiatorWeb.Api, host: InstanceConfig.hostname(), as: :api do
-    pipe_through [:api, :authenticated_api]
-
-    post "/auth/prolong", AuthenticationController, :prolong
-
-    resources "/networks", NetworkController, only: [:show, :create, :update, :delete] do
-      resources "/collaborators", CollaboratorController, only: [:show, :create, :update, :delete]
-      resources "/audios", AudioController, only: [:create]
-    end
-
-    resources "/podcasts", PodcastController, only: [:show, :create, :update, :delete] do
-      put "/publish", PodcastController, :publish
-      put "/depublish", PodcastController, :depublish
-
-      resources "/collaborators", CollaboratorController, only: [:show, :create, :update, :delete]
-    end
-
-    resources "/episodes", EpisodeController, only: [:show, :create, :update, :delete] do
-      put "/publish", EpisodeController, :publish
-      put "/depublish", EpisodeController, :depublish
-
-      resources "/audios", AudioController, only: [:create]
-    end
-
-    resources "/audio_publications", AudioPublicationController,
-      only: [:index, :show, :update, :delete] do
-      put "/publish", AudioPublicationController, :publish
-      put "/depublish", AudioPublicationController, :depublish
-    end
-
-    resources "/people", PersonController, only: [:index, :show, :create, :update, :delete]
-
-    resources "/audios", AudioController, only: [:show, :update, :delete] do
-      resources "/audio_files", AudioFileController,
-        only: [:index, :create],
-        as: :file
-
-      resources "/chapters", ChaptersController,
-        param: "start",
-        only: [:index, :show, :create, :update, :delete]
-    end
-
-    resources "/audio_files", AudioFileController, only: [:show, :update, :delete]
-
-    resources "/contributions", ContributionController,
-      only: [:index, :show, :create, :update, :delete]
-
-    resources "/tasks", TaskController, only: [:show, :create, :delete]
-
-    post "/convert/chapters", Preview.ChaptersImportController, :convert
-  end
-
-  scope "/api", host: InstanceConfig.hostname() do
-    pipe_through :api
-
-    forward "/graphql", Absinthe.Plug, schema: RadiatorWeb.GraphQL.Schema
-    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: RadiatorWeb.GraphQL.Schema
-  end
-
-  scope "/", RadiatorWeb, host: InstanceConfig.hostname() do
+  scope "/", RadiatorWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
-
-    get "/audio_publication/:audio_publication_id/player.json",
-        PlayerController,
-        :audio_publication_config
-
-    get "/episode/:episode_id/player.json", PlayerController, :episode_config
-
-    get "/login/request_verification/:token", LoginController, :resend_verification_mail
-    get "/login/verify_email/:token", LoginController, :verify_email
-    get "/login/request_reset_password/:token", LoginController, :send_reset_password_mail
-    get "/login/reset_password_form", LoginController, :reset_password_form
-    post "/login/reset_password_form", LoginController, :reset_password
-
-    get "/login", LoginController, :index
-    post "/login", LoginController, :login
-
-    get "/login_form", LoginController, :login_form
-
-    get "/signup", LoginController, :signup_form
-    post "/signup", LoginController, :signup
-
-    get "/logout", LoginController, :logout
+    get "/", PageController, :home
   end
 
-  # todo: if a custom host is set, these should all redirect to the custom host
-  scope "/", RadiatorWeb.Public, host: InstanceConfig.hostname() do
-    pipe_through :public_browser
+  # Other scopes may use custom stacks.
+  # scope "/api", RadiatorWeb do
+  #   pipe_through :api
+  # end
 
-    get "/robots.txt", RobotsTxtController, :show
-    get "/:podcast_slug/feed.xml", FeedController, :show
-    get "/:podcast_slug/:episode_slug", EpisodeController, :show
-    get "/:podcast_slug", EpisodeController, :index
-  end
+  # Enable LiveDashboard and Swoosh mailbox preview in development
+  if Application.compile_env(:radiator, :dev_routes) do
+    # If you want to use the LiveDashboard in production, you should put
+    # it behind authentication and allow only admins to access it.
+    # If your application does not have an admins-only section yet,
+    # you can use Plug.BasicAuth to set up some basic authentication
+    # as long as you are also using SSL (which you should anyway).
+    import Phoenix.LiveDashboard.Router
 
-  scope "/", RadiatorWeb.Public, as: :custom_hostname do
-    pipe_through :public_browser_custom_url
+    scope "/dev" do
+      pipe_through :browser
 
-    get "/robots.txt", RobotsTxtController, :show
-    get "/feed.xml", FeedController, :show
-    get "/:episode_slug", EpisodeController, :show
-    get "/", EpisodeController, :index
+      live_dashboard "/dashboard", metrics: RadiatorWeb.Telemetry
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
   end
 end

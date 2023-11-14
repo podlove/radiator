@@ -1,7 +1,0 @@
-<div class="text-sm py-1 px-2 text-white rounded-full <%= case @permission do
-    :own -> "font-bold bg-secondary"
-    :manage -> "font-bold bg-tertiary"
-    _ -> "bg-tertiary"
-    end %>">
-    <%= format_permission(@permission) %>
-</div>

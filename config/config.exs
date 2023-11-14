@@ -1,70 +1,57 @@
 # This file is responsible for configuring your application
-# and its dependencies with the aid of the Mix.Config module.
+# and its dependencies with the aid of the Config module.
 #
 # This configuration file is loaded before any dependency and
 # is restricted to this project.
 
 # General application configuration
-use Mix.Config
-
-default_host = System.get_env("DEFAULT_HOST", "localhost")
+import Config
 
 config :radiator,
-  ecto_repos: [Radiator.Repo]
+  ecto_repos: [Radiator.Repo],
+  generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
 config :radiator, RadiatorWeb.Endpoint,
-  url: [host: default_host],
-  secret_key_base: "Ulfk2ILpLFu95vdZSe8Af8pjN9n516jHZXb7BUnPHU0xu8g/tyAdNzZBVGtMo0JH",
-  render_errors: [view: RadiatorWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Radiator.PubSub, adapter: Phoenix.PubSub.PG2]
+  url: [host: "localhost"],
+  adapter: Phoenix.Endpoint.Cowboy2Adapter,
+  render_errors: [
+    formats: [html: RadiatorWeb.ErrorHTML, json: RadiatorWeb.ErrorJSON],
+    layout: false
+  ],
+  pubsub_server: Radiator.PubSub,
+  live_view: [signing_salt: "yYyDZUkW"]
 
-config :radiator, Radiator.Auth.Guardian,
-  issuer: "radiator",
-  secret_key: "dev-only;I1B6O0dEt9sBw6531zH/vDHKEDTY64ohsPxLw5jvLtKaphKofVC/NM5nzkbyD4HW"
+# Configures the mailer
+#
+# By default it uses the "Local" adapter which stores the emails
+# locally. You can see the emails in your browser, at "/dev/mailbox".
+#
+# For production it's recommended to configure a different adapter
+# at the `config/runtime.exs`.
+config :radiator, Radiator.Mailer, adapter: Swoosh.Adapters.Local
 
-config :radiator,
-  storage_bucket: "radiator"
+# Configure esbuild (the version is required)
+config :esbuild,
+  version: "0.17.11",
+  default: [
+    args:
+      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+    cd: Path.expand("../assets", __DIR__),
+    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
 
-config :radiator, :sandbox_mode, enabled: false
-
-config :radiator, :auth,
-  email_from_name: "Radiator-Instance",
-  email_from_email: "do_not_reply@radiator.local"
-
-config :radiator, :instance_config, base_admin_url: System.get_env("BASE_ADMIN_URL")
-
-config :radiator, Radiator.Mailer,
-  adapter: Bamboo.SMTPAdapter,
-  server: "smtp.domain",
-  hostname: "your.domain",
-  port: 1025,
-  # or {:system, "SMTP_USERNAME"}
-  username: "your.name@your.domain",
-  # or {:system, "SMTP_PASSWORD"}
-  password: "pa55word",
-  # can be `:always` or `:never`
-  tls: :if_available,
-  # or {":system", ALLOWED_TLS_VERSIONS"} w/ comma seprated values (e.g. "tlsv1.1,tlsv1.2")
-  allowed_tls_versions: [:tlsv1, :"tlsv1.1", :"tlsv1.2"],
-  # can be `true`
-  ssl: false,
-  retries: 1,
-  # can be `true`
-  no_mx_lookups: false,
-  # can be `always`. If your smtp relay requires authentication set it to `always`.
-  auth: :if_available
-
-config :arc,
-  storage: Arc.Storage.S3,
-  bucket: "radiator"
-
-config :ex_aws,
-  json_codec: Jason
-
-config :ex_aws, :hackney_opts,
-  follow_redirect: true,
-  recv_timeout: 30_000
+# Configure tailwind (the version is required)
+config :tailwind,
+  version: "3.3.2",
+  default: [
+    args: ~w(
+      --config=tailwind.config.js
+      --input=css/app.css
+      --output=../priv/static/assets/app.css
+    ),
+    cd: Path.expand("../assets", __DIR__)
+  ]
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -74,33 +61,6 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :radiator, Oban,
-  repo: Radiator.Repo,
-  queues: [default: 1, feed: 1],
-  prune: {:maxage, 60 * 60 * 24 * 7},
-  prune_interval: 60 * 60 * 1000,
-  verbose: false
-
-config :radiator, Radiator.Scheduler,
-  # one scheduler per cluster
-  global: true,
-  # prevent next job from being executed if previous job is still running
-  overlap: false,
-  jobs: [
-    reporting_hourly: [
-      schedule: "@hourly",
-      task: {Radiator.Reporting.ReportGenerator, :hourly_report, []}
-    ],
-    reporting_daily: [
-      # every day 00:30
-      schedule: "30 * * * *",
-      task: {Radiator.Reporting.ReportGenerator, :daily_report, []}
-    ]
-  ]
-
-config :ua_inspector,
-  http_opts: [ssl_options: [honor_cipher_order: :undefined]]
-
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-import_config "#{Mix.env()}.exs"
+import_config "#{config_env()}.exs"
