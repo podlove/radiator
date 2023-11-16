@@ -3,6 +3,8 @@ defmodule RadiatorWeb.OutlineLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    socket
+    |> assign(:page_title, "Outline")
+    |> reply(:ok)
   end
 end
