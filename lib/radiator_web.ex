@@ -83,6 +83,9 @@ defmodule RadiatorWeb do
     quote do
       # HTML escaping functionality
       import Phoenix.HTML
+
+      import Extension.Phoenix.Socket
+
       # Core UI components and translation
       import RadiatorWeb.CoreComponents
       import RadiatorWeb.Gettext
