@@ -4,15 +4,15 @@ defmodule RadiatorWeb.OutlineLiveTest do
   import Phoenix.LiveViewTest
   import Radiator.AccountsFixtures
 
-  describe "Outline show page" do
-    test "can render page if user is logged in", %{conn: conn} do
-      {:ok, _live, html} = conn |> log_in_user(user_fixture()) |> live(~p"/outline")
+  describe "Outline page" do
+    test "can render if user is logged in", %{conn: conn} do
+      {:ok, _live, html} = conn |> log_in_user(user_fixture()) |> live(~p"/admin/outline")
 
       assert html =~ "Outline</h1>"
     end
 
     test "redirects if user is not logged in", %{conn: conn} do
-      assert {:error, redirect} = live(conn, ~p"/outline")
+      assert {:error, redirect} = live(conn, ~p"/admin/outline")
 
       assert {:redirect, %{to: path, flash: flash}} = redirect
       assert path == ~p"/users/log_in"
@@ -20,14 +20,14 @@ defmodule RadiatorWeb.OutlineLiveTest do
     end
   end
 
-  describe "Outline has an inbox" do
+  describe "Outline page has an inbox" do
     setup %{conn: conn} do
       user = user_fixture()
       %{conn: log_in_user(conn, user)}
     end
 
-    test "inbox has a haeadline", %{conn: conn} do
-      {:ok, live, _html} = live(conn, ~p"/outline")
+    test "inbox has a headline", %{conn: conn} do
+      {:ok, live, _html} = live(conn, ~p"/admin/outline")
 
       assert live
              |> element("h2", "Inbox")
