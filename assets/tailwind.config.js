@@ -19,7 +19,8 @@ module.exports = {
       colors: {
         brand: "#FD4F00",
         cta: "#EF8376",
-        "page-border": "#C0C0C0",
+        "page-header": "#1C091F",
+        "page-border": "#C0C0C0"
       }
     },
   },
