@@ -1,4 +1,25 @@
 <section>
   <h1>Outline</h1>
+
   <h2>Inbox</h2>
+
+  <.focus_wrap id="input-form-wrap">
+    <.form id="inbox-form" for={@form} phx-change="update" phx-submit="next">
+      <.input type="text" field={@form[:content]} />
+      <.input type="hidden" field={@form[:uuid]} />
+    </.form>
+  </.focus_wrap>
+
+  <ul id="inbox" class="mt-8 list-disc list-inside" phx-update="stream">
+    <li :for={{dom_id, node} <- @streams.nodes} id={dom_id}>
+      <%= node.content %>
+      <.link
+        phx-click={JS.push("delete", value: %{uuid: node.uuid}) |> hide("##{dom_id}")}
+        data-confirm="Delete?"
+      >
+        <.icon name="hero-x-circle" class="w-5 h-5" />
+        <div class="sr-only">Delete</div>
+      </.link>
+    </li>
+  </ul>
 </section>
