@@ -2,10 +2,31 @@
 #
 #     mix run priv/repo/seeds.exs
 #
-# Inside the script, you can read and write to any of your
-# repositories directly:
-#
-#     Radiator.Repo.insert!(%Radiator.SomeSchema{})
-#
-# We recommend using the bang functions (`insert!`, `update!`
-# and so on) as they will fail if something goes wrong.
+alias Radiator.{Accounts, Outline, Podcast}
+
+{:ok, _user_bob} =
+  Accounts.register_user(%{email: "bob@radiator.de", password: "supersupersecret"})
+
+{:ok, _user_jim} =
+  Accounts.register_user(%{email: "jim@radiator.de", password: "supersupersecret"})
+
+{:ok, _node} =
+  Outline.create_node(%{content: "This is my first node"})
+
+{:ok, _node} =
+  Outline.create_node(%{content: "Second node"})
+
+{:ok, network} =
+  Podcast.create_network(%{title: "Podcast network"})
+
+{:ok, _show} =
+  Podcast.create_show(%{title: "Dev Cafe", network_id: network.id})
+
+{:ok, show} =
+  Podcast.create_show(%{title: "Tech Weekly", network_id: network.id})
+
+{:ok, _episode} =
+  Podcast.create_episode(%{title: "past episode", show_id: show.id})
+
+{:ok, _episode} =
+  Podcast.create_episode(%{title: "current episode", show_id: show.id})
