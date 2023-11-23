@@ -3,10 +3,12 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
   import Phoenix.LiveViewTest
   import Radiator.AccountsFixtures
+  import Radiator.OutlineFixtures
 
-  describe "Outline page" do
+  describe "Outline page is restricted" do
     test "can render if user is logged in", %{conn: conn} do
-      {:ok, _live, html} = conn |> log_in_user(user_fixture()) |> live(~p"/admin/outline")
+      user = user_fixture()
+      {:ok, _live, html} = conn |> log_in_user(user) |> live(~p"/admin/outline")
 
       assert html =~ "Outline</h1>"
     end
@@ -23,15 +25,38 @@ defmodule RadiatorWeb.OutlineLiveTest do
   describe "Outline page has an inbox" do
     setup %{conn: conn} do
       user = user_fixture()
-      %{conn: log_in_user(conn, user)}
+      node = node_fixture()
+      %{conn: log_in_user(conn, user), node: node}
     end
 
-    test "inbox has a headline", %{conn: conn} do
+    test "lists all nodes", %{conn: conn, node: node} do
+      {:ok, _live, html} = live(conn, ~p"/admin/outline")
+
+      assert html =~ "Inbox</h2>"
+      assert html =~ node.content
+    end
+
+    test "save new node", %{conn: conn} do
       {:ok, live, _html} = live(conn, ~p"/admin/outline")
 
       assert live
-             |> element("h2", "Inbox")
-             |> render() =~ "Inbox"
+             |> form("#inbox-form", node: %{content: "new node content"})
+             |> render_submit()
+
+      assert live
+             |> element("ul#inbox")
+             |> render() =~ "new node content"
+    end
+
+    test "delete existing node", %{conn: conn, node: node} do
+      {:ok, live, _html} = live(conn, ~p"/admin/outline")
+
+      assert live
+             |> element("#node-#{node.uuid} a", "Delete")
+             |> render_click()
+
+      refute live
+             |> has_element?("#node-#{node.uuid}")
     end
   end
 end
