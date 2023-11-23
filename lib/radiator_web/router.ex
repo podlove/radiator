@@ -24,9 +24,11 @@ defmodule RadiatorWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", RadiatorWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", RadiatorWeb.Api do
+    pipe_through :api
+
+    post "/v1/outline", OutlineController, :create
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:radiator, :dev_routes) do
