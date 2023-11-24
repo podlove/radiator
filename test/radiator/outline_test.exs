@@ -27,6 +27,13 @@ defmodule Radiator.OutlineTest do
       assert node.content == "some content"
     end
 
+    test "create_node/1 trims whitespace from content" do
+      valid_attrs = %{content: "  some content  "}
+
+      assert {:ok, %Node{} = node} = Outline.create_node(valid_attrs)
+      assert node.content == "some content"
+    end
+
     test "create_node/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Outline.create_node(@invalid_attrs)
     end

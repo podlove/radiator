@@ -17,6 +17,10 @@ defmodule Radiator.Outline.Node do
   def changeset(node, attrs) do
     node
     |> cast(attrs, @fields)
+    |> update_change(:content, &trim/1)
     |> validate_required(@fields)
   end
+
+  defp trim(content) when is_binary(content), do: String.trim(content)
+  defp trim(content), do: content
 end
