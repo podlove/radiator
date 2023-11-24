@@ -20,7 +20,7 @@ defmodule RadiatorWeb.AdminLiveTest do
     end
   end
 
-  describe "Admin page has links" do
+  describe "Admin page contains" do
     setup %{conn: conn} do
       user = user_fixture()
       %{conn: log_in_user(conn, user)}
@@ -31,7 +31,7 @@ defmodule RadiatorWeb.AdminLiveTest do
 
       {:ok, conn} =
         live
-        |> element(~s|main a:fl-contains("Accounts")|)
+        |> element(~s|main a[href="/admin/accounts"]|)
         |> render_click()
         |> follow_redirect(conn, ~p"/admin/accounts")
 
@@ -43,7 +43,7 @@ defmodule RadiatorWeb.AdminLiveTest do
 
       {:ok, conn} =
         live
-        |> element(~s|main a:fl-contains("Outline")|)
+        |> element(~s|main a[href="/admin/outline"]|)
         |> render_click()
         |> follow_redirect(conn, ~p"/admin/outline")
 

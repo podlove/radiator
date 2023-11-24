@@ -1,11 +1,25 @@
-<section>
-  <h1>Admin Dashboard</h1>
+<div>
+  <header>
+    <h1 class="text-4xl">Admin Dashboard</h1>
+    <p>Tools to create and manage your prodcasts</p>
+  </header>
 
-  <.link href={~p"/admin/accounts"} class="">
-    Accounts
-  </.link>
-
-  <.link href={~p"/admin/outline"} class="">
-    Outline
-  </.link>
-</section>
+  <section class="my-12">
+    <.link href={~p"/admin/accounts"} class="flex my-6 bg-[#f0f4f4]">
+      <div class="bg-[#f0f4f4] p-2">
+        <.icon name="hero-users" class="w-12 h-12" />
+      </div>
+      <div class="p-2 my-auto">
+        Accounts
+      </div>
+    </.link>
+    <.link href={~p"/admin/outline"} class="flex my-6 bg-[#f0f4f4]">
+      <div class="bg-[#f0f4f4] p-2">
+        <.icon name="hero-list-bullet" class="w-12 h-12" />
+      </div>
+      <div class="p-2 my-auto">
+        Outline
+      </div>
+    </.link>
+  </section>
+</div>
