@@ -26,6 +26,18 @@ defmodule RadiatorWeb.AdminLiveTest do
       %{conn: log_in_user(conn, user)}
     end
 
+    test "link to accounts", %{conn: conn} do
+      {:ok, live, _html} = live(conn, ~p"/admin")
+
+      {:ok, conn} =
+        live
+        |> element(~s|main a:fl-contains("Accounts")|)
+        |> render_click()
+        |> follow_redirect(conn, ~p"/admin/accounts")
+
+      assert conn.resp_body =~ "Accounts"
+    end
+
     test "link to outline", %{conn: conn} do
       {:ok, live, _html} = live(conn, ~p"/admin")
 

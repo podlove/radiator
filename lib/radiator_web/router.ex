@@ -72,6 +72,7 @@ defmodule RadiatorWeb.Router do
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
 
       live "/admin", AdminLive.Index, :index
+      live "/admin/accounts", AccountsLive.Index, :index
       live "/admin/outline", OutlineLive.Index, :index
     end
   end

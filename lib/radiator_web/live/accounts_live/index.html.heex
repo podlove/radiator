@@ -1,0 +1,8 @@
+<section>
+  <h1>Accounts</h1>
+
+  <.table id="accounts" rows={@streams.users}>
+    <:col :let={{_id, user}} label="Id"><%= user.id %></:col>
+    <:col :let={{_id, user}} label="Content"><%= user.email %></:col>
+  </.table>
+</section>

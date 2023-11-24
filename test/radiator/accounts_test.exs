@@ -6,6 +6,13 @@ defmodule Radiator.AccountsTest do
   import Radiator.AccountsFixtures
   alias Radiator.Accounts.{User, UserToken}
 
+  describe "list_users/0" do
+    test "returns all users" do
+      _user = user_fixture()
+      assert [%User{} | _] = Accounts.list_users()
+    end
+  end
+
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
       refute Accounts.get_user_by_email("unknown@example.com")
