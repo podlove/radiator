@@ -34,7 +34,8 @@ defmodule RadiatorWeb.OutlineLive.Index do
 
   @impl true
   def handle_event("next", %{"node" => params}, socket) do
-    {:ok, node} = Outline.create_node(params)
+    user = socket.assigns.current_user
+    {:ok, node} = Outline.create_node(params, user)
 
     Endpoint.broadcast(@topic, "inserted", node)
 

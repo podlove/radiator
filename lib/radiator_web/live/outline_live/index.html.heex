@@ -15,15 +15,20 @@
     </.focus_wrap>
 
     <ul id="inbox" class="mt-8 list-disc list-inside" phx-update="stream">
-      <li :for={{dom_id, node} <- @streams.nodes} id={dom_id}>
-        <%= node.content %>
-        <.link
-          phx-click={JS.push("delete", value: %{uuid: node.uuid}) |> hide("##{dom_id}")}
-          data-confirm="Delete?"
-        >
-          <.icon name="hero-x-circle" class="w-5 h-5" />
-          <div class="sr-only">Delete</div>
-        </.link>
+      <li :for={{dom_id, node} <- @streams.nodes} id={dom_id} class="my-2">
+        <div>
+          <%= node.content %>
+          <.link
+            phx-click={JS.push("delete", value: %{uuid: node.uuid}) |> hide("##{dom_id}")}
+            data-confirm="Delete?"
+          >
+            <.icon name="hero-x-circle" class="w-5 h-5" />
+            <div class="sr-only">Delete</div>
+          </.link>
+        </div>
+        <div class="pl-4 text-xs italic">
+          Creator: <%= node.creator_id %> | Last Update: <%= node.updated_at %>
+        </div>
       </li>
     </ul>
   </section>

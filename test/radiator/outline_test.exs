@@ -34,6 +34,15 @@ defmodule Radiator.OutlineTest do
       assert node.content == "some content"
     end
 
+    test "create_node/1 can have a creator" do
+      user = %{id: 2}
+      valid_attrs = %{content: "some content"}
+
+      assert {:ok, %Node{} = node} = Outline.create_node(valid_attrs, user)
+      assert node.content == "some content"
+      assert node.creator_id == user.id
+    end
+
     test "create_node/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Outline.create_node(@invalid_attrs)
     end

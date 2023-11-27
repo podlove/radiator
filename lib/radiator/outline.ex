@@ -18,7 +18,9 @@ defmodule Radiator.Outline do
 
   """
   def list_nodes do
-    Repo.all(Node)
+    Node
+    |> order_by(desc: :updated_at)
+    |> Repo.all()
   end
 
   @doc """
@@ -35,7 +37,10 @@ defmodule Radiator.Outline do
       ** (Ecto.NoResultsError)
 
   """
-  def get_node!(id), do: Repo.get!(Node, id)
+  def get_node!(id) do
+    Node
+    |> Repo.get!(id)
+  end
 
   @doc """
   Creates a node.
@@ -51,6 +56,12 @@ defmodule Radiator.Outline do
   """
   def create_node(attrs \\ %{}) do
     %Node{}
+    |> Node.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def create_node(attrs, %{id: id}) do
+    %Node{creator_id: id}
     |> Node.changeset(attrs)
     |> Repo.insert()
   end
