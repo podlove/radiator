@@ -14,6 +14,6 @@ defmodule RadiatorWeb.Api.OutlineController do
   def create(conn, _params) do
     conn
     |> put_resp_content_type("application/json")
-    |> send_resp(500, Jason.encode!(%{error: "params"}))
+    |> send_resp(400, Jason.encode!(%{error: "params"}))
   end
 end
