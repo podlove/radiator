@@ -5,20 +5,27 @@ defmodule Radiator.Outline.Node do
   @primary_key {:uuid, :binary_id, autogenerate: true}
   schema "outline_nodes" do
     field :content, :string
+    field :creator_id, :integer
 
     timestamps(type: :utc_datetime)
   end
 
-  @fields [
+  @required_fields [
     :content
   ]
+
+  @optional_fields [
+    :creator_id
+  ]
+
+  @all_fields @optional_fields ++ @required_fields
 
   @doc false
   def changeset(node, attrs) do
     node
-    |> cast(attrs, @fields)
+    |> cast(attrs, @all_fields)
     |> update_change(:content, &trim/1)
-    |> validate_required(@fields)
+    |> validate_required(@required_fields)
   end
 
   defp trim(content) when is_binary(content), do: String.trim(content)
