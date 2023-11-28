@@ -6,6 +6,7 @@ defmodule RadiatorWeb.AccountsLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     socket
+    |> assign(:page_title, "Accounts")
     |> stream(:users, Accounts.list_users())
     |> reply(:ok)
   end
