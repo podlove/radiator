@@ -19,6 +19,7 @@ defmodule RadiatorWeb.OutlineLive.Index do
 
     socket
     |> assign(:page_title, "Outline")
+    |> assign(:bookmarklet, get_bookmarklet(Endpoint.url() <> "/api/v1/outline"))
     |> assign(:node, node)
     |> assign(:form, to_form(changeset))
     |> stream_configure(:nodes, dom_id: &"node-#{&1.uuid}")
@@ -67,5 +68,19 @@ defmodule RadiatorWeb.OutlineLive.Index do
     socket
     |> stream_delete(:nodes, node)
     |> reply(:noreply)
+  end
+
+  defp get_bookmarklet(api_uri) do
+    """
+    javascript:(function(){
+      s=window.getSelection().toString();
+      c=s!=""?s:window.location.href;
+      xhr=new XMLHttpRequest();
+      xhr.open('POST','#{api_uri}',true);
+      xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+      xhr.send('content='+encodeURIComponent(c));
+    })()
+    """
+    |> String.replace(["\n", "  "], "")
   end
 end
