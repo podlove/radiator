@@ -16,7 +16,7 @@ defmodule RadiatorWeb.Api.OutlineControllerTest do
     test "can't create node when content is missing", %{conn: conn} do
       conn = post(conn, ~p"/api/v1/outline", nil)
 
-      assert %{"error" => "params"} = json_response(conn, 400)
+      assert %{"error" => "missing params"} = json_response(conn, 400)
     end
   end
 end
