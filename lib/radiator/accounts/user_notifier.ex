@@ -8,7 +8,7 @@ defmodule Radiator.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Radiator", "contact@example.com"})
+      |> from({"Radiator", "noreply@radiator.metaebene.me"})
       |> subject(subject)
       |> text_body(body)
 
