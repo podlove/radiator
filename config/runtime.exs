@@ -114,4 +114,16 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+
+  config :radiator, Radiator.Mailer,
+    adapter: Swoosh.Adapters.SMTP,
+    relay: System.get_env("SMTP_SERVER"),
+    username: System.get_env("SMTP_USERNAME"),
+    password: System.get_env("SMTP_PASSWORD"),
+    ssl: false,
+    tls: :always,
+    auth: :always,
+    port: String.to_integer(System.get_env("SMTP_PORT")),
+    retries: 2,
+    no_mx_lookups: false
 end
