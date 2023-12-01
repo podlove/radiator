@@ -120,7 +120,7 @@ if config_env() == :prod do
     relay: System.get_env("SMTP_SERVER"),
     username: System.get_env("SMTP_USERNAME"),
     password: System.get_env("SMTP_PASSWORD"),
-    ssl: false,
+    ssl: true,
     tls: :always,
     auth: :always,
     port: String.to_integer(System.get_env("SMTP_PORT")),
