@@ -512,4 +512,96 @@ defmodule Radiator.AccountsTest do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end
   end
+
+  describe "generate_user_api_token/1" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "generates a token", %{user: user} do
+      token = Accounts.generate_user_api_token(user)
+
+      assert user_token = Repo.get_by(UserToken, token: token)
+      assert user_token.context == "api"
+
+      # Creating the same token for another user should fail
+      assert_raise Ecto.ConstraintError, fn ->
+        Repo.insert!(%UserToken{
+          token: user_token.token,
+          user_id: user_fixture().id,
+          context: "api"
+        })
+      end
+    end
+
+    test "returns existing token if token already exists", %{user: user} do
+      token = Accounts.generate_user_api_token(user)
+
+      assert Accounts.generate_user_api_token(user) == token
+    end
+  end
+
+  describe "get_api_token_by_user/1" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "returns nil if user has no api token", %{user: user} do
+      refute Accounts.get_api_token_by_user(user)
+    end
+
+    test "returns api token by user", %{user: user} do
+      token = Accounts.generate_user_api_token(user)
+
+      assert Accounts.get_api_token_by_user(user) == token
+    end
+  end
+
+  describe "get_user_by_api_token/1" do
+    setup do
+      user = user_fixture()
+      token = Accounts.generate_user_api_token(user)
+      %{user: user, token: token}
+    end
+
+    test "does not return user for invalid token" do
+      refute Accounts.get_user_by_api_token("oops")
+    end
+
+    test "returns user by token", %{user: user, token: token} do
+      assert api_user = Accounts.get_user_by_api_token(token)
+      assert api_user.id == user.id
+    end
+
+    test "token won't expire", %{user: user, token: token} do
+      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
+
+      assert api_user = Accounts.get_user_by_api_token(token)
+      assert api_user.id == user.id
+    end
+  end
+
+  describe "refresh_user_api_token/1" do
+    setup do
+      user = user_fixture()
+      token = Accounts.generate_user_api_token(user)
+      %{user: user, token: token}
+    end
+
+    test "deletes the current token and sets a new token", %{user: user, token: token} do
+      refute Accounts.refresh_user_api_token(user) == token
+    end
+  end
+
+  describe "delete_user_api_token/1" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "deletes the token", %{user: user} do
+      token = Accounts.generate_user_api_token(user)
+      assert Accounts.delete_user_api_token(token) == :ok
+      refute Accounts.get_api_token_by_user(user)
+    end
+  end
 end

@@ -1,6 +1,7 @@
 defmodule RadiatorWeb.OutlineLive.Index do
   use RadiatorWeb, :live_view
 
+  alias Radiator.Accounts
   alias Radiator.Outline
   alias Radiator.Outline.Node
 
@@ -19,7 +20,7 @@ defmodule RadiatorWeb.OutlineLive.Index do
 
     socket
     |> assign(:page_title, "Outline")
-    |> assign(:bookmarklet, get_bookmarklet(Endpoint.url() <> "/api/v1/outline"))
+    |> assign(:bookmarklet, get_bookmarklet(Endpoint.url() <> "/api/v1/outline", socket))
     |> assign(:node, node)
     |> assign(:form, to_form(changeset))
     |> stream_configure(:nodes, dom_id: &"node-#{&1.uuid}")
@@ -70,7 +71,12 @@ defmodule RadiatorWeb.OutlineLive.Index do
     |> reply(:noreply)
   end
 
-  defp get_bookmarklet(api_uri) do
+  defp get_bookmarklet(api_uri, socket) do
+    token =
+      socket.assigns.current_user
+      |> Accounts.generate_user_api_token()
+      |> Base.url_encode64(padding: false)
+
     """
     javascript:(function(){
       s=window.getSelection().toString();
@@ -78,7 +84,7 @@ defmodule RadiatorWeb.OutlineLive.Index do
       xhr=new XMLHttpRequest();
       xhr.open('POST','#{api_uri}',true);
       xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
-      xhr.send('content='+encodeURIComponent(c));
+      xhr.send('content='+encodeURIComponent(c)+'&token=#{token}');
     })()
     """
     |> String.replace(["\n", "  "], "")

@@ -176,4 +176,18 @@ defmodule Radiator.Accounts.UserToken do
   def by_user_and_contexts_query(user, [_ | _] = contexts) do
     from t in UserToken, where: t.user_id == ^user.id and t.context in ^contexts
   end
+
+  def build_api_token(user) do
+    token = :crypto.strong_rand_bytes(@rand_size)
+    {token, %UserToken{token: token, context: "api", user_id: user.id}}
+  end
+
+  def verify_api_token_query(token) do
+    query =
+      from token in by_token_and_context_query(token, "api"),
+        join: user in assoc(token, :user),
+        select: user
+
+    {:ok, query}
+  end
 end

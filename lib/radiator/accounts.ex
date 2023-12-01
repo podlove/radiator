@@ -363,4 +363,57 @@ defmodule Radiator.Accounts do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  ## API
+
+  @doc """
+  Generates an api token.
+  """
+  def generate_user_api_token(user) do
+    existing_token = get_api_token_by_user(user)
+
+    if is_nil(existing_token) do
+      {token, user_token} = UserToken.build_api_token(user)
+      Repo.insert!(user_token)
+      token
+    else
+      existing_token
+    end
+  end
+
+  @doc """
+  Gets the api token for the given user.
+  """
+  def get_api_token_by_user(user) do
+    with query <- UserToken.by_user_and_contexts_query(user, ["api"]),
+         %UserToken{token: token} <- Repo.one(query) do
+      token
+    else
+      _ -> nil
+    end
+  end
+
+  @doc """
+  Refresh api token.
+  """
+  def refresh_user_api_token(user) do
+    Repo.delete_all(UserToken.by_user_and_contexts_query(user, ["api"]))
+    generate_user_api_token(user)
+  end
+
+  @doc """
+  Gets the user with the given api token.
+  """
+  def get_user_by_api_token(token) do
+    {:ok, query} = UserToken.verify_api_token_query(token)
+    Repo.one(query)
+  end
+
+  @doc """
+  Deletes the api token.
+  """
+  def delete_user_api_token(token) do
+    Repo.delete_all(UserToken.by_token_and_context_query(token, "api"))
+    :ok
+  end
 end
