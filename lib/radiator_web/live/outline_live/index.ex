@@ -37,35 +37,31 @@ defmodule RadiatorWeb.OutlineLive.Index do
   @impl true
   def handle_event("next", %{"node" => params}, socket) do
     user = socket.assigns.current_user
-    {:ok, node} = Outline.create_node(params, user)
-
-    Endpoint.broadcast(@topic, "inserted", node)
+    Outline.create_node(params, user)
 
     socket
-    |> stream_insert(:nodes, node, at: 0)
+    # |> stream_insert(:nodes, node, at: 0)
     |> reply(:noreply)
   end
 
   @impl true
   def handle_event("delete", %{"uuid" => uuid}, socket) do
     node = Outline.get_node!(uuid)
-    {:ok, _} = Outline.delete_node(node)
-
-    Endpoint.broadcast(@topic, "deleted", node)
+    Outline.delete_node(node)
 
     socket
-    |> stream_delete(:nodes, node)
+    # |> stream_delete(:nodes, node)
     |> reply(:noreply)
   end
 
   @impl true
-  def handle_info(%{topic: @topic, event: "inserted", payload: node}, socket) do
+  def handle_info({:insert, node}, socket) do
     socket
     |> stream_insert(:nodes, node, at: 0)
     |> reply(:noreply)
   end
 
-  def handle_info(%{topic: @topic, event: "deleted", payload: node}, socket) do
+  def handle_info({:delete, node}, socket) do
     socket
     |> stream_delete(:nodes, node)
     |> reply(:noreply)
