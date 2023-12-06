@@ -2,12 +2,11 @@ defmodule Radiator.Outline do
   @moduledoc """
   The Outline context.
   """
-
   import Ecto.Query, warn: false
 
   alias Phoenix.PubSub
-  alias Radiator.Repo
   alias Radiator.Outline.Node
+  alias Radiator.Repo
 
   @topic "outline"
 

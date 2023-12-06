@@ -68,6 +68,9 @@ jobs:
       - name: Compiles without warnings
         run: mix compile --warnings-as-errors
 
+      - name: Check Code Style
+        run: mix credo --strict
+
       - name: Check Formatting
         run: mix format --check-formatted
 

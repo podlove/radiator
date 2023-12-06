@@ -1,4 +1,7 @@
 defmodule RadiatorWeb.UserAuth do
+  @moduledoc """
+  This module provides functions to log in and log out users.
+  """
   use RadiatorWeb, :verified_routes
 
   import Plug.Conn
