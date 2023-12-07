@@ -6,6 +6,8 @@ defmodule Radiator.Outline.Node do
   schema "outline_nodes" do
     field :content, :string
     field :creator_id, :integer
+    field :parent_id, Ecto.UUID
+    field :prev_id, Ecto.UUID
 
     timestamps(type: :utc_datetime)
   end
@@ -15,7 +17,9 @@ defmodule Radiator.Outline.Node do
   ]
 
   @optional_fields [
-    :creator_id
+    :creator_id,
+    :parent_id,
+    :prev_id
   ]
 
   @all_fields @optional_fields ++ @required_fields
