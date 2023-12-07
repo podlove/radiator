@@ -3,8 +3,6 @@ defmodule RadiatorWeb.OutlineLive.Index do
 
   alias Radiator.Accounts
   alias Radiator.Outline
-  alias Radiator.Outline.Node
-
   alias RadiatorWeb.Endpoint
 
   @topic "outline"
@@ -15,7 +13,7 @@ defmodule RadiatorWeb.OutlineLive.Index do
       Endpoint.subscribe(@topic)
     end
 
-    node = %Node{}
+    node = %Outline.Node{}
     changeset = Outline.change_node(node)
 
     socket
@@ -23,49 +21,40 @@ defmodule RadiatorWeb.OutlineLive.Index do
     |> assign(:bookmarklet, get_bookmarklet(Endpoint.url() <> "/api/v1/outline", socket))
     |> assign(:node, node)
     |> assign(:form, to_form(changeset))
-    |> stream_configure(:nodes, dom_id: &"node-#{&1.uuid}")
-    |> stream(:nodes, Outline.list_nodes())
+    |> push_event("insert", %{nodes: Outline.list_nodes()})
     |> reply(:ok)
-  end
-
-  @impl true
-  def handle_event("update", %{"node" => _params}, socket) do
-    socket
-    |> reply(:noreply)
   end
 
   @impl true
   def handle_event("next", %{"node" => params}, socket) do
     user = socket.assigns.current_user
-    Outline.create_node(params, user)
+    {:ok, node} = Outline.create_node(params, user)
 
     socket
-    # |> stream_insert(:nodes, node, at: 0)
+    |> push_event("insert", %{nodes: [node]})
     |> reply(:noreply)
   end
 
-  @impl true
-  def handle_event("delete", %{"uuid" => uuid}, socket) do
-    node = Outline.get_node!(uuid)
-    Outline.delete_node(node)
+  # def handle_event("delete", %{"uuid" => uuid}, socket) do
+  #   node = Outline.get_node!(uuid)
+  #   Outline.delete_node(node)
 
-    socket
-    # |> stream_delete(:nodes, node)
-    |> reply(:noreply)
-  end
+  #   socket
+  #   |> reply(:noreply)
+  # end
 
-  @impl true
-  def handle_info({:insert, node}, socket) do
-    socket
-    |> stream_insert(:nodes, node, at: 0)
-    |> reply(:noreply)
-  end
+  # @impl true
+  # def handle_info({:insert, node}, socket) do
+  #   socket
+  #   |> push_event("insert", node)
+  #   |> reply(:noreply)
+  # end
 
-  def handle_info({:delete, node}, socket) do
-    socket
-    |> stream_delete(:nodes, node)
-    |> reply(:noreply)
-  end
+  # def handle_info({:delete, node}, socket) do
+  #   socket
+  #   |> push_event("delete", node)
+  #   |> reply(:noreply)
+  # end
 
   defp get_bookmarklet(api_uri, socket) do
     token =

@@ -29,11 +29,14 @@ defmodule RadiatorWeb.OutlineLiveTest do
       %{conn: log_in_user(conn, user), node: node}
     end
 
-    test "lists all nodes", %{conn: conn, node: node} do
-      {:ok, _live, html} = live(conn, ~p"/admin/outline")
+    test "lists all nodes", %{conn: conn, node: _node} do
+      {:ok, live, _html} = live(conn, ~p"/admin/outline")
 
-      assert html =~ "Inbox</h2>"
-      assert html =~ node.content
+      assert live |> element("h2", "Inbox")
+
+      assert_push_event(live, "insert", %{nodes: [%{content: "some content"}]})
+
+      # assert html =~ node.content
     end
 
     test "save new node", %{conn: conn} do
@@ -45,18 +48,19 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       assert live
              |> element("ul#inbox")
-             |> render() =~ "new node content"
+
+      assert_push_event(live, "insert", %{nodes: [%{content: "new node content"}]})
     end
 
-    test "delete existing node", %{conn: conn, node: node} do
-      {:ok, live, _html} = live(conn, ~p"/admin/outline")
+    # test "delete existing node", %{conn: conn, node: node} do
+    #   {:ok, live, _html} = live(conn, ~p"/admin/outline")
 
-      assert live
-             |> element("#node-#{node.uuid} a", "Delete")
-             |> render_click()
+    #   assert live
+    #          |> element("#node-#{node.uuid} a", "Delete")
+    #          |> render_click()
 
-      refute live
-             |> has_element?("#node-#{node.uuid}")
-    end
+    #   refute live
+    #          |> has_element?("#node-#{node.uuid}")
+    # end
   end
 end

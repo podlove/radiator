@@ -2,6 +2,8 @@ defmodule Radiator.Outline.Node do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, only: [:uuid, :content, :creator_id, :parent_id, :prev_id]}
+
   @primary_key {:uuid, :binary_id, autogenerate: true}
   schema "outline_nodes" do
     field :content, :string

@@ -22,7 +22,6 @@ defmodule Radiator.Outline do
   """
   def list_nodes do
     Node
-    |> order_by(desc: :updated_at)
     |> Repo.all()
   end
 
