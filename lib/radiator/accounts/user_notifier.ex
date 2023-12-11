@@ -1,4 +1,7 @@
 defmodule Radiator.Accounts.UserNotifier do
+  @moduledoc """
+  Handles notification emails for users.
+  """
   import Swoosh.Email
 
   alias Radiator.Mailer

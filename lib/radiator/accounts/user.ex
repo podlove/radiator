@@ -1,4 +1,7 @@
 defmodule Radiator.Accounts.User do
+  @moduledoc """
+  The user model.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

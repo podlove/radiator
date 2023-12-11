@@ -1,4 +1,7 @@
 defmodule Radiator.Accounts.UserToken do
+  @moduledoc """
+  Token handling for user sessions.
+  """
   use Ecto.Schema
   import Ecto.Query
   alias Radiator.Accounts.UserToken
