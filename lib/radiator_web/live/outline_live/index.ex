@@ -43,18 +43,18 @@ defmodule RadiatorWeb.OutlineLive.Index do
   #   |> reply(:noreply)
   # end
 
-  # @impl true
-  # def handle_info({:insert, node}, socket) do
-  #   socket
-  #   |> push_event("insert", node)
-  #   |> reply(:noreply)
-  # end
+  @impl true
+  def handle_info({:insert, node}, socket) do
+    socket
+    |> push_event("insert", %{nodes: [node]})
+    |> reply(:noreply)
+  end
 
-  # def handle_info({:delete, node}, socket) do
-  #   socket
-  #   |> push_event("delete", node)
-  #   |> reply(:noreply)
-  # end
+  def handle_info({:delete, node}, socket) do
+    socket
+    |> push_event("delete", %{nodes: [node]})
+    |> reply(:noreply)
+  end
 
   defp get_bookmarklet(api_uri, socket) do
     token =
