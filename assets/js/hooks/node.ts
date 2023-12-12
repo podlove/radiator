@@ -8,7 +8,7 @@ interface Node {
 
 export function createNode({ uuid, content }: Node) {
   const input = document.createElement("div")
-  input.innerText = content || ""
+  input.textContent = content || ""
   input.contentEditable = "plaintext-only"
 
   const node = document.createElement("li")
@@ -17,4 +17,9 @@ export function createNode({ uuid, content }: Node) {
   uuid && (node.id = "outline-node-" + uuid)
 
   return node
+}
+
+export function focusNode(node: HTMLElement) {
+  const input = node.firstChild as HTMLElement
+  input.focus()
 }
