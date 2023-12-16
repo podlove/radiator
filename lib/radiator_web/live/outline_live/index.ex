@@ -35,6 +35,21 @@ defmodule RadiatorWeb.OutlineLive.Index do
     |> reply(:noreply)
   end
 
+  def handle_event("set_focus", _node_id, socket) do
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event("remove_focus", _node_id, socket) do
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event("create_node", _params, socket) do
+    socket
+    |> reply(:noreply)
+  end
+
   # def handle_event("delete", %{"uuid" => uuid}, socket) do
   #   node = Outline.get_node!(uuid)
   #   Outline.delete_node(node)

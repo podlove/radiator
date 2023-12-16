@@ -11,15 +11,20 @@ export function createNode({ uuid, content }: Node) {
   input.textContent = content || ""
   input.contentEditable = "plaintext-only"
 
-  const node = document.createElement("li")
-  node.className = "my-2 ml-2"
-  node.appendChild(input)
-  uuid && (node.id = "outline-node-" + uuid)
+  // const ol = document.createElement("ol")
+  // ol.className = "ml-2 list-disc list-inside"
 
-  return node
+  const domNode = document.createElement("li")
+  domNode.className = "my-2 ml-2"
+  domNode.appendChild(input)
+  // domNode.appendChild(ol)
+  uuid && (domNode.id = "outline-node-" + uuid)
+
+  return domNode
 }
 
-export function focusNode(node: HTMLElement) {
-  const input = node.firstChild as HTMLElement
+
+export function focusNode(domNode: HTMLElement) {
+  const input = domNode.firstChild as HTMLElement
   input.focus()
 }

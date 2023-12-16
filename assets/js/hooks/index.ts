@@ -5,6 +5,22 @@ export const Hooks = {
     mounted() {
       const container: HTMLElement = this.el
 
+      container.addEventListener("focusin", (event: FocusEvent) => {
+        const target = <HTMLElement>event.target
+        const domNode = target.parentElement!
+        const id = domNode.getAttribute("data-id")
+
+        this.pushEvent("set_focus", id)
+      })
+
+      container.addEventListener("focusout", (event) => {
+        const target = <HTMLElement>event.target
+        const domNode = target.parentElement!
+        const id = domNode.getAttribute("data-id")
+
+        this.pushEvent("remove_focus", id)
+      })
+
       container.addEventListener("keydown", (event: KeyboardEvent) => {
         const selection = window.getSelection()
         const range = selection?.getRangeAt(0)
@@ -22,12 +38,13 @@ export const Hooks = {
             const contentBefore = content.substring(0, splitPos)
             const contentAfter = content.substring(splitPos)
 
-            const node = createNode({ content: contentAfter })
-            parent.after(node)
+            const domNode = createNode({ content: contentAfter })
+            parent.after(domNode)
 
             target.textContent = contentBefore
 
-            focusNode(node)
+            focusNode(domNode)
+
             break
         }
       })
