@@ -14,16 +14,6 @@
   </section>
 
   <section class="my-12">
-    <h2 class="text-2xl">Inbox</h2>
-
-    <.form id="inbox-form" for={@form} phx-submit="next">
-      <.input
-        type="text"
-        field={@form[:content]}
-        placeholder="this input will be removed in the future"
-      />
-    </.form>
-
-    <ol id="outline" class="mt-8 list-disc list-inside" phx-hook="outline"></ol>
+    <ol id="outline" phx-hook="outline"></ol>
   </section>
 </div>

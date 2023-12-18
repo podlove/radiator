@@ -1,4 +1,4 @@
-import { createNode, focusNode } from "./node"
+import { createItem, updateItem, focusItem, getItemByEvent, getNodeByEvent } from "./item"
 
 export const Hooks = {
   outline: {
@@ -6,56 +6,83 @@ export const Hooks = {
       const container: HTMLElement = this.el
 
       container.addEventListener("focusin", (event: FocusEvent) => {
-        const target = <HTMLElement>event.target
-        const domNode = target.parentElement!
-        const id = domNode.getAttribute("data-id")
+        const node = getNodeByEvent(event)
+        const uuid = node.uuid
 
-        this.pushEvent("set_focus", id)
+        this.pushEvent("set_focus", uuid)
       })
 
-      container.addEventListener("focusout", (event) => {
-        const target = <HTMLElement>event.target
-        const domNode = target.parentElement!
-        const id = domNode.getAttribute("data-id")
+      container.addEventListener("focusout", (event: FocusEvent) => {
+        const node = getNodeByEvent(event)
+        const uuid = node.uuid
 
-        this.pushEvent("remove_focus", id)
+        this.pushEvent("remove_focus", uuid)
+      })
+
+      container.addEventListener("input", (event: Event) => {
+        const node = getNodeByEvent(event)
+
+        this.pushEvent("update_node", node)
       })
 
       container.addEventListener("keydown", (event: KeyboardEvent) => {
         const selection = window.getSelection()
         const range = selection?.getRangeAt(0)
 
+        const node = getNodeByEvent(event)
+
         switch (event.key) {
           case "Enter":
             event.preventDefault()
+            break
 
-            const splitPos = range?.endOffset || 0
+          case "ArrowUp":
+            if (selection?.anchorOffset == 0) {
+              event.preventDefault()
+            }
+            break
 
-            const target = <HTMLElement>event.target
-            const parent = target.parentElement!
+          case "ArrowDown":
+            if (selection?.anchorOffset == node.content.length) {
+              event.preventDefault()
+            }
+            break
 
-            const content = target.textContent || ""
-            const contentBefore = content.substring(0, splitPos)
-            const contentAfter = content.substring(splitPos)
+          case "Tab":
+            event.preventDefault()
 
-            const domNode = createNode({ content: contentAfter })
-            parent.after(domNode)
+            if (event.shiftKey) {
+            }
+            break
 
-            target.textContent = contentBefore
+          case "Backspace":
+            if (node.content.length == 0) {
+              const item = getItemByEvent(event)
+              item.parentNode!.removeChild(item)
 
-            focusNode(domNode)
+              // focus next item
 
+              this.pushEvent("delete_node", node.uuid)
+            }
+            break
+
+          case "Delete":
+            if (node.content.length == 0) {
+              const item = getItemByEvent(event)
+              item.parentNode!.removeChild(item)
+
+              // focus next item
+
+              this.pushEvent("delete_node", node.uuid)
+            }
             break
         }
       })
 
-      container.addEventListener("keyup", (event) => {
-      })
-
-      this.handleEvent("insert", ({ nodes }) => {
+      this.handleEvent("list", ({ nodes }) => {
         nodes.forEach(node => {
-          const li = createNode(node)
-          container.prepend(li)
+          const item = createItem(node)
+          container.prepend(item)
         })
       })
     }

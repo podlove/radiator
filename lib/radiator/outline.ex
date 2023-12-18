@@ -59,14 +59,33 @@ defmodule Radiator.Outline do
     %Node{}
     |> Node.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_node_change(:insert)
+    |> broadcast_node_action(:insert)
   end
 
   def create_node(attrs, %{id: id}) do
     %Node{creator_id: id}
     |> Node.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_node_change(:insert)
+    |> broadcast_node_action(:insert)
+  end
+
+  @doc """
+  Upsert a node.
+
+  ## Examples
+
+      iex> upsert_node(%{field: new_value})
+      {:ok, %Node{}}
+
+      iex> upsert_node(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def upsert_node(attrs) do
+    %Node{}
+    |> Node.changeset(attrs)
+    |> Repo.insert_or_update()
+    |> broadcast_node_action(:update)
   end
 
   @doc """
@@ -85,7 +104,7 @@ defmodule Radiator.Outline do
     node
     |> Node.changeset(attrs)
     |> Repo.update()
-    |> broadcast_node_change(:update)
+    |> broadcast_node_action(:update)
   end
 
   @doc """
@@ -103,7 +122,7 @@ defmodule Radiator.Outline do
   def delete_node(%Node{} = node) do
     node
     |> Repo.delete()
-    |> broadcast_node_change(:delete)
+    |> broadcast_node_action(:delete)
   end
 
   @doc """
@@ -119,10 +138,10 @@ defmodule Radiator.Outline do
     Node.changeset(node, attrs)
   end
 
-  defp broadcast_node_change({:ok, node}, action) do
+  defp broadcast_node_action({:ok, node}, action) do
     PubSub.broadcast(Radiator.PubSub, @topic, {action, node})
     {:ok, node}
   end
 
-  defp broadcast_node_change({:error, error}, _action), do: {:error, error}
+  defp broadcast_node_action({:error, error}, _action), do: {:error, error}
 end
