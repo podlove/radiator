@@ -239,9 +239,31 @@ defmodule Radiator.Podcast do
 
   """
   def create_episode(attrs \\ %{}) do
+    attrs_with_number = set_number(attrs)
+
     %Episode{}
-    |> Episode.changeset(attrs)
+    |> Episode.changeset(attrs_with_number)
     |> Repo.insert()
+  end
+
+  defp set_number(%{number: _number} = attrs), do: attrs
+
+  defp set_number(%{show_id: show_id} = episode_attrs) do
+    number = get_highest_number(show_id) + 1
+    Map.put(episode_attrs, :number, number)
+  end
+
+  defp set_number(%{} = episode_attrs) do
+    Map.put(episode_attrs, :number, 0)
+  end
+
+  defp get_highest_number(show_id) do
+    query =
+      from e in Episode,
+        select: max(e.number),
+        where: [show_id: ^show_id]
+
+    Repo.one(query) || 0
   end
 
   @doc """

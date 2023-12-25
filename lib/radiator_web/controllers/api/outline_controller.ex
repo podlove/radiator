@@ -9,6 +9,9 @@ defmodule RadiatorWeb.Api.OutlineController do
       token
       |> decode_token()
       |> get_user_by_token()
+      # show will be send in request from frontend (show_id)
+      # fetch wanted/current episode for show
+
       |> create_node(content)
       |> get_response()
 

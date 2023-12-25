@@ -18,7 +18,7 @@ defmodule Radiator.Podcast.Episode do
   @doc false
   def changeset(episode, attrs) do
     episode
-    |> cast(attrs, [:title, :show_id])
-    |> validate_required([:title, :show_id])
+    |> cast(attrs, [:title, :show_id, :number])
+    |> validate_required([:title, :show_id, :number])
   end
 end

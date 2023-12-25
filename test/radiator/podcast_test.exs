@@ -132,6 +132,31 @@ defmodule Radiator.PodcastTest do
       assert episode.show_id == show.id
     end
 
+    test "create_episode/1 sets for first episode number 1" do
+      episode_attrs = %{title: "a new episode", show_id: show_fixture().id}
+
+      {:ok, %Episode{} = episode} = Podcast.create_episode(episode_attrs)
+      assert episode.number > 0
+    end
+
+    test "create_episode/1 finds the next highest number " do
+      show = show_fixture()
+      episode_fixture(show_id: show.id, number: 23)
+      episode_attrs = %{title: "my new episode", show_id: show.id}
+
+      {:ok, %Episode{} = episode} = Podcast.create_episode(episode_attrs)
+      assert episode.number == 24
+    end
+
+    test "create_episode/1 can be set explict" do
+      show = show_fixture()
+      episode_fixture(show_id: show.id, number: 2)
+      episode_attrs = %{title: "my new episode", number: 5, show_id: show.id}
+
+      {:ok, %Episode{} = episode} = Podcast.create_episode(episode_attrs)
+      assert episode.number == 5
+    end
+
     test "create_episode/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Podcast.create_episode(@invalid_attrs)
     end
