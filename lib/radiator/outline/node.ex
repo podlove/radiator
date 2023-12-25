@@ -22,14 +22,14 @@ defmodule Radiator.Outline.Node do
   end
 
   @required_fields [
-    :content
+    :content,
+    :episode_id
   ]
 
   @optional_fields [
     :creator_id,
     :parent_id,
-    :prev_id,
-    :episode_id # FIXME: should be required
+    :prev_id
   ]
 
   @all_fields @optional_fields ++ @required_fields

@@ -7,6 +7,7 @@ defmodule Radiator.OutlineTest do
     alias Radiator.Outline.Node
 
     import Radiator.OutlineFixtures
+    alias Radiator.PodcastFixtures
 
     @invalid_attrs %{content: nil}
 
@@ -21,22 +22,25 @@ defmodule Radiator.OutlineTest do
     end
 
     test "create_node/1 with valid data creates a node" do
-      valid_attrs = %{content: "some content"}
+      episode = PodcastFixtures.episode_fixture()
+      valid_attrs = %{content: "some content", episode_id: episode.id}
 
       assert {:ok, %Node{} = node} = Outline.create_node(valid_attrs)
       assert node.content == "some content"
     end
 
     test "create_node/1 trims whitespace from content" do
-      valid_attrs = %{content: "  some content  "}
+      episode = PodcastFixtures.episode_fixture()
+      valid_attrs = %{content: "  some content  ", episode_id: episode.id}
 
       assert {:ok, %Node{} = node} = Outline.create_node(valid_attrs)
       assert node.content == "some content"
     end
 
     test "create_node/1 can have a creator" do
+      episode = PodcastFixtures.episode_fixture()
       user = %{id: 2}
-      valid_attrs = %{content: "some content"}
+      valid_attrs = %{content: "some content", episode_id: episode.id}
 
       assert {:ok, %Node{} = node} = Outline.create_node(valid_attrs, user)
       assert node.content == "some content"

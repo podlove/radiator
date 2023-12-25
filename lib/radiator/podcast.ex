@@ -227,7 +227,8 @@ defmodule Radiator.Podcast do
   def get_episode!(id), do: Repo.get!(Episode, id)
 
   @doc """
-    Returns the newest (TODO: not published ) episode for a show.
+    Finds the newest (TODO: not published ) episode for a show.
+    Returns %Episode{} or `nil` and expects an id of the show.
 
     ## Examples
 

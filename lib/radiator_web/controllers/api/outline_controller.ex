@@ -1,18 +1,16 @@
 defmodule RadiatorWeb.Api.OutlineController do
   use RadiatorWeb, :controller
 
-  alias Radiator.Accounts
-  alias Radiator.Outline
+  alias Radiator.{Accounts, Outline, Podcast}
 
-  def create(conn, %{"content" => content, "token" => token}) do
+  def create(conn, %{"content" => content, "show_id" => show_id, "token" => token}) do
+    episode = Podcast.get_current_episode_for_show(show_id)
+
     {status_code, body} =
       token
       |> decode_token()
       |> get_user_by_token()
-      # show will be send in request from frontend (show_id)
-      # fetch wanted/current episode for show
-
-      |> create_node(content)
+      |> create_node(content, episode.id)
       |> get_response()
 
     conn
@@ -31,8 +29,11 @@ defmodule RadiatorWeb.Api.OutlineController do
   defp get_user_by_token({:ok, token}), do: Accounts.get_user_by_api_token(token)
   defp get_user_by_token(:error), do: {:error, :token}
 
-  defp create_node(nil, _), do: {:error, :user}
-  defp create_node(user, content), do: Outline.create_node(%{"content" => content}, user)
+  defp create_node(nil, _, _), do: {:error, :user}
+  defp create_node(_, _, nil), do: {:error, :episode}
+
+  defp create_node(user, content, episode_id),
+    do: Outline.create_node(%{"content" => content, "episode_id" => episode_id}, user)
 
   defp get_response({:ok, node}), do: {200, %{uuid: node.uuid}}
   defp get_response({:error, _}), do: {400, %{error: "params"}}

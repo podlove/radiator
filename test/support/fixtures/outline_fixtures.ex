@@ -4,6 +4,7 @@ defmodule Radiator.OutlineFixtures do
   entities via the `Radiator.Outline` context.
   """
   alias Radiator.PodcastFixtures
+
   @doc """
   Generate a node.
   """
@@ -17,6 +18,7 @@ defmodule Radiator.OutlineFixtures do
         episode_id: episode.id
       })
       |> Radiator.Outline.create_node()
+
     node
   end
 end
