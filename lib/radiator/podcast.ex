@@ -227,6 +227,26 @@ defmodule Radiator.Podcast do
   def get_episode!(id), do: Repo.get!(Episode, id)
 
   @doc """
+    Returns the newest (TODO: not published ) episode for a show.
+
+    ## Examples
+
+        iex> get_current_episode_for_show(123)
+        %Episode{}
+
+        iex> get_current_episode_for_show(456)
+        nil
+
+  """
+  def get_current_episode_for_show(nil), do: nil
+
+  def get_current_episode_for_show(show_id) do
+    Repo.one(
+      from e in Episode, where: e.show_id == ^show_id, order_by: [desc: e.number], limit: 1
+    )
+  end
+
+  @doc """
   Creates a episode.
 
   ## Examples

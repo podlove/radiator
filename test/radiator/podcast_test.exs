@@ -187,5 +187,28 @@ defmodule Radiator.PodcastTest do
       episode = episode_fixture()
       assert %Ecto.Changeset{} = Podcast.change_episode(episode)
     end
+
+    test "get_current_episode_for_show/1 returns nil when no show has been given" do
+      assert nil == Podcast.get_current_episode_for_show(nil)
+    end
+
+    test "get_current_episode_for_show/1 returns nil when no episode for show exists" do
+      show = show_fixture()
+      assert nil == Podcast.get_current_episode_for_show(show.id)
+    end
+
+    test "get_current_episode_for_show/1 returns episdoe for show" do
+      episode = episode_fixture()
+      assert episode == Podcast.get_current_episode_for_show(episode.show_id)
+    end
+
+    test "get_current_episode_for_show/1 returns the episode with the highest number" do
+      show = show_fixture()
+      # create new before old to ensure that the highest number is returned
+      # and not just the newest
+      episode_new = episode_fixture(number: 23, show_id: show.id)
+      _episode_old = episode_fixture(number: 22, show_id: show.id)
+      assert episode_new == Podcast.get_current_episode_for_show(show.id)
+    end
   end
 end
