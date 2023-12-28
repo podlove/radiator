@@ -1,4 +1,5 @@
-import { createItem, updateItem, focusItem, getItemByEvent, getNodeByEvent } from "./item"
+import { Node } from "./node"
+import { createItem, updateItem, focusItem, getItemByEvent, getItemById, getNodeByItem, getNodeByEvent } from "./item"
 
 export const Hooks = {
   outline: {
@@ -6,15 +7,13 @@ export const Hooks = {
       const container: HTMLElement = this.el
 
       container.addEventListener("focusin", (event: FocusEvent) => {
-        const node = getNodeByEvent(event)
-        const uuid = node.uuid
+        const { uuid } = getNodeByEvent(event)
 
         this.pushEvent("set_focus", uuid)
       })
 
       container.addEventListener("focusout", (event: FocusEvent) => {
-        const node = getNodeByEvent(event)
-        const uuid = node.uuid
+        const { uuid } = getNodeByEvent(event)
 
         this.pushEvent("remove_focus", uuid)
       })
@@ -27,64 +26,151 @@ export const Hooks = {
 
       container.addEventListener("keydown", (event: KeyboardEvent) => {
         const selection = window.getSelection()
-        const range = selection?.getRangeAt(0)
+        // const range = selection?.getRangeAt(0)
 
         const node = getNodeByEvent(event)
 
-        switch (event.key) {
-          case "Enter":
-            event.preventDefault()
-            break
+        const item = getItemByEvent(event)
+        const prevItem = <HTMLLIElement>item.previousSibling
+        const nextItem = <HTMLLIElement>item.nextSibling
 
+        switch (event.key) {
           case "ArrowUp":
-            if (selection?.anchorOffset == 0) {
-              event.preventDefault()
-            }
+            if (selection?.anchorOffset != 0) return
+            event.preventDefault()
+
+            if (!prevItem) return
+            // otherwise parentItem
+
+            focusItem(prevItem)
+            this.pushEvent("set_focus", node.uuid)
             break
 
           case "ArrowDown":
-            if (selection?.anchorOffset == node.content.length) {
-              event.preventDefault()
-            }
-            break
-
-          case "Tab":
+            if (selection?.anchorOffset != node.content.length) return
             event.preventDefault()
 
-            if (event.shiftKey) {
+            if (!nextItem) return
+            // otherwise firstChildItem
+
+            focusItem(nextItem)
+            this.pushEvent("set_focus", node.uuid)
+            break
+
+          case "Enter":
+            event.preventDefault()
+
+            const splitPos = selection?.anchorOffset || 0
+
+            const content = node.content
+            node.content = content?.substring(0, splitPos)
+
+            updateItem(node)
+
+            const newNode: Node = {
+              temp_id: self.crypto.randomUUID(),
+              content: content?.substring(splitPos),
+              parent_id: node.parent_id,
+              prev_id: node.uuid
             }
+
+            const newItem = createItem(newNode)
+            item.after(newItem)
+
+            focusItem(newItem, false)
+
+            this.pushEvent("update_node", node)
+            this.pushEvent("create_node", newNode)
             break
 
           case "Backspace":
-            if (node.content.length == 0) {
-              const item = getItemByEvent(event)
-              item.parentNode!.removeChild(item)
+            if (selection?.anchorOffset != 0) return
+            event.preventDefault()
 
-              // focus next item
+            if (!prevItem) return
 
-              this.pushEvent("delete_node", node.uuid)
-            }
+            const prevNode = getNodeByItem(prevItem)
+            prevNode.content += node.content
+            updateItem(prevNode)
+
+            item.parentNode?.removeChild(item)
+
+            focusItem(prevItem)
+            this.pushEvent("delete_node", node.uuid)
             break
 
           case "Delete":
-            if (node.content.length == 0) {
-              const item = getItemByEvent(event)
-              item.parentNode!.removeChild(item)
+            if (selection?.anchorOffset != node.content.length) return
+            event.preventDefault()
 
-              // focus next item
+            if (!nextItem) return
 
-              this.pushEvent("delete_node", node.uuid)
-            }
+            const nextNode = getNodeByItem(nextItem)
+            node.content += nextNode.content
+            updateItem(node)
+
+            nextItem.parentNode?.removeChild(nextItem)
+
+            focusItem(item)
+            this.pushEvent("delete_node", nextNode.uuid)
             break
+
+          // case "Tab":
+          //   event.preventDefault()
+
+          //   if (event.shiftKey) {
+          //     // outdentNode(node)
+          //     // node.prev_id = node.parent_id
+          //   } else {
+          //     // indentNode(node)
+          //   }
+          //   break
         }
       })
+
+      // container.addEventListener("keyup", (event) => {
+      //   console.log("keyup", event)
+      // })
 
       this.handleEvent("list", ({ nodes }) => {
         nodes.forEach(node => {
           const item = createItem(node)
-          container.prepend(item)
+          container.append(item)
         })
+
+        // sort all items
+        nodes.forEach(node => {
+          const item = getItemById(node.uuid)
+          const prevItem = getItemById(node.prev_id)
+          const parentItem = getItemById(node.parent_id)
+
+          if (prevItem) {
+            prevItem.after(item)
+          } else if (parentItem) {
+            parentItem.querySelector("ol")?.append(item)
+          } else {
+            container.append(item)
+          }
+        })
+
+        const lastItem = container.lastElementChild as HTMLLIElement
+        focusItem(lastItem)
       })
+
+      // this.handleEvent("insert", (node: Node) => {
+      //   const item = createItem(node)
+      //   container.append(item)
+      // })
+
+      // this.handleEvent("update", (node: Node) => {
+      //   // console.log(node)
+      //   // updateItem(node)
+      // })
+
+      // this.handleEvent("delete", ({ uuid }: Node) => {
+      //   const item = getItemById(uuid!)
+      //   item.parentNode!.removeChild(item)
+      // })
     }
   }
 }

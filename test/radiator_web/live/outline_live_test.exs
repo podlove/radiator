@@ -5,6 +5,8 @@ defmodule RadiatorWeb.OutlineLiveTest do
   import Radiator.AccountsFixtures
   import Radiator.OutlineFixtures
 
+  alias Radiator.Outline
+
   describe "Outline page is restricted" do
     test "can render if user is logged in", %{conn: conn} do
       user = user_fixture()
@@ -34,9 +36,41 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       assert live |> element("h2", "Inbox")
 
-      assert_push_event(live, "list", %{nodes: [pushed_node]})
+      assert_push_event(live, "list", %{nodes: [^node]})
+    end
 
-      assert ^pushed_node = node
+    test "create a new node", %{conn: conn} do
+      {:ok, live, _html} = live(conn, ~p"/admin/outline")
+
+      temp_id = "f894d2ed-9447-4eef-8c31-fc52372b3bbe"
+      params = %{"temp_id" => temp_id, "content" => "new node temp content"}
+
+      assert live |> render_hook(:create_node, params)
+
+      node =
+        Outline.list_nodes()
+        |> Enum.find(&(&1.content == "new node temp content"))
+        |> Map.put(:temp_id, temp_id)
+
+      assert_push_event(live, "update", ^node)
+    end
+
+    test "update node", %{conn: conn, node: node} do
+      {:ok, live, _html} = live(conn, ~p"/admin/outline")
+
+      params =
+        node
+        |> Map.from_struct()
+        |> Map.put(:content, "update node content")
+
+      assert live |> render_hook(:update_node, params)
+
+      updated_node =
+        Outline.list_nodes()
+        |> Enum.find(&(&1.content == "update node content"))
+
+      assert updated_node.uuid == params.uuid
+      assert updated_node.content == params.content
     end
   end
 end

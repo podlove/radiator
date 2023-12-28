@@ -1,19 +1,14 @@
-interface Node {
-  uuid?: string
-  content: string
-  creator_id?: number
-  parent_id?: string
-  prev_id?: string
-}
+import { Node } from "./node"
 
-export function createItem({ uuid, content, parent_id, prev_id }: Node) {
+export function createItem({ uuid, temp_id, content, parent_id, prev_id }: Node) {
   const input = document.createElement("div")
   input.textContent = content
   input.contentEditable = "plaintext-only"
 
-  // const ol = document.createElement("ol")
+  const ol = document.createElement("ol")
 
   const item = document.createElement("li")
+  temp_id && (item.id = "outline-node-" + temp_id)
   uuid && (item.id = "outline-node-" + uuid)
 
   item.className = "my-2 ml-2"
@@ -22,21 +17,22 @@ export function createItem({ uuid, content, parent_id, prev_id }: Node) {
   item.setAttribute("data-prev", prev_id || "")
 
   item.appendChild(input)
-  // item.appendChild(ol)
+  item.appendChild(ol)
 
   return item
 }
 
-export function updateItem({ uuid, content, parent_id, prev_id }: Node) {
-  const item = uuid && getItemById(uuid)
+export function updateItem({ uuid, temp_id, content, parent_id, prev_id }: Node) {
+  const item = getItemById(temp_id || uuid!)
+  if (!item) return
 
-  if (item) {
-    const input = item.firstChild!
-    input.textContent = content
+  temp_id && uuid && (item.id = "outline-node-" + uuid)
 
-    item.setAttribute("data-parent", parent_id || "")
-    item.setAttribute("data-prev", prev_id || "")
-  }
+  const input = item.firstChild!
+  input.textContent = content
+
+  item.setAttribute("data-parent", parent_id || "")
+  item.setAttribute("data-prev", prev_id || "")
 }
 
 export function getItemById(uuid: string) {
@@ -63,26 +59,31 @@ export function getNodeByItem(item: HTMLLIElement): Node {
   const input = item.firstChild as HTMLDivElement
   const content = input.textContent!
 
-  const parent_id = item.getAttribute("data-parent")!
-  const prev_id = item.getAttribute("data-prev")!
+  const parent_id = item.getAttribute("data-parent") || undefined
+  const prev_id = item.getAttribute("data-prev") || undefined
 
   return { uuid, content, parent_id, prev_id }
 }
 
 export function focusItem(item: HTMLLIElement, toEnd: boolean = true) {
-  const uuid = item.id.split("outline-node-")[1]
   const input = item.firstChild as HTMLDivElement
   input.focus()
 
   if (toEnd) {
     const range = document.createRange()
-    range.selectNodeContents(input)
-    range.collapse(false)
+    range.setStart(input, 1)
+    range.collapse(true)
 
     const selection = window.getSelection()
     selection?.removeAllRanges()
     selection?.addRange(range)
   }
-
-  this.pushEvent("set_focus", uuid)
 }
+
+// export function indentNode(node: Node) {
+//   // const node = event.target.parentNode
+//   // const parentNode = event.target.parentNode.previousSibling
+// }
+
+// export function outdentNode(node: Node) {
+// }

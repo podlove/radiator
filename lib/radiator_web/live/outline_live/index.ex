@@ -16,6 +16,7 @@ defmodule RadiatorWeb.OutlineLive.Index do
     socket
     |> assign(:page_title, "Outline")
     |> assign(:bookmarklet, get_bookmarklet(Endpoint.url() <> "/api/v1/outline", socket))
+    |> assign(:episode_id, get_episode_id())
     |> push_event("list", %{nodes: Outline.list_nodes()})
     |> reply(:ok)
   end
@@ -31,16 +32,24 @@ defmodule RadiatorWeb.OutlineLive.Index do
     |> reply(:noreply)
   end
 
-  def handle_event("create_node", params, socket) do
+  def handle_event("create_node", %{"temp_id" => temp_id} = params, socket) do
     user = socket.assigns.current_user
-    Outline.create_node(params, user)
+    attrs = Map.put(params, "episode_id", socket.assigns.episode_id)
+
+    socket =
+      case Outline.create_node(attrs, user) do
+        {:ok, node} -> socket |> push_event("update", Map.put(node, :temp_id, temp_id))
+        _ -> socket
+      end
 
     socket
     |> reply(:noreply)
   end
 
-  def handle_event("update_node", params, socket) do
-    Outline.upsert_node(params)
+  def handle_event("update_node", %{"uuid" => uuid} = params, socket) do
+    uuid
+    |> Outline.get_node!()
+    |> Outline.update_node(params)
 
     socket
     |> reply(:noreply)
@@ -55,22 +64,32 @@ defmodule RadiatorWeb.OutlineLive.Index do
   end
 
   @impl true
-  def handle_info({:insert, node}, socket) do
+  def handle_info({:insert, _node}, socket) do
     socket
-    |> push_event("insert", %{nodes: [node]})
+    # |> push_event("insert", node)
     |> reply(:noreply)
   end
 
   def handle_info({:update, _node}, socket) do
     socket
-    # |> push_event("update", %{nodes: [node]})
+    # |> push_event("update", node)
     |> reply(:noreply)
   end
 
-  def handle_info({:delete, node}, socket) do
+  def handle_info({:delete, _node}, socket) do
     socket
-    |> push_event("delete", %{nodes: [node]})
+    # |> push_event("delete", node)
     |> reply(:noreply)
+  end
+
+  defp get_episode_id() do
+    Radiator.Podcast.list_episodes()
+    |> Enum.sort_by(& &1.id)
+    |> List.last()
+    |> case do
+      nil -> nil
+      %{id: id} -> id
+    end
   end
 
   defp get_bookmarklet(api_uri, socket) do

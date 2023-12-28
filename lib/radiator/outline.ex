@@ -70,25 +70,6 @@ defmodule Radiator.Outline do
   end
 
   @doc """
-  Upsert a node.
-
-  ## Examples
-
-      iex> upsert_node(%{field: new_value})
-      {:ok, %Node{}}
-
-      iex> upsert_node(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def upsert_node(attrs) do
-    %Node{}
-    |> Node.changeset(attrs)
-    |> Repo.insert_or_update()
-    |> broadcast_node_action(:update)
-  end
-
-  @doc """
   Updates a node.
 
   ## Examples
