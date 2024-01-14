@@ -10,12 +10,6 @@ alias Radiator.{Accounts, Outline, Podcast}
 {:ok, _user_jim} =
   Accounts.register_user(%{email: "jim@radiator.de", password: "supersupersecret"})
 
-{:ok, _node} =
-  Outline.create_node(%{content: "This is my first node"})
-
-{:ok, _node} =
-  Outline.create_node(%{content: "Second node"})
-
 {:ok, network} =
   Podcast.create_network(%{title: "Podcast network"})
 
@@ -28,5 +22,11 @@ alias Radiator.{Accounts, Outline, Podcast}
 {:ok, _episode} =
   Podcast.create_episode(%{title: "past episode", show_id: show.id})
 
-{:ok, _episode} =
+{:ok, current_episode} =
   Podcast.create_episode(%{title: "current episode", show_id: show.id})
+
+{:ok, _node} =
+  Outline.create_node(%{content: "This is my first node", episode_id: current_episode.id})
+
+{:ok, _node} =
+  Outline.create_node(%{content: "Second node", episode_id: current_episode.id})

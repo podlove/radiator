@@ -5,6 +5,7 @@ defmodule Radiator.Outline.Node do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  alias Radiator.Podcast.Episode
 
   @derive {Jason.Encoder, only: [:uuid, :content, :creator_id, :parent_id, :prev_id]}
 
@@ -15,11 +16,14 @@ defmodule Radiator.Outline.Node do
     field :parent_id, Ecto.UUID
     field :prev_id, Ecto.UUID
 
+    belongs_to :episode, Episode
+
     timestamps(type: :utc_datetime)
   end
 
   @required_fields [
-    :content
+    :content,
+    :episode_id
   ]
 
   @optional_fields [

@@ -227,6 +227,27 @@ defmodule Radiator.Podcast do
   def get_episode!(id), do: Repo.get!(Episode, id)
 
   @doc """
+    Finds the newest (TODO: not published ) episode for a show.
+    Returns %Episode{} or `nil` and expects an id of the show.
+
+    ## Examples
+
+        iex> get_current_episode_for_show(123)
+        %Episode{}
+
+        iex> get_current_episode_for_show(456)
+        nil
+
+  """
+  def get_current_episode_for_show(nil), do: nil
+
+  def get_current_episode_for_show(show_id) do
+    Repo.one(
+      from e in Episode, where: e.show_id == ^show_id, order_by: [desc: e.number], limit: 1
+    )
+  end
+
+  @doc """
   Creates a episode.
 
   ## Examples
@@ -239,9 +260,31 @@ defmodule Radiator.Podcast do
 
   """
   def create_episode(attrs \\ %{}) do
+    attrs_with_number = set_number(attrs)
+
     %Episode{}
-    |> Episode.changeset(attrs)
+    |> Episode.changeset(attrs_with_number)
     |> Repo.insert()
+  end
+
+  defp set_number(%{number: _number} = attrs), do: attrs
+
+  defp set_number(%{show_id: show_id} = episode_attrs) do
+    number = get_highest_number(show_id) + 1
+    Map.put(episode_attrs, :number, number)
+  end
+
+  defp set_number(%{} = episode_attrs) do
+    Map.put(episode_attrs, :number, 0)
+  end
+
+  defp get_highest_number(show_id) do
+    query =
+      from e in Episode,
+        select: max(e.number),
+        where: [show_id: ^show_id]
+
+    Repo.one(query) || 0
   end
 
   @doc """

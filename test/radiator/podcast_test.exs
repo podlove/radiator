@@ -132,6 +132,31 @@ defmodule Radiator.PodcastTest do
       assert episode.show_id == show.id
     end
 
+    test "create_episode/1 sets for first episode number 1" do
+      episode_attrs = %{title: "a new episode", show_id: show_fixture().id}
+
+      {:ok, %Episode{} = episode} = Podcast.create_episode(episode_attrs)
+      assert episode.number > 0
+    end
+
+    test "create_episode/1 finds the next highest number " do
+      show = show_fixture()
+      episode_fixture(show_id: show.id, number: 23)
+      episode_attrs = %{title: "my new episode", show_id: show.id}
+
+      {:ok, %Episode{} = episode} = Podcast.create_episode(episode_attrs)
+      assert episode.number == 24
+    end
+
+    test "create_episode/1 can be set explict" do
+      show = show_fixture()
+      episode_fixture(show_id: show.id, number: 2)
+      episode_attrs = %{title: "my new episode", number: 5, show_id: show.id}
+
+      {:ok, %Episode{} = episode} = Podcast.create_episode(episode_attrs)
+      assert episode.number == 5
+    end
+
     test "create_episode/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Podcast.create_episode(@invalid_attrs)
     end
@@ -161,6 +186,29 @@ defmodule Radiator.PodcastTest do
     test "change_episode/1 returns a episode changeset" do
       episode = episode_fixture()
       assert %Ecto.Changeset{} = Podcast.change_episode(episode)
+    end
+
+    test "get_current_episode_for_show/1 returns nil when no show has been given" do
+      assert nil == Podcast.get_current_episode_for_show(nil)
+    end
+
+    test "get_current_episode_for_show/1 returns nil when no episode for show exists" do
+      show = show_fixture()
+      assert nil == Podcast.get_current_episode_for_show(show.id)
+    end
+
+    test "get_current_episode_for_show/1 returns episdoe for show" do
+      episode = episode_fixture()
+      assert episode == Podcast.get_current_episode_for_show(episode.show_id)
+    end
+
+    test "get_current_episode_for_show/1 returns the episode with the highest number" do
+      show = show_fixture()
+      # create new before old to ensure that the highest number is returned
+      # and not just the newest
+      episode_new = episode_fixture(number: 23, show_id: show.id)
+      _episode_old = episode_fixture(number: 22, show_id: show.id)
+      assert episode_new == Podcast.get_current_episode_for_show(show.id)
     end
   end
 end
