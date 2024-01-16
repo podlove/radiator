@@ -82,7 +82,7 @@ defmodule RadiatorWeb.OutlineLive.Index do
     |> reply(:noreply)
   end
 
-  defp get_episode_id() do
+  defp get_episode_id do
     Radiator.Podcast.list_episodes()
     |> Enum.sort_by(& &1.id)
     |> List.last()
