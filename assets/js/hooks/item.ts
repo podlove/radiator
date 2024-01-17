@@ -22,7 +22,7 @@ export function createItem({ uuid, temp_id, content, parent_id, prev_id }: Node)
   return item
 }
 
-export function updateItem({ uuid, temp_id, content, parent_id, prev_id }: Node) {
+export function updateItem({ uuid, temp_id, content, parent_id, prev_id }: Node, container: HTMLElement) {
   const item = getItemById(temp_id || uuid!)
   if (!item) return
 
@@ -33,12 +33,23 @@ export function updateItem({ uuid, temp_id, content, parent_id, prev_id }: Node)
 
   item.setAttribute("data-parent", parent_id || "")
   item.setAttribute("data-prev", prev_id || "")
+
+  const prevItem = getItemById(prev_id)
+  const parentItem = getItemById(parent_id)
+
+  if (prevItem) {
+    prevItem.after(item)
+  } else if (parentItem) {
+    parentItem.querySelector("ol")?.append(item)
+  } else {
+    container.append(item)
+  }
 }
 
-export function getItemById(uuid: string) {
-  const item = <HTMLLIElement>document.getElementById("outline-node-" + uuid)
+export function getItemById(uuid: string | undefined) {
+  if (!uuid) return null
 
-  return item
+  return document.getElementById("outline-node-" + uuid)
 }
 
 export function getNodeByEvent(event: Event): Node {

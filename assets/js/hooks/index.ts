@@ -65,7 +65,7 @@ export const Hooks = {
             const content = node.content
             node.content = content?.substring(0, splitPos)
 
-            updateItem(node)
+            updateItem(node, container)
 
             const newNode: Node = {
               temp_id: self.crypto.randomUUID(),
@@ -91,7 +91,7 @@ export const Hooks = {
 
             const prevNode = getNodeByItem(prevItem)
             prevNode.content += node.content
-            updateItem(prevNode)
+            updateItem(prevNode, container)
 
             item.parentNode?.removeChild(item)
 
@@ -107,7 +107,7 @@ export const Hooks = {
 
             const nextNode = getNodeByItem(nextItem)
             node.content += nextNode.content
-            updateItem(node)
+            updateItem(node, container)
 
             nextItem.parentNode?.removeChild(nextItem)
 
@@ -115,16 +115,31 @@ export const Hooks = {
             this.pushEvent("delete_node", nextNode.uuid)
             break
 
-          // case "Tab":
-          //   event.preventDefault()
+          case "Tab":
+            event.preventDefault()
 
-          //   if (event.shiftKey) {
-          //     // outdentNode(node)
-          //     // node.prev_id = node.parent_id
-          //   } else {
-          //     // indentNode(node)
-          //   }
-          //   break
+            if (event.shiftKey) {
+              if (node.parent_id) {
+                node.prev_id = node.parent_id
+                node.parent_id = undefined
+
+                updateItem(node, container)
+                focusItem(item)
+
+                this.pushEvent("update_node", node)
+              }
+            } else {
+              if (node.prev_id) {
+                node.parent_id = node.prev_id
+                node.prev_id = undefined
+
+                updateItem(node, container)
+                focusItem(item)
+
+                this.pushEvent("update_node", node)
+              }
+            }
+            break
         }
       })
 
@@ -133,26 +148,18 @@ export const Hooks = {
       // })
 
       this.handleEvent("list", ({ nodes }) => {
+        // add all items
         nodes.forEach(node => {
           const item = createItem(node)
           container.append(item)
         })
 
-        // sort all items
+        // sort & indent all items
         nodes.forEach(node => {
-          const item = getItemById(node.uuid)
-          const prevItem = getItemById(node.prev_id)
-          const parentItem = getItemById(node.parent_id)
-
-          if (prevItem) {
-            prevItem.after(item)
-          } else if (parentItem) {
-            parentItem.querySelector("ol")?.append(item)
-          } else {
-            container.append(item)
-          }
+          updateItem(node, container)
         })
 
+        // focus last item
         const lastItem = container.lastElementChild as HTMLLIElement
         focusItem(lastItem)
       })

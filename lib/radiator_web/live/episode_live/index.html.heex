@@ -1,0 +1,24 @@
+<div class="grid grid-cols-12 gap-24">
+  <aside class="col-span-12 sm:col-span-4">
+    <button class="block w-full my-4 rounded text-white bg-[#df7366] px-8 py-2">
+      Create Episode
+    </button>
+    <ol>
+      <li
+        :for={{episode, i} <- Enum.with_index(@episodes)}
+        class={[episode.id == @selected_episode.id && "bg-[#f0f4f4]"]}
+      >
+        <.link patch={~p"/admin/podcast/#{@show.id}/#{episode.id}"} class="flex gap-4 my-4">
+          <img src={"/images/pic1#{i}.jpg"} alt="" width="100" />
+          <%= episode.number %>
+          <%= episode.title %>
+        </.link>
+      </li>
+    </ol>
+  </aside>
+  <section :if={@selected_episode} class="col-span-12 sm:col-span-8">
+    <h2 class="text-2xl"><%= @selected_episode.number %> <%= @selected_episode.title %></h2>
+    <img class="my-4" src={~p"/images/pic06.jpg"} alt="" />
+    <ol id="outline" class="my-6" phx-hook="outline"></ol>
+  </section>
+</div>

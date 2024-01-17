@@ -44,6 +44,25 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+  Gets a single node.
+
+  Returns `nil` if the Node does not exist.
+
+  ## Examples
+
+      iex> get_node(123)
+      %Node{}
+
+      iex> get_node(456)
+      nil
+
+  """
+  def get_node(id) do
+    Node
+    |> Repo.get(id)
+  end
+
+  @doc """
   Creates a node.
 
   ## Examples

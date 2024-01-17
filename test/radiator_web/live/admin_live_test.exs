@@ -3,6 +3,7 @@ defmodule RadiatorWeb.AdminLiveTest do
 
   import Phoenix.LiveViewTest
   import Radiator.AccountsFixtures
+  import Radiator.PodcastFixtures
 
   describe "Admin page" do
     test "can render if user is logged in", %{conn: conn} do
@@ -22,8 +23,22 @@ defmodule RadiatorWeb.AdminLiveTest do
 
   describe "Admin page contains" do
     setup %{conn: conn} do
+      show = show_fixture()
       user = user_fixture()
-      %{conn: log_in_user(conn, user)}
+
+      %{conn: log_in_user(conn, user), show: show}
+    end
+
+    test "links to each show", %{conn: conn, show: show} do
+      {:ok, live, _html} = live(conn, ~p"/admin")
+
+      {:ok, conn} =
+        live
+        |> element(~s{main a[href="/admin/podcast/#{show.id}"]})
+        |> render_click()
+        |> follow_redirect(conn, ~p"/admin/podcast/#{show.id}")
+
+      assert conn.resp_body =~ show.title
     end
 
     test "link to accounts", %{conn: conn} do
@@ -36,18 +51,6 @@ defmodule RadiatorWeb.AdminLiveTest do
         |> follow_redirect(conn, ~p"/admin/accounts")
 
       assert conn.resp_body =~ "Accounts"
-    end
-
-    test "link to outline", %{conn: conn} do
-      {:ok, live, _html} = live(conn, ~p"/admin")
-
-      {:ok, conn} =
-        live
-        |> element(~s|main a[href="/admin/outline"]|)
-        |> render_click()
-        |> follow_redirect(conn, ~p"/admin/outline")
-
-      assert conn.resp_body =~ "Outline"
     end
   end
 end

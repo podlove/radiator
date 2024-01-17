@@ -1,24 +1,36 @@
-defmodule RadiatorWeb.OutlineLive.Index do
+defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
-  alias Radiator.Accounts
   alias Radiator.Outline
+  alias Radiator.Podcast
   alias RadiatorWeb.Endpoint
 
   @topic "outline"
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(%{"show" => show_id}, _session, socket) do
     if connected?(socket) do
       Endpoint.subscribe(@topic)
     end
 
+    show = Podcast.get_show!(show_id, preload: :episodes)
+
     socket
-    |> assign(:page_title, "Outline")
-    |> assign(:bookmarklet, get_bookmarklet(Endpoint.url() <> "/api/v1/outline", socket))
-    |> assign(:episode_id, get_episode_id())
-    |> push_event("list", %{nodes: Outline.list_nodes()})
+    |> assign(:page_title, show.title)
+    # |> assign(:page_description, "")
+    |> assign(:show, show)
+    |> assign(:episodes, show.episodes)
     |> reply(:ok)
+  end
+
+  @impl true
+  def handle_params(params, _uri, socket) do
+    episode = get_selected_episode(params)
+
+    socket
+    |> assign(:selected_episode, episode)
+    |> push_event("list", %{nodes: Outline.list_nodes()})
+    |> reply(:noreply)
   end
 
   @impl true
@@ -34,7 +46,8 @@ defmodule RadiatorWeb.OutlineLive.Index do
 
   def handle_event("create_node", %{"temp_id" => temp_id} = params, socket) do
     user = socket.assigns.current_user
-    attrs = Map.put(params, "episode_id", socket.assigns.episode_id)
+    episode_id = socket.assigns.selected_episode.id
+    attrs = Map.put(params, "episode_id", episode_id)
 
     socket =
       case Outline.create_node(attrs, user) do
@@ -47,17 +60,21 @@ defmodule RadiatorWeb.OutlineLive.Index do
   end
 
   def handle_event("update_node", %{"uuid" => uuid} = params, socket) do
-    uuid
-    |> Outline.get_node!()
-    |> Outline.update_node(params)
+    attrs = Map.merge(%{"parent_id" => nil, "prev_id" => nil}, params)
+
+    case Outline.get_node(uuid) do
+      nil -> nil
+      node -> Outline.update_node(node, attrs)
+    end
 
     socket
     |> reply(:noreply)
   end
 
   def handle_event("delete_node", node_id, socket) do
-    node = Outline.get_node!(node_id)
-    Outline.delete_node(node)
+    node_id
+    |> Outline.get_node!()
+    |> Outline.delete_node()
 
     socket
     |> reply(:noreply)
@@ -82,32 +99,11 @@ defmodule RadiatorWeb.OutlineLive.Index do
     |> reply(:noreply)
   end
 
-  defp get_episode_id do
-    Radiator.Podcast.list_episodes()
-    |> Enum.sort_by(& &1.id)
-    |> List.last()
-    |> case do
-      nil -> nil
-      %{id: id} -> id
-    end
+  defp get_selected_episode(%{"episode" => episode_id}) do
+    Podcast.get_episode!(episode_id)
   end
 
-  defp get_bookmarklet(api_uri, socket) do
-    token =
-      socket.assigns.current_user
-      |> Accounts.generate_user_api_token()
-      |> Base.url_encode64(padding: false)
-
-    """
-    javascript:(function(){
-      s=window.getSelection().toString();
-      c=s!=""?s:window.location.href;
-      xhr=new XMLHttpRequest();
-      xhr.open('POST','#{api_uri}',true);
-      xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
-      xhr.send('content='+encodeURIComponent(c)+'&token=#{token}');
-    })()
-    """
-    |> String.replace(["\n", "  "], "")
+  defp get_selected_episode(%{"show" => show_id}) do
+    Podcast.get_current_episode_for_show(show_id)
   end
 end
