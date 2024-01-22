@@ -14,6 +14,13 @@ defmodule Radiator.PodcastTest do
       assert Podcast.list_networks() == [network]
     end
 
+    test "list_networks/1 returns all networks with preloaded shows" do
+      show = show_fixture()
+
+      assert [%Network{shows: shows}] = Podcast.list_networks(preload: :shows)
+      assert shows == [show]
+    end
+
     test "get_network!/1 returns the network with given id" do
       network = network_fixture()
       assert Podcast.get_network!(network.id) == network
@@ -57,7 +64,7 @@ defmodule Radiator.PodcastTest do
   end
 
   describe "shows" do
-    @invalid_attrs %{title: nil, hostname: nil}
+    @invalid_attrs %{title: nil}
 
     test "list_shows/0 returns all shows" do
       show = show_fixture()
@@ -67,6 +74,14 @@ defmodule Radiator.PodcastTest do
     test "get_show!/1 returns the show with given id" do
       show = show_fixture()
       assert Podcast.get_show!(show.id) == show
+    end
+
+    test "get_show!/2 returns the show with preloaded episodes" do
+      show = show_fixture()
+      episode = episode_fixture(%{show_id: show.id})
+
+      assert %Show{episodes: episodes} = Podcast.get_show!(show.id, preload: :episodes)
+      assert episodes == [episode]
     end
 
     test "create_show/1 with valid data creates a show" do

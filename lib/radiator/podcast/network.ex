@@ -12,6 +12,7 @@ defmodule Radiator.Podcast.Network do
     field :title, :string
 
     has_many(:shows, Show)
+
     timestamps(type: :utc_datetime)
   end
 

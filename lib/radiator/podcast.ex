@@ -23,6 +23,22 @@ defmodule Radiator.Podcast do
   end
 
   @doc """
+  Returns the list of networks with preloaded associations.
+
+  ## Examples
+
+      iex> list_networks(preload: :shows)
+      [%Network{}, ...]
+
+  """
+
+  def list_networks(preload: preload) do
+    Network
+    |> Repo.all()
+    |> Repo.preload(preload)
+  end
+
+  @doc """
   Gets a single network.
 
   Raises `Ecto.NoResultsError` if the Network does not exist.
@@ -131,6 +147,27 @@ defmodule Radiator.Podcast do
 
   """
   def get_show!(id), do: Repo.get!(Show, id)
+
+  @doc """
+  Gets a single show with preloaded associations.
+
+  Raises `Ecto.NoResultsError` if the Show does not exist.
+
+  ## Examples
+
+      iex> get_show!(123, preload: :episodes)
+      %Show{}
+
+      iex> get_show!(456, preload: :episodes)
+      ** (Ecto.NoResultsError)
+
+  """
+
+  def get_show!(id, preload: preload) do
+    Show
+    |> Repo.get!(id)
+    |> Repo.preload(preload)
+  end
 
   @doc """
   Creates a show.

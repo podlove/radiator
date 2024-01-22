@@ -23,14 +23,13 @@ defmodule Radiator.PodcastFixtures do
   Generate a show.
   """
   def show_fixture(attrs \\ %{}) do
-    network = network_fixture()
+    network = get_network(attrs)
 
     {:ok, show} =
       attrs
       |> Enum.into(%{
-        hostname: "some hostname",
         title: "some title",
-        network: network
+        network_id: network.id
       })
       |> Podcast.create_show()
 
@@ -41,7 +40,7 @@ defmodule Radiator.PodcastFixtures do
   Generate a episode.
   """
   def episode_fixture(attrs \\ %{}) do
-    show = show_fixture()
+    show = get_show(attrs)
 
     {:ok, episode} =
       attrs
@@ -53,4 +52,10 @@ defmodule Radiator.PodcastFixtures do
 
     episode
   end
+
+  defp get_network(%{network_id: id}), do: Podcast.get_network!(id)
+  defp get_network(_), do: network_fixture()
+
+  defp get_show(%{show_id: id}), do: Podcast.get_show!(id)
+  defp get_show(_), do: show_fixture()
 end

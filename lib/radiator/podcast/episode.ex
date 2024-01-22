@@ -11,7 +11,9 @@ defmodule Radiator.Podcast.Episode do
   schema "episodes" do
     field :title, :string
     field :number, :integer
+
     belongs_to :show, Show
+
     timestamps(type: :utc_datetime)
   end
 

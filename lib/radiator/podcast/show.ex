@@ -9,8 +9,11 @@ defmodule Radiator.Podcast.Show do
 
   schema "shows" do
     field :title, :string
+
     belongs_to :network, Network
+
     has_many(:episodes, Episode)
+
     timestamps(type: :utc_datetime)
   end
 
