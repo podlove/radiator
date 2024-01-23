@@ -72,9 +72,10 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   def handle_event("delete_node", node_id, socket) do
-    node_id
-    |> Outline.get_node!()
-    |> Outline.delete_node()
+    case Outline.get_node(node_id) do
+      nil -> nil
+      node -> Outline.delete_node(node)
+    end
 
     socket
     |> reply(:noreply)

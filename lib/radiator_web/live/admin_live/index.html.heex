@@ -1,7 +1,13 @@
 <div>
   <section class="my-12">
     <div :for={network <- @networks}>
-      <h2 class="my-4 text-2xl"><%= network.title %></h2>
+      <h2 class="my-4 text-2xl">
+        <%= network.title %>
+        <button phx-click="delete" phx-value-id={network.id} data-confirm="Are you sure?">
+          <.icon name="hero-x-circle" class="w-6 h-6" />
+        </button>
+      </h2>
+
       <div class="grid grid-cols-3 gap-6 sm:grid-cols-6">
         <.link
           :for={{show, i} <- Enum.with_index(network.shows)}
@@ -13,7 +19,26 @@
         </.link>
       </div>
     </div>
-    <button class="my-4 rounded text-white bg-[#df7366] px-8 py-2">Create Network</button>
+    <button
+      :if={@action != :new}
+      class="my-4 rounded text-white bg-[#df7366] px-8 py-2"
+      phx-click="new"
+    >
+      Create Network
+    </button>
+
+    <.simple_form
+      :if={@action == :new}
+      for={@form}
+      id="network-form"
+      phx-change="validate"
+      phx-submit="save"
+    >
+      <.input field={@form[:title]} type="text" label="Title" />
+      <:actions>
+        <.button phx-disable-with="Saving...">Save Network</.button>
+      </:actions>
+    </.simple_form>
   </section>
 
   <section class="my-12">
