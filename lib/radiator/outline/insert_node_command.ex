@@ -1,4 +1,4 @@
-defmodule InsertNodeCommand do
+defmodule Radiator.Outline.InsertNodeCommand do
   @enforce_keys [:parent_id, :owner_id, :episode_id]
 
   defstruct [
@@ -27,3 +27,5 @@ defmodule InsertNodeCommand do
     # TODO: Implement the logic for the command here
   end
 end
+
+InsertNodeCommand

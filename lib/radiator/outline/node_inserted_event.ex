@@ -1,4 +1,4 @@
-defmodule NodeInsertedEvent do
+defmodule Radiator.Outline.NodeInsertedEvent do
   alias Radiator.Outline.Node
 
   # typespec .. wont need without dialyzer
