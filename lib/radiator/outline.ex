@@ -92,26 +92,33 @@ defmodule Radiator.Outline do
   """
   def create_node(attrs \\ %{}) do
     %Node{}
-    |> Node.changeset(attrs)
+    |> Node.insert_changeset(attrs)
+    |> Repo.insert()
+    |> broadcast_node_action(:insert)
+  end
+
+  def create_node(attrs, %{id: id}) do
+    %Node{creator_id: id}
+    |> Node.insert_changeset(attrs)
     |> Repo.insert()
     |> broadcast_node_action(:insert)
   end
 
   @doc """
-  Updates a node.
+  Updates a nodes content.
 
   ## Examples
 
-      iex> update_node(node, %{field: new_value})
+      iex> update_node_content(node, %{content: new_value})
       {:ok, %Node{}}
 
-      iex> update_node(node, %{field: bad_value})
+      iex> update_node_content(node, %{content: nil})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_node(%Node{} = node, attrs) do
+  def update_node_content(%Node{} = node, attrs) do
     node
-    |> Node.changeset(attrs)
+    |> Node.update_content_changeset(attrs)
     |> Repo.update()
     |> broadcast_node_action(:update)
   end
@@ -132,19 +139,6 @@ defmodule Radiator.Outline do
     node
     |> Repo.delete()
     |> broadcast_node_action(:delete)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking node changes.
-
-  ## Examples
-
-      iex> change_node(node)
-      %Ecto.Changeset{data: %Node{}}
-
-  """
-  def change_node(%Node{} = node, attrs \\ %{}) do
-    Node.changeset(node, attrs)
   end
 
   defp broadcast_node_action({:ok, node}, action) do

@@ -51,17 +51,17 @@ defmodule Radiator.OutlineTest do
       assert {:error, %Ecto.Changeset{}} = Outline.create_node(@invalid_attrs)
     end
 
-    test "update_node/2 with valid data updates the node" do
+    test "update_node_content/2 with valid data updates the node" do
       node = node_fixture()
       update_attrs = %{content: "some updated content"}
 
-      assert {:ok, %Node{} = node} = Outline.update_node(node, update_attrs)
+      assert {:ok, %Node{} = node} = Outline.update_node_content(node, update_attrs)
       assert node.content == "some updated content"
     end
 
-    test "update_node/2 with invalid data returns error changeset" do
+    test "update_node_content/2 with invalid data returns error changeset" do
       node = node_fixture()
-      assert {:error, %Ecto.Changeset{}} = Outline.update_node(node, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Outline.update_node_content(node, @invalid_attrs)
       assert node == Outline.get_node!(node.uuid)
     end
 
@@ -69,11 +69,6 @@ defmodule Radiator.OutlineTest do
       node = node_fixture()
       assert {:ok, %Node{}} = Outline.delete_node(node)
       assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(node.uuid) end
-    end
-
-    test "change_node/1 returns a node changeset" do
-      node = node_fixture()
-      assert %Ecto.Changeset{} = Outline.change_node(node)
     end
   end
 end
