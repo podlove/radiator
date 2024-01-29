@@ -64,7 +64,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     case Outline.get_node(uuid) do
       nil -> nil
-      node -> Outline.update_node(node, attrs)
+      node -> Outline.update_node_content(node, attrs)
     end
 
     socket
