@@ -10,12 +10,12 @@ defmodule Radiator.Outline.Node do
   @derive {Jason.Encoder, only: [:uuid, :content, :creator_id, :parent_id, :prev_id]}
 
   @primary_key {:uuid, :binary_id, autogenerate: true}
-
   schema "outline_nodes" do
     field :content, :string
     field :creator_id, :integer
     field :parent_id, Ecto.UUID
     field :prev_id, Ecto.UUID
+    field :level, :integer, virtual: true
 
     belongs_to :episode, Episode
 
@@ -35,15 +35,6 @@ defmodule Radiator.Outline.Node do
     |> cast(attributes, [:content, :episode_id, :creator_id, :parent_id, :prev_id])
     |> update_change(:content, &trim/1)
     |> validate_required([:content, :episode_id])
-  end
-
-  @doc """
-  Changeset for moving a node
-  Only the parent_id is allowed and expected to be changed
-  """
-  def move_changeset(node, attrs) do
-    node
-    |> cast(attrs, [:parent_id])
   end
 
   @doc """
