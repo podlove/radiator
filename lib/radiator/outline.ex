@@ -108,6 +108,25 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+  Moves a nodes to another parent.
+
+  ## Examples
+
+      iex> move_node(node, %Node{uuid: new_parent_id})
+      {:ok, %Node{}}
+
+      iex> move_node(node, nil)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def move_node(%Node{} = node, %Node{} = parent_node) do
+    node
+    |> Node.move_changeset(parent_node)
+    |> Repo.update()
+    |> broadcast_node_action(:update)
+  end
+
+  @doc """
   Deletes a node.
 
   ## Examples

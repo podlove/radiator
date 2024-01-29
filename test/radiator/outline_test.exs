@@ -3,25 +3,29 @@ defmodule Radiator.OutlineTest do
 
   alias Radiator.Outline
 
-  describe "outline_nodes" do
-    alias Radiator.Outline.Node
+  alias Radiator.Outline.Node
 
-    import Radiator.OutlineFixtures
-    alias Radiator.PodcastFixtures
+  import Radiator.OutlineFixtures
+  alias Radiator.PodcastFixtures
 
-    @invalid_attrs %{content: nil}
+  @invalid_attrs %{content: nil}
 
-    test "list_nodes/0 returns all nodes" do
+  describe "list_nodes/0" do
+    test "returns all nodes" do
       node = node_fixture()
       assert Outline.list_nodes() == [node]
     end
+  end
 
-    test "get_node!/1 returns the node with given id" do
+  describe "get_node!/1" do
+    test "returns the node with given id" do
       node = node_fixture()
       assert Outline.get_node!(node.uuid) == node
     end
+  end
 
-    test "create_node/1 with valid data creates a node" do
+  describe "create_node/1" do
+    test "with valid data creates a node" do
       episode = PodcastFixtures.episode_fixture()
       valid_attrs = %{content: "some content", episode_id: episode.id}
 
@@ -29,7 +33,7 @@ defmodule Radiator.OutlineTest do
       assert node.content == "some content"
     end
 
-    test "create_node/1 trims whitespace from content" do
+    test "trims whitespace from content" do
       episode = PodcastFixtures.episode_fixture()
       valid_attrs = %{content: "  some content  ", episode_id: episode.id}
 
@@ -37,7 +41,7 @@ defmodule Radiator.OutlineTest do
       assert node.content == "some content"
     end
 
-    test "create_node/1 can have a creator" do
+    test "can have a creator" do
       episode = PodcastFixtures.episode_fixture()
       user = %{id: 2}
       valid_attrs = %{content: "some content", episode_id: episode.id}
@@ -47,11 +51,13 @@ defmodule Radiator.OutlineTest do
       assert node.creator_id == user.id
     end
 
-    test "create_node/1 with invalid data returns error changeset" do
+    test "with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Outline.create_node(@invalid_attrs)
     end
+  end
 
-    test "update_node_content/2 with valid data updates the node" do
+  describe "update_node_content/2" do
+    test "with valid data updates the node" do
       node = node_fixture()
       update_attrs = %{content: "some updated content"}
 
@@ -59,13 +65,34 @@ defmodule Radiator.OutlineTest do
       assert node.content == "some updated content"
     end
 
-    test "update_node_content/2 with invalid data returns error changeset" do
+    test "with invalid data returns error changeset" do
       node = node_fixture()
       assert {:error, %Ecto.Changeset{}} = Outline.update_node_content(node, @invalid_attrs)
       assert node == Outline.get_node!(node.uuid)
     end
+  end
 
-    test "delete_node/1 deletes the node" do
+  describe "move_node/2" do
+    test "moves node to another parent" do
+      node = node_fixture()
+      new_parent = node_fixture(episode_id: node.episode_id)
+
+      assert {:ok, %Node{} = node} = Outline.move_node(node, new_parent)
+      assert node.parent_id == new_parent.uuid
+    end
+
+    test "update_node_content/2 with parent from another episode returns error changeset" do
+      node = node_fixture()
+      new_bad_parent = node_fixture()
+      assert node.episode_id != new_bad_parent.episode_id
+
+      assert {:error, %Ecto.Changeset{}} = Outline.move_node(node, new_bad_parent)
+      assert node == Outline.get_node!(node.uuid)
+    end
+  end
+
+  describe "delete_node/1" do
+    test "deletes the node" do
       node = node_fixture()
       assert {:ok, %Node{}} = Outline.delete_node(node)
       assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(node.uuid) end

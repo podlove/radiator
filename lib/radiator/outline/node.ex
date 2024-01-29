@@ -41,9 +41,10 @@ defmodule Radiator.Outline.Node do
   Changeset for moving a node
   Only the parent_id is allowed and expected to be changed
   """
-  def move_changeset(node, attrs) do
+  def move_changeset(node, new_parent_node) do
     node
-    |> cast(attrs, [:parent_id])
+    |> cast(%{parent_id: new_parent_node.uuid}, [:parent_id])
+    |> validate_parent(new_parent_node)
   end
 
   @doc """
@@ -58,4 +59,22 @@ defmodule Radiator.Outline.Node do
 
   defp trim(content) when is_binary(content), do: String.trim(content)
   defp trim(content), do: content
+
+  defp validate_parent(changeset, nil), do: add_error(changeset, :parent_id, "must not be nil")
+
+  defp validate_parent(changeset, parent_node) do
+    cond do
+      parent_node.uuid == changeset.data.uuid ->
+        add_error(changeset, :parent_id, "must not be the same as the node itself")
+
+      parent_node.parent_id == changeset.data.uuid ->
+        add_error(changeset, :parent_id, "node is already parent of the parent node")
+
+      parent_node.episode_id != changeset.data.episode_id ->
+        add_error(changeset, :parent_id, "nodes must be in the same episode")
+
+      true ->
+        changeset
+    end
+  end
 end
