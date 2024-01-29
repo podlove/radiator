@@ -15,12 +15,6 @@ defmodule Radiator.Outline do
     |> Notify.broadcast_node_action(:insert, socket_id)
   end
 
-  def update(%Node{} = node, attrs, socket_id \\ nil) do
-    node
-    |> update_node(attrs)
-    |> Notify.broadcast_node_action(:update, socket_id)
-  end
-
   def delete(%Node{} = node, socket_id \\ nil) do
     node
     |> delete_node()
@@ -107,28 +101,36 @@ defmodule Radiator.Outline do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_node(attrs \\ %{}) do
+  def create_node(attrs \\ %{}, socket_id \\ nil) do
     %Node{}
-    |> Node.changeset(attrs)
+    |> Node.insert_changeset(attrs)
+    |> Repo.insert()
+    |> Notify.broadcast_node_action(:insert, socket_id)
+  end
+
+  def create_node(attrs, %{id: id}) do
+    %Node{creator_id: id}
+    |> Node.insert_changeset(attrs)
     |> Repo.insert()
   end
 
   @doc """
-  Updates a node.
+  Updates a nodes content.
 
   ## Examples
 
-      iex> update_node(node, %{field: new_value})
+      iex> update_node_content(node, %{content: new_value})
       {:ok, %Node{}}
 
-      iex> update_node(node, %{field: bad_value})
+      iex> update_node_content(node, %{content: nil})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_node(%Node{} = node, attrs) do
+  def update_node_content(%Node{} = node, attrs, socket_id \\ nil) do
     node
-    |> Node.changeset(attrs)
+    |> Node.update_content_changeset(attrs)
     |> Repo.update()
+    |> Notify.broadcast_node_action(:update, socket_id)
   end
 
   @doc """
@@ -146,18 +148,5 @@ defmodule Radiator.Outline do
   def delete_node(%Node{} = node) do
     node
     |> Repo.delete()
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking node changes.
-
-  ## Examples
-
-      iex> change_node(node)
-      %Ecto.Changeset{data: %Node{}}
-
-  """
-  def change_node(%Node{} = node, attrs \\ %{}) do
-    Node.changeset(node, attrs)
   end
 end
