@@ -88,6 +88,47 @@ defmodule Radiator.Outline do
     |> broadcast_node_action(:insert)
   end
 
+
+  ##
+  def create_node(attrs, %{id: id}) do
+
+    |> Node.changeset(attrs)
+    |> Repo.insert()
+    |> broadcast_node_action(:insert)
+  end
+
+  def
+
+  def open_account(account_params) do
+      changeset = account_opening_changeset(account_params)
+
+      if changeset.valid? do
+        account_uuid = UUID.uuid4()
+
+        dispatch_result =
+          %OpenAccount{
+            initial_balance: changeset.changes.initial_balance,
+            account_uuid: account_uuid
+          }
+          |> Router.dispatch()
+
+        case dispatch_result do
+          :ok ->
+            {
+              :ok,
+              %Account{
+                uuid: account_uuid,
+                current_balance: changeset.changes.initial_balance
+              }
+            }
+
+          reply ->
+            reply
+        end
+      else
+        {:validation_error, changeset}
+      end
+    end
   @doc """
   Updates a nodes content.
 
