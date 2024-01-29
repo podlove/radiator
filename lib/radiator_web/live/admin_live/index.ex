@@ -17,14 +17,31 @@ defmodule RadiatorWeb.AdminLive.Index do
   end
 
   @impl true
-  def handle_event("new", _params, socket) do
+  def handle_event("new_network", _params, socket) do
     network = %Podcast.Network{}
     changeset = Podcast.change_network(network)
 
     socket
-    |> assign(:action, :new)
+    |> assign(:action, :new_network)
     |> assign(:network, network)
     |> assign(:form, to_form(changeset))
+    |> reply(:noreply)
+  end
+
+  def handle_event("new_show", params, socket) do
+    show = %Podcast.Show{}
+    changeset = Podcast.change_show(show, params)
+
+    socket
+    |> assign(:action, :new_show)
+    |> assign(:show, show)
+    |> assign(:form, to_form(changeset))
+    |> reply(:noreply)
+  end
+
+  def handle_event("cancel", _params, socket) do
+    socket
+    |> assign(:action, nil)
     |> reply(:noreply)
   end
 
@@ -39,16 +56,47 @@ defmodule RadiatorWeb.AdminLive.Index do
     |> reply(:noreply)
   end
 
+  def handle_event("validate", %{"show" => params}, socket) do
+    changeset =
+      socket.assigns.show
+      |> Podcast.change_show(params)
+      |> Map.put(:action, :validate)
+
+    socket
+    |> assign(:form, to_form(changeset))
+    |> reply(:noreply)
+  end
+
   def handle_event("save", %{"network" => params}, socket) do
     case Podcast.create_network(params) do
       {:ok, _network} ->
         socket
+        |> assign(:action, nil)
+        |> assign(:networks, Podcast.list_networks(preload: :shows))
         |> put_flash(:info, "Network created successfully")
         |> reply(:noreply)
 
       {:error, %Ecto.Changeset{} = changeset} ->
         socket
         |> assign(:form, to_form(changeset))
+        |> put_flash(:info, "Network could not be created")
+        |> reply(:noreply)
+    end
+  end
+
+  def handle_event("save", %{"show" => params}, socket) do
+    case Podcast.create_show(params) do
+      {:ok, _show} ->
+        socket
+        |> assign(:action, nil)
+        |> assign(:networks, Podcast.list_networks(preload: :shows))
+        |> put_flash(:info, "Show created successfully")
+        |> reply(:noreply)
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        socket
+        |> assign(:form, to_form(changeset))
+        |> put_flash(:info, "Show could not be created")
         |> reply(:noreply)
     end
   end
@@ -58,6 +106,7 @@ defmodule RadiatorWeb.AdminLive.Index do
     {:ok, _} = Podcast.delete_network(network)
 
     socket
+    |> assign(:networks, Podcast.list_networks(preload: :shows))
     # |> stream_delete(:networks, network)}
     |> reply(:noreply)
   end
