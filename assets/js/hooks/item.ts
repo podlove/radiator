@@ -3,7 +3,8 @@ import { Node } from "./node"
 export function createItem({ uuid, temp_id, content, parent_id, prev_id }: Node) {
   const input = document.createElement("div")
   input.textContent = content
-  input.contentEditable = "plaintext-only"
+  // input.contentEditable = "plaintext-only"
+  input.contentEditable = "true"
 
   const ol = document.createElement("ol")
   ol.className = "list-disc"
