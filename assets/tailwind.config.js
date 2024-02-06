@@ -7,7 +7,7 @@ const path = require("path")
 
 module.exports = {
   content: [
-    "./js/**/*.js",
+    "./js/**/*.*s",
     "../lib/radiator_web.ex",
     "../lib/radiator_web/**/*.*ex"
   ],
