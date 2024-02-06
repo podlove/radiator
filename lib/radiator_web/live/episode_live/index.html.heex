@@ -19,6 +19,6 @@
   <section :if={@selected_episode} class="col-span-12 sm:col-span-8">
     <h2 class="text-2xl"><%= @selected_episode.number %> <%= @selected_episode.title %></h2>
     <img class="my-4" src={~p"/images/pic06.jpg"} alt="" />
-    <ol id="outline" class="my-6" phx-hook="outline"></ol>
+    <ol id="outline" class="my-6 list-disc" phx-hook="outline"></ol>
   </section>
 </div>

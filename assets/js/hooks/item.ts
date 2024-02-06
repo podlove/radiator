@@ -6,12 +6,13 @@ export function createItem({ uuid, temp_id, content, parent_id, prev_id }: Node)
   input.contentEditable = "plaintext-only"
 
   const ol = document.createElement("ol")
+  ol.className = "list-disc"
 
   const item = document.createElement("li")
   temp_id && (item.id = "outline-node-" + temp_id)
   uuid && (item.id = "outline-node-" + uuid)
 
-  item.className = "my-2 ml-2"
+  item.className = "my-1 ml-4"
 
   item.setAttribute("data-parent", parent_id || "")
   item.setAttribute("data-prev", prev_id || "")
