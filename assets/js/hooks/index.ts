@@ -148,6 +148,13 @@ export const Hooks = {
       // })
 
       this.handleEvent("list", ({ nodes }) => {
+        if ((nodes.length) == 0) {
+          nodes = [{
+            temp_id: self.crypto.randomUUID(),
+            content: "",
+          }]
+        }
+
         // add all items
         nodes.forEach(node => {
           const item = createItem(node)
