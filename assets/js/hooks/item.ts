@@ -1,4 +1,4 @@
-import { Node } from "./node"
+import { Node } from "./types"
 
 export function createItem({ uuid, temp_id, content, parent_id, prev_id }: Node) {
   const input = document.createElement("div")

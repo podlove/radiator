@@ -1,5 +1,5 @@
-import { Node } from "./node"
 import { createItem, updateItem, focusItem, getItemByEvent, getItemById, getNodeByItem, getNodeByEvent } from "./item"
+import { Node } from "./types"
 
 export const Hooks = {
   outline: {
