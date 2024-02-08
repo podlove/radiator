@@ -22,11 +22,11 @@ defmodule Radiator.Outline.Node do
   end
 
   @required_fields [
-    :content,
     :episode_id
   ]
 
   @optional_fields [
+    :content,
     :creator_id,
     :parent_id,
     :prev_id

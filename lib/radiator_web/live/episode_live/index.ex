@@ -5,7 +5,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   alias Radiator.Podcast
   alias RadiatorWeb.Endpoint
 
-  @topic "outline"
+  @topic "outline-node"
 
   @impl true
   def mount(%{"show" => show_id}, _session, socket) do
@@ -26,10 +26,11 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   @impl true
   def handle_params(params, _uri, socket) do
     episode = get_selected_episode(params)
+    nodes = get_nodes(episode)
 
     socket
     |> assign(:selected_episode, episode)
-    |> push_event("list", %{nodes: Outline.list_nodes()})
+    |> push_event("list", %{nodes: nodes})
     |> reply(:noreply)
   end
 
@@ -46,17 +47,13 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   def handle_event("create_node", %{"temp_id" => temp_id} = params, socket) do
     user = socket.assigns.current_user
-    episode_id = socket.assigns.selected_episode.id
-    attrs = Map.put(params, "episode_id", episode_id)
+    episode = socket.assigns.selected_episode
+    attrs = Map.merge(params, %{"creator_id" => user.id, "episode_id" => episode.id})
 
-    socket =
-      case Outline.create_node(attrs, user) do
-        {:ok, node} -> socket |> push_event("update", Map.put(node, :temp_id, temp_id))
-        _ -> socket
-      end
-
-    socket
-    |> reply(:noreply)
+    case Outline.create_node(attrs) do
+      {:ok, node} -> socket |> reply(:reply, Map.put(node, :temp_id, temp_id))
+      _ -> socket |> reply(:noreply)
+    end
   end
 
   def handle_event("update_node", %{"uuid" => uuid} = params, socket) do
@@ -82,21 +79,21 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   @impl true
-  def handle_info({:insert, _node}, socket) do
+  def handle_info({:insert, node}, socket) do
     socket
-    # |> push_event("insert", node)
+    |> push_event("insert", node)
     |> reply(:noreply)
   end
 
-  def handle_info({:update, _node}, socket) do
+  def handle_info({:update, node}, socket) do
     socket
-    # |> push_event("update", node)
+    |> push_event("update", node)
     |> reply(:noreply)
   end
 
-  def handle_info({:delete, _node}, socket) do
+  def handle_info({:delete, node}, socket) do
     socket
-    # |> push_event("delete", node)
+    |> push_event("delete", node)
     |> reply(:noreply)
   end
 
@@ -107,4 +104,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   defp get_selected_episode(%{"show" => show_id}) do
     Podcast.get_current_episode_for_show(show_id)
   end
+
+  defp get_nodes(%{id: id}), do: Outline.list_nodes_by_episode(id)
+  defp get_nodes(_), do: []
 end

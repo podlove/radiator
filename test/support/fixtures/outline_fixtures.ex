@@ -3,13 +3,14 @@ defmodule Radiator.OutlineFixtures do
   This module defines test helpers for creating
   entities via the `Radiator.Outline` context.
   """
+  alias Radiator.Podcast
   alias Radiator.PodcastFixtures
 
   @doc """
   Generate a node.
   """
   def node_fixture(attrs \\ %{}) do
-    episode = PodcastFixtures.episode_fixture()
+    episode = get_episode(attrs)
 
     {:ok, node} =
       attrs
@@ -21,4 +22,7 @@ defmodule Radiator.OutlineFixtures do
 
     node
   end
+
+  defp get_episode(%{episode_id: id}), do: Podcast.get_episode!(id)
+  defp get_episode(_), do: PodcastFixtures.episode_fixture()
 end

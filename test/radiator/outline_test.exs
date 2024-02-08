@@ -9,11 +9,21 @@ defmodule Radiator.OutlineTest do
     import Radiator.OutlineFixtures
     alias Radiator.PodcastFixtures
 
-    @invalid_attrs %{content: nil}
+    @invalid_attrs %{episode_id: nil}
 
     test "list_nodes/0 returns all nodes" do
-      node = node_fixture()
-      assert Outline.list_nodes() == [node]
+      node1 = node_fixture()
+      node2 = node_fixture()
+
+      assert Outline.list_nodes() == [node1, node2]
+    end
+
+    test "list_nodes/1 returns only nodes of this episode" do
+      node1 = node_fixture()
+      node2 = node_fixture()
+
+      assert Outline.list_nodes_by_episode(node1.episode_id) == [node1]
+      assert Outline.list_nodes_by_episode(node2.episode_id) == [node2]
     end
 
     test "get_node!/1 returns the node with given id" do
@@ -35,16 +45,6 @@ defmodule Radiator.OutlineTest do
 
       assert {:ok, %Node{} = node} = Outline.create_node(valid_attrs)
       assert node.content == "some content"
-    end
-
-    test "create_node/1 can have a creator" do
-      episode = PodcastFixtures.episode_fixture()
-      user = %{id: 2}
-      valid_attrs = %{content: "some content", episode_id: episode.id}
-
-      assert {:ok, %Node{} = node} = Outline.create_node(valid_attrs, user)
-      assert node.content == "some content"
-      assert node.creator_id == user.id
     end
 
     test "create_node/1 with invalid data returns error changeset" do

@@ -32,8 +32,13 @@ defmodule RadiatorWeb.Api.OutlineController do
   defp create_node(nil, _, _), do: {:error, :user}
   defp create_node(_, _, nil), do: {:error, :episode}
 
-  defp create_node(user, content, episode_id),
-    do: Outline.create_node(%{"content" => content, "episode_id" => episode_id}, user)
+  defp create_node(user, content, episode_id) do
+    Outline.create_node(%{
+      "content" => content,
+      "creator_id" => user.id,
+      "episode_id" => episode_id
+    })
+  end
 
   defp get_response({:ok, node}), do: {200, %{uuid: node.uuid}}
   defp get_response({:error, _}), do: {400, %{error: "params"}}

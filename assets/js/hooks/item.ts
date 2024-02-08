@@ -3,8 +3,7 @@ import { Node } from "./types"
 export function createItem({ uuid, temp_id, content, parent_id, prev_id }: Node) {
   const input = document.createElement("div")
   input.textContent = content
-  // input.contentEditable = "plaintext-only"
-  input.contentEditable = "true"
+  input.contentEditable = "true" // firefox does not support "plaintext-only"
 
   const ol = document.createElement("ol")
   ol.className = "list-disc"
@@ -24,8 +23,8 @@ export function createItem({ uuid, temp_id, content, parent_id, prev_id }: Node)
   return item
 }
 
-export function updateItem({ uuid, temp_id, content, parent_id, prev_id }: Node, container: HTMLElement) {
-  const item = getItemById(temp_id || uuid!)
+export function updateItem({ uuid, temp_id, content, parent_id, prev_id }: Node, container: HTMLOListElement) {
+  const item = getItemById(temp_id || uuid)
   if (!item) return
 
   temp_id && uuid && (item.id = "outline-node-" + uuid)
@@ -48,34 +47,28 @@ export function updateItem({ uuid, temp_id, content, parent_id, prev_id }: Node,
   }
 }
 
-export function getItemById(uuid: string | undefined) {
-  if (!uuid) return null
+export function deleteItem({ uuid }: Node) {
+  const item = getItemById(uuid)
+  if (!item) return
 
-  return document.getElementById("outline-node-" + uuid)
+  item.parentNode!.removeChild(item)
 }
 
-export function getNodeByEvent(event: Event): Node {
-  const item = getItemByEvent(event)
+export function getItemByNode({ uuid, temp_id }: Node) {
+  return getItemById(temp_id || uuid)
+}
 
-  return getNodeByItem(item)
+function getItemById(uuid: string | undefined) {
+  if (!uuid) return null
+
+  return document.getElementById("outline-node-" + uuid) as HTMLLIElement
 }
 
 export function getItemByEvent(event: Event): HTMLLIElement {
-  const target = <HTMLElement>event.target
+  const target = <HTMLDivElement>event.target
   const item = <HTMLLIElement>target.parentElement!
 
   return item
-}
-
-export function getNodeByItem(item: HTMLLIElement): Node {
-  const uuid = item.id.split("outline-node-")[1]
-  const input = item.firstChild as HTMLDivElement
-  const content = input.textContent!
-
-  const parent_id = item.getAttribute("data-parent") || undefined
-  const prev_id = item.getAttribute("data-prev") || undefined
-
-  return { uuid, content, parent_id, prev_id }
 }
 
 export function focusItem(item: HTMLLIElement, toEnd: boolean = true) {

@@ -10,4 +10,5 @@ defmodule Extension.Phoenix.Socket do
   """
 
   def reply(socket, reply) when is_atom(reply), do: {reply, socket}
+  def reply(socket, reply, data) when is_atom(reply) and is_map(data), do: {reply, data, socket}
 end

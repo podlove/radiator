@@ -37,9 +37,9 @@
       <h3 class="text-xl">Create Network</h3>
       <.form :let={f} for={@form} id="network-form" phx-change="validate" phx-submit="save">
         <.input field={f[:title]} type="text" label="Title" />
-        <div class="mt-2 flex items-center justify-between gap-6">
+        <div class="flex items-center justify-between gap-6 mt-2">
           <div
-            class="phx-submit-loading:opacity-75 cursor-pointer rounded-lg border border-zinc-900 hover:border-zinc-700 py-2 px-3 text-sm font-semibold leading-6 text-zinc-900 active:text-zinc-900/80"
+            class="px-3 py-2 text-sm font-semibold leading-6 border rounded-lg cursor-pointer phx-submit-loading:opacity-75 border-zinc-900 hover:border-zinc-700 text-zinc-900 active:text-zinc-900/80"
             phx-click="cancel"
           >
             Cancel
@@ -54,9 +54,9 @@
       <.form :let={f} for={@form} id="show-form" phx-change="validate" phx-submit="save">
         <.input field={f[:title]} type="text" label="Title" />
         <.input field={f[:network_id]} type="hidden" />
-        <div class="mt-2 flex items-center justify-between gap-6">
+        <div class="flex items-center justify-between gap-6 mt-2">
           <div
-            class="phx-submit-loading:opacity-75 cursor-pointer rounded-lg border border-zinc-900 hover:border-zinc-700 py-2 px-3 text-sm font-semibold leading-6 text-zinc-900 active:text-zinc-900/80"
+            class="px-3 py-2 text-sm font-semibold leading-6 border rounded-lg cursor-pointer phx-submit-loading:opacity-75 border-zinc-900 hover:border-zinc-700 text-zinc-900 active:text-zinc-900/80"
             phx-click="cancel"
           >
             Cancel

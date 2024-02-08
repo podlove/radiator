@@ -8,7 +8,7 @@
         :for={{episode, i} <- Enum.with_index(@episodes)}
         class={[episode.id == @selected_episode.id && "bg-[#f0f4f4]"]}
       >
-        <.link patch={~p"/admin/podcast/#{@show.id}/#{episode.id}"} class="flex gap-4 my-4">
+        <.link patch={~p"/admin/podcast/#{@show}/#{episode}"} class="flex gap-4 my-4">
           <img src={"/images/pic1#{i}.jpg"} alt="" width="100" />
           <%= episode.number %>
           <%= episode.title %>

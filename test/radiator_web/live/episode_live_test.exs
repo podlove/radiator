@@ -29,14 +29,20 @@ defmodule RadiatorWeb.EpisodeLiveTest do
     end
   end
 
-  describe "Episode page has an outline" do
+  describe "Episode page" do
     setup %{conn: conn} do
       user = user_fixture()
       show = show_fixture()
-      _episode = episode_fixture(%{show_id: show.id})
-      node = node_fixture()
+      episode = episode_fixture(%{show_id: show.id})
+      node = node_fixture(%{episode_id: episode.id})
 
       %{conn: log_in_user(conn, user), show: show, node: node}
+    end
+
+    test "has the title of the episode", %{conn: conn, show: show} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+
+      assert page_title(live) =~ show.title
     end
 
     test "lists all nodes", %{conn: conn, show: show, node: node} do
@@ -58,7 +64,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
         |> Enum.find(&(&1.content == "new node temp content"))
         |> Map.put(:temp_id, temp_id)
 
-      assert_push_event(live, "update", ^node)
+      assert_reply(live, ^node)
     end
 
     test "update node", %{conn: conn, show: show, node: node} do

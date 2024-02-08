@@ -1,8 +1,10 @@
+export type UUID = `${string}-${string}-${string}-${string}-${string}`
+
 export interface Node {
-  uuid?: string
-  temp_id?: string
+  uuid?: UUID
+  temp_id?: UUID
   content: string
   creator_id?: number
-  parent_id?: string
-  prev_id?: string
+  parent_id?: UUID
+  prev_id?: UUID
 }

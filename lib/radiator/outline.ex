@@ -8,7 +8,7 @@ defmodule Radiator.Outline do
   alias Radiator.Outline.Node
   alias Radiator.Repo
 
-  @topic "outline"
+  @topic "outline-node"
 
   @doc """
   Returns the list of nodes.
@@ -21,6 +21,22 @@ defmodule Radiator.Outline do
   """
   def list_nodes do
     Node
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the list of nodes for an episode.
+
+  ## Examples
+
+      iex> list_nodes(123)
+      [%Node{}, ...]
+
+  """
+
+  def list_nodes_by_episode(episode_id) do
+    Node
+    |> where([p], p.episode_id == ^episode_id)
     |> Repo.all()
   end
 
@@ -76,13 +92,6 @@ defmodule Radiator.Outline do
   """
   def create_node(attrs \\ %{}) do
     %Node{}
-    |> Node.changeset(attrs)
-    |> Repo.insert()
-    |> broadcast_node_action(:insert)
-  end
-
-  def create_node(attrs, %{id: id}) do
-    %Node{creator_id: id}
     |> Node.changeset(attrs)
     |> Repo.insert()
     |> broadcast_node_action(:insert)
