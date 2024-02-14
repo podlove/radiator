@@ -78,10 +78,18 @@ defmodule Radiator.Outline do
       Node
       |> where([n], is_nil(n.parent_id))
       |> where([n], n.episode_id == ^episode_id)
+      |> select([n], %{uuid: n.uuid, content: n.content, parent_id: n.parent_id, prev_id: n.prev_id, level: 0})
 
-    node_tree_recursion_query =
-      Node
-      |> join(:inner, [n], nd in "node_tree", on: n.parent_id == nd.uuid)
+    # node_tree_recursion_query =
+    #   Node
+    #   |> join(:inner, [n], nd in "node_tree", on: n.parent_id == nd.uuid)
+    #   |> fragmet("JOIN node_tree ON outline_nodes.parent_id = node_tree.uuid")
+    #   |> select([n], %{uuid: n.uuid, content: n.content, parent_id: n.parent_id, prev_id: n.prev_id, level: fragment("'node_tree.level + 1'")})
+
+
+    node_tree_recursion_query = from outline_node in "outline_nodes",
+      join: node_tree in "node_tree", on: outline_node.parent_id == node_tree.uuid,
+      select: [outline_node.uuid, outline_node.content, outline_node.parent_id, outline_node.prev_id, node_tree.level + 1]
 
     node_tree_query =
       node_tree_initial_query
@@ -95,6 +103,34 @@ defmodule Radiator.Outline do
 
     {:ok, tree}
   end
+
+
+
+  # WITH RECURSIVE cte AS (
+  #       SELECT uuid, content, parent_id, prev_id, 0 AS level
+  #       FROM outline_nodes
+  #       WHERE episode_id = 2 and parent_id is NULL
+  #    UNION ALL
+  #       SELECT outline_nodes.uuid, outline_nodes.content, outline_nodes.parent_id, outline_nodes.prev_id, cte.level + 1
+  #       FROM outline_nodes
+  #          JOIN cte ON outline_nodes.parent_id = cte.uuid
+  # )
+  # SELECT * FROM cte;
+  #
+
+  #
+  #  WITH RECURSIVE "node_tree" AS (
+  #       SELECT so0."uuid" AS "uuid", so0."content" AS "content", so0."parent_id" AS "parent_id", so0."prev_id" AS "prev_id", 0 AS "level"
+  #       FROM "outline_nodes" AS so0
+  #       WHERE (so0."parent_id" IS NULL) AND (so0."episode_id" = $1)
+  #     UNION ALL (
+  #       SELECT so0."uuid", so0."content", so0."parent_id", so0."prev_id", 'node_tree.level + 1'
+  #     FROM "outline_nodes" AS so0
+  #   INNER JOIN "node_tree" AS sn1 ON so0."parent_id" = sn1."uuid")) SELECT o0."uuid", o0."content", o0."creator_id", o0."parent_id", o0."prev_id", o0."episode_id", o0."inserted_at", o0."updated_at" FROM "outline_nodes" AS o0
+
+
+
+
 
   @doc """
   Creates a node.

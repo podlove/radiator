@@ -19,7 +19,7 @@ alias Radiator.{Accounts, Outline, Podcast}
 {:ok, show} =
   Podcast.create_show(%{title: "Tech Weekly", network_id: network.id})
 
-{:ok, _episode} =
+{:ok, past_episode} =
   Podcast.create_episode(%{title: "past episode", show_id: show.id})
 
 {:ok, current_episode} =
@@ -60,3 +60,7 @@ alias Radiator.{Accounts, Outline, Podcast}
     episode_id: current_episode.id,
     prev_id: node211.uuid
   })
+
+
+  {:ok, past_parent_node} =
+    Outline.create_node(%{content: "Old Content", episode_id: past_episode.id})
