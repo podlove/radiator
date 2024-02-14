@@ -121,14 +121,14 @@ defmodule Radiator.OutlineTest do
     setup :complex_node_fixture
 
     test "returns all nodes from a episode", %{
-      node_1: node_1,
-      node_2: node_2,
-      node_3: node_3,
-      node_4: node_4,
-      node_5: node_5,
-      node_6: node_6,
-      nested_node_1: nested_node_1,
-      nested_node_2: nested_node_2,
+      # node_1: node_1,
+      # node_2: node_2,
+      # node_3: node_3,
+      # node_4: node_4,
+      # node_5: node_5,
+      # node_6: node_6,
+      # nested_node_1: nested_node_1,
+      # nested_node_2: nested_node_2,
       parent: parent
     } do
       episode_id = parent.episode_id
@@ -139,12 +139,26 @@ defmodule Radiator.OutlineTest do
         |> where([n], n.episode_id == ^episode_id)
         |> Repo.all()
       assert Enum.count(tree) == Enum.count(all_nodes)
+      Enum.each(tree, fn node ->
+        assert node == List.first(Enum.filter(all_nodes, fn n -> n.uuid == node.uuid end))
+      end)
     end
+
+    test "does not return a node not in this episode", %{
+     parent: parent
+    } do
+      episode_id = parent.episode_id
+      other_node = node_fixture(parent_id: nil, prev_id: nil, content: "other content")
+      assert other_node.episode_id != episode_id
+      {:ok, tree} = Outline.get_node_tree(episode_id)
+      assert Enum.filter(tree, fn n -> n.uuid == other_node.uuid end) == nil
+    end
+
   end
 
   defp complex_node_fixture(_) do
     episode = PodcastFixtures.episode_fixture()
-    parent = node_fixture(episode_id: episode.id)
+    parent = node_fixture(episode_id: episode.id, parent_id: nil, prev_id: nil)
     node_1 = node_fixture(episode_id: episode.id, parent_id: parent.uuid, prev_id: nil)
     node_2 = node_fixture(episode_id: episode.id, parent_id: parent.uuid, prev_id: node_1.uuid)
     node_3 = node_fixture(episode_id: episode.id, parent_id: parent.uuid, prev_id: node_2.uuid)

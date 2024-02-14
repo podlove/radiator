@@ -77,6 +77,7 @@ defmodule Radiator.Outline do
     node_tree_initial_query =
       Node
       |> where([n], is_nil(n.parent_id))
+      |> where([n], n.episode_id == ^episode_id)
 
     node_tree_recursion_query =
       Node
