@@ -63,6 +63,39 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+  Gets all nodes of an episode as a tree.
+
+  ## Examples
+
+      iex> get_node_tree(123)
+      [%Node{}, %Node{}, ..]
+  """
+  #  episode_id = 2
+  #  Radiator.Outline.get_node_tree(episode_id)
+  def get_node_tree(episode_id) do
+
+    node_tree_initial_query =
+      Node
+      |> where([n], is_nil(n.parent_id))
+
+    node_tree_recursion_query =
+      Node
+      |> join(:inner, [n], nd in "node_tree", on: n.parent_id == nd.uuid)
+
+    node_tree_query =
+      node_tree_initial_query
+      |> union_all(^node_tree_recursion_query)
+
+    tree =
+      Node
+      |> recursive_ctes(true)
+      |> with_cte("node_tree", as: ^node_tree_query)
+      |> Repo.all()
+
+    {:ok, tree}
+  end
+
+  @doc """
   Creates a node.
 
   ## Examples

@@ -98,4 +98,49 @@ defmodule Radiator.OutlineTest do
       assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(node.uuid) end
     end
   end
+
+  describe "get_node_tree/1" do
+    test "returns all nodes from a episode", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5,
+      node_6: node_6,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2,
+      parent: parent
+    } do
+      assert {:ok, tree}} = Outline.get_node_tree(parent.episode_id)
+      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(node.uuid) end
+      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(child.uuid) end
+      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(grandchild.uuid) end
+    end
+  end
+
+  defp complex_node_fixture(_) do
+    episode = PodcastFixtures.episode_fixture()
+    parent = node_fixture(episode_id: episode.id)
+    node_1 = node_fixture(episode_id: episode.id, parent_id: parent.uuid, prev_id: nil)
+    node_2 = node_fixture(episode_id: episode.id, parent_id: parent.uuid, prev_id: node_1.uuid)
+    node_3 = node_fixture(episode_id: episode.id, parent_id: parent.uuid, prev_id: node_2.uuid)
+    node_4 = node_fixture(episode_id: episode.id, parent_id: parent.uuid, prev_id: node_3.uuid)
+    node_5 = node_fixture(episode_id: episode.id, parent_id: parent.uuid, prev_id: node_4.uuid)
+    node_6 = node_fixture(episode_id: episode.id, parent_id: parent.uuid, prev_id: node_5.uuid)
+
+    nested_node_1 = node_fixture(episode_id: episode.id, parent_id: node_3.uuid, prev_id: nil)
+    nested_node_2 = node_fixture(episode_id: episode.id, parent_id: node_3.uuid, prev_id: nested_node_1.uuid)
+
+    %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5,
+      node_6: node_6,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2,
+      parent: parent
+    }
+  end
 end
