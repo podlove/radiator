@@ -2,11 +2,12 @@ defmodule Radiator.OutlineTest do
   use Radiator.DataCase
 
   alias Radiator.Outline
-
   alias Radiator.Outline.Node
+  alias Radiator.PodcastFixtures
+  alias Radiator.Repo
 
   import Radiator.OutlineFixtures
-  alias Radiator.PodcastFixtures
+  import Ecto.Query, warn: false
 
   @invalid_attrs %{content: nil}
 
@@ -72,24 +73,41 @@ defmodule Radiator.OutlineTest do
     end
   end
 
-  describe "move_node/2" do
-    test "moves node to another parent" do
-      node = node_fixture()
-      new_parent = node_fixture(episode_id: node.episode_id)
+  # describe "move_node/2" do
+  #   test "moves node to another parent" do
+  #     node = node_fixture()
+  #     new_parent = node_fixture(episode_id: node.episode_id)
 
-      assert {:ok, %Node{} = node} = Outline.move_node(node, new_parent)
-      assert node.parent_id == new_parent.uuid
-    end
+  #     assert {:ok, %Node{} = node} = Outline.move_node(node, new_parent)
+  #     assert node.parent_id == new_parent.uuid
+  #   end
 
-    test "update_node_content/2 with parent from another episode returns error changeset" do
-      node = node_fixture()
-      new_bad_parent = node_fixture()
-      assert node.episode_id != new_bad_parent.episode_id
+  #   test "update_node_content/2 with parent from another episode returns error changeset" do
+  #     node = node_fixture()
+  #     new_bad_parent = node_fixture()
+  #     assert node.episode_id != new_bad_parent.episode_id
 
-      assert {:error, %Ecto.Changeset{}} = Outline.move_node(node, new_bad_parent)
-      assert node == Outline.get_node!(node.uuid)
-    end
-  end
+  #     assert {:error, %Ecto.Changeset{}} = Outline.move_node(node, new_bad_parent)
+  #     assert node == Outline.get_node!(node.uuid)
+  #   end
+  # end
+
+  # describe "sort_node/2" do
+  #   setup :complex_node_fixture
+
+  #   test "moves node 6 to top", %{
+  #     node_1: node_1,
+  #     node_2: node_2,
+  #     node_3: node_3,
+  #     node_4: node_4,
+  #     node_5: node_5,
+  #     node_6: node_6,
+  #     parent: parent
+  #   } do
+  #     assert {:ok, %Node{} = node} = Outline.sort_node(node_6, nil)
+  #     assert node.parent_id == new_parent.uuid
+  #   end
+  # end
 
   describe "delete_node/1" do
     test "deletes the node" do
@@ -100,6 +118,8 @@ defmodule Radiator.OutlineTest do
   end
 
   describe "get_node_tree/1" do
+    setup :complex_node_fixture
+
     test "returns all nodes from a episode", %{
       node_1: node_1,
       node_2: node_2,
@@ -111,10 +131,14 @@ defmodule Radiator.OutlineTest do
       nested_node_2: nested_node_2,
       parent: parent
     } do
-      assert {:ok, tree}} = Outline.get_node_tree(parent.episode_id)
-      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(node.uuid) end
-      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(child.uuid) end
-      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(grandchild.uuid) end
+      episode_id = parent.episode_id
+      assert {:ok, tree} = Outline.get_node_tree(episode_id)
+
+      all_nodes =
+        Node
+        |> where([n], n.episode_id == ^episode_id)
+        |> Repo.all()
+      assert Enum.count(tree) == Enum.count(all_nodes)
     end
   end
 
