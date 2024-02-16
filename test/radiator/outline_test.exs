@@ -140,7 +140,7 @@ defmodule Radiator.OutlineTest do
         |> Repo.all()
       assert Enum.count(tree) == Enum.count(all_nodes)
       Enum.each(tree, fn node ->
-        assert node == List.first(Enum.filter(all_nodes, fn n -> n.uuid == node.uuid end))
+        assert node.uuid == List.first(Enum.filter(all_nodes, fn n -> n.uuid == node.uuid end)).uuid
       end)
     end
 
@@ -151,9 +151,8 @@ defmodule Radiator.OutlineTest do
       other_node = node_fixture(parent_id: nil, prev_id: nil, content: "other content")
       assert other_node.episode_id != episode_id
       {:ok, tree} = Outline.get_node_tree(episode_id)
-      assert Enum.filter(tree, fn n -> n.uuid == other_node.uuid end) == nil
+      assert Enum.filter(tree, fn n -> n.uuid == other_node.uuid end) == []
     end
-
   end
 
   defp complex_node_fixture(_) do

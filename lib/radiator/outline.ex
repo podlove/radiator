@@ -62,15 +62,6 @@ defmodule Radiator.Outline do
     |> Repo.get(id)
   end
 
-  @raw_sql_node_tree """
-              SELECT uuid, content, parent_id, prev_id, 0 AS level
-              FROM outline_nodes
-              WHERE episode_id = 2 and parent_id is NULL
-           UNION ALL
-              SELECT outline_nodes.uuid, outline_nodes.content, outline_nodes.parent_id, outline_nodes.prev_id, node_tree.level + 1
-              FROM outline_nodes
-                 JOIN node_tree ON outline_nodes.parent_id = node_tree.uuid
-        """
   @doc """
   Gets all nodes of an episode as a tree.
 
@@ -89,13 +80,6 @@ defmodule Radiator.Outline do
       |> where([n], n.episode_id == ^episode_id)
       |> select([n], %{uuid: n.uuid, content: n.content, parent_id: n.parent_id, prev_id: n.prev_id, level: 0})
 
-    # node_tree_recursion_query =
-    #   Node
-    #   |> join(:inner, [n], nd in "node_tree", on: n.parent_id == nd.uuid)
-    #   |> fragmet("JOIN node_tree ON outline_nodes.parent_id = node_tree.uuid")
-    #   |> select([n], %{uuid: n.uuid, content: n.content, parent_id: n.parent_id, prev_id: n.prev_id, level: fragment("'node_tree.level + 1'")})
-
-
     node_tree_recursion_query = from outline_node in "outline_nodes",
       join: node_tree in "node_tree", on: outline_node.parent_id == node_tree.uuid,
       select: [outline_node.uuid, outline_node.content, outline_node.parent_id, outline_node.prev_id, node_tree.level + 1]
@@ -108,43 +92,18 @@ defmodule Radiator.Outline do
       "node_tree"
       |> recursive_ctes(true)
       |> with_cte("node_tree", as: ^node_tree_query)
-      |> select([n], %{uuid: n.uuid, content: n.content, parent_id: n.parent_id, prev_id: n.prev_id, level: 0})
+      |> select([n], %{uuid: n.uuid, content: n.content, parent_id: n.parent_id, prev_id: n.prev_id, level: n.level})
       |> Repo.all()
-
-
-      tree2 = Node
-      |> recursive_ctes(true)
-      |> with_cte("node_tree", as: fragment(@raw_sql_node_tree))
-      |> Repo.all()
-
-    {:ok, tree, tree2}
+      |> Enum.map(fn %{uuid: uuid, content: content, parent_id: parent_id, prev_id: prev_id, level: level} ->
+        %Node{uuid: binaray_uuid_to_ecto_uuid(uuid), content: content, parent_id:  binaray_uuid_to_ecto_uuid(parent_id), prev_id:  binaray_uuid_to_ecto_uuid(prev_id), level: level}
+      end)
+    {:ok, tree}
   end
 
-
-
-  # WITH RECURSIVE cte AS (
-  #       SELECT uuid, content, parent_id, prev_id, 0 AS level
-  #       FROM outline_nodes
-  #       WHERE episode_id = 2 and parent_id is NULL
-  #    UNION ALL
-  #       SELECT outline_nodes.uuid, outline_nodes.content, outline_nodes.parent_id, outline_nodes.prev_id, cte.level + 1
-  #       FROM outline_nodes
-  #          JOIN cte ON outline_nodes.parent_id = cte.uuid
-  # )
-  # SELECT * FROM cte;
-  #
-
-  #
-  #  WITH RECURSIVE "node_tree" AS (
-  #       SELECT so0."uuid" AS "uuid", so0."content" AS "content", so0."parent_id" AS "parent_id", so0."prev_id" AS "prev_id", 0 AS "level"
-  #       FROM "outline_nodes" AS so0
-  #       WHERE (so0."parent_id" IS NULL) AND (so0."episode_id" = $1)
-  #     UNION ALL (
-  #       SELECT so0."uuid", so0."content", so0."parent_id", so0."prev_id", 'node_tree.level + 1'
-  #     FROM "outline_nodes" AS so0
-  #   INNER JOIN "node_tree" AS sn1 ON so0."parent_id" = sn1."uuid")) SELECT o0."uuid", o0."content", o0."creator_id", o0."parent_id", o0."prev_id", o0."episode_id", o0."inserted_at", o0."updated_at" FROM "outline_nodes" AS o0
-
-
+  defp binaray_uuid_to_ecto_uuid(nil), do: nil
+  defp binaray_uuid_to_ecto_uuid(uuid) do
+    Ecto.UUID.load!(uuid)
+  end
 
 
 
