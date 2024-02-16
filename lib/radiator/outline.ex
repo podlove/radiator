@@ -62,6 +62,15 @@ defmodule Radiator.Outline do
     |> Repo.get(id)
   end
 
+  @raw_sql_node_tree """
+              SELECT uuid, content, parent_id, prev_id, 0 AS level
+              FROM outline_nodes
+              WHERE episode_id = 2 and parent_id is NULL
+           UNION ALL
+              SELECT outline_nodes.uuid, outline_nodes.content, outline_nodes.parent_id, outline_nodes.prev_id, node_tree.level + 1
+              FROM outline_nodes
+                 JOIN node_tree ON outline_nodes.parent_id = node_tree.uuid
+        """
   @doc """
   Gets all nodes of an episode as a tree.
 
@@ -96,12 +105,19 @@ defmodule Radiator.Outline do
       |> union_all(^node_tree_recursion_query)
 
     tree =
-      Node
+      "node_tree"
       |> recursive_ctes(true)
       |> with_cte("node_tree", as: ^node_tree_query)
+      |> select([n], %{uuid: n.uuid, content: n.content, parent_id: n.parent_id, prev_id: n.prev_id, level: 0})
       |> Repo.all()
 
-    {:ok, tree}
+
+      tree2 = Node
+      |> recursive_ctes(true)
+      |> with_cte("node_tree", as: fragment(@raw_sql_node_tree))
+      |> Repo.all()
+
+    {:ok, tree, tree2}
   end
 
 
