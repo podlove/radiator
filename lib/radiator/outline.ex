@@ -71,6 +71,39 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+  Returns the previous node of a given node in the outline tree.
+  Returns `nil` if prev_id of the node is nil.
+
+  ## Examples
+        iex> get_prev_node(%Node{prev_id: nil})
+        nil
+
+        iex> get_prev_node(%Node{prev_id: 42})
+        %Node{uuid: 42}
+
+  """
+  def get_prev_node(node) when is_nil(node.prev_id), do: nil
+
+  def get_prev_node(node) do
+    Node
+    |> where([n], n.uuid == ^node.prev_id)
+    |> Repo.one()
+  end
+
+  @doc """
+  Returns all child nodes of a given node.
+  ## Examples
+        iex> get_all_child_nodes(%Node{})
+        [%Node{}, %Node{}]
+
+  """
+  def get_all_child_nodes(node) do
+    Node
+    |> where([n], n.parent_id == ^node.uuid)
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a single node.
 
   Returns `nil` if the Node does not exist.
@@ -222,6 +255,33 @@ defmodule Radiator.Outline do
 
   """
   def delete_node(%Node{} = node) do
+    next_node =
+      Node
+      |> where([n], n.prev_id == ^node.uuid)
+      |> Repo.one()
+
+    prev_node = get_prev_node(node)
+
+    prev_uuid =
+      if prev_node do
+        prev_node.uuid
+      else
+        nil
+      end
+
+    if next_node do
+      next_node
+      |> Node.move_node_changeset(%{prev_id: prev_uuid})
+      |> Repo.update()
+    end
+
+    # no tail recursion but we dont have too much levels in a tree
+    node
+    |> get_all_child_nodes()
+    |> Enum.each(fn child_node ->
+      delete_node(child_node)
+    end)
+
     node
     |> Repo.delete()
   end
