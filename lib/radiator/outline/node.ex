@@ -47,6 +47,11 @@ defmodule Radiator.Outline.Node do
     |> validate_required([:content])
   end
 
+  def move_node_changeset(node, attrs) do
+    node
+    |> cast(attrs, [:parent_id, :prev_id])
+  end
+
   defp trim(content) when is_binary(content), do: String.trim(content)
   defp trim(content), do: content
 end
