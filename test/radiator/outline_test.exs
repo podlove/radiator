@@ -4,7 +4,6 @@ defmodule Radiator.OutlineTest do
   alias Radiator.Outline
   alias Radiator.Outline.Node
   alias Radiator.PodcastFixtures
-  alias Radiator.Repo
 
   import Radiator.OutlineFixtures
   import Ecto.Query, warn: false
@@ -83,11 +82,126 @@ defmodule Radiator.OutlineTest do
     end
   end
 
+  describe "get_prev_node/1" do
+    setup :complex_node_fixture
+
+    test "returns the previous node", %{node_2: node_2, node_3: node_3} do
+      assert Outline.get_prev_node(node_3) == node_2
+    end
+
+    test "returns nil if there is no previous node", %{node_1: node_1} do
+      assert Outline.get_prev_node(node_1) == nil
+    end
+  end
+
+  describe "get_all_child_nodes/1" do
+    setup :complex_node_fixture
+
+    test "returns all child nodes", %{
+      node_3: node_3,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      assert Outline.get_all_child_nodes(node_3) == [nested_node_1, nested_node_2]
+    end
+
+    test "returns an empty list if there are no child nodes", %{node_1: node_1} do
+      assert Outline.get_all_child_nodes(node_1) == []
+    end
+  end
+
   describe "delete_node/1" do
+    setup :complex_node_fixture
+
     test "deletes the node" do
       node = node_fixture()
       assert {:ok, %Node{}} = Outline.delete_node(node)
       assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(node.uuid) end
+    end
+
+    test "next node must be updated", %{
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4
+    } do
+      assert node_4.prev_id == node_3.uuid
+
+      assert {:ok, %Node{}} = Outline.delete_node(node_3)
+      # reload nodes
+      node_4 = Outline.get_node!(node_4.uuid)
+      node_2 = Outline.get_node!(node_2.uuid)
+
+      assert node_4.prev_id == node_2.uuid
+    end
+
+    test "works for last element in list", %{
+      node_6: node_6
+    } do
+      episode_id = node_6.episode_id
+
+      count_nodes =
+        episode_id
+        |> Outline.list_nodes_by_episode()
+        |> Enum.count()
+
+      assert {:ok, %Node{}} = Outline.delete_node(node_6)
+
+      new_count_nodes =
+        episode_id
+        |> Outline.list_nodes_by_episode()
+        |> Enum.count()
+
+      assert new_count_nodes == count_nodes - 1
+    end
+
+    test "works for first element in list", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      episode_id = node_1.episode_id
+
+      count_nodes =
+        episode_id
+        |> Outline.list_nodes_by_episode()
+        |> Enum.count()
+
+      assert {:ok, %Node{}} = Outline.delete_node(node_1)
+
+      new_count_nodes =
+        episode_id
+        |> Outline.list_nodes_by_episode()
+        |> Enum.count()
+
+      assert new_count_nodes == count_nodes - 1
+      node_2 = Outline.get_node!(node_2.uuid)
+      assert node_2.prev_id == nil
+    end
+
+    test "delete also child elements", %{
+      node_3: node_3,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      assert {:ok, %Node{}} = Outline.delete_node(node_3)
+
+      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(nested_node_1.uuid) end
+      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(nested_node_2.uuid) end
+    end
+
+    test "when top parent gets deleted the whole tree will be gone", %{
+      node_1: node_1,
+      node_4: node_4,
+      node_6: node_6,
+      nested_node_2: nested_node_2,
+      parent: parent
+    } do
+      assert {:ok, %Node{}} = Outline.delete_node(parent)
+
+      # test some of elements in the tree
+      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(node_1.uuid) end
+      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(node_4.uuid) end
+      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(node_6.uuid) end
+      assert_raise Ecto.NoResultsError, fn -> Outline.get_node!(nested_node_2.uuid) end
     end
   end
 
@@ -98,10 +212,7 @@ defmodule Radiator.OutlineTest do
       episode_id = parent.episode_id
       assert {:ok, tree} = Outline.get_node_tree(episode_id)
 
-      all_nodes =
-        Node
-        |> where([n], n.episode_id == ^episode_id)
-        |> Repo.all()
+      all_nodes = Outline.list_nodes_by_episode(episode_id)
 
       assert Enum.count(tree) == Enum.count(all_nodes)
 
