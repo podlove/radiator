@@ -52,6 +52,21 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+  Returns the the number of nodes for an episode
+
+  ## Examples
+
+      iex> count_nodes_by_episode(123)
+      3
+
+  """
+  def count_nodes_by_episode(episode_id) do
+    episode_id
+    |> list_nodes_by_episode()
+    |> Enum.count()
+  end
+
+  @doc """
   Gets a single node.
 
   Raises `Ecto.NoResultsError` if the Node does not exist.
@@ -224,6 +239,74 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+  Inserts a node.
+
+  ## Examples
+
+      iex> insert_node(%{content: 'foo'}, %Node{} = parent_node, %Node{} = prev_node)
+      {:ok, %Node{}}
+
+      iex> insert_node(%{content: value}, %Node{} = parent_node, %Node{parent_id: nil} = prev_node)
+      {:error, :parent_and_prev_not_consistent}
+
+  """
+  # creates a node and inserts it into the outline tree
+  # if a parent node is given, the new node will be inserted as a child of the parent node
+  # if a previous node is given, the new node will be inserted after the previous node
+  # if no parent is given, the new node will be inserted as a root node
+  # if no previous node is given, the new node will be inserted as the first child of the parent node
+  def insert_node(attrs, parent_node \\ nil, prev_node \\ nil) do
+    Repo.transaction(fn ->
+      prev_node_id = get_node_id(prev_node)
+      parent_node_id = get_node_id(parent_node)
+
+      # find Node which has been previously connected to prev_node
+      node_to_move =
+        Node
+        |> where_prev_node_equals(prev_node_id)
+        |> where_parent_node_equals(parent_node_id)
+        |> Repo.one()
+
+      with true <- parent_and_prev_consistent?(parent_node, prev_node),
+           {:ok, node} <- create_node(attrs),
+           {:ok, _node_to_move} <- move_node_(node_to_move, nil, node.uuid),
+           {:ok, node} <- move_node_(node, parent_node_id, prev_node_id) do
+        node
+      else
+        false ->
+          Repo.rollback("Insert node failed. Parent and prev node are not consistent.")
+
+        {:error, _} ->
+          Repo.rollback("Insert node failed. Unkown error")
+      end
+    end)
+  end
+
+  defp move_node_(nil, _parent_node_id, _prev_node_id), do: {:ok, nil}
+
+  defp move_node_(node, parent_node_id, prev_node_id) do
+    node
+    |> Node.move_node_changeset(%{
+      parent_id: parent_node_id,
+      prev_id: prev_node_id
+    })
+    |> Repo.update()
+  end
+
+  defp parent_and_prev_consistent?(_, nil), do: true
+  defp parent_and_prev_consistent?(nil, _), do: true
+
+  defp parent_and_prev_consistent?(parent, prev) do
+    parent.uuid == prev.parent_id
+  end
+
+  defp where_prev_node_equals(node, nil), do: where(node, [n], is_nil(n.prev_id))
+  defp where_prev_node_equals(node, prev_id), do: where(node, [n], n.prev_id == ^prev_id)
+
+  defp where_parent_node_equals(node, nil), do: where(node, [n], is_nil(n.parent_id))
+  defp where_parent_node_equals(node, parent_id), do: where(node, [n], n.parent_id == ^parent_id)
+
+  @doc """
   Updates a nodes content.
 
   ## Examples
@@ -262,16 +345,9 @@ defmodule Radiator.Outline do
 
     prev_node = get_prev_node(node)
 
-    prev_uuid =
-      if prev_node do
-        prev_node.uuid
-      else
-        nil
-      end
-
     if next_node do
       next_node
-      |> Node.move_node_changeset(%{prev_id: prev_uuid})
+      |> Node.move_node_changeset(%{prev_id: get_node_id(prev_node)})
       |> Repo.update()
     end
 
@@ -284,6 +360,12 @@ defmodule Radiator.Outline do
 
     node
     |> Repo.delete()
+  end
+
+  defp get_node_id(nil), do: nil
+
+  defp get_node_id(%Node{} = node) do
+    node.uuid
   end
 
   defp binaray_uuid_to_ecto_uuid(nil), do: nil
