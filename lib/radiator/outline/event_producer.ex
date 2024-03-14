@@ -15,6 +15,12 @@ defmodule Radiator.Outline.EventProducer do
   end
 
   def handle_cast({:enqueue, event}, state) do
+    IO.inspect(state, label: "EventProducer. handle_cast")
     {:noreply, [event], state}
+  end
+
+  def handle_demand(demand, state) do
+    IO.inspect(demand, label: "EventConsumer")
+    {:noreply, [], state}
   end
 end
