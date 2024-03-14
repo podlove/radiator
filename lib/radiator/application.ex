@@ -5,6 +5,8 @@ defmodule Radiator.Application do
 
   use Application
 
+  alias Radiator.Outline.EventProducer
+
   @impl true
   def start(_type, _args) do
     children = [
@@ -17,7 +19,8 @@ defmodule Radiator.Application do
       # Start a worker by calling: Radiator.Worker.start_link(arg)
       # {Radiator.Worker, arg},
       # Start to serve requests, typically the last entry
-      RadiatorWeb.Endpoint
+      RadiatorWeb.Endpoint,
+      {EventProducer, name: EventProducer}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

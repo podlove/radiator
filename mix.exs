@@ -40,6 +40,7 @@ defmodule Radiator.MixProject do
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
       {:gen_smtp, "~> 1.1"},
+      {:gen_stage, "~> 1.2"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
