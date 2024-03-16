@@ -1,10 +1,13 @@
 defmodule Radiator.Outline.Server do
+  @moduledoc false
+
   alias Radiator.Outline.Event
+  alias Radiator.Outline.EventProducer
 
   def insert_node(attributes, user_id, event_id) do
     "insert_node"
     |> Event.build(attributes, user_id, event_id)
-    |> Event.enqueue()
+    |> EventProducer.enqueue()
 
     # generate event
     #   send to Eventserver
