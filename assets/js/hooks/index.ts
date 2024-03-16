@@ -79,7 +79,7 @@ export const Hooks = {
               prev_id: node.uuid
             }
 
-            this.pushEvent("create_node", newNode, (node: Node, _ref: Number) => {
+            this.pushEvent("create_node", newNode, (node: Node, _ref: number) => {
               const newItem = createItem(node)
               item.after(newItem)
               focusItem(newItem, false)
