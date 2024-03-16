@@ -2,13 +2,30 @@ defmodule Radiator.Outline do
   @moduledoc """
   The Outline context.
   """
+
   import Ecto.Query, warn: false
 
-  alias Phoenix.PubSub
   alias Radiator.Outline.Node
+  alias Radiator.Outline.Notify
   alias Radiator.Repo
 
-  @topic "outline-node"
+  def create(attrs \\ %{}, socket_id \\ nil) do
+    attrs
+    |> create_node()
+    |> Notify.broadcast_node_action(:insert, socket_id)
+  end
+
+  def update(%Node{} = node, attrs, socket_id \\ nil) do
+    node
+    |> update_node(attrs)
+    |> Notify.broadcast_node_action(:update, socket_id)
+  end
+
+  def delete(%Node{} = node, socket_id \\ nil) do
+    node
+    |> delete()
+    |> Notify.broadcast_node_action(:delete, socket_id)
+  end
 
   @doc """
   Returns the list of nodes.
@@ -94,7 +111,6 @@ defmodule Radiator.Outline do
     %Node{}
     |> Node.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_node_action(:insert)
   end
 
   @doc """
@@ -113,7 +129,6 @@ defmodule Radiator.Outline do
     node
     |> Node.changeset(attrs)
     |> Repo.update()
-    |> broadcast_node_action(:update)
   end
 
   @doc """
@@ -131,7 +146,6 @@ defmodule Radiator.Outline do
   def delete_node(%Node{} = node) do
     node
     |> Repo.delete()
-    |> broadcast_node_action(:delete)
   end
 
   @doc """
@@ -146,11 +160,4 @@ defmodule Radiator.Outline do
   def change_node(%Node{} = node, attrs \\ %{}) do
     Node.changeset(node, attrs)
   end
-
-  defp broadcast_node_action({:ok, node}, action) do
-    PubSub.broadcast(Radiator.PubSub, @topic, {action, node})
-    {:ok, node}
-  end
-
-  defp broadcast_node_action({:error, error}, _action), do: {:error, error}
 end

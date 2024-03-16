@@ -116,31 +116,31 @@ export const Hooks = {
             this.pushEvent("delete_node", nextNode.uuid)
             break
 
-          // case "Tab":
-          //   event.preventDefault()
+          case "Tab":
+            event.preventDefault()
 
-          //   if (event.shiftKey) {
-          //     if (node.parent_id) {
-          //       // outdent
-          //       node.prev_id = node.parent_id
-          //       node.parent_id = undefined
-          //       updateItem(node, container)
+            if (event.shiftKey) {
+              if (node.parent_id) {
+                // outdent
+                node.prev_id = node.parent_id
+                node.parent_id = undefined
+                updateItem(node, container)
 
-          //       focusItem(item)
-          //       this.pushEvent("update_node", node)
-          //     }
-          //   } else {
-          //     if (node.prev_id) {
-          //       // indent
-          //       node.parent_id = node.prev_id
-          //       node.prev_id = undefined // TODO: prev_id should be the id of the last child of the parent node
-          //       updateItem(node, container)
+                focusItem(item)
+                this.pushEvent("update_node", node)
+              }
+            } else {
+              if (node.prev_id) {
+                // indent
+                node.parent_id = node.prev_id
+                node.prev_id = undefined // TODO: prev_id should be the id of the last child of the parent node
+                updateItem(node, container)
 
-          //       focusItem(item)
-          //       this.pushEvent("update_node", node)
-          //     }
-          //   }
-          //   break
+                focusItem(item)
+                this.pushEvent("update_node", node)
+              }
+            }
+            break
         }
       })
 
@@ -170,18 +170,18 @@ export const Hooks = {
         focusItem(lastItem)
       })
 
-      // this.handleEvent("insert", (node: Node) => {
-      //   const item = createItem(node)
-      //   container.append(item)
-      // })
+      this.handleEvent("insert", (node: Node) => {
+        const item = createItem(node)
+        container.append(item)
+      })
 
-      // this.handleEvent("update", (node: Node) => {
-      //   updateItem(node, container)
-      // })
+      this.handleEvent("update", (node: Node) => {
+        updateItem(node, container)
+      })
 
-      // this.handleEvent("delete", (node: Node) => {
-      //   deleteItem(node)
-      // })
+      this.handleEvent("delete", (node: Node) => {
+        deleteItem(node)
+      })
     }
   }
 }

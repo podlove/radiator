@@ -50,7 +50,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     episode = socket.assigns.selected_episode
     attrs = Map.merge(params, %{"creator_id" => user.id, "episode_id" => episode.id})
 
-    case Outline.create_node(attrs) do
+    case Outline.create(attrs, socket.id) do
       {:ok, node} -> socket |> reply(:reply, Map.put(node, :temp_id, temp_id))
       _ -> socket |> reply(:noreply)
     end
@@ -61,7 +61,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     case Outline.get_node(uuid) do
       nil -> nil
-      node -> Outline.update_node(node, attrs)
+      node -> Outline.update(node, attrs, socket.id)
     end
 
     socket
@@ -71,7 +71,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   def handle_event("delete_node", node_id, socket) do
     case Outline.get_node(node_id) do
       nil -> nil
-      node -> Outline.delete_node(node)
+      node -> Outline.delete(node, socket.id)
     end
 
     socket
@@ -79,19 +79,24 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   @impl true
-  def handle_info({:insert, node}, socket) do
+  def handle_info({_, _node, socket_id}, socket) when socket_id == socket.id do
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_info({:insert, node, _socket_id}, socket) do
     socket
     |> push_event("insert", node)
     |> reply(:noreply)
   end
 
-  def handle_info({:update, node}, socket) do
+  def handle_info({:update, node, _socket_id}, socket) do
     socket
     |> push_event("update", node)
     |> reply(:noreply)
   end
 
-  def handle_info({:delete, node}, socket) do
+  def handle_info({:delete, node, _socket_id}, socket) do
     socket
     |> push_event("delete", node)
     |> reply(:noreply)
