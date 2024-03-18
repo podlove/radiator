@@ -23,7 +23,7 @@ defmodule Radiator.Outline do
 
   def delete(%Node{} = node, socket_id \\ nil) do
     node
-    |> delete()
+    |> delete_node()
     |> Notify.broadcast_node_action(:delete, socket_id)
   end
 
