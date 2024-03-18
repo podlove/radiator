@@ -95,7 +95,7 @@ export function keydown(event: KeyboardEvent) {
       this.pushEvent("update_node", node)
 
       deleteItem(node)
-      this.pushEvent("delete_node", node.uuid)
+      this.pushEvent("delete_node", node)
       break
 
     case "Delete":
@@ -110,7 +110,7 @@ export function keydown(event: KeyboardEvent) {
       this.pushEvent("update_node", node)
 
       deleteItem(nextNode)
-      this.pushEvent("delete_node", nextNode.uuid)
+      this.pushEvent("delete_node", nextNode)
       break
 
     case "Tab":
