@@ -1,43 +1,46 @@
 defmodule Radiator.Outline.EventConsumer do
   use GenStage
+
+  alias Radiator.Outline
   alias Radiator.Outline.EventProducer
+  alias Radiator.Outline.Event.InsertNodeEvent
 
   def start_link(opts \\ []) do
     GenStage.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  def init(_opts) do
-    options = []
-    {:consumer, :event_producer, subscribe_to: [{EventProducer, options}]}
+  def init(opts \\ [max_demand: 1]) do
+    {:consumer, :event_producer, subscribe_to: [{EventProducer, opts}]}
   end
 
-  def handle_events(events, _from, state) do
-    IO.inspect(events, label: "EventConsumer handle_events")
-
-    Enum.each(events, fn event ->
-      process_event(event, state)
-      IO.inspect(event, label: "EventConsumer handle_events event")
-    end)
+  def handle_events([event], _from, state) do
+    process_event(event)
 
     {:noreply, [], state}
   end
 
-  defp process_event(%InsertNodeEvent{} = event) do
-    # validate
+  defp process_event(%InsertNodeEvent{payload: payload} = _event) do
+    payload
+    |> Outline.create_node()
+    |> handle_insert_result()
+
+    #      validate
     #         true->
     #           database action: insert node()
     #           create && persist event (event contains all attributes, user, event_id, timestamps)
     #           broadcast event (topic: episode_id)
+    #           broadcast node (topic: episode_id)
     #         false->
     #           log error and return error (audit log)
   end
 
-  defp handle_result(:ok, event) do
-    persist_event(event)
-    broadcast_success(event)
+  defp handle_insert_result({:ok, node}) do
+    {:ok, node}
   end
 
-  defp handle_result(:error, event) do
-    broadcast_error(event)
+  defp handle_insert_result({:error, _error}) do
+    # log_error_please :-)
+
+    :error
   end
 end
