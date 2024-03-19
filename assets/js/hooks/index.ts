@@ -1,5 +1,5 @@
-import { focusin, focusout, input, keydown } from "./event_listener"
-import { handleList, handleInsert, handleUpdate, handleDelete } from "./event_handler"
+import { focusin, focusout, input, keydown } from "./events/listener"
+import { handleList, handleInsert, handleUpdate, handleDelete } from "./events/handler"
 
 export const Hooks = {
   outline: {

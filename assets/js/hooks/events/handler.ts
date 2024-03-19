@@ -1,5 +1,5 @@
-import { Node } from "./types"
-import { createItem, updateItem, deleteItem, focusItem } from "./item"
+import { Node } from "../types"
+import { createItem, updateItem, deleteItem, focusItem } from "../item"
 
 export function handleList({ nodes }: { nodes: Node[] }) {
   const container: HTMLOListElement = this.el

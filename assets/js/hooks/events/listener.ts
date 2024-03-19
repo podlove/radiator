@@ -1,6 +1,6 @@
-import { Node } from "./types"
-import { createItem, updateItem, deleteItem, getItemByNode, focusItem } from "./item"
-import { getNodeByEvent, getNodeByItem } from "./node"
+import { Node } from "../types"
+import { createItem, updateItem, deleteItem, getItemByNode, focusItem } from "../item"
+import { getNodeByEvent, getNodeByItem } from "../node"
 
 export function focusin(event: FocusEvent) {
   const { uuid } = getNodeByEvent(event)
