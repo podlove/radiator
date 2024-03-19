@@ -33,10 +33,8 @@ defmodule RadiatorWeb.EpisodeLiveTest do
     setup %{conn: conn} do
       user = user_fixture()
       show = show_fixture()
-      episode = episode_fixture(%{show_id: show.id})
-      node = node_fixture(%{episode_id: episode.id})
 
-      %{conn: log_in_user(conn, user), show: show, node: node}
+      %{conn: log_in_user(conn, user), show: show}
     end
 
     test "has the title of the episode", %{conn: conn, show: show} do
@@ -44,15 +42,32 @@ defmodule RadiatorWeb.EpisodeLiveTest do
 
       assert page_title(live) =~ show.title
     end
+  end
 
-    test "lists all nodes", %{conn: conn, show: show, node: node} do
-      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+  describe "Episode outline nodes" do
+    setup %{conn: conn} do
+      user = user_fixture()
+      show = show_fixture()
+      episode = episode_fixture(%{show_id: show.id})
 
-      assert_push_event(live, "list", %{nodes: [^node]})
+      node_1 = node_fixture(%{episode_id: episode.id})
+      node_2 = node_fixture(%{episode_id: episode.id, prev_id: node_1.uuid})
+      _node_21 = node_fixture(%{episode_id: episode.id, parent_id: node_2.uuid})
+
+      %{conn: log_in_user(conn, user), show: show, episode: episode}
     end
 
-    test "create a new node", %{conn: conn, show: show} do
+    test "lists all nodes", %{conn: conn, show: show} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+
+      nodes = Outline.list_nodes()
+
+      assert_push_event(live, "list", %{nodes: ^nodes})
+    end
+
+    test "insert a new node", %{conn: conn, show: show} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
       temp_id = "f894d2ed-9447-4eef-8c31-fc52372b3bbe"
       params = %{"temp_id" => temp_id, "content" => "new node temp content"}
@@ -62,13 +77,19 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       node =
         Outline.list_nodes()
         |> Enum.find(&(&1.content == "new node temp content"))
-        |> Map.put(:temp_id, temp_id)
 
-      assert_reply(live, ^node)
+      node_with_temp_id = Map.put(node, :temp_id, temp_id)
+
+      assert_reply(live, ^node_with_temp_id)
+
+      assert_push_event(other_live, "insert", ^node)
     end
 
-    test "update node", %{conn: conn, show: show, node: node} do
+    test "update node", %{conn: conn, show: show, episode: episode} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+
+      node = node_fixture(%{episode_id: episode.id})
 
       params =
         node
@@ -83,14 +104,22 @@ defmodule RadiatorWeb.EpisodeLiveTest do
 
       assert updated_node.uuid == params.uuid
       assert updated_node.content == params.content
+
+      assert_push_event(other_live, "update", ^updated_node)
     end
 
-    # {:ok, pid} = MyGenServer.start_link()
+    test "delete node", %{conn: conn, show: show, episode: episode} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
-    # send(self(), :hello)
-    # send(pid, {:some_message, self()})
+      node = node_fixture(%{episode_id: episode.id})
+      params = Map.from_struct(node)
 
-    # assert_received {:handle_info, {:some_message, self()}, _state}
-    # assert_push_event(live, "insert", %{nodes: [%{content: "new node content"}]})
+      assert live |> render_hook(:delete_node, params)
+
+      assert_push_event(other_live, "delete", %{uuid: deleted_uuid})
+
+      assert deleted_uuid == node.uuid
+    end
   end
 end

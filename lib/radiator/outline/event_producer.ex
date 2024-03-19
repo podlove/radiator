@@ -1,4 +1,6 @@
 defmodule Radiator.Outline.EventProducer do
+  @moduledoc false
+
   use GenStage
 
   def start_link(opts \\ []) do
