@@ -1,9 +1,11 @@
 defmodule Radiator.Outline.EventConsumer do
+  @moduledoc false
+
   use GenStage
 
   alias Radiator.Outline
-  alias Radiator.Outline.EventProducer
   alias Radiator.Outline.Event.InsertNodeEvent
+  alias Radiator.Outline.EventProducer
 
   def start_link(opts \\ []) do
     GenStage.start_link(__MODULE__, opts, name: __MODULE__)
