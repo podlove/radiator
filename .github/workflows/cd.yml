@@ -4,10 +4,6 @@ on:
   push:
     branches: [main]
 
-env:
-  OTP_VERSION: "26"
-  ELIXIR_VERSION: "1.15"
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -36,8 +32,8 @@ jobs:
       - name: Setup Elixir
         uses: erlef/setup-beam@v1
         with:
-          otp-version: ${{ env.OTP_VERSION }}
-          elixir-version: ${{ env.ELIXIR_VERSION }}
+          version-file: .tool-versions
+          version-type: strict
 
       - name: Checkout Repository
         uses: actions/checkout@v4
