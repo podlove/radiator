@@ -6,19 +6,16 @@ defmodule Radiator.Outline do
   import Ecto.Query, warn: false
 
   alias Radiator.Outline.Node
-  alias Radiator.Outline.Notify
   alias Radiator.Repo
 
   def create(attrs \\ %{}, socket_id \\ nil) do
     attrs
     |> create_node()
-    |> Notify.broadcast_node_action(:insert, socket_id)
   end
 
   def delete(%Node{} = node, socket_id \\ nil) do
     node
     |> delete_node()
-    |> Notify.broadcast_node_action(:delete, socket_id)
   end
 
   @doc """
@@ -235,7 +232,6 @@ defmodule Radiator.Outline do
     %Node{}
     |> Node.insert_changeset(attrs)
     |> Repo.insert()
-    |> Notify.broadcast_node_action(:insert, socket_id)
   end
 
   @doc """
@@ -322,7 +318,6 @@ defmodule Radiator.Outline do
     node
     |> Node.update_content_changeset(attrs)
     |> Repo.update()
-    |> Notify.broadcast_node_action(:update, socket_id)
   end
 
   @doc """
