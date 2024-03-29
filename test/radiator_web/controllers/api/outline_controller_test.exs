@@ -4,7 +4,8 @@ defmodule RadiatorWeb.Api.OutlineControllerTest do
   import Radiator.AccountsFixtures
   import Radiator.PodcastFixtures
 
-  alias Radiator.{Accounts, Outline, Podcast}
+  alias Radiator.{Accounts, Podcast}
+  alias Radiator.Outline.NodeRepository
 
   describe "POST /api/v1/outline" do
     setup %{conn: conn} do
@@ -31,7 +32,7 @@ defmodule RadiatorWeb.Api.OutlineControllerTest do
       %{"uuid" => uuid} = json_response(conn, 200)
 
       assert %{content: "new node content", creator_id: ^user_id} =
-               Outline.get_node!(uuid)
+               NodeRepository.get_node!(uuid)
     end
 
     test "created node is connected to episode", %{
@@ -45,7 +46,9 @@ defmodule RadiatorWeb.Api.OutlineControllerTest do
       %{"uuid" => uuid} = json_response(conn, 200)
 
       episode_id = Podcast.get_current_episode_for_show(show_id).id
-      assert %{content: "new node content", episode_id: ^episode_id} = Outline.get_node!(uuid)
+
+      assert %{content: "new node content", episode_id: ^episode_id} =
+               NodeRepository.get_node!(uuid)
     end
 
     test "can't create node when content is missing", %{conn: conn} do

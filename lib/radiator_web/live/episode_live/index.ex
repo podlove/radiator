@@ -2,6 +2,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
   alias Radiator.Outline
+  alias Radiator.Outline.NodeRepository
   alias Radiator.Podcast
   alias RadiatorWeb.Endpoint
 
@@ -50,7 +51,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     episode = socket.assigns.selected_episode
     attrs = Map.merge(params, %{"creator_id" => user.id, "episode_id" => episode.id})
 
-    case Outline.create(attrs, socket.id) do
+    case Outline.insert_node(attrs) do
       {:ok, node} -> socket |> reply(:reply, Map.put(node, :temp_id, temp_id))
       _ -> socket |> reply(:noreply)
     end
@@ -59,7 +60,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   def handle_event("update_node", %{"uuid" => uuid} = params, socket) do
     attrs = Map.merge(%{"parent_id" => nil, "prev_id" => nil}, params)
 
-    case Outline.get_node(uuid) do
+    case NodeRepository.get_node(uuid) do
       nil -> nil
       node -> Outline.update_node_content(node, attrs, socket.id)
     end
@@ -69,9 +70,9 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   def handle_event("delete_node", %{"uuid" => uuid}, socket) do
-    case Outline.get_node(uuid) do
+    case NodeRepository.get_node(uuid) do
       nil -> nil
-      node -> Outline.delete(node, socket.id)
+      node -> Outline.remove_node(node, socket.id)
     end
 
     socket
@@ -110,6 +111,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     Podcast.get_current_episode_for_show(show_id)
   end
 
-  defp get_nodes(%{id: id}), do: Outline.list_nodes_by_episode(id)
+  defp get_nodes(%{id: id}), do: NodeRepository.list_nodes_by_episode(id)
   defp get_nodes(_), do: []
 end

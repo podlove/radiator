@@ -6,7 +6,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
   import Radiator.PodcastFixtures
   import Radiator.OutlineFixtures
 
-  alias Radiator.Outline
+  alias Radiator.Outline.NodeRepository
 
   describe "Episode page is restricted" do
     setup do
@@ -60,7 +60,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
     test "lists all nodes", %{conn: conn, show: show} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
-      nodes = Outline.list_nodes()
+      nodes = NodeRepository.list_nodes()
 
       assert_push_event(live, "list", %{nodes: ^nodes})
     end
@@ -75,14 +75,12 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       assert live |> render_hook(:create_node, params)
 
       node =
-        Outline.list_nodes()
+        NodeRepository.list_nodes()
         |> Enum.find(&(&1.content == "new node temp content"))
 
       node_with_temp_id = Map.put(node, :temp_id, temp_id)
 
       assert_reply(live, ^node_with_temp_id)
-
-      # FIXME: assert_push_event(other_live, "insert", ^node)
     end
 
     test "update node", %{conn: conn, show: show, episode: episode} do
@@ -99,12 +97,11 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       assert live |> render_hook(:update_node, params)
 
       updated_node =
-        Outline.list_nodes()
+        NodeRepository.list_nodes()
         |> Enum.find(&(&1.content == "update node content"))
 
       assert updated_node.uuid == params.uuid
       assert updated_node.content == params.content
-      # FIXME: assert_push_event(other_live, "update", ^updated_node)
     end
 
     test "delete node", %{conn: conn, show: show, episode: episode} do
@@ -115,9 +112,6 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       params = Map.from_struct(node)
 
       assert live |> render_hook(:delete_node, params)
-
-      # FIXME: assert_push_event(other_live, "delete", %{uuid: deleted_uuid})
-      # FIXME: assert deleted_uuid == node.uuid
     end
   end
 end

@@ -3,6 +3,8 @@ defmodule Radiator.OutlineFixtures do
   This module defines test helpers for creating
   entities via the `Radiator.Outline` context.
   """
+
+  alias Radiator.Outline.NodeRepository
   alias Radiator.Podcast
   alias Radiator.PodcastFixtures
 
@@ -18,7 +20,7 @@ defmodule Radiator.OutlineFixtures do
         content: "some content",
         episode_id: episode.id
       })
-      |> Radiator.Outline.create_node()
+      |> NodeRepository.create_node()
 
     node
   end

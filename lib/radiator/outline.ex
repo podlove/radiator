@@ -6,80 +6,109 @@ defmodule Radiator.Outline do
   import Ecto.Query, warn: false
 
   alias Radiator.Outline.Node
+  alias Radiator.Outline.NodeRepository
   alias Radiator.Repo
 
-  def create(attrs \\ %{}, _socket_id \\ nil) do
-    attrs
-    |> create_node()
+  @doc """
+  Inserts a node.
+
+  ## Examples
+
+      iex> insert_node(%{content: 'foo'})
+      {:ok, %Node{}}
+
+      iex> insert_node(%{content: value})
+      {:error, :parent_and_prev_not_consistent}
+
+  """
+  # creates a node and inserts it into the outline tree
+  # if a parent node is given, the new node will be inserted as a child of the parent node
+  # if a previous node is given, the new node will be inserted after the previous node
+  # if no parent is given, the new node will be inserted as a root node
+  # if no previous node is given, the new node will be inserted as the first child of the parent node
+  def insert_node(attrs) do
+    Repo.transaction(fn ->
+      prev_node_id = attrs["prev_node"]
+      parent_node_id = attrs["parent_node"]
+      episode_id = attrs["episode_id"]
+      # find Node which has been previously connected to prev_node
+      node_to_move =
+        Node
+        |> where(episode_id: ^episode_id)
+        |> where_prev_node_equals(prev_node_id)
+        |> where_parent_node_equals(parent_node_id)
+        |> Repo.one()
+
+      with parent_node <- NodeRepository.get_node_if(parent_node_id),
+           prev_node <- NodeRepository.get_node_if(prev_node_id),
+           true <- parent_and_prev_consistent?(parent_node, prev_node),
+           {:ok, node} <- NodeRepository.create_node(attrs),
+           {:ok, _node_to_move} <- move_node_(node_to_move, nil, node.uuid),
+           {:ok, node} <- move_node_(node, parent_node_id, prev_node_id) do
+        node
+      else
+        false ->
+          Repo.rollback("Insert node failed. Parent and prev node are not consistent.")
+
+        {:error, _} ->
+          Repo.rollback("Insert node failed. Unkown error")
+      end
+    end)
   end
 
-  def delete(%Node{} = node, _socket_id \\ nil) do
+  @doc """
+  Updates a nodes content.
+
+  ## Examples
+
+      iex> update_node_content(node, %{content: new_value})
+      {:ok, %Node{}}
+
+      iex> update_node_content(node, %{content: nil})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_node_content(%Node{} = node, attrs, _socket_id \\ nil) do
     node
-    |> delete_node()
+    |> Node.update_content_changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
-  Returns the list of nodes.
-
+  Removes a node from the tree and deletes it from the repository.
+  Recursivly deletes all children if there are some.
   ## Examples
 
-      iex> list_nodes()
-      [%Node{}, ...]
+      iex> remove_node(node)
+      {:ok, %Node{}}
+
+      iex> remove_node(node)
+      {:error, %Ecto.Changeset{}}
 
   """
-  def list_nodes do
-    Node
-    |> Repo.all()
-  end
+  def remove_node(%Node{} = node, _socket_id \\ nil) do
+    next_node =
+      Node
+      |> where([n], n.prev_id == ^node.uuid)
+      |> Repo.one()
 
-  @doc """
-  Returns the list of nodes for an episode.
+    prev_node = get_prev_node(node)
 
-  ## Examples
+    if next_node do
+      next_node
+      |> Node.move_node_changeset(%{prev_id: get_node_id(prev_node)})
+      |> Repo.update()
+    end
 
-      iex> list_nodes(123)
-      [%Node{}, ...]
+    # no tail recursion but we dont have too much levels in a tree
+    node
+    |> get_all_child_nodes()
+    |> Enum.each(fn child_node ->
+      remove_node(child_node)
+    end)
 
-  """
-
-  def list_nodes_by_episode(episode_id) do
-    Node
-    |> where([p], p.episode_id == ^episode_id)
-    |> Repo.all()
-  end
-
-  @doc """
-  Returns the the number of nodes for an episode
-
-  ## Examples
-
-      iex> count_nodes_by_episode(123)
-      3
-
-  """
-  def count_nodes_by_episode(episode_id) do
-    episode_id
-    |> list_nodes_by_episode()
-    |> Enum.count()
-  end
-
-  @doc """
-  Gets a single node.
-
-  Raises `Ecto.NoResultsError` if the Node does not exist.
-
-  ## Examples
-
-      iex> get_node!(123)
-      %Node{}
-
-      iex> get_node!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_node!(id) do
-    Node
-    |> Repo.get!(id)
+    # finally delete the node itself from the database
+    NodeRepository.delete_node(node)
   end
 
   @doc """
@@ -114,45 +143,6 @@ defmodule Radiator.Outline do
     |> where([n], n.parent_id == ^node.uuid)
     |> Repo.all()
   end
-
-  @doc """
-  Gets a single node.
-
-  Returns `nil` if the Node does not exist.
-
-  ## Examples
-
-      iex> get_node(123)
-      %Node{}
-
-      iex> get_node(456)
-      nil
-
-  """
-  def get_node(id) do
-    Node
-    |> Repo.get(id)
-  end
-
-  @doc """
-  Gets a single node where id can be nil.
-
-  Returns `nil` if the Node does not exist.
-
-  ## Examples
-
-      iex> get_node_if(123)
-      %Node{}
-
-      iex> get_node_if(456)
-      nil
-
-      iex> get_node_if(nil)
-      nil
-
-  """
-  def get_node_if(nil), do: nil
-  def get_node_if(node), do: get_node(node)
 
   @doc """
   Gets all nodes of an episode as a tree.
@@ -237,71 +227,6 @@ defmodule Radiator.Outline do
     {:ok, tree}
   end
 
-  @doc """
-  Creates a node.
-
-  ## Examples
-
-      iex> create_node(%{field: value})
-      {:ok, %Node{}}
-
-      iex> create_node(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_node(attrs \\ %{}, _socket_id \\ nil) do
-    %Node{}
-    |> Node.insert_changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Inserts a node.
-
-  ## Examples
-
-      iex> insert_node(%{content: 'foo'})
-      {:ok, %Node{}}
-
-      iex> insert_node(%{content: value})
-      {:error, :parent_and_prev_not_consistent}
-
-  """
-  # creates a node and inserts it into the outline tree
-  # if a parent node is given, the new node will be inserted as a child of the parent node
-  # if a previous node is given, the new node will be inserted after the previous node
-  # if no parent is given, the new node will be inserted as a root node
-  # if no previous node is given, the new node will be inserted as the first child of the parent node
-  def insert_node(attrs) do
-    Repo.transaction(fn ->
-      prev_node_id = attrs["prev_node"]
-      parent_node_id = attrs["parent_node"]
-      episode_id = attrs["episode_id"]
-      # find Node which has been previously connected to prev_node
-      node_to_move =
-        Node
-        |> where(episode_id: ^episode_id)
-        |> where_prev_node_equals(prev_node_id)
-        |> where_parent_node_equals(parent_node_id)
-        |> Repo.one()
-
-      with parent_node <- get_node_if(parent_node_id),
-           prev_node <- get_node_if(prev_node_id),
-           true <- parent_and_prev_consistent?(parent_node, prev_node),
-           {:ok, node} <- create_node(attrs),
-           {:ok, _node_to_move} <- move_node_(node_to_move, nil, node.uuid),
-           {:ok, node} <- move_node_(node, parent_node_id, prev_node_id) do
-        node
-      else
-        false ->
-          Repo.rollback("Insert node failed. Parent and prev node are not consistent.")
-
-        {:error, _} ->
-          Repo.rollback("Insert node failed. Unkown error")
-      end
-    end)
-  end
-
   defp move_node_(nil, _parent_node_id, _prev_node_id), do: {:ok, nil}
 
   defp move_node_(node, parent_node_id, prev_node_id) do
@@ -325,61 +250,6 @@ defmodule Radiator.Outline do
 
   defp where_parent_node_equals(node, nil), do: where(node, [n], is_nil(n.parent_id))
   defp where_parent_node_equals(node, parent_id), do: where(node, [n], n.parent_id == ^parent_id)
-
-  @doc """
-  Updates a nodes content.
-
-  ## Examples
-
-      iex> update_node_content(node, %{content: new_value})
-      {:ok, %Node{}}
-
-      iex> update_node_content(node, %{content: nil})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_node_content(%Node{} = node, attrs, _socket_id \\ nil) do
-    node
-    |> Node.update_content_changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a node.
-
-  ## Examples
-
-      iex> delete_node(node)
-      {:ok, %Node{}}
-
-      iex> delete_node(node)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_node(%Node{} = node) do
-    next_node =
-      Node
-      |> where([n], n.prev_id == ^node.uuid)
-      |> Repo.one()
-
-    prev_node = get_prev_node(node)
-
-    if next_node do
-      next_node
-      |> Node.move_node_changeset(%{prev_id: get_node_id(prev_node)})
-      |> Repo.update()
-    end
-
-    # no tail recursion but we dont have too much levels in a tree
-    node
-    |> get_all_child_nodes()
-    |> Enum.each(fn child_node ->
-      delete_node(child_node)
-    end)
-
-    node
-    |> Repo.delete()
-  end
 
   defp get_node_id(nil), do: nil
 

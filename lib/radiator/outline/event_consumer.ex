@@ -23,7 +23,7 @@ defmodule Radiator.Outline.EventConsumer do
 
   defp process_event(%InsertNodeEvent{payload: payload} = _event) do
     payload
-    |> Outline.create_node()
+    |> Outline.insert_node()
     |> handle_insert_result()
 
     #      validate
