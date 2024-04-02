@@ -1,144 +1,155 @@
-import { Node } from "../types"
-import { createItem, updateItem, deleteItem, getItemByNode, focusItem } from "../item"
-import { getNodeByEvent, getNodeByItem } from "../node"
+import { Node } from "../types";
+import {
+  createItem,
+  updateItem,
+  deleteItem,
+  getItemByNode,
+  focusItem,
+} from "../item";
+import { getNodeByEvent, getNodeByItem } from "../node";
 
 export function focusin(event: FocusEvent) {
-  const { uuid } = getNodeByEvent(event)
+  const { uuid } = getNodeByEvent(event);
 
-  this.pushEvent("set_focus", uuid)
+  this.pushEvent("set_focus", uuid);
 }
 
 export function focusout(event: FocusEvent) {
-  const { uuid } = getNodeByEvent(event)
+  const { uuid } = getNodeByEvent(event);
 
-  this.pushEvent("remove_focus", uuid)
+  this.pushEvent("remove_focus", uuid);
 }
 
 export function input(event: Event) {
-  const node = getNodeByEvent(event)
-
-  this.pushEvent("update_node", node)
+  const node = getNodeByEvent(event);
+  node.dirty = true;
+  this.pushEvent("update_node", node);
 }
 
 export function keydown(event: KeyboardEvent) {
-  const container: HTMLOListElement = this.el
+  const container: HTMLOListElement = this.el;
 
-  const selection = window.getSelection()
+  const selection = window.getSelection();
   // const range = selection?.getRangeAt(0)
 
-  const node = getNodeByEvent(event)
+  const node = getNodeByEvent(event);
 
-  const item = getItemByNode(node)!
-  const prevItem = item.previousSibling as HTMLLIElement | null
-  const nextItem = item.nextSibling as HTMLLIElement | null
+  const item = getItemByNode(node)!;
+  const prevItem = item.previousSibling as HTMLLIElement | null;
+  const nextItem = item.nextSibling as HTMLLIElement | null;
 
-  const prevNode = prevItem && getNodeByItem(prevItem)
-  const nextNode = nextItem && getNodeByItem(nextItem)
+  const prevNode = prevItem && getNodeByItem(prevItem);
+  const nextNode = nextItem && getNodeByItem(nextItem);
 
   switch (event.key) {
     case "ArrowUp":
-      if (selection?.anchorOffset != 0) return
-      event.preventDefault()
+      if (selection?.anchorOffset != 0) return;
+      event.preventDefault();
 
-      if (!prevItem || !prevNode) return
+      if (!prevItem || !prevNode) return;
       // TODO: if no prevItem exists, try to select the parent item
 
-      focusItem(prevItem)
-      this.pushEvent("set_focus", prevNode.uuid)
-      break
+      focusItem(prevItem);
+      this.pushEvent("set_focus", prevNode.uuid);
+      break;
 
     case "ArrowDown":
-      if (selection?.anchorOffset != node.content.length) return
-      event.preventDefault()
+      if (selection?.anchorOffset != node.content.length) return;
+      event.preventDefault();
 
-      if (!nextItem || !nextNode) return
+      if (!nextItem || !nextNode) return;
       // TODO: if no nextItem exists, try to select the first child
 
-      focusItem(nextItem)
-      this.pushEvent("set_focus", nextNode.uuid)
-      break
+      focusItem(nextItem);
+      this.pushEvent("set_focus", nextNode.uuid);
+      break;
 
     case "Enter":
-      event.preventDefault()
+      event.preventDefault();
 
-      const splitPos = selection?.anchorOffset || 0
+      const splitPos = selection?.anchorOffset || 0;
 
-      const content = node.content
-      node.content = content?.substring(0, splitPos)
+      const content = node.content;
+      node.content = content?.substring(0, splitPos);
+      node.dirty = true;
 
-      updateItem(node, container)
-      this.pushEvent("update_node", node)
+      updateItem(node, container);
+      this.pushEvent("update_node", node);
 
       const newNode: Node = {
         temp_id: self.crypto.randomUUID(),
         content: content?.substring(splitPos),
         parent_id: node.parent_id,
-        prev_id: node.uuid
-      }
+        prev_id: node.uuid,
+        dirty: true,
+      };
 
-      this.pushEvent("create_node", newNode, (node: Node, _ref: number) => {
-        const newItem = createItem(node)
-        item.after(newItem)
-        focusItem(newItem, false)
-      })
-      break
+      this.pushEvent("create_node", newNode);
+      // this.pushEvent("create_node", newNode, (node: Node, _ref: number) => {
+      //   const newItem = createItem(node);
+      //   item.after(newItem);
+      //   focusItem(newItem, false);
+      // });
+      break;
 
     case "Backspace":
-      if (selection?.anchorOffset != 0) return
-      event.preventDefault()
+      if (selection?.anchorOffset != 0) return;
+      event.preventDefault();
 
-      if (!prevItem || !prevNode) return
+      if (!prevItem || !prevNode) return;
 
-      prevNode.content += node.content
-      updateItem(prevNode, container)
-      focusItem(prevItem)
-      this.pushEvent("update_node", node)
+      prevNode.content += node.content;
+      updateItem(prevNode, container);
+      focusItem(prevItem);
+      prevNode.dirty = true;
+      this.pushEvent("update_node", prevNode);
 
-      deleteItem(node)
-      this.pushEvent("delete_node", node)
-      break
+      deleteItem(node);
+      node.dirty = true;
+      this.pushEvent("delete_node", node);
+      break;
 
     case "Delete":
-      if (selection?.anchorOffset != node.content.length) return
-      event.preventDefault()
+      if (selection?.anchorOffset != node.content.length) return;
+      event.preventDefault();
 
-      if (!nextItem || !nextNode) return
+      if (!nextItem || !nextNode) return;
 
-      node.content += nextNode.content
-      updateItem(node, container)
-      focusItem(item)
-      this.pushEvent("update_node", node)
+      node.content += nextNode.content;
+      updateItem(node, container);
+      focusItem(item);
+      node.dirty = true;
+      this.pushEvent("update_node", node);
 
-      deleteItem(nextNode)
-      this.pushEvent("delete_node", nextNode)
-      break
+      deleteItem(nextNode);
+      nextNode.dirty = true;
+      this.pushEvent("delete_node", nextNode);
+      break;
 
-    case "Tab":
-      event.preventDefault()
+    // case "Tab":
+    //   event.preventDefault();
 
-      if (event.shiftKey) {
-        if (node.parent_id) {
-          // outdent
-          node.prev_id = node.parent_id
-          node.parent_id = undefined
-          updateItem(node, container)
+    //   if (event.shiftKey) {
+    //     if (node.parent_id) {
+    //       // outdent
+    //       node.prev_id = node.parent_id;
+    //       node.parent_id = undefined;
+    //       updateItem(node, container);
 
-          focusItem(item)
-          this.pushEvent("update_node", node)
-        }
-      } else {
-        if (node.prev_id) {
-          // indent
-          node.parent_id = node.prev_id
-          node.prev_id = undefined // TODO: prev_id should be the id of the last child of the parent node
-          updateItem(node, container)
+    //       focusItem(item);
+    //       this.pushEvent("update_node", node);
+    //     }
+    //   } else {
+    //     if (node.prev_id) {
+    //       // indent
+    //       node.parent_id = node.prev_id;
+    //       node.prev_id = undefined; // TODO: prev_id should be the id of the last child of the parent node
+    //       updateItem(node, container);
 
-          focusItem(item)
-          this.pushEvent("update_node", node)
-        }
-      }
-      break
+    //       focusItem(item);
+    //       this.pushEvent("update_node", node);
+    //     }
+    //   }
+    //   break;
   }
 }
-
-

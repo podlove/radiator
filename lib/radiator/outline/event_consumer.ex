@@ -4,9 +4,11 @@ defmodule Radiator.Outline.EventConsumer do
   use GenStage
 
   alias Radiator.Outline
-  alias Radiator.Outline.Event.InsertNodeEvent
+  alias Radiator.Outline.Command.InsertNodeCommand
+  alias Radiator.Outline.Event.NodeInsertedEvent
   alias Radiator.Outline.EventProducer
   alias Radiator.EventStore
+  alias Radiator.Outline.Dispatch
 
   def start_link(opts \\ []) do
     GenStage.start_link(__MODULE__, opts, name: __MODULE__)
@@ -22,17 +24,17 @@ defmodule Radiator.Outline.EventConsumer do
     {:noreply, [], state}
   end
 
-  defp process_event(%InsertNodeEvent{payload: payload} = event) do
+  defp process_event(%InsertNodeCommand{payload: payload} = command) do
     payload
     |> Outline.insert_node()
-    |> handle_insert_result(event)
+    |> handle_insert_result(command)
   end
 
-  defp handle_insert_result({:ok, node}, event) do
-    EventStore.persist_event(event)
+  defp handle_insert_result({:ok, node}, command) do
+    %NodeInsertedEvent{node: node, event_id: command.event_id}
+    |> EventStore.persist_event()
+    |> Dispatch.broadcast()
 
-    # persist event (event contains all attributes, user, event_id, timestamps)
-    # broadcast event (topic: episode_id)
     {:ok, node}
   end
 

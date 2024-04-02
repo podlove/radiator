@@ -10,6 +10,14 @@ defmodule Radiator.Outline.Dispatch do
     |> EventProducer.enqueue()
   end
 
+  def subscribe(_episode_id) do
+    Phoenix.PubSub.subscribe(Radiator.PubSub, "events")
+  end
+
+  def broadcast(event) do
+    Phoenix.PubSub.broadcast(Radiator.PubSub, "events", event)
+  end
+
   # TODO
   # update_node
   # delete_node
