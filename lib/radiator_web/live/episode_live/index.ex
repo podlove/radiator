@@ -6,10 +6,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   alias Radiator.Outline.Event.NodeInsertedEvent
   alias Radiator.Podcast
 
-  # alias RadiatorWeb.Endpoint
-
-  # @topic "outline-node"
-
   @impl true
   def mount(%{"show" => show_id}, _session, socket) do
     show = Podcast.get_show!(show_id, preload: :episodes)
@@ -86,7 +82,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
         socket
       ) do
     socket
-    |> IO.inspect(label: "handle_info")
     |> push_event("insert", node)
     |> reply(:noreply)
   end
