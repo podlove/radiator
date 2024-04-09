@@ -1,4 +1,4 @@
-defmodule Radiator.Outline.Event do
+defmodule Radiator.Outline.Command do
   @moduledoc false
 
   alias Radiator.Outline.Command.InsertNodeCommand
