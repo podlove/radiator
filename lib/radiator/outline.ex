@@ -27,6 +27,7 @@ defmodule Radiator.Outline do
   # if no parent is given, the new node will be inserted as a root node
   # if no previous node is given, the new node will be inserted as the first child of the parent node
   def insert_node(attrs) do
+    # FIXME: missing test  required episode_id . .it crashes without given
     Repo.transaction(fn ->
       prev_node_id = attrs["prev_node"]
       parent_node_id = attrs["parent_node"]
@@ -43,8 +44,8 @@ defmodule Radiator.Outline do
            prev_node <- NodeRepository.get_node_if(prev_node_id),
            true <- parent_and_prev_consistent?(parent_node, prev_node),
            {:ok, node} <- NodeRepository.create_node(attrs),
-           {:ok, _node_to_move} <- move_node_(node_to_move, nil, node.uuid),
-           {:ok, node} <- move_node_(node, parent_node_id, prev_node_id) do
+           {:ok, _node_to_move} <- move_node_if(node_to_move, nil, node.uuid),
+           {:ok, node} <- move_node_if(node, parent_node_id, prev_node_id) do
         node
       else
         false ->
@@ -227,9 +228,9 @@ defmodule Radiator.Outline do
     {:ok, tree}
   end
 
-  defp move_node_(nil, _parent_node_id, _prev_node_id), do: {:ok, nil}
+  defp move_node_if(nil, _parent_node_id, _prev_node_id), do: {:ok, nil}
 
-  defp move_node_(node, parent_node_id, prev_node_id) do
+  defp move_node_if(node, parent_node_id, prev_node_id) do
     node
     |> Node.move_node_changeset(%{
       parent_id: parent_node_id,
