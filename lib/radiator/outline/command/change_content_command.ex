@@ -6,7 +6,7 @@ defmodule Radiator.Outline.Command.ChangeContentCommand do
           event_id: binary(),
           user_id: binary(),
           node_id: binary(),
-          content: string() | nil
+          content: String.t() | nil
         }
 
   defstruct [:event_id, :user_id, :node_id, :content]
