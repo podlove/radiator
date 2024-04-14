@@ -29,14 +29,14 @@ jobs:
           --health-retries 5
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Setup Elixir
         uses: erlef/setup-beam@v1
         with:
-          otp-version: ${{ env.OTP_VERSION }}
-          elixir-version: ${{ env.ELIXIR_VERSION }}
-
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+          version-file: .tool-versions
+          version-type: strict
 
       - name: Cache deps
         uses: actions/cache@v4
