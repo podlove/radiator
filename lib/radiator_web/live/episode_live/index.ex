@@ -2,18 +2,12 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
   alias Radiator.Outline
-  alias Radiator.Outline.NodeRepository
+  alias Radiator.Outline.{Dispatch, NodeRepository}
+  alias Radiator.Outline.Event.NodeInsertedEvent
   alias Radiator.Podcast
-  alias RadiatorWeb.Endpoint
-
-  @topic "outline-node"
 
   @impl true
   def mount(%{"show" => show_id}, _session, socket) do
-    if connected?(socket) do
-      Endpoint.subscribe(@topic)
-    end
-
     show = Podcast.get_show!(show_id, preload: :episodes)
 
     socket
@@ -28,6 +22,12 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   def handle_params(params, _uri, socket) do
     episode = get_selected_episode(params)
     nodes = get_nodes(episode)
+
+    # would need to unsucbscribe from previous episode,
+    # better: load new liveview
+    if connected?(socket) and episode do
+      Dispatch.subscribe(episode.id)
+    end
 
     socket
     |> assign(:selected_episode, episode)
@@ -50,11 +50,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     user = socket.assigns.current_user
     episode = socket.assigns.selected_episode
     attrs = Map.merge(params, %{"creator_id" => user.id, "episode_id" => episode.id})
-
-    case Outline.insert_node(attrs) do
-      {:ok, node} -> socket |> reply(:reply, Map.put(node, :temp_id, temp_id))
-      _ -> socket |> reply(:noreply)
-    end
+    Dispatch.insert_node(attrs, user.id, temp_id)
+    socket |> reply(:noreply)
   end
 
   def handle_event("update_node", %{"uuid" => uuid} = params, socket) do
@@ -80,24 +77,22 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   @impl true
-  def handle_info({_, _node, socket_id}, socket) when socket_id == socket.id do
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_info({:insert, node, _socket_id}, socket) do
+  def handle_info(
+        %NodeInsertedEvent{event_id: _event_id, node: node},
+        socket
+      ) do
     socket
     |> push_event("insert", node)
     |> reply(:noreply)
   end
 
-  def handle_info({:update, node, _socket_id}, socket) do
+  def handle_info({:update, node}, socket) do
     socket
     |> push_event("update", node)
     |> reply(:noreply)
   end
 
-  def handle_info({:delete, node, _socket_id}, socket) do
+  def handle_info({:delete, node}, socket) do
     socket
     |> push_event("delete", node)
     |> reply(:noreply)
