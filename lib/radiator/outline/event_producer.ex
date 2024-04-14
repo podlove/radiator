@@ -11,26 +11,26 @@ defmodule Radiator.Outline.EventProducer do
     {:producer, {:queue.new(), 0}}
   end
 
-  def enqueue(event) do
-    GenStage.cast(__MODULE__, {:enqueue, event})
+  def enqueue(command) do
+    GenStage.cast(__MODULE__, {:enqueue, command})
     :ok
   end
 
-  def handle_cast({:enqueue, event}, {queue, 0}) do
-    queue = :queue.in(event, queue)
+  def handle_cast({:enqueue, command}, {queue, 0}) do
+    queue = :queue.in(command, queue)
     {:noreply, [], {queue, 0}}
   end
 
-  def handle_cast({:enqueue, event}, {queue, demand}) do
-    queue = :queue.in(event, queue)
-    {{:value, event}, queue} = :queue.out(queue)
-    {:noreply, [event], {queue, demand - 1}}
+  def handle_cast({:enqueue, command}, {queue, demand}) do
+    queue = :queue.in(command, queue)
+    {{:value, command}, queue} = :queue.out(queue)
+    {:noreply, [command], {queue, demand - 1}}
   end
 
   def handle_demand(_incoming, {queue, demand}) do
     with {item, queue} <- :queue.out(queue),
-         {:value, event} <- item do
-      {:noreply, [event], {queue, demand}}
+         {:value, command} <- item do
+      {:noreply, [command], {queue, demand}}
     else
       _ -> {:noreply, [], {queue, demand + 1}}
     end
