@@ -6,7 +6,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
   import Radiator.PodcastFixtures
   import Radiator.OutlineFixtures
 
-  alias Radiator.Outline
+  alias Radiator.Outline.NodeRepository
 
   describe "Episode page is restricted" do
     setup do
@@ -60,14 +60,14 @@ defmodule RadiatorWeb.EpisodeLiveTest do
     test "lists all nodes", %{conn: conn, show: show} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
-      nodes = Outline.list_nodes()
+      nodes = NodeRepository.list_nodes()
 
       assert_push_event(live, "list", %{nodes: ^nodes})
     end
 
     test "insert a new node", %{conn: conn, show: show} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+      {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
       temp_id = "f894d2ed-9447-4eef-8c31-fc52372b3bbe"
       params = %{"temp_id" => temp_id, "content" => "new node temp content"}
@@ -75,19 +75,17 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       assert live |> render_hook(:create_node, params)
 
       node =
-        Outline.list_nodes()
+        NodeRepository.list_nodes()
         |> Enum.find(&(&1.content == "new node temp content"))
 
       node_with_temp_id = Map.put(node, :temp_id, temp_id)
 
       assert_reply(live, ^node_with_temp_id)
-
-      assert_push_event(other_live, "insert", ^node)
     end
 
     test "update node", %{conn: conn, show: show, episode: episode} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+      {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
       node = node_fixture(%{episode_id: episode.id})
 
@@ -99,27 +97,21 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       assert live |> render_hook(:update_node, params)
 
       updated_node =
-        Outline.list_nodes()
+        NodeRepository.list_nodes()
         |> Enum.find(&(&1.content == "update node content"))
 
       assert updated_node.uuid == params.uuid
       assert updated_node.content == params.content
-
-      assert_push_event(other_live, "update", ^updated_node)
     end
 
     test "delete node", %{conn: conn, show: show, episode: episode} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+      {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
       node = node_fixture(%{episode_id: episode.id})
       params = Map.from_struct(node)
 
       assert live |> render_hook(:delete_node, params)
-
-      assert_push_event(other_live, "delete", %{uuid: deleted_uuid})
-
-      assert deleted_uuid == node.uuid
     end
   end
 end

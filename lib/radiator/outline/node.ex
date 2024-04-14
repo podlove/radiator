@@ -15,31 +15,41 @@ defmodule Radiator.Outline.Node do
     field :creator_id, :integer
     field :parent_id, Ecto.UUID
     field :prev_id, Ecto.UUID
+    field :level, :integer, virtual: true
 
     belongs_to :episode, Episode
 
     timestamps(type: :utc_datetime)
   end
 
-  @required_fields [
-    :episode_id
-  ]
-
-  @optional_fields [
-    :content,
-    :creator_id,
-    :parent_id,
-    :prev_id
-  ]
-
-  @all_fields @optional_fields ++ @required_fields
-
-  @doc false
-  def changeset(node, attrs) do
+  @doc """
+  A changeset for inserting a new node
+  Work in progress. Since we currently ignore the tree structure, there is
+  no concept for a root node.
+  Also questionable wether a node really needs a content from beginning. So probably a root
+  doesnt have a content
+  Another issue might be we need to create the uuid upfront and pass it here
+  """
+  def insert_changeset(node, attributes) do
     node
-    |> cast(attrs, @all_fields)
+    |> cast(attributes, [:content, :episode_id, :creator_id, :parent_id, :prev_id])
     |> update_change(:content, &trim/1)
-    |> validate_required(@required_fields)
+    |> validate_required([:content, :episode_id])
+  end
+
+  @doc """
+  Changeset for updating the content of a node
+  """
+  def update_content_changeset(node, attrs) do
+    node
+    |> cast(attrs, [:content])
+    |> update_change(:content, &trim/1)
+    |> validate_required([:content])
+  end
+
+  def move_node_changeset(node, attrs) do
+    node
+    |> cast(attrs, [:parent_id, :prev_id])
   end
 
   defp trim(content) when is_binary(content), do: String.trim(content)
