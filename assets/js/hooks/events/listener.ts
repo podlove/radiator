@@ -22,6 +22,7 @@ export function focusout(event: FocusEvent) {
 
 export function input(event: Event) {
   const node = getNodeByEvent(event);
+  node.event_id = self.crypto.randomUUID();
   node.dirty = true;
   this.pushEvent("update_node", node);
 }
@@ -71,13 +72,14 @@ export function keydown(event: KeyboardEvent) {
 
       const content = node.content;
       node.content = content?.substring(0, splitPos);
+      node.event_id = self.crypto.randomUUID();
       node.dirty = true;
 
       updateItem(node, container);
       this.pushEvent("update_node", node);
 
       const newNode: Node = {
-        temp_id: self.crypto.randomUUID(),
+        event_id: self.crypto.randomUUID(),
         content: content?.substring(splitPos),
         parent_id: node.parent_id,
         prev_id: node.uuid,
@@ -101,10 +103,12 @@ export function keydown(event: KeyboardEvent) {
       prevNode.content += node.content;
       updateItem(prevNode, container);
       focusItem(prevItem);
+      prevNode.event_id = self.crypto.randomUUID();
       prevNode.dirty = true;
       this.pushEvent("update_node", prevNode);
 
       deleteItem(node);
+      node.event_id = self.crypto.randomUUID();
       node.dirty = true;
       this.pushEvent("delete_node", node);
       break;
@@ -118,10 +122,12 @@ export function keydown(event: KeyboardEvent) {
       node.content += nextNode.content;
       updateItem(node, container);
       focusItem(item);
+      node.event_id = self.crypto.randomUUID();
       node.dirty = true;
       this.pushEvent("update_node", node);
 
       deleteItem(nextNode);
+      nextNode.event_id = self.crypto.randomUUID();
       nextNode.dirty = true;
       this.pushEvent("delete_node", nextNode);
       break;

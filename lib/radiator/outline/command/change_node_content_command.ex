@@ -1,4 +1,4 @@
-defmodule Radiator.Outline.Command.ChangeContentCommand do
+defmodule Radiator.Outline.Command.ChangeNodeContentCommand do
   @moduledoc """
   Command to move a nodeinside the outline to another place.
   """

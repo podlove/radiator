@@ -1,8 +1,8 @@
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
 
 export interface Node {
+  event_id?: UUID;
   uuid?: UUID;
-  temp_id?: UUID;
   content: string;
   creator_id?: number;
   parent_id?: UUID;

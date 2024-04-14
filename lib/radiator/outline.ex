@@ -62,17 +62,19 @@ defmodule Radiator.Outline do
 
   ## Examples
 
-      iex> update_node_content(node, %{content: new_value})
+      iex> update_node_content(node_id, %{content: new_value})
       {:ok, %Node{}}
 
-      iex> update_node_content(node, %{content: nil})
+      iex> update_node_content(node_id, %{content: nil})
       {:error, %Ecto.Changeset{}}
-
   """
-  def update_node_content(%Node{} = node, attrs, _socket_id \\ nil) do
-    node
-    |> Node.update_content_changeset(attrs)
-    |> Repo.update()
+  def update_node_content(node_id, content) do
+    case NodeRepository.get_node(node_id) do
+      nil -> {:error, :not_found}
+      node -> node
+        |> Node.update_content_changeset(%{content: content})
+        |> Repo.update()
+    end
   end
 
   @doc """
