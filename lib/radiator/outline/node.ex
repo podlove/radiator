@@ -9,7 +9,7 @@ defmodule Radiator.Outline.Node do
 
   @derive {Jason.Encoder, only: [:uuid, :content, :creator_id, :parent_id, :prev_id]}
 
-  @primary_key {:uuid, :binary_id, autogenerate: true}
+  @primary_key {:uuid, :binary_id, autogenerate: false}
   schema "outline_nodes" do
     field :content, :string
     field :creator_id, :integer
@@ -32,9 +32,12 @@ defmodule Radiator.Outline.Node do
   """
   def insert_changeset(node, attributes) do
     node
-    |> cast(attributes, [:content, :episode_id, :creator_id, :parent_id, :prev_id])
+    |> cast(attributes, [:uuid, :content, :episode_id, :creator_id, :parent_id, :prev_id])
+    |> put_uuid()
     |> update_change(:content, &trim/1)
     |> validate_required([:content, :episode_id])
+    |> validate_format(:uuid, ~r/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+    |> unique_constraint(:uuid, name: "outline_nodes_pkey")
   end
 
   @doc """
@@ -54,4 +57,14 @@ defmodule Radiator.Outline.Node do
 
   defp trim(content) when is_binary(content), do: String.trim(content)
   defp trim(content), do: content
+
+  defp put_uuid(%Ecto.Changeset{valid?: true} = changeset) do
+    if changed?(changeset, :uuid) do
+      changeset
+    else
+      put_change(changeset, :uuid, Ecto.UUID.generate())
+    end
+  end
+
+  defp put_uuid(changeset), do: changeset
 end

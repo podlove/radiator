@@ -1,13 +1,6 @@
 import { Node } from "./types";
 
-export function createItem({
-  uuid,
-  temp_id,
-  content,
-  parent_id,
-  prev_id,
-  dirty,
-}: Node) {
+export function createItem({ uuid, content, parent_id, prev_id, dirty }: Node) {
   const input = document.createElement("div");
   input.textContent = content;
   input.contentEditable = "true"; // firefox does not support "plaintext-only"
@@ -16,9 +9,7 @@ export function createItem({
   ol.className = "list-disc";
 
   const item = document.createElement("li");
-  temp_id && (item.id = "outline-node-" + temp_id);
-  uuid && (item.id = "outline-node-" + uuid);
-
+  item.id = "outline-node-" + uuid;
   item.className = "my-1 ml-4";
 
   item.setAttribute("data-parent", parent_id || "");
@@ -32,19 +23,18 @@ export function createItem({
 }
 
 export function updateItem(
-  { uuid, temp_id, content, parent_id, prev_id }: Node,
-  container: HTMLOListElement,
+  { uuid, content, parent_id, prev_id, dirty }: Node,
+  container: HTMLOListElement
 ) {
-  const item = getItemById(temp_id || uuid);
+  const item = getItemById(uuid);
   if (!item) return;
-
-  temp_id && uuid && (item.id = "outline-node-" + uuid);
 
   const input = item.firstChild!;
   input.textContent = content;
 
   item.setAttribute("data-parent", parent_id || "");
   item.setAttribute("data-prev", prev_id || "");
+  item.setAttribute("data-dirty", dirty ? "true" : "false");
 
   const prevItem = getItemById(prev_id);
   const parentItem = getItemById(parent_id);
@@ -65,8 +55,8 @@ export function deleteItem({ uuid }: Node) {
   item.parentNode!.removeChild(item);
 }
 
-export function getItemByNode({ uuid, temp_id }: Node) {
-  return getItemById(temp_id || uuid);
+export function getItemByNode({ uuid }: Node) {
+  return getItemById(uuid);
 }
 
 function getItemById(uuid: string | undefined) {

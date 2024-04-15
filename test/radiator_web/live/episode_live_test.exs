@@ -6,6 +6,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
   import Radiator.PodcastFixtures
   import Radiator.OutlineFixtures
 
+  alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepository
 
   describe "Episode page is restricted" do
@@ -70,7 +71,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
       temp_id = "f894d2ed-9447-4eef-8c31-fc52372b3bbe"
-      params = %{"temp_id" => temp_id, "content" => "new node temp content"}
+      params = %{"event_id" => temp_id, "content" => "new node temp content"}
 
       assert live |> render_hook(:create_node, params)
 
@@ -83,6 +84,34 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       # assert handle info was called with temp id, js got push event with node
       # FIXME: assert_reply(live, ^node_with_temp_id)
       # FIXME: assert_push_event(other_live, "insert", ^node)
+    end
+
+    test "receive node inserted event after inserting a node", %{conn: conn, show: show} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+
+      event_id1 = Ecto.UUID.generate()
+      event_id2 = Ecto.UUID.generate()
+      content1 = Ecto.UUID.generate()
+      content2 = Ecto.UUID.generate()
+      params1 = %{"event_id" => event_id1, "content" => content1}
+      params2 = %{"event_id" => event_id2, "content" => content2}
+
+      assert live |> render_hook(:create_node, params1)
+      assert live |> render_hook(:create_node, params2)
+
+      assert_push_event(
+        live,
+        "insert",
+        %{node: %Node{content: ^content1}, event_id: ^event_id1},
+        1000
+      )
+
+      assert_push_event(
+        live,
+        "insert",
+        %{node: %Node{content: ^content2}, event_id: ^event_id2},
+        1000
+      )
     end
 
     test "update node", %{conn: conn, show: show, episode: episode} do

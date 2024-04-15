@@ -1,4 +1,4 @@
-  defmodule RadiatorWeb.EpisodeLive.Index do
+defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
   alias Radiator.Outline
@@ -81,27 +81,27 @@
   end
 
   @impl true
-  def handle_info(%NodeInsertedEvent{event_id: _event_id, node: node}, socket) do
+  def handle_info(%NodeInsertedEvent{node: node, event_id: event_id}, socket) do
     socket
-    |> push_event("insert", node)
+    |> push_event("insert", %{node: node, event_id: event_id})
     |> reply(:noreply)
   end
 
-  def handle_info(%NodeContentChangedEvent{event_id: _event_id, node: node}, socket) do
+  def handle_info(%NodeContentChangedEvent{node: node, event_id: event_id}, socket) do
     socket
-    |> push_event("update", node)
+    |> push_event("update", %{node: node, event_id: event_id})
     |> reply(:noreply)
   end
 
   def handle_info({:update, node}, socket) do
     socket
-    |> push_event("update", node)
+    |> push_event("update", %{node: node})
     |> reply(:noreply)
   end
 
   def handle_info({:delete, node}, socket) do
     socket
-    |> push_event("delete", node)
+    |> push_event("delete", %{node: node})
     |> reply(:noreply)
   end
 

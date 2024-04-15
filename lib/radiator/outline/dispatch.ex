@@ -11,7 +11,7 @@ defmodule Radiator.Outline.Dispatch do
   end
 
   def change_node_content(node_id, content, user_id, event_id) do
-    IO.inspect(node_id, label: "Dispatcher change_node_content")
+    # IO.inspect(node_id, label: "Dispatcher change_node_content")
     "change_node_content"
     |> Command.build(node_id, content, user_id, event_id)
     |> EventProducer.enqueue()

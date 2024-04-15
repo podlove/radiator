@@ -79,10 +79,11 @@ export function keydown(event: KeyboardEvent) {
       this.pushEvent("update_node", node);
 
       const newNode: Node = {
-        event_id: self.crypto.randomUUID(),
+        uuid: self.crypto.randomUUID(),
         content: content?.substring(splitPos),
         parent_id: node.parent_id,
         prev_id: node.uuid,
+        event_id: self.crypto.randomUUID(),
         dirty: true,
       };
 
