@@ -12,6 +12,7 @@ defmodule Radiator.Outline.NodeTest do
       episode = PodcastFixtures.episode_fixture()
 
       uuid = Ecto.UUID.generate()
+
       attributes = %{
         "uuid" => uuid,
         "episode_id" => episode.id,

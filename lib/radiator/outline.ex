@@ -70,8 +70,11 @@ defmodule Radiator.Outline do
   """
   def update_node_content(node_id, content) do
     case NodeRepository.get_node(node_id) do
-      nil -> {:error, :not_found}
-      node -> node
+      nil ->
+        {:error, :not_found}
+
+      node ->
+        node
         |> Node.update_content_changeset(%{content: content})
         |> Repo.update()
     end

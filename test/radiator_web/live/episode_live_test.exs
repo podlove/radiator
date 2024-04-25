@@ -120,19 +120,16 @@ defmodule RadiatorWeb.EpisodeLiveTest do
 
       node = node_fixture(%{episode_id: episode.id})
 
-      params =
-        node
-        |> Map.from_struct()
-        |> Map.put(:content, "update node content")
+      update_attrs = %{
+        content: "update node content",
+        event_id: Ecto.UUID.generate()
+      }
 
+      params = node |> Map.from_struct() |> Map.merge(update_attrs)
       assert live |> render_hook(:update_node, params)
 
-      updated_node =
-        NodeRepository.list_nodes()
-        |> Enum.find(&(&1.content == "update node content"))
-
-      assert updated_node.uuid == params.uuid
-      assert updated_node.content == params.content
+      updated_node = NodeRepository.get_node!(node.uuid)
+      assert updated_node.content == update_attrs.content
     end
 
     test "delete node", %{conn: conn, show: show, episode: episode} do
