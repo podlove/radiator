@@ -68,22 +68,17 @@ defmodule RadiatorWeb.EpisodeLiveTest do
 
     test "insert a new node", %{conn: conn, show: show} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-      {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
-      temp_id = "f894d2ed-9447-4eef-8c31-fc52372b3bbe"
-      params = %{"event_id" => temp_id, "content" => "new node temp content"}
+      uuid = Ecto.UUID.generate()
+      event_id = Ecto.UUID.generate()
 
+      params = %{"uuid" => uuid, "event_id" => event_id, "content" => "new node temp content"}
       assert live |> render_hook(:create_node, params)
 
-      node =
-        NodeRepository.list_nodes()
-        |> Enum.find(&(&1.content == "new node temp content"))
-
-      _node_with_temp_id = Map.put(node, :temp_id, temp_id)
-
-      # assert handle info was called with temp id, js got push event with node
-      # FIXME: assert_reply(live, ^node_with_temp_id)
-      # FIXME: assert_push_event(other_live, "insert", ^node)
+      node = NodeRepository.get_node!(uuid)
+      assert_push_event(live, "insert", %{node: ^node, event_id: ^event_id})
+      assert_push_event(other_live, "insert", %{node: ^node, event_id: ^event_id})
     end
 
     test "receive node inserted event after inserting a node", %{conn: conn, show: show} do

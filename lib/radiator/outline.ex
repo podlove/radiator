@@ -27,7 +27,6 @@ defmodule Radiator.Outline do
   # if no parent is given, the new node will be inserted as a root node
   # if no previous node is given, the new node will be inserted as the first child of the parent node
   def insert_node(attrs) do
-    # FIXME: missing test  required episode_id . .it crashes without given
     Repo.transaction(fn ->
       prev_node_id = attrs["prev_node"]
       parent_node_id = attrs["parent_node"]
