@@ -26,40 +26,56 @@ alias Radiator.{Accounts, Outline, Podcast}
   Podcast.create_episode(%{title: "current episode", show_id: show.id})
 
 {:ok, node1} =
-  Outline.create_node(%{content: "Node 1", episode_id: current_episode.id})
+  Outline.insert_node(%{"content" => "Node 1", "episode_id" => current_episode.id})
 
 {:ok, node2} =
-  Outline.create_node(%{content: "Node 2", episode_id: current_episode.id, prev_id: node1.uuid})
+  Outline.insert_node(%{
+    "content" => "Node 2",
+    "episode_id" => current_episode.id,
+    "prev_id" => node1.uuid
+  })
 
 {:ok, node3} =
-  Outline.create_node(%{content: "Node 3", episode_id: current_episode.id, prev_id: node2.uuid})
+  Outline.insert_node(%{
+    "content" => "Node 3",
+    "episode_id" => current_episode.id,
+    "prev_id" => node2.uuid
+  })
 
 {:ok, _node4} =
-  Outline.create_node(%{content: "Node 4", episode_id: current_episode.id, prev_id: node3.uuid})
+  Outline.insert_node(%{
+    "content" => "Node 4",
+    "episode_id" => current_episode.id,
+    "prev_id" => node3.uuid
+  })
 
 {:ok, node21} =
-  Outline.create_node(%{
-    content: "Node 2.1",
-    episode_id: current_episode.id,
-    parent_id: node2.uuid
+  Outline.insert_node(%{
+    "content" => "Node 2.1",
+    "episode_id" => current_episode.id,
+    "parent_id" => node2.uuid
   })
 
 {:ok, _node22} =
-  Outline.create_node(%{content: "Node 2.2", episode_id: current_episode.id, prev_id: node21.uuid})
+  Outline.insert_node(%{
+    "content" => "Node 2.2",
+    "episode_id" => current_episode.id,
+    "prev_id" => node21.uuid
+  })
 
 {:ok, node211} =
-  Outline.create_node(%{
-    content: "Node 2.1.1",
-    episode_id: current_episode.id,
-    parent_id: node21.uuid
+  Outline.insert_node(%{
+    "content" => "Node 2.1.1",
+    "episode_id" => current_episode.id,
+    "parent_id" => node21.uuid
   })
 
 {:ok, _node212} =
-  Outline.create_node(%{
-    content: "Node 2.1.2",
-    episode_id: current_episode.id,
-    prev_id: node211.uuid
+  Outline.insert_node(%{
+    "content" => "Node 2.1.2",
+    "episode_id" => current_episode.id,
+    "prev_id" => node211.uuid
   })
 
-{:ok, past_parent_node} =
-  Outline.create_node(%{content: "Old Content", episode_id: past_episode.id})
+{:ok, _past_parent_node} =
+  Outline.insert_node(%{"content" => "Old Content", "episode_id" => past_episode.id})

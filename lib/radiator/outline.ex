@@ -27,7 +27,6 @@ defmodule Radiator.Outline do
   # if no parent is given, the new node will be inserted as a root node
   # if no previous node is given, the new node will be inserted as the first child of the parent node
   def insert_node(attrs) do
-    # FIXME: missing test  required episode_id . .it crashes without given
     Repo.transaction(fn ->
       prev_node_id = attrs["prev_node"]
       parent_node_id = attrs["parent_node"]
@@ -62,17 +61,22 @@ defmodule Radiator.Outline do
 
   ## Examples
 
-      iex> update_node_content(node, %{content: new_value})
+      iex> update_node_content(node_id, %{content: new_value})
       {:ok, %Node{}}
 
-      iex> update_node_content(node, %{content: nil})
+      iex> update_node_content(node_id, %{content: nil})
       {:error, %Ecto.Changeset{}}
-
   """
-  def update_node_content(%Node{} = node, attrs, _socket_id \\ nil) do
-    node
-    |> Node.update_content_changeset(attrs)
-    |> Repo.update()
+  def update_node_content(node_id, content) do
+    case NodeRepository.get_node(node_id) do
+      nil ->
+        {:error, :not_found}
+
+      node ->
+        node
+        |> Node.update_content_changeset(%{content: content})
+        |> Repo.update()
+    end
   end
 
   @doc """

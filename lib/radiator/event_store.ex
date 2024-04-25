@@ -5,6 +5,6 @@ defmodule Radiator.EventStore do
 
   def persist_event(event) do
     # persist event
-    {:ok, event}
+    event
   end
 end
