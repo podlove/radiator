@@ -12,15 +12,18 @@ defmodule Radiator.OutlineTest do
   describe "update_node_content/2" do
     test "with valid data updates the node" do
       node = node_fixture()
-      update_attrs = %{"content" => "some updated content"}
+      updated_content = "some updated content"
 
-      assert {:ok, %Node{} = node} = Outline.update_node_content(node, update_attrs)
-      assert node.content == "some updated content"
+      assert {:ok, %Node{} = node} = Outline.update_node_content(node.uuid, updated_content)
+      assert node.content == updated_content
     end
 
     test "with invalid data returns error changeset" do
       node = node_fixture()
-      assert {:error, %Ecto.Changeset{}} = Outline.update_node_content(node, %{"content" => nil})
+
+      assert {:error, %Ecto.Changeset{}} =
+               Outline.update_node_content(node.uuid, %{"content" => nil})
+
       assert node == NodeRepository.get_node!(node.uuid)
     end
   end
