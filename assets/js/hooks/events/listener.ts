@@ -88,11 +88,11 @@ export function keydown(event: KeyboardEvent) {
       };
 
       this.pushEvent("create_node", newNode);
-      // this.pushEvent("create_node", newNode, (node: Node, _ref: number) => {
-      //   const newItem = createItem(node);
-      //   item.after(newItem);
-      //   focusItem(newItem, false);
-      // });
+      // this.pushEvent("create_node", newNode, (node: Node, _ref: number) => { });
+
+      const newItem = createItem(newNode);
+      item.after(newItem);
+      focusItem(newItem, false);
       break;
 
     case "Backspace":
