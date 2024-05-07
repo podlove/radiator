@@ -50,7 +50,7 @@ defmodule Radiator.Outline.EventConsumer do
   end
 
   def handle_change_node_content_result({:ok, node}, command) do
-    %NodeContentChangedEvent{node: node, event_id: command.event_id}
+    %NodeContentChangedEvent{node_id: node.id, event_id: command.event_id}
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
 

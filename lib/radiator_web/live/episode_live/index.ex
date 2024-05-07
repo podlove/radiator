@@ -95,9 +95,9 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
-  def handle_info(%NodeContentChangedEvent{node: node}, socket) do
+  def handle_info(%NodeContentChangedEvent{node_id: node_id, event_id: event_id}, socket) do
     socket
-    |> push_event("update", %{node: node})
+    |> push_event("update", %{node_id: node_id, event_id: event_id})
     |> reply(:noreply)
   end
 

@@ -1,4 +1,7 @@
 defmodule Radiator.EventStore.EventData do
+  @moduledoc """
+  EventData schema represents a persistend event.
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

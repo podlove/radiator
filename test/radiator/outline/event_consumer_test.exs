@@ -21,7 +21,7 @@ defmodule Radiator.Outline.EventConsumerTest do
       }
 
       user_id = "user_id"
-      event_id = "event_id"
+      event_id = Ecto.UUID.generate()
 
       command = Command.build("insert_node", attributes, user_id, event_id)
       EventConsumer.handle_events([command], 0, nil)
