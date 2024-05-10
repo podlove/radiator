@@ -6,6 +6,7 @@ defmodule Radiator.EventStoreTest do
   describe "event_data" do
     alias Radiator.EventStore.EventData
 
+    alias Radiator.AccountsFixtures
     import Radiator.EventStoreFixtures
 
     @invalid_attrs %{data: nil, uuid: nil, event_type: nil}
@@ -21,16 +22,20 @@ defmodule Radiator.EventStoreTest do
     end
 
     test "create_event/1 with valid data creates a event" do
+      user = AccountsFixtures.user_fixture()
+
       valid_attrs = %{
         data: %{},
-        uuid: "7488a646-e31f-11e4-aace-600308960662",
-        event_type: "some event_type"
+        uuid: Ecto.UUID.generate(),
+        event_type: "some event_type",
+        user_id: user.id
       }
 
       assert {:ok, %EventData{} = event} = EventStore.create_event_data(valid_attrs)
       assert event.data == %{}
-      assert event.uuid == "7488a646-e31f-11e4-aace-600308960662"
-      assert event.event_type == "some event_type"
+      assert event.uuid == valid_attrs.uuid
+      assert event.event_type == valid_attrs.event_type
+      assert event.user_id == valid_attrs.user_id
     end
 
     test "create_event/1 with invalid data returns error changeset" do
