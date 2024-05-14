@@ -52,7 +52,7 @@ defmodule Radiator.Outline.EventConsumer do
 
   def handle_change_node_content_result({:ok, node}, %ChangeNodeContentCommand{} = command) do
     %NodeContentChangedEvent{
-      node_id: node.id,
+      node_id: node.uuid,
       content: node.content,
       user_id: command.user_id,
       event_id: command.event_id
