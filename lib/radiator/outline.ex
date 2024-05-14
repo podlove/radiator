@@ -91,7 +91,7 @@ defmodule Radiator.Outline do
       {:error, %Ecto.Changeset{}}
 
   """
-  def remove_node(%Node{} = node, _socket_id \\ nil) do
+  def remove_node(%Node{} = node) do
     next_node =
       Node
       |> where([n], n.prev_id == ^node.uuid)
