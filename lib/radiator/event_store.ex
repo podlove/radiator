@@ -19,7 +19,7 @@ defmodule Radiator.EventStore do
     event
   end
 
-  defp convert_to_uuid(<<uuid::binary-size(36), _>>), do: uuid
+  defp convert_to_uuid(<<uuid::binary-size(36), ":", _::binary>>), do: uuid
   defp convert_to_uuid(uuid), do: uuid
 
   @doc """
