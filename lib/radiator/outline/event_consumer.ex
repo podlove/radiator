@@ -24,8 +24,9 @@ defmodule Radiator.Outline.EventConsumer do
     {:noreply, [], state}
   end
 
-  defp process_command(%InsertNodeCommand{payload: payload} = command) do
+  defp process_command(%InsertNodeCommand{payload: payload, user_id: user_id} = command) do
     payload
+    |> Map.merge(%{"user_id" => user_id})
     |> Outline.insert_node()
     |> handle_insert_node_result(command)
   end
@@ -37,7 +38,7 @@ defmodule Radiator.Outline.EventConsumer do
   end
 
   defp handle_insert_node_result({:ok, node}, command) do
-    %NodeInsertedEvent{node: node, event_id: command.event_id}
+    %NodeInsertedEvent{node: node, event_id: command.event_id, user_id: command.user_id}
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
 
@@ -49,8 +50,13 @@ defmodule Radiator.Outline.EventConsumer do
     :error
   end
 
-  def handle_change_node_content_result({:ok, node}, command) do
-    %NodeContentChangedEvent{node: node, event_id: command.event_id}
+  def handle_change_node_content_result({:ok, node}, %ChangeNodeContentCommand{} = command) do
+    %NodeContentChangedEvent{
+      node_id: node.id,
+      content: node.content,
+      user_id: command.user_id,
+      event_id: command.event_id
+    }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
 

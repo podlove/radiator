@@ -1,7 +1,6 @@
 defmodule Radiator.Outline.Node do
   @moduledoc """
-  The node model which represents a single node in the outline.
-  Currenty there is no concept of a tree
+  The node model represents a single node in the outline.
   """
   use Ecto.Schema
   import Ecto.Changeset

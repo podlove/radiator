@@ -11,23 +11,22 @@ defmodule Radiator.Outline.Dispatch do
   end
 
   def change_node_content(node_id, content, user_id, event_id) do
-    # IO.inspect(node_id, label: "Dispatcher change_node_content")
     "change_node_content"
     |> Command.build(node_id, content, user_id, event_id)
     |> EventProducer.enqueue()
   end
 
-  # def move_node(attributes, user_id, event_id) do
-  #   "move_node"
-  #   |> Command.build(attributes, user_id, event_id)
-  #   |> EventProducer.enqueue()
-  # end
+  def move_node(node_id, parent_node_id, prev_node_id, user_id, event_id) do
+    "move_node"
+    |> Command.build(node_id, parent_node_id, prev_node_id, user_id, event_id)
+    |> EventProducer.enqueue()
+  end
 
-  # def delete_node(node_id, user_id, event_id) do
-  #   "delete_node"
-  #   |> Command.build(node_id, user_id, event_id)
-  #   |> EventProducer.enqueue()
-  # end
+  def delete_node(node_id, user_id, event_id) do
+    "delete_node"
+    |> Command.build(node_id, user_id, event_id)
+    |> EventProducer.enqueue()
+  end
 
   def subscribe(_episode_id) do
     Phoenix.PubSub.subscribe(Radiator.PubSub, "events")
