@@ -1,4 +1,4 @@
-import { Node, UUID } from "../types";
+import { Node } from "../types";
 import {
   getItemByNode,
   createItem,
@@ -14,7 +14,6 @@ export function handleList({ nodes }: { nodes: Node[] }) {
     const node: Node = {
       uuid: self.crypto.randomUUID(),
       content: "",
-      event_id: self.crypto.randomUUID(),
       dirty: true,
     };
     nodes = [node];
@@ -36,12 +35,7 @@ export function handleList({ nodes }: { nodes: Node[] }) {
   focusItem(lastItem);
 }
 
-interface NodeEvent {
-  node: Node;
-  event_id: UUID;
-}
-
-export function handleInsert({ node, event_id }: NodeEvent) {
+export function handleInsert(node: Node) {
   const container: HTMLOListElement = this.el;
 
   const item = getItemByNode(node);
@@ -54,13 +48,19 @@ export function handleInsert({ node, event_id }: NodeEvent) {
   }
 }
 
-export function handleUpdate({ node, event_id }: NodeEvent) {
+export function handleUpdate(node: Node) {
+  const container: HTMLOListElement = this.el;
+
+  updateItem(node, container);
+}
+
+export function handleDelete(node: Node) {
+  deleteItem(node);
+}
+
+export function handleClean(node: Node) {
   const container: HTMLOListElement = this.el;
 
   node.dirty = false;
   updateItem(node, container);
-}
-
-export function handleDelete({ node, event_id }: NodeEvent) {
-  deleteItem(node);
 }

@@ -46,31 +46,30 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
-  def handle_event("create_node", %{"event_id" => event_id} = params, socket) do
+  def handle_event("create_node", params, socket) do
     user = socket.assigns.current_user
     episode = socket.assigns.selected_episode
     attrs = Map.merge(params, %{"creator_id" => user.id, "episode_id" => episode.id})
 
-    Dispatch.insert_node(attrs, user.id, event_id)
+    Dispatch.insert_node(attrs, user.id, generate_event_id(socket.id))
 
     socket
     |> reply(:noreply)
   end
 
-  def handle_event(
-        "update_node",
-        %{"uuid" => uuid, "content" => content, "event_id" => event_id},
-        socket
-      ) do
+  # seperate update content & move node in frontent/js
+  def handle_event("update_node", %{"uuid" => uuid, "content" => content}, socket) do
     user = socket.assigns.current_user
 
-    Dispatch.change_node_content(uuid, content, user.id, event_id)
+    Dispatch.change_node_content(uuid, content, user.id, generate_event_id(socket.id))
 
     socket
     |> reply(:noreply)
   end
 
   def handle_event("delete_node", %{"uuid" => uuid}, socket) do
+    _event_id = generate_event_id(socket.id)
+
     case NodeRepository.get_node(uuid) do
       nil -> nil
       node -> Outline.remove_node(node, socket.id)
@@ -81,15 +80,24 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   @impl true
-  def handle_info(%NodeInsertedEvent{node: node, event_id: event_id}, socket) do
+  def handle_info(
+        %{node: node, event_id: <<_::binary-size(36)>> <> ":" <> id},
+        %{id: id} = socket
+      ) do
     socket
-    |> push_event("insert", %{node: node, event_id: event_id})
+    |> push_event("clean", %{node: node})
     |> reply(:noreply)
   end
 
-  def handle_info(%NodeContentChangedEvent{node: node, event_id: event_id}, socket) do
+  def handle_info(%NodeInsertedEvent{node: node}, socket) do
     socket
-    |> push_event("update", %{node: node, event_id: event_id})
+    |> push_event("insert", %{node: node})
+    |> reply(:noreply)
+  end
+
+  def handle_info(%NodeContentChangedEvent{node: node}, socket) do
+    socket
+    |> push_event("update", %{node: node})
     |> reply(:noreply)
   end
 
@@ -115,4 +123,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   defp get_nodes(%{id: id}), do: NodeRepository.list_nodes_by_episode(id)
   defp get_nodes(_), do: []
+
+  defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
 end
