@@ -12,12 +12,15 @@ defmodule Radiator.EventStore do
       create_event_data(%{
         data: AbstractEvent.payload(event),
         event_type: AbstractEvent.event_type(event),
-        uuid: event.event_id,
+        uuid: convert_to_uuid(event.event_id),
         user_id: event.user_id
       })
 
     event
   end
+
+  defp convert_to_uuid(<<uuid::binary-size(36), _>>), do: uuid
+  defp convert_to_uuid(uuid), do: uuid
 
   @doc """
   Returns the list of foo_events.
