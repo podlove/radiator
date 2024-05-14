@@ -10,7 +10,7 @@ export function createItem({ uuid, content, parent_id, prev_id, dirty }: Node) {
 
   const item = document.createElement("li");
   item.id = "outline-node-" + uuid;
-  item.className = "my-1 ml-4";
+  item.className = dirty ? "my-1 ml-4 bg-red-100" : "my-1 ml-4";
 
   item.setAttribute("data-parent", parent_id || "");
   item.setAttribute("data-prev", prev_id || "");
@@ -31,6 +31,8 @@ export function updateItem(
 
   const input = item.firstChild!;
   input.textContent = content;
+
+  item.className = dirty ? "my-1 ml-4 bg-red-100" : "my-1 ml-4";
 
   item.setAttribute("data-parent", parent_id || "");
   item.setAttribute("data-prev", prev_id || "");

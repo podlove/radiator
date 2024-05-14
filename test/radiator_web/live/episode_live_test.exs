@@ -6,7 +6,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
   import Radiator.PodcastFixtures
   import Radiator.OutlineFixtures
 
-  alias Radiator.Outline.Node
+  # alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepository
 
   describe "Episode page is restricted" do
