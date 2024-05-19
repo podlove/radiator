@@ -2,7 +2,7 @@ export type UUID = `${string}-${string}-${string}-${string}-${string}`;
 
 export interface Node {
   uuid: UUID;
-  content: string;
+  content?: string;
   creator_id?: number;
   parent_id?: UUID;
   prev_id?: UUID;
