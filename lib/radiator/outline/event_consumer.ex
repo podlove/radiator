@@ -48,8 +48,8 @@ defmodule Radiator.Outline.EventConsumer do
     {:ok, node}
   end
 
-  defp handle_insert_node_result({:error, _error}, _event) do
-    # log_error_please :-)
+  defp handle_insert_node_result({:error, error}, _event) do
+    Logger.error("Insert node failed #{inspect(error)}")
     :error
   end
 
@@ -67,12 +67,12 @@ defmodule Radiator.Outline.EventConsumer do
   end
 
   def handle_change_node_content_result({:error, :not_found}, _command) do
-    # log_error_please :-)
+    Logger.error("Update node content failed. Node not found.")
     :error
   end
 
-  def handle_change_node_content_result({:error, _changeset}, _command) do
-    # log_error_please :-)
+  def handle_change_node_content_result({:error, changeset}, _command) do
+    Logger.error("Update node content failed. #{inspect(changeset)}")
     :error
   end
 end
