@@ -1,8 +1,13 @@
 <div class="grid grid-cols-12 gap-24">
   <aside class="col-span-12 sm:col-span-4">
-    <button class="block w-full my-4 rounded text-white bg-[#df7366] px-8 py-2">
+    <button
+      :if={@action != :new_episode}
+      class="block w-full my-4 rounded text-white bg-[#df7366] px-8 py-2"
+      phx-click="new_episode"
+    >
       Create Episode
     </button>
+
     <ol>
       <li
         :for={{episode, i} <- Enum.with_index(@episodes)}
@@ -16,6 +21,26 @@
       </li>
     </ol>
   </aside>
+
+  <section :if={@action == :new_episode} class="col-span-12 sm:col-span-8">
+    <div class="p-4 my-4 bg-[#f0f4f4]">
+      <h3 class="text-xl">Create Episode</h3>
+      <.form :let={f} for={@form} id="episode-form" phx-change="validate" phx-submit="save">
+        <.input field={f[:number]} type="text" label="Number" />
+        <.input field={f[:title]} type="text" label="Title" />
+        <div class="flex items-center justify-between gap-6 mt-2">
+          <div
+            class="px-3 py-2 text-sm font-semibold leading-6 border rounded-lg cursor-pointer phx-submit-loading:opacity-75 border-zinc-900 hover:border-zinc-700 text-zinc-900 active:text-zinc-900/80"
+            phx-click="cancel"
+          >
+            Cancel
+          </div>
+          <.button phx-disable-with="Saving...">Save Episode</.button>
+        </div>
+      </.form>
+    </div>
+  </section>
+
   <section :if={@selected_episode} class="col-span-12 sm:col-span-8">
     <h2 class="text-2xl"><%= @selected_episode.number %> <%= @selected_episode.title %></h2>
     <img class="my-4" src={~p"/images/pic06.jpg"} alt="" />

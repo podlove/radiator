@@ -4,6 +4,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   alias Radiator.Outline.{Dispatch, NodeRepository}
   alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeDeletedEvent, NodeInsertedEvent}
   alias Radiator.Podcast
+  alias Radiator.Podcast.Episode
 
   @impl true
   def mount(%{"show" => show_id}, _session, socket) do
@@ -14,6 +15,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     # |> assign(:page_description, "")
     |> assign(:show, show)
     |> assign(:episodes, show.episodes)
+    |> assign(action: nil, episode: nil, form: nil)
     |> reply(:ok)
   end
 
@@ -73,6 +75,54 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     socket
     |> reply(:noreply)
+  end
+
+  def handle_event("new_episode", _params, socket) do
+    show = socket.assigns.show
+    number = Podcast.get_next_episode_number(show.id)
+
+    episode = %Podcast.Episode{}
+    changeset = Episode.changeset(episode, %{number: number})
+
+    socket
+    |> assign(:action, :new_episode)
+    |> assign(:episode, episode)
+    |> assign(:form, to_form(changeset))
+    |> reply(:noreply)
+  end
+
+  @impl true
+  def handle_event("validate", %{"episode" => params}, socket) do
+    changeset = socket.assigns.episode |> Episode.changeset(params) |> Map.put(:action, :validate)
+
+    socket
+    |> assign(:form, to_form(changeset))
+    |> reply(:noreply)
+  end
+
+  @impl true
+  def handle_event("save", %{"episode" => params}, socket) do
+    show_id = socket.assigns.show.id
+
+    params = Map.put(params, "show_id", show_id)
+
+    case Podcast.create_episode(params) do
+      {:ok, episode} ->
+        show = Podcast.get_show!(show_id, preload: :episodes)
+
+        socket
+        |> assign(:action, nil)
+        |> assign(:episodes, show.episodes)
+        |> put_flash(:info, "Episode created successfully")
+        |> push_patch(to: ~p"/admin/podcast/#{show}/#{episode}")
+        |> reply(:noreply)
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        socket
+        |> assign(:form, to_form(changeset))
+        |> put_flash(:info, "Episode could not be created")
+        |> reply(:noreply)
+    end
   end
 
   @impl true

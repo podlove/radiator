@@ -41,12 +41,14 @@ defmodule Radiator.PodcastFixtures do
   """
   def episode_fixture(attrs \\ %{}) do
     show = get_show(attrs)
+    number = Podcast.get_next_episode_number(show.id)
 
     {:ok, episode} =
       attrs
       |> Enum.into(%{
         title: "my show episode 23",
-        show_id: show.id
+        show_id: show.id,
+        number: number
       })
       |> Podcast.create_episode()
 
