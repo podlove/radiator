@@ -54,7 +54,7 @@ export function keydown(event: KeyboardEvent) {
       break;
 
     case "ArrowDown":
-      if (selection?.anchorOffset != node.content.length) return;
+      if (selection?.anchorOffset != node.content?.length) return;
       event.preventDefault();
 
       if (!nextItem || !nextNode) return;
@@ -98,7 +98,7 @@ export function keydown(event: KeyboardEvent) {
 
       if (!prevItem || !prevNode) return;
 
-      prevNode.content += node.content;
+      prevNode.content += node.content || "";
       updateItem(prevNode, container);
       focusItem(prevItem);
       prevNode.dirty = true;
@@ -110,12 +110,12 @@ export function keydown(event: KeyboardEvent) {
       break;
 
     case "Delete":
-      if (selection?.anchorOffset != node.content.length) return;
+      if (selection?.anchorOffset != node.content?.length) return;
       event.preventDefault();
 
       if (!nextItem || !nextNode) return;
 
-      node.content += nextNode.content;
+      node.content += nextNode.content || "";
       updateItem(node, container);
       focusItem(item);
       node.dirty = true;

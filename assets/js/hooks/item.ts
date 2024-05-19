@@ -2,7 +2,7 @@ import { Node } from "./types";
 
 export function createItem({ uuid, content, parent_id, prev_id, dirty }: Node) {
   const input = document.createElement("div");
-  input.textContent = content;
+  input.textContent = content || "";
   input.contentEditable = "true"; // firefox does not support "plaintext-only"
 
   const ol = document.createElement("ol");
@@ -31,7 +31,7 @@ export function updateItem(
   if (!item) return;
 
   const input = item.firstChild!;
-  input.textContent = content;
+  input.textContent = content || "";
 
   item.className = dirty ? "my-1 ml-4 bg-red-100" : "my-1 ml-4";
 

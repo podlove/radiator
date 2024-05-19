@@ -58,7 +58,7 @@ export function handleContentChange({ node }: { node: Node }) {
   }
 
   const input = item.firstChild!;
-  input.textContent = node.content;
+  input.textContent = node.content || "";
 
   setItemDirty(item, false);
 }
