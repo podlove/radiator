@@ -81,7 +81,7 @@ export function focusItem(item: HTMLLIElement, toEnd: boolean = true) {
 
   if (toEnd) {
     const range = document.createRange();
-    range.setStart(input, 1);
+    range.setStart(input, 0);
     range.collapse(true);
 
     const selection = window.getSelection();
