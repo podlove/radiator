@@ -9,6 +9,8 @@ defmodule Radiator.Outline do
   alias Radiator.Outline.NodeRepository
   alias Radiator.Repo
 
+  require Logger
+
   @doc """
   Inserts a node.
 
@@ -50,8 +52,9 @@ defmodule Radiator.Outline do
         false ->
           Repo.rollback("Insert node failed. Parent and prev node are not consistent.")
 
-        {:error, _} ->
-          Repo.rollback("Insert node failed. Unkown error")
+        {:error, error} ->
+          Logger.error("Insert node failed. #{inspect(error)}")
+          Repo.rollback("Insert node failed. Unknown error")
       end
     end)
   end

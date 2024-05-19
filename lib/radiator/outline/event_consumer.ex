@@ -9,6 +9,8 @@ defmodule Radiator.Outline.EventConsumer do
   alias Radiator.Outline.Dispatch
   alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeInsertedEvent}
 
+  require Logger
+
   def start_link(opts \\ []) do
     {name, opts} = Keyword.pop(opts, :name, __MODULE__)
     GenStage.start_link(__MODULE__, opts, name: name)
@@ -19,6 +21,7 @@ defmodule Radiator.Outline.EventConsumer do
   end
 
   def handle_events([command], _from, state) do
+    Logger.debug("Processing command: #{inspect(command)}")
     process_command(command)
 
     {:noreply, [], state}
