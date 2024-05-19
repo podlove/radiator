@@ -4,10 +4,11 @@ defmodule Radiator.Outline.EventConsumer do
   use GenStage
 
   alias Radiator.EventStore
+  alias Radiator.Outline.NodeRepository
   alias Radiator.Outline
-  alias Radiator.Outline.Command.{ChangeNodeContentCommand, InsertNodeCommand}
+  alias Radiator.Outline.Command.{ChangeNodeContentCommand, InsertNodeCommand, DeleteNodeCommand}
   alias Radiator.Outline.Dispatch
-  alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeInsertedEvent}
+  alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeInsertedEvent, NodeDeletedEvent}
 
   require Logger
 
@@ -38,6 +39,19 @@ defmodule Radiator.Outline.EventConsumer do
     node_id
     |> Outline.update_node_content(content)
     |> handle_change_node_content_result(command)
+  end
+
+  defp process_command(%DeleteNodeCommand{node_id: node_id} = command) do
+    case NodeRepository.get_node(node_id) do
+      nil -> Logger.error("Could not remove node. Node not found.")
+      node -> Outline.remove_node(node)
+    end
+
+    %NodeDeletedEvent{node_id: node_id, event_id: command.event_id, user_id: command.user_id}
+    |> EventStore.persist_event()
+    |> Dispatch.broadcast()
+
+    :ok
   end
 
   defp handle_insert_node_result({:ok, node}, command) do

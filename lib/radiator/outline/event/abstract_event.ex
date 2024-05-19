@@ -3,7 +3,12 @@ defprotocol Radiator.Outline.Event.AbstractEvent do
   def event_type(event)
 end
 
-alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeInsertedEvent}
+alias Radiator.Outline.Event.{
+  NodeContentChangedEvent,
+  NodeInsertedEvent,
+  NodeDeletedEvent,
+  NodeMovedEvent
+}
 
 defimpl Radiator.Outline.Event.AbstractEvent, for: NodeInsertedEvent do
   def payload(event) do
@@ -23,7 +28,7 @@ end
 
 defimpl Radiator.Outline.Event.AbstractEvent, for: NodeDeletedEvent do
   def payload(event) do
-    event.node_id
+    %{node_id: event.node_id}
   end
 
   def event_type(_event), do: "NodeDeletedEvent"

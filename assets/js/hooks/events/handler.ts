@@ -5,6 +5,8 @@ import {
   updateItem,
   deleteItem,
   focusItem,
+  getItemById,
+  setItemDirty,
 } from "../item";
 
 export function handleList({ nodes }: { nodes: Node[] }) {
@@ -35,7 +37,7 @@ export function handleList({ nodes }: { nodes: Node[] }) {
   focusItem(lastItem);
 }
 
-export function handleInsert(node: Node) {
+export function handleInsert({ node }: { node: Node }) {
   const container: HTMLOListElement = this.el;
 
   const item = getItemByNode(node);
@@ -48,17 +50,24 @@ export function handleInsert(node: Node) {
   }
 }
 
-export function handleUpdate(node: Node) {
-  const container: HTMLOListElement = this.el;
+export function handleContentChange({ node }: { node: Node }) {
+  const item = getItemById(node.uuid);
+  if (!item) {
+    console.error("item not found");
+    return;
+  }
 
-  updateItem(node, container);
+  const input = item.firstChild!;
+  input.textContent = node.content;
+
+  setItemDirty(item, false);
 }
 
-export function handleDelete(node: Node) {
+export function handleDelete({ node }: { node: Node }) {
   deleteItem(node);
 }
 
-export function handleClean(node: Node) {
+export function handleClean({ node }: { node: Node }) {
   const container: HTMLOListElement = this.el;
 
   node.dirty = false;

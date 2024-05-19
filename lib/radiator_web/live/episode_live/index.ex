@@ -2,7 +2,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
   alias Radiator.Outline.{Dispatch, NodeRepository}
-  alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeInsertedEvent}
+  alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeInsertedEvent, NodeDeletedEvent}
   alias Radiator.Podcast
 
   @impl true
@@ -66,13 +66,10 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
-  def handle_event("delete_node", %{"uuid" => _uuid}, socket) do
-    _event_id = generate_event_id(socket.id)
+  def handle_event("delete_node", %{"uuid" => uuid}, socket) do
+    user = socket.assigns.current_user
 
-    # case NodeRepository.get_node(uuid) do
-    #   nil -> nil
-    #   node -> Outline.remove_node(node, socket.id)
-    # end
+    Dispatch.delete_node(uuid, user.id, generate_event_id(socket.id))
 
     socket
     |> reply(:noreply)
@@ -99,19 +96,13 @@ defmodule RadiatorWeb.EpisodeLive.Index do
         socket
       ) do
     socket
-    |> push_event("update", %{node: %{id: id, content: content}})
+    |> push_event("change_content", %{node: %{uuid: id, content: content}})
     |> reply(:noreply)
   end
 
-  def handle_info({:update, node}, socket) do
+  def handle_info(%NodeDeletedEvent{node_id: id}, socket) do
     socket
-    |> push_event("update", %{node: node})
-    |> reply(:noreply)
-  end
-
-  def handle_info({:delete, node}, socket) do
-    socket
-    |> push_event("delete", %{node: node})
+    |> push_event("delete", %{node: %{uuid: id}})
     |> reply(:noreply)
   end
 

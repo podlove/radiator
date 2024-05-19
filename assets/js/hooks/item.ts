@@ -27,6 +27,7 @@ export function updateItem(
   container: HTMLOListElement
 ) {
   const item = getItemById(uuid);
+  console.log({ item, uuid, content, parent_id, prev_id, dirty });
   if (!item) return;
 
   const input = item.firstChild!;
@@ -96,3 +97,8 @@ export function focusItem(item: HTMLLIElement, toEnd: boolean = true) {
 
 // export function outdentNode(node: Node) {
 // }
+
+export function setItemDirty(item: HTMLLIElement, dirty: boolean) {
+  item.className = dirty ? "my-1 ml-4 bg-red-100" : "my-1 ml-4";
+  item.setAttribute("data-dirty", dirty ? "true" : "false");
+}
