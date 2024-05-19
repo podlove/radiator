@@ -2,7 +2,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
   alias Radiator.Outline.{Dispatch, NodeRepository}
-  alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeInsertedEvent, NodeDeletedEvent}
+  alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeDeletedEvent, NodeInsertedEvent}
   alias Radiator.Podcast
 
   @impl true

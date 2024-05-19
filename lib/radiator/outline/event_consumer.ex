@@ -4,11 +4,11 @@ defmodule Radiator.Outline.EventConsumer do
   use GenStage
 
   alias Radiator.EventStore
-  alias Radiator.Outline.NodeRepository
   alias Radiator.Outline
-  alias Radiator.Outline.Command.{ChangeNodeContentCommand, InsertNodeCommand, DeleteNodeCommand}
+  alias Radiator.Outline.Command.{ChangeNodeContentCommand, DeleteNodeCommand, InsertNodeCommand}
   alias Radiator.Outline.Dispatch
-  alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeInsertedEvent, NodeDeletedEvent}
+  alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeDeletedEvent, NodeInsertedEvent}
+  alias Radiator.Outline.NodeRepository
 
   require Logger
 
