@@ -10,11 +10,12 @@ export function createItem({ uuid, content, parent_id, prev_id, dirty }: Node) {
 
   const item = document.createElement("li");
   item.id = "outline-node-" + uuid;
-  item.className = dirty ? "my-1 ml-4 bg-red-100" : "my-1 ml-4";
+  item.className = "my-1 ml-4 data-[dirty=true]:bg-red-100";
 
   item.setAttribute("data-parent", parent_id || "");
   item.setAttribute("data-prev", prev_id || "");
-  item.setAttribute("data-dirty", dirty ? "true" : "false");
+
+  setItemDirty(item, dirty)
 
   item.appendChild(input);
   item.appendChild(ol);
@@ -27,17 +28,15 @@ export function updateItem(
   container: HTMLOListElement
 ) {
   const item = getItemById(uuid);
-  console.log({ item, uuid, content, parent_id, prev_id, dirty });
   if (!item) return;
 
   const input = item.firstChild!;
   input.textContent = content || "";
 
-  item.className = dirty ? "my-1 ml-4 bg-red-100" : "my-1 ml-4";
-
   item.setAttribute("data-parent", parent_id || "");
   item.setAttribute("data-prev", prev_id || "");
-  item.setAttribute("data-dirty", dirty ? "true" : "false");
+
+  setItemDirty(item, dirty)
 
   const prevItem = getItemById(prev_id);
   const parentItem = getItemById(parent_id);
@@ -46,8 +45,6 @@ export function updateItem(
     prevItem.after(item);
   } else if (parentItem) {
     parentItem.querySelector("ol")?.append(item);
-  } else {
-    container.append(item);
   }
 }
 
@@ -99,6 +96,5 @@ export function focusItem(item: HTMLLIElement, toEnd: boolean = true) {
 // }
 
 export function setItemDirty(item: HTMLLIElement, dirty: boolean) {
-  item.className = dirty ? "my-1 ml-4 bg-red-100" : "my-1 ml-4";
   item.setAttribute("data-dirty", dirty ? "true" : "false");
 }

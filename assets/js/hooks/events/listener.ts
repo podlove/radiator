@@ -5,6 +5,7 @@ import {
   deleteItem,
   getItemByNode,
   focusItem,
+  setItemDirty,
 } from "../item";
 import { getNodeByEvent, getNodeByItem } from "../node";
 
@@ -22,7 +23,9 @@ export function focusout(event: FocusEvent) {
 
 export function input(event: Event) {
   const node = getNodeByEvent(event);
-  node.dirty = true;
+  const item = getItemByNode(node);
+  item && setItemDirty(item, true);
+
   this.pushEvent("update_node", node);
 }
 
@@ -99,13 +102,12 @@ export function keydown(event: KeyboardEvent) {
       if (!prevItem || !prevNode) return;
 
       prevNode.content += node.content || "";
+      prevNode.dirty = true;
       updateItem(prevNode, container);
       focusItem(prevItem);
-      prevNode.dirty = true;
       this.pushEvent("update_node", prevNode);
 
       deleteItem(node);
-      node.dirty = true;
       this.pushEvent("delete_node", node);
       break;
 
@@ -116,13 +118,12 @@ export function keydown(event: KeyboardEvent) {
       if (!nextItem || !nextNode) return;
 
       node.content += nextNode.content || "";
+      node.dirty = true;
       updateItem(node, container);
       focusItem(item);
-      node.dirty = true;
       this.pushEvent("update_node", node);
 
       deleteItem(nextNode);
-      nextNode.dirty = true;
       this.pushEvent("delete_node", nextNode);
       break;
 

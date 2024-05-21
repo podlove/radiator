@@ -91,7 +91,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
-  @impl true
   def handle_event("validate", %{"episode" => params}, socket) do
     changeset = socket.assigns.episode |> Episode.changeset(params) |> Map.put(:action, :validate)
 
@@ -100,7 +99,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
-  @impl true
   def handle_event("save", %{"episode" => params}, socket) do
     show_id = socket.assigns.show.id
 
@@ -126,12 +124,15 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   @impl true
-  def handle_info(
-        %{node: node, event_id: <<_::binary-size(36)>> <> ":" <> id},
-        %{id: id} = socket
-      ) do
+  def handle_info(%{event_id: <<_::binary-size(36)>> <> ":" <> id} = payload, %{id: id} = socket) do
+    id =
+      case payload do
+        %{node: %{uuid: id}} -> id
+        %{node_id: id} -> id
+      end
+
     socket
-    |> push_event("clean", %{node: node})
+    |> push_event("clean", %{node: %{uuid: id}})
     |> reply(:noreply)
   end
 

@@ -30,8 +30,8 @@ defmodule Radiator.Outline do
   # if no previous node is given, the new node will be inserted as the first child of the parent node
   def insert_node(attrs) do
     Repo.transaction(fn ->
-      prev_node_id = attrs["prev_node"]
-      parent_node_id = attrs["parent_node"]
+      prev_node_id = attrs["prev_id"]
+      parent_node_id = attrs["parent_id"]
       episode_id = attrs["episode_id"]
       # find Node which has been previously connected to prev_node
       node_to_move =

@@ -59,6 +59,24 @@ defmodule Radiator.OutlineTest do
   describe "insert_node/1" do
     setup :complex_node_fixture
 
+    test "node can be inserted after another node", %{node_3: node_3, node_4: node_4} do
+      node_attrs = %{
+        "content" => "node 3.1",
+        "episode_id" => node_3.episode_id,
+        "parent_id" => node_3.parent_id,
+        "prev_id" => node_3.uuid
+      }
+
+      assert {:ok, %Node{uuid: node3_1_uuid} = node} = Outline.insert_node(node_attrs)
+
+      assert node.parent_id == node_3.parent_id
+      assert node.prev_id == node_3.uuid
+
+      node4 = Repo.reload!(node_4)
+
+      assert node4.prev_id == node3_1_uuid
+    end
+
     test "creates a new node in the tree", %{
       node_3: node_3,
       nested_node_1: nested_node_1
@@ -68,8 +86,8 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
-        "parent_node" => node_3.uuid,
-        "prev_node" => nested_node_1.uuid
+        "parent_id" => node_3.uuid,
+        "prev_id" => nested_node_1.uuid
       }
 
       Outline.insert_node(node_attrs)
@@ -84,8 +102,8 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
-        "parent_node" => node_3.uuid,
-        "prev_node" => nested_node_1.uuid
+        "parent_id" => node_3.uuid,
+        "prev_id" => nested_node_1.uuid
       }
 
       {:ok, new_node} = Outline.insert_node(node_attrs)
@@ -99,8 +117,8 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
-        "parent_node" => node_3.uuid,
-        "prev_node" => nested_node_1.uuid
+        "parent_id" => node_3.uuid,
+        "prev_id" => nested_node_1.uuid
       }
 
       {:ok, new_node} = Outline.insert_node(node_attrs)
@@ -115,8 +133,8 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
-        "parent_node" => node_3.uuid,
-        "prev_node" => nested_node_1.uuid
+        "parent_id" => node_3.uuid,
+        "prev_id" => nested_node_1.uuid
       }
 
       {:ok, new_node} = Outline.insert_node(node_attrs)
@@ -134,8 +152,8 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
-        "parent_node" => node_3.uuid,
-        "prev_node" => nested_node_2.uuid
+        "parent_id" => node_3.uuid,
+        "prev_id" => nested_node_2.uuid
       }
 
       {:ok, new_node} = Outline.insert_node(node_attrs)
@@ -153,7 +171,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
-        "parent_node" => node_3.uuid
+        "parent_id" => node_3.uuid
       }
 
       {:ok, new_node} = Outline.insert_node(node_attrs)
@@ -184,8 +202,8 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => parent_node.episode_id,
-        "parent_node" => parent_node.uuid,
-        "prev_node" => nested_node_1.uuid
+        "parent_id" => parent_node.uuid,
+        "prev_id" => nested_node_1.uuid
       }
 
       {:error, "Insert node failed. Parent and prev node are not consistent."} =
@@ -201,8 +219,8 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => parent_node.episode_id,
-        "parent_node" => parent_node.uuid,
-        "prev_node" => bad_parent_node.uuid
+        "parent_id" => parent_node.uuid,
+        "prev_id" => bad_parent_node.uuid
       }
 
       {:error, _error_message} =
@@ -218,8 +236,8 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => parent_node.episode_id,
-        "parent_node" => parent_node.uuid,
-        "prev_node" => nested_node_1.uuid
+        "parent_id" => parent_node.uuid,
+        "prev_id" => nested_node_1.uuid
       }
 
       {:error, _error_message} = Outline.insert_node(node_attrs)

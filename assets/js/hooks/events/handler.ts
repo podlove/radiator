@@ -68,8 +68,6 @@ export function handleDelete({ node }: { node: Node }) {
 }
 
 export function handleClean({ node }: { node: Node }) {
-  const container: HTMLOListElement = this.el;
-
-  node.dirty = false;
-  updateItem(node, container);
+  const item = getItemById(node.uuid)
+  item && setItemDirty(item, false);
 }

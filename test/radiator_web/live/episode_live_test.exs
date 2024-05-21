@@ -55,7 +55,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       node_2 = node_fixture(%{episode_id: episode.id, prev_id: node_1.uuid})
       _node_21 = node_fixture(%{episode_id: episode.id, parent_id: node_2.uuid})
 
-      %{conn: log_in_user(conn, user), show: show, episode: episode}
+      %{conn: log_in_user(conn, user), show: show, episode: episode, nodes: [node_1, node_2]}
     end
 
     test "lists all nodes", %{conn: conn, show: show} do
@@ -66,20 +66,28 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       assert_push_event(live, "list", %{nodes: ^nodes})
     end
 
-    # test "insert a new node", %{conn: conn, show: show} do
-    #   {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-    #   {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+    test "insert a new node", %{conn: conn, show: show, nodes: [node_1 | _]} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
-    #   uuid = Ecto.UUID.generate()
-    #   event_id = Ecto.UUID.generate()
+      uuid = Ecto.UUID.generate()
 
-    #   params = %{"uuid" => uuid, "event_id" => event_id, "content" => "new node temp content"}
-    #   assert live |> render_hook(:create_node, params)
+      params = %{
+        "uuid" => uuid,
+        "content" => "new node temp content",
+        # "parent_id" => nil,
+        "prev_id" => node_1.uuid
+      }
 
-    #   node = NodeRepository.get_node!(uuid)
-    #   assert_push_event(live, "insert", %{node: ^node, event_id: ^event_id})
-    #   assert_push_event(other_live, "insert", %{node: ^node, event_id: ^event_id})
-    # end
+      assert live |> render_hook(:create_node, params)
+
+      node = NodeRepository.get_node!(uuid)
+      assert node.parent_id == nil
+      assert node.prev_id == node_1.uuid
+
+      assert_push_event(live, "clean", %{node: %{uuid: ^uuid}})
+      assert_push_event(other_live, "insert", %{node: ^node})
+    end
 
     #   test "receive node inserted event after inserting a node", %{conn: conn, show: show} do
     #     {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
