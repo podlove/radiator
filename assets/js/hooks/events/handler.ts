@@ -40,14 +40,9 @@ export function handleList({ nodes }: { nodes: Node[] }) {
 export function handleInsert({ node }: { node: Node }) {
   const container: HTMLOListElement = this.el;
 
-  const item = getItemByNode(node);
-  if (item) {
-    node.dirty = false;
-    updateItem(node, container);
-  } else {
-    const newItem = createItem(node);
-    container.append(newItem);
-  }
+  const item = createItem(node);
+  container.append(item);
+  updateItem(node, container);
 }
 
 export function handleContentChange({ node }: { node: Node }) {
