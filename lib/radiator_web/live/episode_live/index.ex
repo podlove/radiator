@@ -58,11 +58,25 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
-  # seperate update content & move node in frontent/js
   def handle_event("update_node", %{"uuid" => uuid, "content" => content}, socket) do
     user = socket.assigns.current_user
 
     Dispatch.change_node_content(uuid, content, user.id, generate_event_id(socket.id))
+
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event("move_node", %{"uuid" => uuid} = node, socket) do
+    user = socket.assigns.current_user
+
+    Dispatch.move_node(
+      uuid,
+      node["parent_id"],
+      node["prev_id"],
+      user.id,
+      generate_event_id(socket.id)
+    )
 
     socket
     |> reply(:noreply)

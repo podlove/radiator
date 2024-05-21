@@ -5,7 +5,14 @@ defmodule Radiator.Outline.EventConsumer do
 
   alias Radiator.EventStore
   alias Radiator.Outline
-  alias Radiator.Outline.Command.{ChangeNodeContentCommand, DeleteNodeCommand, InsertNodeCommand}
+
+  alias Radiator.Outline.Command.{
+    ChangeNodeContentCommand,
+    DeleteNodeCommand,
+    InsertNodeCommand,
+    MoveNodeCommand
+  }
+
   alias Radiator.Outline.Dispatch
   alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeDeletedEvent, NodeInsertedEvent}
   alias Radiator.Outline.NodeRepository
@@ -39,6 +46,18 @@ defmodule Radiator.Outline.EventConsumer do
     node_id
     |> Outline.update_node_content(content)
     |> handle_change_node_content_result(command)
+  end
+
+  defp process_command(
+         %MoveNodeCommand{
+           node_id: _node_id,
+           parent_node_id: _parent_node_id,
+           prev_node_id: _prev_node_id
+         } = _command
+       ) do
+    # node_id
+    # |> Outline.update_node_content(content)
+    # |> handle_change_node_content_result(command)
   end
 
   defp process_command(%DeleteNodeCommand{node_id: node_id} = command) do
