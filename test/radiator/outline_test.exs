@@ -247,6 +247,251 @@ defmodule Radiator.OutlineTest do
     end
   end
 
+  describe "move_node/3 - simple context" do
+    setup :simple_node_fixture
+
+    # before 1 2
+    # after  2 1
+    test "move node on same level", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      {:ok, _} = Outline.move_node(node_2.uuid, nil, node_2.parent_id)
+
+      # reload nodes
+      node_1 = Repo.reload!(node_1)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_1.prev_id == node_2.uuid
+      assert node_2.prev_id == nil
+    end
+
+    # before 1 2
+    # after  2 1
+    test "move node on same level - move the other node", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      {:ok, _} = Outline.move_node(node_1.uuid, node_2.uuid, node_1.parent_id)
+
+      # reload nodes
+      node_1 = Repo.reload!(node_1)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_1.prev_id == node_2.uuid
+      assert node_2.prev_id == nil
+    end
+
+    test "ignore when nothing should change", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      {:ok, _} = Outline.move_node(node_2.uuid, node_1.uuid, node_2.parent_id)
+
+      # reload nodes
+      node_1 = Repo.reload!(node_1)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_2.prev_id == node_1.uuid
+      assert node_1.prev_id == nil
+    end
+
+    test "ignore when nothing should change - other way around", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      {:ok, _} = Outline.move_node(node_1.uuid, nil, node_2.parent_id)
+
+      # reload nodes
+      node_1 = Repo.reload!(node_1)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_2.prev_id == node_1.uuid
+      assert node_1.prev_id == nil
+    end
+
+    test "move node below other node", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      {:ok, _} = Outline.move_node(node_2.uuid, nil, node_1.uuid)
+
+      # reload nodes
+      node_1 = Repo.reload!(node_1)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_1.prev_id == nil
+      assert node_2.prev_id == nil
+
+      assert node_1.parent_id == nil
+      assert node_2.parent_id == node_1.uuid
+    end
+  end
+
+  describe "move_node/3" do
+    setup :complex_node_fixture
+
+    # before 1 2 3 4 5
+    # after  1 2 4 3 5
+    test "move node 4 within list to node 2", %{
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5
+    } do
+      {:ok, _} = Outline.move_node(node_4.uuid, node_2.uuid, node_4.parent_id)
+
+      # reload nodes
+      node_5 = Repo.reload!(node_5)
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_4.prev_id == node_2.uuid
+      assert node_3.prev_id == node_4.uuid
+      assert node_5.prev_id == node_3.uuid
+    end
+
+    # before 1 2 3 4 5
+    # after  4 1 2 3 5
+    test "move node 4 to the top of the list", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5
+    } do
+      {:ok, _} = Outline.move_node(node_4.uuid, nil, node_4.parent_id)
+
+      # reload nodes
+      node_5 = Repo.reload!(node_5)
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      node_2 = Repo.reload!(node_2)
+      node_1 = Repo.reload!(node_1)
+
+      assert node_4.prev_id == nil
+      assert node_1.prev_id == node_4.uuid
+      assert node_2.prev_id == node_1.uuid
+      assert node_3.prev_id == node_2.uuid
+      assert node_5.prev_id == node_3.uuid
+    end
+
+    # before 1 2 3 4 5
+    # after  1 3 4 5 2
+    test "move node 2 to the end of the list", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5
+    } do
+      {:ok, _} = Outline.move_node(node_2.uuid, node_5.uuid, node_2.parent_id)
+
+      # reload nodes
+      node_5 = Repo.reload!(node_5)
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      node_2 = Repo.reload!(node_2)
+      node_1 = Repo.reload!(node_1)
+
+      assert node_3.prev_id == node_1.uuid
+      assert node_4.prev_id == node_3.uuid
+      assert node_5.prev_id == node_4.uuid
+      assert node_2.prev_id == node_5.uuid
+    end
+
+    # before 1 2 3 4 5
+    # after  2 3 4 5 1
+    test "move first node to the end of the list", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5
+    } do
+      {:ok, _} = Outline.move_node(node_1.uuid, node_5.uuid, node_2.parent_id)
+
+      # reload nodes
+      node_5 = Repo.reload!(node_5)
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      node_2 = Repo.reload!(node_2)
+      node_1 = Repo.reload!(node_1)
+
+      assert node_1.prev_id == node_5.uuid
+      assert node_5.prev_id == node_4.uuid
+      assert node_3.prev_id == node_2.uuid
+      assert node_2.prev_id == nil
+    end
+
+    # before 1 2 3 4 5
+    # after  5 1 2 3 4
+    test "move last node to the top of the list", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5
+    } do
+      {:ok, _} = Outline.move_node(node_5.uuid, nil, node_2.parent_id)
+
+      # reload nodes
+      node_5 = Repo.reload!(node_5)
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      node_2 = Repo.reload!(node_2)
+      node_1 = Repo.reload!(node_1)
+
+      assert node_5.prev_id == nil
+      assert node_1.prev_id == node_5.uuid
+      assert node_2.prev_id == node_1.uuid
+      assert node_3.prev_id == node_2.uuid
+      assert node_4.prev_id == node_3.uuid
+    end
+
+    test "move nested node to a new parent", %{
+      node_2: node_2,
+      node_3: node_3,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      {:ok, _} = Outline.move_node(nested_node_1.uuid, nil, node_2.uuid)
+
+      # reload nodes
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert nested_node_1.parent_id == node_2.uuid
+      assert nested_node_2.parent_id == node_3.uuid
+      assert nested_node_1.prev_id == nil
+      assert nested_node_2.prev_id == nil
+    end
+
+    test "move node with child elements to top", %{
+      parent_node: parent_node,
+      node_3: node_3,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      {:ok, _} = Outline.move_node(node_3.uuid, nil, nil)
+
+      # reload nodes
+      parent_node = Repo.reload!(parent_node)
+      node_3 = Repo.reload!(node_3)
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert node_3.prev_id == nil
+      assert node_3.parent_id == nil
+      assert parent_node.prev_id == node_3.uuid
+      assert nested_node_1.parent_id == node_3.uuid
+      assert nested_node_2.parent_id == node_3.uuid
+      assert nested_node_1.prev_id == nil
+      assert nested_node_2.prev_id == nested_node_1.uuid
+    end
+  end
+
   describe "remove_node/1" do
     setup :complex_node_fixture
 
@@ -422,6 +667,36 @@ defmodule Radiator.OutlineTest do
     assert node.level == level
   end
 
+  defp simple_node_fixture(_) do
+    episode = PodcastFixtures.episode_fixture()
+
+    node_1 =
+      node_fixture(
+        episode_id: episode.id,
+        parent_id: nil,
+        prev_id: nil,
+        content: "node_1"
+      )
+
+    node_2 =
+      node_fixture(
+        episode_id: episode.id,
+        parent_id: nil,
+        prev_id: node_1.uuid,
+        content: "node_2"
+      )
+
+    assert node_2.prev_id == node_1.uuid
+    assert node_1.prev_id == nil
+    assert node_1.parent_id == nil
+    assert node_2.parent_id == nil
+
+    %{
+      node_1: node_1,
+      node_2: node_2
+    }
+  end
+
   defp complex_node_fixture(_) do
     episode = PodcastFixtures.episode_fixture()
 
@@ -496,6 +771,17 @@ defmodule Radiator.OutlineTest do
         prev_id: nested_node_1.uuid,
         content: "nested_node_2"
       )
+
+    assert node_5.prev_id == node_4.uuid
+    assert node_4.prev_id == node_3.uuid
+    assert node_3.prev_id == node_2.uuid
+    assert node_2.prev_id == node_1.uuid
+    assert node_1.prev_id == nil
+
+    assert nested_node_1.parent_id == node_3.uuid
+    assert nested_node_2.parent_id == node_3.uuid
+    assert nested_node_1.prev_id == nil
+    assert nested_node_2.prev_id == nested_node_1.uuid
 
     %{
       node_1: node_1,

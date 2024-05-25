@@ -60,6 +60,57 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+  Moves a node to another parent.
+
+  ## Examples
+
+      iex> move_node(node_id, new_prev_id, new_parent_id)
+      {:ok, %Node{}}
+  """
+  def move_node(node_id, new_prev_id, new_parent_id) do
+    case NodeRepository.get_node(node_id) do
+      nil ->
+        {:error, :not_found}
+
+      node ->
+        prev_node = get_prev_node(node)
+        parent_node = get_parent_node(node)
+
+        if get_node_id(prev_node) != new_prev_id || get_node_id(parent_node) != new_parent_id do
+          do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node)
+        else
+          {:ok, node}
+        end
+    end
+  end
+
+  # low level function to move a node
+  defp do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node) do
+    Repo.transaction(fn ->
+      old_next_node =
+        Node
+        |> where_prev_node_equals(node.uuid)
+        |> where_parent_node_equals(get_node_id(parent_node))
+        |> Repo.one()
+
+      new_next_node =
+        Node
+        |> where_prev_node_equals(new_prev_id)
+        |> where_parent_node_equals(new_parent_id)
+        |> Repo.one()
+
+      {:ok, node} = move_node_if(node, new_parent_id, new_prev_id)
+
+      {:ok, _old_next_node} =
+        move_node_if(old_next_node, get_node_id(parent_node), get_node_id(prev_node))
+
+      {:ok, _new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
+    end)
+
+    {:ok, node}
+  end
+
+  @doc """
   Updates a nodes content.
 
   ## Examples
@@ -136,6 +187,26 @@ defmodule Radiator.Outline do
   def get_prev_node(node) do
     Node
     |> where([n], n.uuid == ^node.prev_id)
+    |> Repo.one()
+  end
+
+  @doc """
+  Returns the parent node of a given node in the outline tree.
+  Returns `nil` if parent_id of the node is nil.
+
+  ## Examples
+        iex> get_parent_node(%Node{parent_id: nil})
+        nil
+
+        iex> get_parent_node(%Node{parent_id: 42})
+        %Node{uuid: 42}
+
+  """
+  def get_parent_node(node) when is_nil(node.parent_id), do: nil
+
+  def get_parent_node(node) do
+    Node
+    |> where([n], n.uuid == ^node.parent_id)
     |> Repo.one()
   end
 
