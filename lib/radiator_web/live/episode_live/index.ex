@@ -2,7 +2,14 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
   alias Radiator.Outline.{Dispatch, NodeRepository}
-  alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeDeletedEvent, NodeInsertedEvent}
+
+  alias Radiator.Outline.Event.{
+    NodeContentChangedEvent,
+    NodeDeletedEvent,
+    NodeInsertedEvent,
+    NodeMovedEvent
+  }
+
   alias Radiator.Podcast
   alias Radiator.Podcast.Episode
 
@@ -58,7 +65,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
-  def handle_event("update_node", %{"uuid" => uuid, "content" => content}, socket) do
+  def handle_event("update_node_content", %{"uuid" => uuid, "content" => content}, socket) do
     user = socket.assigns.current_user
 
     Dispatch.change_node_content(uuid, content, user.id, generate_event_id(socket.id))
@@ -162,6 +169,15 @@ defmodule RadiatorWeb.EpisodeLive.Index do
       ) do
     socket
     |> push_event("change_content", %{node: %{uuid: id, content: content}})
+    |> reply(:noreply)
+  end
+
+  def handle_info(
+        %NodeMovedEvent{node_id: id, parent_id: parent_id, prev_id: prev_id},
+        socket
+      ) do
+    socket
+    |> push_event("move", %{node: %{uuid: id, parent_id: parent_id, prev_id: prev_id}})
     |> reply(:noreply)
   end
 

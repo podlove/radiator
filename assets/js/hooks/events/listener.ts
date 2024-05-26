@@ -26,7 +26,7 @@ export function input(event: Event) {
   const item = getItemByNode(node);
   item && setItemDirty(item, true);
 
-  this.pushEvent("update_node", node);
+  this.pushEvent("update_node_content", node);
 }
 
 export function keydown(event: KeyboardEvent) {
@@ -77,7 +77,7 @@ export function keydown(event: KeyboardEvent) {
       node.dirty = true;
 
       updateItem(node, container);
-      this.pushEvent("update_node", node);
+      this.pushEvent("update_node_content", node);
 
       const newNode: Node = {
         uuid: self.crypto.randomUUID(),
@@ -105,7 +105,7 @@ export function keydown(event: KeyboardEvent) {
       prevNode.dirty = true;
       updateItem(prevNode, container);
       focusItem(prevItem);
-      this.pushEvent("update_node", prevNode);
+      this.pushEvent("update_node_content", prevNode);
 
       deleteItem(node);
       this.pushEvent("delete_node", node);
@@ -121,7 +121,7 @@ export function keydown(event: KeyboardEvent) {
       node.dirty = true;
       updateItem(node, container);
       focusItem(item);
-      this.pushEvent("update_node", node);
+      this.pushEvent("update_node_content", node);
 
       deleteItem(nextNode);
       this.pushEvent("delete_node", nextNode);
@@ -138,7 +138,7 @@ export function keydown(event: KeyboardEvent) {
         //       updateItem(node, container);
 
         //       focusItem(item);
-        //       this.pushEvent("update_node", node);
+        //       this.pushEvent("move_node", node);
         //     }
       } else {
         // indent
