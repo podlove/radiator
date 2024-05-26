@@ -132,14 +132,14 @@ export function keydown(event: KeyboardEvent) {
 
       if (event.shiftKey) {
         // outdent
-        // if (node.parent_id) {
-        //       node.prev_id = node.parent_id;
-        //       node.parent_id = undefined;
-        //       updateItem(node, container);
+        if (node.parent_id) {
+          node.prev_id = node.parent_id;
+          node.parent_id = prevNode?.parent_id;
+          updateItem(node, container);
 
-        //       focusItem(item);
-        //       this.pushEvent("move_node", node);
-        //     }
+          // focusItem(item);
+          this.pushEvent("move_node", node);
+        }
       } else {
         // indent
         if (node.prev_id) {
