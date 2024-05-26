@@ -123,7 +123,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
         })
 
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-      {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
       params = node2 |> Map.merge(%{parent_id: uuid1, prev_id: nil}) |> Map.from_struct()
 
@@ -131,10 +131,13 @@ defmodule RadiatorWeb.EpisodeLiveTest do
 
       keep_liveview_alive()
 
-      ### assert %Node{parent_id: ^uuid1} = NodeRepository.get_node!(uuid2)
+      assert %Node{parent_id: ^uuid1} = NodeRepository.get_node!(uuid2)
 
-      ### assert_push_event(live, "clean", %{node: %{uuid: ^uuid2}})
-      ### assert_push_event(other_live, "move", %{node: %{uuid: ^uuid2, parent_id: ^uuid1, prev_id: nil}})
+      assert_push_event(live, "clean", %{node: %{uuid: ^uuid2}})
+
+      assert_push_event(other_live, "move", %{
+        node: %{uuid: ^uuid2, parent_id: ^uuid1, prev_id: nil}
+      })
     end
 
     test "delete node", %{conn: conn, show: show, node: %{uuid: uuid}} do

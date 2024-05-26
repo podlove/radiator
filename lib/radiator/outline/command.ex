@@ -38,8 +38,8 @@ defmodule Radiator.Outline.Command do
       event_id: event_id,
       user_id: user_id,
       node_id: node_id,
-      parent_node_id: parent_node_id,
-      prev_node_id: prev_node_id
+      parent_id: parent_node_id,
+      prev_id: prev_node_id
     }
   end
 end

@@ -6,9 +6,9 @@ defmodule Radiator.Outline.Command.MoveNodeCommand do
           event_id: binary(),
           user_id: binary(),
           node_id: binary(),
-          parent_node_id: binary() | nil,
-          prev_node_id: binary() | nil
+          parent_id: binary() | nil,
+          prev_id: binary() | nil
         }
 
-  defstruct [:event_id, :user_id, :node_id, :parent_node_id, :prev_node_id]
+  defstruct [:event_id, :user_id, :node_id, :parent_id, :prev_id]
 end

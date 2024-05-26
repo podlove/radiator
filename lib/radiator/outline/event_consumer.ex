@@ -14,7 +14,14 @@ defmodule Radiator.Outline.EventConsumer do
   }
 
   alias Radiator.Outline.Dispatch
-  alias Radiator.Outline.Event.{NodeContentChangedEvent, NodeDeletedEvent, NodeInsertedEvent}
+
+  alias Radiator.Outline.Event.{
+    NodeContentChangedEvent,
+    NodeDeletedEvent,
+    NodeInsertedEvent,
+    NodeMovedEvent
+  }
+
   alias Radiator.Outline.NodeRepository
 
   require Logger
@@ -50,14 +57,14 @@ defmodule Radiator.Outline.EventConsumer do
 
   defp process_command(
          %MoveNodeCommand{
-           node_id: _node_id,
-           parent_node_id: _parent_node_id,
-           prev_node_id: _prev_node_id
-         } = _command
+           node_id: node_id,
+           parent_id: parent_id,
+           prev_id: prev_id
+         } = command
        ) do
-    # node_id
-    # |> Outline.update_node_content(content)
-    # |> handle_change_node_content_result(command)
+    node_id
+    |> Outline.move_node(prev_id, parent_id)
+    |> handle_move_node_result(command)
   end
 
   defp process_command(%DeleteNodeCommand{node_id: node_id} = command) do
@@ -83,6 +90,25 @@ defmodule Radiator.Outline.EventConsumer do
 
   defp handle_insert_node_result({:error, error}, _event) do
     Logger.error("Insert node failed #{inspect(error)}")
+    :error
+  end
+
+  def handle_move_node_result({:ok, node}, %MoveNodeCommand{} = command) do
+    %NodeMovedEvent{
+      node_id: node.uuid,
+      parent_id: command.parent_id,
+      prev_id: command.prev_id,
+      user_id: command.user_id,
+      event_id: command.event_id
+    }
+    |> EventStore.persist_event()
+    |> Dispatch.broadcast()
+
+    {:ok, node}
+  end
+
+  def handle_move_node_result({:error, changeset}, _command) do
+    Logger.error("Move node failed. #{inspect(changeset)}")
     :error
   end
 
