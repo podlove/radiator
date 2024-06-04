@@ -1,16 +1,15 @@
 import { Node } from "../types";
 import {
-  getItemByNode,
+  changeItemContent,
+  cleanItem,
   createItem,
-  updateItem,
   deleteItem,
   focusItem,
-  getItemById,
-  setItemDirty,
+  moveItem,
 } from "../item";
 
 export function handleList({ nodes }: { nodes: Node[] }) {
-  const container: HTMLOListElement = this.el;
+  const container: HTMLDivElement = this.el.querySelector(".children");
 
   if (nodes.length == 0) {
     const node: Node = {
@@ -29,33 +28,24 @@ export function handleList({ nodes }: { nodes: Node[] }) {
 
   // sort & indent all items
   nodes.forEach((node) => {
-    updateItem(node, container);
+    moveItem(node, container, true);
   });
 
   // focus last item
-  const lastItem = container.lastElementChild as HTMLLIElement;
+  const lastItem = container.lastElementChild as HTMLDivElement;
   focusItem(lastItem);
 }
 
 export function handleInsert({ node }: { node: Node }) {
-  const container: HTMLOListElement = this.el;
+  const container: HTMLDivElement = this.el.querySelector(".children");
 
   const item = createItem(node);
   container.append(item);
-  updateItem(node, container);
+  moveItem(node, container);
 }
 
 export function handleContentChange({ node }: { node: Node }) {
-  const item = getItemById(node.uuid);
-  if (!item) {
-    console.error("item not found");
-    return;
-  }
-
-  const input = item.firstChild!;
-  input.textContent = node.content || "";
-
-  setItemDirty(item, false);
+  changeItemContent(node);
 }
 
 export function handleDelete({ node }: { node: Node }) {
@@ -63,6 +53,5 @@ export function handleDelete({ node }: { node: Node }) {
 }
 
 export function handleClean({ node }: { node: Node }) {
-  const item = getItemById(node.uuid)
-  item && setItemDirty(item, false);
+  cleanItem(node);
 }

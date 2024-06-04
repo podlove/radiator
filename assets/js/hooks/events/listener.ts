@@ -1,10 +1,11 @@
 import { Node } from "../types";
 import {
+  changeItemContent,
   createItem,
-  updateItem,
   deleteItem,
-  getItemByNode,
   focusItem,
+  getItemByNode,
+  moveItem,
   setItemDirty,
 } from "../item";
 import { getNodeByEvent, getNodeByItem } from "../node";
@@ -30,7 +31,7 @@ export function input(event: Event) {
 }
 
 export function keydown(event: KeyboardEvent) {
-  const container: HTMLOListElement = this.el;
+  const container: HTMLDivElement = this.el.querySelector(".children");
 
   const selection = window.getSelection();
   // const range = selection?.getRangeAt(0)
@@ -38,8 +39,8 @@ export function keydown(event: KeyboardEvent) {
   const node = getNodeByEvent(event);
 
   const item = getItemByNode(node)!;
-  const prevItem = item.previousSibling as HTMLLIElement | null;
-  const nextItem = item.nextSibling as HTMLLIElement | null;
+  const prevItem = item.previousSibling as HTMLDivElement | null;
+  const nextItem = item.nextSibling as HTMLDivElement | null;
 
   const prevNode = prevItem && getNodeByItem(prevItem);
   const nextNode = nextItem && getNodeByItem(nextItem);
@@ -76,7 +77,7 @@ export function keydown(event: KeyboardEvent) {
       node.content = content?.substring(0, splitPos);
       node.dirty = true;
 
-      updateItem(node, container);
+      changeItemContent(node);
       this.pushEvent("update_node_content", node);
 
       const newNode: Node = {
@@ -86,9 +87,7 @@ export function keydown(event: KeyboardEvent) {
         prev_id: node.uuid,
         dirty: true,
       };
-
       this.pushEvent("create_node", newNode);
-      // this.pushEvent("create_node", newNode, (node: Node, _ref: number) => { });
 
       const newItem = createItem(newNode);
       item.after(newItem);
@@ -103,7 +102,7 @@ export function keydown(event: KeyboardEvent) {
 
       prevNode.content += node.content || "";
       prevNode.dirty = true;
-      updateItem(prevNode, container);
+      changeItemContent(prevNode);
       focusItem(prevItem);
       this.pushEvent("update_node_content", prevNode);
 
@@ -119,7 +118,7 @@ export function keydown(event: KeyboardEvent) {
 
       node.content += nextNode.content || "";
       node.dirty = true;
-      updateItem(node, container);
+      changeItemContent(node);
       focusItem(item);
       this.pushEvent("update_node_content", node);
 
@@ -135,9 +134,9 @@ export function keydown(event: KeyboardEvent) {
         if (node.parent_id) {
           node.prev_id = node.parent_id;
           node.parent_id = prevNode?.parent_id;
-          updateItem(node, container);
+          moveItem(node, container);
 
-          // focusItem(item);
+          focusItem(item);
           this.pushEvent("move_node", node);
         }
       } else {
@@ -145,9 +144,9 @@ export function keydown(event: KeyboardEvent) {
         if (node.prev_id) {
           node.parent_id = node.prev_id;
           node.prev_id = undefined; // TODO: prev_id should be the id of the last child of the parent node
-          updateItem(node, container);
+          moveItem(node, container);
 
-          // focusItem(item);
+          focusItem(item);
           this.pushEvent("move_node", node);
         }
       }
