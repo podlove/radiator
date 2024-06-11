@@ -7,6 +7,8 @@ import {
   getItemByNode,
   moveItem,
   setItemDirty,
+  setItemParent,
+  setItemPrev,
 } from "../item";
 import { getNodeByEvent, getNodeByItem } from "../node";
 
@@ -92,6 +94,14 @@ export function keydown(event: KeyboardEvent) {
       const newItem = createItem(newNode);
       item.after(newItem);
       focusItem(newItem, false);
+
+      const oldNextItem = newItem.nextSibling as HTMLDivElement | null;
+      if (oldNextItem) {
+        const nextNode = getNodeByItem(oldNextItem);
+        nextNode.prev_id = newNode.uuid;
+        nextNode.dirty = true;
+        setItemPrev(oldNextItem, newNode.uuid);
+      }
       break;
 
     case "Backspace":

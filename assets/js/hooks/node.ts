@@ -9,8 +9,8 @@ export function getNodeByEvent(event: Event): Node {
 
 export function getNodeByItem(item: HTMLDivElement): Node {
   const uuid = item.id.split("outline-node-")[1] as UUID;
-  const span = item.querySelector(".innerContent") as HTMLSpanElement;
-  const content = span.textContent || "";
+  const input = item.querySelector(".content") as HTMLDivElement;
+  const content = input.textContent || "";
 
   const parent_id = (item.getAttribute("data-parent") as UUID) || undefined;
   const prev_id = (item.getAttribute("data-prev") as UUID) || undefined;
