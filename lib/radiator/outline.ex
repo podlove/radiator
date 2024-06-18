@@ -1,3 +1,16 @@
+defmodule Radiator.Outline.NodeRepoResult do
+  @moduledoc """
+    Generic result structure for node operations.
+  """
+  defstruct [
+    :node,
+    :old_prev_id,
+    :old_next_id,
+    :next_id,
+    :children
+  ]
+end
+
 defmodule Radiator.Outline do
   @moduledoc """
   The Outline context.
@@ -6,6 +19,7 @@ defmodule Radiator.Outline do
   import Ecto.Query, warn: false
 
   alias Radiator.Outline.Node
+  alias Radiator.Outline.NodeRepoResult
   alias Radiator.Outline.NodeRepository
   alias Radiator.Repo
 
@@ -17,7 +31,7 @@ defmodule Radiator.Outline do
   ## Examples
 
       iex> insert_node(%{content: 'foo'})
-      {:ok, %Node{}}
+      {:ok, %NodeRepoResult{}}
 
       iex> insert_node(%{content: value})
       {:error, :parent_and_prev_not_consistent}
@@ -34,7 +48,7 @@ defmodule Radiator.Outline do
       parent_node_id = attrs["parent_id"]
       episode_id = attrs["episode_id"]
       # find Node which has been previously connected to prev_node
-      node_to_move =
+      next_node =
         Node
         |> where(episode_id: ^episode_id)
         |> where_prev_node_equals(prev_node_id)
@@ -45,9 +59,9 @@ defmodule Radiator.Outline do
            prev_node <- NodeRepository.get_node_if(prev_node_id),
            true <- parent_and_prev_consistent?(parent_node, prev_node),
            {:ok, node} <- NodeRepository.create_node(attrs),
-           {:ok, _node_to_move} <- move_node_if(node_to_move, nil, node.uuid),
+           {:ok, _node_to_move} <- move_node_if(next_node, nil, node.uuid),
            {:ok, node} <- move_node_if(node, parent_node_id, prev_node_id) do
-        node
+        %NodeRepoResult{node: node, next_id: get_node_id(next_node)}
       else
         false ->
           Repo.rollback("Insert node failed. Parent and prev node are not consistent.")

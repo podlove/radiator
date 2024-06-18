@@ -118,7 +118,7 @@ export function getItemByNode({ uuid }: Node) {
   return getItemById(uuid);
 }
 
-function getItemById(uuid: string | undefined) {
+export function getItemById(uuid: string | undefined) {
   if (!uuid) return null;
 
   return document.getElementById(`outline-node-${uuid}`) as HTMLDivElement;

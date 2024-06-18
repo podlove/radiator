@@ -5,6 +5,7 @@ defmodule Radiator.Outline.EventConsumer do
 
   alias Radiator.EventStore
   alias Radiator.Outline
+  alias Radiator.Outline.NodeRepoResult
 
   alias Radiator.Outline.Command.{
     ChangeNodeContentCommand,
@@ -80,8 +81,13 @@ defmodule Radiator.Outline.EventConsumer do
     :ok
   end
 
-  defp handle_insert_node_result({:ok, node}, command) do
-    %NodeInsertedEvent{node: node, event_id: command.event_id, user_id: command.user_id}
+  defp handle_insert_node_result({:ok, %NodeRepoResult{node: node, next_id: next_id}}, command) do
+    %NodeInsertedEvent{
+      node: node,
+      event_id: command.event_id,
+      user_id: command.user_id,
+      next_id: next_id
+    }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
 

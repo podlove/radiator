@@ -40,6 +40,6 @@ defmodule RadiatorWeb.Api.OutlineController do
     })
   end
 
-  defp get_response({:ok, node}), do: {200, %{uuid: node.uuid}}
+  defp get_response({:ok, %{node: node}}), do: {200, %{uuid: node.uuid}}
   defp get_response({:error, _}), do: {400, %{error: "params"}}
 end
