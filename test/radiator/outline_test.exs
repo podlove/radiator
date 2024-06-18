@@ -1,4 +1,5 @@
 defmodule Radiator.OutlineTest do
+  alias Radiator.Outline.NodeRepoResult
   use Radiator.DataCase
 
   alias Radiator.Outline
@@ -489,6 +490,21 @@ defmodule Radiator.OutlineTest do
       assert nested_node_2.parent_id == node_3.uuid
       assert nested_node_1.prev_id == nil
       assert nested_node_2.prev_id == nested_node_1.uuid
+    end
+
+    # before 1 2 3 4 5
+    # after  2 3 4 5 1
+    test "move first node to the end of the list returns all needed infos", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_5: node_5
+    } do
+      {:ok, %NodeRepoResult{} = node_result} =
+        Outline.move_node(node_1.uuid, node_5.uuid, node_2.parent_id)
+
+      assert node_result.node.uuid == node_1.uuid
+      assert node_result.old_prev_id == nil
+      assert node_result.old_next_id == node_2.uuid
     end
   end
 

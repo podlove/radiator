@@ -99,13 +99,17 @@ defmodule Radiator.Outline.EventConsumer do
     :error
   end
 
-  def handle_move_node_result({:ok, node}, %MoveNodeCommand{} = command) do
+  def handle_move_node_result(
+        {:ok, %NodeRepoResult{node: node} = result},
+        %MoveNodeCommand{} = command
+      ) do
     %NodeMovedEvent{
       node_id: node.uuid,
       parent_id: command.parent_id,
       prev_id: command.prev_id,
       user_id: command.user_id,
-      event_id: command.event_id
+      event_id: command.event_id,
+      next_id: result.next_id
     }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
