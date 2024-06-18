@@ -23,6 +23,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> assign(:show, show)
     |> assign(:episodes, show.episodes)
     |> assign(action: nil, episode: nil, form: nil)
+    |> stream(:log_items, [])
     |> reply(:ok)
   end
 
@@ -145,45 +146,64 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   @impl true
-  def handle_info(%{event_id: <<_::binary-size(36)>> <> ":" <> id} = payload, %{id: id} = socket) do
+  def handle_info(%{event_id: <<_::binary-size(36)>> <> ":" <> id} = event, %{id: id} = socket) do
     id =
-      case payload do
+      case event do
         %{node: %{uuid: id}} -> id
         %{node_id: id} -> id
       end
 
-    socket
-    |> push_event("clean", %{node: %{uuid: id}})
-    |> reply(:noreply)
-  end
+    payload = %{node: %{uuid: id}}
 
-  def handle_info(%NodeInsertedEvent{node: node, next_id: next_id}, socket) do
     socket
-    |> push_event("insert", %{node: node, next_id: next_id})
-    |> reply(:noreply)
-  end
-
-  def handle_info(
-        %NodeContentChangedEvent{node_id: id, content: content},
-        socket
-      ) do
-    socket
-    |> push_event("change_content", %{node: %{uuid: id, content: content}})
+    |> push_event("clean", payload)
+    |> stream_event("clean", event, payload)
     |> reply(:noreply)
   end
 
   def handle_info(
-        %NodeMovedEvent{node_id: id, parent_id: parent_id, prev_id: prev_id},
+        %NodeInsertedEvent{node: node, next_id: next_id} = event,
         socket
       ) do
+    payload = %{node: node, next_id: next_id}
+
     socket
-    |> push_event("move", %{node: %{uuid: id, parent_id: parent_id, prev_id: prev_id}})
+    |> push_event("insert", payload)
+    |> stream_event("insert", event, payload)
     |> reply(:noreply)
   end
 
-  def handle_info(%NodeDeletedEvent{node_id: id}, socket) do
+  def handle_info(
+        %NodeContentChangedEvent{node_id: id, content: content} = event,
+        socket
+      ) do
+    payload = %{node: %{uuid: id, content: content}}
+
     socket
-    |> push_event("delete", %{node: %{uuid: id}})
+    |> push_event("change_content", payload)
+    |> stream_event("change_content", event, payload)
+    |> reply(:noreply)
+  end
+
+  def handle_info(
+        %NodeMovedEvent{node_id: id, parent_id: parent_id, prev_id: prev_id} =
+          event,
+        socket
+      ) do
+    payload = %{node: %{uuid: id, parent_id: parent_id, prev_id: prev_id}}
+
+    socket
+    |> push_event("move", payload)
+    |> stream_event("move", event, payload)
+    |> reply(:noreply)
+  end
+
+  def handle_info(%NodeDeletedEvent{node_id: id} = event, socket) do
+    payload = %{node: %{uuid: id}}
+
+    socket
+    |> push_event("delete", payload)
+    |> stream_event("delete", event, payload)
     |> reply(:noreply)
   end
 
@@ -199,4 +219,11 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   defp get_nodes(_), do: []
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
+
+  defp stream_event(socket, action, %{event_id: event_id, user_id: user_id}, payload) do
+    socket
+    |> stream_insert(:log_items, %{id: event_id, action: action, payload: payload, user: user_id},
+      at: 0
+    )
+  end
 end

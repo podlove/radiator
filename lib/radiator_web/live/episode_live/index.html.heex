@@ -44,8 +44,22 @@
   <section :if={@selected_episode} class="col-span-12 sm:col-span-8">
     <h2 class="text-2xl"><%= @selected_episode.number %> <%= @selected_episode.title %></h2>
     <img class="my-4" src={~p"/images/pic06.jpg"} alt="" />
-    <div id="outline" class="my-6" phx-hook="outline">
+    <div id="outline" class="my-6" phx-hook="outline" phx-update="ignore">
       <div class="children"></div>
+    </div>
+  </section>
+
+  <section class="col-span-12 sm:col-span-12">
+    <h4 class="text-lg">EVENT-LOG</h4>
+    <div id="log" phx-update="stream">
+      <div :for={{dom_id, item} <- @streams.log_items} class="my-4 border-2 rounded" id={dom_id}>
+        <div class="px-2 bg-gray-200">
+          <.event_type_icon type={item.action} class="w-5 h-5" /> EVENT_ID | USER
+        </div>
+        <div class="px-2 ml-8">
+          <%= Jason.encode!(item.payload) %>
+        </div>
+      </div>
     </div>
   </section>
 </div>
