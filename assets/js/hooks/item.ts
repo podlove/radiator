@@ -15,26 +15,22 @@ export function createItem({ uuid, content, parent_id, prev_id, dirty }: Node) {
 
   const item = document.createElement("div");
   item.id = `outline-node-${uuid}`;
-  item.className = "my-1 bg-gray-100 data-[dirty=true]:bg-red-100";
+  item.className = "my-1 data-[dirty=true]:bg-red-100";
   item.setAttribute("data-parent", parent_id || "");
   item.setAttribute("data-prev", prev_id || "");
 
   const link = document.createElement("a");
-  link.className = "block float-left my-0.5 bg-gray-200 rounded-full";
+  link.className = "block float-left my-0.5 rounded-full";
   link.href = `#${uuid}`;
   link.innerHTML =
     '<svg viewBox="0 0 18 18" fill="currentColor" class="w-5 h-5"><circle cx="9" cy="9" r="3.5"></circle></svg>';
   item.appendChild(link);
 
-  const contentWrap = document.createElement("div");
-  contentWrap.className = "ml-5 bg-gray-300 content";
-  contentWrap.contentEditable = "true";
-  item.appendChild(contentWrap);
-
-  const span = document.createElement("span");
-  span.className = "bg-gray-400 innerContent";
-  span.textContent = content || " ";
-  contentWrap.appendChild(span);
+  const input = document.createElement("div");
+  input.className = "ml-5 content";
+  input.contentEditable = "true";
+  input.textContent = content || "";
+  item.appendChild(input);
 
   const childContainer = document.createElement("div");
   childContainer.className = "ml-5 children";
@@ -51,8 +47,8 @@ export function changeItemContent({ uuid, content, dirty }: Node) {
 
   const newContent = content || "";
 
-  const span = item.querySelector(".innerContent") as HTMLSpanElement;
-  if (span.textContent != newContent) span.textContent = newContent;
+  const input = item.querySelector(".content") as HTMLDivElement;
+  if (input.textContent != newContent) input.textContent = newContent;
 
   setItemDirty(item, dirty);
 
@@ -62,7 +58,7 @@ export function changeItemContent({ uuid, content, dirty }: Node) {
 export function moveItem(
   { uuid, parent_id, prev_id, dirty }: Node,
   container: HTMLDivElement,
-  force: boolean = false
+  force: boolean = false,
 ) {
   const item = getItemById(uuid);
   if (!item) return;
@@ -75,8 +71,8 @@ export function moveItem(
   )
     return;
 
-  item.setAttribute("data-parent", parent_id || "");
-  item.setAttribute("data-prev", prev_id || "");
+  setItemParent(item, parent_id);
+  setItemPrev(item, prev_id);
 
   const prevItem = getItemById(prev_id);
   const parentItem = getItemById(parent_id);
@@ -92,6 +88,16 @@ export function moveItem(
   setItemDirty(item, dirty);
 
   return item;
+}
+
+export function setItemParent(
+  item: HTMLDivElement,
+  parent_id: string | undefined,
+) {
+  item.setAttribute("data-parent", parent_id || "");
+}
+export function setItemPrev(item: HTMLDivElement, prev_id: string | undefined) {
+  item.setAttribute("data-prev", prev_id || "");
 }
 
 export function deleteItem({ uuid }: Node) {
@@ -112,7 +118,7 @@ export function getItemByNode({ uuid }: Node) {
   return getItemById(uuid);
 }
 
-function getItemById(uuid: string | undefined) {
+export function getItemById(uuid: string | undefined) {
   if (!uuid) return null;
 
   return document.getElementById(`outline-node-${uuid}`) as HTMLDivElement;
@@ -126,12 +132,12 @@ export function getItemByEvent(event: Event): HTMLDivElement {
 }
 
 export function focusItem(item: HTMLDivElement, toEnd: boolean = true) {
-  const contentWrap = item.querySelector(".innerContent") as HTMLDivElement;
-  contentWrap.focus();
+  const input = item.querySelector(".content") as HTMLDivElement;
+  input.focus();
 
   if (toEnd) {
     const range = document.createRange();
-    range.setStart(contentWrap, 0);
+    range.setStart(input, 0);
     range.collapse(true);
 
     const selection = window.getSelection();

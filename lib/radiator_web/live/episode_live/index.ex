@@ -157,9 +157,9 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
-  def handle_info(%NodeInsertedEvent{node: node}, socket) do
+  def handle_info(%NodeInsertedEvent{node: node, next_id: next_id}, socket) do
     socket
-    |> push_event("insert", %{node: node})
+    |> push_event("insert", %{node: node, next_id: next_id})
     |> reply(:noreply)
   end
 

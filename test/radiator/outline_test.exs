@@ -67,7 +67,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => node_3.uuid
       }
 
-      assert {:ok, %Node{uuid: node3_1_uuid} = node} = Outline.insert_node(node_attrs)
+      assert {:ok, %{node: %Node{uuid: node3_1_uuid} = node}} = Outline.insert_node(node_attrs)
 
       assert node.parent_id == node_3.parent_id
       assert node.prev_id == node_3.uuid
@@ -106,7 +106,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_1.uuid
       }
 
-      {:ok, new_node} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
       assert new_node.parent_id == node_3.uuid
     end
 
@@ -121,7 +121,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_1.uuid
       }
 
-      {:ok, new_node} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
       assert new_node.prev_id == nested_node_1.uuid
     end
 
@@ -137,7 +137,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_1.uuid
       }
 
-      {:ok, new_node} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
 
       assert NodeRepository.get_node!(nested_node_2.uuid).prev_id == new_node.uuid
       assert new_node.prev_id == nested_node_1.uuid
@@ -156,7 +156,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_2.uuid
       }
 
-      {:ok, new_node} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
 
       assert NodeRepository.get_node!(nested_node_2.uuid).prev_id == nested_node_1.uuid
       assert new_node.prev_id == nested_node_2.uuid
@@ -174,7 +174,7 @@ defmodule Radiator.OutlineTest do
         "parent_id" => node_3.uuid
       }
 
-      {:ok, new_node} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
 
       assert new_node.prev_id == nil
       assert NodeRepository.get_node!(nested_node_1.uuid).prev_id == new_node.uuid
@@ -187,7 +187,7 @@ defmodule Radiator.OutlineTest do
       # another node in another episode without parent and prev node
       node_fixture(parent_id: nil, prev_id: nil)
       node_attrs = %{"content" => "new node", "episode_id" => parent_node.episode_id}
-      {:ok, new_node} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
 
       assert new_node.prev_id == nil
       assert new_node.parent_id == nil

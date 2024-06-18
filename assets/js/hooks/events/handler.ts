@@ -6,7 +6,9 @@ import {
   deleteItem,
   focusItem,
   moveItem,
+  getItemById,
 } from "../item";
+import { getNodeByItem } from "../node";
 
 export function handleList({ nodes }: { nodes: Node[] }) {
   const container: HTMLDivElement = this.el.querySelector(".children");
@@ -36,12 +38,23 @@ export function handleList({ nodes }: { nodes: Node[] }) {
   focusItem(lastItem);
 }
 
-export function handleInsert({ node }: { node: Node }) {
+export function handleInsert({
+  node,
+  next_id,
+}: {
+  node: Node;
+  next_id: string | undefined;
+}) {
   const container: HTMLDivElement = this.el.querySelector(".children");
 
   const item = createItem(node);
   container.append(item);
   moveItem(node, container);
+  const nextItem = getItemById(next_id) as HTMLDivElement;
+  const nextNode = getNodeByItem(nextItem);
+  nextNode.prev_id = node.uuid;
+  nextNode.dirty = false;
+  moveItem(nextNode, container);
 }
 
 export function handleContentChange({ node }: { node: Node }) {
