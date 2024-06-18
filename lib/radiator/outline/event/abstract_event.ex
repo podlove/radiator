@@ -23,7 +23,7 @@ defimpl Radiator.Outline.Event.AbstractEvent, for: NodeContentChangedEvent do
     %{node_id: event.node_id, content: event.content}
   end
 
-  def event_type(_event), do: "NodeInsertedEvent"
+  def event_type(_event), do: "NodeContentChangedEvent"
 end
 
 defimpl Radiator.Outline.Event.AbstractEvent, for: NodeDeletedEvent do
@@ -36,8 +36,15 @@ end
 
 defimpl Radiator.Outline.Event.AbstractEvent, for: NodeMovedEvent do
   def payload(event) do
-    %{node_id: event.node_id, parent_id: event.parent_id, prev_id: event.prev_id}
+    %{
+      node_id: event.node_id,
+      parent_id: event.parent_id,
+      prev_id: event.prev_id,
+      old_prev_id: event.old_prev_id,
+      old_next_id: event.old_next_id,
+      next_id: event.next_id
+    }
   end
 
-  def event_type(_event), do: "NodeInsertedEvent"
+  def event_type(_event), do: "NodeMovedEvent"
 end
