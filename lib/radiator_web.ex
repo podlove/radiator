@@ -86,11 +86,8 @@ defmodule RadiatorWeb do
 
       import SocketReply
 
-      # UI components
+      # Core UI components and translation
       import RadiatorWeb.CoreComponents
-      import RadiatorWeb.OutlineComponents
-
-      # Translation
       import RadiatorWeb.Gettext
 
       # Shortcut for generating JS commands

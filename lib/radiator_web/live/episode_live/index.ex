@@ -13,6 +13,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   alias Radiator.Podcast
   alias Radiator.Podcast.Episode
 
+  alias RadiatorWeb.OutlineComponents
+
   @impl true
   def mount(%{"show" => show_id}, _session, socket) do
     show = Podcast.get_show!(show_id, preload: :episodes)
@@ -23,7 +25,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> assign(:show, show)
     |> assign(:episodes, show.episodes)
     |> assign(action: nil, episode: nil, form: nil)
-    |> stream(:log_items, [])
+    |> stream_configure(:event_logs, dom_id: & &1.event_id)
+    |> stream(:event_logs, [])
     |> reply(:ok)
   end
 
@@ -32,7 +35,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     episode = get_selected_episode(params)
     nodes = get_nodes(episode)
 
-    # would need to unsucbscribe from previous episode,
+    # would need to unsubscribe from previous episode,
     # better: load new liveview
     if connected?(socket) and episode do
       Dispatch.subscribe(episode.id)
@@ -157,7 +160,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     socket
     |> push_event("clean", payload)
-    |> stream_event("clean", event, payload)
+    |> stream_event(event)
     |> reply(:noreply)
   end
 
@@ -169,7 +172,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     socket
     |> push_event("insert", payload)
-    |> stream_event("insert", event, payload)
+    |> stream_event(event)
     |> reply(:noreply)
   end
 
@@ -181,7 +184,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     socket
     |> push_event("change_content", payload)
-    |> stream_event("change_content", event, payload)
+    |> stream_event(event)
     |> reply(:noreply)
   end
 
@@ -194,7 +197,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     socket
     |> push_event("move", payload)
-    |> stream_event("move", event, payload)
+    |> stream_event(event)
     |> reply(:noreply)
   end
 
@@ -203,7 +206,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     socket
     |> push_event("delete", payload)
-    |> stream_event("delete", event, payload)
+    |> stream_event(event)
     |> reply(:noreply)
   end
 
@@ -220,10 +223,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
 
-  defp stream_event(socket, action, %{event_id: event_id, user_id: user_id}, payload) do
+  defp stream_event(socket, event) do
     socket
-    |> stream_insert(:log_items, %{id: event_id, action: action, payload: payload, user: user_id},
-      at: 0
-    )
+    |> stream_insert(:event_logs, event, at: 0)
   end
 end

@@ -22,44 +22,38 @@
     </ol>
   </aside>
 
-  <section :if={@action == :new_episode} class="col-span-12 sm:col-span-8">
-    <div class="p-4 my-4 bg-[#f0f4f4]">
-      <h3 class="text-xl">Create Episode</h3>
-      <.form :let={f} for={@form} id="episode-form" phx-change="validate" phx-submit="save">
-        <.input field={f[:number]} type="text" label="Number" />
-        <.input field={f[:title]} type="text" label="Title" />
-        <div class="flex items-center justify-between gap-6 mt-2">
-          <div
-            class="px-3 py-2 text-sm font-semibold leading-6 border rounded-lg cursor-pointer phx-submit-loading:opacity-75 border-zinc-900 hover:border-zinc-700 text-zinc-900 active:text-zinc-900/80"
-            phx-click="cancel"
-          >
-            Cancel
+  <div class="col-span-12 sm:col-span-8">
+    <section :if={@action == :new_episode}>
+      <div class="p-4 my-4 bg-[#f0f4f4]">
+        <h3 class="text-xl">Create Episode</h3>
+        <.form :let={f} for={@form} id="episode-form" phx-change="validate" phx-submit="save">
+          <.input field={f[:number]} type="text" label="Number" />
+          <.input field={f[:title]} type="text" label="Title" />
+          <div class="flex items-center justify-between gap-6 mt-2">
+            <div
+              class="px-3 py-2 text-sm font-semibold leading-6 border rounded-lg cursor-pointer phx-submit-loading:opacity-75 border-zinc-900 hover:border-zinc-700 text-zinc-900 active:text-zinc-900/80"
+              phx-click="cancel"
+            >
+              Cancel
+            </div>
+            <.button phx-disable-with="Saving...">Save Episode</.button>
           </div>
-          <.button phx-disable-with="Saving...">Save Episode</.button>
-        </div>
-      </.form>
-    </div>
-  </section>
-
-  <section :if={@selected_episode} class="col-span-12 sm:col-span-8">
-    <h2 class="text-2xl"><%= @selected_episode.number %> <%= @selected_episode.title %></h2>
-    <img class="my-4" src={~p"/images/pic06.jpg"} alt="" />
-    <div id="outline" class="my-6" phx-hook="outline" phx-update="ignore">
-      <div class="children"></div>
-    </div>
-  </section>
-
-  <section class="col-span-12 sm:col-span-12">
-    <h4 class="text-lg">EVENT-LOG</h4>
-    <div id="log" phx-update="stream">
-      <div :for={{dom_id, item} <- @streams.log_items} class="my-4 border-2 rounded" id={dom_id}>
-        <div class="px-2 bg-gray-200">
-          <.event_type_icon type={item.action} class="w-5 h-5" /> EVENT_ID | USER
-        </div>
-        <div class="px-2 ml-8">
-          <%= Jason.encode!(item.payload) %>
-        </div>
+        </.form>
       </div>
-    </div>
-  </section>
+    </section>
+
+    <section :if={@selected_episode}>
+      <h2 class="text-2xl"><%= @selected_episode.number %> <%= @selected_episode.title %></h2>
+      <img class="my-4" src={~p"/images/pic06.jpg"} alt="" />
+      <div id="outline" class="my-6" phx-hook="outline" phx-update="ignore">
+        <div class="children"></div>
+      </div>
+      <.live_component id="outline-component" module={RadiatorWeb.EpisodeLive.OutlineComponent} />
+    </section>
+
+    <section>
+      <h4 class="text-lg">EVENT-LOG</h4>
+      <OutlineComponents.event_logs stream={@streams.event_logs} />
+    </section>
+  </div>
 </div>

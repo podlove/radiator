@@ -4,38 +4,81 @@ defmodule RadiatorWeb.OutlineComponents do
   """
   use Phoenix.Component
 
-  import RadiatorWeb.CoreComponents, only: [icon: 1]
+  alias RadiatorWeb.CoreComponents, as: Core
 
-  attr :type, :string, values: ~w(clean insert change_content move delete)
-  attr :class, :string, default: nil
+  alias Radiator.Outline.Event.{
+    NodeContentChangedEvent,
+    NodeDeletedEvent,
+    NodeInsertedEvent,
+    NodeMovedEvent
+  }
 
-  def event_type_icon(%{type: "clean"} = assigns) do
+  def event_logs(assigns) do
     ~H"""
-    <.icon name="hero-check-solid" class={@class} />
+    <ul id="event_logs" class="" phx-update="stream" phx-page-loading>
+      <li :for={{id, event} <- @stream} id={id} class="my-4 border-2 rounded">
+        <.event_entry event={event} />
+      </li>
+    </ul>
     """
   end
 
-  def event_type_icon(%{type: "insert"} = assigns) do
+  attr :event, :map, required: true
+
+  defp event_entry(%{event: %NodeContentChangedEvent{}} = assigns) do
     ~H"""
-    <.icon name="hero-plus-solid" class={@class} />
+    <div class="px-2 bg-gray-200">
+      <Core.icon name="hero-pencil-square-solid" class="w-5 h-5" />
+      <%= @event.event_id %>
+    </div>
+    <div class="px-2 ml-8">
+      <pre><%= @event.node_id %> - NodeContentChanged</pre>
+      <p>content = <%= @event.content %></p>
+    </div>
     """
   end
 
-  def event_type_icon(%{type: "change_content"} = assigns) do
+  defp event_entry(%{event: %NodeDeletedEvent{}} = assigns) do
     ~H"""
-    <.icon name="hero-pencil-solid" class={@class} />
+    <div class="px-2 bg-gray-200">
+      <Core.icon name="hero-archive-box-x-mark-solid" class="w-5 h-5" />
+      <%= @event.event_id %>
+    </div>
+    <div class="px-2 ml-8">
+      <pre><%= @event.node_id %> - NodeDeleted</pre>
+      <p>moved nodes = ?</p>
+    </div>
     """
   end
 
-  def event_type_icon(%{type: "move"} = assigns) do
+  defp event_entry(%{event: %NodeInsertedEvent{}} = assigns) do
     ~H"""
-    <.icon name="hero-chevron-up-down-solid" class={@class} />
+    <div class="px-2 bg-gray-200">
+      <Core.icon name="hero-plus-solid" class="w-5 h-5" />
+      <%= @event.event_id %>
+    </div>
+    <div class="px-2 ml-8">
+      <pre><%= @event.node.uuid %> - NodeInserted</pre>
+      <p>parent_id = <%= @event.node.parent_id %></p>
+      <p>prev_id = <%= @event.node.prev_id %></p>
+      <p>content = <%= @event.node.content %></p>
+      <p>moved nodes = ?</p>
+    </div>
     """
   end
 
-  def event_type_icon(%{type: "delete"} = assigns) do
+  defp event_entry(%{event: %NodeMovedEvent{}} = assigns) do
     ~H"""
-    <.icon name="hero-trash-solid" class={@class} />
+    <div class="px-2 bg-gray-200">
+      <Core.icon name="hero-arrows-pointing-out-solid" class="w-5 h-5" />
+      <%= @event.event_id %>
+    </div>
+    <div class="px-2 ml-8">
+      <pre><%= @event.node_id %> - NodeMoved</pre>
+      <p>parent_id = <%= @event.parent_id %></p>
+      <p>prev_id = <%= @event.prev_id %></p>
+      <p>moved nodes = ?</p>
+    </div>
     """
   end
 end
