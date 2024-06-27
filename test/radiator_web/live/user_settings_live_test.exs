@@ -1,5 +1,5 @@
 defmodule RadiatorWeb.UserSettingsLiveTest do
-  use RadiatorWeb.ConnCase
+  use RadiatorWeb.ConnCase, async: true
 
   alias Radiator.Accounts
   import Phoenix.LiveViewTest

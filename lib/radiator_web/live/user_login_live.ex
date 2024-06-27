@@ -5,7 +5,7 @@ defmodule RadiatorWeb.UserLoginLive do
     ~H"""
     <div class="mx-auto max-w-sm">
       <.header class="text-center">
-        Sign in to account
+        Log in to account
         <:subtitle>
           Don't have an account?
           <.link navigate={~p"/users/register"} class="font-semibold text-brand hover:underline">
@@ -26,8 +26,8 @@ defmodule RadiatorWeb.UserLoginLive do
           </.link>
         </:actions>
         <:actions>
-          <.button phx-disable-with="Signing in..." class="w-full">
-            Sign in <span aria-hidden="true">→</span>
+          <.button phx-disable-with="Logging in..." class="w-full">
+            Log in <span aria-hidden="true">→</span>
           </.button>
         </:actions>
       </.simple_form>
@@ -36,7 +36,7 @@ defmodule RadiatorWeb.UserLoginLive do
   end
 
   def mount(_params, _session, socket) do
-    email = live_flash(socket.assigns.flash, :email)
+    email = Phoenix.Flash.get(socket.assigns.flash, :email)
     form = to_form(%{"email" => email}, as: "user")
     {:ok, assign(socket, form: form), temporary_assigns: [form: form]}
   end

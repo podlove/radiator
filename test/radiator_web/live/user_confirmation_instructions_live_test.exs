@@ -1,5 +1,5 @@
 defmodule RadiatorWeb.UserConfirmationInstructionsLiveTest do
-  use RadiatorWeb.ConnCase
+  use RadiatorWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
   import Radiator.AccountsFixtures

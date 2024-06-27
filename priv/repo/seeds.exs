@@ -2,7 +2,16 @@
 #
 #     mix run priv/repo/seeds.exs
 #
-alias Radiator.{Accounts, Outline, Podcast}
+# Inside the script, you can read and write to any of your
+# repositories directly:
+#
+#     Radiator.Repo.insert!(%Radiator.SomeSchema{})
+#
+# We recommend using the bang functions (`insert!`, `update!`
+# and so on) as they will fail if something goes wrong.
+
+alias Radiator.{Accounts, Podcast}
+alias Radiator.Outline.NodeRepository
 
 {:ok, _user_bob} =
   Accounts.register_user(%{email: "bob@radiator.de", password: "supersupersecret"})
@@ -20,62 +29,62 @@ alias Radiator.{Accounts, Outline, Podcast}
   Podcast.create_show(%{title: "Tech Weekly", network_id: network.id})
 
 {:ok, past_episode} =
-  Podcast.create_episode(%{title: "past episode", show_id: show.id})
+  Podcast.create_episode(%{title: "past episode", show_id: show.id, number: 1})
 
 {:ok, current_episode} =
-  Podcast.create_episode(%{title: "current episode", show_id: show.id})
+  Podcast.create_episode(%{title: "current episode", show_id: show.id, number: 2})
 
 {:ok, node1} =
-  Outline.insert_node(%{"content" => "Node 1", "episode_id" => current_episode.id})
+  NodeRepository.create_node(%{"content" => "Node 1", "episode_id" => current_episode.id})
 
 {:ok, node2} =
-  Outline.insert_node(%{
+  NodeRepository.create_node(%{
     "content" => "Node 2",
     "episode_id" => current_episode.id,
     "prev_id" => node1.uuid
   })
 
 {:ok, node3} =
-  Outline.insert_node(%{
+  NodeRepository.create_node(%{
     "content" => "Node 3",
     "episode_id" => current_episode.id,
     "prev_id" => node2.uuid
   })
 
 {:ok, _node4} =
-  Outline.insert_node(%{
+  NodeRepository.create_node(%{
     "content" => "Node 4",
     "episode_id" => current_episode.id,
     "prev_id" => node3.uuid
   })
 
 {:ok, node21} =
-  Outline.insert_node(%{
+  NodeRepository.create_node(%{
     "content" => "Node 2.1",
     "episode_id" => current_episode.id,
     "parent_id" => node2.uuid
   })
 
 {:ok, _node22} =
-  Outline.insert_node(%{
+  NodeRepository.create_node(%{
     "content" => "Node 2.2",
     "episode_id" => current_episode.id,
     "prev_id" => node21.uuid
   })
 
 {:ok, node211} =
-  Outline.insert_node(%{
+  NodeRepository.create_node(%{
     "content" => "Node 2.1.1",
     "episode_id" => current_episode.id,
     "parent_id" => node21.uuid
   })
 
 {:ok, _node212} =
-  Outline.insert_node(%{
+  NodeRepository.create_node(%{
     "content" => "Node 2.1.2",
     "episode_id" => current_episode.id,
     "prev_id" => node211.uuid
   })
 
 {:ok, _past_parent_node} =
-  Outline.insert_node(%{"content" => "Old Content", "episode_id" => past_episode.id})
+  NodeRepository.create_node(%{"content" => "Old Content", "episode_id" => past_episode.id})

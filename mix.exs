@@ -33,6 +33,7 @@ defmodule Radiator.MixProject do
   defp deps do
     [
       {:argon2_elixir, "~> 3.0"},
+      {:bandit, "~> 1.5"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dns_cluster, "~> 0.1.1"},
       {:ecto_sql, "~> 3.10"},
@@ -42,20 +43,27 @@ defmodule Radiator.MixProject do
       {:gen_smtp, "~> 1.1"},
       {:gen_stage, "~> 1.2"},
       {:gettext, "~> 0.20"},
+      {:heroicons,
+       github: "tailwindlabs/heroicons",
+       tag: "v2.1.1",
+       sparse: "optimized",
+       app: false,
+       compile: false,
+       depth: 1},
       {:jason, "~> 1.2"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:phoenix, "~> 1.7.10"},
-      {:phoenix_ecto, "~> 4.4"},
-      {:phoenix_html, "~> 3.3"},
-      {:phoenix_live_dashboard, "~> 0.8.2"},
+      {:phoenix_ecto, "~> 4.5"},
+      {:phoenix_html, "~> 4.1"},
+      {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.20.1"},
-      {:plug_cowboy, "~> 2.5"},
+      # TODO bump on release to {:phoenix_live_view, "~> 1.0.0"},
+      {:phoenix_live_view, "~> 1.0.0-rc.1", override: true},
+      {:phoenix, "~> 1.7.14"},
       {:postgrex, ">= 0.0.0"},
       {:socket_reply, "~> 0.1.0"},
-      {:swoosh, "~> 1.3"},
-      {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
-      {:telemetry_metrics, "~> 0.6"},
+      {:swoosh, "~> 1.5"},
+      {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
+      {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"}
     ]
   end
@@ -73,8 +81,12 @@ defmodule Radiator.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.build": ["tailwind radiator", "esbuild radiator"],
+      "assets.deploy": [
+        "tailwind radiator --minify",
+        "esbuild radiator --minify",
+        "phx.digest"
+      ]
     ]
   end
 end

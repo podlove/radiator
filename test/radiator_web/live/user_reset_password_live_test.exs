@@ -1,5 +1,5 @@
 defmodule RadiatorWeb.UserResetPasswordLiveTest do
-  use RadiatorWeb.ConnCase
+  use RadiatorWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
   import Radiator.AccountsFixtures
@@ -100,7 +100,7 @@ defmodule RadiatorWeb.UserResetPasswordLiveTest do
       assert conn.resp_body =~ "Log in"
     end
 
-    test "redirects to password reset page when the Register button is clicked", %{
+    test "redirects to registration page when the Register button is clicked", %{
       conn: conn,
       token: token
     } do
