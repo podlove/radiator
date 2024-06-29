@@ -60,7 +60,7 @@ defmodule Radiator.MixProject do
       {:phoenix_live_view, "~> 1.0.0-rc.1", override: true},
       {:phoenix, "~> 1.7.14"},
       {:postgrex, ">= 0.0.0"},
-      {:socket_reply, "~> 0.1.0"},
+      {:reply, "~> 0.2.0"},
       {:swoosh, "~> 1.5"},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},

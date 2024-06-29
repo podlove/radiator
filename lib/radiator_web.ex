@@ -84,7 +84,7 @@ defmodule RadiatorWeb do
       # HTML escaping functionality
       import Phoenix.HTML
 
-      import SocketReply
+      import Reply
 
       # Core UI components and translation
       import RadiatorWeb.CoreComponents
