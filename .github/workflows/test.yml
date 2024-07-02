@@ -4,10 +4,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  OTP_VERSION: "26"
-  ELIXIR_VERSION: "1.15"
-
 permissions:
   contents: read
 
