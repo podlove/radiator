@@ -678,6 +678,55 @@ defmodule Radiator.OutlineTest do
     end
   end
 
+  describe "get_node_postion/1" do
+      setup :complex_node_fixture
+
+      test "with a given uuid we get all child nodes with positions",%{
+        node_1: node_1,
+        node_2: node_2,
+        node_3: node_3,
+        node_4: node_4,
+        node_5: node_5,
+        node_6: node_6,
+        nested_node_1: nested_node_1,
+        nested_node_2: nested_node_2,
+        parent_node: parent_node
+      } do
+        # get_node_postion_for_level(parent_node.uuid)
+        parent_node = Outline.get_parent_node(node_4)
+        child_nodes = Outline.get_all_child_nodes(parent_node)
+
+        # child_nodes
+        # sorted_child_nodes = []
+
+        # child_nodes.prev_id.nil?
+
+        # child_nodes -- first
+        # sorted_child_nodes = [first]
+
+        # child_nodes
+        # child_map %{
+        #   uuid: {node, position},
+
+
+        # }
+        # sorted_child_nodes = []
+
+       temp_child_nodes = child_nodes
+       |> Enum.map(fn node -> {node.uuid, {node, nil}} end)
+       |> Map.new
+
+       temp_child_nodes
+       |> Enum.map(fn {uuid, {node, _}} -> {node, get_position(node.prev_id, temp_child_nodes) end)
+      end
+
+  end
+
+  def get_position(uuid, %{uuid => {_node, nil}}), do: 1
+
+  def get_position(uuid, %{uuid => {_node, position}}), do: position + 1
+
+
   defp assert_level_for_node(tree, node, level) do
     node = Enum.filter(tree, fn n -> n.uuid == node.uuid end) |> List.first()
     assert node.level == level
