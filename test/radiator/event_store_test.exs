@@ -22,7 +22,7 @@ defmodule Radiator.EventStoreTest do
       event = node_inserted_event_fixture(user_id: user.id)
 
       EventStore.persist_event(event)
-      stored_event = EventStore.get_event_data!(event.event_id)
+      stored_event = EventStore.get_event_data!(event.uuid)
       assert stored_event.data["next_id"] == event.next_id
       assert stored_event.user_id == event.user_id
       assert stored_event.event_type == "NodeInsertedEvent"
@@ -65,7 +65,7 @@ defmodule Radiator.EventStoreTest do
       event = node_moved_event_fixture(user_id: user.id)
 
       EventStore.persist_event(event)
-      stored_event = EventStore.get_event_data!(event.event_id)
+      stored_event = EventStore.get_event_data!(event.uuid)
       assert stored_event.data["node_id"] == event.node_id
       assert stored_event.data["parent_id"] == event.parent_id
       assert stored_event.data["prev_id"] == event.prev_id

@@ -40,7 +40,7 @@ defmodule Radiator.EventStoreFixtures do
     %NodeInsertedEvent{
       node: node,
       user_id: user_id,
-      event_id: Ecto.UUID.generate(),
+      uuid: Ecto.UUID.generate(),
       next_id: next.uuid
     }
   end
@@ -52,7 +52,7 @@ defmodule Radiator.EventStoreFixtures do
       node_id: node.uuid,
       content: node.content,
       user_id: user_id,
-      event_id: Ecto.UUID.generate()
+      uuid: Ecto.UUID.generate()
     }
   end
 
@@ -62,7 +62,7 @@ defmodule Radiator.EventStoreFixtures do
     %NodeDeletedEvent{
       node_id: node.uuid,
       user_id: user_id,
-      event_id: Ecto.UUID.generate()
+      uuid: Ecto.UUID.generate()
     }
   end
 
@@ -84,7 +84,7 @@ defmodule Radiator.EventStoreFixtures do
       next_id: next.uuid,
       old_next_id: old_next.uuid,
       old_prev_id: old_prev.uuid,
-      event_id: Ecto.UUID.generate()
+      uuid: Ecto.UUID.generate()
     }
   end
 end

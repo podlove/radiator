@@ -29,7 +29,7 @@ defmodule RadiatorWeb.OutlineComponents do
     ~H"""
     <div class="px-2 bg-gray-200">
       <Core.icon name="hero-pencil-square-solid" class="w-5 h-5" />
-      <%= @event.event_id %>
+      <%= @event.uuid %>
     </div>
     <div class="px-2 ml-8">
       <pre><%= @event.node_id %> - NodeContentChanged</pre>
@@ -42,11 +42,12 @@ defmodule RadiatorWeb.OutlineComponents do
     ~H"""
     <div class="px-2 bg-gray-200">
       <Core.icon name="hero-archive-box-x-mark-solid" class="w-5 h-5" />
-      <%= @event.event_id %>
+      <%= @event.uuid %>
     </div>
     <div class="px-2 ml-8">
       <pre><%= @event.node_id %> - NodeDeleted</pre>
-      <p>moved nodes = ?</p>
+      <p>next node = ?</p>
+      <p>child nodes = ?</p>
     </div>
     """
   end
@@ -55,14 +56,14 @@ defmodule RadiatorWeb.OutlineComponents do
     ~H"""
     <div class="px-2 bg-gray-200">
       <Core.icon name="hero-plus-solid" class="w-5 h-5" />
-      <%= @event.event_id %>
+      <%= @event.uuid %>
     </div>
     <div class="px-2 ml-8">
       <pre><%= @event.node.uuid %> - NodeInserted</pre>
       <p>parent_id = <%= @event.node.parent_id %></p>
       <p>prev_id = <%= @event.node.prev_id %></p>
+      <p>next_id = <%= @event.next_id %></p>
       <p>content = <%= @event.node.content %></p>
-      <p>moved nodes = ?</p>
     </div>
     """
   end
@@ -71,13 +72,15 @@ defmodule RadiatorWeb.OutlineComponents do
     ~H"""
     <div class="px-2 bg-gray-200">
       <Core.icon name="hero-arrows-pointing-out-solid" class="w-5 h-5" />
-      <%= @event.event_id %>
+      <%= @event.uuid %>
     </div>
     <div class="px-2 ml-8">
       <pre><%= @event.node_id %> - NodeMoved</pre>
       <p>parent_id = <%= @event.parent_id %></p>
       <p>prev_id = <%= @event.prev_id %></p>
-      <p>moved nodes = ?</p>
+      <p>old_prev_id = <%= @event.old_prev_id %></p>
+      <p>old_next_id = <%= @event.old_next_id %></p>
+      <p>next_id = <%= @event.next_id %></p>
     </div>
     """
   end

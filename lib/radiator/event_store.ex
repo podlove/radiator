@@ -12,7 +12,7 @@ defmodule Radiator.EventStore do
       create_event_data(%{
         data: AbstractEvent.payload(event),
         event_type: AbstractEvent.event_type(event),
-        uuid: convert_to_uuid(event.event_id),
+        uuid: convert_to_uuid(event.uuid),
         user_id: event.user_id
       })
 
@@ -23,16 +23,30 @@ defmodule Radiator.EventStore do
   defp convert_to_uuid(uuid), do: uuid
 
   @doc """
-  Returns the list of foo_events.
+  Returns the list of all event_data.
 
   ## Examples
 
-      iex> list_events()
+      iex> list_event_data()
       [%Event{}, ...]
 
   """
   def list_event_data do
     Repo.all(EventData)
+  end
+
+  @doc """
+  Returns the list of event_data per episode.
+
+  ## Examples
+
+      iex> list_event_data_by_episode()
+      [%Event{}, ...]
+
+  """
+  # def list_event_data_by_episode(nil), do: nil
+  def list_event_data_by_episode(episode_id) do
+    Repo.all(EventData, where: [episode_id: episode_id], order_by: [desc: :inserted_at])
   end
 
   @doc """
