@@ -93,13 +93,15 @@ defmodule Radiator.Outline do
         if get_node_id(prev_node) != new_prev_id || get_node_id(parent_node) != new_parent_id do
           do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node)
         else
-          {:ok, node}
+          {:ok, %NodeRepoResult{node: node}}
         end
     end
   end
 
   # low level function to move a node
   defp do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node) do
+    node_repo_result = %NodeRepoResult{node: node}
+
     Repo.transaction(fn ->
       old_next_node =
         Node
@@ -119,9 +121,13 @@ defmodule Radiator.Outline do
         move_node_if(old_next_node, get_node_id(parent_node), get_node_id(prev_node))
 
       {:ok, _new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
-    end)
 
-    {:ok, node}
+      Map.merge(node_repo_result, %{
+        old_next_id: get_node_id(old_next_node),
+        old_prev_id: get_node_id(prev_node),
+        next_id: get_node_id(new_next_node)
+      })
+    end)
   end
 
   @doc """
