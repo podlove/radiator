@@ -3,6 +3,8 @@ defprotocol Radiator.Outline.Event.AbstractEvent do
   def event_type(event)
 end
 
+# TODO remove protocol, rename to Event, move one hierarchy up
+
 alias Radiator.Outline.Event.{
   NodeContentChangedEvent,
   NodeInsertedEvent,

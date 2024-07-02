@@ -222,7 +222,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   def get_event_logs(nil), do: []
   def get_event_logs(episode) do
-    EventStore.list_event_data_by_episode(episode.id)
+    # EventStore.list_event_data_by_episode(episode.id)
+    []
   end
 
   defp get_nodes(%{id: id}), do: NodeRepository.list_nodes_by_episode(id)

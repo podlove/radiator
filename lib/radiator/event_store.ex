@@ -19,6 +19,14 @@ defmodule Radiator.EventStore do
     event
   end
 
+  def list_events_by_episode(episode_id) do
+    episode_id
+    |> list_event_data_by_episode
+    |> Enum.map(&event_data_to_event/1)
+  end
+
+  defp event_data_to_event(_event), do: nil
+
   defp convert_to_uuid(<<uuid::binary-size(36), ":", _::binary>>), do: uuid
   defp convert_to_uuid(uuid), do: uuid
 
