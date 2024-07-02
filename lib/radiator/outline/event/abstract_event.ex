@@ -12,7 +12,13 @@ alias Radiator.Outline.Event.{
 
 defimpl Radiator.Outline.Event.AbstractEvent, for: NodeInsertedEvent do
   def payload(event) do
-    event.node
+    %{
+      node_id: event.node.uuid,
+      content: event.node.content,
+      parent_id: event.node.parent_id,
+      prev_id: event.node.prev_id,
+      next_id: event.next_id
+    }
   end
 
   def event_type(_event), do: "NodeInsertedEvent"
