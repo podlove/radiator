@@ -10,7 +10,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     NodeMovedEvent
   }
 
-  alias Radiator.EventStore
+  # alias Radiator.EventStore
   alias Radiator.Podcast
   alias Radiator.Podcast.Episode
 
@@ -221,7 +221,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   def get_event_logs(nil), do: []
-  def get_event_logs(episode) do
+
+  def get_event_logs(_episode) do
     # EventStore.list_event_data_by_episode(episode.id)
     []
   end
