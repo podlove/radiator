@@ -678,27 +678,12 @@ defmodule Radiator.OutlineTest do
     end
   end
 
-  describe "get_node_postion/1" do
+  describe "order_child_nodes/1" do
     setup :complex_node_fixture
 
-    test "with a given uuid we get all child nodes with positions", %{node_4: node_4} do
-      ordered_list =
-        node_4
-        |> Outline.get_parent_node()
-        |> Outline.get_all_child_nodes()
-        |> Enum.map(fn node -> {node.prev_id, node} end)
-        |> Map.new()
-        |> order_nodes(nil, [])
-
-      assert ordered_list |> Enum.map(& &1.content) ==
+    test "get child nodes in correct order", %{parent_node: parent_node} do
+      assert parent_node |> Outline.order_child_nodes() |> Enum.map(& &1.content) ==
                ["node_1", "node_2", "node_3", "node_4", "node_5", "node_6"]
-    end
-  end
-
-  defp order_nodes(index, prev_id, collection) do
-    case index[prev_id] do
-      %{uuid: uuid} = node -> order_nodes(index, uuid, [node | collection])
-      _ -> Enum.reverse(collection)
     end
   end
 
