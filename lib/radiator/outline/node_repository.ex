@@ -71,6 +71,9 @@ defmodule Radiator.Outline.NodeRepository do
     Node
     |> where([p], p.episode_id == ^episode_id)
     |> Repo.all()
+    |> Enum.group_by(& &1.parent_id)
+    |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)
+    |> List.flatten()
   end
 
   @doc """
