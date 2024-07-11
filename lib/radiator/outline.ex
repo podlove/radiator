@@ -32,14 +32,19 @@ defmodule Radiator.Outline do
   def order_child_nodes(%Node{} = node) do
     node
     |> get_all_child_nodes()
-    |> Enum.map(fn node -> {node.prev_id, node} end)
-    |> Map.new()
-    |> order_nodes(nil, [])
+    |> order_sibling_nodes()
   end
 
-  defp order_nodes(index, prev_id, collection) do
+  def order_sibling_nodes(nodes) do
+    nodes
+    |> Enum.map(fn node -> {node.prev_id, node} end)
+    |> Map.new()
+    |> order_nodes_by_index(nil, [])
+  end
+
+  defp order_nodes_by_index(index, prev_id, collection) do
     case index[prev_id] do
-      %{uuid: uuid} = node -> order_nodes(index, uuid, [node | collection])
+      %{uuid: uuid} = node -> order_nodes_by_index(index, uuid, [node | collection])
       _ -> Enum.reverse(collection)
     end
   end
