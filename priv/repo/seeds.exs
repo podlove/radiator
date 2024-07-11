@@ -69,6 +69,7 @@ alias Radiator.Outline.NodeRepository
   NodeRepository.create_node(%{
     "content" => "Node 2.2",
     "episode_id" => current_episode.id,
+    "parent_id" => node2.uuid,
     "prev_id" => node21.uuid
   })
 
@@ -83,6 +84,7 @@ alias Radiator.Outline.NodeRepository
   NodeRepository.create_node(%{
     "content" => "Node 2.1.2",
     "episode_id" => current_episode.id,
+    "parent_id" => node21.uuid,
     "prev_id" => node211.uuid
   })
 
