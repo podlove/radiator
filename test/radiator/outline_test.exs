@@ -678,6 +678,15 @@ defmodule Radiator.OutlineTest do
     end
   end
 
+  describe "order_child_nodes/1" do
+    setup :complex_node_fixture
+
+    test "get child nodes in correct order", %{parent_node: parent_node} do
+      assert parent_node |> Outline.order_child_nodes() |> Enum.map(& &1.content) ==
+               ["node_1", "node_2", "node_3", "node_4", "node_5", "node_6"]
+    end
+  end
+
   defp assert_level_for_node(tree, node, level) do
     node = Enum.filter(tree, fn n -> n.uuid == node.uuid end) |> List.first()
     assert node.level == level

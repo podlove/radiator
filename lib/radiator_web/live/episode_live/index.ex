@@ -10,14 +10,16 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     NodeMovedEvent
   }
 
+  # alias Radiator.EventStore
   alias Radiator.Podcast
   alias Radiator.Podcast.Episode
 
   alias RadiatorWeb.OutlineComponents
 
   @impl true
-  def mount(%{"show" => show_id}, _session, socket) do
+  def mount(%{"show" => show_id} = params, _session, socket) do
     show = Podcast.get_show!(show_id, preload: :episodes)
+    episode = get_selected_episode(params)
 
     socket
     |> assign(:page_title, show.title)
@@ -25,8 +27,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> assign(:show, show)
     |> assign(:episodes, show.episodes)
     |> assign(action: nil, episode: nil, form: nil)
-    |> stream_configure(:event_logs, dom_id: & &1.event_id)
-    |> stream(:event_logs, [])
+    |> stream_configure(:event_logs, dom_id: & &1.uuid)
+    |> stream(:event_logs, get_event_logs(episode))
     |> reply(:ok)
   end
 
@@ -149,7 +151,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   @impl true
-  def handle_info(%{event_id: <<_::binary-size(36)>> <> ":" <> id} = event, %{id: id} = socket) do
+  def handle_info(%{uuid: <<_::binary-size(36)>> <> ":" <> id} = event, %{id: id} = socket) do
     id =
       case event do
         %{node: %{uuid: id}} -> id
@@ -216,6 +218,13 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   defp get_selected_episode(%{"show" => show_id}) do
     Podcast.get_current_episode_for_show(show_id)
+  end
+
+  def get_event_logs(nil), do: []
+
+  def get_event_logs(_episode) do
+    # EventStore.list_event_data_by_episode(episode.id)
+    []
   end
 
   defp get_nodes(%{id: id}), do: NodeRepository.list_nodes_by_episode(id)

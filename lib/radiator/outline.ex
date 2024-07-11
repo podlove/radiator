@@ -26,6 +26,25 @@ defmodule Radiator.Outline do
   require Logger
 
   @doc """
+  Returns a list of direct child nodes in correct order.
+  """
+
+  def order_child_nodes(%Node{} = node) do
+    node
+    |> get_all_child_nodes()
+    |> Enum.map(fn node -> {node.prev_id, node} end)
+    |> Map.new()
+    |> order_nodes(nil, [])
+  end
+
+  defp order_nodes(index, prev_id, collection) do
+    case index[prev_id] do
+      %{uuid: uuid} = node -> order_nodes(index, uuid, [node | collection])
+      _ -> Enum.reverse(collection)
+    end
+  end
+
+  @doc """
   Inserts a node.
 
   ## Examples

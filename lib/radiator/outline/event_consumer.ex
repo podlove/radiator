@@ -74,7 +74,7 @@ defmodule Radiator.Outline.EventConsumer do
       node -> Outline.remove_node(node)
     end
 
-    %NodeDeletedEvent{node_id: node_id, event_id: command.event_id, user_id: command.user_id}
+    %NodeDeletedEvent{node_id: node_id, uuid: command.event_id, user_id: command.user_id}
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
 
@@ -84,7 +84,7 @@ defmodule Radiator.Outline.EventConsumer do
   defp handle_insert_node_result({:ok, %NodeRepoResult{node: node, next_id: next_id}}, command) do
     %NodeInsertedEvent{
       node: node,
-      event_id: command.event_id,
+      uuid: command.event_id,
       user_id: command.user_id,
       next_id: next_id
     }
@@ -108,7 +108,7 @@ defmodule Radiator.Outline.EventConsumer do
       parent_id: command.parent_id,
       prev_id: command.prev_id,
       user_id: command.user_id,
-      event_id: command.event_id,
+      uuid: command.event_id,
       next_id: result.next_id
     }
     |> EventStore.persist_event()
@@ -127,7 +127,7 @@ defmodule Radiator.Outline.EventConsumer do
       node_id: node.uuid,
       content: node.content,
       user_id: command.user_id,
-      event_id: command.event_id
+      uuid: command.event_id
     }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
