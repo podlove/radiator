@@ -83,7 +83,7 @@ defmodule Radiator.Outline do
            prev_node <- NodeRepository.get_node_if(prev_node_id),
            true <- parent_and_prev_consistent?(parent_node, prev_node),
            {:ok, node} <- NodeRepository.create_node(attrs),
-           {:ok, _node_to_move} <- move_node_if(next_node, nil, node.uuid),
+           {:ok, _node_to_move} <- move_node_if(next_node, parent_node_id, node.uuid),
            {:ok, node} <- move_node_if(node, parent_node_id, prev_node_id) do
         %NodeRepoResult{node: node, next_id: get_node_id(next_node)}
       else

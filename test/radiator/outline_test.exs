@@ -78,6 +78,24 @@ defmodule Radiator.OutlineTest do
       assert node4.prev_id == node3_1_uuid
     end
 
+    test "the moved node gets moved to its right place", %{
+      node_3: node_3,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      node_attrs = %{
+        "content" => "new node",
+        "episode_id" => node_3.episode_id,
+        "parent_id" => node_3.uuid,
+        "prev_id" => nested_node_1.uuid
+      }
+
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      nested_node_2 = Repo.reload!(nested_node_2)
+      assert nested_node_2.prev_id == new_node.uuid
+      assert nested_node_2.parent_id == node_3.uuid
+    end
+
     test "creates a new node in the tree", %{
       node_3: node_3,
       nested_node_1: nested_node_1
