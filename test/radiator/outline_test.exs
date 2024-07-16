@@ -699,9 +699,33 @@ defmodule Radiator.OutlineTest do
   describe "order_child_nodes/1" do
     setup :complex_node_fixture
 
-    test "get child nodes in correct order", %{parent_node: parent_node} do
-      assert parent_node |> Outline.order_child_nodes() |> Enum.map(& &1.content) ==
-               ["node_1", "node_2", "node_3", "node_4", "node_5", "node_6"]
+    test "get child nodes in correct order" do
+      episode = PodcastFixtures.episode_fixture()
+      node_1 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: nil,
+          prev_id: nil,
+          content: "node_1"
+        )
+      node_3 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: node_1.uuid,
+          prev_id: nil,
+          content: "node_3"
+      )
+      node_2 =
+          node_fixture(
+            episode_id: episode.id,
+            parent_id: node_1.uuid,
+            prev_id: node_3.uuid,
+            content: "node_2"
+        )
+      {:ok, %NodeRepoResult{} = _result} = Outline.move_node(node_3.uuid, node_2.uuid, node_1.uuid)
+
+      assert node_1 |> Outline.order_child_nodes() |> Enum.map(& &1.content) ==
+               ["node_2", "node_3"]
     end
   end
 

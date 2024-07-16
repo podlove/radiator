@@ -147,6 +147,7 @@ defmodule Radiator.Outline do
       {:ok, _new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
 
       Map.merge(node_repo_result, %{
+        node: node,
         old_next_id: get_node_id(old_next_node),
         old_prev_id: get_node_id(prev_node),
         next_id: get_node_id(new_next_node)
