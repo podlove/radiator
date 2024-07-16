@@ -4,14 +4,14 @@ defmodule Radiator.EventStore do
   """
 
   alias Radiator.EventStore.EventData
-  alias Radiator.Outline.Event.AbstractEvent
+  alias Radiator.Outline.Event
   alias Radiator.Repo
 
   def persist_event(event) do
     {:ok, _stored_event} =
       create_event_data(%{
-        data: AbstractEvent.payload(event),
-        event_type: AbstractEvent.event_type(event),
+        data: Event.payload(event),
+        event_type: Event.event_type(event),
         uuid: convert_to_uuid(event.uuid),
         user_id: event.user_id
       })
