@@ -49,19 +49,14 @@ export function keydown(event: KeyboardEvent) {
   switch (event.key) {
     case "ArrowUp":
       event.altKey && moveNodeUp(event, container, this);
-      !event.altKey && moveCursorUp(event);
+      !event.altKey && moveCursorUp(event, this);
 
       break;
 
     case "ArrowDown":
-      if (selection?.anchorOffset != node.content?.length) return;
-      event.preventDefault();
+      event.altKey && moveNodeDown(event, container, this);
+      !event.altKey && moveCursorDown(event, this);
 
-      if (!nextItem || !nextNode) return;
-      // TODO: if no nextItem exists, try to select the first child
-
-      focusItem(nextItem);
-      this.pushEvent("set_focus", nextNode.uuid);
       break;
 
     case "Enter":
@@ -158,7 +153,7 @@ export function keydown(event: KeyboardEvent) {
   }
 }
 
-function moveCursorUp(event: KeyboardEvent) {
+function moveCursorUp(event: KeyboardEvent, outerThis: any) {
   const selection = window.getSelection();
   if (selection?.anchorOffset != 0) return;
   event.preventDefault();
@@ -173,7 +168,26 @@ function moveCursorUp(event: KeyboardEvent) {
   // TODO: if no prevItem exists, try to select the parent item
 
   focusItem(prevItem);
-  this.pushEvent("set_focus", prevNode.uuid);
+  outerThis.pushEvent("set_focus", prevNode.uuid);
+}
+
+function moveCursorDown(event: KeyboardEvent, outerThis: any) {
+  const selection = window.getSelection();
+  const node = getNodeByEvent(event);
+
+  const item = getItemByNode(node)!;
+  const nextItem = item.nextSibling as HTMLDivElement | null;
+
+  const nextNode = nextItem && getNodeByItem(nextItem);
+
+  if (selection?.anchorOffset != node.content?.length) return;
+  event.preventDefault();
+
+  if (!nextItem || !nextNode) return;
+  // TODO: if no nextItem exists, try to select the first child
+
+  focusItem(nextItem);
+  outerThis.pushEvent("set_focus", nextNode.uuid);
 }
 
 function moveNodeUp(
@@ -192,11 +206,52 @@ function moveNodeUp(
   const nextNode = nextItem && getNodeByItem(nextItem);
   if (prevNode) {
     node.prev_id = prevNode.prev_id;
-    if (nextNode) nextNode.prev_id = prevNode.uuid;
     prevNode.prev_id = node.uuid;
+    if (nextNode) {
+      nextNode.prev_id = prevNode.uuid;
+      moveItem(nextNode, container);
+      outerThis.pushEvent("move_node", nextNode);
+    }
     moveItem(node, container);
     outerThis.pushEvent("move_node", node);
+    moveItem(prevNode, container);
     outerThis.pushEvent("move_node", prevNode);
-    if (nextNode) outerThis.pushEvent("move_node", nextNode);
+
+    focusItem(item);
+  }
+}
+
+function moveNodeDown(
+  event: KeyboardEvent,
+  container: HTMLDivElement,
+  outerThis: any,
+) {
+  event.preventDefault();
+
+  const node = getNodeByEvent(event);
+  const item = getItemByNode(node)!;
+  const prevItem = item.previousSibling as HTMLDivElement | null;
+  const nextItem = item.nextSibling as HTMLDivElement | null;
+  const nextNextItem = nextItem?.nextSibling as HTMLDivElement | null;
+
+  const prevNode = prevItem && getNodeByItem(prevItem);
+  const nextNode = nextItem && getNodeByItem(nextItem);
+  const nextNextNode = nextNextItem && getNodeByItem(nextNextItem);
+
+  if (nextNode) {
+    node.prev_id = nextNode.uuid;
+    if (prevNode) {
+      nextNode.prev_id = prevNode.uuid;
+      moveItem(nextNode, container);
+      outerThis.pushEvent("move_node", nextNode);
+    }
+    if (nextNextNode) {
+      nextNextNode.prev_id = node.uuid;
+      moveItem(nextNextNode, container);
+      outerThis.pushEvent("move_node", nextNextNode);
+    }
+    moveItem(node, container);
+    outerThis.pushEvent("move_node", node);
+    focusItem(item);
   }
 }
