@@ -78,6 +78,24 @@ defmodule Radiator.OutlineTest do
       assert node4.prev_id == node3_1_uuid
     end
 
+    test "the moved node gets moved to its right place", %{
+      node_3: node_3,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      node_attrs = %{
+        "content" => "new node",
+        "episode_id" => node_3.episode_id,
+        "parent_id" => node_3.uuid,
+        "prev_id" => nested_node_1.uuid
+      }
+
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      nested_node_2 = Repo.reload!(nested_node_2)
+      assert nested_node_2.prev_id == new_node.uuid
+      assert nested_node_2.parent_id == node_3.uuid
+    end
+
     test "creates a new node in the tree", %{
       node_3: node_3,
       nested_node_1: nested_node_1
@@ -681,9 +699,38 @@ defmodule Radiator.OutlineTest do
   describe "order_child_nodes/1" do
     setup :complex_node_fixture
 
-    test "get child nodes in correct order", %{parent_node: parent_node} do
-      assert parent_node |> Outline.order_child_nodes() |> Enum.map(& &1.content) ==
-               ["node_1", "node_2", "node_3", "node_4", "node_5", "node_6"]
+    test "get child nodes in correct order" do
+      episode = PodcastFixtures.episode_fixture()
+
+      node_1 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: nil,
+          prev_id: nil,
+          content: "node_1"
+        )
+
+      node_3 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: node_1.uuid,
+          prev_id: nil,
+          content: "node_3"
+        )
+
+      node_2 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: node_1.uuid,
+          prev_id: node_3.uuid,
+          content: "node_2"
+        )
+
+      {:ok, %NodeRepoResult{} = _result} =
+        Outline.move_node(node_3.uuid, node_2.uuid, node_1.uuid)
+
+      assert node_1 |> Outline.order_child_nodes() |> Enum.map(& &1.content) ==
+               ["node_2", "node_3"]
     end
   end
 

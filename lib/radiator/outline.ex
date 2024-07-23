@@ -28,18 +28,31 @@ defmodule Radiator.Outline do
   @doc """
   Returns a list of direct child nodes in correct order.
   """
-
   def order_child_nodes(%Node{} = node) do
     node
     |> get_all_child_nodes()
     |> order_sibling_nodes()
   end
 
+  @doc """
+  Orders a given list of nodes by their prev_id.
+  """
   def order_sibling_nodes(nodes) do
     nodes
     |> Enum.map(fn node -> {node.prev_id, node} end)
     |> Map.new()
     |> order_nodes_by_index(nil, [])
+  end
+
+  @doc """
+  Returns a list of all child nodes.
+  """
+  def list_nodes_by_episode_sorted(episode_id) do
+    episode_id
+    |> NodeRepository.list_nodes_by_episode()
+    |> Enum.group_by(& &1.parent_id)
+    |> Enum.map(fn {_parent_id, children} -> order_sibling_nodes(children) end)
+    |> List.flatten()
   end
 
   defp order_nodes_by_index(index, prev_id, collection) do
@@ -83,7 +96,7 @@ defmodule Radiator.Outline do
            prev_node <- NodeRepository.get_node_if(prev_node_id),
            true <- parent_and_prev_consistent?(parent_node, prev_node),
            {:ok, node} <- NodeRepository.create_node(attrs),
-           {:ok, _node_to_move} <- move_node_if(next_node, nil, node.uuid),
+           {:ok, _node_to_move} <- move_node_if(next_node, parent_node_id, node.uuid),
            {:ok, node} <- move_node_if(node, parent_node_id, prev_node_id) do
         %NodeRepoResult{node: node, next_id: get_node_id(next_node)}
       else
@@ -147,6 +160,7 @@ defmodule Radiator.Outline do
       {:ok, _new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
 
       Map.merge(node_repo_result, %{
+        node: node,
         old_next_id: get_node_id(old_next_node),
         old_prev_id: get_node_id(prev_node),
         next_id: get_node_id(new_next_node)

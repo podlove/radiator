@@ -6,6 +6,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
   import Radiator.PodcastFixtures
   import Radiator.OutlineFixtures
 
+  alias Radiator.Outline
   alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepository
 
@@ -53,20 +54,46 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       show = show_fixture()
       episode = episode_fixture(%{show_id: show.id})
 
-      node = node_fixture(%{episode_id: episode.id})
+      node_1 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: nil,
+          prev_id: nil,
+          content: "node_1"
+        )
 
-      %{conn: log_in_user(conn, user), show: show, episode: episode, node: node}
+      node_3 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: node_1.uuid,
+          prev_id: nil,
+          content: "node_3"
+        )
+
+      node_2 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: node_1.uuid,
+          prev_id: node_3.uuid,
+          content: "node_2"
+        )
+
+      Outline.move_node(node_3.uuid, node_2.uuid, node_1.uuid)
+
+      %{conn: log_in_user(conn, user), show: show, episode: episode, nodes: [node_3, node_2]}
     end
 
-    test "lists all nodes", %{conn: conn, show: show} do
+    test "lists all nodes", %{conn: conn, show: show, episode: episode} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
-      nodes = NodeRepository.list_nodes()
+      nodes =
+        episode.id
+        |> Outline.list_nodes_by_episode_sorted()
 
       assert_push_event(live, "list", %{nodes: ^nodes})
     end
 
-    test "insert a new node", %{conn: conn, show: show, node: node} do
+    test "insert a new node", %{conn: conn, show: show, nodes: [node | _]} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
       {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
@@ -75,7 +102,6 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       params = %{
         "uuid" => uuid,
         "content" => "new node content",
-        # "parent_id" => nil,
         "prev_id" => node.uuid
       }
 
@@ -92,7 +118,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       assert_push_event(other_live, "insert", %{node: ^new_node})
     end
 
-    test "update node content", %{conn: conn, show: show, node: %{uuid: uuid}} do
+    test "update node content", %{conn: conn, show: show, nodes: [%{uuid: uuid} | _]} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
       {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
@@ -109,8 +135,8 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       assert_push_event(other_live, "change_content", %{node: %{uuid: ^uuid, content: ^content}})
     end
 
-    test "move node", %{conn: conn, show: show, episode: episode, node: node1} do
-      %{uuid: uuid1, parent_id: parent_id1} = node1
+    test "move node", %{conn: conn, show: show, episode: episode, nodes: [node_1 | _]} do
+      %{uuid: uuid1, parent_id: parent_id1} = node_1
 
       uuid2 = Ecto.UUID.generate()
 
@@ -140,7 +166,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       })
     end
 
-    test "delete node", %{conn: conn, show: show, node: %{uuid: uuid}} do
+    test "delete node", %{conn: conn, show: show, nodes: [%{uuid: uuid} | _]} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
       {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
