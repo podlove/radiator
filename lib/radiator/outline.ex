@@ -34,7 +34,6 @@ defmodule Radiator.Outline do
     |> order_sibling_nodes()
   end
 
-
   @doc """
   Orders a given list of nodes by their prev_id.
   """
@@ -44,7 +43,6 @@ defmodule Radiator.Outline do
     |> Map.new()
     |> order_nodes_by_index(nil, [])
   end
-
 
   @doc """
   Returns a list of all child nodes.
