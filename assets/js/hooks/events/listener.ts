@@ -31,7 +31,6 @@ export function input(event: Event) {
 
   this.pushEvent("update_node_content", node);
 }
-
 export function keydown(event: KeyboardEvent) {
   const container: HTMLDivElement = this.el.querySelector(".children");
 
@@ -49,14 +48,9 @@ export function keydown(event: KeyboardEvent) {
 
   switch (event.key) {
     case "ArrowUp":
-      if (selection?.anchorOffset != 0) return;
-      event.preventDefault();
+      event.altKey && moveNodeUp(event, container, this);
+      !event.altKey && moveCursorUp(event);
 
-      if (!prevItem || !prevNode) return;
-      // TODO: if no prevItem exists, try to select the parent item
-
-      focusItem(prevItem);
-      this.pushEvent("set_focus", prevNode.uuid);
       break;
 
     case "ArrowDown":
@@ -161,5 +155,48 @@ export function keydown(event: KeyboardEvent) {
         }
       }
       break;
+  }
+}
+
+function moveCursorUp(event: KeyboardEvent) {
+  const selection = window.getSelection();
+  if (selection?.anchorOffset != 0) return;
+  event.preventDefault();
+
+  const node = getNodeByEvent(event);
+
+  const item = getItemByNode(node)!;
+  const prevItem = item.previousSibling as HTMLDivElement | null;
+
+  const prevNode = prevItem && getNodeByItem(prevItem);
+  if (!prevItem || !prevNode) return;
+  // TODO: if no prevItem exists, try to select the parent item
+
+  focusItem(prevItem);
+  this.pushEvent("set_focus", prevNode.uuid);
+}
+
+function moveNodeUp(
+  event: KeyboardEvent,
+  container: HTMLDivElement,
+  outerThis: any,
+) {
+  event.preventDefault();
+
+  const node = getNodeByEvent(event);
+  const item = getItemByNode(node)!;
+  const prevItem = item.previousSibling as HTMLDivElement | null;
+  const nextItem = item.nextSibling as HTMLDivElement | null;
+
+  const prevNode = prevItem && getNodeByItem(prevItem);
+  const nextNode = nextItem && getNodeByItem(nextItem);
+  if (prevNode) {
+    node.prev_id = prevNode.prev_id;
+    if (nextNode) nextNode.prev_id = prevNode.uuid;
+    prevNode.prev_id = node.uuid;
+    moveItem(node, container);
+    outerThis.pushEvent("move_node", node);
+    outerThis.pushEvent("move_node", prevNode);
+    if (nextNode) outerThis.pushEvent("move_node", nextNode);
   }
 }
