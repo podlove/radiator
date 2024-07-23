@@ -28,7 +28,6 @@ defmodule Radiator.Outline do
   @doc """
   Returns a list of direct child nodes in correct order.
   """
-
   def order_child_nodes(%Node{} = node) do
     node
     |> get_all_child_nodes()
@@ -40,6 +39,12 @@ defmodule Radiator.Outline do
     |> Enum.map(fn node -> {node.prev_id, node} end)
     |> Map.new()
     |> order_nodes_by_index(nil, [])
+  end
+
+  def list_nodes_by_episode_sorted(episode_id) do
+    episode_id
+    |> NodeRepository.list_nodes_by_episode()
+    |> order_sibling_nodes()
   end
 
   defp order_nodes_by_index(index, prev_id, collection) do

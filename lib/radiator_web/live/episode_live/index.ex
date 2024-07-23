@@ -1,7 +1,8 @@
 defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
-  alias Radiator.Outline.{Dispatch, NodeRepository}
+  alias Radiator.Outline
+  alias Radiator.Outline.Dispatch
 
   alias Radiator.Outline.Event.{
     NodeContentChangedEvent,
@@ -227,7 +228,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     []
   end
 
-  defp get_nodes(%{id: id}), do: NodeRepository.list_nodes_by_episode(id)
+  defp get_nodes(%{id: id}), do: Outline.list_nodes_by_episode_sorted(id)
   defp get_nodes(_), do: []
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id

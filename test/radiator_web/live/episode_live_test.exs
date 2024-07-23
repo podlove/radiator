@@ -54,24 +54,42 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       show = show_fixture()
       episode = episode_fixture(%{show_id: show.id})
 
-      node_2 = node_fixture(%{episode_id: episode.id, content: "node 2"})
+      node_1 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: nil,
+          prev_id: nil,
+          content: "node_1"
+        )
 
-      node_1 = node_fixture(%{episode_id: episode.id, content: "node 1", prev_id: node_2.uuid})
+      node_3 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: node_1.uuid,
+          prev_id: nil,
+          content: "node_3"
+        )
 
-      Outline.move_node(node_1.uuid, nil, nil)
+      node_2 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: node_1.uuid,
+          prev_id: node_3.uuid,
+          content: "node_2"
+        )
 
-      %{conn: log_in_user(conn, user), show: show, episode: episode, nodes: [node_1, node_2]}
+      Outline.move_node(node_3.uuid, node_2.uuid, node_1.uuid)
+
+      %{conn: log_in_user(conn, user), show: show, episode: episode, nodes: [node_3, node_2]}
     end
 
     test "lists all nodes", %{conn: conn, show: show, episode: episode} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
+      nodes =
+        episode.id
+        |> Outline.list_nodes_by_episode_sorted()
 
-
-      NodeRepository.list_nodes_by_episode(episode.id)
-      nodes = episode.id
-      |> NodeRepository.list_nodes_by_episode()
-      |> Outline.order_sibling_nodes
       assert_push_event(live, "list", %{nodes: ^nodes})
     end
 
@@ -100,7 +118,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       assert_push_event(other_live, "insert", %{node: ^new_node})
     end
 
-    test "update node content", %{conn: conn, show: show, nodes: [%{uuid: uuid} | _] } do
+    test "update node content", %{conn: conn, show: show, nodes: [%{uuid: uuid} | _]} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
       {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
