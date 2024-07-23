@@ -34,6 +34,10 @@ defmodule Radiator.Outline do
     |> order_sibling_nodes()
   end
 
+
+  @doc """
+  Orders a given list of nodes by their prev_id.
+  """
   def order_sibling_nodes(nodes) do
     nodes
     |> Enum.map(fn node -> {node.prev_id, node} end)
@@ -41,10 +45,16 @@ defmodule Radiator.Outline do
     |> order_nodes_by_index(nil, [])
   end
 
+
+  @doc """
+  Returns a list of all child nodes.
+  """
   def list_nodes_by_episode_sorted(episode_id) do
     episode_id
     |> NodeRepository.list_nodes_by_episode()
-    |> order_sibling_nodes()
+    |> Enum.group_by(& &1.parent_id)
+    |> Enum.map(fn {_parent_id, children} -> order_sibling_nodes(children) end)
+    |> List.flatten()
   end
 
   defp order_nodes_by_index(index, prev_id, collection) do
