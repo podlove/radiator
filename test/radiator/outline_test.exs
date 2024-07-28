@@ -696,6 +696,64 @@ defmodule Radiator.OutlineTest do
     end
   end
 
+  describe "list_nodes_by_episode_sorted/1" do
+    setup :complex_node_fixture
+
+    test "returns all nodes from a episode", %{parent_node: parent_node} do
+      episode_id = parent_node.episode_id
+      tree = Outline.list_nodes_by_episode_sorted(episode_id)
+
+      all_nodes = NodeRepository.list_nodes_by_episode(episode_id)
+
+      assert Enum.count(tree) == Enum.count(all_nodes)
+
+      Enum.each(tree, fn node ->
+        assert node.uuid ==
+                 List.first(Enum.filter(all_nodes, fn n -> n.uuid == node.uuid end)).uuid
+      end)
+    end
+
+    test "does not return a node from another episode", %{
+      parent_node: parent_node
+    } do
+      episode_id = parent_node.episode_id
+      other_node = node_fixture(parent_id: nil, prev_id: nil, content: "other content")
+      assert other_node.episode_id != episode_id
+      tree = Outline.list_nodes_by_episode_sorted(episode_id)
+      assert Enum.filter(tree, fn n -> n.uuid == other_node.uuid end) == []
+    end
+
+    test "tree can have more than one parent node", %{
+      parent_node: parent_node
+    } do
+      episode_id = parent_node.episode_id
+
+      other_parent_node =
+        node_fixture(
+          parent_id: nil,
+          prev_id: parent_node.uuid,
+          episode_id: episode_id,
+          content: "also a parent"
+        )
+
+      _third_parent_node =
+        node_fixture(
+          parent_id: nil,
+          prev_id: other_parent_node.uuid,
+          episode_id: episode_id,
+          content: "even another root element"
+        )
+
+      tree = Outline.list_nodes_by_episode_sorted(parent_node.episode_id)
+
+      num_nodes_without_parents =
+        tree
+        |> Enum.count(fn n -> n.parent_id == nil end)
+
+      assert num_nodes_without_parents == 3
+    end
+  end
+
   describe "order_child_nodes/1" do
     setup :complex_node_fixture
 
