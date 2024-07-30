@@ -1,4 +1,6 @@
-import { focusin, focusout, input, keydown } from "./events/listener";
+import { focusin, focusout } from "./events/listener/focus";
+import { input } from "./events/listener/input";
+import { keydown } from "./events/listener";
 import {
   handleList,
   handleInsert,
