@@ -46,6 +46,30 @@ defmodule RadiatorWeb.EpisodeLiveTest do
 
       assert page_title(live) =~ show.title
     end
+
+    test "create new episode will create node as well", %{conn: conn, show: show} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+
+      live
+      |> element(~s{main aside button}, "Create Episode")
+      |> render_click()
+
+      submit_live =
+        live
+        |> form("#episode-form", episode: %{title: "Some new episode"})
+        |> render_submit()
+
+      {path, %{"info" => "Episode created successfully"}} = assert_redirect(live)
+
+      episode_id = path |> Path.basename() |> String.to_integer()
+
+      {:ok, new_live, _html} = submit_live |> follow_redirect(conn)
+
+      assert new_live |> has_element?(~s{main h2}, "Some new episode")
+
+      assert_push_event(new_live, "list", %{nodes: [node]})
+      %{content: nil, parent_id: nil, prev_id: nil, episode_id: ^episode_id} = node
+    end
   end
 
   describe "Episode outline nodes" do
