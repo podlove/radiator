@@ -25,7 +25,7 @@ defmodule Radiator.Outline.Event do
   end
 
   def payload(%NodeDeletedEvent{} = event) do
-    %{node_id: event.node_id}
+    %{node_id: event.node_id, children: event.children, next_id: event.next_id}
   end
 
   def payload(%NodeMovedEvent{} = event) do
