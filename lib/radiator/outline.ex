@@ -197,10 +197,7 @@ defmodule Radiator.Outline do
   ## Examples
 
       iex> remove_node(node)
-      {:ok, %Node{}}
-
-      iex> remove_node(node)
-      {:error, %Ecto.Changeset{}}
+      { %NodeRepoResult{} }
 
   """
   def remove_node(%Node{} = node) do
@@ -218,14 +215,24 @@ defmodule Radiator.Outline do
     end
 
     # no tail recursion but we dont have too much levels in a tree
-    node
-    |> get_all_child_nodes()
-    |> Enum.each(fn child_node ->
-      remove_node(child_node)
-    end)
+    all_children = node |> get_all_child_nodes()
+
+    recursive_deleted_children =
+      all_children
+      |> Enum.map(fn child_node ->
+        %NodeRepoResult{children: children} = remove_node(child_node)
+        children
+      end)
+      |> List.flatten()
 
     # finally delete the node itself from the database
-    NodeRepository.delete_node(node)
+    deleted_node = NodeRepository.delete_node(node)
+
+    %NodeRepoResult{
+      node: deleted_node,
+      next_id: get_node_id(next_node),
+      children: all_children ++ recursive_deleted_children
+    }
   end
 
   @doc """

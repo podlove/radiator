@@ -531,7 +531,7 @@ defmodule Radiator.OutlineTest do
 
     test "deletes the node" do
       node = node_fixture()
-      assert {:ok, %Node{}} = Outline.remove_node(node)
+      assert %NodeRepoResult{} = Outline.remove_node(node)
       assert_raise Ecto.NoResultsError, fn -> NodeRepository.get_node!(node.uuid) end
     end
 
@@ -542,7 +542,7 @@ defmodule Radiator.OutlineTest do
     } do
       assert node_4.prev_id == node_3.uuid
 
-      assert {:ok, %Node{}} = Outline.remove_node(node_3)
+      assert %NodeRepoResult{} = Outline.remove_node(node_3)
       # reload nodes
       node_4 = NodeRepository.get_node!(node_4.uuid)
       node_2 = NodeRepository.get_node!(node_2.uuid)
@@ -555,7 +555,7 @@ defmodule Radiator.OutlineTest do
     } do
       episode_id = node_6.episode_id
       count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
-      assert {:ok, %Node{}} = Outline.remove_node(node_6)
+      assert %NodeRepoResult{} = Outline.remove_node(node_6)
       new_count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
       assert new_count_nodes == count_nodes - 1
     end
@@ -567,7 +567,7 @@ defmodule Radiator.OutlineTest do
       episode_id = node_1.episode_id
 
       count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
-      assert {:ok, %Node{}} = Outline.remove_node(node_1)
+      assert %NodeRepoResult{} = Outline.remove_node(node_1)
       new_count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
       assert new_count_nodes == count_nodes - 1
 
@@ -580,10 +580,19 @@ defmodule Radiator.OutlineTest do
       nested_node_1: nested_node_1,
       nested_node_2: nested_node_2
     } do
-      assert {:ok, %Node{}} = Outline.remove_node(node_3)
+      assert %NodeRepoResult{} = Outline.remove_node(node_3)
 
       assert_raise Ecto.NoResultsError, fn -> NodeRepository.get_node!(nested_node_1.uuid) end
       assert_raise Ecto.NoResultsError, fn -> NodeRepository.get_node!(nested_node_2.uuid) end
+    end
+
+    test "returns all deleted child elements", %{
+      node_3: node_3,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      assert %NodeRepoResult{children: children} = Outline.remove_node(node_3)
+      assert children == [nested_node_1, nested_node_2]
     end
 
     test "when top parent gets deleted the whole tree will be gone", %{
@@ -593,13 +602,28 @@ defmodule Radiator.OutlineTest do
       nested_node_2: nested_node_2,
       parent_node: parent_node
     } do
-      assert {:ok, %Node{}} = Outline.remove_node(parent_node)
+      assert %NodeRepoResult{} = Outline.remove_node(parent_node)
 
       # test some of elements in the tree
       assert_raise Ecto.NoResultsError, fn -> NodeRepository.get_node!(node_1.uuid) end
       assert_raise Ecto.NoResultsError, fn -> NodeRepository.get_node!(node_4.uuid) end
       assert_raise Ecto.NoResultsError, fn -> NodeRepository.get_node!(node_6.uuid) end
       assert_raise Ecto.NoResultsError, fn -> NodeRepository.get_node!(nested_node_2.uuid) end
+    end
+
+    test "returns all recursive deleted child elements in NodeRepoResult", %{
+      node_1: node_1,
+      node_6: node_6,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2,
+      parent_node: parent_node
+    } do
+      assert %NodeRepoResult{children: children} = Outline.remove_node(parent_node)
+      assert Enum.member?(children, node_1)
+      assert Enum.member?(children, node_6)
+      assert Enum.member?(children, nested_node_1)
+      assert Enum.member?(children, nested_node_2)
+      refute Enum.member?(children, parent_node)
     end
   end
 
@@ -693,6 +717,64 @@ defmodule Radiator.OutlineTest do
       assert_level_for_node(tree, parent_node, 0)
       assert_level_for_node(tree, other_parent_node, 0)
       assert_level_for_node(tree, third_parent_node, 0)
+    end
+  end
+
+  describe "list_nodes_by_episode_sorted/1" do
+    setup :complex_node_fixture
+
+    test "returns all nodes from a episode", %{parent_node: parent_node} do
+      episode_id = parent_node.episode_id
+      tree = Outline.list_nodes_by_episode_sorted(episode_id)
+
+      all_nodes = NodeRepository.list_nodes_by_episode(episode_id)
+
+      assert Enum.count(tree) == Enum.count(all_nodes)
+
+      Enum.each(tree, fn node ->
+        assert node.uuid ==
+                 List.first(Enum.filter(all_nodes, fn n -> n.uuid == node.uuid end)).uuid
+      end)
+    end
+
+    test "does not return a node from another episode", %{
+      parent_node: parent_node
+    } do
+      episode_id = parent_node.episode_id
+      other_node = node_fixture(parent_id: nil, prev_id: nil, content: "other content")
+      assert other_node.episode_id != episode_id
+      tree = Outline.list_nodes_by_episode_sorted(episode_id)
+      assert Enum.filter(tree, fn n -> n.uuid == other_node.uuid end) == []
+    end
+
+    test "tree can have more than one parent node", %{
+      parent_node: parent_node
+    } do
+      episode_id = parent_node.episode_id
+
+      other_parent_node =
+        node_fixture(
+          parent_id: nil,
+          prev_id: parent_node.uuid,
+          episode_id: episode_id,
+          content: "also a parent"
+        )
+
+      _third_parent_node =
+        node_fixture(
+          parent_id: nil,
+          prev_id: other_parent_node.uuid,
+          episode_id: episode_id,
+          content: "even another root element"
+        )
+
+      tree = Outline.list_nodes_by_episode_sorted(parent_node.episode_id)
+
+      num_nodes_without_parents =
+        tree
+        |> Enum.count(fn n -> n.parent_id == nil end)
+
+      assert num_nodes_without_parents == 3
     end
   end
 
