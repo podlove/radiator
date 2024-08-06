@@ -56,15 +56,20 @@ export function createItem({ uuid, content, parent_id, prev_id, dirty }: Node) {
 
   const item = document.createElement("div");
   item.id = `outline-node-${uuid}`;
-  item.className = "my-1 data-[dirty=true]:bg-red-100";
+  item.className = "item group relative my-1 data-[dirty=true]:bg-red-100";
   item.setAttribute("data-parent", parent_id || "");
   item.setAttribute("data-prev", prev_id || "");
 
-  item.innerHTML = `<a href="#${uuid}" class="block float-left my-0.5 rounded-full">
+  item.innerHTML = `<button class="absolute top-0.5 left-0 group-[.collapsed]:-rotate-90 duration-200 z-10">
+    <svg width="20" height="20" viewBox="0 0 20 20" class="rotate-90 text-gray-500 hover:text-black">
+      <path d="M13.75 9.56879C14.0833 9.76124 14.0833 10.2424 13.75 10.4348L8.5 13.4659C8.16667 13.6584 7.75 13.4178 7.75 13.0329L7.75 6.97072C7.75 6.58582 8.16667 6.34525 8.5 6.5377L13.75 9.56879Z" stroke="none" fill="currentColor"></path>
+    </svg>
+  </button>
+  <a href="#${uuid}" class="absolute top-0 left-4 my-0.5 rounded-full text-gray-500 hover:text-black">
     <svg viewBox="0 0 18 18" fill="currentColor" class="w-5 h-5"><circle cx="9" cy="9" r="3.5"></circle></svg>
   </a>
-  <div class="ml-5 content" contentEditable>${content}</div>
-  <div class="ml-5 children"></div>`;
+  <div class="ml-10 content" contentEditable>${content}</div>
+  <div class="ml-4 children group-[.collapsed]:hidden"></div>`;
 
   setItemDirty(item, dirty);
 

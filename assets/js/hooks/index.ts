@@ -21,6 +21,16 @@ export const Hooks = {
       container.addEventListener("keydown", keydown.bind(this));
       // container.addEventListener("keyup", keyup.bind(this))
 
+      container.addEventListener("click", function (event) {
+        const target = event.target as HTMLElement;
+        const item = target.closest(".item");
+
+        if (item) {
+          // only if target has children
+          item.classList.toggle("collapsed");
+        }
+      });
+
       this.handleEvent("list", handleList.bind(this));
       this.handleEvent("insert", handleInsert.bind(this));
       this.handleEvent("change_content", handleContentChange.bind(this));
