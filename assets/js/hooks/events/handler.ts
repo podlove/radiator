@@ -13,15 +13,6 @@ import { getNodeByItem } from "../node";
 export function handleList({ nodes }: { nodes: Node[] }) {
   const container: HTMLDivElement = this.el.querySelector(".children");
 
-  // if (nodes.length == 0) {
-  //   const node: Node = {
-  //     uuid: self.crypto.randomUUID(),
-  //     content: "",
-  //     dirty: true,
-  //   };
-  //   nodes = [node];
-  // }
-
   // add all items
   nodes.forEach((node) => {
     const item = createItem(node);

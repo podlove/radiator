@@ -2,16 +2,57 @@ import { Node } from "./types";
 import { getNodeByItem } from "./node";
 
 export function createItem({ uuid, content, parent_id, prev_id, dirty }: Node) {
-  // <div id="outline-node-uuid" class="item">
-  //   <a class="bullet" href="/#/UUID">
-  //     <svg viewBox="0 0 18 18" fill="currentColor" class="">
-  //       <circle cx="9" cy="9" r="3.5"></circle>
-  //     </svg></a>
-  //   <div class="content" contenteditable="true">
-  //     <span class="innerContent">Node Content</span>
-  //   </div>
-  //   <div class="children"></div>
-  // </div>
+  /*
+  <div projectid="50f56aa7-bfda-355e-9687-3586f52e957c" class="project open">
+    <div tabindex="-1" class="name">
+      <a href="/#/3586f52e957c" data-handbook="bullet.handle" class="bullet" data-pre-drag-click="true">
+        <svg width="100%" height="100%" viewBox="0 0 18 18" fill="currentColor" class="zoomBulletIcon">
+          <circle cx="9" cy="9" r="3.5"></circle>
+        </svg>
+      </a>
+      <div class="prefix"></div>
+      <div class="content" contenteditable="true">
+        <span class="innerContentContainer">Parent-Text</span>
+      </div>
+      <div class="nameButtons"></div>
+      <a class="expand" data-handbook="expand.toggle">
+        <div class="">
+          <svg width="20" height="20" viewBox="0 0 20 20" class="">
+            <path d="M13.75 9.56879C14.0833 9.76124 14.0833 10.2424 13.75 10.4348L8.5 13.4659C8.16667 13.6584 7.75 13.4178 7.75 13.0329L7.75 6.97072C7.75 6.58582 8.16667 6.34525 8.5 6.5377L13.75 9.56879Z" stroke="none" fill="currentColor"></path>
+          </svg>
+        </div>
+      </a>
+    </div>
+    <div class="drop-line">
+      <div class="line"></div>
+    </div>
+    <div class="children">
+      <div projectid="f88abf4e-a7ac-f806-733e-053415351c8b" class="project task">
+        <div tabindex="-1" class="name">
+          <a href="/#/053415351c8b" data-handbook="bullet.handle" class="bullet">
+            <svg width="100%" height="100%" viewBox="0 0 18 18" fill="currentColor" class="zoomBulletIcon">
+              <circle cx="9" cy="9" r="3.5"></circle>
+            </svg>
+          </a>
+          <div class="prefix"></div>
+          <div class="content" contenteditable="true">
+            <span class="innerContentContainer">Child-Test</span>
+          </div>
+          <div class="nameButtons"></div>
+          <a class="expand" data-handbook="expand.toggle"></a>
+        </div>
+        <div class="drop-line">
+          <div class="line"></div>
+        </div>
+      </div>
+      <svg viewBox="0 0 20 20" class="addSiblingButton">
+        <circle cx="10.5" cy="10.5" r="9" fill="var(--wf-button-background-secondary)"></circle>
+        <line x1="6" y1="10.5" x2="15" y2="10.5" stroke="var(--wf-icon-secondary)" stroke-width="1"></line>
+        <line x1="10.5" y1="6" x2="10.5" y2="15" stroke="var(--wf-icon-secondary)" stroke-width="1"></line>
+      </svg>
+    </div>
+  </div>
+  */
 
   const item = document.createElement("div");
   item.id = `outline-node-${uuid}`;
@@ -19,22 +60,11 @@ export function createItem({ uuid, content, parent_id, prev_id, dirty }: Node) {
   item.setAttribute("data-parent", parent_id || "");
   item.setAttribute("data-prev", prev_id || "");
 
-  const link = document.createElement("a");
-  link.className = "block float-left my-0.5 rounded-full";
-  link.href = `#${uuid}`;
-  link.innerHTML =
-    '<svg viewBox="0 0 18 18" fill="currentColor" class="w-5 h-5"><circle cx="9" cy="9" r="3.5"></circle></svg>';
-  item.appendChild(link);
-
-  const input = document.createElement("div");
-  input.className = "ml-5 content";
-  input.contentEditable = "true";
-  input.textContent = content || "";
-  item.appendChild(input);
-
-  const childContainer = document.createElement("div");
-  childContainer.className = "ml-5 children";
-  item.appendChild(childContainer);
+  item.innerHTML = `<a href="#${uuid}" class="block float-left my-0.5 rounded-full">
+    <svg viewBox="0 0 18 18" fill="currentColor" class="w-5 h-5"><circle cx="9" cy="9" r="3.5"></circle></svg>
+  </a>
+  <div class="ml-5 content" contentEditable>${content}</div>
+  <div class="ml-5 children"></div>`;
 
   setItemDirty(item, dirty);
 
@@ -58,7 +88,7 @@ export function changeItemContent({ uuid, content, dirty }: Node) {
 export function moveItem(
   { uuid, parent_id, prev_id, dirty }: Node,
   container: HTMLDivElement,
-  force: boolean = false,
+  force: boolean = false
 ) {
   const item = getItemById(uuid);
   if (!item) return;
@@ -92,7 +122,7 @@ export function moveItem(
 
 export function setItemParent(
   item: HTMLDivElement,
-  parent_id: string | undefined,
+  parent_id: string | undefined
 ) {
   item.setAttribute("data-parent", parent_id || "");
 }
