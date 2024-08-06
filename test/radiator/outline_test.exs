@@ -41,7 +41,7 @@ defmodule Radiator.OutlineTest do
     end
   end
 
-  describe "get_all_child_nodes/1" do
+  describe "get_all_siblings/1" do
     setup :complex_node_fixture
 
     test "returns all child nodes", %{
@@ -49,11 +49,11 @@ defmodule Radiator.OutlineTest do
       nested_node_1: nested_node_1,
       nested_node_2: nested_node_2
     } do
-      assert Outline.get_all_child_nodes(node_3) == [nested_node_1, nested_node_2]
+      assert Outline.get_all_siblings(node_3) == [nested_node_1, nested_node_2]
     end
 
     test "returns an empty list if there are no child nodes", %{node_1: node_1} do
-      assert Outline.get_all_child_nodes(node_1) == []
+      assert Outline.get_all_siblings(node_1) == []
     end
   end
 
@@ -301,11 +301,11 @@ defmodule Radiator.OutlineTest do
       assert node_2.prev_id == nil
     end
 
-    test "ignore when nothing should change", %{
+    test "error when nothing should change", %{
       node_1: node_1,
       node_2: node_2
     } do
-      {:ok, _} = Outline.move_node(node_2.uuid, node_1.uuid, node_2.parent_id)
+      {:error, :noop} = Outline.move_node(node_2.uuid, node_1.uuid, node_2.parent_id)
 
       # reload nodes
       node_1 = Repo.reload!(node_1)
@@ -315,11 +315,11 @@ defmodule Radiator.OutlineTest do
       assert node_1.prev_id == nil
     end
 
-    test "ignore when nothing should change - other way around", %{
+    test "error when nothing should change - other way around", %{
       node_1: node_1,
       node_2: node_2
     } do
-      {:ok, _} = Outline.move_node(node_1.uuid, nil, node_2.parent_id)
+      {:error, :noop} = Outline.move_node(node_1.uuid, nil, node_2.parent_id)
 
       # reload nodes
       node_1 = Repo.reload!(node_1)
