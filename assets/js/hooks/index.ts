@@ -1,6 +1,7 @@
 import { focusin, focusout } from "./events/listener/focus";
 import { input } from "./events/listener/input";
 import { keydown } from "./events/listener";
+import { click } from "./events/listener/click";
 import {
   handleList,
   handleInsert,
@@ -21,15 +22,7 @@ export const Hooks = {
       container.addEventListener("keydown", keydown.bind(this));
       // container.addEventListener("keyup", keyup.bind(this))
 
-      container.addEventListener("click", function (event) {
-        const target = event.target as HTMLElement;
-        const item = target.closest(".item");
-
-        if (item) {
-          // only if target has children
-          item.classList.toggle("collapsed");
-        }
-      });
+      container.addEventListener("click", click.bind(this));
 
       this.handleEvent("list", handleList.bind(this));
       this.handleEvent("insert", handleInsert.bind(this));
