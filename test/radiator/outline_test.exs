@@ -44,7 +44,7 @@ defmodule Radiator.OutlineTest do
   describe "get_all_siblings/1" do
     setup :complex_node_fixture
 
-    test "returns all child nodes", %{
+    test "returns all direct child nodes", %{
       node_3: node_3,
       nested_node_1: nested_node_1,
       nested_node_2: nested_node_2
@@ -52,8 +52,50 @@ defmodule Radiator.OutlineTest do
       assert Outline.get_all_siblings(node_3) == [nested_node_1, nested_node_2]
     end
 
+    test "does not return child nodes deeper then 1 level", %{
+      parent_node: parent_node,
+      node_1: node_1,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      assert parent_node |> Outline.get_all_siblings() |> Enum.member?(node_1)
+      refute parent_node |> Outline.get_all_siblings() |> Enum.member?(nested_node_1)
+      refute parent_node |> Outline.get_all_siblings() |> Enum.member?(nested_node_2)
+    end
+
     test "returns an empty list if there are no child nodes", %{node_1: node_1} do
       assert Outline.get_all_siblings(node_1) == []
+    end
+  end
+
+  describe "get_all_children/1" do
+    setup :complex_node_fixture
+
+    test "returns all child nodes", %{
+      parent_node: parent_node,
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5,
+      node_6: node_6,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      assert Outline.get_all_children(parent_node) == [
+               node_1,
+               node_2,
+               node_3,
+               node_4,
+               node_5,
+               node_6,
+               nested_node_1,
+               nested_node_2
+             ]
+    end
+
+    test "returns an empty list if there are no child nodes", %{nested_node_1: nested_node_1} do
+      assert Outline.get_all_children(nested_node_1) == []
     end
   end
 
@@ -345,6 +387,14 @@ defmodule Radiator.OutlineTest do
       assert node_1.parent_id == nil
       assert node_2.parent_id == node_1.uuid
     end
+
+    test "error when parent and prev are the same", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      {:error, :parent_and_prev_not_consistent} =
+        Outline.move_node(node_2.uuid, node_1.uuid, node_1.uuid)
+    end
   end
 
   describe "move_node/3" do
@@ -523,6 +573,56 @@ defmodule Radiator.OutlineTest do
       assert node_result.node.uuid == node_1.uuid
       assert node_result.old_prev_id == nil
       assert node_result.old_next_id == node_2.uuid
+    end
+
+    test "error when prev id is the same as node id", %{
+      node_1: node_1
+    } do
+      {:error, :self_link} =
+        Outline.move_node(node_1.uuid, node_1.uuid, node_1.parent_id)
+    end
+
+    test "error when parent id is the same as node id", %{
+      node_1: node_1,
+      node_5: node_5
+    } do
+      {:error, :circle_link} =
+        Outline.move_node(node_1.uuid, node_5.uuid, node_1.uuid)
+    end
+
+    test "error when parent is a child of new node", %{
+      node_1: node_1,
+      node_5: node_5,
+      nested_node_1: nested_node_1
+    } do
+      {:error, :parent_and_prev_not_consistent} =
+        Outline.move_node(node_1.uuid, node_5.uuid, nested_node_1.uuid)
+    end
+
+    test "error when parent is on same level of new node", %{
+      node_1: node_1,
+      node_5: node_5,
+      node_3: node_3
+    } do
+      {:error, :parent_and_prev_not_consistent} =
+        Outline.move_node(node_1.uuid, node_5.uuid, node_3.uuid)
+    end
+
+    test "error when new prev is not a direct child of new parent", %{
+      parent_node: parent_node,
+      node_1: node_1,
+      nested_node_1: nested_node_1
+    } do
+      {:error, :parent_and_prev_not_consistent} =
+        Outline.move_node(node_1.uuid, nested_node_1.uuid, parent_node.uuid)
+    end
+
+    test "error when new new parent is nil but prev is not on level 1", %{
+      node_1: node_1,
+      nested_node_1: nested_node_1
+    } do
+      {:error, :parent_and_prev_not_consistent} =
+        Outline.move_node(node_1.uuid, nested_node_1.uuid, nil)
     end
   end
 
