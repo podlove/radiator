@@ -6,5 +6,6 @@ export interface Node {
   creator_id?: number;
   parent_id?: UUID;
   prev_id?: UUID;
+  collapsed?: boolean;
   dirty: boolean;
 }
