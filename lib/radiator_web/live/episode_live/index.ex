@@ -62,6 +62,16 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
+  def handle_event("set_collapsed", _node_id, socket) do
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event("set_expanded", _node_id, socket) do
+    socket
+    |> reply(:noreply)
+  end
+
   def handle_event("create_node", params, socket) do
     user = socket.assigns.current_user
     episode = socket.assigns.selected_episode

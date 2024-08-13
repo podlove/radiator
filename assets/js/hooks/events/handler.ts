@@ -26,7 +26,7 @@ export function handleList({ nodes }: { nodes: Node[] }) {
 
   // focus last item
   const lastItem = container.lastElementChild as HTMLDivElement;
-  focusItem(lastItem);
+  focusItem(lastItem, true);
 }
 
 export function handleInsert({
