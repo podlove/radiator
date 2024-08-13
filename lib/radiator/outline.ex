@@ -126,26 +126,30 @@ defmodule Radiator.Outline do
     {:error, :circle_link}
   end
 
+  def move_node(_node_id, other_id, other_id) when not is_nil(other_id) do
+    {:error, :parent_and_prev_not_consistent}
+  end
+
   def move_node(node_id, new_prev_id, new_parent_id) do
     case NodeRepository.get_node(node_id) do
       nil ->
         {:error, :not_found}
 
       node ->
-        prev_node = get_prev_node(node)
         parent_node = get_parent_node(node)
 
-        case validate_consistency(node, new_prev_id, new_parent_id, parent_node) do
+        case validate_consistency_for_move(node, new_prev_id, new_parent_id, parent_node) do
           {:error, error} ->
             {:error, error}
 
           {:ok, node} ->
+            prev_node = get_prev_node(node)
             do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node)
         end
     end
   end
 
-  defp validate_consistency(
+  defp validate_consistency_for_move(
          %{prev_id: new_prev_id, parent_id: new_parent_id},
          new_prev_id,
          new_parent_id,
@@ -154,40 +158,27 @@ defmodule Radiator.Outline do
     {:error, :noop}
   end
 
-  defp validate_consistency(
-         %{parent_id: new_parent_id} = node,
-         _new_prev_id,
-         new_parent_id,
+  # when prev is nil, every parent is allowed
+  defp validate_consistency_for_move(
+         node,
+         nil,
+         _new_parent_id,
          _parent_node
        ) do
     {:ok, node}
   end
 
-  defp validate_consistency(node, new_prev_id, new_parent_id, parent_node) do
-    node
-    |> get_all_children()
-    |> Enum.map(& &1.uuid)
-    |> Enum.member?(new_parent_id)
-    |> case do
-      true ->
-        {:error, :circle_link}
-
-      #  parent and previous must be consistent, prev must be direct child of parent
-      false ->
-        validate_prev_child_of_parent(new_prev_id, parent_node, node)
-    end
-  end
-
-  defp validate_prev_child_of_parent(nil, _parent_node, node), do: {:ok, node}
-
-  defp validate_prev_child_of_parent(new_prev_id, parent_node, node) do
-    parent_node
-    |> get_all_siblings()
-    |> Enum.map(& &1.uuid)
-    |> Enum.member?(new_prev_id)
-    |> case do
-      true -> {:ok, node}
-      false -> {:error, :parent_and_prev_not_consistent}
+  # when prev is not nil, parent and prev must be consistent
+  defp validate_consistency_for_move(
+         node,
+         new_prev_id,
+         new_parent_id,
+         _parent_node
+       ) do
+    if NodeRepository.get_node(new_prev_id).parent_id == new_parent_id do
+      {:ok, node}
+    else
+      {:error, :parent_and_prev_not_consistent}
     end
   end
 
@@ -351,7 +342,11 @@ defmodule Radiator.Outline do
   end
 
   @doc """
-  TODO + test
+  get all children of a node. there is no limit of levels.
+  It basically calls `get_all_siblings` recursively and flattens the result.
+  ## Examples
+        iex> get_all_children(%Node{})
+        [%Node{}, %Node{}]
   """
   def get_all_children(node) do
     siblings = node |> get_all_siblings()
