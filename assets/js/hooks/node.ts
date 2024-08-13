@@ -8,13 +8,29 @@ export function getNodeByEvent(event: Event): Node {
 }
 
 export function getNodeByItem(item: HTMLDivElement): Node {
-  const uuid = item.id.split("outline-node-")[1] as UUID;
+  const uuid = getUUID(item);
+  const content = getContent(item);
+  const parent_id = getAttribute(item, "parent");
+  const prev_id = getAttribute(item, "prev");
+  const collapsed = isSet(item, "collapsed");
+  const dirty = isSet(item, "dirty");
+
+  return { uuid, content, parent_id, prev_id, collapsed, dirty };
+}
+
+function getUUID(item: HTMLDivElement) {
+  return item.id.split("outline-node-")[1] as UUID;
+}
+
+function getContent(item: HTMLDivElement) {
   const input = item.querySelector(".content") as HTMLDivElement;
-  const content = input.textContent || "";
+  return input.textContent || "";
+}
 
-  const parent_id = (item.getAttribute("data-parent") as UUID) || undefined;
-  const prev_id = (item.getAttribute("data-prev") as UUID) || undefined;
-  const dirty = item.getAttribute("data-dirty") == "true" ? true : false;
+function getAttribute(item: HTMLDivElement, key: string) {
+  return (item.getAttribute(`data-${key}`) as UUID) || undefined;
+}
 
-  return { uuid, content, parent_id, prev_id, dirty };
+function isSet(item: HTMLDivElement, key: string) {
+  return item.getAttribute(`data-${key}`) == "true" ? true : false;
 }
