@@ -39,7 +39,7 @@ export const Hooks = {
       let isDragging = false;
       this.el.addEventListener(
         "focusout",
-        (e) => isDragging && e.stopImmediatePropagation(),
+        (e) => isDragging && e.stopImmediatePropagation()
       );
       let sorter = new Sortable(this.el, {
         group: group ? { name: group, pull: true, put: true } : undefined,
@@ -58,7 +58,7 @@ export const Hooks = {
           this.pushEventTo(
             this.el,
             this.el.dataset["drop"] || "reposition",
-            params,
+            params
           );
         },
       });
