@@ -7,6 +7,7 @@ defmodule Radiator.Application do
 
   alias Radiator.Outline.CommandProcessor
   alias Radiator.Outline.EventProducer
+  alias Radiator.Outline.NodeChangeListener
 
   @impl true
   def start(_type, _args) do
@@ -22,7 +23,8 @@ defmodule Radiator.Application do
       # Start to serve requests, typically the last entry
       RadiatorWeb.Endpoint,
       {EventProducer, name: EventProducer},
-      {CommandProcessor, name: CommandProcessor, subscribe_to: [{EventProducer, max_demand: 1}]}
+      {CommandProcessor, name: CommandProcessor, subscribe_to: [{EventProducer, max_demand: 1}]},
+      {NodeChangeListener, name: NodeChangeListener}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
