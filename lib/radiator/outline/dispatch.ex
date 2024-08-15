@@ -1,8 +1,7 @@
 defmodule Radiator.Outline.Dispatch do
   @moduledoc false
 
-  alias Radiator.Outline.Command
-  alias Radiator.Outline.EventProducer
+  alias Radiator.Outline.{Command, Event, EventProducer, Validations}
 
   def insert_node(attributes, user_id, event_id) do
     "insert_node"
@@ -33,6 +32,13 @@ defmodule Radiator.Outline.Dispatch do
   end
 
   def broadcast(event) do
+    if Mix.env() == :dev || Mix.env() == :test do
+      :ok =
+        event
+        |> Event.episode_id()
+        |> Validations.validate_tree_for_episode()
+    end
+
     Phoenix.PubSub.broadcast(Radiator.PubSub, "events", event)
   end
 

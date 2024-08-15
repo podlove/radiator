@@ -11,10 +11,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   }
 
   alias Radiator.Outline.NodeRepository
-  # alias Radiator.EventStore
   alias Radiator.Podcast
   alias Radiator.Podcast.Episode
-
   alias RadiatorWeb.OutlineComponents
 
   @impl true

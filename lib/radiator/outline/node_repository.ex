@@ -86,9 +86,9 @@ defmodule Radiator.Outline.NodeRepository do
 
   """
   def count_nodes_by_episode(episode_id) do
-    episode_id
-    |> list_nodes_by_episode()
-    |> Enum.count()
+    Node
+    |> where([p], p.episode_id == ^episode_id)
+    |> Repo.aggregate(:count)
   end
 
   @doc """
