@@ -1,5 +1,6 @@
 defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
+  require Logger
 
   alias Radiator.Outline.Dispatch
 
@@ -39,13 +40,109 @@ defmodule RadiatorWeb.EpisodeLive.Index do
       Dispatch.subscribe()
     end
 
+    socket =
+      if connected?(socket) do
+        # TODO: Not too sure wether we should use one key for all episodes or one key per episode.
+        storage_key = "radiator-episode-#{episode.id}"
+
+        socket
+        |> assign(:user_session_info, storage_key)
+        # request the browser to restore any state it has for this key.
+        |> push_event("restore", %{key: storage_key, event: "restoreSettings"})
+      else
+        socket
+      end
+
     socket
     |> apply_action(socket.assigns.live_action, params)
     |> assign(:selected_episode, episode)
     |> reply(:noreply)
   end
 
+  defp restore_from_token(nil), do: {:ok, nil}
+
+  defp restore_from_token(token) do
+    salt = Application.get_env(:radiator, RadiatorWeb.Endpoint)[:live_view][:signing_salt]
+    # Max age is 1 day. 86,400 seconds
+    case Phoenix.Token.decrypt(RadiatorWeb.Endpoint, salt, token, max_age: 86_400) do
+      {:ok, data} ->
+        {:ok, data}
+
+      {:error, reason} ->
+        # handles `:invalid`, `:expired` and possibly other things?
+        {:error, "Failed to restore previous state. Reason: #{inspect(reason)}."}
+    end
+  end
+
+  defp serialize_to_token(state_data) do
+    salt = Application.get_env(:radiator, RadiatorWeb.Endpoint)[:live_view][:signing_salt]
+    Phoenix.Token.encrypt(RadiatorWeb.Endpoint, salt, state_data)
+  end
+
+  # Push a websocket event down to the browser's JS hook.
+  # Clear any settings for the current my_storage_key.
+  defp clear_browser_storage(socket) do
+    push_event(socket, "clear", %{key: socket.assigns.my_storage_key})
+  end
+
   @impl true
+  # Pushed from JS hook. Server requests it to send up any
+  # stored settings for the key.
+  def handle_event("restoreSettings", token_data, socket) when is_binary(token_data) do
+    socket =
+      case restore_from_token(token_data) do
+        {:ok, nil} ->
+          # do nothing with the previous state
+          socket
+
+        {:ok, restored} ->
+          socket
+          |> assign(:state, restored)
+
+        {:error, reason} ->
+          # We don't continue checking. Display error.
+          # Clear the token so it doesn't keep showing an error.
+          socket
+          |> put_flash(:error, reason)
+          |> clear_browser_storage()
+      end
+
+    {:noreply, socket}
+  end
+
+  def handle_event("restoreSettings", _token_data, socket) do
+    # No expected token data received from the client
+    Logger.debug("No LiveView SessionStorage state to restore")
+    {:noreply, socket}
+  end
+
+  def handle_event("something_happened_and_i_want_to_store", _params, socket) do
+    state_to_store = socket.assigns.state
+
+    socket =
+      socket
+      |> push_event("store", %{
+        key: socket.assigns.my_storage_key,
+        data: serialize_to_token(state_to_store)
+      })
+
+    {:noreply, socket}
+  end
+
+  def handle_event("new_episode", _params, socket) do
+    show = socket.assigns.show
+    number = Podcast.get_next_episode_number(show.id)
+
+    episode = %Podcast.Episode{}
+    changeset = Episode.changeset(episode, %{number: number})
+
+    socket
+    |> assign(:action, :new_episode)
+    |> assign(:episode, episode)
+    |> assign(:form, to_form(changeset))
+    |> reply(:noreply)
+  end
+
   def handle_event("validate", %{"episode" => params}, socket) do
     changeset = Episode.changeset(socket.assigns.episode, params)
 

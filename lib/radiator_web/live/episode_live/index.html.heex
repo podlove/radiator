@@ -1,4 +1,4 @@
-<div class="grid grid-cols-12 gap-24">
+<div class="grid grid-cols-12 gap-24" id="main-grid" phx-hook="LocalStateStore">
   <aside class="col-span-12 sm:col-span-4">
     <.link
       patch={~p"/admin/podcast/#{@show}/new"}
