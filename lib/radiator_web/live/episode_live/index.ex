@@ -39,8 +39,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     episode = get_selected_episode(params)
     nodes = get_nodes(episode)
 
-    # would need to unsubscribe from previous episode,
-    # better: load new liveview
     if connected?(socket) and episode do
       Dispatch.subscribe(episode.id)
     end
