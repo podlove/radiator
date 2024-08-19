@@ -1,7 +1,6 @@
 defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
-  alias Radiator.Outline
   alias Radiator.Outline.Dispatch
 
   alias Radiator.Outline.Event.{
@@ -37,7 +36,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   @impl true
   def handle_params(params, _uri, socket) do
     episode = get_selected_episode(params)
-    nodes = get_nodes(episode)
 
     if connected?(socket) and episode do
       Dispatch.subscribe(episode.id)
@@ -45,75 +43,10 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     socket
     |> assign(:selected_episode, episode)
-    |> push_event("list", %{nodes: nodes})
     |> reply(:noreply)
   end
 
   @impl true
-  def handle_event("set_focus", _node_id, socket) do
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_event("remove_focus", _node_id, socket) do
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_event("set_collapsed", _node_id, socket) do
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_event("set_expanded", _node_id, socket) do
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_event("create_node", params, socket) do
-    user = socket.assigns.current_user
-    episode = socket.assigns.selected_episode
-    attrs = Map.merge(params, %{"creator_id" => user.id, "episode_id" => episode.id})
-
-    Dispatch.insert_node(attrs, user.id, generate_event_id(socket.id))
-
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_event("update_node_content", %{"uuid" => uuid, "content" => content}, socket) do
-    user = socket.assigns.current_user
-
-    Dispatch.change_node_content(uuid, content, user.id, generate_event_id(socket.id))
-
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_event("move_node", %{"uuid" => uuid} = node, socket) do
-    user = socket.assigns.current_user
-
-    Dispatch.move_node(
-      uuid,
-      node["parent_id"],
-      node["prev_id"],
-      user.id,
-      generate_event_id(socket.id)
-    )
-
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_event("delete_node", %{"uuid" => uuid}, socket) do
-    user = socket.assigns.current_user
-
-    Dispatch.delete_node(uuid, user.id, generate_event_id(socket.id))
-
-    socket
-    |> reply(:noreply)
-  end
-
   def handle_event("new_episode", _params, socket) do
     show = socket.assigns.show
     number = Podcast.get_next_episode_number(show.id)
@@ -159,48 +92,34 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
-  def handle_info(
-        %NodeInsertedEvent{node: node, next_id: next_id} = event,
-        socket
-      ) do
-    payload = %{node: node, next_id: next_id}
+  def handle_info(%NodeInsertedEvent{} = event, socket) do
+    send_update(RadiatorWeb.OutlineComponent, id: "outline", event: event)
 
     socket
-    |> push_event("insert", payload)
     |> stream_event(event)
     |> reply(:noreply)
   end
 
-  def handle_info(
-        %NodeContentChangedEvent{node_id: id, content: content} = event,
-        socket
-      ) do
-    payload = %{node: %{uuid: id, content: content}}
+  def handle_info(%NodeContentChangedEvent{} = event, socket) do
+    send_update(RadiatorWeb.OutlineComponent, id: "outline", event: event)
 
     socket
-    |> push_event("change_content", payload)
     |> stream_event(event)
     |> reply(:noreply)
   end
 
-  def handle_info(
-        %NodeMovedEvent{node_id: id, parent_id: parent_id, prev_id: prev_id} =
-          event,
-        socket
-      ) do
-    payload = %{node: %{uuid: id, parent_id: parent_id, prev_id: prev_id}}
+  def handle_info(%NodeMovedEvent{} = event, socket) do
+    send_update(RadiatorWeb.OutlineComponent, id: "outline", event: event)
 
     socket
-    |> push_event("move", payload)
     |> stream_event(event)
     |> reply(:noreply)
   end
 
-  def handle_info(%NodeDeletedEvent{node_id: id} = event, socket) do
-    payload = %{node: %{uuid: id}}
+  def handle_info(%NodeDeletedEvent{} = event, socket) do
+    send_update(RadiatorWeb.OutlineComponent, id: "outline", event: event)
 
     socket
-    |> push_event("delete", payload)
     |> stream_event(event)
     |> reply(:noreply)
   end
@@ -219,11 +138,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     # EventStore.list_event_data_by_episode(episode.id)
     []
   end
-
-  defp get_nodes(%{id: id}), do: Outline.list_nodes_by_episode_sorted(id)
-  defp get_nodes(_), do: []
-
-  defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
 
   defp stream_event(socket, event) do
     socket

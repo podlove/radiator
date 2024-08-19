@@ -48,7 +48,7 @@ export function keydown(event: KeyboardEvent) {
       node.dirty = true;
 
       changeItemContent(node);
-      this.pushEvent("update_node_content", node);
+      this.pushEventTo(this.el, "update_node_content", node);
 
       const newNode: Node = {
         uuid: self.crypto.randomUUID(),
@@ -57,7 +57,7 @@ export function keydown(event: KeyboardEvent) {
         prev_id: node.uuid,
         dirty: true,
       };
-      this.pushEvent("create_node", newNode);
+      this.pushEventTo(this.el, "create_node", newNode);
 
       const newItem = createItem(newNode);
       item.after(newItem);
@@ -82,10 +82,10 @@ export function keydown(event: KeyboardEvent) {
       prevNode.dirty = true;
       changeItemContent(prevNode);
       focusItem(prevItem);
-      this.pushEvent("update_node_content", prevNode);
+      this.pushEventTo(this.el, "update_node_content", prevNode);
 
       deleteItem(node);
-      this.pushEvent("delete_node", node);
+      this.pushEventTo(this.el, "delete_node", node);
       break;
 
     case "Delete":
@@ -98,10 +98,10 @@ export function keydown(event: KeyboardEvent) {
       node.dirty = true;
       changeItemContent(node);
       focusItem(item);
-      this.pushEvent("update_node_content", node);
+      this.pushEventTo(this.el, "update_node_content", node);
 
       deleteItem(nextNode);
-      this.pushEvent("delete_node", nextNode);
+      this.pushEventTo(this.el, "delete_node", nextNode);
       break;
 
     case "Tab":
@@ -115,7 +115,7 @@ export function keydown(event: KeyboardEvent) {
           moveItem(node, container);
 
           focusItem(item);
-          this.pushEvent("move_node", node);
+          this.pushEventTo(this.el, "move_node", node);
         }
       } else {
         // indent
@@ -125,7 +125,7 @@ export function keydown(event: KeyboardEvent) {
           moveItem(node, container);
 
           focusItem(item);
-          this.pushEvent("move_node", node);
+          this.pushEventTo(this.el, "move_node", node);
         }
       }
       break;
@@ -147,7 +147,7 @@ function moveCursorUp(event: KeyboardEvent, outerThis: any) {
   // TODO: if no prevItem exists, try to select the parent item
 
   focusItem(prevItem);
-  outerThis.pushEvent("set_focus", prevNode.uuid);
+  outerThis.pushEventTo(this.el, "set_focus", prevNode.uuid);
 }
 
 function moveCursorDown(event: KeyboardEvent, outerThis: any) {
@@ -166,7 +166,7 @@ function moveCursorDown(event: KeyboardEvent, outerThis: any) {
   // TODO: if no nextItem exists, try to select the first child
 
   focusItem(nextItem);
-  outerThis.pushEvent("set_focus", nextNode.uuid);
+  outerThis.pushEventTo(this.el, "set_focus", nextNode.uuid);
 }
 
 function moveNodeUp(
@@ -189,12 +189,12 @@ function moveNodeUp(
     if (nextNode) {
       nextNode.prev_id = prevNode.uuid;
       moveItem(nextNode, container);
-      outerThis.pushEvent("move_node", nextNode);
+      outerThis.pushEventTo(this.el, "move_node", nextNode);
     }
     moveItem(node, container);
-    outerThis.pushEvent("move_node", node);
+    outerThis.pushEventTo(this.el, "move_node", node);
     moveItem(prevNode, container);
-    outerThis.pushEvent("move_node", prevNode);
+    outerThis.pushEventTo(this.el, "move_node", prevNode);
 
     focusItem(item);
   }
@@ -222,15 +222,15 @@ function moveNodeDown(
     if (prevNode) {
       nextNode.prev_id = prevNode.uuid;
       moveItem(nextNode, container);
-      outerThis.pushEvent("move_node", nextNode);
+      outerThis.pushEventTo(this.el, "move_node", nextNode);
     }
     if (nextNextNode) {
       nextNextNode.prev_id = node.uuid;
       moveItem(nextNextNode, container);
-      outerThis.pushEvent("move_node", nextNextNode);
+      outerThis.pushEventTo(this.el, "move_node", nextNextNode);
     }
     moveItem(node, container);
-    outerThis.pushEvent("move_node", node);
+    outerThis.pushEventTo(this.el, "move_node", node);
     focusItem(item);
   }
 }

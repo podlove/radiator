@@ -10,8 +10,8 @@ export function click(event: MouseEvent) {
   upsertItem(node, container);
 
   if (node.collapsed) {
-    this.pushEvent("set_expanded", node.uuid);
+    this.pushEventTo(this.el, "set_expanded", node.uuid);
   } else {
-    this.pushEvent("set_collapsed", node.uuid);
+    this.pushEventTo(this.el, "set_collapsed", node.uuid);
   }
 }

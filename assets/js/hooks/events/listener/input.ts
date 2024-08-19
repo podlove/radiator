@@ -6,5 +6,5 @@ export function input(event: Event) {
   const item = getItemByNode(node);
   item && setItemDirty(item, true);
 
-  this.pushEvent("update_node_content", node);
+  this.pushEventTo(this.el, "update_node_content", node);
 }
