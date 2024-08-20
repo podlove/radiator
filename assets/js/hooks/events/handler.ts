@@ -11,7 +11,7 @@ import {
 import { getNodeByItem } from "../node";
 
 export function handleList({ nodes }: { nodes: Node[] }) {
-  const container: HTMLDivElement = this.el.querySelector(".children");
+  const container: HTMLDivElement = this.el.querySelector(".nodes");
 
   // add all items
   nodes.forEach((node) => {
@@ -36,7 +36,7 @@ export function handleInsert({
   node: Node;
   next_id: string | undefined;
 }) {
-  const container: HTMLDivElement = this.el.querySelector(".children");
+  const container: HTMLDivElement = this.el.querySelector(".nodes");
 
   const item = createItem(node);
   container.append(item);

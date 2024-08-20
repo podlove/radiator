@@ -11,7 +11,7 @@ import {
 import { getNodeByEvent, getNodeByItem } from "../node";
 
 export function keydown(event: KeyboardEvent) {
-  const container: HTMLDivElement = this.el.querySelector(".children");
+  const container: HTMLDivElement = this.el.querySelector(".nodes");
 
   const selection = window.getSelection();
   // const range = selection?.getRangeAt(0)

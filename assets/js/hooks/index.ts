@@ -13,7 +13,7 @@ import {
 export const Hooks = {
   outline: {
     mounted() {
-      const container: HTMLDivElement = this.el.querySelector(".children");
+      const container: HTMLDivElement = this.el.querySelector(".nodes");
 
       container.addEventListener("focusin", focusin.bind(this));
       container.addEventListener("focusout", focusout.bind(this));
