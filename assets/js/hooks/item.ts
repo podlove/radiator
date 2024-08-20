@@ -27,7 +27,7 @@ export function createItem({
   setContent(item, content);
 
   setAttribute(item, "parent", parent_id);
-  setAttribute(item, "prev_id", prev_id);
+  setAttribute(item, "prev", prev_id);
 
   setItemDirty(item, dirty);
   setItemCollapsed(item, collapsed);
