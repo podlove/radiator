@@ -211,8 +211,8 @@ function setItemCollapsed(item: HTMLDivElement, collapsed: boolean = false) {
 export function setAttribute(
   item: HTMLDivElement,
   key: string,
-  value: string | boolean | undefined
+  value: string | number | boolean | undefined
 ) {
-  const attrValue = typeof value === "boolean" ? String(value) : value || "";
+  const attrValue = value === undefined ? "" : String(value);
   item.setAttribute(`data-${key}`, attrValue);
 }

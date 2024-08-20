@@ -31,38 +31,36 @@ export const Hooks = {
       this.handleEvent("delete", handleDelete.bind(this));
       this.handleEvent("clean", handleClean.bind(this));
 
-      //// //// //// ////
-
-      const nodes = this.el.querySelectorAll(this.selector);
-      nodes.forEach((node: HTMLDivElement) => {
-        const { parent_id, prev_id } = getNodeByItem(node);
+      const items = this.el.querySelectorAll(this.selector);
+      items.forEach((item: HTMLDivElement) => {
+        const { parent_id, prev_id } = getNodeByItem(item);
         const parentNode = getItemById(parent_id);
         const prevNode = getItemById(prev_id);
 
         if (prevNode) {
-          prevNode.after(node);
+          prevNode.after(item);
         } else if (parentNode) {
-          parentNode.querySelector(".children")!.append(node);
+          parentNode.querySelector(".children")!.append(item);
         }
 
-        setAttribute(node, "processed", true);
+        setAttribute(item, "processed", true);
       });
     },
   },
   updated() {
-    const nodes = this.el.querySelectorAll(this.selector);
-    nodes.forEach((node: HTMLDivElement) => {
-      const { parent_id, prev_id } = getNodeByItem(node);
+    const items = this.el.querySelectorAll(this.selector);
+    items.forEach((item: HTMLDivElement) => {
+      const { parent_id, prev_id } = getNodeByItem(item);
       const parentNode = getItemById(parent_id);
       const prevNode = getItemById(prev_id);
 
       if (prevNode) {
-        prevNode.after(node);
+        prevNode.after(item);
       } else if (parentNode) {
-        parentNode.querySelector(".children")!.append(node);
+        parentNode.querySelector(".children")!.append(item);
       }
 
-      setAttribute(node, "processed", true);
+      setAttribute(item, "processed", true);
     });
   },
 };
