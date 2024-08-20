@@ -60,7 +60,8 @@ defmodule RadiatorWeb.OutlineComponent do
 
     socket
     |> assign(assigns)
-    |> push_event("list", %{nodes: nodes})
+    |> stream_configure(:nodes, dom_id: &"outline-node-#{&1.uuid}")
+    |> stream(:nodes, nodes)
     |> reply(:ok)
   end
 

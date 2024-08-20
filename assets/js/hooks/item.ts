@@ -208,7 +208,7 @@ function setItemCollapsed(item: HTMLDivElement, collapsed: boolean = false) {
   item.setAttribute("data-collapsed", String(collapsed));
 }
 
-function setAttribute(
+export function setAttribute(
   item: HTMLDivElement,
   key: string,
   value: string | boolean | undefined
