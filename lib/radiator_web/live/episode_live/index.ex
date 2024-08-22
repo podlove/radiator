@@ -42,25 +42,12 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     end
 
     socket
+    |> apply_action(socket.assigns.live_action, params)
     |> assign(:selected_episode, episode)
     |> reply(:noreply)
   end
 
   @impl true
-  def handle_event("new_episode", _params, socket) do
-    show = socket.assigns.show
-    number = Podcast.get_next_episode_number(show.id)
-
-    episode = %Podcast.Episode{}
-    changeset = Episode.changeset(episode, %{number: number})
-
-    socket
-    |> assign(:action, :new_episode)
-    |> assign(:episode, episode)
-    |> assign(:form, to_form(changeset))
-    |> reply(:noreply)
-  end
-
   def handle_event("validate", %{"episode" => params}, socket) do
     changeset = Episode.changeset(socket.assigns.episode, params)
 
@@ -70,10 +57,9 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   def handle_event("save", %{"episode" => params}, socket) do
-    params
-    |> Map.put("show_id", socket.assigns.show.id)
-    |> Podcast.create_episode()
-    |> process_create_episode(socket)
+    params = Map.put(params, "show_id", socket.assigns.show.id)
+
+    save_episode(socket, socket.assigns.action, params)
   end
 
   @impl true
@@ -124,6 +110,64 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> reply(:noreply)
   end
 
+  defp apply_action(socket, :new, %{"show" => show_id}) do
+    number = Podcast.get_next_episode_number(show_id)
+
+    episode = %Podcast.Episode{}
+    changeset = Episode.changeset(episode, %{number: number})
+
+    socket
+    |> assign(:title, "New Episode")
+    |> assign(:episode, episode)
+    |> assign(:form, to_form(changeset))
+  end
+
+  defp apply_action(socket, :edit, %{"episode" => episode_id}) do
+    episode = Podcast.get_episode!(episode_id)
+    changeset = Podcast.change_episode(episode, %{})
+
+    socket
+    |> assign(:title, "Edit Episode")
+    |> assign(:episode, episode)
+    |> assign(:form, to_form(changeset))
+  end
+
+  defp apply_action(socket, :index, _params) do
+    socket
+  end
+
+  defp save_episode(socket, :new, params) do
+    case Podcast.create_episode(params) do
+      {:ok, episode} ->
+        NodeRepository.create_node(%{
+          "uuid" => Ecto.UUID.generate(),
+          "creator_id" => socket.assigns.current_user.id,
+          "episode_id" => episode.id
+        })
+
+        socket
+        |> put_flash(:info, "Episode created")
+        |> push_patch(to: ~p"/admin/podcast/#{socket.assigns.show}/#{episode}")
+        |> reply(:noreply)
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        socket |> assign(form: to_form(changeset)) |> reply(:noreply)
+    end
+  end
+
+  defp save_episode(socket, :edit, params) do
+    case Podcast.update_episode(socket.assigns.episode, params) do
+      {:ok, episode} ->
+        socket
+        |> put_flash(:info, "Episode updated")
+        |> push_patch(to: ~p"/admin/podcast/#{socket.assigns.show}/#{episode}")
+        |> reply(:noreply)
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        socket |> assign(form: to_form(changeset)) |> reply(:noreply)
+    end
+  end
+
   defp get_selected_episode(%{"episode" => episode_id}) do
     Podcast.get_episode!(episode_id)
   end
@@ -142,29 +186,5 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   defp stream_event(socket, event) do
     socket
     |> stream_insert(:event_logs, event, at: 0)
-  end
-
-  defp process_create_episode({:ok, episode}, socket) do
-    show = Podcast.get_show!(socket.assigns.show.id, preload: :episodes)
-
-    NodeRepository.create_node(%{
-      "uuid" => Ecto.UUID.generate(),
-      "creator_id" => socket.assigns.current_user.id,
-      "episode_id" => episode.id
-    })
-
-    socket
-    |> assign(:action, nil)
-    |> assign(:episodes, show.episodes)
-    |> put_flash(:info, "Episode created successfully")
-    |> push_navigate(to: ~p"/admin/podcast/#{show}/#{episode}")
-    |> reply(:noreply)
-  end
-
-  defp process_create_episode({:error, %Ecto.Changeset{} = changeset}, socket) do
-    socket
-    |> assign(:form, to_form(changeset))
-    |> put_flash(:info, "Episode could not be created")
-    |> reply(:noreply)
   end
 end

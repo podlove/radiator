@@ -76,7 +76,10 @@ defmodule RadiatorWeb.Router do
       live "/admin/accounts", AccountsLive.Index, :index
 
       live "/admin/podcast/:show", EpisodeLive.Index, :index
+
+      live "/admin/podcast/:show/new", EpisodeLive.Index, :new
       live "/admin/podcast/:show/:episode", EpisodeLive.Index, :index
+      live "/admin/podcast/:show/:episode/edit", EpisodeLive.Index, :edit
     end
   end
 

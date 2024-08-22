@@ -57,11 +57,14 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def update(%{episode_id: id} = assigns, socket) do
     nodes = get_nodes(id)
+    # node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
 
     socket
     |> assign(assigns)
     |> stream_configure(:nodes, dom_id: &"outline-node-#{&1.uuid}")
     |> stream(:nodes, nodes)
+    # |> stream_configure(:nodes_new, dom_id: &"outline-node-#{&1.uuid}")
+    # |> stream(:nodes_new, node_forms)
     |> reply(:ok)
   end
 

@@ -1,13 +1,67 @@
-<div id={@id} class="my-6" phx-hook="outline" phx-update="stream">
-  <div id={"#{@id}-nodes"} class="nodes">
-    <div
-      :for={{id, node} <- @streams.nodes}
-      id={id}
-      class="item group relative my-1 data-[dirty=true]:bg-red-100"
-      data-parent={node.parent_id}
-      data-prev={node.prev_id}
-      data-collapsed={false}
-    >
+<div id={@id}>
+  <aside>
+    <h3 class="text-base font-semibold leading-7 text-gray-600">Shortcuts</h3>
+    <dl class="divide-y divide-gray-100">
+      <div class="grid grid-cols-3 gap-4 px-0 py-2">
+        <dt class="text-sm font-medium leading-6 text-gray-600">Add note</dt>
+        <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">
+          ↵
+        </dd>
+      </div>
+      <div class="grid grid-cols-3 gap-4 px-0 py-2">
+        <dt class="text-sm font-medium leading-6 text-gray-600">Cursor up</dt>
+        <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">
+          ↑
+        </dd>
+      </div>
+      <div class="grid grid-cols-3 gap-4 px-0 py-2">
+        <dt class="text-sm font-medium leading-6 text-gray-600">Cursor down</dt>
+        <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">
+          ↓
+        </dd>
+      </div>
+      <div class="grid grid-cols-3 gap-4 px-0 py-2">
+        <dt class="text-sm font-medium leading-6 text-gray-600">Indent</dt>
+        <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">
+          ⇥
+        </dd>
+      </div>
+      <div class="grid grid-cols-3 gap-4 px-0 py-2">
+        <dt class="text-sm font-medium leading-6 text-gray-600">Outdent</dt>
+        <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">
+          ⇧⇥
+        </dd>
+      </div>
+      <div class="grid grid-cols-3 gap-4 px-0 py-2">
+        <dt class="text-sm font-medium leading-6 text-gray-600">Collapse</dt>
+        <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700"></dd>
+      </div>
+      <div class="grid grid-cols-3 gap-4 px-0 py-2">
+        <dt class="text-sm font-medium leading-6 text-gray-600">Expand</dt>
+        <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700"></dd>
+      </div>
+      <div class="grid grid-cols-3 gap-4 px-0 py-2">
+        <dt class="text-sm font-medium leading-6 text-gray-600">Move node up</dt>
+        <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">⌥↑</dd>
+      </div>
+      <div class="grid grid-cols-3 gap-4 px-0 py-2">
+        <dt class="text-sm font-medium leading-6 text-gray-600">Move node down</dt>
+        <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">⌥↓</dd>
+      </div>
+    </dl>
+  </aside>
+
+  <div id={@id <> "-stream"} class="my-6" phx-hook="outline" phx-update="stream">
+    <div id={"#{@id}-nodes"} class="nodes">
+      <div
+        :for={{id, node} <- @streams.nodes}
+        id={id}
+        class="item group relative my-1 data-[dirty=true]:bg-red-100"
+        data-parent={node.parent_id}
+        data-prev={node.prev_id}
+        data-collapsed={false}
+      >
+        <!--
       <button class="absolute top-0.5 left-0 group-[.collapsed]:-rotate-90 duration-200 z-10">
         <svg
           width="20"
@@ -31,8 +85,10 @@
           <circle cx="9" cy="9" r="3.5"></circle>
         </svg>
       </a>
-      <div class="ml-10 content" contentEditable><%= node.content %></div>
-      <div class="ml-4 children group-[.collapsed]:hidden"></div>
+      -->
+        <div class="ml-5 content" contentEditable><%= node.content %></div>
+        <div class="ml-4 children group-[.collapsed]:hidden"></div>
+      </div>
     </div>
   </div>
 </div>

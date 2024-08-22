@@ -1,12 +1,11 @@
 <div class="grid grid-cols-12 gap-24">
   <aside class="col-span-12 sm:col-span-4">
-    <button
-      :if={@action != :new_episode}
-      class="block w-full my-4 rounded text-white bg-[#df7366] px-8 py-2"
-      phx-click="new_episode"
+    <.link
+      patch={~p"/admin/podcast/#{@show}/new"}
+      class="block w-full my-4 rounded text-white bg-[#df7366] px-8 py-2 text-center"
     >
       Create Episode
-    </button>
+    </.link>
 
     <ol>
       <li
@@ -23,19 +22,19 @@
   </aside>
 
   <div class="col-span-12 sm:col-span-8">
-    <section :if={@action == :new_episode}>
+    <section :if={@live_action in [:new, :edit]}>
       <div class="p-4 my-4 bg-[#f0f4f4]">
-        <h3 class="text-xl">Create Episode</h3>
+        <h3 class="text-xl"><%= @title %></h3>
         <.form :let={f} for={@form} id="episode-form" phx-change="validate" phx-submit="save">
           <.input field={f[:number]} type="text" label="Number" />
           <.input field={f[:title]} type="text" label="Title" />
           <div class="flex items-center justify-between gap-6 mt-2">
-            <div
+            <.link
+              patch={~p"/admin/podcast/#{@show}"}
               class="px-3 py-2 text-sm font-semibold leading-6 border rounded-lg cursor-pointer phx-submit-loading:opacity-75 border-zinc-900 hover:border-zinc-700 text-zinc-900 active:text-zinc-900/80"
-              phx-click="cancel"
             >
               Cancel
-            </div>
+            </.link>
             <.button phx-disable-with="Saving...">Save Episode</.button>
           </div>
         </.form>
@@ -43,8 +42,25 @@
     </section>
 
     <section :if={@selected_episode}>
-      <h2 class="text-2xl"><%= @selected_episode.number %> <%= @selected_episode.title %></h2>
-      <img class="my-4" src={~p"/images/pic06.jpg"} alt="" />
+      <.header class="text-2xl">
+        <%= @selected_episode.number %>: <%= @selected_episode.title %>
+        <:actions>
+          <.link
+            navigate={~p"/admin/podcast/#{@show}/#{@selected_episode}/edit"}
+            class="flex gap-4 my-4"
+          >
+            <.icon name="hero-pencil-square" class="w-5 h-5" />
+          </.link>
+          <.link
+            title="Delete"
+            phx-click={JS.push("delete", value: %{id: @selected_episode.id})}
+            data-confirm="Are you sure?"
+          >
+            <.icon name="hero-trash" class="w-5 h-5" />
+          </.link>
+        </:actions>
+      </.header>
+
       <.live_component
         id="outline"
         module={RadiatorWeb.OutlineComponent}
