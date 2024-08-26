@@ -62,45 +62,17 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   @impl true
   def handle_info(%{uuid: <<_::binary-size(36)>> <> ":" <> id} = event, %{id: id} = socket) do
-    id =
-      case event do
-        %{node: %{uuid: id}} -> id
-        %{node_id: id} -> id
-      end
-
-    payload = %{node: %{uuid: id}}
-
-    socket
-    |> push_event("clean", payload)
-    |> stream_event(event)
-    |> reply(:noreply)
-  end
-
-  def handle_info(%NodeInsertedEvent{} = event, socket) do
-    send_update(RadiatorWeb.OutlineComponent, id: "outline", event: event)
-
     socket
     |> stream_event(event)
     |> reply(:noreply)
   end
 
-  def handle_info(%NodeContentChangedEvent{} = event, socket) do
-    send_update(RadiatorWeb.OutlineComponent, id: "outline", event: event)
+  def handle_info(%NodeInsertedEvent{} = event, socket), do: proxy_event(event, socket)
+  def handle_info(%NodeContentChangedEvent{} = event, socket), do: proxy_event(event, socket)
+  def handle_info(%NodeMovedEvent{} = event, socket), do: proxy_event(event, socket)
+  def handle_info(%NodeDeletedEvent{} = event, socket), do: proxy_event(event, socket)
 
-    socket
-    |> stream_event(event)
-    |> reply(:noreply)
-  end
-
-  def handle_info(%NodeMovedEvent{} = event, socket) do
-    send_update(RadiatorWeb.OutlineComponent, id: "outline", event: event)
-
-    socket
-    |> stream_event(event)
-    |> reply(:noreply)
-  end
-
-  def handle_info(%NodeDeletedEvent{} = event, socket) do
+  defp proxy_event(event, socket) do
     send_update(RadiatorWeb.OutlineComponent, id: "outline", event: event)
 
     socket

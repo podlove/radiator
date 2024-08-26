@@ -23,8 +23,8 @@ function getUUID(item: HTMLDivElement) {
 }
 
 function getContent(item: HTMLDivElement) {
-  const input = item.querySelector(".content") as HTMLDivElement;
-  return input.textContent || "";
+  const input = item.querySelector("input") as HTMLInputElement;
+  return input.value;
 }
 
 function getAttribute(item: HTMLDivElement, key: string) {

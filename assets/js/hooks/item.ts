@@ -116,7 +116,7 @@ export function getItemByNode({ uuid }: Node) {
 export function getItemById(uuid: string | undefined) {
   if (!uuid) return null;
 
-  return document.getElementById(`outline-node-${uuid}`) as HTMLDivElement;
+  return document.getElementById(`nodes-form-${uuid}`) as HTMLDivElement;
 }
 
 export function getItemByEvent(event: Event) {
