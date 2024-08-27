@@ -98,8 +98,9 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
-  def handle_event("toggle_collapse", %{"uuid" => _uuid}, socket) do
+  def handle_event("toggle_collapse", %{"uuid" => uuid}, socket) do
     socket
+    |> store_node_state(uuid, %{collapsed: true})
     |> reply(:noreply)
   end
 
@@ -201,6 +202,25 @@ defmodule RadiatorWeb.OutlineComponent do
       |> Map.put(:action, action)
 
     to_form(changeset, as: "node", id: "form-#{changeset.data.uuid}")
+  end
+
+  defp store_node_state(socket, node_id, data) do
+    state_to_store = %{collapsed: data.collapsed}
+
+    current_session_info =
+      if Map.has_key?(socket.assigns, :user_session_info) do
+        socket.assigns.user_session_info
+      else
+        %{}
+      end
+
+    state = Map.put(current_session_info, node_id, state_to_store)
+
+    socket
+    |> push_event("store", %{
+      key: socket.assigns.user_session_info,
+      data: RadiatorWeb.EpisodeLive.Index.serialize_to_token(state)
+    })
   end
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id

@@ -36,12 +36,9 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   def handle_params(params, _uri, socket) do
     episode = get_selected_episode(params)
 
-    if connected?(socket) do
-      Dispatch.subscribe()
-    end
-
     socket =
-      if connected?(socket) do
+      if connected?(socket) and episode do
+        Dispatch.subscribe()
         # TODO: Not too sure wether we should use one key for all episodes or one key per episode.
         storage_key = "radiator-episode-#{episode.id}"
 
@@ -74,7 +71,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     end
   end
 
-  defp serialize_to_token(state_data) do
+  def serialize_to_token(state_data) do
     salt = Application.get_env(:radiator, RadiatorWeb.Endpoint)[:live_view][:signing_salt]
     Phoenix.Token.encrypt(RadiatorWeb.Endpoint, salt, state_data)
   end
