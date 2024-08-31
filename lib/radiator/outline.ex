@@ -21,6 +21,7 @@ defmodule Radiator.Outline do
   alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepoResult
   alias Radiator.Outline.NodeRepository
+  alias Radiator.Outline.Validations, as: NodeValidator
   alias Radiator.Repo
 
   require Logger
@@ -138,7 +139,12 @@ defmodule Radiator.Outline do
       node ->
         parent_node = get_parent_node(node)
 
-        case validate_consistency_for_move(node, new_prev_id, new_parent_id, parent_node) do
+        case NodeValidator.validate_consistency_for_move(
+               node,
+               new_prev_id,
+               new_parent_id,
+               parent_node
+             ) do
           {:error, error} ->
             {:error, error}
 
@@ -146,39 +152,6 @@ defmodule Radiator.Outline do
             prev_node = get_prev_node(node)
             do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node)
         end
-    end
-  end
-
-  defp validate_consistency_for_move(
-         %{prev_id: new_prev_id, parent_id: new_parent_id},
-         new_prev_id,
-         new_parent_id,
-         _parent_node
-       ) do
-    {:error, :noop}
-  end
-
-  # when prev is nil, every parent is allowed
-  defp validate_consistency_for_move(
-         node,
-         nil,
-         _new_parent_id,
-         _parent_node
-       ) do
-    {:ok, node}
-  end
-
-  # when prev is not nil, parent and prev must be consistent
-  defp validate_consistency_for_move(
-         node,
-         new_prev_id,
-         new_parent_id,
-         _parent_node
-       ) do
-    if NodeRepository.get_node(new_prev_id).parent_id == new_parent_id do
-      {:ok, node}
-    else
-      {:error, :parent_and_prev_not_consistent}
     end
   end
 

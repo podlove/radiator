@@ -15,7 +15,6 @@ defmodule Radiator.Outline.Node do
     field :parent_id, Ecto.UUID
     field :prev_id, Ecto.UUID
     field :level, :integer, virtual: true
-    field :position, :integer, virtual: true
 
     belongs_to :episode, Episode
 
@@ -24,11 +23,8 @@ defmodule Radiator.Outline.Node do
 
   @doc """
   A changeset for inserting a new node
-  Work in progress. Since we currently ignore the tree structure, there is
-  no concept for a root node.
-  Also questionable wether a node really needs a content from beginning. So probably a root
-  doesnt have a content
-  Another issue might be we need to create the uuid upfront and pass it here
+  A content is not mandatory,
+  The uuid might be generated upfront
   """
   def insert_changeset(node, attributes) do
     node

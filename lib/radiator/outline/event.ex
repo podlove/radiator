@@ -10,6 +10,8 @@ defmodule Radiator.Outline.Event do
     NodeMovedEvent
   }
 
+  alias Radiator.Outline.NodeRepository
+
   def payload(%NodeInsertedEvent{} = event) do
     %{
       node_id: event.node.uuid,
@@ -46,4 +48,20 @@ defmodule Radiator.Outline.Event do
   def event_type(%NodeDeletedEvent{} = _event), do: "NodeDeletedEvent"
 
   def event_type(%NodeMovedEvent{} = _event), do: "NodeMovedEvent"
+
+  def episode_id(%NodeInsertedEvent{} = event) do
+    event.node.episode_id
+  end
+
+  def episode_id(%NodeContentChangedEvent{} = event) do
+    NodeRepository.get_node(event.node_id).episode_id
+  end
+
+  def episode_id(%NodeDeletedEvent{} = event) do
+    NodeRepository.get_node(event.next_id).episode_id
+  end
+
+  def episode_id(%NodeMovedEvent{} = event) do
+    NodeRepository.get_node(event.node_id).episode_id
+  end
 end
