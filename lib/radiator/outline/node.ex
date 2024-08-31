@@ -15,7 +15,6 @@ defmodule Radiator.Outline.Node do
     field :parent_id, Ecto.UUID
     field :prev_id, Ecto.UUID
     field :level, :integer, virtual: true
-    field :position, :integer, virtual: true
 
     belongs_to :episode, Episode
 
