@@ -62,7 +62,7 @@ defmodule Radiator.Outline.EventConsumerTest do
         }
       }
 
-      Dispatch.subscribe(episode.id)
+      Dispatch.subscribe()
       EventProducer.enqueue(producer, command)
 
       start_supervised!(
