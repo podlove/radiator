@@ -11,6 +11,12 @@ defmodule Radiator.Application do
 
   @impl true
   def start(_type, _args) do
+    job_runner_config = [
+      strategy: :one_for_one,
+      max_seconds: 30,
+      name: Radiator.JobRunner
+    ]
+
     children = [
       RadiatorWeb.Telemetry,
       Radiator.Repo,
@@ -24,7 +30,9 @@ defmodule Radiator.Application do
       RadiatorWeb.Endpoint,
       {CommandQueue, name: CommandQueue},
       {CommandProcessor, name: CommandProcessor, subscribe_to: [{CommandQueue, max_demand: 1}]},
-      {NodeChangeListener, name: NodeChangeListener}
+      {NodeChangeListener, name: NodeChangeListener},
+      {Registry, keys: :unique, name: Radiator.JobRegistry},
+      {DynamicSupervisor, job_runner_config}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -14,7 +14,7 @@ defmodule Radiator.Outline.NodeChangeListener do
 
   alias Radiator.Outline.Dispatch
   # alias Radiator.Resources
-  alias Radiator.Resources.UrlExtractor
+  alias Radiator.Resources.UrlWorker
 
   require Logger
 
@@ -55,18 +55,7 @@ defmodule Radiator.Outline.NodeChangeListener do
 
   defp scan_content_for_urls(_node_id, nil), do: nil
 
-  defp scan_content_for_urls(_node_id, content) do
-    Task.async(fn ->
-      _result = UrlExtractor.extract_urls(content)
-
-      # TODO - handle old existing urls for this node, error handling!
-      # Enum.each(result, fn info ->
-      #   {:ok, _url} =
-      #     info
-      #     |> Map.put(:node_id, node_id)
-      #     |> Map.put(:url, info.parsed_url)
-      #     |> Web.create_url()
-      # end)
-    end)
+  defp scan_content_for_urls(node_id, content) do
+    UrlWorker.extract_urls(node_id, content)
   end
 end
