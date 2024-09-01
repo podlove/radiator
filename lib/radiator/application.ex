@@ -5,7 +5,7 @@ defmodule Radiator.Application do
 
   use Application
 
-  alias Radiator.Outline.EventConsumer
+  alias Radiator.Outline.CommandProcessor
   alias Radiator.Outline.EventProducer
 
   @impl true
@@ -22,7 +22,7 @@ defmodule Radiator.Application do
       # Start to serve requests, typically the last entry
       RadiatorWeb.Endpoint,
       {EventProducer, name: EventProducer},
-      {EventConsumer, name: EventConsumer, subscribe_to: [{EventProducer, max_demand: 1}]}
+      {CommandProcessor, name: CommandProcessor, subscribe_to: [{EventProducer, max_demand: 1}]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
