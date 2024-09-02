@@ -8,6 +8,7 @@ defmodule Radiator.Outline.Event.NodeMovedEvent do
     :user_id,
     :old_prev_id,
     :old_next_id,
-    :next_id
+    :next_id,
+    :episode_id
   ]
 end
