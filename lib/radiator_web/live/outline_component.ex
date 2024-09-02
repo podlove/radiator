@@ -18,35 +18,43 @@ defmodule RadiatorWeb.OutlineComponent do
   alias RadiatorWeb.OutlineComponents
 
   @impl true
-  def update(%{event: %NodeInsertedEvent{node: %{uuid: uuid}}} = _event, socket) do
-    node = NodeRepository.get_node!(uuid)
+  def update(%{event: %NodeInsertedEvent{node: node, next_id: next_id}}, socket) do
+    next_node = NodeRepository.get_node!(next_id)
 
     socket
     |> stream_insert(:nodes, to_change_form(node, %{}))
+    |> stream_insert(:nodes, to_change_form(next_node, %{}))
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeContentChangedEvent{node_id: uuid}} = _event, socket) do
-    node = NodeRepository.get_node!(uuid)
+  def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: content}}, socket) do
+    node = NodeRepository.get_node!(node_id)
 
     socket
-    |> stream_insert(:nodes, to_change_form(node, %{}))
+    |> stream_insert(:nodes, to_change_form(node, %{content: content}))
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeMovedEvent{node_id: uuid}} = _event, socket) do
-    node = NodeRepository.get_node!(uuid)
-
+  def update(
+        %{event: %NodeMovedEvent{node_id: _node_id, parent_id: _parent_id, prev_id: _prev_id}},
+        socket
+      ) do
     socket
-    |> stream_insert(:nodes, to_change_form(node, %{}))
+    # |> stream_insert(:nodes, to_change_form(node, %{}))
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeDeletedEvent{node_id: uuid}}, socket) do
-    node = %Node{uuid: uuid}
+  def update(
+        %{event: %NodeDeletedEvent{node_id: node_id, next_id: next_id, children: children}},
+        socket
+      ) do
+    next_node = NodeRepository.get_node!(next_id)
+    children_forms = Enum.map(children, &to_change_form(&1, %{}))
 
     socket
-    |> stream_delete(:nodes, to_change_form(node, %{}))
+    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node_id}")
+    |> stream_insert(:nodes, to_change_form(next_node, %{}))
+    |> stream(:nodes, children_forms)
     |> reply(:ok)
   end
 
@@ -89,19 +97,46 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
+  def handle_event(
+        "keydown",
+        %{"key" => "Tab", "shiftKey" => false, "uuid" => uuid, "prev" => prev_id},
+        socket
+      ) do
+    socket
+    |> indent(uuid, prev_id)
+    |> reply(:noreply)
+  end
+
+  def handle_event("keydown", %{"key" => "Tab", "shiftKey" => false}, socket) do
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event(
+        "keydown",
+        %{"key" => "Tab", "shiftKey" => true, "uuid" => uuid, "parent" => parent_id},
+        socket
+      ) do
+    socket
+    |> outdent(uuid, parent_id)
+    |> reply(:noreply)
+  end
+
+  def handle_event("keydown", %{"key" => "Tab", "shiftKey" => true}, socket) do
+    socket
+    |> reply(:noreply)
+  end
+
   def handle_event("keydown", _params, socket) do
     socket
     |> reply(:noreply)
   end
 
   def handle_event("save", %{"uuid" => uuid, "node" => params}, socket) do
-    node = NodeRepository.get_node!(uuid)
-
     user_id = socket.assigns.user_id
     Dispatch.change_node_content(uuid, params["content"], user_id, generate_event_id(socket.id))
 
     socket
-    |> stream_insert(:nodes, to_change_form(node, params, :validate))
     |> reply(:noreply)
   end
 
@@ -120,12 +155,18 @@ defmodule RadiatorWeb.OutlineComponent do
       "episode_id" => episode_id
     }
 
-    new_node = %Node{uuid: new_uuid}
+    new_node = %Node{
+      uuid: new_uuid,
+      parent_id: node.parent_id,
+      prev_id: node.uuid,
+      creator_id: user_id,
+      episode_id: episode_id
+    }
 
     Dispatch.insert_node(params, user_id, generate_event_id(socket.id))
 
     socket
-    |> stream_insert(:nodes, to_change_form(new_node, params))
+    |> stream_insert(:nodes, to_change_form(new_node, %{}))
     |> reply(:noreply)
   end
 
@@ -139,4 +180,12 @@ defmodule RadiatorWeb.OutlineComponent do
   end
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
+
+  defp indent(socket, _uuid, _prev_id) do
+    socket
+  end
+
+  defp outdent(socket, _uuid, _parent_id) do
+    socket
+  end
 end

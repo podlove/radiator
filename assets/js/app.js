@@ -34,6 +34,7 @@ let liveSocket = new LiveSocket("/live", Socket, {
       return {
         key: e.key,
         metaKey: e.metaKey,
+        shiftKey: e.shiftKey,
         repeat: e.repeat
       }
     }

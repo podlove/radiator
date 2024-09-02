@@ -1,60 +1,61 @@
 <div id={@id}>
   <OutlineComponents.keyboard_shortcuts />
 
-  <div id={[@id, "-nodes"]} class="my-6" phx-hook="outline">
-    <div id={"#{@id}-stream"} phx-update="stream">
-      <div
-        :for={{id, form} <- @streams.nodes}
-        id={id}
-        class="relative group item"
-        data-parent={form.data.parent_id}
-        data-prev={form.data.prev_id}
-        data-collapsed={false}
+  <div id={[@id, "-stream"]} class="my-6" phx-hook="outline" phx-update="stream">
+    <div
+      :for={{id, form} <- @streams.nodes}
+      id={id}
+      class="relative group node"
+      data-parent={form.data.parent_id}
+      data-prev={form.data.prev_id}
+      data-collapsed={false}
+    >
+      <OutlineComponents.outline_form
+        for={form}
+        phx-change="save"
+        phx-submit="new"
+        phx-value-uuid={form.data.uuid}
+        phx-target={@myself}
+        class="ml-5"
       >
-        <OutlineComponents.outline_form
-          for={form}
-          phx-change="save"
-          phx-submit="new"
+        <.input
+          type="text"
+          field={form[:content]}
+          placeholder="Content..."
+          phx-mounted={JS.focus()}
+          phx-focus="focus"
+          phx-blur="blur"
+          phx-keydown="keydown"
           phx-value-uuid={form.data.uuid}
+          phx-value-parent={form.data.parent_id}
+          phx-value-prev={form.data.prev_id}
           phx-target={@myself}
-          class="ml-5"
-        >
-          <.input
-            type="text"
-            field={form[:content]}
-            placeholder="Content..."
-            phx-focus="focus"
-            phx-blur="blur"
-            phx-keydown="keydown"
-            phx-value-uuid={form.data.uuid}
-            phx-target={@myself}
-          />
-        </OutlineComponents.outline_form>
-        <div class="ml-4 peer children group-data-[collapsed]:hidden"></div>
-        <button
-          class="absolute peer-empty:hidden top-3 left-0 group-data-[collapsed]:-rotate-90 duration-200 z-10"
-          phx-click="toggle_collapse"
-          phx-value-uuid={form.data.uuid}
-          phx-target={@myself}
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" class="text-gray-500 rotate-90">
-            <path
-              d="M13.75 9.56879C14.0833 9.76124 14.0833 10.2424 13.75 10.4348L8.5 13.4659C8.16667 13.6584 7.75 13.4178 7.75 13.0329L7.75 6.97072C7.75 6.58582 8.16667 6.34525 8.5 6.5377L13.75 9.56879Z"
-              stroke="none"
-              fill="currentColor"
-            >
-            </path>
-          </svg>
-        </button>
-        <a
-          href={"##{form.data.uuid}"}
-          class="absolute left-0 hidden text-gray-500 peer-empty:block top-3"
-        >
-          <svg viewBox="0 0 18 18" fill="currentColor" class="w-5 h-5">
-            <circle cx="9" cy="9" r="3.5"></circle>
-          </svg>
-        </a>
-      </div>
+        />
+      </OutlineComponents.outline_form>
+      <div class="ml-4 peer children group-data-[collapsed]:hidden"></div>
+      <button
+        class="absolute peer-empty:hidden top-3 left-0 group-data-[collapsed]:-rotate-90 duration-200 z-10"
+        phx-click="toggle_collapse"
+        phx-value-uuid={form.data.uuid}
+        phx-target={@myself}
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" class="text-gray-500 rotate-90">
+          <path
+            d="M13.75 9.56879C14.0833 9.76124 14.0833 10.2424 13.75 10.4348L8.5 13.4659C8.16667 13.6584 7.75 13.4178 7.75 13.0329L7.75 6.97072C7.75 6.58582 8.16667 6.34525 8.5 6.5377L13.75 9.56879Z"
+            stroke="none"
+            fill="currentColor"
+          >
+          </path>
+        </svg>
+      </button>
+      <a
+        href={"##{form.data.uuid}"}
+        class="absolute left-0 hidden text-gray-500 peer-empty:block top-3"
+      >
+        <svg viewBox="0 0 18 18" fill="currentColor" class="w-5 h-5">
+          <circle cx="9" cy="9" r="3.5"></circle>
+        </svg>
+      </a>
     </div>
   </div>
 </div>
