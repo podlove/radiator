@@ -28,7 +28,16 @@ let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("
 let liveSocket = new LiveSocket("/live", Socket, {
   hooks: Hooks,
   longPollFallbackMs: 2500,
-  params: { _csrf_token: csrfToken }
+  params: { _csrf_token: csrfToken },
+  metadata: {
+    keydown: (e, el) => {
+      return {
+        key: e.key,
+        metaKey: e.metaKey,
+        repeat: e.repeat
+      }
+    }
+  }
 })
 
 // Show progress bar on live navigation and form submits
