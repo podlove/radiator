@@ -32,7 +32,8 @@ defmodule Radiator.Outline.Dispatch do
   end
 
   def broadcast(event) do
-    if Mix.env() == :dev || Mix.env() == :test do
+    # if enabled validate tree and crash if tree got inconsistent
+    if Application.get_env(:radiator, :tree_consistency_validator, false) do
       :ok =
         event
         |> Event.episode_id()

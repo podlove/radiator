@@ -65,6 +65,9 @@ config :radiator, RadiatorWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :radiator, dev_routes: true
 
+# Enable tree consistency validator: crashes when tree is not valid!
+config :radiator, tree_consistency_validator: true
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 
