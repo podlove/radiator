@@ -35,8 +35,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   def handle_params(params, _uri, socket) do
     episode = get_selected_episode(params)
 
-    if connected?(socket) and episode do
-      Dispatch.subscribe(episode.id)
+    if connected?(socket) do
+      Dispatch.subscribe()
     end
 
     socket

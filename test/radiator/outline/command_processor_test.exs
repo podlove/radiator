@@ -1,10 +1,10 @@
-defmodule Radiator.Outline.EventConsumerTest do
+defmodule Radiator.Outline.CommandProcessorTest do
   alias Radiator.Outline.NodeRepository
   use Radiator.DataCase
 
   alias Radiator.AccountsFixtures
   alias Radiator.EventStore
-  alias Radiator.Outline.{Command, Dispatch, EventConsumer, EventProducer, NodeRepository}
+  alias Radiator.Outline.{Command, CommandProcessor, Dispatch, EventProducer, NodeRepository}
   alias Radiator.Outline.Command.InsertNodeCommand
   alias Radiator.Outline.Event.NodeInsertedEvent
   alias Radiator.PodcastFixtures
@@ -21,7 +21,7 @@ defmodule Radiator.Outline.EventConsumerTest do
 
       num_nodes = NodeRepository.count_nodes_by_episode(episode.id)
       command = Command.build("insert_node", attributes, user.id, event_id)
-      EventConsumer.handle_events([command], 0, nil)
+      CommandProcessor.handle_events([command], 0, nil)
 
       # assert a node has been created
       assert num_nodes + 1 == NodeRepository.count_nodes_by_episode(episode.id)
@@ -41,7 +41,7 @@ defmodule Radiator.Outline.EventConsumerTest do
       }
 
       command = Command.build("insert_node", attributes, user.id, event_id)
-      EventConsumer.handle_events([command], 0, nil)
+      CommandProcessor.handle_events([command], 0, nil)
       event = EventStore.list_event_data() |> hd()
 
       assert event.event_type == "NodeInsertedEvent"
@@ -62,11 +62,11 @@ defmodule Radiator.Outline.EventConsumerTest do
         }
       }
 
-      Dispatch.subscribe(episode.id)
+      Dispatch.subscribe()
       EventProducer.enqueue(producer, command)
 
       start_supervised!(
-        {EventConsumer, name: TestEventConsumer, subscribe_to: [{producer, max_demand: 1}]}
+        {CommandProcessor, name: TestCommandProcessor, subscribe_to: [{producer, max_demand: 1}]}
       )
 
       assert_receive(%NodeInsertedEvent{}, 1000)

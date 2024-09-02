@@ -27,7 +27,7 @@ defmodule Radiator.Outline.Dispatch do
     |> EventProducer.enqueue()
   end
 
-  def subscribe(_episode_id) do
+  def subscribe do
     Phoenix.PubSub.subscribe(Radiator.PubSub, "events")
   end
 

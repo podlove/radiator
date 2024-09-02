@@ -1,4 +1,4 @@
-defmodule Radiator.Outline.EventConsumer do
+defmodule Radiator.Outline.CommandProcessor do
   @moduledoc false
 
   use GenStage
@@ -78,6 +78,7 @@ defmodule Radiator.Outline.EventConsumer do
 
         %NodeDeletedEvent{
           node_id: node_id,
+          episode_id: node.episode_id,
           uuid: command.event_id,
           user_id: command.user_id,
           children: result.children,
@@ -95,7 +96,8 @@ defmodule Radiator.Outline.EventConsumer do
       node: node,
       uuid: command.event_id,
       user_id: command.user_id,
-      next_id: next_id
+      next_id: next_id,
+      episode_id: node.episode_id
     }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
@@ -118,7 +120,8 @@ defmodule Radiator.Outline.EventConsumer do
       prev_id: command.prev_id,
       user_id: command.user_id,
       uuid: command.event_id,
-      next_id: result.next_id
+      next_id: result.next_id,
+      episode_id: node.episode_id
     }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
@@ -136,7 +139,8 @@ defmodule Radiator.Outline.EventConsumer do
       node_id: node.uuid,
       content: node.content,
       user_id: command.user_id,
-      uuid: command.event_id
+      uuid: command.event_id,
+      episode_id: node.episode_id
     }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
