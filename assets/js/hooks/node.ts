@@ -19,7 +19,7 @@ export function getNodeByItem(item: HTMLDivElement): Node {
 }
 
 function getUUID(item: HTMLDivElement) {
-  return item.id.split("outline-node-")[1] as UUID;
+  return item.id.split("nodes-form-")[1] as UUID;
 }
 
 function getContent(item: HTMLDivElement) {
