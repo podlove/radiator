@@ -43,6 +43,10 @@ defmodule Radiator.Outline.NodeChangeListener do
     {:noreply, state}
   end
 
+  def handle_info({:DOWN, _ref, :process, _, _}, state) do
+    {:noreply, state}
+  end
+
   def handle_info(_reference, state) do
     Logger.warning("Unknown event type")
     {:noreply, state}
