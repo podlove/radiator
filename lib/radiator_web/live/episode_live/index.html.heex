@@ -28,6 +28,7 @@
         <.form :let={f} for={@form} id="episode-form" phx-change="validate" phx-submit="save">
           <.input field={f[:number]} type="text" label="Number" />
           <.input field={f[:title]} type="text" label="Title" />
+          <.input field={f[:publish_date]} type="date" label="Publish date" />
           <div class="flex items-center justify-between gap-6 mt-2">
             <.link
               patch={~p"/admin/podcast/#{@show}"}

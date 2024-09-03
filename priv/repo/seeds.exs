@@ -29,10 +29,20 @@ alias Radiator.Outline.NodeRepository
   Podcast.create_show(%{title: "Tech Weekly", network_id: network.id})
 
 {:ok, past_episode} =
-  Podcast.create_episode(%{title: "past episode", show_id: show.id, number: 1})
+  Podcast.create_episode(%{
+    title: "past episode",
+    show_id: show.id,
+    number: 1,
+    publish_date: Date.utc_today() |> Date.add(-23)
+  })
 
 {:ok, current_episode} =
-  Podcast.create_episode(%{title: "current episode", show_id: show.id, number: 2})
+  Podcast.create_episode(%{
+    title: "current episode",
+    show_id: show.id,
+    number: 2,
+    publish_date: Date.utc_today() |> Date.add(23)
+  })
 
 {:ok, node1} =
   NodeRepository.create_node(%{"content" => "Node 1", "episode_id" => current_episode.id})

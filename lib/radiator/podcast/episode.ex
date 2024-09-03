@@ -11,6 +11,7 @@ defmodule Radiator.Podcast.Episode do
   schema "episodes" do
     field :title, :string
     field :number, :integer
+    field :publish_date, :date
 
     belongs_to :show, Show
 
@@ -20,7 +21,7 @@ defmodule Radiator.Podcast.Episode do
   @doc false
   def changeset(episode, attrs) do
     episode
-    |> cast(attrs, [:title, :show_id, :number])
+    |> cast(attrs, [:title, :show_id, :number, :publish_date])
     |> validate_required([:title, :show_id, :number])
   end
 end
