@@ -7,10 +7,9 @@ defmodule RadiatorWeb.EpisodeLiveTest do
   import Radiator.OutlineFixtures
 
   alias Radiator.Outline
-  # alias Radiator.Outline.Node
-  # alias Radiator.Outline.NodeRepository
+  alias Radiator.Outline.NodeRepository
 
-  # @additional_keep_alive 2000
+  @additional_keep_alive 2000
 
   describe "Episode page is restricted" do
     setup do
@@ -61,139 +60,135 @@ defmodule RadiatorWeb.EpisodeLiveTest do
   describe "Episode outline nodes" do
     setup %{conn: conn} do
       user = user_fixture()
-      show = show_fixture()
-      episode = episode_fixture(%{show_id: show.id})
+      %{id: show_id} = show_fixture()
+      %{id: episode_id} = episode_fixture(%{show_id: show_id})
 
       node_1 =
         node_fixture(
-          episode_id: episode.id,
+          episode_id: episode_id,
           parent_id: nil,
           prev_id: nil,
           content: "node_1"
         )
 
-      node_3 =
-        node_fixture(
-          episode_id: episode.id,
-          parent_id: node_1.uuid,
-          prev_id: nil,
-          content: "node_3"
-        )
-
       node_2 =
         node_fixture(
-          episode_id: episode.id,
-          parent_id: node_1.uuid,
-          prev_id: node_3.uuid,
+          episode_id: episode_id,
+          parent_id: nil,
+          prev_id: node_1.uuid,
           content: "node_2"
         )
 
-      Outline.move_node(node_3.uuid, node_2.uuid, node_1.uuid)
+      node_3 =
+        node_fixture(
+          episode_id: episode_id,
+          parent_id: nil,
+          prev_id: node_2.uuid,
+          content: "node_3"
+        )
 
-      %{conn: log_in_user(conn, user), show: show, episode: episode, nodes: [node_3, node_2]}
+      %{conn: log_in_user(conn, user), show_id: show_id, nodes: [node_1, node_2, node_3]}
     end
 
-    test "lists all nodes", %{conn: conn, show: show, episode: episode} do
-      {:ok, _live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+    test "lists all nodes", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, node_3]} do
+      {:ok, _live, html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
-      _nodes =
-        episode.id
-        |> Outline.list_nodes_by_episode_sorted()
-
-      # assert_push_event(live, "list", %{nodes: ^nodes})
+      assert html =~ node_1.content
+      assert html =~ node_2.content
+      assert html =~ node_3.content
     end
 
-    test "insert a new node", %{conn: conn, show: show, nodes: [node | _]} do
-      {:ok, _live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-      {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+    test "update node content", %{conn: conn, show_id: show_id, nodes: [node_1 | _]} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      {:ok, other_live, _other_html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
-      uuid = Ecto.UUID.generate()
+      assert live
+             |> form("#form-#{node_1.uuid}", node: %{content: "node_1_updated"})
+             |> render_change()
 
-      _params = %{
-        "uuid" => uuid,
-        "content" => "new node content",
-        "prev_id" => node.uuid
-      }
+      keep_liveview_alive()
 
-      # assert live |> render_hook(:create_node, params)
+      updated_node = NodeRepository.get_node!(node_1.uuid)
+      assert updated_node.uuid == node_1.uuid
+      assert updated_node.parent_id == node_1.parent_id
+      assert updated_node.prev_id == node_1.prev_id
+      assert updated_node.content == "node_1_updated"
 
-      # keep_liveview_alive()
-
-      # assert %Node{} = new_node = NodeRepository.get_node!(uuid)
-      # assert new_node.uuid == uuid
-      # assert new_node.parent_id == nil
-      # assert new_node.prev_id == node.uuid
-
-      # assert_push_event(live, "clean", %{node: %{uuid: ^uuid}})
-      # assert_push_event(other_live, "insert", %{node: ^new_node})
+      assert other_live
+             |> has_element?("#form-#{node_1.uuid} input[value=node_1_updated]")
     end
 
-    test "update node content", %{conn: conn, show: show, nodes: [%{uuid: uuid} | _]} do
-      {:ok, _live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-      {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+    test "insert a new node", %{conn: conn, show_id: show_id, nodes: [_, node_2 | _]} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
-      content = "updated node content"
-      _params = %{"uuid" => uuid, "content" => content}
+      assert live
+             |> form("#form-#{node_2.uuid}", node: %{content: "node_2_updated"})
+             |> render_submit()
 
-      # assert live |> render_hook(:update_node_content, params)
+      keep_liveview_alive()
 
-      # keep_liveview_alive()
+      siblings = Outline.get_all_siblings(nil)
+      node_2_1 = Enum.find(siblings, &(&1.prev_id == node_2.uuid))
 
-      # assert %Node{content: ^content} = NodeRepository.get_node!(uuid)
+      assert node_2_1.parent_id == node_2.parent_id
+      assert node_2_1.prev_id == node_2.uuid
+      assert node_2_1.content == nil
 
-      # assert_push_event(live, "clean", %{node: %{uuid: ^uuid}})
-      # assert_push_event(other_live, "change_content", %{node: %{uuid: ^uuid, content: ^content}})
+      assert other_live
+             |> has_element?("#form-#{node_2_1.uuid}")
     end
 
-    test "move node", %{conn: conn, show: show, episode: episode, nodes: [node_1 | _]} do
-      %{uuid: uuid1, parent_id: parent_id1} = node_1
+    # test "move node", %{conn: conn, show: show, episode: episode, nodes: [node_1 | _]} do
+    #   %{uuid: uuid1, parent_id: parent_id1} = node_1
 
-      uuid2 = Ecto.UUID.generate()
+    #   uuid2 = Ecto.UUID.generate()
 
-      node2 =
-        node_fixture(%{
-          uuid: uuid2,
-          episode_id: episode.id,
-          parent_id: parent_id1,
-          prev_id: uuid1
-        })
+    #   node2 =
+    #     node_fixture(%{
+    #       uuid: uuid2,
+    #       episode_id: episode.id,
+    #       parent_id: parent_id1,
+    #       prev_id: uuid1
+    #     })
 
-      {:ok, _live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-      {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+    #   {:ok, _live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+    #   {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
-      _params = node2 |> Map.merge(%{parent_id: uuid1, prev_id: nil}) |> Map.from_struct()
+    #   _params = node2 |> Map.merge(%{parent_id: uuid1, prev_id: nil}) |> Map.from_struct()
 
-      # assert live |> render_hook(:move_node, params)
+    #   # assert live |> render_hook(:move_node, params)
 
-      # keep_liveview_alive()
+    #   # keep_liveview_alive()
 
-      # assert %Node{parent_id: ^uuid1} = NodeRepository.get_node!(uuid2)
+    #   # assert %Node{parent_id: ^uuid1} = NodeRepository.get_node!(uuid2)
 
-      # assert_push_event(live, "clean", %{node: %{uuid: ^uuid2}})
+    #   # assert_push_event(live, "clean", %{node: %{uuid: ^uuid2}})
 
-      # assert_push_event(other_live, "move", %{
-      #   node: %{uuid: ^uuid2, parent_id: ^uuid1, prev_id: nil}
-      # })
-    end
+    #   # assert_push_event(other_live, "move", %{
+    #   #   node: %{uuid: ^uuid2, parent_id: ^uuid1, prev_id: nil}
+    #   # })
+    # end
 
-    test "delete node", %{conn: conn, show: show, nodes: [%{uuid: uuid} | _]} do
-      {:ok, _live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-      {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+    test "delete node", %{conn: conn, show_id: show_id, nodes: [_, _, node_3]} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
-      _params = %{"uuid" => uuid}
+      assert live
+             |> element("#form-#{node_3.uuid} input")
+             |> render_keydown(%{"key" => "Delete", "value" => ""})
 
-      # assert live |> render_hook(:delete_node, params)
+      keep_liveview_alive()
 
-      # keep_liveview_alive()
+      siblings = Outline.get_all_siblings(nil)
+      assert Enum.find(siblings, &(&1.prev_id == node_3.uuid)) == nil
 
-      # assert NodeRepository.get_node(uuid) == nil
-
-      # assert_push_event(live, "clean", %{node: %{uuid: ^uuid}})
-      # assert_push_event(other_live, "delete", %{node: %{uuid: ^uuid}})
+      refute other_live
+             |> has_element?("#form-#{node_3.uuid}")
     end
   end
 
-  # defp keep_liveview_alive do
-  #   :timer.sleep(@additional_keep_alive)
-  # end
+  defp keep_liveview_alive do
+    :timer.sleep(@additional_keep_alive)
+  end
 end

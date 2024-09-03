@@ -19,11 +19,16 @@ defmodule RadiatorWeb.OutlineComponent do
 
   @impl true
   def update(%{event: %NodeInsertedEvent{node: node, next_id: next_id}}, socket) do
-    next_node = NodeRepository.get_node!(next_id)
+    nodes =
+      case NodeRepository.get_node_if(next_id) do
+        nil -> []
+        next_node -> [node, next_node]
+      end
+
+    node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
 
     socket
-    |> stream_insert(:nodes, to_change_form(node, %{}))
-    |> stream_insert(:nodes, to_change_form(next_node, %{}))
+    |> stream(:nodes, node_forms)
     |> reply(:ok)
   end
 
@@ -35,12 +40,8 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:ok)
   end
 
-  def update(
-        %{event: %NodeMovedEvent{node_id: _node_id, parent_id: _parent_id, prev_id: _prev_id}},
-        socket
-      ) do
+  def update(%{event: %NodeMovedEvent{node_id: _, parent_id: _, prev_id: _}}, socket) do
     socket
-    # |> stream_insert(:nodes, to_change_form(node, %{}))
     |> reply(:ok)
   end
 
@@ -48,13 +49,17 @@ defmodule RadiatorWeb.OutlineComponent do
         %{event: %NodeDeletedEvent{node_id: node_id, next_id: next_id, children: children}},
         socket
       ) do
-    next_node = NodeRepository.get_node!(next_id)
-    children_forms = Enum.map(children, &to_change_form(&1, %{}))
+    nodes =
+      case NodeRepository.get_node_if(next_id) do
+        nil -> children
+        next_node -> [next_node, children]
+      end
+
+    node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
 
     socket
     |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node_id}")
-    |> stream_insert(:nodes, to_change_form(next_node, %{}))
-    |> stream(:nodes, children_forms)
+    |> stream(:nodes, node_forms)
     |> reply(:ok)
   end
 
