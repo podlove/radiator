@@ -1,14 +1,13 @@
 <div id={@id}>
   <OutlineComponents.keyboard_shortcuts />
 
-  <div id={[@id, "-stream"]} class="my-6" phx-hook="outline" phx-update="stream">
+  <div id={[@id, "-stream-#{@episode_id}"]} class="my-6" phx-hook="outline" phx-update="stream">
     <div
       :for={{id, form} <- @streams.nodes}
       id={id}
       class="relative group node"
       data-parent={form.data.parent_id}
       data-prev={form.data.prev_id}
-      data-collapsed={false}
     >
       <OutlineComponents.outline_form
         for={form}
@@ -35,9 +34,7 @@
       <div class="ml-4 peer children group-data-[collapsed]:hidden"></div>
       <button
         class="absolute peer-empty:hidden top-3 left-0 group-data-[collapsed]:-rotate-90 duration-200 z-10"
-        phx-click="toggle_collapse"
-        phx-value-uuid={form.data.uuid}
-        phx-target={@myself}
+        phx-click={JS.dispatch("toggle_collapse", detail: %{uuid: form.data.uuid})}
       >
         <svg width="20" height="20" viewBox="0 0 20 20" class="text-gray-500 rotate-90">
           <path

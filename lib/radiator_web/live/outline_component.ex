@@ -98,11 +98,6 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
-  def handle_event("toggle_collapse", %{"uuid" => _uuid}, socket) do
-    socket
-    |> reply(:noreply)
-  end
-
   def handle_event("keydown", %{"key" => key, "uuid" => uuid, "value" => ""}, socket)
       when key in ["Backspace", "Delete", "Meta"] do
     user_id = socket.assigns.user_id
