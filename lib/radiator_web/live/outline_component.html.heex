@@ -1,7 +1,7 @@
 <div id={@id}>
   <OutlineComponents.keyboard_shortcuts />
 
-  <div id={[@id, "-stream-#{@episode_id}"]} class="my-6" phx-hook="outline" phx-update="stream">
+  <div id={[@id, "-stream"]} class="my-6" phx-hook="outline" phx-update="stream">
     <div
       :for={{id, form} <- @streams.nodes}
       id={id}

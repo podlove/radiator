@@ -73,7 +73,10 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   def handle_info(%NodeDeletedEvent{} = event, socket), do: proxy_event(event, socket)
 
   defp proxy_event(event, socket) do
-    send_update(RadiatorWeb.OutlineComponent, id: "outline", event: event)
+    send_update(RadiatorWeb.OutlineComponent,
+      id: "outline-#{socket.assigns.selected_episode.id}",
+      event: event
+    )
 
     socket
     |> stream_event(event)
