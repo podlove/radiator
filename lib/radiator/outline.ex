@@ -93,12 +93,12 @@ defmodule Radiator.Outline do
         |> where_parent_node_equals(parent_node_id)
         |> Repo.one()
 
-      with parent_node <- NodeRepository.get_node_if(parent_node_id),
-           prev_node <- NodeRepository.get_node_if(prev_node_id),
+      with prev_node <- NodeRepository.get_node_if(prev_node_id),
+           parent_node <- find_parent_node(prev_node, parent_node_id),
            true <- parent_and_prev_consistent?(parent_node, prev_node),
-           {:ok, node} <- NodeRepository.create_node(attrs),
-           {:ok, _node_to_move} <- move_node_if(next_node, parent_node_id, node.uuid),
-           {:ok, node} <- move_node_if(node, parent_node_id, prev_node_id) do
+           true <- episode_valid?(episode_id, parent_node, prev_node),
+           {:ok, node} <- NodeRepository.create_node(set_parent_id_if(attrs, parent_node)),
+           {:ok, _node_to_move} <- move_node_if(next_node, parent_node_id, node.uuid) do
         %NodeRepoResult{node: node, next_id: get_node_id(next_node)}
       else
         false ->
@@ -109,6 +109,25 @@ defmodule Radiator.Outline do
           Repo.rollback("Insert node failed. Unknown error")
       end
     end)
+  end
+
+  defp episode_valid?(episode_id, %Node{episode_id: episode_id}, %Node{episode_id: episode_id}),
+    do: true
+
+  defp episode_valid?(episode_id, %Node{episode_id: episode_id}, nil), do: true
+  defp episode_valid?(episode_id, nil, %Node{episode_id: episode_id}), do: true
+  defp episode_valid?(_episode_id, nil, nil), do: true
+  defp episode_valid?(_episode_id, _parent_node, _prev_node), do: false
+
+  defp set_parent_id_if(attrs, nil), do: attrs
+  defp set_parent_id_if(attrs, %Node{uuid: uuid}), do: Map.put_new(attrs, "parent_id", uuid)
+
+  defp find_parent_node(%Node{parent_id: parent_id}, nil) do
+    NodeRepository.get_node_if(parent_id)
+  end
+
+  defp find_parent_node(_, parent_id) do
+    NodeRepository.get_node_if(parent_id)
   end
 
   @doc """

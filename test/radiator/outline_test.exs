@@ -5,6 +5,7 @@ defmodule Radiator.OutlineTest do
   alias Radiator.Outline
   alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepository
+  alias Radiator.Podcast
   alias Radiator.PodcastFixtures
 
   import Radiator.OutlineFixtures
@@ -186,6 +187,20 @@ defmodule Radiator.OutlineTest do
       assert new_node.prev_id == nested_node_1.uuid
     end
 
+    test "if prev_id has been given the parent_id can be omitted", %{
+      node_3: node_3,
+      nested_node_1: nested_node_1
+    } do
+      node_attrs = %{
+        "content" => "new node",
+        "episode_id" => node_3.episode_id,
+        "prev_id" => nested_node_1.uuid
+      }
+
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      assert new_node.parent_id == node_3.uuid
+    end
+
     test "all nodes in same level are correctly connected", %{
       node_3: node_3,
       nested_node_1: nested_node_1,
@@ -289,15 +304,18 @@ defmodule Radiator.OutlineTest do
     end
 
     test "in case of error no node gets inserted", %{
+      episode: episode,
       parent_node: parent_node,
       nested_node_1: nested_node_1
     } do
       count_nodes = NodeRepository.count_nodes_by_episode(parent_node.episode_id)
 
+      {:ok, another_episode} =
+        Podcast.create_episode(%{title: "current episode", show_id: episode.show_id, number: 23})
+
       node_attrs = %{
         "content" => "new node",
-        "episode_id" => parent_node.episode_id,
-        "parent_id" => parent_node.uuid,
+        "episode_id" => another_episode.id,
         "prev_id" => nested_node_1.uuid
       }
 
