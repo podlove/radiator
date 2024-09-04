@@ -88,13 +88,21 @@ defmodule RadiatorWeb.OutlineComponent do
   end
 
   @impl true
-  def handle_event("focus", %{"uuid" => _uuid}, socket) do
+  def handle_event("focus", %{"uuid" => uuid}, socket) do
+    id = socket.assigns.user_id
+    name = socket.assigns.user.email |> String.split("@") |> List.first()
+
     socket
+    |> push_event("focus", %{uuid: uuid, user_id: id, user_name: name})
     |> reply(:noreply)
   end
 
-  def handle_event("blur", %{"uuid" => _uuid}, socket) do
+  def handle_event("blur", %{"uuid" => uuid}, socket) do
+    id = socket.assigns.user_id
+    name = socket.assigns.user.email |> String.split("@") |> List.first()
+
     socket
+    |> push_event("blur", %{uuid: uuid, user_id: id, user_name: name})
     |> reply(:noreply)
   end
 

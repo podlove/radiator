@@ -5,16 +5,29 @@ export const Hooks = {
   outline: {
     selector: '.node:not([data-processed="true"]',
     mounted() {
-      this.el.addEventListener("toggle_collapse", ({ detail }) => {
-        const item = getItemById(detail.uuid);
+      this.handleEvent("focus", ({ uuid, user_name }) => {
+        const item = getItemById(uuid);
+        item!.querySelector(".editing")!.innerHTML = user_name;
+      });
+      this.handleEvent("blur", ({ uuid }) => {
+        const item = getItemById(uuid);
+        item!.querySelector(".editing")!.innerHTML = "";
+      });
+
+      this.el.addEventListener("toggle_collapse", ({ detail: { uuid } }) => {
+        const item = getItemById(uuid);
         item!.toggleAttribute("data-collapsed");
+
         const collapsedStatus = localStorage.getItem(this.el.id) || "{}";
         const collapsed = JSON.parse(collapsedStatus);
-        collapsed[detail.uuid] = !collapsed[detail.uuid];
+
+        collapsed[uuid] = !collapsed[uuid];
         localStorage.setItem(this.el.id, JSON.stringify(collapsed));
       });
+
       const collapsedStatus = localStorage.getItem(this.el.id) || "{}";
       const collapsed = JSON.parse(collapsedStatus);
+
       const nodes = this.el.querySelectorAll(this.selector);
       nodes.forEach((item: HTMLDivElement) => {
         const { uuid, parent_id, prev_id } = getNodeByItem(item);
@@ -26,6 +39,7 @@ export const Hooks = {
         } else if (parentNode) {
           parentNode.querySelector(".children")!.append(item);
         }
+
         item.toggleAttribute("data-collapsed", !!collapsed[uuid]);
         setAttribute(item, "processed", true);
       });
