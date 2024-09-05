@@ -177,6 +177,7 @@ defmodule Radiator.DataCase do
     assert nested_node_2.prev_id == nested_node_1.uuid
 
     %{
+      episode: episode,
       node_1: node_1,
       node_2: node_2,
       node_3: node_3,
