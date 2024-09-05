@@ -64,7 +64,7 @@ defmodule Radiator.Outline.CommandProcessor do
          } = command
        ) do
     node_id
-    |> Outline.move_node(prev_id, parent_id)
+    |> Outline.move_node(prev_id: prev_id, parent_id: parent_id)
     |> handle_move_node_result(command)
   end
 

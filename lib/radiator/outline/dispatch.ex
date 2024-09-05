@@ -15,7 +15,10 @@ defmodule Radiator.Outline.Dispatch do
     |> EventProducer.enqueue()
   end
 
-  def move_node(node_id, parent_node_id, prev_node_id, user_id, event_id) do
+  def move_node(node_id, user_id, event_id,
+        parent_node_id: parent_node_id,
+        prev_node_id: prev_node_id
+      ) do
     "move_node"
     |> Command.build(node_id, parent_node_id, prev_node_id, user_id, event_id)
     |> EventProducer.enqueue()
