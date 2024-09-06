@@ -1,5 +1,5 @@
-import { getNodeByItem } from "./node";
-import { getItemById, setAttribute } from "./item";
+import { moveNode, setAttribute } from "./node";
+import { getItemById } from "./item";
 
 export const Hooks = {
   outline: {
@@ -12,6 +12,19 @@ export const Hooks = {
       this.handleEvent("blur", ({ uuid }) => {
         const item = getItemById(uuid);
         item!.querySelector(".editing")!.innerHTML = "";
+      });
+
+      this.handleEvent("move_node", ({ uuid, parent_id, prev_id }) => {
+        // const node = getItemById(uuid)!;
+        // setNodeAttribute(node, "parent", parent_id);
+        // setNodeAttribute(node, "prev", prev_id);
+        // const x = moveNode(node);
+      });
+
+      this.el.addEventListener("keydown", (event) => {
+        if (event.key == "Tab") {
+          event.preventDefault();
+        }
       });
 
       this.el.addEventListener("toggle_collapse", ({ detail: { uuid } }) => {
@@ -29,35 +42,18 @@ export const Hooks = {
       const collapsed = JSON.parse(collapsedStatus);
 
       const nodes = this.el.querySelectorAll(this.selector);
-      nodes.forEach((item: HTMLDivElement) => {
-        const { uuid, parent_id, prev_id } = getNodeByItem(item);
-        const parentNode = getItemById(parent_id);
-        const prevNode = getItemById(prev_id);
+      nodes.forEach((node: HTMLDivElement) => {
+        const { uuid } = moveNode(node);
+        node.toggleAttribute("data-collapsed", !!collapsed[uuid]);
 
-        if (prevNode) {
-          prevNode.after(item);
-        } else if (parentNode) {
-          parentNode.querySelector(".children")!.append(item);
-        }
-
-        item.toggleAttribute("data-collapsed", !!collapsed[uuid]);
-        setAttribute(item, "processed", true);
+        setAttribute(node, "processed", true);
       });
     },
     updated() {
       const nodes = this.el.querySelectorAll(this.selector);
-      nodes.forEach((item: HTMLDivElement) => {
-        const { parent_id, prev_id } = getNodeByItem(item);
-        const parentNode = getItemById(parent_id);
-        const prevNode = getItemById(prev_id);
-
-        if (prevNode) {
-          prevNode.after(item);
-        } else if (parentNode) {
-          parentNode.querySelector(".children")!.append(item);
-        }
-
-        setAttribute(item, "processed", true);
+      nodes.forEach((node: HTMLDivElement) => {
+        moveNode(node);
+        setAttribute(node, "processed", true);
       });
     },
   },

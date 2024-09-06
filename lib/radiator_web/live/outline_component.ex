@@ -107,7 +107,7 @@ defmodule RadiatorWeb.OutlineComponent do
   end
 
   def handle_event("keydown", %{"key" => key, "uuid" => uuid, "value" => ""}, socket)
-      when key in ["Backspace", "Delete", "Meta"] do
+      when key in ["Backspace", "Delete"] do
     user_id = socket.assigns.user_id
     Dispatch.delete_node(uuid, user_id, generate_event_id(socket.id))
 
@@ -118,43 +118,41 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def handle_event(
         "keydown",
-        %{
-          "key" => "Tab",
-          "shiftKey" => false,
-          "uuid" => uuid,
-          "prev" => prev_id,
-          "value" => content
-        },
+        %{"key" => "ArrowUp", "altKey" => true, "uuid" => uuid, "prev" => prev_id},
         socket
       ) do
     socket
-    |> indent(uuid, prev_id, content)
-    |> reply(:noreply)
-  end
-
-  def handle_event("keydown", %{"key" => "Tab", "shiftKey" => false}, socket) do
-    socket
+    |> move_up(uuid, prev_id)
     |> reply(:noreply)
   end
 
   def handle_event(
         "keydown",
-        %{
-          "key" => "Tab",
-          "shiftKey" => true,
-          "uuid" => uuid,
-          "parent" => parent_id,
-          "value" => content
-        },
+        %{"key" => "ArrowDown", "altKey" => true, "uuid" => uuid},
         socket
       ) do
     socket
-    |> outdent(uuid, parent_id, content)
+    |> move_down(uuid, "next_id")
     |> reply(:noreply)
   end
 
-  def handle_event("keydown", %{"key" => "Tab", "shiftKey" => true}, socket) do
+  def handle_event(
+        "keydown",
+        %{"key" => "Tab", "shiftKey" => false, "uuid" => uuid, "prev" => prev_id},
+        socket
+      ) do
     socket
+    |> indent(uuid, prev_id)
+    |> reply(:noreply)
+  end
+
+  def handle_event(
+        "keydown",
+        %{"key" => "Tab", "shiftKey" => true, "uuid" => uuid, "parent" => parent_id},
+        socket
+      ) do
+    socket
+    |> outdent(uuid, parent_id)
     |> reply(:noreply)
   end
 
@@ -208,33 +206,46 @@ defmodule RadiatorWeb.OutlineComponent do
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
 
-  defp indent(socket, uuid, prev_id, content) do
-    node = %Node{
-      uuid: uuid,
-      parent_id: prev_id,
-      prev_id: nil,
-      content: content
-    }
+  defp move_up(socket, uuid, prev_id) do
+    %{uuid: prev_uuid, parent_id: prev_parent_id} = NodeRepository.get_node!(prev_id)
 
     user_id = socket.assigns.user_id
-    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id), prev_id: prev_id)
+
+    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id),
+      parent_id: prev_parent_id,
+      prev_id: prev_uuid
+    )
 
     socket
-    |> stream_insert(:nodes, to_change_form(node, %{}))
+    |> push_event("move_node", %{uuid: uuid, parent_id: prev_parent_id, prev_id: prev_uuid})
   end
 
-  defp outdent(socket, uuid, parent_id, content) do
-    node = %Node{
-      uuid: uuid,
-      parent_id: nil,
-      prev_id: parent_id,
-      content: content
-    }
+  defp move_down(socket, _uuid, _prev_id) do
+    socket
+    # |> push_event("move_node", %{uuid: uuid, parent_id: next_parent_id, prev_id: next_uuid})
+  end
 
+  defp indent(socket, uuid, prev_id) do
     user_id = socket.assigns.user_id
-    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id), parent_id: parent_id)
+
+    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id),
+      parent_id: prev_id,
+      prev_id: nil
+    )
 
     socket
-    |> stream_insert(:nodes, to_change_form(node, %{}))
+    |> push_event("move_node", %{uuid: uuid, parent_id: prev_id, prev_id: nil})
+  end
+
+  defp outdent(socket, uuid, parent_id) do
+    user_id = socket.assigns.user_id
+
+    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id),
+      parent_id: nil,
+      prev_id: parent_id
+    )
+
+    socket
+    |> push_event("move_node", %{uuid: uuid, parent_id: nil, prev_id: parent_id})
   end
 end

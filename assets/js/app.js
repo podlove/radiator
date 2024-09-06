@@ -33,7 +33,7 @@ let liveSocket = new LiveSocket("/live", Socket, {
     keydown: (e, el) => {
       return {
         key: e.key,
-        metaKey: e.metaKey,
+        altKey: e.altKey,
         shiftKey: e.shiftKey,
         repeat: e.repeat
       }
