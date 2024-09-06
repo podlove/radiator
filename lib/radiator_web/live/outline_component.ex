@@ -171,29 +171,29 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
-  def handle_event("new", %{"uuid" => uuid, "node" => _params}, socket) do
+  def handle_event("new", %{"uuid" => uuid}, socket) do
     new_uuid = Ecto.UUID.generate()
     user_id = socket.assigns.user_id
     episode_id = socket.assigns.episode_id
 
     params = %{
       "uuid" => new_uuid,
-      "parent_id" => nil,
       "prev_id" => uuid,
       "creator_id" => user_id,
       "episode_id" => episode_id
     }
 
-    new_node = %Node{
+    node = %Node{
       uuid: new_uuid,
-      parent_id: nil,
-      prev_id: uuid
+      prev_id: uuid,
+      creator_id: user_id,
+      episode_id: episode_id
     }
 
     Dispatch.insert_node(params, user_id, generate_event_id(socket.id))
 
     socket
-    |> stream_insert(:nodes, to_change_form(new_node, %{}))
+    |> stream_insert(:nodes, to_change_form(node, %{}))
     |> reply(:noreply)
   end
 
