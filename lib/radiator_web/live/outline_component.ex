@@ -217,7 +217,7 @@ defmodule RadiatorWeb.OutlineComponent do
     }
 
     user_id = socket.assigns.user_id
-    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id), prev_node_id: prev_id)
+    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id), prev_id: prev_id)
 
     socket
     |> stream_insert(:nodes, to_change_form(node, %{}))
@@ -232,7 +232,7 @@ defmodule RadiatorWeb.OutlineComponent do
     }
 
     user_id = socket.assigns.user_id
-    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id), parent_node_id: parent_id)
+    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id), parent_id: parent_id)
 
     socket
     |> stream_insert(:nodes, to_change_form(node, %{}))

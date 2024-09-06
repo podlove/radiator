@@ -33,13 +33,13 @@ defmodule Radiator.Outline.Command do
     }
   end
 
-  def build("move_node", node_id, parent_node_id, prev_node_id, user_id, event_id) do
+  def build("move_node", node_id, parent_id, prev_id, user_id, event_id) do
     %MoveNodeCommand{
       event_id: event_id,
       user_id: user_id,
       node_id: node_id,
-      parent_id: parent_node_id,
-      prev_id: prev_node_id
+      parent_id: parent_id,
+      prev_id: prev_id
     }
   end
 end

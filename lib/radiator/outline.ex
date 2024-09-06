@@ -82,23 +82,23 @@ defmodule Radiator.Outline do
   # if no previous node is given, the new node will be inserted as the first child of the parent node
   def insert_node(attrs) do
     Repo.transaction(fn ->
-      prev_node_id = attrs["prev_id"]
-      parent_node_id = attrs["parent_id"]
+      prev_id = attrs["prev_id"]
+      parent_id = attrs["parent_id"]
       episode_id = attrs["episode_id"]
       # find Node which has been previously connected to prev_node
       next_node =
         Node
         |> where(episode_id: ^episode_id)
-        |> where_prev_node_equals(prev_node_id)
-        |> where_parent_node_equals(parent_node_id)
+        |> where_prev_node_equals(prev_id)
+        |> where_parent_node_equals(parent_id)
         |> Repo.one()
 
-      with prev_node <- NodeRepository.get_node_if(prev_node_id),
-           parent_node <- find_parent_node(prev_node, parent_node_id),
+      with prev_node <- NodeRepository.get_node_if(prev_id),
+           parent_node <- find_parent_node(prev_node, parent_id),
            true <- parent_and_prev_consistent?(parent_node, prev_node),
            true <- episode_valid?(episode_id, parent_node, prev_node),
            {:ok, node} <- NodeRepository.create_node(set_parent_id_if(attrs, parent_node)),
-           {:ok, _node_to_move} <- move_node_if(next_node, parent_node_id, node.uuid) do
+           {:ok, _node_to_move} <- move_node_if(next_node, parent_id, node.uuid) do
         %NodeRepoResult{node: node, next_id: get_node_id(next_node)}
       else
         false ->
@@ -455,11 +455,11 @@ defmodule Radiator.Outline do
 
   defp move_node_if(nil, _parent_node_id, _prev_node_id), do: {:ok, nil}
 
-  defp move_node_if(node, parent_node_id, prev_node_id) do
+  defp move_node_if(node, parent_id, prev_id) do
     node
     |> Node.move_node_changeset(%{
-      parent_id: parent_node_id,
-      prev_id: prev_node_id
+      parent_id: parent_id,
+      prev_id: prev_id
     })
     |> Repo.update()
   end
