@@ -335,7 +335,7 @@ defmodule Radiator.OutlineTest do
       node_1: node_1,
       node_2: node_2
     } do
-      {:ok, _} = Outline.move_node(node_2.uuid, nil, node_2.parent_id)
+      {:ok, _} = Outline.move_node(node_2.uuid, prev_id: nil, parent_id: node_2.parent_id)
 
       # reload nodes
       node_1 = Repo.reload!(node_1)
@@ -351,7 +351,21 @@ defmodule Radiator.OutlineTest do
       node_1: node_1,
       node_2: node_2
     } do
-      {:ok, _} = Outline.move_node(node_1.uuid, node_2.uuid, node_1.parent_id)
+      {:ok, _} = Outline.move_node(node_1.uuid, prev_id: node_2.uuid, parent_id: node_1.parent_id)
+
+      # reload nodes
+      node_1 = Repo.reload!(node_1)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_1.prev_id == node_2.uuid
+      assert node_2.prev_id == nil
+    end
+
+    test "if prev_id has been given the parent_id can be omitted", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      {:ok, _} = Outline.move_node(node_1.uuid, prev_id: node_2.uuid)
 
       # reload nodes
       node_1 = Repo.reload!(node_1)
@@ -365,7 +379,8 @@ defmodule Radiator.OutlineTest do
       node_1: node_1,
       node_2: node_2
     } do
-      {:error, :noop} = Outline.move_node(node_2.uuid, node_1.uuid, node_2.parent_id)
+      {:error, :noop} =
+        Outline.move_node(node_2.uuid, prev_id: node_1.uuid, parent_id: node_2.parent_id)
 
       # reload nodes
       node_1 = Repo.reload!(node_1)
@@ -379,7 +394,7 @@ defmodule Radiator.OutlineTest do
       node_1: node_1,
       node_2: node_2
     } do
-      {:error, :noop} = Outline.move_node(node_1.uuid, nil, node_2.parent_id)
+      {:error, :noop} = Outline.move_node(node_1.uuid, prev_id: nil, parent_id: node_2.parent_id)
 
       # reload nodes
       node_1 = Repo.reload!(node_1)
@@ -393,7 +408,7 @@ defmodule Radiator.OutlineTest do
       node_1: node_1,
       node_2: node_2
     } do
-      {:ok, _} = Outline.move_node(node_2.uuid, nil, node_1.uuid)
+      {:ok, _} = Outline.move_node(node_2.uuid, prev_id: nil, parent_id: node_1.uuid)
 
       # reload nodes
       node_1 = Repo.reload!(node_1)
@@ -411,7 +426,7 @@ defmodule Radiator.OutlineTest do
       node_2: node_2
     } do
       {:error, :parent_and_prev_not_consistent} =
-        Outline.move_node(node_2.uuid, node_1.uuid, node_1.uuid)
+        Outline.move_node(node_2.uuid, prev_id: node_1.uuid, parent_id: node_1.uuid)
     end
   end
 
@@ -426,7 +441,28 @@ defmodule Radiator.OutlineTest do
       node_4: node_4,
       node_5: node_5
     } do
-      {:ok, _} = Outline.move_node(node_4.uuid, node_2.uuid, node_4.parent_id)
+      {:ok, _} = Outline.move_node(node_4.uuid, prev_id: node_2.uuid, parent_id: node_4.parent_id)
+
+      # reload nodes
+      node_5 = Repo.reload!(node_5)
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_4.prev_id == node_2.uuid
+      assert node_3.prev_id == node_4.uuid
+      assert node_5.prev_id == node_3.uuid
+    end
+
+    # before 1 2 3 4 5
+    # after  1 2 4 3 5
+    test "move node 4 within list to node 2, but ommitting the parent_id", %{
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5
+    } do
+      {:ok, _} = Outline.move_node(node_4.uuid, prev_id: node_2.uuid)
 
       # reload nodes
       node_5 = Repo.reload!(node_5)
@@ -448,7 +484,7 @@ defmodule Radiator.OutlineTest do
       node_4: node_4,
       node_5: node_5
     } do
-      {:ok, _} = Outline.move_node(node_4.uuid, nil, node_4.parent_id)
+      {:ok, _} = Outline.move_node(node_4.uuid, prev_id: nil, parent_id: node_4.parent_id)
 
       # reload nodes
       node_5 = Repo.reload!(node_5)
@@ -473,7 +509,31 @@ defmodule Radiator.OutlineTest do
       node_4: node_4,
       node_5: node_5
     } do
-      {:ok, _} = Outline.move_node(node_2.uuid, node_5.uuid, node_2.parent_id)
+      {:ok, _} = Outline.move_node(node_2.uuid, prev_id: node_5.uuid, parent_id: node_2.parent_id)
+
+      # reload nodes
+      node_5 = Repo.reload!(node_5)
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      node_2 = Repo.reload!(node_2)
+      node_1 = Repo.reload!(node_1)
+
+      assert node_3.prev_id == node_1.uuid
+      assert node_4.prev_id == node_3.uuid
+      assert node_5.prev_id == node_4.uuid
+      assert node_2.prev_id == node_5.uuid
+    end
+
+    # before 1 2 3 4 5
+    # after  1 3 4 5 2
+    test "move node 2 to the end of the list but ommitting the parent_id", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5
+    } do
+      {:ok, _} = Outline.move_node(node_2.uuid, prev_id: node_5.uuid)
 
       # reload nodes
       node_5 = Repo.reload!(node_5)
@@ -497,7 +557,31 @@ defmodule Radiator.OutlineTest do
       node_4: node_4,
       node_5: node_5
     } do
-      {:ok, _} = Outline.move_node(node_1.uuid, node_5.uuid, node_2.parent_id)
+      {:ok, _} = Outline.move_node(node_1.uuid, prev_id: node_5.uuid, parent_id: node_2.parent_id)
+
+      # reload nodes
+      node_5 = Repo.reload!(node_5)
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      node_2 = Repo.reload!(node_2)
+      node_1 = Repo.reload!(node_1)
+
+      assert node_1.prev_id == node_5.uuid
+      assert node_5.prev_id == node_4.uuid
+      assert node_3.prev_id == node_2.uuid
+      assert node_2.prev_id == nil
+    end
+
+    # before 1 2 3 4 5
+    # after  2 3 4 5 1
+    test "move first node to the end of the list and ommitting the parent_id", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      node_5: node_5
+    } do
+      {:ok, _} = Outline.move_node(node_1.uuid, prev_id: node_5.uuid)
 
       # reload nodes
       node_5 = Repo.reload!(node_5)
@@ -521,7 +605,7 @@ defmodule Radiator.OutlineTest do
       node_4: node_4,
       node_5: node_5
     } do
-      {:ok, _} = Outline.move_node(node_5.uuid, nil, node_2.parent_id)
+      {:ok, _} = Outline.move_node(node_5.uuid, prev_id: nil, parent_id: node_2.parent_id)
 
       # reload nodes
       node_5 = Repo.reload!(node_5)
@@ -543,7 +627,7 @@ defmodule Radiator.OutlineTest do
       nested_node_1: nested_node_1,
       nested_node_2: nested_node_2
     } do
-      {:ok, _} = Outline.move_node(nested_node_1.uuid, nil, node_2.uuid)
+      {:ok, _} = Outline.move_node(nested_node_1.uuid, prev_id: nil, parent_id: node_2.uuid)
 
       # reload nodes
       nested_node_1 = Repo.reload!(nested_node_1)
@@ -561,7 +645,30 @@ defmodule Radiator.OutlineTest do
       nested_node_1: nested_node_1,
       nested_node_2: nested_node_2
     } do
-      {:ok, _} = Outline.move_node(node_3.uuid, nil, nil)
+      {:ok, _} = Outline.move_node(node_3.uuid, prev_id: nil, parent_id: nil)
+
+      # reload nodes
+      parent_node = Repo.reload!(parent_node)
+      node_3 = Repo.reload!(node_3)
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert node_3.prev_id == nil
+      assert node_3.parent_id == nil
+      assert parent_node.prev_id == node_3.uuid
+      assert nested_node_1.parent_id == node_3.uuid
+      assert nested_node_2.parent_id == node_3.uuid
+      assert nested_node_1.prev_id == nil
+      assert nested_node_2.prev_id == nested_node_1.uuid
+    end
+
+    test "move node with child elements to top also works without parent_id", %{
+      parent_node: parent_node,
+      node_3: node_3,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      {:ok, _} = Outline.move_node(node_3.uuid, prev_id: nil)
 
       # reload nodes
       parent_node = Repo.reload!(parent_node)
@@ -586,7 +693,7 @@ defmodule Radiator.OutlineTest do
       node_5: node_5
     } do
       {:ok, %NodeRepoResult{} = node_result} =
-        Outline.move_node(node_1.uuid, node_5.uuid, node_2.parent_id)
+        Outline.move_node(node_1.uuid, prev_id: node_5.uuid, parent_id: node_2.parent_id)
 
       assert node_result.node.uuid == node_1.uuid
       assert node_result.old_prev_id == nil
@@ -597,7 +704,7 @@ defmodule Radiator.OutlineTest do
       node_1: node_1
     } do
       {:error, :self_link} =
-        Outline.move_node(node_1.uuid, node_1.uuid, node_1.parent_id)
+        Outline.move_node(node_1.uuid, prev_id: node_1.uuid, parent_id: node_1.parent_id)
     end
 
     test "error when parent id is the same as node id", %{
@@ -605,7 +712,7 @@ defmodule Radiator.OutlineTest do
       node_5: node_5
     } do
       {:error, :circle_link} =
-        Outline.move_node(node_1.uuid, node_5.uuid, node_1.uuid)
+        Outline.move_node(node_1.uuid, prev_id: node_5.uuid, parent_id: node_1.uuid)
     end
 
     test "error when parent is a child of new node", %{
@@ -614,7 +721,7 @@ defmodule Radiator.OutlineTest do
       nested_node_1: nested_node_1
     } do
       {:error, :parent_and_prev_not_consistent} =
-        Outline.move_node(node_1.uuid, node_5.uuid, nested_node_1.uuid)
+        Outline.move_node(node_1.uuid, prev_id: node_5.uuid, parent_id: nested_node_1.uuid)
     end
 
     test "error when parent is on same level of new node", %{
@@ -623,7 +730,7 @@ defmodule Radiator.OutlineTest do
       node_3: node_3
     } do
       {:error, :parent_and_prev_not_consistent} =
-        Outline.move_node(node_1.uuid, node_5.uuid, node_3.uuid)
+        Outline.move_node(node_1.uuid, prev_id: node_5.uuid, parent_id: node_3.uuid)
     end
 
     test "error when new prev is not a direct child of new parent", %{
@@ -632,7 +739,7 @@ defmodule Radiator.OutlineTest do
       nested_node_1: nested_node_1
     } do
       {:error, :parent_and_prev_not_consistent} =
-        Outline.move_node(node_1.uuid, nested_node_1.uuid, parent_node.uuid)
+        Outline.move_node(node_1.uuid, prev_id: nested_node_1.uuid, parent_id: parent_node.uuid)
     end
 
     test "error when new new parent is nil but prev is not on level 1", %{
@@ -640,7 +747,7 @@ defmodule Radiator.OutlineTest do
       nested_node_1: nested_node_1
     } do
       {:error, :parent_and_prev_not_consistent} =
-        Outline.move_node(node_1.uuid, nested_node_1.uuid, nil)
+        Outline.move_node(node_1.uuid, prev_id: nested_node_1.uuid, parent_id: nil)
     end
   end
 
@@ -927,7 +1034,7 @@ defmodule Radiator.OutlineTest do
         )
 
       {:ok, %NodeRepoResult{} = _result} =
-        Outline.move_node(node_3.uuid, node_2.uuid, node_1.uuid)
+        Outline.move_node(node_3.uuid, prev_id: node_2.uuid, parent_id: node_1.uuid)
 
       assert node_1 |> Outline.order_child_nodes() |> Enum.map(& &1.content) ==
                ["node_2", "node_3"]
