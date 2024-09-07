@@ -11,7 +11,7 @@ defmodule Radiator.UrlExtractor do
       %{
         start_bytes: start_bytes,
         size_bytes: size_bytes,
-        url: String.byte_slice(text, start_bytes, size_bytes)
+        parsed_url: String.byte_slice(text, start_bytes, size_bytes)
       }
     end)
   end
