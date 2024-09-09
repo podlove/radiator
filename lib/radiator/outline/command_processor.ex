@@ -10,6 +10,7 @@ defmodule Radiator.Outline.CommandProcessor do
   alias Radiator.Outline.Command.{
     ChangeNodeContentCommand,
     DeleteNodeCommand,
+    IndentNodeCommand,
     InsertNodeCommand,
     MoveNodeCommand
   }
@@ -20,6 +21,7 @@ defmodule Radiator.Outline.CommandProcessor do
     NodeContentChangedEvent,
     NodeDeletedEvent,
     NodeInsertedEvent,
+    NodeIndentedEvent,
     NodeMovedEvent
   }
 
@@ -66,6 +68,28 @@ defmodule Radiator.Outline.CommandProcessor do
     node_id
     |> Outline.move_node(prev_id: prev_id, parent_id: parent_id)
     |> handle_move_node_result(command)
+  end
+
+  defp process_command(%IndentNodeCommand{node_id: node_id} = command) do
+    case Outline.indent_node(node_id) do
+      {:error, reason} ->
+        Logger.error("Could not intend node. Reason: #{reason}")
+
+      {:ok, node_result} ->
+        %NodeIndentedEvent{
+          node_id: node_id,
+          user_id: command.user_id,
+          uuid: command.event_id,
+          next_id: node_result.next_id,
+          parent_id: node_result.node.parent_id,
+          prev_id: node_result.node.prev_id,
+          old_prev_id: node_result.old_prev_id,
+          old_next_id: node_result.old_next_id,
+          episode_id: node_result.node.episode_id
+        }
+        |> EventStore.persist_event()
+        |> Dispatch.broadcast()
+    end
   end
 
   defp process_command(%DeleteNodeCommand{node_id: node_id} = command) do
