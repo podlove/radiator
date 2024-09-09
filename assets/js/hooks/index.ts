@@ -15,10 +15,11 @@ export const Hooks = {
       });
 
       this.handleEvent("move_node", ({ uuid, parent_id, prev_id }) => {
-        // const node = getItemById(uuid)!;
-        // setNodeAttribute(node, "parent", parent_id);
-        // setNodeAttribute(node, "prev", prev_id);
-        // const x = moveNode(node);
+        const node = getItemById(uuid)!;
+        setAttribute(node, "parent", parent_id);
+        setAttribute(node, "prev", prev_id);
+
+        moveNode(node);
       });
 
       this.el.addEventListener("keydown", (event) => {
