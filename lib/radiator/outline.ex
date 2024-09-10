@@ -117,16 +117,21 @@ defmodule Radiator.Outline do
           do_indent_node(node, prev_node)
       end
     end)
-    |> case do
-      {:ok, {:error, error}} ->
-        {:error, error}
+    |> unwrap_transaction_result
+  end
 
-      {:ok, {:ok, node_result}} ->
-        {:ok, node_result}
+  def outdent_node(node_id) do
+    Repo.transaction(fn ->
+      case NodeRepository.get_node(node_id) do
+        nil ->
+          {:error, :not_found}
 
-      {:error, error} ->
-        {:error, error}
-    end
+        node ->
+          parent_node = get_parent_node(node)
+          do_outdent_node(node, parent_node)
+      end
+    end)
+    |> unwrap_transaction_result
   end
 
   @doc """
@@ -496,6 +501,40 @@ defmodule Radiator.Outline do
     move_node(node.uuid, prev_id: new_previous_id, parent_id: prev_node.uuid)
   end
 
+  defp do_outdent_node(_node, nil), do: {:error, :no_parent_node}
+
+  defp do_outdent_node(node, parent_node) do
+    new_children =
+      parent_node
+      |> order_child_nodes()
+      |> next_nodes(node)
+
+    last_of_old_children =
+      node
+      |> order_child_nodes()
+      |> List.last()
+
+    {:ok, main_move_result} =
+      move_node(node.uuid, prev_id: parent_node.uuid, parent_id: parent_node.parent_id)
+
+    # new children are the possible new child elements of the node
+    # if the node already had children the new children are appended to the list of existing children
+    _t =
+      Enum.reduce(new_children, get_node_id(last_of_old_children), fn n, prev_id ->
+        move_node_if(n, node.uuid, prev_id)
+        n.uuid
+      end)
+
+    {:ok, Map.put(main_move_result, :children, new_children)}
+  end
+
+  # given a list of nodes in one level, return all the nodes that are after a give
+  defp next_nodes([], _node), do: []
+  defp next_nodes([%{prev_id: uuid} | _tail] = children, %{uuid: uuid}), do: children
+
+  defp next_nodes([_head | tail_children], node),
+    do: next_nodes(tail_children, node)
+
   defp parent_and_prev_consistent?(_, nil), do: true
   defp parent_and_prev_consistent?(nil, _), do: true
 
@@ -520,6 +559,18 @@ defmodule Radiator.Outline do
       %{uuid: uuid} = node -> order_nodes_by_index(index, uuid, [node | collection])
       _ -> Enum.reverse(collection)
     end
+  end
+
+  defp unwrap_transaction_result({:ok, {:error, error}}) do
+    {:error, error}
+  end
+
+  defp unwrap_transaction_result({:ok, {:ok, node_result}}) do
+    {:ok, node_result}
+  end
+
+  defp unwrap_transaction_result({:error, error}) do
+    {:error, error}
   end
 
   defp binaray_uuid_to_ecto_uuid(nil), do: nil

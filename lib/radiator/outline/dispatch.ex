@@ -21,6 +21,12 @@ defmodule Radiator.Outline.Dispatch do
     |> EventProducer.enqueue()
   end
 
+  def outdent_node(node_id, user_id, event_id) do
+    "outdent_node"
+    |> Command.build(node_id, user_id, event_id)
+    |> EventProducer.enqueue()
+  end
+
   def move_node(node_id, user_id, event_id,
         parent_id: parent_id,
         prev_id: prev_id

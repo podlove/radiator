@@ -90,6 +90,31 @@ defmodule Radiator.DataCase do
     }
   end
 
+  def simple_node_fixture_hierachical(_) do
+    episode = PodcastFixtures.episode_fixture()
+
+    node_1 =
+      node_fixture(
+        episode_id: episode.id,
+        parent_id: nil,
+        prev_id: nil,
+        content: "node_1"
+      )
+
+    node_2 =
+      node_fixture(
+        episode_id: episode.id,
+        parent_id: node_1.uuid,
+        prev_id: nil,
+        content: "node_2"
+      )
+
+    %{
+      node_1: node_1,
+      node_2: node_2
+    }
+  end
+
   def complex_node_fixture(_) do
     episode = PodcastFixtures.episode_fixture()
 

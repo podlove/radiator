@@ -12,7 +12,8 @@ defmodule Radiator.Outline.CommandProcessor do
     DeleteNodeCommand,
     IndentNodeCommand,
     InsertNodeCommand,
-    MoveNodeCommand
+    MoveNodeCommand,
+    OutdentNodeCommand
   }
 
   alias Radiator.Outline.Dispatch
@@ -75,6 +76,12 @@ defmodule Radiator.Outline.CommandProcessor do
     |> handle_move_node_result(command)
   end
 
+  defp process_command(%OutdentNodeCommand{node_id: node_id} = command) do
+    node_id
+    |> Outline.outdent_node()
+    |> handle_move_node_result(command)
+  end
+
   defp process_command(%DeleteNodeCommand{node_id: node_id} = command) do
     case NodeRepository.get_node(node_id) do
       nil ->
@@ -130,7 +137,8 @@ defmodule Radiator.Outline.CommandProcessor do
       user_id: command.user_id,
       uuid: command.event_id,
       next_id: result.next_id,
-      episode_id: node.episode_id
+      episode_id: node.episode_id,
+      children: result.children
     }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
@@ -141,6 +149,28 @@ defmodule Radiator.Outline.CommandProcessor do
   def handle_move_node_result(
         {:ok, %NodeRepoResult{node: node} = result},
         %IndentNodeCommand{} = command
+      ) do
+    %NodeMovedEvent{
+      node_id: node.uuid,
+      parent_id: result.node.parent_id,
+      prev_id: result.node.prev_id,
+      old_prev_id: result.old_prev_id,
+      old_next_id: result.old_next_id,
+      user_id: command.user_id,
+      uuid: command.event_id,
+      next_id: result.next_id,
+      episode_id: node.episode_id,
+      children: result.children
+    }
+    |> EventStore.persist_event()
+    |> Dispatch.broadcast()
+
+    {:ok, node}
+  end
+
+  def handle_move_node_result(
+        {:ok, %NodeRepoResult{node: node} = result},
+        %OutdentNodeCommand{} = command
       ) do
     %NodeMovedEvent{
       node_id: node.uuid,
