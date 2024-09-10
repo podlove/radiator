@@ -751,6 +751,103 @@ defmodule Radiator.OutlineTest do
     end
   end
 
+  describe "indent_node/1 - simple context" do
+    setup :simple_node_fixture
+
+    # before 1 2
+    # intend node 2: 1 parentof 2
+    test "intended node is now child of old previous node", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      assert node_2.parent_id == nil
+      assert node_2.prev_id == node_1.uuid
+
+      {:ok, _} = Outline.indent_node(node_2.uuid)
+
+      # reload nodes
+      node_1 = Repo.reload!(node_1)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_2.parent_id == node_1.uuid
+      assert node_2.prev_id == nil
+    end
+
+    # before 1 2
+    # intend node 2: 1 parentof 2
+    test "returns changed nodes in result", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      {:ok, result} = Outline.indent_node(node_2.uuid)
+      assert result.node.parent_id == node_1.uuid
+      assert result.old_prev_id == node_1.uuid
+    end
+
+    # before 1 2
+    # intend node 1: error because node 1 is the first in the list
+    test "intended node does not work when there is no previous node", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      {:error, :no_prev_node} = Outline.indent_node(node_1.uuid)
+
+      node_1 = Repo.reload!(node_1)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_1.parent_id == nil
+      assert node_1.prev_id == nil
+      assert node_2.parent_id == nil
+      assert node_2.prev_id == node_1.uuid
+    end
+  end
+
+  describe "indent_node/1" do
+    setup :complex_node_fixture
+
+    #  1 2 3 4 5
+    test "intend node 3 moves under node 2 and does not change nested nodes", %{
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      {:ok, _} = Outline.indent_node(node_3.uuid)
+
+      # reload nodes
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      node_2 = Repo.reload!(node_2)
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert node_3.prev_id == nil
+      assert node_3.parent_id == node_2.uuid
+      assert node_4.prev_id == node_2.uuid
+      assert nested_node_1.prev_id == nil
+      assert nested_node_2.prev_id == nested_node_1.uuid
+      assert nested_node_1.parent_id == node_3.uuid
+      assert nested_node_2.parent_id == node_3.uuid
+    end
+
+    test "intend node 4 moves under node 3 and after existing nested nodes", %{
+      node_3: node_3,
+      node_4: node_4,
+      nested_node_2: nested_node_2
+    } do
+      {:ok, _} = Outline.indent_node(node_4.uuid)
+
+      # reload nodes
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert node_4.prev_id == nested_node_2.uuid
+      assert node_4.parent_id == node_3.uuid
+    end
+  end
+
   describe "remove_node/1" do
     setup :complex_node_fixture
 

@@ -4,6 +4,7 @@ defmodule Radiator.Outline.Command do
   alias Radiator.Outline.Command.{
     ChangeNodeContentCommand,
     DeleteNodeCommand,
+    IndentNodeCommand,
     InsertNodeCommand,
     MoveNodeCommand
   }
@@ -18,6 +19,14 @@ defmodule Radiator.Outline.Command do
 
   def build("delete_node", node_id, user_id, event_id) do
     %DeleteNodeCommand{
+      event_id: event_id,
+      user_id: user_id,
+      node_id: node_id
+    }
+  end
+
+  def build("indent_node", node_id, user_id, event_id) do
+    %IndentNodeCommand{
       event_id: event_id,
       user_id: user_id,
       node_id: node_id

@@ -29,6 +29,8 @@ defmodule Radiator.Outline do
   @doc """
   Returns a list of direct child nodes in correct order.
   """
+  def order_child_nodes(nil), do: []
+
   def order_child_nodes(%Node{} = node) do
     node
     |> get_all_siblings()
@@ -54,13 +56,6 @@ defmodule Radiator.Outline do
     |> Enum.group_by(& &1.parent_id)
     |> Enum.map(fn {_parent_id, children} -> order_sibling_nodes(children) end)
     |> List.flatten()
-  end
-
-  defp order_nodes_by_index(index, prev_id, collection) do
-    case index[prev_id] do
-      %{uuid: uuid} = node -> order_nodes_by_index(index, uuid, [node | collection])
-      _ -> Enum.reverse(collection)
-    end
   end
 
   @doc """
@@ -111,23 +106,27 @@ defmodule Radiator.Outline do
     end)
   end
 
-  defp episode_valid?(episode_id, %Node{episode_id: episode_id}, %Node{episode_id: episode_id}),
-    do: true
+  def indent_node(node_id) do
+    Repo.transaction(fn ->
+      case NodeRepository.get_node(node_id) do
+        nil ->
+          {:error, :not_found}
 
-  defp episode_valid?(episode_id, %Node{episode_id: episode_id}, nil), do: true
-  defp episode_valid?(episode_id, nil, %Node{episode_id: episode_id}), do: true
-  defp episode_valid?(_episode_id, nil, nil), do: true
-  defp episode_valid?(_episode_id, _parent_node, _prev_node), do: false
+        node ->
+          prev_node = get_prev_node(node)
+          do_indent_node(node, prev_node)
+      end
+    end)
+    |> case do
+      {:ok, {:error, error}} ->
+        {:error, error}
 
-  defp set_parent_id_if(attrs, nil), do: attrs
-  defp set_parent_id_if(attrs, %Node{uuid: uuid}), do: Map.put_new(attrs, "parent_id", uuid)
+      {:ok, {:ok, node_result}} ->
+        {:ok, node_result}
 
-  defp find_parent_node(%Node{parent_id: parent_id}, nil) do
-    NodeRepository.get_node_if(parent_id)
-  end
-
-  defp find_parent_node(_, parent_id) do
-    NodeRepository.get_node_if(parent_id)
+      {:error, error} ->
+        {:error, error}
+    end
   end
 
   @doc """
@@ -185,39 +184,6 @@ defmodule Radiator.Outline do
       |> get_node_id
 
     move_node(node_id, prev_id: new_prev_id, parent_id: parent_id)
-  end
-
-  # low level function to move a node
-  defp do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node) do
-    node_repo_result = %NodeRepoResult{node: node}
-
-    Repo.transaction(fn ->
-      old_next_node =
-        Node
-        |> where_prev_node_equals(node.uuid)
-        |> where_parent_node_equals(get_node_id(parent_node))
-        |> Repo.one()
-
-      new_next_node =
-        Node
-        |> where_prev_node_equals(new_prev_id)
-        |> where_parent_node_equals(new_parent_id)
-        |> Repo.one()
-
-      {:ok, node} = move_node_if(node, new_parent_id, new_prev_id)
-
-      {:ok, _old_next_node} =
-        move_node_if(old_next_node, get_node_id(parent_node), get_node_id(prev_node))
-
-      {:ok, _new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
-
-      Map.merge(node_repo_result, %{
-        node: node,
-        old_next_id: get_node_id(old_next_node),
-        old_prev_id: get_node_id(prev_node),
-        next_id: get_node_id(new_next_node)
-      })
-    end)
   end
 
   @doc """
@@ -453,6 +419,25 @@ defmodule Radiator.Outline do
     {:ok, tree}
   end
 
+  defp episode_valid?(episode_id, %Node{episode_id: episode_id}, %Node{episode_id: episode_id}),
+    do: true
+
+  defp episode_valid?(episode_id, %Node{episode_id: episode_id}, nil), do: true
+  defp episode_valid?(episode_id, nil, %Node{episode_id: episode_id}), do: true
+  defp episode_valid?(_episode_id, nil, nil), do: true
+  defp episode_valid?(_episode_id, _parent_node, _prev_node), do: false
+
+  defp set_parent_id_if(attrs, nil), do: attrs
+  defp set_parent_id_if(attrs, %Node{uuid: uuid}), do: Map.put_new(attrs, "parent_id", uuid)
+
+  defp find_parent_node(%Node{parent_id: parent_id}, nil) do
+    NodeRepository.get_node_if(parent_id)
+  end
+
+  defp find_parent_node(_, parent_id) do
+    NodeRepository.get_node_if(parent_id)
+  end
+
   defp move_node_if(nil, _parent_node_id, _prev_node_id), do: {:ok, nil}
 
   defp move_node_if(node, parent_id, prev_id) do
@@ -462,6 +447,53 @@ defmodule Radiator.Outline do
       prev_id: prev_id
     })
     |> Repo.update()
+  end
+
+  # low level function to move a node
+  defp do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node) do
+    node_repo_result = %NodeRepoResult{node: node}
+
+    Repo.transaction(fn ->
+      old_next_node =
+        Node
+        |> where_prev_node_equals(node.uuid)
+        |> where_parent_node_equals(get_node_id(parent_node))
+        |> Repo.one()
+
+      new_next_node =
+        Node
+        |> where_prev_node_equals(new_prev_id)
+        |> where_parent_node_equals(new_parent_id)
+        |> Repo.one()
+
+      {:ok, node} = move_node_if(node, new_parent_id, new_prev_id)
+
+      if !is_nil(old_next_node) do
+        {:ok, _old_next_node} =
+          move_node_if(old_next_node, old_next_node.parent_id, get_node_id(prev_node))
+      end
+
+      {:ok, _new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
+
+      Map.merge(node_repo_result, %{
+        node: node,
+        old_next_id: get_node_id(old_next_node),
+        old_prev_id: get_node_id(prev_node),
+        next_id: get_node_id(new_next_node)
+      })
+    end)
+  end
+
+  defp do_indent_node(_node, nil), do: {:error, :no_prev_node}
+
+  defp do_indent_node(node, prev_node) do
+    new_previous_id =
+      prev_node
+      |> order_child_nodes()
+      |> List.last()
+      |> get_node_id()
+
+    move_node(node.uuid, prev_id: new_previous_id, parent_id: prev_node.uuid)
   end
 
   defp parent_and_prev_consistent?(_, nil), do: true
@@ -481,6 +513,13 @@ defmodule Radiator.Outline do
 
   defp get_node_id(%Node{} = node) do
     node.uuid
+  end
+
+  defp order_nodes_by_index(index, prev_id, collection) do
+    case index[prev_id] do
+      %{uuid: uuid} = node -> order_nodes_by_index(index, uuid, [node | collection])
+      _ -> Enum.reverse(collection)
+    end
   end
 
   defp binaray_uuid_to_ecto_uuid(nil), do: nil

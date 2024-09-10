@@ -49,8 +49,5 @@ defmodule Radiator.Outline.Event do
   def event_type(%NodeDeletedEvent{} = _event), do: "NodeDeletedEvent"
   def event_type(%NodeMovedEvent{} = _event), do: "NodeMovedEvent"
 
-  def episode_id(%NodeInsertedEvent{episode_id: episode_id}), do: episode_id
-  def episode_id(%NodeContentChangedEvent{episode_id: episode_id}), do: episode_id
-  def episode_id(%NodeDeletedEvent{episode_id: episode_id}), do: episode_id
-  def episode_id(%NodeMovedEvent{episode_id: episode_id}), do: episode_id
+  def episode_id(%{episode_id: episode_id}), do: episode_id
 end
