@@ -217,12 +217,10 @@ defmodule RadiatorWeb.OutlineComponent do
     )
 
     socket
-    |> push_event("move_node", %{uuid: uuid, parent_id: prev_parent_id, prev_id: prev_prev_id})
   end
 
   defp move_down(socket, _uuid, _prev_id) do
     socket
-    # |> push_event("move_node", %{uuid: uuid, parent_id: next_parent_id, prev_id: next_uuid})
   end
 
   defp indent(socket, uuid, _prev_id) do
@@ -241,6 +239,5 @@ defmodule RadiatorWeb.OutlineComponent do
     )
 
     socket
-    |> push_event("move_node", %{uuid: uuid, parent_id: nil, prev_id: parent_id})
   end
 end
