@@ -7,7 +7,6 @@ defmodule Radiator.Outline.Event do
     NodeContentChangedEvent,
     NodeDeletedEvent,
     NodeInsertedEvent,
-    NodeIndentedEvent,
     NodeMovedEvent
   }
 
@@ -34,16 +33,6 @@ defmodule Radiator.Outline.Event do
     }
   end
 
-  def payload(%NodeIndentedEvent{} = event) do
-    %{
-      node_id: event.node_id,
-      prev_id: event.prev_id,
-      next_id: event.next_id,
-      old_prev_id: event.old_prev_id,
-      old_next_id: event.old_next_id
-    }
-  end
-
   def payload(%NodeMovedEvent{} = event) do
     %{
       node_id: event.node_id,
@@ -59,7 +48,6 @@ defmodule Radiator.Outline.Event do
   def event_type(%NodeContentChangedEvent{} = _event), do: "NodeContentChangedEvent"
   def event_type(%NodeDeletedEvent{} = _event), do: "NodeDeletedEvent"
   def event_type(%NodeMovedEvent{} = _event), do: "NodeMovedEvent"
-  def event_type(%NodeIndentedEvent{} = _event), do: "NodeIndentedEvent"
 
   def episode_id(%{episode_id: episode_id}), do: episode_id
 end

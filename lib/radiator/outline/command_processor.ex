@@ -21,7 +21,6 @@ defmodule Radiator.Outline.CommandProcessor do
     NodeContentChangedEvent,
     NodeDeletedEvent,
     NodeInsertedEvent,
-    NodeIndentedEvent,
     NodeMovedEvent
   }
 
@@ -71,25 +70,9 @@ defmodule Radiator.Outline.CommandProcessor do
   end
 
   defp process_command(%IndentNodeCommand{node_id: node_id} = command) do
-    case Outline.indent_node(node_id) do
-      {:error, reason} ->
-        Logger.error("Could not intend node. Reason: #{reason}")
-
-      {:ok, node_result} ->
-        %NodeIndentedEvent{
-          node_id: node_id,
-          user_id: command.user_id,
-          uuid: command.event_id,
-          next_id: node_result.next_id,
-          parent_id: node_result.node.parent_id,
-          prev_id: node_result.node.prev_id,
-          old_prev_id: node_result.old_prev_id,
-          old_next_id: node_result.old_next_id,
-          episode_id: node_result.node.episode_id
-        }
-        |> EventStore.persist_event()
-        |> Dispatch.broadcast()
-    end
+    node_id
+    |> Outline.indent_node()
+    |> handle_move_node_result(command)
   end
 
   defp process_command(%DeleteNodeCommand{node_id: node_id} = command) do
@@ -142,6 +125,29 @@ defmodule Radiator.Outline.CommandProcessor do
       node_id: node.uuid,
       parent_id: command.parent_id,
       prev_id: command.prev_id,
+      old_prev_id: result.old_prev_id,
+      old_next_id: result.old_next_id,
+      user_id: command.user_id,
+      uuid: command.event_id,
+      next_id: result.next_id,
+      episode_id: node.episode_id
+    }
+    |> EventStore.persist_event()
+    |> Dispatch.broadcast()
+
+    {:ok, node}
+  end
+
+  def handle_move_node_result(
+        {:ok, %NodeRepoResult{node: node} = result},
+        %IndentNodeCommand{} = command
+      ) do
+    %NodeMovedEvent{
+      node_id: node.uuid,
+      parent_id: result.node.parent_id,
+      prev_id: result.node.prev_id,
+      old_prev_id: result.old_prev_id,
+      old_next_id: result.old_next_id,
       user_id: command.user_id,
       uuid: command.event_id,
       next_id: result.next_id,
