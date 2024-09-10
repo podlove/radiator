@@ -59,7 +59,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   def handle_event("save", %{"episode" => params}, socket) do
     params = Map.put(params, "show_id", socket.assigns.show.id)
 
-    save_episode(socket, socket.assigns.action, params)
+    save_episode(socket, socket.assigns.live_action, params)
   end
 
   @impl true
