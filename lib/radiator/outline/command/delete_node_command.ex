@@ -9,15 +9,4 @@ defmodule Radiator.Outline.Command.DeleteNodeCommand do
         }
 
   defstruct [:event_id, :user_id, :node_id]
-
-  # def execute(%{id: id}) do
-  #   case Radiator.Outline.Node.get(id) do
-  #     nil ->
-  #       {:error, "Node not found"}
-
-  #     node ->
-  #       Radiator.Outline.Node.delete(node)
-  #       {:ok, %{}}
-  #   end
-  # end
 end
