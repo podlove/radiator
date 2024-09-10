@@ -15,6 +15,7 @@ defmodule RadiatorWeb.OutlineComponent do
   alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepository
 
+  alias RadiatorWeb.Endpoint
   alias RadiatorWeb.OutlineComponents
 
   @impl true
@@ -76,6 +77,12 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:ok)
   end
 
+  def update(%{event: event, payload: payload}, socket) when event in ["focus", "blur"] do
+    socket
+    |> push_event(event, payload)
+    |> reply(:ok)
+  end
+
   def update(%{episode_id: id} = assigns, socket) do
     nodes = Outline.list_nodes_by_episode_sorted(id)
     node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
@@ -92,8 +99,9 @@ defmodule RadiatorWeb.OutlineComponent do
     id = socket.assigns.user_id
     name = socket.assigns.user.email |> String.split("@") |> List.first()
 
+    Endpoint.broadcast("outline", "focus", %{uuid: uuid, user_id: id, user_name: name})
+
     socket
-    |> push_event("focus", %{uuid: uuid, user_id: id, user_name: name})
     |> reply(:noreply)
   end
 
@@ -101,8 +109,9 @@ defmodule RadiatorWeb.OutlineComponent do
     id = socket.assigns.user_id
     name = socket.assigns.user.email |> String.split("@") |> List.first()
 
+    Endpoint.broadcast("outline", "blur", %{uuid: uuid, user_id: id, user_name: name})
+
     socket
-    |> push_event("blur", %{uuid: uuid, user_id: id, user_name: name})
     |> reply(:noreply)
   end
 

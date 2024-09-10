@@ -37,6 +37,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     if connected?(socket) do
       Dispatch.subscribe()
+
+      RadiatorWeb.Endpoint.subscribe("outline")
     end
 
     socket
@@ -72,11 +74,17 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   def handle_info(%NodeMovedEvent{} = event, socket), do: proxy_event(event, socket)
   def handle_info(%NodeDeletedEvent{} = event, socket), do: proxy_event(event, socket)
 
+  def handle_info(%{topic: "outline"} = event, socket) do
+    id = "outline-#{socket.assigns.selected_episode.id}"
+    send_update(RadiatorWeb.OutlineComponent, id: id, event: event)
+
+    socket
+    |> reply(:noreply)
+  end
+
   defp proxy_event(event, socket) do
-    send_update(RadiatorWeb.OutlineComponent,
-      id: "outline-#{socket.assigns.selected_episode.id}",
-      event: event
-    )
+    id = "outline-#{socket.assigns.selected_episode.id}"
+    send_update(RadiatorWeb.OutlineComponent, id: id, event: event)
 
     socket
     |> stream_event(event)
