@@ -77,7 +77,8 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:ok)
   end
 
-  def update(%{event: event, payload: payload}, socket) when event in ["focus", "blur"] do
+  def update(%{event: %Phoenix.Socket.Broadcast{event: event, payload: payload}}, socket)
+      when event in ["focus", "blur"] do
     socket
     |> push_event(event, payload)
     |> reply(:ok)
