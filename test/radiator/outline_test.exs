@@ -1,15 +1,50 @@
 defmodule Radiator.OutlineTest do
-  alias Radiator.Outline.NodeRepoResult
   use Radiator.DataCase
+
+  import Ecto.Query, warn: false
+  import Radiator.OutlineFixtures
+  import Radiator.PodcastFixtures
 
   alias Radiator.Outline
   alias Radiator.Outline.Node
+  alias Radiator.Outline.NodeRepoResult
   alias Radiator.Outline.NodeRepository
   alias Radiator.Podcast
-  alias Radiator.PodcastFixtures
 
-  import Radiator.OutlineFixtures
-  import Ecto.Query, warn: false
+  describe "node_tree" do
+    test "generate from template" do
+      %{id: episode_id} = episode_fixture()
+
+      nodes =
+        [
+          {"node-1"},
+          {"node-2",
+           [
+             {"node-2_1"},
+             {"node-2_2"},
+             {"node-2_3"}
+           ]},
+          {"node-3"},
+          {"node-4",
+           [
+             {"node-4_1",
+              [
+                {"node-4_1_1"},
+                {"node-4_1_2",
+                 [
+                   {"node-4_1_2_1"}
+                 ]}
+              ]},
+             {"node-4_2"}
+           ]},
+          {"node-5"}
+        ]
+        |> node_tree_fixture(%{episode_id: episode_id})
+
+      assert length(nodes) == 13
+      assert Enum.all?(nodes, &match?(%Node{episode_id: ^episode_id}, &1))
+    end
+  end
 
   describe "update_node_content/2" do
     test "with valid data updates the node" do
@@ -1104,7 +1139,7 @@ defmodule Radiator.OutlineTest do
     setup :complex_node_fixture
 
     test "get child nodes in correct order" do
-      episode = PodcastFixtures.episode_fixture()
+      episode = episode_fixture()
 
       node_1 =
         node_fixture(
