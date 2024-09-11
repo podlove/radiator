@@ -24,6 +24,14 @@ module.exports = {
       }
     },
   },
+  safelist: [
+    {
+      // Colors that are used dynamically and therefore can't be detected by CSS preprocessing,
+      // and have to be added manually to the safelist.
+      pattern:
+        /bg-(indigo|violet|purple|fuchsia|pink|sky|orange|lime|amber|emerald|teal|cyan)-(500|600|700)/,
+    },
+  ],
   plugins: [
     require("@tailwindcss/forms"),
     // Allows prefixing tailwind classes with LiveView classes to add rules
