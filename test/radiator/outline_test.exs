@@ -187,6 +187,21 @@ defmodule Radiator.OutlineTest do
       assert new_node.prev_id == nested_node_1.uuid
     end
 
+    test "the next node - if existing - changes its prev_id and gets returned", %{
+      node_2: node_2,
+      node_3: node_3
+    } do
+      node_attrs = %{
+        "content" => "new node",
+        "episode_id" => node_2.episode_id,
+        "prev_id" => node_2.uuid
+      }
+
+      {:ok, %{next_id: next_id, node: new_node}} = Outline.insert_node(node_attrs)
+      assert node_3.uuid == next_id
+      assert NodeRepository.get_node!(node_3.uuid).prev_id == new_node.uuid
+    end
+
     test "if prev_id has been given the parent_id can be omitted", %{
       node_3: node_3,
       nested_node_1: nested_node_1

@@ -80,20 +80,22 @@ defmodule Radiator.Outline do
       prev_id = attrs["prev_id"]
       parent_id = attrs["parent_id"]
       episode_id = attrs["episode_id"]
+
+      prev_node = NodeRepository.get_node_if(prev_id)
+      parent_node = find_parent_node(prev_node, parent_id)
+
       # find Node which has been previously connected to prev_node
       next_node =
         Node
         |> where(episode_id: ^episode_id)
         |> where_prev_node_equals(prev_id)
-        |> where_parent_node_equals(parent_id)
+        |> where_parent_node_equals(get_node_id(parent_node))
         |> Repo.one()
 
-      with prev_node <- NodeRepository.get_node_if(prev_id),
-           parent_node <- find_parent_node(prev_node, parent_id),
-           true <- parent_and_prev_consistent?(parent_node, prev_node),
+      with true <- parent_and_prev_consistent?(parent_node, prev_node),
            true <- episode_valid?(episode_id, parent_node, prev_node),
            {:ok, node} <- NodeRepository.create_node(set_parent_id_if(attrs, parent_node)),
-           {:ok, _node_to_move} <- move_node_if(next_node, parent_id, node.uuid) do
+           {:ok, _node_to_move} <- move_node_if(next_node, get_node_id(parent_node), node.uuid) do
         %NodeRepoResult{node: node, next_id: get_node_id(next_node)}
       else
         false ->
