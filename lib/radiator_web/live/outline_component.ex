@@ -240,14 +240,9 @@ defmodule RadiatorWeb.OutlineComponent do
     socket
   end
 
-  defp outdent(socket, uuid, parent_id) do
+  defp outdent(socket, uuid, _parent_id) do
     user_id = socket.assigns.user_id
-
-    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id),
-      parent_id: nil,
-      prev_id: parent_id
-    )
-
+    Dispatch.outdent_node(uuid, user_id, generate_event_id(socket.id))
     socket
   end
 end

@@ -222,6 +222,21 @@ defmodule Radiator.OutlineTest do
       assert new_node.prev_id == nested_node_1.uuid
     end
 
+    test "the next node - if existing - changes its prev_id and gets returned", %{
+      node_2: node_2,
+      node_3: node_3
+    } do
+      node_attrs = %{
+        "content" => "new node",
+        "episode_id" => node_2.episode_id,
+        "prev_id" => node_2.uuid
+      }
+
+      {:ok, %{next_id: next_id, node: new_node}} = Outline.insert_node(node_attrs)
+      assert node_3.uuid == next_id
+      assert NodeRepository.get_node!(node_3.uuid).prev_id == new_node.uuid
+    end
+
     test "if prev_id has been given the parent_id can be omitted", %{
       node_3: node_3,
       nested_node_1: nested_node_1
@@ -877,6 +892,138 @@ defmodule Radiator.OutlineTest do
       node_4 = Repo.reload!(node_4)
       node_3 = Repo.reload!(node_3)
       nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert node_4.prev_id == nested_node_2.uuid
+      assert node_4.parent_id == node_3.uuid
+    end
+  end
+
+  describe "outdent_node/1 - simple context" do
+    setup :simple_node_fixture_hierachical
+
+    test "outdent_node node moves node to same level as previous parent", %{
+      node_1: node_1,
+      node_2: node_2
+    } do
+      assert node_2.parent_id == node_1.uuid
+      assert node_2.prev_id == nil
+
+      {:ok, _} = Outline.outdent_node(node_2.uuid)
+
+      # reload nodes
+      node_1 = Repo.reload!(node_1)
+      node_2 = Repo.reload!(node_2)
+
+      assert node_2.parent_id == nil
+      assert node_2.prev_id == node_1.uuid
+    end
+
+    test "outdent_node needs a parent node", %{
+      node_1: node_1
+    } do
+      assert node_1.parent_id == nil
+      {:error, :no_parent_node} = Outline.outdent_node(node_1.uuid)
+    end
+  end
+
+  describe "outdent_node/1" do
+    setup :complex_node_fixture
+
+    test "outdent nested node 1", %{
+      parent_node: parent_node,
+      node_3: node_3,
+      node_4: node_4,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      {:ok, _} = Outline.outdent_node(nested_node_1.uuid)
+
+      # reload nodes
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert nested_node_1.prev_id == node_3.uuid
+      assert nested_node_1.parent_id == parent_node.uuid
+
+      assert nested_node_2.prev_id == nil
+      assert nested_node_2.parent_id == nested_node_1.uuid
+
+      assert node_4.prev_id == nested_node_1.uuid
+    end
+
+    test "outdent nested node with a next node makes next node new child", %{
+      episode: episode,
+      parent_node: parent_node,
+      node_3: node_3,
+      node_4: node_4,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      nested_node_3 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: node_3.uuid,
+          prev_id: nested_node_2.uuid,
+          content: "nested_node_3"
+        )
+
+      nested_node_4 =
+        node_fixture(
+          episode_id: episode.id,
+          parent_id: node_3.uuid,
+          prev_id: nested_node_3.uuid,
+          content: "nested_node_4"
+        )
+
+      {:ok, _} = Outline.outdent_node(nested_node_2.uuid)
+
+      # reload nodes
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+      nested_node_3 = Repo.reload!(nested_node_3)
+      nested_node_4 = Repo.reload!(nested_node_4)
+
+      assert nested_node_1.prev_id == nil
+      assert nested_node_1.parent_id == node_3.uuid
+
+      assert nested_node_2.prev_id == node_3.uuid
+      assert nested_node_2.parent_id == parent_node.uuid
+
+      assert node_4.prev_id == nested_node_2.uuid
+
+      assert nested_node_3.prev_id == nil
+      assert nested_node_3.parent_id == nested_node_2.uuid
+
+      assert nested_node_4.prev_id == nested_node_3.uuid
+      assert nested_node_4.parent_id == nested_node_2.uuid
+    end
+
+    test "outdent node 3 with children", %{
+      parent_node: parent_node,
+      node_3: node_3,
+      node_4: node_4,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      {:ok, _result} = Outline.outdent_node(node_3.uuid)
+
+      # reload nodes
+      node_4 = Repo.reload!(node_4)
+      node_3 = Repo.reload!(node_3)
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert node_3.prev_id == parent_node.uuid
+      assert node_3.parent_id == nil
+
+      assert nested_node_1.prev_id == nil
+      assert nested_node_1.parent_id == node_3.uuid
+      assert nested_node_2.prev_id == nested_node_1.uuid
+      assert nested_node_2.parent_id == node_3.uuid
 
       assert node_4.prev_id == nested_node_2.uuid
       assert node_4.parent_id == node_3.uuid
