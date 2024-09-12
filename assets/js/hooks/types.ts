@@ -9,7 +9,7 @@ export type CollapseParams = {
   detail: UserAction;
 };
 
-export interface Node {
+export interface NodeData {
   uuid: UUID;
   content?: string;
   creator_id?: number;

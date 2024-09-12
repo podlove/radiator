@@ -1,5 +1,5 @@
 import { CollapseParams } from "../types";
-import { getItemById } from "../item";
+import { getNodeById } from "../node";
 
 export function keydown(event: KeyboardEvent) {
   if (event.key == "Tab") {
@@ -8,8 +8,8 @@ export function keydown(event: KeyboardEvent) {
 }
 
 export function toggleCollapse({ detail: { uuid } }: CollapseParams) {
-  const item = getItemById(uuid);
-  item!.toggleAttribute("data-collapsed");
+  const node = getNodeById(uuid);
+  node!.toggleAttribute("data-collapsed");
 
   const collapsedStatus = localStorage.getItem(this.el.id) || "{}";
   const collapsed = JSON.parse(collapsedStatus);
