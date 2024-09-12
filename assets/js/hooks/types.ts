@@ -1,5 +1,14 @@
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
 
+export type UserAction = {
+  uuid: UUID;
+  user_name: string;
+};
+
+export type CollapseParams = {
+  detail: UserAction;
+};
+
 export interface Node {
   uuid: UUID;
   content?: string;
@@ -7,5 +16,4 @@ export interface Node {
   parent_id?: UUID;
   prev_id?: UUID;
   collapsed?: boolean;
-  dirty: boolean;
 }

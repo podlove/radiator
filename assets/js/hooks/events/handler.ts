@@ -1,41 +1,25 @@
-import { Node } from "../types";
+import { Node, UserAction } from "../types";
 import {
-  changeItemContent,
-  cleanItem,
-  createItem,
-  deleteItem,
-  moveItem,
   getItemById,
+  addEditingUserLabel,
+  removeEditingUserLabel,
 } from "../item";
-import { getNodeByItem } from "../node";
+import { moveNode, setAttribute } from "../node";
 
-export function handleInsert({
-  node,
-  next_id,
-}: {
-  node: Node;
-  next_id: string | undefined;
-}) {
-  const container: HTMLDivElement = this.el.querySelector(".nodes");
-
-  const item = createItem(node);
-  container.append(item);
-  moveItem(node, container);
-  const nextItem = getItemById(next_id) as HTMLDivElement;
-  const nextNode = getNodeByItem(nextItem);
-  nextNode.prev_id = node.uuid;
-  nextNode.dirty = false;
-  moveItem(nextNode, container);
+export function handleFocus({ uuid, user_name }: UserAction) {
+  const item = getItemById(uuid)!;
+  addEditingUserLabel(item, user_name);
 }
 
-export function handleContentChange({ node }: { node: Node }) {
-  changeItemContent(node);
+export function handleBlur({ uuid, user_name }: UserAction) {
+  const item = getItemById(uuid)!;
+  removeEditingUserLabel(item, user_name);
 }
 
-export function handleDelete({ node }: { node: Node }) {
-  deleteItem(node);
-}
+export function handleMove({ uuid, parent_id, prev_id }: Node) {
+  const node = getItemById(uuid)!;
+  setAttribute(node, "parent", parent_id);
+  setAttribute(node, "prev", prev_id);
 
-export function handleClean({ node }: { node: Node }) {
-  cleanItem(node);
+  moveNode(node);
 }
