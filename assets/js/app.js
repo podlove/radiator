@@ -30,6 +30,10 @@ let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
   metadata: {
+    // submit: (e, el) => {
+    //   console.log(e) 
+    //   return {cursor: "123"}
+    // },
     keydown: (e, el) => {
       return {
         key: e.key,

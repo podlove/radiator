@@ -2,38 +2,45 @@
   <OutlineComponents.keyboard_shortcuts />
 
   <div id={[@id, "-stream"]} class="my-6" phx-hook="outline" phx-update="stream">
-    <div
-      :for={{id, form} <- @streams.nodes}
-      id={id}
-      class="relative group node"
-      data-parent={form.data.parent_id}
-      data-prev={form.data.prev_id}
-    >
+    <div :for={{id, form} <- @streams.nodes} id={id} class="relative group node">
       <OutlineComponents.outline_form
         for={form}
         phx-change="save"
         phx-submit="new"
-        phx-value-uuid={form.data.uuid}
         phx-target={@myself}
         class="ml-5"
       >
+        <input class="uuid" type="hidden" name={form[:uuid].name} value={form[:uuid].value} />
+        <input
+          class="parent_id"
+          type="hidden"
+          name={form[:parent_id].name}
+          value={form[:parent_id].value}
+        />
+        <input
+          class="prev_id"
+          type="hidden"
+          name={form[:prev_id].name}
+          value={form[:prev_id].value}
+        />
         <.input
+          class="content"
           type="text"
           field={form[:content]}
           placeholder="Content..."
           phx-focus="focus"
           phx-blur="blur"
           phx-keydown="keydown"
-          phx-value-uuid={form.data.uuid}
-          phx-value-parent={form.data.parent_id}
-          phx-value-prev={form.data.prev_id}
+          phx-value-uuid={form[:uuid].value}
+          phx-value-parent={form[:parent_id].value}
+          phx-value-prev={form[:prev_id].value}
           phx-target={@myself}
         />
       </OutlineComponents.outline_form>
       <div class="absolute top-0 right-0 z-10 text-xs text-white editing"></div>
       <div class="ml-4 peer children group-data-[collapsed]:hidden"></div>
       <button
-        class="absolute peer-empty:hidden top-3 left-0 group-data-[collapsed]:-rotate-90 duration-200 z-10"
+        class="absolute peer-empty:hidden top-3 left-0 handle group-data-[collapsed]:-rotate-90 duration-200 z-10"
         phx-click={JS.dispatch("toggle_collapse", detail: %{uuid: form.data.uuid})}
       >
         <svg width="20" height="20" viewBox="0 0 20 20" class="text-gray-500 rotate-90">
@@ -47,7 +54,7 @@
       </button>
       <a
         href={"##{form.data.uuid}"}
-        class="absolute left-0 hidden text-gray-500 peer-empty:block top-3"
+        class="absolute left-0 hidden text-gray-500 handle peer-empty:block top-3"
       >
         <svg viewBox="0 0 18 18" fill="currentColor" class="w-5 h-5">
           <circle cx="9" cy="9" r="3.5"></circle>

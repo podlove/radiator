@@ -16,8 +16,8 @@ export function moveNode(node: HTMLDivElement): NodeData {
 
 function getNodeData(node: HTMLDivElement): NodeData {
   const uuid = getUUID(node);
-  const parent_id = getAttribute(node, "parent");
-  const prev_id = getAttribute(node, "prev");
+  const parent_id = getValue(node, ".parent_id");
+  const prev_id = getValue(node, ".prev_id");
   const content = getContent(node);
 
   return { uuid, parent_id, prev_id, content };
@@ -32,17 +32,18 @@ function getContent(node: HTMLDivElement) {
   return input.value;
 }
 
-function getAttribute(node: HTMLDivElement, key: string) {
-  return (node.getAttribute(`data-${key}`) as UUID) || undefined;
+function getValue(node: HTMLDivElement, selector: string) {
+  const input = node.querySelector(selector) as HTMLInputElement;
+  return input.value as UUID;
 }
 
-export function setAttribute(
+export function setValue(
   node: HTMLDivElement,
-  key: string,
-  value: string | number | boolean | undefined
+  selector: string,
+  value: string
 ) {
-  const attrValue = value === undefined ? "" : String(value);
-  node.setAttribute(`data-${key}`, attrValue);
+  const input = node.querySelector(selector) as HTMLInputElement;
+  input.value = value;
 }
 
 export function getNodeById(uuid: UUID | undefined) {
