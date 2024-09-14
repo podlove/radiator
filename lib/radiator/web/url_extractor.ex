@@ -1,4 +1,4 @@
-defmodule Radiator.UrlExtractor do
+defmodule Radiator.Web.UrlExtractor do
   @moduledoc """
   extract urls
   """
