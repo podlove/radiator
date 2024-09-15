@@ -17,7 +17,7 @@ defmodule Radiator.Web.Url do
   @doc false
   def changeset(url, attrs) do
     url
-    |> cast(attrs, [:url, :start_bytes, :size_bytes])
-    |> validate_required([:url, :start_bytes, :size_bytes])
+    |> cast(attrs, [:url, :start_bytes, :size_bytes, :node_id])
+    |> validate_required([:url, :start_bytes, :size_bytes, :node_id])
   end
 end

@@ -2,17 +2,31 @@ defmodule Radiator.WebTest do
   use Radiator.DataCase
 
   import Ecto.Query, warn: false
-
-  alias Radiator.Web
-  alias Radiator.Web.Url
   import Radiator.WebFixtures
 
+  alias Radiator.OutlineFixtures
+  alias Radiator.Web
+  alias Radiator.Web.Url
+
   describe "urls" do
+    setup do
+      node =
+        OutlineFixtures.node_fixture()
+        |> Repo.preload([:episode])
+
+      episode = node.episode
+
+      %{
+        episode: episode,
+        node: node
+      }
+    end
+
     @invalid_attrs %{url: nil, start_bytes: nil, size_bytes: nil}
 
-    test "list_urls/0 returns all urls" do
-      url = url_fixture()
-      assert Web.list_urls() == [url]
+    test "list_urls/0 returns all urls", %{episode: episode, node: node} do
+      url = url_fixture(node_id: node.uuid)
+      assert Web.list_urls(episode.id) == [url]
     end
 
     test "get_url!/1 returns the url with given id" do
@@ -20,8 +34,8 @@ defmodule Radiator.WebTest do
       assert Web.get_url!(url.id) == url
     end
 
-    test "create_url/1 with valid data creates a url" do
-      valid_attrs = %{url: "some url", start_bytes: 42, size_bytes: 42}
+    test "create_url/1 with valid data creates a url", %{node: node} do
+      valid_attrs = %{url: "some url", start_bytes: 42, size_bytes: 42, node_id: node.uuid}
 
       assert {:ok, %Url{} = url} = Web.create_url(valid_attrs)
       assert url.url == "some url"

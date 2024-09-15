@@ -5,23 +5,27 @@ defmodule Radiator.Web do
 
   import Ecto.Query, warn: false
 
-  # alias Radiator.Outline.Node
   alias Radiator.Repo
   alias Radiator.Web.Url
 
   require Logger
 
   @doc """
-  Returns the list of urls.
+  Returns the list of urls of a given episode.
 
   ## Examples
 
-      iex> list_urls()
+      iex> list_urls(episode_id)
       [%Url{}, ...]
 
   """
-  def list_urls do
-    Repo.all(Url)
+  def list_urls(episode_id) do
+    query =
+      from u in Url,
+        join: n in assoc(u, :node),
+        where: n.episode_id == ^episode_id
+
+    Repo.all(query)
   end
 
   @doc """
