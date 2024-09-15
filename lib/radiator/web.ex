@@ -1,6 +1,7 @@
 defmodule Radiator.Web do
   @moduledoc """
-  The Web context. All related to web related stuff, handing URLs, etc.
+  The Web context. All web related stuff, handing URLs,
+  scraped Websites etc..
   """
 
   import Ecto.Query, warn: false
