@@ -1,5 +1,5 @@
 defmodule Radiator.Outline.Event.NodeInsertedEvent do
   @moduledoc false
 
-  defstruct [:uuid, :node, :user_id, :next_id, :episode_id]
+  defstruct [:event_id, :node, :user_id, :next, :episode_id, :content]
 end

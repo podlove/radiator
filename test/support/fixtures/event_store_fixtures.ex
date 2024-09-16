@@ -40,8 +40,8 @@ defmodule Radiator.EventStoreFixtures do
     %NodeInsertedEvent{
       node: node,
       user_id: user_id,
-      uuid: Ecto.UUID.generate(),
-      next_id: next.uuid
+      event_id: Ecto.UUID.generate(),
+      next: next
     }
   end
 
@@ -52,7 +52,7 @@ defmodule Radiator.EventStoreFixtures do
       node_id: node.uuid,
       content: node.content,
       user_id: user_id,
-      uuid: Ecto.UUID.generate()
+      event_id: Ecto.UUID.generate()
     }
   end
 
@@ -60,16 +60,16 @@ defmodule Radiator.EventStoreFixtures do
     node = OutlineFixtures.node_fixture()
 
     %NodeDeletedEvent{
-      node_id: node.uuid,
+      node: node,
       user_id: user_id,
-      uuid: Ecto.UUID.generate()
+      event_id: Ecto.UUID.generate()
     }
   end
 
   def node_moved_event_fixture(user_id: user_id) do
     node = OutlineFixtures.node_fixture()
-    parent = OutlineFixtures.node_fixture(episode_id: node.episode_id)
-    prev = OutlineFixtures.node_fixture(episode_id: node.episode_id)
+    _parent = OutlineFixtures.node_fixture(episode_id: node.episode_id)
+    _prev = OutlineFixtures.node_fixture(episode_id: node.episode_id)
     next = OutlineFixtures.node_fixture(episode_id: node.episode_id)
     old_next = OutlineFixtures.node_fixture(episode_id: node.episode_id)
 
@@ -77,14 +77,12 @@ defmodule Radiator.EventStoreFixtures do
       OutlineFixtures.node_fixture(episode_id: node.episode_id)
 
     %NodeMovedEvent{
-      node_id: node.uuid,
+      node: %{uuid: node.uuid, parent_id: node.parent_id, prev_id: node.prev_id},
       user_id: user_id,
-      parent_id: parent.uuid,
-      prev_id: prev.uuid,
-      next_id: next.uuid,
-      old_next_id: old_next.uuid,
-      old_prev_id: old_prev.uuid,
-      uuid: Ecto.UUID.generate()
+      next: next,
+      old_next: old_next,
+      old_prev: old_prev,
+      event_id: Ecto.UUID.generate()
     }
   end
 end

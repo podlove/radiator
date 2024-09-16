@@ -1,14 +1,12 @@
 defmodule Radiator.Outline.Event.NodeMovedEvent do
   @moduledoc false
   defstruct [
-    :uuid,
-    :node_id,
-    :parent_id,
-    :prev_id,
+    :event_id,
+    :node,
     :user_id,
-    :old_prev_id,
-    :old_next_id,
-    :next_id,
+    :old_prev,
+    :old_next,
+    :next,
     :episode_id,
     :children
   ]

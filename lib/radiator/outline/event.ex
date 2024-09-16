@@ -12,11 +12,9 @@ defmodule Radiator.Outline.Event do
 
   def payload(%NodeInsertedEvent{} = event) do
     %{
-      node_id: event.node.uuid,
+      node: event.node,
       content: event.node.content,
-      parent_id: event.node.parent_id,
-      prev_id: event.node.prev_id,
-      next_id: event.next_id
+      next: event.next
     }
   end
 
@@ -26,21 +24,19 @@ defmodule Radiator.Outline.Event do
 
   def payload(%NodeDeletedEvent{} = event) do
     %{
-      node_id: event.node_id,
+      node: event.node,
       episode_id: event.episode_id,
       children: event.children,
-      next_id: event.next_id
+      next: event.next
     }
   end
 
   def payload(%NodeMovedEvent{} = event) do
     %{
-      node_id: event.node_id,
-      parent_id: event.parent_id,
-      prev_id: event.prev_id,
-      old_prev_id: event.old_prev_id,
-      old_next_id: event.old_next_id,
-      next_id: event.next_id
+      node: event.node,
+      old_prev: event.old_prev,
+      old_next: event.old_next,
+      next: event.next
     }
   end
 

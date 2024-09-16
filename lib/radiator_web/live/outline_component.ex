@@ -19,14 +19,13 @@ defmodule RadiatorWeb.OutlineComponent do
   alias RadiatorWeb.OutlineComponents
 
   @impl true
-  def update(%{event: %NodeInsertedEvent{node: node, next_id: nil}}, socket) do
+  def update(%{event: %NodeInsertedEvent{node: node, next: nil}}, socket) do
     socket
     |> stream_insert(:nodes, to_change_form(node, %{}))
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeInsertedEvent{node: node, next_id: next_id}}, socket) do
-    next_node = NodeRepository.get_node!(next_id)
+  def update(%{event: %NodeInsertedEvent{node: node, next: next_node}}, socket) do
     node_forms = Enum.map([node, next_node], &to_change_form(&1, %{}))
 
     socket
@@ -44,14 +43,10 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def update(
         %{
-          event: %NodeMovedEvent{node_id: node_id, old_next_id: old_next_id, next_id: new_next_id}
+          event: %NodeMovedEvent{node: node, old_next: old_next_node, next: new_next_node}
         },
         socket
       ) do
-    node = NodeRepository.get_node!(node_id)
-    old_next_node = NodeRepository.get_node_if(old_next_id)
-    new_next_node = NodeRepository.get_node_if(new_next_id)
-
     nodes = [node, old_next_node, new_next_node] |> Enum.reject(&is_nil/1)
     node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
 
@@ -60,18 +55,16 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeDeletedEvent{node_id: node_id, next_id: nil}}, socket) do
+  def update(%{event: %NodeDeletedEvent{node: node, next: nil}}, socket) do
     socket
-    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node_id}")
+    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node.uuid}")
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeDeletedEvent{node_id: node_id, next_id: next_id}}, socket) do
-    next_node = NodeRepository.get_node!(next_id)
-
+  def update(%{event: %NodeDeletedEvent{node: node, next: next}}, socket) do
     socket
-    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node_id}")
-    |> stream_insert(:nodes, to_change_form(next_node, %{}))
+    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node.uuid}")
+    |> stream_insert(:nodes, to_change_form(next, %{}))
     |> reply(:ok)
   end
 
