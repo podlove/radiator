@@ -146,6 +146,7 @@ defmodule Radiator.PodcastTest do
       assert episode.title == "some title"
       assert episode.show_id == show.id
       assert episode.number == 5
+      assert episode.slug == "some-title"
     end
 
     test "create_episode/1 with invalid data returns error changeset" do
@@ -160,6 +161,7 @@ defmodule Radiator.PodcastTest do
       assert {:ok, %Episode{} = episode} = Podcast.update_episode(episode, update_attrs)
       assert episode.title == "some updated title"
       assert episode.show_id == updated_podcast.id
+      assert episode.slug == "some-updated-title"
     end
 
     test "update_episode/2 with invalid data returns error changeset" do
