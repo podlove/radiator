@@ -3,10 +3,11 @@ defmodule Radiator.OutlineFixtures do
   This module defines test helpers for creating
   entities via the `Radiator.Outline` context.
   """
-
+  alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepository
   alias Radiator.Podcast
   alias Radiator.PodcastFixtures
+  alias Radiator.Repo
 
   @doc """
   Generate a node.
@@ -22,7 +23,8 @@ defmodule Radiator.OutlineFixtures do
       })
       |> NodeRepository.create_node()
 
-    node
+    Node
+    |> Repo.get!(node.uuid)
   end
 
   defp get_episode(%{episode_id: id}), do: Podcast.get_episode!(id)
