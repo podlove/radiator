@@ -192,6 +192,7 @@ defmodule RadiatorWeb.OutlineComponent do
     Dispatch.insert_node(params, user_id, generate_event_id(socket.id))
 
     socket
+    # TODO @sorax needs to be refactored, node is only a minor version without content
     |> stream_insert(:nodes, to_change_form(node, %{}))
     |> reply(:noreply)
   end
