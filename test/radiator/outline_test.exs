@@ -1030,6 +1030,81 @@ defmodule Radiator.OutlineTest do
     end
   end
 
+  describe "move_up/1" do
+    setup :complex_node_fixture
+
+    test "moves node up", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4
+    } do
+      assert node_2.prev_id == node_1.uuid
+      assert node_3.prev_id == node_2.uuid
+      assert node_4.prev_id == node_3.uuid
+
+      {:ok, _} = Outline.move_up(node_3.uuid)
+
+      # reload nodes
+      node_2 = Repo.reload!(node_2)
+      node_3 = Repo.reload!(node_3)
+      node_4 = Repo.reload!(node_4)
+
+      assert node_2.prev_id == node_3.uuid
+      assert node_3.prev_id == node_1.uuid
+      assert node_4.prev_id == node_2.uuid
+    end
+
+    test "cannot move up when there is no previous node", %{
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      assert nested_node_1.prev_id == nil
+      assert nested_node_2.prev_id == nested_node_1.uuid
+
+      {:error, :no_previous_node} = Outline.move_up(nested_node_1.uuid)
+
+      # reload nodes
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert nested_node_1.prev_id == nil
+      assert nested_node_2.prev_id == nested_node_1.uuid
+    end
+
+    test "moves node up when there is no next node", %{
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      assert nested_node_1.prev_id == nil
+      assert nested_node_2.prev_id == nested_node_1.uuid
+
+      {:ok, _} = Outline.move_up(nested_node_2.uuid)
+
+      # reload nodes
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert nested_node_2.prev_id == nil
+      assert nested_node_1.prev_id == nested_node_2.uuid
+    end
+
+    # test "moves node up with children and next node", %{
+    #   episode: episode,
+    #   parent_node: parent_node,
+    #   node_3: node_3,
+    #   node_4: node_4,
+    #   nested_node_1: nested_node_1,
+    #   nested_node_2: nested_node_2
+    # } do
+    #   nested_node_3 =
+    #     node_fixture(
+    #       episode_id: episode.id,
+    #       parent_id: node_3.uuid,
+    #       prev_id: nested_node_2.uuid,
+    #       content:
+  end
+
   describe "remove_node/1" do
     setup :complex_node_fixture
 
