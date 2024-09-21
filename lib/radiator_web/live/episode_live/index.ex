@@ -26,7 +26,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> assign(:show, show)
     |> assign(:episodes, show.episodes)
     |> assign(action: nil, episode: nil, form: nil)
-    |> stream_configure(:event_logs, dom_id: & &1.uuid)
+    |> stream_configure(:event_logs, dom_id: & &1.event_id)
     |> stream(:event_logs, get_event_logs(episode))
     |> reply(:ok)
   end

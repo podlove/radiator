@@ -4,10 +4,11 @@ defmodule Radiator.Outline.NodeRepoResult do
   """
   defstruct [
     :node,
-    :old_prev_id,
-    :old_next_id,
-    :next_id,
-    :children
+    :old_prev,
+    :old_next,
+    :next,
+    :children,
+    :episode_id
   ]
 end
 
@@ -96,7 +97,7 @@ defmodule Radiator.Outline do
            true <- episode_valid?(episode_id, parent_node, prev_node),
            {:ok, node} <- NodeRepository.create_node(set_parent_id_if(attrs, parent_node)),
            {:ok, _node_to_move} <- move_node_if(next_node, get_node_id(parent_node), node.uuid) do
-        %NodeRepoResult{node: node, next_id: get_node_id(next_node)}
+        %NodeRepoResult{node: node, next: get_node_result_info(next_node), episode_id: episode_id}
       else
         false ->
           Repo.rollback("Insert node failed. Parent and prev node are not consistent.")
@@ -251,12 +252,13 @@ defmodule Radiator.Outline do
       |> List.flatten()
 
     # finally delete the node itself from the database
-    deleted_node = NodeRepository.delete_node(node)
+    {:ok, deleted_node} = NodeRepository.delete_node(node)
 
     %NodeRepoResult{
       node: deleted_node,
-      next_id: get_node_id(next_node),
-      children: all_children ++ recursive_deleted_children
+      next: get_node_result_info(next_node),
+      children: all_children ++ recursive_deleted_children,
+      episode_id: node.episode_id
     }
   end
 
@@ -426,6 +428,9 @@ defmodule Radiator.Outline do
     {:ok, tree}
   end
 
+  def get_node_id(nil), do: nil
+  def get_node_id(%Node{} = node), do: node.uuid
+
   defp episode_valid?(episode_id, %Node{episode_id: episode_id}, %Node{episode_id: episode_id}),
     do: true
 
@@ -458,7 +463,10 @@ defmodule Radiator.Outline do
 
   # low level function to move a node
   defp do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node) do
-    node_repo_result = %NodeRepoResult{node: node}
+    node_repo_result = %NodeRepoResult{
+      node: get_node_result_info(node),
+      episode_id: node.episode_id
+    }
 
     Repo.transaction(fn ->
       old_next_node =
@@ -483,10 +491,10 @@ defmodule Radiator.Outline do
       {:ok, _new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
 
       Map.merge(node_repo_result, %{
-        node: node,
-        old_next_id: get_node_id(old_next_node),
-        old_prev_id: get_node_id(prev_node),
-        next_id: get_node_id(new_next_node)
+        node: get_node_result_info(node),
+        old_next: get_node_result_info(old_next_node),
+        old_prev: get_node_result_info(prev_node),
+        next: get_node_result_info(new_next_node)
       })
     end)
   end
@@ -550,11 +558,10 @@ defmodule Radiator.Outline do
   defp where_parent_node_equals(node, nil), do: where(node, [n], is_nil(n.parent_id))
   defp where_parent_node_equals(node, parent_id), do: where(node, [n], n.parent_id == ^parent_id)
 
-  defp get_node_id(nil), do: nil
+  def get_node_result_info(nil), do: nil
 
-  defp get_node_id(%Node{} = node) do
-    node.uuid
-  end
+  def get_node_result_info(%Node{uuid: uuid, prev_id: prev_id, parent_id: parent_id}),
+    do: %Node{uuid: uuid, prev_id: prev_id, parent_id: parent_id}
 
   defp order_nodes_by_index(index, prev_id, collection) do
     case index[prev_id] do

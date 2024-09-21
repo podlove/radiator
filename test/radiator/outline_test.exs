@@ -232,7 +232,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => node_2.uuid
       }
 
-      {:ok, %{next_id: next_id, node: new_node}} = Outline.insert_node(node_attrs)
+      {:ok, %{next: %{uuid: next_id}, node: new_node}} = Outline.insert_node(node_attrs)
       assert node_3.uuid == next_id
       assert NodeRepository.get_node!(node_3.uuid).prev_id == new_node.uuid
     end
@@ -746,8 +746,8 @@ defmodule Radiator.OutlineTest do
         Outline.move_node(node_1.uuid, prev_id: node_5.uuid, parent_id: node_2.parent_id)
 
       assert node_result.node.uuid == node_1.uuid
-      assert node_result.old_prev_id == nil
-      assert node_result.old_next_id == node_2.uuid
+      assert node_result.old_prev == nil
+      assert node_result.old_next.uuid == node_2.uuid
     end
 
     test "error when prev id is the same as node id", %{
@@ -831,7 +831,7 @@ defmodule Radiator.OutlineTest do
     } do
       {:ok, result} = Outline.indent_node(node_2.uuid)
       assert result.node.parent_id == node_1.uuid
-      assert result.old_prev_id == node_1.uuid
+      assert result.old_prev.uuid == node_1.uuid
     end
 
     # before 1 2

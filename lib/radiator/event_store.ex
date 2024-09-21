@@ -12,7 +12,7 @@ defmodule Radiator.EventStore do
       create_event_data(%{
         data: Event.payload(event),
         event_type: Event.event_type(event),
-        uuid: convert_to_uuid(event.uuid),
+        uuid: convert_to_uuid(event.event_id),
         user_id: event.user_id
       })
 
