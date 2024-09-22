@@ -27,6 +27,18 @@ defmodule Radiator.Outline.Dispatch do
     |> CommandQueue.enqueue()
   end
 
+  def move_up(node_id, user_id, event_id) do
+    "move_up"
+    |> Command.build(node_id, user_id, event_id)
+    |> CommandQueue.enqueue()
+  end
+
+  def move_down(node_id, user_id, event_id) do
+    "move_down"
+    |> Command.build(node_id, user_id, event_id)
+    |> CommandQueue.enqueue()
+  end
+
   def move_node(node_id, user_id, event_id,
         parent_id: parent_id,
         prev_id: prev_id

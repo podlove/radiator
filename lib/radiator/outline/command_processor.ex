@@ -7,12 +7,16 @@ defmodule Radiator.Outline.CommandProcessor do
   alias Radiator.Outline
   alias Radiator.Outline.NodeRepoResult
 
+  alias Radiator.Outline.Command
+
   alias Radiator.Outline.Command.{
     ChangeNodeContentCommand,
     DeleteNodeCommand,
     IndentNodeCommand,
     InsertNodeCommand,
+    MoveDownCommand,
     MoveNodeCommand,
+    MoveUpCommand,
     OutdentNodeCommand
   }
 
@@ -28,6 +32,8 @@ defmodule Radiator.Outline.CommandProcessor do
   alias Radiator.Outline.NodeRepository
 
   require Logger
+  # for the guard
+  require Radiator.Outline.Command
 
   def start_link(opts \\ []) do
     {name, opts} = Keyword.pop(opts, :name, __MODULE__)
@@ -82,6 +88,18 @@ defmodule Radiator.Outline.CommandProcessor do
     |> handle_move_node_result(command)
   end
 
+  defp process_command(%MoveUpCommand{node_id: node_id} = command) do
+    node_id
+    |> Outline.move_up()
+    |> handle_move_node_result(command)
+  end
+
+  defp process_command(%MoveDownCommand{node_id: node_id} = command) do
+    node_id
+    |> Outline.move_down()
+    |> handle_move_node_result(command)
+  end
+
   defp process_command(%DeleteNodeCommand{node_id: node_id} = command) do
     case NodeRepository.get_node(node_id) do
       nil ->
@@ -129,48 +147,9 @@ defmodule Radiator.Outline.CommandProcessor do
 
   def handle_move_node_result(
         {:ok, %NodeRepoResult{node: node} = result},
-        %MoveNodeCommand{} = command
-      ) do
-    %NodeMovedEvent{
-      node: Outline.get_node_result_info(node),
-      old_prev: result.old_prev,
-      old_next: result.old_next,
-      user_id: command.user_id,
-      event_id: command.event_id,
-      next: result.next,
-      episode_id: result.episode_id,
-      children: result.children
-    }
-    |> EventStore.persist_event()
-    |> Dispatch.broadcast()
-
-    {:ok, node}
-  end
-
-  def handle_move_node_result(
-        {:ok, %NodeRepoResult{node: node} = result},
-        %IndentNodeCommand{} = command
-      ) do
-    %NodeMovedEvent{
-      node: node,
-      old_prev: result.old_prev,
-      old_next: result.old_next,
-      user_id: command.user_id,
-      event_id: command.event_id,
-      next: result.next,
-      episode_id: result.episode_id,
-      children: result.children
-    }
-    |> EventStore.persist_event()
-    |> Dispatch.broadcast()
-
-    {:ok, node}
-  end
-
-  def handle_move_node_result(
-        {:ok, %NodeRepoResult{node: node} = result},
-        %OutdentNodeCommand{} = command
-      ) do
+        %command_type{} = command
+      )
+      when Command.move_command?(command_type) do
     %NodeMovedEvent{
       node: node,
       old_prev: result.old_prev,

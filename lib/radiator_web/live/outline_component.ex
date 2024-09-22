@@ -192,20 +192,16 @@ defmodule RadiatorWeb.OutlineComponent do
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
 
   defp move_up(socket, uuid) do
-    node = NodeRepository.get_node!(uuid)
-    prev_node = NodeRepository.get_node!(node.prev_id)
-
     user_id = socket.assigns.user_id
 
-    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id),
-      parent_id: node.parent_id,
-      prev_id: prev_node.prev_id
-    )
-
+    Dispatch.move_up(uuid, user_id, generate_event_id(socket.id))
     socket
   end
 
-  defp move_down(socket, _uuid) do
+  defp move_down(socket, uuid) do
+    user_id = socket.assigns.user_id
+
+    Dispatch.move_down(uuid, user_id, generate_event_id(socket.id))
     socket
   end
 

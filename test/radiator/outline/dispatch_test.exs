@@ -6,10 +6,6 @@ defmodule Radiator.Outline.DispatchTest do
   import Radiator.AccountsFixtures
   import Radiator.PodcastFixtures
 
-  # alias Radiator.Outline
-  # alias Radiator.Outline.Dispatch
-  # alias Radiator.Outline.Node
-
   describe "outline dispatch" do
     setup do
       user = user_fixture()
