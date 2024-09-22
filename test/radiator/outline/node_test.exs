@@ -8,6 +8,25 @@ defmodule Radiator.Outline.NodeTest do
   alias Radiator.PodcastFixtures
 
   describe "insert_changeset/2" do
+    test "put uuid if none exists" do
+      episode = PodcastFixtures.episode_fixture()
+      uuid = Ecto.UUID.generate()
+
+      node1 =
+        %Node{uuid: uuid, episode_id: episode.id}
+        |> Node.insert_changeset(%{content: "some content"})
+        |> Ecto.Changeset.apply_changes()
+
+      assert node1.uuid == uuid
+
+      node2 =
+        %Node{episode_id: episode.id}
+        |> Node.insert_changeset(%{content: "some other content"})
+        |> Ecto.Changeset.apply_changes()
+
+      refute node2.uuid == nil
+    end
+
     test "accepts a UUID" do
       episode = PodcastFixtures.episode_fixture()
 
