@@ -26,29 +26,29 @@ defmodule RadiatorWeb.OutlineComponent do
   end
 
   def update(%{event: %NodeInsertedEvent{node: node, next: next_node}}, socket) do
-    # node_forms = Enum.map([node, next_node], &to_change_form(&1, %{}))
+    node_forms = Enum.map([node, next_node], &to_change_form(&1, %{}))
+
+    socket
+    |> stream(:nodes, node_forms)
+    |> reply(:ok)
+  end
+
+  def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: _content}}, socket) do
+    node = NodeRepository.get_node!(node_id)
+
+    socket
+    |> stream_insert(:nodes, to_change_form(node, %{}))
+    # |> push_event("set_content", %{uuid: node_id, content: content})
+    |> reply(:ok)
+  end
+
+  def update(%{event: %NodeMovedEvent{}}, socket) do
+    # nodes = [node, old_next_node, new_next_node] |> Enum.reject(&is_nil/1)
+    # node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
 
     socket
     # |> stream(:nodes, node_forms)
-    # |> stream_insert(:nodes, to_change_form(node, %{}))
     # |> push_event("move_node", %{})
-    |> reply(:ok)
-  end
-
-  def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: content}}, socket) do
-    socket
-    |> push_event("set_content", %{uuid: node_id, content: content})
-    |> reply(:ok)
-  end
-
-  def update(%{event: %NodeMovedEvent{} = evt}, socket) do
-    evt |> IO.inspect(label: "3")
-
-    #     nodes = [node, old_next_node, new_next_node] |> Enum.reject(&is_nil/1)
-    #     node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
-
-    socket
-    #     |> stream(:nodes, node_forms)
     |> reply(:ok)
   end
 
