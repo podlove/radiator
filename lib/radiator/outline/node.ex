@@ -53,13 +53,10 @@ defmodule Radiator.Outline.Node do
   defp trim(content) when is_binary(content), do: String.trim(content)
   defp trim(content), do: content
 
-  defp put_uuid(%Ecto.Changeset{valid?: true} = changeset) do
-    if changed?(changeset, :uuid) do
-      changeset
-    else
-      put_change(changeset, :uuid, Ecto.UUID.generate())
+  defp put_uuid(%Ecto.Changeset{} = changeset) do
+    case get_field(changeset, :uuid) do
+      nil -> put_change(changeset, :uuid, Ecto.UUID.generate())
+      _ -> changeset
     end
   end
-
-  defp put_uuid(changeset), do: changeset
 end

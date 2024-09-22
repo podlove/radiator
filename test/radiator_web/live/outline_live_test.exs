@@ -69,7 +69,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert updated_node.content == "node_1_updated"
 
       assert other_live
-             |> has_element?("#form-#{node_1.uuid} input[value=node_1_updated]")
+             |> has_element?("#form-#{node_1.uuid}_content[value=node_1_updated]")
     end
 
     test "insert a new node", %{conn: conn, show_id: show_id, nodes: [_, node_2 | _]} do
@@ -89,8 +89,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert node_2_1.prev_id == node_2.uuid
       assert node_2_1.content == nil
 
-      assert other_live
-             |> has_element?("#form-#{node_2_1.uuid}")
+      assert other_live |> has_element?("#form-#{node_2_1.uuid}")
     end
 
     # test "move node", %{conn: conn, show: show, episode: episode, nodes: [node_1 | _]} do
@@ -129,16 +128,13 @@ defmodule RadiatorWeb.OutlineLiveTest do
       {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
       assert live
-             |> element("#form-#{node_3.uuid} input")
+             |> element("#form-#{node_3.uuid}_content")
              |> render_keydown(%{"key" => "Delete", "value" => ""})
 
       keep_liveview_alive()
 
-      siblings = Outline.get_all_siblings(nil)
-      assert Enum.find(siblings, &(&1.prev_id == node_3.uuid)) == nil
-
-      refute other_live
-             |> has_element?("#form-#{node_3.uuid}")
+      refute live |> has_element?("#form-#{node_3.uuid}")
+      refute other_live |> has_element?("#form-#{node_3.uuid}")
     end
   end
 

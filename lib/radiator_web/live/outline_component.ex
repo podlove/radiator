@@ -33,37 +33,34 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: content}}, socket) do
+  def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: _content}}, socket) do
     node = NodeRepository.get_node!(node_id)
 
     socket
-    |> stream_insert(:nodes, to_change_form(node, %{content: content}))
+    |> stream_insert(:nodes, to_change_form(node, %{}))
+    # |> push_event("set_content", %{uuid: node_id, content: content})
     |> reply(:ok)
   end
 
-  def update(
-        %{
-          event: %NodeMovedEvent{node: node, old_next: old_next_node, next: new_next_node}
-        },
-        socket
-      ) do
-    nodes = [node, old_next_node, new_next_node] |> Enum.reject(&is_nil/1)
-    node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
+  def update(%{event: %NodeMovedEvent{}}, socket) do
+    # nodes = [node, old_next_node, new_next_node] |> Enum.reject(&is_nil/1)
+    # node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
 
     socket
-    |> stream(:nodes, node_forms)
+    # |> stream(:nodes, node_forms)
+    # |> push_event("move_node", %{})
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeDeletedEvent{node: node, next: nil}}, socket) do
+  def update(%{event: %NodeDeletedEvent{node: %{uuid: uuid}, next: nil}}, socket) do
     socket
-    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node.uuid}")
+    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeDeletedEvent{node: node, next: next}}, socket) do
+  def update(%{event: %NodeDeletedEvent{node: %{uuid: uuid}, next: next}}, socket) do
     socket
-    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node.uuid}")
+    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
     |> stream_insert(:nodes, to_change_form(next, %{}))
     |> reply(:ok)
   end
@@ -87,9 +84,30 @@ defmodule RadiatorWeb.OutlineComponent do
   end
 
   @impl true
+  def handle_event("save", %{"node" => %{"uuid" => uuid, "content" => content}}, socket) do
+    user_id = socket.assigns.user_id
+    Dispatch.change_node_content(uuid, content, user_id, generate_event_id(socket.id))
+
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event("new", %{"node" => %{"uuid" => uuid}}, socket) do
+    new_uuid = Ecto.UUID.generate()
+    user_id = socket.assigns.user_id
+    episode_id = socket.assigns.episode_id
+
+    params = %{"uuid" => new_uuid, "prev_id" => uuid, "episode_id" => episode_id}
+
+    Dispatch.insert_node(params, user_id, generate_event_id(socket.id))
+
+    socket
+    |> reply(:noreply)
+  end
+
   def handle_event("focus", %{"uuid" => uuid}, socket) do
     id = socket.assigns.user_id
-    name = socket.assigns.user.email |> String.split("@") |> List.first()
+    [name | _] = String.split(socket.assigns.user.email, "@")
 
     Endpoint.broadcast("outline", "focus", %{uuid: uuid, user_id: id, user_name: name})
 
@@ -99,7 +117,7 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def handle_event("blur", %{"uuid" => uuid}, socket) do
     id = socket.assigns.user_id
-    name = socket.assigns.user.email |> String.split("@") |> List.first()
+    [name | _] = String.split(socket.assigns.user.email, "@")
 
     Endpoint.broadcast("outline", "blur", %{uuid: uuid, user_id: id, user_name: name})
 
@@ -119,11 +137,11 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def handle_event(
         "keydown",
-        %{"key" => "ArrowUp", "altKey" => true, "uuid" => uuid, "prev" => prev_id},
+        %{"key" => "ArrowUp", "altKey" => true, "uuid" => uuid, "prev" => _},
         socket
       ) do
     socket
-    |> move_up(uuid, prev_id)
+    |> move_up(uuid)
     |> reply(:noreply)
   end
 
@@ -133,67 +151,32 @@ defmodule RadiatorWeb.OutlineComponent do
         socket
       ) do
     socket
-    |> move_down(uuid, "next_id")
+    |> move_down(uuid)
     |> reply(:noreply)
   end
 
   def handle_event(
         "keydown",
-        %{"key" => "Tab", "shiftKey" => false, "uuid" => uuid, "prev" => prev_id},
+        %{"key" => "Tab", "shiftKey" => false, "uuid" => uuid, "prev" => _},
         socket
       ) do
     socket
-    |> indent(uuid, prev_id)
+    |> indent(uuid)
     |> reply(:noreply)
   end
 
   def handle_event(
         "keydown",
-        %{"key" => "Tab", "shiftKey" => true, "uuid" => uuid, "parent" => parent_id},
+        %{"key" => "Tab", "shiftKey" => true, "uuid" => uuid, "parent" => _},
         socket
       ) do
     socket
-    |> outdent(uuid, parent_id)
+    |> outdent(uuid)
     |> reply(:noreply)
   end
 
   def handle_event("keydown", _params, socket) do
     socket
-    |> reply(:noreply)
-  end
-
-  def handle_event("save", %{"uuid" => uuid, "node" => params}, socket) do
-    user_id = socket.assigns.user_id
-    Dispatch.change_node_content(uuid, params["content"], user_id, generate_event_id(socket.id))
-
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_event("new", %{"uuid" => uuid}, socket) do
-    new_uuid = Ecto.UUID.generate()
-    user_id = socket.assigns.user_id
-    episode_id = socket.assigns.episode_id
-
-    params = %{
-      "uuid" => new_uuid,
-      "prev_id" => uuid,
-      "creator_id" => user_id,
-      "episode_id" => episode_id
-    }
-
-    node = %Node{
-      uuid: new_uuid,
-      prev_id: uuid,
-      creator_id: user_id,
-      episode_id: episode_id
-    }
-
-    Dispatch.insert_node(params, user_id, generate_event_id(socket.id))
-
-    socket
-    # TODO @sorax needs to be refactored, node is only a minor version without content
-    |> stream_insert(:nodes, to_change_form(node, %{}))
     |> reply(:noreply)
   end
 
@@ -208,33 +191,35 @@ defmodule RadiatorWeb.OutlineComponent do
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
 
-  defp move_up(socket, uuid, prev_id) do
-    %{parent_id: prev_parent_id, prev_id: prev_prev_id} = NodeRepository.get_node!(prev_id)
+  defp move_up(socket, uuid) do
+    node = NodeRepository.get_node!(uuid)
+    prev_node = NodeRepository.get_node!(node.prev_id)
 
     user_id = socket.assigns.user_id
 
     Dispatch.move_node(uuid, user_id, generate_event_id(socket.id),
-      parent_id: prev_parent_id,
-      prev_id: prev_prev_id
+      parent_id: node.parent_id,
+      prev_id: prev_node.prev_id
     )
 
     socket
   end
 
-  defp move_down(socket, _uuid, _prev_id) do
+  defp move_down(socket, _uuid) do
     socket
   end
 
-  defp indent(socket, uuid, _prev_id) do
+  defp indent(socket, uuid) do
     user_id = socket.assigns.user_id
-
     Dispatch.indent_node(uuid, user_id, generate_event_id(socket.id))
+
     socket
   end
 
-  defp outdent(socket, uuid, _parent_id) do
+  defp outdent(socket, uuid) do
     user_id = socket.assigns.user_id
     Dispatch.outdent_node(uuid, user_id, generate_event_id(socket.id))
+
     socket
   end
 end
