@@ -6,7 +6,7 @@ defmodule Radiator.Application do
   use Application
 
   alias Radiator.Outline.CommandProcessor
-  alias Radiator.Outline.EventProducer
+  alias Radiator.Outline.CommandQueue
   alias Radiator.Outline.NodeChangeListener
 
   @impl true
@@ -22,8 +22,8 @@ defmodule Radiator.Application do
       # {Radiator.Worker, arg},
       # Start to serve requests, typically the last entry
       RadiatorWeb.Endpoint,
-      {EventProducer, name: EventProducer},
-      {CommandProcessor, name: CommandProcessor, subscribe_to: [{EventProducer, max_demand: 1}]},
+      {CommandQueue, name: CommandQueue},
+      {CommandProcessor, name: CommandProcessor, subscribe_to: [{CommandQueue, max_demand: 1}]},
       {NodeChangeListener, name: NodeChangeListener}
     ]
 
