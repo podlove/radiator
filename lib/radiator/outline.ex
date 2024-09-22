@@ -184,6 +184,32 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+  Moves a node down in the outline tree. Only works if the node
+  is not the last child of its parent meaning there must be a next node.
+  In that case the two nodes will switch places.
+  ## Examples
+
+      iex> move_down("074b755d-d095-4b9c-8445-ef1f7ea76d54")
+      {:ok, %NodeRepoResult{}}
+
+      iex> move_down("0000000-1111-2222-3333-44444444")
+      {:error, :not_found}
+  """
+  def move_down(node_id) do
+    Repo.transaction(fn ->
+      case NodeRepository.get_node(node_id) do
+        nil ->
+          {:error, :not_found}
+
+        node ->
+          next_node = get_next_node(node)
+          do_move_down(node, next_node)
+      end
+    end)
+    |> unwrap_transaction_result
+  end
+
+  @doc """
   Moves a node to another parent.
 
   ## Examples
@@ -321,12 +347,16 @@ defmodule Radiator.Outline do
 
   """
   def get_prev_node(nil), do: nil
-  def get_prev_node(node) when is_nil(node.prev_id), do: nil
+  def get_prev_node(%Node{prev_id: nil}), do: nil
 
-  def get_prev_node(node) do
+  def get_prev_node(%Node{} = node) do
     Node
     |> where([n], n.uuid == ^node.prev_id)
     |> Repo.one()
+  end
+
+  def get_next_node(%Node{episode_id: episode_id, uuid: node_id, parent_id: parent_id}) do
+    get_next_node(episode_id, node_id, parent_id)
   end
 
   def get_next_node(episode_id, node_id, parent_id) do
@@ -609,6 +639,26 @@ defmodule Radiator.Outline do
       episode_id: episode_id,
       old_prev: get_node_result_info(prev_node),
       old_next: get_node_result_info(next_node)
+    }
+  end
+
+  defp do_move_down(%Node{}, nil), do: {:error, :no_next_node}
+
+  defp do_move_down(
+         %Node{episode_id: episode_id, parent_id: parent_id} = node,
+         %Node{} = next_node
+       ) do
+    new_next_node = get_next_node(next_node)
+
+    move_node_if(next_node, parent_id, node.prev_id)
+    move_node_if(node, parent_id, next_node.uuid)
+    move_node_if(new_next_node, parent_id, node.uuid)
+
+    %NodeRepoResult{
+      node: get_node_result_info(node),
+      episode_id: episode_id,
+      old_next: get_node_result_info(next_node),
+      next: get_node_result_info(new_next_node)
     }
   end
 

@@ -1088,21 +1088,67 @@ defmodule Radiator.OutlineTest do
       assert nested_node_2.prev_id == nil
       assert nested_node_1.prev_id == nested_node_2.uuid
     end
+  end
 
-    # test "moves node up with children and next node", %{
-    #   episode: episode,
-    #   parent_node: parent_node,
-    #   node_3: node_3,
-    #   node_4: node_4,
-    #   nested_node_1: nested_node_1,
-    #   nested_node_2: nested_node_2
-    # } do
-    #   nested_node_3 =
-    #     node_fixture(
-    #       episode_id: episode.id,
-    #       parent_id: node_3.uuid,
-    #       prev_id: nested_node_2.uuid,
-    #       content:
+  describe "move_down/1" do
+    setup :complex_node_fixture
+
+    # moving node_2 down should be the same as moving node_3 up
+    test "moves node down", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4
+    } do
+      assert node_2.prev_id == node_1.uuid
+      assert node_3.prev_id == node_2.uuid
+      assert node_4.prev_id == node_3.uuid
+
+      {:ok, _} = Outline.move_down(node_2.uuid)
+
+      # reload nodes
+      node_2 = Repo.reload!(node_2)
+      node_3 = Repo.reload!(node_3)
+      node_4 = Repo.reload!(node_4)
+
+      assert node_2.prev_id == node_3.uuid
+      assert node_3.prev_id == node_1.uuid
+      assert node_4.prev_id == node_2.uuid
+    end
+
+    test "cannot move down when there is no next node", %{
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      assert nested_node_1.prev_id == nil
+      assert nested_node_2.prev_id == nested_node_1.uuid
+
+      {:error, :no_next_node} = Outline.move_down(nested_node_2.uuid)
+
+      # reload nodes, should be no changes
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert nested_node_1.prev_id == nil
+      assert nested_node_2.prev_id == nested_node_1.uuid
+    end
+
+    test "moves node down when there is no previous node", %{
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      assert nested_node_1.prev_id == nil
+      assert nested_node_2.prev_id == nested_node_1.uuid
+
+      {:ok, _} = Outline.move_down(nested_node_1.uuid)
+
+      # reload nodes
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+
+      assert nested_node_2.prev_id == nil
+      assert nested_node_1.prev_id == nested_node_2.uuid
+    end
   end
 
   describe "remove_node/1" do
