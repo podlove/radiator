@@ -1,7 +1,7 @@
-defmodule Radiator.Web.UrlExtractorTest do
+defmodule Radiator.Resources.UrlExtractorTest do
   use Radiator.DataCase
 
-  alias Radiator.Web.UrlExtractor
+  alias Radiator.Resources.UrlExtractor
 
   describe "extract_url_positions/1" do
     test "recognizes an URL" do

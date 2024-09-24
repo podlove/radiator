@@ -13,8 +13,8 @@ defmodule Radiator.Outline.NodeChangeListener do
   }
 
   alias Radiator.Outline.Dispatch
-  alias Radiator.Web
-  alias Radiator.Web.UrlExtractor
+  alias Radiator.Resources
+  alias Radiator.Resources.UrlExtractor
 
   require Logger
 

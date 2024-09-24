@@ -1,4 +1,4 @@
-defmodule Radiator.Web.Url do
+defmodule Radiator.Resources.Url do
   @moduledoc """
   An extracted URL which always related to a node.
   """

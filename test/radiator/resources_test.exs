@@ -1,12 +1,12 @@
-defmodule Radiator.WebTest do
+defmodule Radiator.ResourcesbTest do
   use Radiator.DataCase
 
   import Ecto.Query, warn: false
-  import Radiator.WebFixtures
+  import Radiator.ResourcesFixtures
 
   alias Radiator.OutlineFixtures
-  alias Radiator.Web
-  alias Radiator.Web.Url
+  alias Radiator.Resources
+  alias Radiator.Resources.Url
 
   describe "urls" do
     setup do
@@ -26,32 +26,32 @@ defmodule Radiator.WebTest do
 
     test "list_urls/0 returns all urls", %{episode: episode, node: node} do
       url = url_fixture(node_id: node.uuid)
-      assert Web.list_urls(episode.id) == [url]
+      assert Resources.list_urls(episode.id) == [url]
     end
 
     test "get_url!/1 returns the url with given id" do
       url = url_fixture()
-      assert Web.get_url!(url.id) == url
+      assert Resources.get_url!(url.id) == url
     end
 
     test "create_url/1 with valid data creates a url", %{node: node} do
       valid_attrs = %{url: "some url", start_bytes: 42, size_bytes: 42, node_id: node.uuid}
 
-      assert {:ok, %Url{} = url} = Web.create_url(valid_attrs)
+      assert {:ok, %Url{} = url} = Resources.create_url(valid_attrs)
       assert url.url == "some url"
       assert url.start_bytes == 42
       assert url.size_bytes == 42
     end
 
     test "create_url/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Web.create_url(@invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Resources.create_url(@invalid_attrs)
     end
 
     test "update_url/2 with valid data updates the url" do
       url = url_fixture()
       update_attrs = %{url: "some updated url", start_bytes: 43, size_bytes: 43}
 
-      assert {:ok, %Url{} = url} = Web.update_url(url, update_attrs)
+      assert {:ok, %Url{} = url} = Resources.update_url(url, update_attrs)
       assert url.url == "some updated url"
       assert url.start_bytes == 43
       assert url.size_bytes == 43
@@ -59,19 +59,19 @@ defmodule Radiator.WebTest do
 
     test "update_url/2 with invalid data returns error changeset" do
       url = url_fixture()
-      assert {:error, %Ecto.Changeset{}} = Web.update_url(url, @invalid_attrs)
-      assert url == Web.get_url!(url.id)
+      assert {:error, %Ecto.Changeset{}} = Resources.update_url(url, @invalid_attrs)
+      assert url == Resources.get_url!(url.id)
     end
 
     test "delete_url/1 deletes the url" do
       url = url_fixture()
-      assert {:ok, %Url{}} = Web.delete_url(url)
-      assert_raise Ecto.NoResultsError, fn -> Web.get_url!(url.id) end
+      assert {:ok, %Url{}} = Resources.delete_url(url)
+      assert_raise Ecto.NoResultsError, fn -> Resources.get_url!(url.id) end
     end
 
     test "change_url/1 returns a url changeset" do
       url = url_fixture()
-      assert %Ecto.Changeset{} = Web.change_url(url)
+      assert %Ecto.Changeset{} = Resources.change_url(url)
     end
   end
 end

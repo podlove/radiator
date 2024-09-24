@@ -1,4 +1,4 @@
-defmodule Radiator.Web do
+defmodule Radiator.Resources do
   @moduledoc """
   The Web context. All web related stuff, handing URLs,
   scraped Websites etc..
@@ -7,7 +7,7 @@ defmodule Radiator.Web do
   import Ecto.Query, warn: false
 
   alias Radiator.Repo
-  alias Radiator.Web.Url
+  alias Radiator.Resources.Url
 
   require Logger
 

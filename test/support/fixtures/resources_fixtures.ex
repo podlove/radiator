@@ -1,10 +1,10 @@
-defmodule Radiator.WebFixtures do
+defmodule Radiator.ResourcesFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Radiator.Web` context.
+  entities via the `Radiator.Resources` context.
   """
   alias Radiator.OutlineFixtures
-  alias Radiator.Web
+  alias Radiator.Resources
 
   @doc """
   Generate a url.
@@ -20,7 +20,7 @@ defmodule Radiator.WebFixtures do
         url: "some url",
         node_id: node_id
       })
-      |> Web.create_url()
+      |> Resources.create_url()
 
     url
   end
