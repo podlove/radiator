@@ -25,8 +25,8 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeInsertedEvent{node: node, next: next_node}}, socket) do
-    node_forms = Enum.map([node, next_node], &to_change_form(&1, %{}))
+  def update(%{event: %NodeInsertedEvent{node: node, next: next}}, socket) do
+    node_forms = Enum.map([node, next], &to_change_form(&1, %{}))
 
     socket
     |> stream(:nodes, node_forms)
@@ -42,12 +42,19 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeMovedEvent{}}, socket) do
-    # nodes = [node, old_next_node, new_next_node] |> Enum.reject(&is_nil/1)
-    # node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
+  def update(
+        %{event: %NodeMovedEvent{node: node, next: next, old_prev: old_prev, old_next: old_next}},
+        socket
+      ) do
+    nodes =
+      [node, next, old_prev, old_next]
+      |> Enum.reject(&is_nil/1)
+      |> Enum.map(&NodeRepository.get_node!(&1.uuid))
+
+    node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
 
     socket
-    # |> stream(:nodes, node_forms)
+    |> stream(:nodes, node_forms)
     # |> push_event("move_node", %{})
     |> reply(:ok)
   end
@@ -140,8 +147,10 @@ defmodule RadiatorWeb.OutlineComponent do
         %{"key" => "ArrowUp", "altKey" => true, "uuid" => uuid, "prev" => _},
         socket
       ) do
+    user_id = socket.assigns.user_id
+    Dispatch.move_up(uuid, user_id, generate_event_id(socket.id))
+
     socket
-    |> move_up(uuid)
     |> reply(:noreply)
   end
 
@@ -150,8 +159,10 @@ defmodule RadiatorWeb.OutlineComponent do
         %{"key" => "ArrowDown", "altKey" => true, "uuid" => uuid},
         socket
       ) do
+    user_id = socket.assigns.user_id
+    Dispatch.move_down(uuid, user_id, generate_event_id(socket.id))
+
     socket
-    |> move_down(uuid)
     |> reply(:noreply)
   end
 
@@ -160,8 +171,10 @@ defmodule RadiatorWeb.OutlineComponent do
         %{"key" => "Tab", "shiftKey" => false, "uuid" => uuid, "prev" => _},
         socket
       ) do
+    user_id = socket.assigns.user_id
+    Dispatch.indent_node(uuid, user_id, generate_event_id(socket.id))
+
     socket
-    |> indent(uuid)
     |> reply(:noreply)
   end
 
@@ -170,8 +183,10 @@ defmodule RadiatorWeb.OutlineComponent do
         %{"key" => "Tab", "shiftKey" => true, "uuid" => uuid, "parent" => _},
         socket
       ) do
+    user_id = socket.assigns.user_id
+    Dispatch.outdent_node(uuid, user_id, generate_event_id(socket.id))
+
     socket
-    |> outdent(uuid)
     |> reply(:noreply)
   end
 
@@ -190,32 +205,4 @@ defmodule RadiatorWeb.OutlineComponent do
   end
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
-
-  defp move_up(socket, uuid) do
-    user_id = socket.assigns.user_id
-
-    Dispatch.move_up(uuid, user_id, generate_event_id(socket.id))
-    socket
-  end
-
-  defp move_down(socket, uuid) do
-    user_id = socket.assigns.user_id
-
-    Dispatch.move_down(uuid, user_id, generate_event_id(socket.id))
-    socket
-  end
-
-  defp indent(socket, uuid) do
-    user_id = socket.assigns.user_id
-    Dispatch.indent_node(uuid, user_id, generate_event_id(socket.id))
-
-    socket
-  end
-
-  defp outdent(socket, uuid) do
-    user_id = socket.assigns.user_id
-    Dispatch.outdent_node(uuid, user_id, generate_event_id(socket.id))
-
-    socket
-  end
 end
