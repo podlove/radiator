@@ -86,12 +86,7 @@ defmodule Radiator.Outline do
       parent_node = find_parent_node(prev_node, parent_id)
 
       # find Node which has been previously connected to prev_node
-      next_node =
-        Node
-        |> where(episode_id: ^episode_id)
-        |> where_prev_node_equals(prev_id)
-        |> where_parent_node_equals(get_node_id(parent_node))
-        |> Repo.one()
+      next_node = get_next_node(episode_id, prev_id, get_node_id(parent_node))
 
       with true <- parent_and_prev_consistent?(parent_node, prev_node),
            true <- episode_valid?(episode_id, parent_node, prev_node),
@@ -109,6 +104,18 @@ defmodule Radiator.Outline do
     end)
   end
 
+  @doc """
+  Intends a node given by its id (by using the tab key).
+
+  ## Examples
+
+      iex> indent_node("074b755d-d095-4b9c-8445-ef1f7ea76d54")
+      {:ok, %NodeRepoResult{}}
+
+      iex> indent_node("0000000-1111-2222-3333-44444444")
+      {:error, :not_found}
+
+  """
   def indent_node(node_id) do
     Repo.transaction(fn ->
       case NodeRepository.get_node(node_id) do
@@ -123,6 +130,18 @@ defmodule Radiator.Outline do
     |> unwrap_transaction_result
   end
 
+  @doc """
+  Outdents a node given by its id (by using the shift-tab keys).
+
+  ## Examples
+
+      iex> outdent_node("074b755d-d095-4b9c-8445-ef1f7ea76d54")
+      {:ok, %NodeRepoResult{}}
+
+      iex> outdent_node("0000000-1111-2222-3333-44444444")
+      {:error, :not_found}
+
+  """
   def outdent_node(node_id) do
     Repo.transaction(fn ->
       case NodeRepository.get_node(node_id) do
@@ -132,6 +151,59 @@ defmodule Radiator.Outline do
         node ->
           parent_node = get_parent_node(node)
           do_outdent_node(node, parent_node)
+      end
+    end)
+    |> unwrap_transaction_result
+  end
+
+  @doc """
+  Moves a node up in the outline tree. Only works if the node
+  is not the first child of its parent meaning there must be a
+  previous node. In that case the two nodes will switch places.
+  ## Examples
+
+      iex> move_up("074b755d-d095-4b9c-8445-ef1f7ea76d54")
+      {:ok, %NodeRepoResult{}}
+
+      iex> move_up("0000000-1111-2222-3333-44444444")
+      {:error, :not_found}
+
+  """
+  def move_up(node_id) do
+    Repo.transaction(fn ->
+      case NodeRepository.get_node(node_id) do
+        nil ->
+          {:error, :not_found}
+
+        node ->
+          prev_node = get_prev_node(node)
+          do_move_up(node, prev_node)
+      end
+    end)
+    |> unwrap_transaction_result
+  end
+
+  @doc """
+  Moves a node down in the outline tree. Only works if the node
+  is not the last child of its parent meaning there must be a next node.
+  In that case the two nodes will switch places.
+  ## Examples
+
+      iex> move_down("074b755d-d095-4b9c-8445-ef1f7ea76d54")
+      {:ok, %NodeRepoResult{}}
+
+      iex> move_down("0000000-1111-2222-3333-44444444")
+      {:error, :not_found}
+  """
+  def move_down(node_id) do
+    Repo.transaction(fn ->
+      case NodeRepository.get_node(node_id) do
+        nil ->
+          {:error, :not_found}
+
+        node ->
+          next_node = get_next_node(node)
+          do_move_down(node, next_node)
       end
     end)
     |> unwrap_transaction_result
@@ -275,11 +347,23 @@ defmodule Radiator.Outline do
 
   """
   def get_prev_node(nil), do: nil
-  def get_prev_node(node) when is_nil(node.prev_id), do: nil
+  def get_prev_node(%Node{prev_id: nil}), do: nil
 
-  def get_prev_node(node) do
+  def get_prev_node(%Node{} = node) do
     Node
     |> where([n], n.uuid == ^node.prev_id)
+    |> Repo.one()
+  end
+
+  def get_next_node(%Node{episode_id: episode_id, uuid: node_id, parent_id: parent_id}) do
+    get_next_node(episode_id, node_id, parent_id)
+  end
+
+  def get_next_node(episode_id, node_id, parent_id) do
+    Node
+    |> where(episode_id: ^episode_id)
+    |> where_prev_node_equals(node_id)
+    |> where_parent_node_equals(parent_id)
     |> Repo.one()
   end
 
@@ -538,6 +622,46 @@ defmodule Radiator.Outline do
     {:ok, Map.put(main_move_result, :children, new_children)}
   end
 
+  defp do_move_up(%Node{}, nil), do: {:error, :no_previous_node}
+
+  defp do_move_up(
+         %Node{episode_id: episode_id, parent_id: parent_id} = node,
+         %Node{} = prev_node
+       ) do
+    next_node = get_next_node(episode_id, node.uuid, parent_id)
+
+    move_node_if(node, parent_id, prev_node.prev_id)
+    move_node_if(prev_node, parent_id, node.uuid)
+    move_node_if(next_node, parent_id, prev_node.uuid)
+
+    %NodeRepoResult{
+      node: get_node_result_info(node),
+      episode_id: episode_id,
+      old_prev: get_node_result_info(prev_node),
+      old_next: get_node_result_info(next_node)
+    }
+  end
+
+  defp do_move_down(%Node{}, nil), do: {:error, :no_next_node}
+
+  defp do_move_down(
+         %Node{episode_id: episode_id, parent_id: parent_id} = node,
+         %Node{} = next_node
+       ) do
+    new_next_node = get_next_node(next_node)
+
+    move_node_if(next_node, parent_id, node.prev_id)
+    move_node_if(node, parent_id, next_node.uuid)
+    move_node_if(new_next_node, parent_id, node.uuid)
+
+    %NodeRepoResult{
+      node: get_node_result_info(node),
+      episode_id: episode_id,
+      old_next: get_node_result_info(next_node),
+      next: get_node_result_info(new_next_node)
+    }
+  end
+
   # given a list of nodes in one level, return all the nodes that are after a give
   defp next_nodes([], _node), do: []
   defp next_nodes([%{prev_id: uuid} | _tail] = children, %{uuid: uuid}), do: children
@@ -581,6 +705,8 @@ defmodule Radiator.Outline do
   defp unwrap_transaction_result({:error, error}) do
     {:error, error}
   end
+
+  defp unwrap_transaction_result(result), do: result
 
   defp binaray_uuid_to_ecto_uuid(nil), do: nil
 

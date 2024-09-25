@@ -4,7 +4,7 @@ defmodule Radiator.Outline.CommandProcessorTest do
 
   alias Radiator.AccountsFixtures
   alias Radiator.EventStore
-  alias Radiator.Outline.{Command, CommandProcessor, Dispatch, EventProducer, NodeRepository}
+  alias Radiator.Outline.{Command, CommandProcessor, CommandQueue, Dispatch, NodeRepository}
   alias Radiator.Outline.Command.InsertNodeCommand
   alias Radiator.Outline.Event.NodeInsertedEvent
   alias Radiator.PodcastFixtures
@@ -50,7 +50,7 @@ defmodule Radiator.Outline.CommandProcessorTest do
     end
 
     test "handles previously enqueued events", %{episode: episode, user: user, event_id: event_id} do
-      producer = start_supervised!({EventProducer, name: TestEventProducer})
+      producer = start_supervised!({CommandQueue, name: TestCommandQueue})
 
       command = %InsertNodeCommand{
         event_id: event_id,
@@ -63,7 +63,7 @@ defmodule Radiator.Outline.CommandProcessorTest do
       }
 
       Dispatch.subscribe()
-      EventProducer.enqueue(producer, command)
+      CommandQueue.enqueue(producer, command)
 
       start_supervised!(
         {CommandProcessor, name: TestCommandProcessor, subscribe_to: [{producer, max_demand: 1}]}

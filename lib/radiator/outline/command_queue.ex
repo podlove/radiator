@@ -1,4 +1,4 @@
-defmodule Radiator.Outline.EventProducer do
+defmodule Radiator.Outline.CommandQueue do
   @moduledoc false
 
   use GenStage

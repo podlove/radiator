@@ -6,9 +6,21 @@ defmodule Radiator.Outline.Command do
     DeleteNodeCommand,
     IndentNodeCommand,
     InsertNodeCommand,
+    MoveDownCommand,
     MoveNodeCommand,
+    MoveUpCommand,
     OutdentNodeCommand
   }
+
+  @move_commands [
+    IndentNodeCommand,
+    MoveDownCommand,
+    MoveNodeCommand,
+    MoveUpCommand,
+    OutdentNodeCommand
+  ]
+
+  defguard move_command?(command) when command in @move_commands
 
   def build("insert_node", payload, user_id, event_id) do
     %InsertNodeCommand{
@@ -36,6 +48,22 @@ defmodule Radiator.Outline.Command do
 
   def build("outdent_node", node_id, user_id, event_id) do
     %OutdentNodeCommand{
+      event_id: event_id,
+      user_id: user_id,
+      node_id: node_id
+    }
+  end
+
+  def build("move_up", node_id, user_id, event_id) do
+    %MoveUpCommand{
+      event_id: event_id,
+      user_id: user_id,
+      node_id: node_id
+    }
+  end
+
+  def build("move_down", node_id, user_id, event_id) do
+    %MoveDownCommand{
       event_id: event_id,
       user_id: user_id,
       node_id: node_id

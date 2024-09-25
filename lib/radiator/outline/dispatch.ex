@@ -1,30 +1,42 @@
 defmodule Radiator.Outline.Dispatch do
   @moduledoc false
 
-  alias Radiator.Outline.{Command, Event, EventProducer, Validations}
+  alias Radiator.Outline.{Command, CommandQueue, Event, Validations}
 
   def insert_node(attributes, user_id, event_id) do
     "insert_node"
     |> Command.build(attributes, user_id, event_id)
-    |> EventProducer.enqueue()
+    |> CommandQueue.enqueue()
   end
 
   def change_node_content(node_id, content, user_id, event_id) do
     "change_node_content"
     |> Command.build(node_id, content, user_id, event_id)
-    |> EventProducer.enqueue()
+    |> CommandQueue.enqueue()
   end
 
   def indent_node(node_id, user_id, event_id) do
     "indent_node"
     |> Command.build(node_id, user_id, event_id)
-    |> EventProducer.enqueue()
+    |> CommandQueue.enqueue()
   end
 
   def outdent_node(node_id, user_id, event_id) do
     "outdent_node"
     |> Command.build(node_id, user_id, event_id)
-    |> EventProducer.enqueue()
+    |> CommandQueue.enqueue()
+  end
+
+  def move_up(node_id, user_id, event_id) do
+    "move_up"
+    |> Command.build(node_id, user_id, event_id)
+    |> CommandQueue.enqueue()
+  end
+
+  def move_down(node_id, user_id, event_id) do
+    "move_down"
+    |> Command.build(node_id, user_id, event_id)
+    |> CommandQueue.enqueue()
   end
 
   def move_node(node_id, user_id, event_id,
@@ -33,13 +45,13 @@ defmodule Radiator.Outline.Dispatch do
       ) do
     "move_node"
     |> Command.build(node_id, parent_id, prev_id, user_id, event_id)
-    |> EventProducer.enqueue()
+    |> CommandQueue.enqueue()
   end
 
   def delete_node(node_id, user_id, event_id) do
     "delete_node"
     |> Command.build(node_id, user_id, event_id)
-    |> EventProducer.enqueue()
+    |> CommandQueue.enqueue()
   end
 
   def subscribe do

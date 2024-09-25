@@ -1,6 +1,6 @@
 defmodule Radiator.Outline.Command.MoveNodeCommand do
   @moduledoc """
-  Command to move a nodeinside the outline to another place.
+  Command to move a node inside the outline to another place.
   """
   @type t() :: %__MODULE__{
           event_id: binary(),
