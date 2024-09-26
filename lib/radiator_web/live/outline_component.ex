@@ -38,10 +38,37 @@ defmodule RadiatorWeb.OutlineComponent do
   end
 
   def update(
-        %{event: %NodeMovedEvent{node: node, next: next, old_prev: old_prev, old_next: old_next}},
+        %{
+          event: %NodeMovedEvent{
+            node: node,
+            next: next,
+            old_prev: old_prev,
+            old_next: old_next,
+            children: nil
+          }
+        },
         socket
       ) do
     nodes = [node, next, old_prev, old_next] |> Enum.reject(&is_nil/1)
+
+    socket
+    |> push_event("move_nodes", %{nodes: nodes})
+    |> reply(:ok)
+  end
+
+  def update(
+        %{
+          event: %NodeMovedEvent{
+            node: node,
+            next: next,
+            old_prev: old_prev,
+            old_next: old_next,
+            children: children
+          }
+        },
+        socket
+      ) do
+    nodes = ([node, next, old_prev, old_next] ++ children) |> Enum.reject(&is_nil/1)
 
     socket
     |> push_event("move_nodes", %{nodes: nodes})
@@ -157,7 +184,7 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def handle_event(
         "keydown",
-        %{"key" => "Tab", "shiftKey" => false, "uuid" => uuid, "prev" => _},
+        %{"key" => "Tab", "shiftKey" => false, "uuid" => uuid},
         socket
       ) do
     user_id = socket.assigns.user_id
@@ -169,7 +196,7 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def handle_event(
         "keydown",
-        %{"key" => "Tab", "shiftKey" => true, "uuid" => uuid, "parent" => _},
+        %{"key" => "Tab", "shiftKey" => true, "uuid" => uuid},
         socket
       ) do
     user_id = socket.assigns.user_id

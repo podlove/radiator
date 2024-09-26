@@ -1044,6 +1044,23 @@ defmodule Radiator.OutlineTest do
       assert node_4.prev_id == nested_node_2.uuid
       assert node_4.parent_id == node_3.uuid
     end
+
+    test "outdent nested 1 returns correct result", %{
+      parent_node: parent_node,
+      node_3: node_3,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2
+    } do
+      {:ok, result} = Outline.outdent_node(nested_node_1.uuid)
+      assert result.node.parent_id == parent_node.uuid
+      assert result.node.prev_id == node_3.uuid
+
+      result_nested_node_2 =
+        Enum.find(result.children, fn node -> node.uuid == nested_node_2.uuid end)
+
+      assert result_nested_node_2.parent_id == nested_node_1.uuid
+      assert result_nested_node_2.prev_id == nil
+    end
   end
 
   describe "move_up/1" do

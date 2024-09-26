@@ -568,9 +568,9 @@ defmodule Radiator.Outline do
       {:ok, node} = move_node_if(node, new_parent_id, new_prev_id)
 
       {:ok, old_next_node} =
-          move_node_if(old_next_node, old_next_node.parent_id, get_node_id(prev_node))
+        move_node_if(old_next_node, get_parent_id_if(old_next_node), get_node_id(prev_node))
 
-      {:ok, _new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
+      {:ok, new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
 
       Map.merge(node_repo_result, %{
         node: get_node_result_info(node),
@@ -580,6 +580,9 @@ defmodule Radiator.Outline do
       })
     end)
   end
+
+  defp get_parent_id_if(nil), do: nil
+  defp get_parent_id_if(%Node{parent_id: parent_id}), do: parent_id
 
   defp do_indent_node(_node, nil), do: {:error, :no_prev_node}
 
@@ -611,13 +614,28 @@ defmodule Radiator.Outline do
 
     # new children are the possible new child elements of the node
     # if the node already had children the new children are appended to the list of existing children
-    _t =
-      Enum.reduce(new_children, get_node_id(last_of_old_children), fn n, prev_id ->
-        move_node_if(n, node.uuid, prev_id)
-        n.uuid
-      end)
 
-    {:ok, Map.put(main_move_result, :children, new_children)}
+    moved_children =
+      if Enum.empty?(new_children) do
+        []
+      else
+        [first_of_new_children | tail_of_new_children] = new_children
+
+        {:ok, moved_first_child} =
+          move_node_if(first_of_new_children, node.uuid, get_node_id(last_of_old_children))
+
+        Enum.map(tail_of_new_children, fn n ->
+          {:ok, child_move_result} = move_node_if(n, node.uuid, n.prev_id)
+          child_move_result
+        end) ++ [moved_first_child]
+      end
+
+    result =
+      main_move_result
+      |> Map.put(:children, moved_children)
+      |> Map.put(:old_next, nil)
+
+    {:ok, result}
   end
 
   defp do_move_up(%Node{}, nil), do: {:error, :no_previous_node}

@@ -157,6 +157,7 @@ defmodule Radiator.Outline.CommandProcessor do
       user_id: command.user_id,
       event_id: command.event_id,
       next: result.next,
+      children: result.children,
       episode_id: result.episode_id
     }
     |> EventStore.persist_event()
