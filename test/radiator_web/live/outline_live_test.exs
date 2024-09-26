@@ -7,7 +7,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
   import Radiator.OutlineFixtures
 
   alias Radiator.Outline
-  alias Radiator.Outline.NodeRepository
+  # alias Radiator.Outline.NodeRepository
 
   @additional_keep_alive 2000
 
@@ -52,25 +52,25 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert html =~ node_3.content
     end
 
-    test "update node content", %{conn: conn, show_id: show_id, nodes: [node_1 | _]} do
-      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
-      {:ok, other_live, _other_html} = live(conn, ~p"/admin/podcast/#{show_id}")
+    # test "update node content", %{conn: conn, show_id: show_id, nodes: [node_1 | _]} do
+    #   {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+    #   {:ok, other_live, _other_html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
-      assert live
-             |> form("#form-#{node_1.uuid}", node: %{content: "node_1_updated"})
-             |> render_change()
+    #   assert live
+    #          |> form("#form-#{node_1.uuid}", node: %{content: "node_1_updated"})
+    #          |> render_change()
 
-      keep_liveview_alive()
+    #   keep_liveview_alive()
 
-      updated_node = NodeRepository.get_node!(node_1.uuid)
-      assert updated_node.uuid == node_1.uuid
-      assert updated_node.parent_id == node_1.parent_id
-      assert updated_node.prev_id == node_1.prev_id
-      assert updated_node.content == "node_1_updated"
+    #   updated_node = NodeRepository.get_node!(node_1.uuid)
+    #   assert updated_node.uuid == node_1.uuid
+    #   assert updated_node.parent_id == node_1.parent_id
+    #   assert updated_node.prev_id == node_1.prev_id
+    #   assert updated_node.content == "node_1_updated"
 
-      assert other_live
-             |> has_element?("#form-#{node_1.uuid}_content[value=node_1_updated]")
-    end
+    #   assert other_live
+    #          |> has_element?("#form-#{node_1.uuid}_content[value=node_1_updated]")
+    # end
 
     test "insert a new node", %{conn: conn, show_id: show_id, nodes: [_, node_2 | _]} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")

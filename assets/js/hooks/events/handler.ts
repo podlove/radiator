@@ -17,12 +17,14 @@ export function handleFocus({ uuid, user_name }: UserAction) {
   addEditingUserLabel(node, user_name);
 }
 
-export function handleMove({ uuid, parent_id, prev_id }: NodeData) {
-  const node = getNodeById(uuid)!;
-  setValue(node, ".parent_id", parent_id || "");
-  setValue(node, ".prev_id", prev_id || "");
+export function handleMoves({ nodes }: { nodes: NodeData[] }) {
+  nodes.forEach(({ uuid, parent_id, prev_id }: NodeData) => {
+    const node = getNodeById(uuid)!;
+    setValue(node, ".parent_id", parent_id || "");
+    setValue(node, ".prev_id", prev_id || "");
 
-  moveNode(node);
+    moveNode(node);
+  });
 }
 
 export function handleSetContent({ uuid, content }: any) {

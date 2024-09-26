@@ -13,7 +13,6 @@ defmodule RadiatorWeb.OutlineComponent do
   }
 
   alias Radiator.Outline.Node
-  alias Radiator.Outline.NodeRepository
 
   alias RadiatorWeb.Endpoint
   alias RadiatorWeb.OutlineComponents
@@ -26,19 +25,15 @@ defmodule RadiatorWeb.OutlineComponent do
   end
 
   def update(%{event: %NodeInsertedEvent{node: node, next: next}}, socket) do
-    node_forms = Enum.map([node, next], &to_change_form(&1, %{}))
-
     socket
-    |> stream(:nodes, node_forms)
+    |> push_event("move_nodes", %{nodes: [next]})
+    |> stream_insert(:nodes, to_change_form(node, %{}))
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: _content}}, socket) do
-    node = NodeRepository.get_node!(node_id)
-
+  def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: content}}, socket) do
     socket
-    |> stream_insert(:nodes, to_change_form(node, %{}))
-    # |> push_event("set_content", %{uuid: node_id, content: content})
+    |> push_event("set_content", %{uuid: node_id, content: content})
     |> reply(:ok)
   end
 
@@ -46,16 +41,10 @@ defmodule RadiatorWeb.OutlineComponent do
         %{event: %NodeMovedEvent{node: node, next: next, old_prev: old_prev, old_next: old_next}},
         socket
       ) do
-    nodes =
-      [node, next, old_prev, old_next]
-      |> Enum.reject(&is_nil/1)
-      |> Enum.map(&NodeRepository.get_node!(&1.uuid))
-
-    node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
+    nodes = [node, next, old_prev, old_next] |> Enum.reject(&is_nil/1)
 
     socket
-    |> stream(:nodes, node_forms)
-    # |> push_event("move_node", %{})
+    |> push_event("move_nodes", %{nodes: nodes})
     |> reply(:ok)
   end
 
@@ -67,8 +56,8 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def update(%{event: %NodeDeletedEvent{node: %{uuid: uuid}, next: next}}, socket) do
     socket
+    |> push_event("move_nodes", %{nodes: [next]})
     |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
-    |> stream_insert(:nodes, to_change_form(next, %{}))
     |> reply(:ok)
   end
 
