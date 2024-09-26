@@ -830,7 +830,9 @@ defmodule Radiator.OutlineTest do
       node_2: node_2
     } do
       {:ok, result} = Outline.indent_node(node_2.uuid)
+
       assert result.node.parent_id == node_1.uuid
+      assert result.old_prev.uuid == node_1.uuid
       assert result.old_prev.uuid == node_1.uuid
     end
 
@@ -895,6 +897,20 @@ defmodule Radiator.OutlineTest do
 
       assert node_4.prev_id == nested_node_2.uuid
       assert node_4.parent_id == node_3.uuid
+    end
+
+    test "indent node 2 returns the correct result", %{
+      parent_node: parent_node,
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3
+    } do
+      {:ok, result} = Outline.indent_node(node_2.uuid)
+      assert result.node.parent_id == node_1.uuid
+      assert result.node.prev_id == nil
+      assert result.old_next.uuid == node_3.uuid
+      assert result.old_next.parent_id == parent_node.uuid
+      assert result.old_next.prev_id == node_1.uuid
     end
   end
 

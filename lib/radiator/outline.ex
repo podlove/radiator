@@ -567,10 +567,8 @@ defmodule Radiator.Outline do
 
       {:ok, node} = move_node_if(node, new_parent_id, new_prev_id)
 
-      if !is_nil(old_next_node) do
-        {:ok, _old_next_node} =
+      {:ok, old_next_node} =
           move_node_if(old_next_node, old_next_node.parent_id, get_node_id(prev_node))
-      end
 
       {:ok, _new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
 
