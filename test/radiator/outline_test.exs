@@ -1088,6 +1088,19 @@ defmodule Radiator.OutlineTest do
       assert node_4.prev_id == node_2.uuid
     end
 
+    test "moves node up returns correct result", %{
+      node_1: node_1,
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4
+    } do
+      {:ok, response} = Outline.move_up(node_3.uuid)
+      assert response.node.prev_id == node_1.uuid
+      assert response.node.uuid == node_3.uuid
+      assert response.old_prev.uuid == node_2.uuid
+      assert response.old_next.uuid == node_4.uuid
+    end
+
     test "cannot move up when there is no previous node", %{
       nested_node_1: nested_node_1,
       nested_node_2: nested_node_2
@@ -1147,6 +1160,19 @@ defmodule Radiator.OutlineTest do
       assert node_2.prev_id == node_3.uuid
       assert node_3.prev_id == node_1.uuid
       assert node_4.prev_id == node_2.uuid
+    end
+
+    test "moves node down returns correct result", %{
+      node_2: node_2,
+      node_3: node_3,
+      node_4: node_4
+    } do
+      {:ok, response} = Outline.move_down(node_2.uuid)
+      assert response.node.uuid == node_2.uuid
+      assert response.node.prev_id == node_3.uuid
+      assert response.old_prev == nil
+      assert response.old_next.uuid == node_3.uuid
+      assert response.next.uuid == node_4.uuid
     end
 
     test "cannot move down when there is no next node", %{

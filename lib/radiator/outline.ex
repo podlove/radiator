@@ -646,12 +646,12 @@ defmodule Radiator.Outline do
        ) do
     next_node = get_next_node(episode_id, node.uuid, parent_id)
 
-    move_node_if(node, parent_id, prev_node.prev_id)
+    {:ok, new_node} = move_node_if(node, parent_id, prev_node.prev_id)
     move_node_if(prev_node, parent_id, node.uuid)
     move_node_if(next_node, parent_id, prev_node.uuid)
 
     %NodeRepoResult{
-      node: get_node_result_info(node),
+      node: get_node_result_info(new_node),
       episode_id: episode_id,
       old_prev: get_node_result_info(prev_node),
       old_next: get_node_result_info(next_node)
@@ -667,11 +667,11 @@ defmodule Radiator.Outline do
     new_next_node = get_next_node(next_node)
 
     move_node_if(next_node, parent_id, node.prev_id)
-    move_node_if(node, parent_id, next_node.uuid)
+    {:ok, new_node} = move_node_if(node, parent_id, next_node.uuid)
     move_node_if(new_next_node, parent_id, node.uuid)
 
     %NodeRepoResult{
-      node: get_node_result_info(node),
+      node: get_node_result_info(new_node),
       episode_id: episode_id,
       old_next: get_node_result_info(next_node),
       next: get_node_result_info(new_next_node)
