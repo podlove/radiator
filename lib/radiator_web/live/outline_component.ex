@@ -18,16 +18,20 @@ defmodule RadiatorWeb.OutlineComponent do
   alias RadiatorWeb.OutlineComponents
 
   @impl true
-  def update(%{event: %NodeInsertedEvent{node: node, next: nil}}, socket) do
+  def update(%{event: %NodeInsertedEvent{event_id: event_id, node: node, next: nil}}, socket) do
+    action = get_action(socket.id, event_id)
+
     socket
-    |> stream_insert(:nodes, to_change_form(node, %{}))
+    |> stream_insert(:nodes, to_change_form(node, %{}, action))
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeInsertedEvent{node: node, next: next}}, socket) do
+  def update(%{event: %NodeInsertedEvent{event_id: event_id, node: node, next: next}}, socket) do
+    action = get_action(socket.id, event_id)
+
     socket
+    |> stream_insert(:nodes, to_change_form(node, %{}, action))
     |> push_event("move_nodes", %{nodes: [next]})
-    |> stream_insert(:nodes, to_change_form(node, %{}))
     |> reply(:ok)
   end
 
@@ -53,6 +57,7 @@ defmodule RadiatorWeb.OutlineComponent do
 
     socket
     |> push_event("move_nodes", %{nodes: nodes})
+    |> push_event("focus_node", %{uuid: node.uuid})
     |> reply(:ok)
   end
 
@@ -88,10 +93,10 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:ok)
   end
 
-  def update(%{event: %Phoenix.Socket.Broadcast{event: event, payload: payload}}, socket)
+  def update(%{event: %Phoenix.Socket.Broadcast{event: event, payload: _payload}}, socket)
       when event in ["focus", "blur"] do
     socket
-    |> push_event(event, payload)
+    # |> push_event(event, payload)
     |> reply(:ok)
   end
 
@@ -115,15 +120,7 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
-  def handle_event("new", %{"node" => %{"uuid" => uuid}}, socket) do
-    new_uuid = Ecto.UUID.generate()
-    user_id = socket.assigns.user_id
-    episode_id = socket.assigns.episode_id
-
-    params = %{"uuid" => new_uuid, "prev_id" => uuid, "episode_id" => episode_id}
-
-    Dispatch.insert_node(params, user_id, generate_event_id(socket.id))
-
+  def handle_event("new", _params, socket) do
     socket
     |> reply(:noreply)
   end
@@ -143,6 +140,31 @@ defmodule RadiatorWeb.OutlineComponent do
     [name | _] = String.split(socket.assigns.user.email, "@")
 
     Endpoint.broadcast("outline", "blur", %{uuid: uuid, user_id: id, user_name: name})
+
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event(
+        "keydown",
+        %{"key" => "Enter", "uuid" => uuid, "value" => value, "selection" => selection},
+        socket
+      ) do
+    {first, _} = String.split_at(value, selection["start"])
+    {_, last} = String.split_at(value, selection["end"])
+
+    user_id = socket.assigns.user_id
+    Dispatch.change_node_content(uuid, first, user_id, generate_event_id(socket.id))
+
+    episode_id = socket.assigns.episode_id
+
+    params = %{
+      "prev_id" => uuid,
+      "content" => last,
+      "episode_id" => episode_id
+    }
+
+    Dispatch.insert_node(params, user_id, generate_event_id(socket.id))
 
     socket
     |> reply(:noreply)
@@ -219,6 +241,9 @@ defmodule RadiatorWeb.OutlineComponent do
 
     to_form(changeset, as: "node", id: "form-#{changeset.data.uuid}")
   end
+
+  defp get_action(id, <<_::binary-size(36)>> <> ":" <> id), do: :self
+  defp get_action(_id, _event_id), do: nil
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
 end

@@ -28,7 +28,7 @@ function getUUID(node: HTMLDivElement) {
 }
 
 function getContent(node: HTMLDivElement) {
-  const input = node.querySelector("input") as HTMLInputElement;
+  const input = node.querySelector("input[type=text]") as HTMLInputElement;
   return input.value;
 }
 

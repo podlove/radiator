@@ -6,7 +6,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
   import Radiator.PodcastFixtures
   import Radiator.OutlineFixtures
 
-  alias Radiator.Outline
+  # alias Radiator.Outline
   # alias Radiator.Outline.NodeRepository
 
   @additional_keep_alive 2000
@@ -52,44 +52,35 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert html =~ node_3.content
     end
 
-    # test "update node content", %{conn: conn, show_id: show_id, nodes: [node_1 | _]} do
-    #   {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
-    #   {:ok, other_live, _other_html} = live(conn, ~p"/admin/podcast/#{show_id}")
+    test "update node content", %{conn: conn, show_id: show_id, nodes: [%{uuid: uuid} | _]} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      {:ok, other_live, _other_html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
-    #   assert live
-    #          |> form("#form-#{node_1.uuid}", node: %{content: "node_1_updated"})
-    #          |> render_change()
+      assert live
+             |> form("#form-#{uuid}", node: %{content: "node_1_updated"})
+             |> render_change()
 
-    #   keep_liveview_alive()
+      keep_liveview_alive()
 
-    #   updated_node = NodeRepository.get_node!(node_1.uuid)
-    #   assert updated_node.uuid == node_1.uuid
-    #   assert updated_node.parent_id == node_1.parent_id
-    #   assert updated_node.prev_id == node_1.prev_id
-    #   assert updated_node.content == "node_1_updated"
+      assert_push_event(live, "set_content", %{uuid: ^uuid, content: "node_1_updated"})
+      assert_push_event(other_live, "set_content", %{uuid: ^uuid, content: "node_1_updated"})
+    end
 
-    #   assert other_live
-    #          |> has_element?("#form-#{node_1.uuid}_content[value=node_1_updated]")
-    # end
-
-    test "insert a new node", %{conn: conn, show_id: show_id, nodes: [_, node_2 | _]} do
+    test "insert a new node", %{conn: conn, show_id: show_id, nodes: [_, %{uuid: uuid} | _]} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
       {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
       assert live
-             |> form("#form-#{node_2.uuid}", node: %{content: "node_2_updated"})
-             |> render_submit()
+             |> element("#form-#{uuid}_content")
+             |> render_keydown(%{"key" => "Enter", "selection" => %{"start" => 2, "end" => 2}})
 
       keep_liveview_alive()
 
-      siblings = Outline.get_all_siblings(nil)
-      node_2_1 = Enum.find(siblings, &(&1.prev_id == node_2.uuid))
+      assert_push_event(live, "set_content", %{uuid: ^uuid, content: "no"})
+      assert_push_event(other_live, "set_content", %{uuid: ^uuid, content: "no"})
 
-      assert node_2_1.parent_id == node_2.parent_id
-      assert node_2_1.prev_id == node_2.uuid
-      assert node_2_1.content == nil
-
-      assert other_live |> has_element?("#form-#{node_2_1.uuid}")
+      assert live |> has_element?("[value=de_2]")
+      assert other_live |> has_element?("[value=de_2]")
     end
 
     # test "move node", %{conn: conn, show: show, episode: episode, nodes: [node_1 | _]} do

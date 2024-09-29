@@ -63,16 +63,9 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   end
 
   @impl true
-  def handle_info(%NodeMovedEvent{} = event, socket), do: proxy_event(event, socket)
-
-  def handle_info(%{uuid: <<_::binary-size(36)>> <> ":" <> id} = event, %{id: id} = socket) do
-    socket
-    |> stream_event(event)
-    |> reply(:noreply)
-  end
-
   def handle_info(%NodeInsertedEvent{} = event, socket), do: proxy_event(event, socket)
   def handle_info(%NodeContentChangedEvent{} = event, socket), do: proxy_event(event, socket)
+  def handle_info(%NodeMovedEvent{} = event, socket), do: proxy_event(event, socket)
   def handle_info(%NodeDeletedEvent{} = event, socket), do: proxy_event(event, socket)
 
   def handle_info(%{topic: "outline"} = event, socket) do

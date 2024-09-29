@@ -17,7 +17,14 @@ export function handleFocus({ uuid, user_name }: UserAction) {
   addEditingUserLabel(node, user_name);
 }
 
-export function handleMoves({ nodes }: { nodes: NodeData[] }) {
+export function handleFocusNode({ uuid }: NodeData) {
+  const input = document.getElementById(
+    `form-${uuid}_content`
+  ) as HTMLDivElement;
+  input.focus();
+}
+
+export function handleMoveNodes({ nodes }: { nodes: NodeData[] }) {
   nodes.forEach(({ uuid, parent_id, prev_id }: NodeData) => {
     const node = getNodeById(uuid)!;
     setValue(node, ".parent_id", parent_id || "");

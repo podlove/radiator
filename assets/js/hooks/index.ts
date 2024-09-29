@@ -2,7 +2,8 @@ import { moveNode } from "./node";
 import {
   handleBlur,
   handleFocus,
-  handleMoves,
+  handleFocusNode,
+  handleMoveNodes,
   handleSetContent,
 } from "./events/handler";
 import { keydown, toggleCollapse } from "./events/listener";
@@ -15,7 +16,8 @@ export const Hooks = {
     mounted() {
       this.handleEvent("blur", handleBlur.bind(this));
       this.handleEvent("focus", handleFocus.bind(this));
-      this.handleEvent("move_nodes", handleMoves.bind(this));
+      this.handleEvent("focus_node", handleFocusNode.bind(this));
+      this.handleEvent("move_nodes", handleMoveNodes.bind(this));
       this.handleEvent("set_content", handleSetContent.bind(this));
 
       this.el.addEventListener("keydown", keydown.bind(this));
