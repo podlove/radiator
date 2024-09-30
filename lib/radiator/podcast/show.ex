@@ -6,6 +6,7 @@ defmodule Radiator.Podcast.Show do
   use Ecto.Schema
   import Ecto.Changeset
   alias Radiator.Podcast.{Episode, Network}
+  alias Radiator.Accounts.User
 
   schema "shows" do
     field :title, :string
@@ -14,6 +15,7 @@ defmodule Radiator.Podcast.Show do
     belongs_to :network, Network
 
     has_many(:episodes, Episode)
+    many_to_many(:hosts, User, join_through: "show_hosts")
 
     timestamps(type: :utc_datetime)
   end
