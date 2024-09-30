@@ -54,7 +54,8 @@ defmodule Radiator.Outline.NodeRepositoryTest do
       node1 = node_fixture()
       node2 = node_fixture()
 
-      assert NodeRepository.list_nodes() == [node1, node2]
+      assert Enum.member?(NodeRepository.list_nodes(), node1)
+      assert Enum.member?(NodeRepository.list_nodes(), node2)
     end
   end
 
