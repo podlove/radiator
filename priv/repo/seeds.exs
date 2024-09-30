@@ -23,10 +23,18 @@ alias Radiator.Outline.NodeRepository
   Podcast.create_network(%{title: "Podcast network"})
 
 {:ok, _show} =
-  Podcast.create_show(%{title: "Dev Cafe", network_id: network.id})
+  Podcast.create_show(%{
+    title: "Dev Cafe",
+    description: "Campfire chat between seasoned developers.",
+    network_id: network.id
+  })
 
 {:ok, show} =
-  Podcast.create_show(%{title: "Tech Weekly", network_id: network.id})
+  Podcast.create_show(%{
+    title: "Tech Weekly",
+    description: "Weekly discussion on latest topic out of the tech sphere.",
+    network_id: network.id
+  })
 
 {:ok, past_episode} =
   Podcast.create_episode(%{

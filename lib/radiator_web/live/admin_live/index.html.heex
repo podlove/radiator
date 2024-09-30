@@ -53,6 +53,7 @@
       <h3 class="text-xl">Create Show</h3>
       <.form :let={f} for={@form} id="show-form" phx-change="validate" phx-submit="save">
         <.input field={f[:title]} type="text" label="Title" />
+        <.input field={f[:description]} type="text" label="Description" />
         <input name={f[:network_id].name} type="hidden" value={f[:network_id].value} />
         <div class="flex items-center justify-between gap-6 mt-2">
           <div

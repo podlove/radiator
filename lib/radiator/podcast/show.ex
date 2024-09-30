@@ -9,6 +9,7 @@ defmodule Radiator.Podcast.Show do
 
   schema "shows" do
     field :title, :string
+    field :description, :string
 
     belongs_to :network, Network
 
@@ -20,7 +21,7 @@ defmodule Radiator.Podcast.Show do
   @doc false
   def changeset(show, attrs) do
     show
-    |> cast(attrs, [:title, :network_id])
+    |> cast(attrs, [:title, :description, :network_id])
     |> validate_required([:title])
   end
 end
