@@ -33,8 +33,7 @@ alias Radiator.Outline.NodeRepository
     title: "past episode",
     show_id: show.id,
     number: 1,
-    publish_date: Date.utc_today() |> Date.add(-23),
-    slug: Slug.slugify("past episode")
+    publish_date: Date.utc_today() |> Date.add(-23)
   })
 
 {:ok, current_episode} =
@@ -42,8 +41,7 @@ alias Radiator.Outline.NodeRepository
     title: "current episode",
     show_id: show.id,
     number: 2,
-    publish_date: Date.utc_today() |> Date.add(23),
-    slug: Slug.slugify("current episode")
+    publish_date: Date.utc_today() |> Date.add(23)
   })
 
 {:ok, node1} =

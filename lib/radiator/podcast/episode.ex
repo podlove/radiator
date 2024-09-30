@@ -26,7 +26,6 @@ defmodule Radiator.Podcast.Episode do
     |> cast(attrs, [:title, :show_id, :number, :publish_date, :slug])
     |> validate_required([:title, :show_id, :number])
     |> maybe_update_slug()
-    |> validate_slug()
   end
 
   defp maybe_update_slug(changeset) do
@@ -42,13 +41,5 @@ defmodule Radiator.Podcast.Episode do
         changeset
         |> put_change(:slug, new_slug)
     end
-  end
-
-  defp validate_slug(changeset) do
-    changeset
-    |> validate_format(:slug, ~r/^[a-z0-9-]+$/,
-      message: "can only contain lowercase letters, numbers, and dashes"
-    )
-    |> validate_length(:slug, min: 3, max: @slug_max_length)
   end
 end
