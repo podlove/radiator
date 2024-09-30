@@ -120,7 +120,11 @@ defmodule RadiatorWeb.EpisodeLive.Index do
           "episode_id" => episode.id
         })
 
+        show = Podcast.reload_assoc(socket.assigns.show, [:episodes])
+
         socket
+        |> assign(:show, show)
+        |> assign(:episodes, show.episodes)
         |> put_flash(:info, "Episode created")
         |> push_patch(to: ~p"/admin/podcast/#{socket.assigns.show}/#{episode}")
         |> reply(:noreply)
@@ -133,7 +137,11 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   defp save_episode(socket, :edit, params) do
     case Podcast.update_episode(socket.assigns.episode, params) do
       {:ok, episode} ->
+        show = Podcast.reload_assoc(socket.assigns.show, [:episodes])
+
         socket
+        |> assign(:show, show)
+        |> assign(:episodes, show.episodes)
         |> put_flash(:info, "Episode updated")
         |> push_patch(to: ~p"/admin/podcast/#{socket.assigns.show}/#{episode}")
         |> reply(:noreply)
