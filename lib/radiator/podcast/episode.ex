@@ -25,6 +25,7 @@ defmodule Radiator.Podcast.Episode do
     episode
     |> cast(attrs, [:title, :show_id, :number, :publish_date, :slug])
     |> validate_required([:title, :show_id, :number])
+    |> validate_length(:title, min: 3)
     |> maybe_update_slug()
   end
 
