@@ -121,6 +121,8 @@ defmodule RadiatorWeb.OutlineComponent do
   end
 
   def handle_event("new", _params, socket) do
+    # This is noop
+    # We use handle_event("keydown", %{"key" => "Enter"}, _} instead, to get the cursor position as well.
     socket
     |> reply(:noreply)
   end
