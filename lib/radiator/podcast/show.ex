@@ -5,8 +5,8 @@ defmodule Radiator.Podcast.Show do
   """
   use Ecto.Schema
   import Ecto.Changeset
-  alias Radiator.Podcast.{Episode, Network}
   alias Radiator.Accounts.User
+  alias Radiator.Podcast.{Episode, Network}
 
   schema "shows" do
     field :title, :string

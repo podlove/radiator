@@ -1,8 +1,12 @@
 defmodule Radiator.Podcast.ShowHosts do
+  @moduledoc """
+    Represents the show_hosts model.
+    Used for many-to-many relationship between shows and users.
+  """
   use Ecto.Schema
   import Ecto.Changeset
-  alias Radiator.Podcast.Show
   alias Radiator.Accounts.User
+  alias Radiator.Podcast.Show
 
   schema "show_hosts" do
     belongs_to :show, Show
