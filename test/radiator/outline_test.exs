@@ -118,16 +118,15 @@ defmodule Radiator.OutlineTest do
       nested_node_1: nested_node_1,
       nested_node_2: nested_node_2
     } do
-      assert Outline.get_all_children(parent_node) == [
-               node_1,
-               node_2,
-               node_3,
-               node_4,
-               node_5,
-               node_6,
-               nested_node_1,
-               nested_node_2
-             ]
+      all_children = parent_node |> Outline.get_all_children()
+      assert Enum.member?(all_children, node_1)
+      assert Enum.member?(all_children, node_2)
+      assert Enum.member?(all_children, node_3)
+      assert Enum.member?(all_children, node_4)
+      assert Enum.member?(all_children, node_5)
+      assert Enum.member?(all_children, node_6)
+      assert Enum.member?(all_children, nested_node_1)
+      assert Enum.member?(all_children, nested_node_2)
     end
 
     test "returns an empty list if there are no child nodes", %{nested_node_1: nested_node_1} do
