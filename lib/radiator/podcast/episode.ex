@@ -7,7 +7,7 @@ defmodule Radiator.Podcast.Episode do
   import Ecto.Changeset
 
   alias Radiator.Podcast.Show
-  @slug_max_length 50
+  @slug_max_length 500
 
   schema "episodes" do
     field :title, :string
