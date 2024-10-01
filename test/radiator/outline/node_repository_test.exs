@@ -19,14 +19,6 @@ defmodule Radiator.Outline.NodeRepositoryTest do
       assert node.content == "some content"
     end
 
-    test "trims whitespace from content" do
-      episode = PodcastFixtures.episode_fixture()
-      valid_attrs = %{content: "  some content  ", episode_id: episode.id}
-
-      assert {:ok, %Node{} = node} = NodeRepository.create_node(valid_attrs)
-      assert node.content == "some content"
-    end
-
     test "can have a creator" do
       episode = PodcastFixtures.episode_fixture()
       user = %{id: 2}

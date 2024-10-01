@@ -30,7 +30,6 @@ defmodule Radiator.Outline.Node do
     node
     |> cast(attributes, [:uuid, :content, :episode_id, :creator_id, :parent_id, :prev_id])
     |> put_uuid()
-    |> update_change(:content, &trim/1)
     |> validate_required([:episode_id])
     |> validate_format(:uuid, ~r/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
     |> unique_constraint(:uuid, name: "outline_nodes_pkey")
@@ -42,16 +41,12 @@ defmodule Radiator.Outline.Node do
   def update_content_changeset(node, attrs) do
     node
     |> cast(attrs, [:content])
-    |> update_change(:content, &trim/1)
   end
 
   def move_node_changeset(node, attrs) do
     node
     |> cast(attrs, [:parent_id, :prev_id])
   end
-
-  defp trim(content) when is_binary(content), do: String.trim(content)
-  defp trim(content), do: content
 
   defp put_uuid(%Ecto.Changeset{} = changeset) do
     case get_field(changeset, :uuid) do
