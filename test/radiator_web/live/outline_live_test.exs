@@ -83,36 +83,69 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_live |> has_element?("[value=de_2]")
     end
 
-    # test "move node", %{conn: conn, show: show, episode: episode, nodes: [node_1 | _]} do
-    #   %{uuid: uuid1, parent_id: parent_id1} = node_1
+    test "move node up", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, node_3]} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
-    #   uuid2 = Ecto.UUID.generate()
+      assert live
+             |> element("#form-#{node_2.uuid}_content")
+             |> render_keydown(%{"key" => "ArrowUp", "altKey" => true})
 
-    #   node2 =
-    #     node_fixture(%{
-    #       uuid: uuid2,
-    #       episode_id: episode.id,
-    #       parent_id: parent_id1,
-    #       prev_id: uuid1
-    #     })
+      keep_liveview_alive()
 
-    #   {:ok, _live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
-    #   {:ok, _other_live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
+      node_2_uuid = node_2.uuid
+      assert_push_event(live, "move_nodes", %{nodes: nodes})
+      assert_push_event(live, "focus_node", %{uuid: ^node_2_uuid})
 
-    #   _params = node2 |> Map.merge(%{parent_id: uuid1, prev_id: nil}) |> Map.from_struct()
+      assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
+      assert_push_event(other_live, "focus_node", %{uuid: ^node_2_uuid})
 
-    #   # assert live |> render_hook(:move_node, params)
+      node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
 
-    #   # keep_liveview_alive()
+      assert length(nodes) == 3
+      assert node_map[node_1.uuid].prev_id == node_2.uuid
+      assert node_map[node_1.uuid].parent_id == node_1.parent_id
 
-    #   # assert %Node{parent_id: ^uuid1} = NodeRepository.get_node!(uuid2)
+      assert node_map[node_2.uuid].prev_id == nil
+      assert node_map[node_2.uuid].parent_id == node_2.parent_id
 
-    #   # assert_push_event(live, "clean", %{node: %{uuid: ^uuid2}})
+      assert node_map[node_3.uuid].prev_id == node_1.uuid
+      assert node_map[node_3.uuid].parent_id == node_3.parent_id
 
-    #   # assert_push_event(other_live, "move", %{
-    #   #   node: %{uuid: ^uuid2, parent_id: ^uuid1, prev_id: nil}
-    #   # })
-    # end
+      assert other_nodes == nodes
+    end
+
+    test "move node down", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, node_3]} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+
+      assert live
+             |> element("#form-#{node_1.uuid}_content")
+             |> render_keydown(%{"key" => "ArrowDown", "altKey" => true})
+
+      keep_liveview_alive()
+
+      node_1_uuid = node_1.uuid
+      assert_push_event(live, "move_nodes", %{nodes: nodes})
+      assert_push_event(live, "focus_node", %{uuid: ^node_1_uuid})
+
+      assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
+      assert_push_event(other_live, "focus_node", %{uuid: ^node_1_uuid})
+
+      node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
+
+      assert length(nodes) == 3
+      assert node_map[node_1.uuid].prev_id == node_2.uuid
+      assert node_map[node_1.uuid].parent_id == node_1.parent_id
+
+      assert node_map[node_2.uuid].prev_id == nil
+      assert node_map[node_2.uuid].parent_id == node_2.parent_id
+
+      assert node_map[node_3.uuid].prev_id == node_1.uuid
+      assert node_map[node_3.uuid].parent_id == node_3.parent_id
+
+      assert other_nodes == nodes
+    end
 
     test "delete node", %{conn: conn, show_id: show_id, nodes: [_, _, node_3]} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
