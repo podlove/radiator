@@ -35,6 +35,9 @@ defmodule RadiatorWeb.AdminLive.Index do
     socket
     |> assign(:action, :new_show)
     |> assign(:show, show)
+    |> assign(:host_suggestions, [])
+    |> assign(:selected_hosts, [])
+    |> assign(:host_email, "")
     |> assign(:form, to_form(changeset))
     |> reply(:noreply)
   end
@@ -84,12 +87,52 @@ defmodule RadiatorWeb.AdminLive.Index do
     end
   end
 
+  @impl true
+  def handle_event("add_host", _params, socket) do
+    case Accounts.get_user_by_email(socket.assigns.host_email) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "User not found")}
+
+      user ->
+        selected_hosts = [user | socket.assigns.selected_hosts] |> Enum.uniq_by(& &1.id)
+
+        {:noreply,
+         socket
+         |> assign(selected_hosts: selected_hosts)
+         # Clear the input field
+         |> assign(host_email: "")
+         # Clear suggestions
+         |> assign(host_suggestions: [])}
+    end
+  end
+
+  @impl true
+  def handle_event("remove_host", %{"host-id" => host_id}, socket) do
+    selected_hosts =
+      Enum.reject(socket.assigns.selected_hosts, &(&1.id == String.to_integer(host_id)))
+
+    {:noreply, assign(socket, selected_hosts: selected_hosts)}
+  end
+
+  @impl true
+  def handle_event("suggest_hosts", %{"show" => %{"host_email" => search}}, socket) do
+    suggestions = Accounts.search_users(search)
+
+    {:noreply,
+     socket
+     |> assign(host_suggestions: suggestions)
+     |> assign(host_email: search)}
+  end
+
   def handle_event("save", %{"show" => params}, socket) do
-    case Podcast.create_show(params) do
+    case Podcast.create_show(params, socket.assigns.selected_hosts) do
       {:ok, _show} ->
         socket
         |> assign(:action, nil)
         |> assign(:networks, Podcast.list_networks(preload: :shows))
+        |> assign(selected_hosts: [])
+        |> assign(host_suggestions: [])
+        |> assign(host_email: "")
         |> put_flash(:info, "Show created successfully")
         |> reply(:noreply)
 

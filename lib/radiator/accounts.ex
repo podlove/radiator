@@ -24,6 +24,25 @@ defmodule Radiator.Accounts do
   end
 
   @doc """
+  Returns a list of users search by using a partial email address
+
+  ## Examples
+
+      iex> search_users("foo@exampl")
+      [%User{email: "foo@example.com"}]
+
+      iex> search_users("unknown@example.com")
+      []
+
+  """
+  def search_users(search_term, limit \\ 10) do
+    User
+    |> where([u], ilike(u.email, ^"%#{search_term}%"))
+    |> limit(^limit)
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a user by email.
 
   ## Examples
