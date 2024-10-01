@@ -182,7 +182,7 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def handle_event(
         "keydown",
-        %{"key" => "ArrowUp", "altKey" => true, "uuid" => uuid, "prev" => _},
+        %{"key" => "ArrowUp", "altKey" => true, "uuid" => uuid},
         socket
       ) do
     user_id = socket.assigns.user_id
