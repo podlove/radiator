@@ -235,6 +235,23 @@ defmodule Radiator.Podcast do
   end
 
   @doc """
+  A forced reload of preloaded associations.
+  Usefull when only the associations have changed and Show does need to be reloaded.
+
+  ## Examples
+
+      iex> reload_assoc(%Show{}, :episodes)
+      %Show{}
+
+      iex> reload_assoc(%Show{}, (from e in Episode, where: e.show_id == ^show_id, order_by: [desc: e.number]))
+      %Show{}
+
+  """
+  def reload_assoc(%Show{} = show, fields_or_query) do
+    Repo.preload(show, fields_or_query, force: true)
+  end
+
+  @doc """
   Returns the list of episodes.
 
   ## Examples
