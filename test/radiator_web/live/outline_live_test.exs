@@ -6,9 +6,6 @@ defmodule RadiatorWeb.OutlineLiveTest do
   import Radiator.PodcastFixtures
   import Radiator.OutlineFixtures
 
-  # alias Radiator.Outline
-  # alias Radiator.Outline.NodeRepository
-
   @additional_keep_alive 2000
 
   describe "Episode outline nodes" do
@@ -33,6 +30,14 @@ defmodule RadiatorWeb.OutlineLiveTest do
           content: "node_2"
         )
 
+      node_2_1 =
+        node_fixture(
+          episode_id: episode_id,
+          parent_id: node_2.uuid,
+          prev_id: nil,
+          content: "node_2_1"
+        )
+
       node_3 =
         node_fixture(
           episode_id: episode_id,
@@ -41,14 +46,23 @@ defmodule RadiatorWeb.OutlineLiveTest do
           content: "node_3"
         )
 
-      %{conn: log_in_user(conn, user), show_id: show_id, nodes: [node_1, node_2, node_3]}
+      %{
+        conn: log_in_user(conn, user),
+        show_id: show_id,
+        nodes: [node_1, node_2, node_2_1, node_3]
+      }
     end
 
-    test "lists all nodes", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, node_3]} do
+    test "lists all nodes", %{
+      conn: conn,
+      show_id: show_id,
+      nodes: [node_1, node_2, node_2_1, node_3]
+    } do
       {:ok, _live, html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
       assert html =~ node_1.content
       assert html =~ node_2.content
+      assert html =~ node_2_1.content
       assert html =~ node_3.content
     end
 
@@ -83,7 +97,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_live |> has_element?("[value=de_2]")
     end
 
-    test "move node up", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, node_3]} do
+    test "move node up", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, _, node_3]} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
       {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
@@ -103,19 +117,19 @@ defmodule RadiatorWeb.OutlineLiveTest do
       node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
 
       assert length(nodes) == 3
-      assert node_map[node_1.uuid].prev_id == node_2.uuid
       assert node_map[node_1.uuid].parent_id == node_1.parent_id
+      assert node_map[node_1.uuid].prev_id == node_2.uuid
 
-      assert node_map[node_2.uuid].prev_id == nil
       assert node_map[node_2.uuid].parent_id == node_2.parent_id
+      assert node_map[node_2.uuid].prev_id == nil
 
-      assert node_map[node_3.uuid].prev_id == node_1.uuid
       assert node_map[node_3.uuid].parent_id == node_3.parent_id
+      assert node_map[node_3.uuid].prev_id == node_1.uuid
 
       assert other_nodes == nodes
     end
 
-    test "move node down", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, node_3]} do
+    test "move node down", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, _, node_3]} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
       {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
 
@@ -135,19 +149,82 @@ defmodule RadiatorWeb.OutlineLiveTest do
       node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
 
       assert length(nodes) == 3
-      assert node_map[node_1.uuid].prev_id == node_2.uuid
       assert node_map[node_1.uuid].parent_id == node_1.parent_id
+      assert node_map[node_1.uuid].prev_id == node_2.uuid
 
-      assert node_map[node_2.uuid].prev_id == nil
       assert node_map[node_2.uuid].parent_id == node_2.parent_id
+      assert node_map[node_2.uuid].prev_id == nil
 
-      assert node_map[node_3.uuid].prev_id == node_1.uuid
       assert node_map[node_3.uuid].parent_id == node_3.parent_id
+      assert node_map[node_3.uuid].prev_id == node_1.uuid
 
       assert other_nodes == nodes
     end
 
-    test "delete node", %{conn: conn, show_id: show_id, nodes: [_, _, node_3]} do
+    test "indent node", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, _, node_3]} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+
+      assert live
+             |> element("#form-#{node_2.uuid}_content")
+             |> render_keydown(%{"key" => "Tab", "shiftKey" => false})
+
+      keep_liveview_alive()
+
+      node_2_uuid = node_2.uuid
+      assert_push_event(live, "move_nodes", %{nodes: nodes})
+      assert_push_event(live, "focus_node", %{uuid: ^node_2_uuid})
+
+      assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
+      assert_push_event(other_live, "focus_node", %{uuid: ^node_2_uuid})
+
+      node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
+
+      assert length(nodes) == 3
+      assert node_map[node_1.uuid].parent_id == nil
+      assert node_map[node_1.uuid].prev_id == nil
+
+      assert node_map[node_2.uuid].parent_id == node_1.uuid
+      assert node_map[node_2.uuid].prev_id == nil
+
+      assert node_map[node_3.uuid].parent_id == nil
+      assert node_map[node_3.uuid].prev_id == node_1.uuid
+
+      assert other_nodes == nodes
+    end
+
+    test "outdent node", %{conn: conn, show_id: show_id, nodes: [_, node_2, node_2_1, node_3]} do
+      {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+
+      assert live
+             |> element("#form-#{node_2_1.uuid}_content")
+             |> render_keydown(%{"key" => "Tab", "shiftKey" => true})
+
+      keep_liveview_alive()
+
+      node_2_1_uuid = node_2_1.uuid
+      assert_push_event(live, "move_nodes", %{nodes: nodes})
+      assert_push_event(live, "focus_node", %{uuid: ^node_2_1_uuid})
+
+      assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
+      assert_push_event(other_live, "focus_node", %{uuid: ^node_2_1_uuid})
+
+      node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
+
+      assert length(nodes) == 2
+      assert node_map[node_2_1.uuid].parent_id == nil
+      assert node_map[node_2_1.uuid].prev_id == node_2.uuid
+
+      assert node_map[node_3.uuid].parent_id == nil
+      assert node_map[node_3.uuid].prev_id == node_2_1.uuid
+
+      assert other_nodes == nodes
+    end
+
+    # test "move node around", %{conn: conn, show: show, episode: episode, nodes: [node_1 | _]} do
+
+    test "delete node", %{conn: conn, show_id: show_id, nodes: [_, _, _, node_3]} do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
       {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
 

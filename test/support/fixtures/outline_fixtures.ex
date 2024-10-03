@@ -34,14 +34,13 @@ defmodule Radiator.OutlineFixtures do
   Generate a tree of nodes based on a human readable pseudo syntax.
   [
     {"node-1"},
-    {"node-2",
-      [
-        {"node-2_1"},
-        {"node-2_2",
-        [
-          {"node-2_2_1"}
-        ]}
+    {"node-2", [
+      {"node-2_1"},
+      {"node-2_2", [
+        {"node-2_2_1"}
       ]}
+    ]},
+    {"node-3"}
   ]
   |> node_tree_fixture(%{episode_id: episode.id})
 

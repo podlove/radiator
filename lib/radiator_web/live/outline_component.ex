@@ -77,6 +77,7 @@ defmodule RadiatorWeb.OutlineComponent do
 
     socket
     |> push_event("move_nodes", %{nodes: nodes})
+    |> push_event("focus_node", %{uuid: node.uuid})
     |> reply(:ok)
   end
 
