@@ -8,7 +8,7 @@ export function moveNode(node: HTMLDivElement): NodeData {
   if (prevNode) {
     prevNode.after(node);
   } else if (parentNode) {
-    parentNode.querySelector(".children")!.append(node);
+    parentNode.querySelector(".children")!.prepend(node);
   }
 
   return { uuid, parent_id, prev_id };
