@@ -17,8 +17,6 @@ defmodule Radiator.Outline do
   The Outline context.
   """
 
-  import Ecto.Query, warn: false
-
   alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepoResult
   alias Radiator.Outline.NodeRepository
@@ -34,7 +32,7 @@ defmodule Radiator.Outline do
 
   def order_child_nodes(%Node{} = node) do
     node
-    |> get_all_siblings()
+    |> NodeRepository.get_all_siblings()
     |> order_sibling_nodes()
   end
 
@@ -86,12 +84,13 @@ defmodule Radiator.Outline do
       parent_node = find_parent_node(prev_node, parent_id)
 
       # find Node which has been previously connected to prev_node
-      next_node = get_next_node(episode_id, prev_id, get_node_id(parent_node))
+      next_node = NodeRepository.get_next_node(episode_id, prev_id, get_node_id(parent_node))
 
       with true <- parent_and_prev_consistent?(parent_node, prev_node),
            true <- episode_valid?(episode_id, parent_node, prev_node),
            {:ok, node} <- NodeRepository.create_node(set_parent_id_if(attrs, parent_node)),
-           {:ok, _node_to_move} <- move_node_if(next_node, get_node_id(parent_node), node.uuid) do
+           {:ok, _node_to_move} <-
+             NodeRepository.move_node_if(next_node, get_node_id(parent_node), node.uuid) do
         %NodeRepoResult{node: node, next: get_node_result_info(next_node), episode_id: episode_id}
       else
         false ->
@@ -123,7 +122,7 @@ defmodule Radiator.Outline do
           {:error, :not_found}
 
         node ->
-          prev_node = get_prev_node(node)
+          prev_node = NodeRepository.get_prev_node(node)
           do_indent_node(node, prev_node)
       end
     end)
@@ -149,7 +148,7 @@ defmodule Radiator.Outline do
           {:error, :not_found}
 
         node ->
-          parent_node = get_parent_node(node)
+          parent_node = NodeRepository.get_parent_node(node)
           do_outdent_node(node, parent_node)
       end
     end)
@@ -176,7 +175,7 @@ defmodule Radiator.Outline do
           {:error, :not_found}
 
         node ->
-          prev_node = get_prev_node(node)
+          prev_node = NodeRepository.get_prev_node(node)
           do_move_up(node, prev_node)
       end
     end)
@@ -202,7 +201,7 @@ defmodule Radiator.Outline do
           {:error, :not_found}
 
         node ->
-          next_node = get_next_node(node)
+          next_node = NodeRepository.get_next_node(node)
           do_move_down(node, next_node)
       end
     end)
@@ -235,7 +234,7 @@ defmodule Radiator.Outline do
         {:error, :not_found}
 
       node ->
-        parent_node = get_parent_node(node)
+        parent_node = NodeRepository.get_parent_node(node)
 
         case NodeValidator.validate_consistency_for_move(
                node,
@@ -247,7 +246,7 @@ defmodule Radiator.Outline do
             {:error, error}
 
           {:ok, node} ->
-            prev_node = get_prev_node(node)
+            prev_node = NodeRepository.get_prev_node(node)
             do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node)
         end
     end
@@ -260,7 +259,7 @@ defmodule Radiator.Outline do
     parent_id =
       new_prev_id
       |> NodeRepository.get_node_if()
-      |> get_parent_node
+      |> NodeRepository.get_parent_node()
       |> get_node_id
 
     move_node(node_id, prev_id: new_prev_id, parent_id: parent_id)
@@ -299,21 +298,14 @@ defmodule Radiator.Outline do
 
   """
   def remove_node(%Node{} = node) do
-    next_node =
-      Node
-      |> where([n], n.prev_id == ^node.uuid)
-      |> Repo.one()
+    next_node = NodeRepository.get_next_node(node)
+    prev_node = NodeRepository.get_prev_node(node)
 
-    prev_node = get_prev_node(node)
-
-    if next_node do
-      next_node
-      |> Node.move_node_changeset(%{prev_id: get_node_id(prev_node)})
-      |> Repo.update()
-    end
+    {:ok, updated_next_node} =
+      NodeRepository.move_node_if(next_node, node.parent_id, get_node_id(prev_node))
 
     # no tail recursion but we dont have too much levels in a tree
-    all_children = node |> get_all_siblings()
+    all_children = node |> NodeRepository.get_all_siblings()
 
     recursive_deleted_children =
       all_children
@@ -328,188 +320,10 @@ defmodule Radiator.Outline do
 
     %NodeRepoResult{
       node: deleted_node,
-      next: get_node_result_info(next_node),
+      next: get_node_result_info(updated_next_node),
       children: all_children ++ recursive_deleted_children,
       episode_id: node.episode_id
     }
-  end
-
-  @doc """
-  Returns the previous node of a given node in the outline tree.
-  Returns `nil` if prev_id of the node is nil.
-
-  ## Examples
-        iex> get_prev_node(%Node{prev_id: nil})
-        nil
-
-        iex> get_prev_node(%Node{prev_id: 42})
-        %Node{uuid: 42}
-
-  """
-  def get_prev_node(nil), do: nil
-  def get_prev_node(%Node{prev_id: nil}), do: nil
-
-  def get_prev_node(%Node{} = node) do
-    Node
-    |> where([n], n.uuid == ^node.prev_id)
-    |> Repo.one()
-  end
-
-  def get_next_node(%Node{episode_id: episode_id, uuid: node_id, parent_id: parent_id}) do
-    get_next_node(episode_id, node_id, parent_id)
-  end
-
-  def get_next_node(episode_id, node_id, parent_id) do
-    Node
-    |> where(episode_id: ^episode_id)
-    |> where_prev_node_equals(node_id)
-    |> where_parent_node_equals(parent_id)
-    |> Repo.one()
-  end
-
-  @doc """
-  Returns the parent node of a given node in the outline tree.
-  Returns `nil` if parent_id of the node is nil.
-
-  ## Examples
-        iex> get_parent_node(%Node{parent_id: nil})
-        nil
-
-        iex> get_parent_node(%Node{parent_id: 42})
-        %Node{uuid: 42}
-
-        iex> get_parent_node(nil)
-        nil
-
-  """
-  def get_parent_node(nil), do: nil
-  def get_parent_node(node) when is_nil(node.parent_id), do: nil
-
-  def get_parent_node(node) do
-    Node
-    |> where([n], n.uuid == ^node.parent_id)
-    |> Repo.one()
-  end
-
-  @doc """
-  Returns all direct child nodes of a given node.
-  ## Examples
-        iex> get_all_siblings(%Node{})
-        [%Node{}, %Node{}]
-
-  """
-  def get_all_siblings(nil) do
-    Node
-    |> where([n], is_nil(n.parent_id))
-    |> Repo.all()
-  end
-
-  def get_all_siblings(node) do
-    Node
-    |> where([n], n.parent_id == ^node.uuid)
-    |> Repo.all()
-  end
-
-  @doc """
-  get all children of a node. there is no limit of levels.
-  It basically calls `get_all_siblings` recursively and flattens the result.
-  ## Examples
-        iex> get_all_children(%Node{})
-        [%Node{}, %Node{}]
-  """
-  def get_all_children(node) do
-    siblings = node |> get_all_siblings()
-
-    children =
-      siblings
-      |> Enum.map(&get_all_children/1)
-      |> List.flatten()
-      |> Enum.reject(&is_nil/1)
-
-    siblings ++ children
-  end
-
-  @doc """
-  Gets all nodes of an episode as a tree.
-  Uses a Common Table Expression (CTE) to recursively query the database.
-  Sets the level of each node in the tree. Level 0 are the root nodes (without a parent)
-  Returns a list with all nodes of the episode sorted by the level.
-  ## Examples
-
-      iex> get_node_tree(123)
-      [%Node{}, %Node{}, ..]
-
-  SQL:
-  WITH RECURSIVE node_tree AS (
-        SELECT uuid, content, parent_id, prev_id, 0 AS level
-        FROM outline_nodes
-        WHERE episode_id = ?::integer and parent_id is NULL
-     UNION ALL
-        SELECT outline_nodes.uuid, outline_nodes.content, outline_nodes.parent_id, outline_nodes.prev_id, node_tree.level + 1
-        FROM outline_nodes
-           JOIN node_tree ON outline_nodes.parent_id = node_tree.uuid
-  )
-  SELECT * FROM node_tree;
-  """
-  def get_node_tree(episode_id) do
-    node_tree_initial_query =
-      Node
-      |> where([n], is_nil(n.parent_id))
-      |> where([n], n.episode_id == ^episode_id)
-      |> select([n], %{
-        uuid: n.uuid,
-        content: n.content,
-        parent_id: n.parent_id,
-        prev_id: n.prev_id,
-        level: 0
-      })
-
-    node_tree_recursion_query =
-      from outline_node in "outline_nodes",
-        join: node_tree in "node_tree",
-        on: outline_node.parent_id == node_tree.uuid,
-        select: [
-          outline_node.uuid,
-          outline_node.content,
-          outline_node.parent_id,
-          outline_node.prev_id,
-          node_tree.level + 1
-        ]
-
-    node_tree_query =
-      node_tree_initial_query
-      |> union_all(^node_tree_recursion_query)
-
-    tree =
-      "node_tree"
-      |> recursive_ctes(true)
-      |> with_cte("node_tree", as: ^node_tree_query)
-      |> select([n], %{
-        uuid: n.uuid,
-        content: n.content,
-        parent_id: n.parent_id,
-        prev_id: n.prev_id,
-        level: n.level
-      })
-      |> Repo.all()
-      |> Enum.map(fn %{
-                       uuid: uuid,
-                       content: content,
-                       parent_id: parent_id,
-                       prev_id: prev_id,
-                       level: level
-                     } ->
-        %Node{
-          uuid: binaray_uuid_to_ecto_uuid(uuid),
-          content: content,
-          parent_id: binaray_uuid_to_ecto_uuid(parent_id),
-          prev_id: binaray_uuid_to_ecto_uuid(prev_id),
-          level: level,
-          episode_id: episode_id
-        }
-      end)
-
-    {:ok, tree}
   end
 
   def get_node_id(nil), do: nil
@@ -534,17 +348,6 @@ defmodule Radiator.Outline do
     NodeRepository.get_node_if(parent_id)
   end
 
-  defp move_node_if(nil, _parent_node_id, _prev_node_id), do: {:ok, nil}
-
-  defp move_node_if(node, parent_id, prev_id) do
-    node
-    |> Node.move_node_changeset(%{
-      parent_id: parent_id,
-      prev_id: prev_id
-    })
-    |> Repo.update()
-  end
-
   # low level function to move a node
   defp do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node) do
     node_repo_result = %NodeRepoResult{
@@ -554,23 +357,22 @@ defmodule Radiator.Outline do
 
     Repo.transaction(fn ->
       old_next_node =
-        Node
-        |> where_prev_node_equals(node.uuid)
-        |> where_parent_node_equals(get_node_id(parent_node))
-        |> Repo.one()
+        NodeRepository.get_node_by_parent_and_prev(get_node_id(parent_node), node.uuid)
 
       new_next_node =
-        Node
-        |> where_prev_node_equals(new_prev_id)
-        |> where_parent_node_equals(new_parent_id)
-        |> Repo.one()
+        NodeRepository.get_node_by_parent_and_prev(new_parent_id, new_prev_id)
 
-      {:ok, node} = move_node_if(node, new_parent_id, new_prev_id)
+      {:ok, node} = NodeRepository.move_node_if(node, new_parent_id, new_prev_id)
 
       {:ok, old_next_node} =
-        move_node_if(old_next_node, get_parent_id_if(old_next_node), get_node_id(prev_node))
+        NodeRepository.move_node_if(
+          old_next_node,
+          get_parent_id_if(old_next_node),
+          get_node_id(prev_node)
+        )
 
-      {:ok, new_next_node} = move_node_if(new_next_node, new_parent_id, get_node_id(node))
+      {:ok, new_next_node} =
+        NodeRepository.move_node_if(new_next_node, new_parent_id, get_node_id(node))
 
       Map.merge(node_repo_result, %{
         node: get_node_result_info(node),
@@ -622,10 +424,14 @@ defmodule Radiator.Outline do
         [first_of_new_children | tail_of_new_children] = new_children
 
         {:ok, moved_first_child} =
-          move_node_if(first_of_new_children, node.uuid, get_node_id(last_of_old_children))
+          NodeRepository.move_node_if(
+            first_of_new_children,
+            node.uuid,
+            get_node_id(last_of_old_children)
+          )
 
         Enum.map(tail_of_new_children, fn n ->
-          {:ok, child_move_result} = move_node_if(n, node.uuid, n.prev_id)
+          {:ok, child_move_result} = NodeRepository.move_node_if(n, node.uuid, n.prev_id)
           child_move_result
         end) ++ [moved_first_child]
       end
@@ -644,11 +450,11 @@ defmodule Radiator.Outline do
          %Node{episode_id: episode_id, parent_id: parent_id} = node,
          %Node{} = prev_node
        ) do
-    next_node = get_next_node(episode_id, node.uuid, parent_id)
+    next_node = NodeRepository.get_next_node(episode_id, node.uuid, parent_id)
 
-    {:ok, updated_node} = move_node_if(node, parent_id, prev_node.prev_id)
-    {:ok, updated_prev_node} = move_node_if(prev_node, parent_id, node.uuid)
-    {:ok, updated_next_node} = move_node_if(next_node, parent_id, prev_node.uuid)
+    {:ok, updated_node} = NodeRepository.move_node_if(node, parent_id, prev_node.prev_id)
+    {:ok, updated_prev_node} = NodeRepository.move_node_if(prev_node, parent_id, node.uuid)
+    {:ok, updated_next_node} = NodeRepository.move_node_if(next_node, parent_id, prev_node.uuid)
 
     %NodeRepoResult{
       node: get_node_result_info(updated_node),
@@ -664,11 +470,13 @@ defmodule Radiator.Outline do
          %Node{episode_id: episode_id, parent_id: parent_id} = node,
          %Node{} = next_node
        ) do
-    new_next_node = get_next_node(next_node)
+    new_next_node = NodeRepository.get_next_node(next_node)
 
-    {:ok, updated_next_node} = move_node_if(next_node, parent_id, node.prev_id)
-    {:ok, updated_node} = move_node_if(node, parent_id, next_node.uuid)
-    {:ok, updated_new_next_node} = move_node_if(new_next_node, parent_id, node.uuid)
+    {:ok, updated_next_node} = NodeRepository.move_node_if(next_node, parent_id, node.prev_id)
+    {:ok, updated_node} = NodeRepository.move_node_if(node, parent_id, next_node.uuid)
+
+    {:ok, updated_new_next_node} =
+      NodeRepository.move_node_if(new_next_node, parent_id, node.uuid)
 
     %NodeRepoResult{
       node: get_node_result_info(updated_node),
@@ -691,12 +499,6 @@ defmodule Radiator.Outline do
   defp parent_and_prev_consistent?(parent, prev) do
     parent.uuid == prev.parent_id
   end
-
-  defp where_prev_node_equals(node, nil), do: where(node, [n], is_nil(n.prev_id))
-  defp where_prev_node_equals(node, prev_id), do: where(node, [n], n.prev_id == ^prev_id)
-
-  defp where_parent_node_equals(node, nil), do: where(node, [n], is_nil(n.parent_id))
-  defp where_parent_node_equals(node, parent_id), do: where(node, [n], n.parent_id == ^parent_id)
 
   def get_node_result_info(nil), do: nil
 
@@ -723,10 +525,4 @@ defmodule Radiator.Outline do
   end
 
   defp unwrap_transaction_result(result), do: result
-
-  defp binaray_uuid_to_ecto_uuid(nil), do: nil
-
-  defp binaray_uuid_to_ecto_uuid(uuid) do
-    Ecto.UUID.load!(uuid)
-  end
 end
