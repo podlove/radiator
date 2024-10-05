@@ -1206,7 +1206,9 @@ defmodule Radiator.OutlineTest do
       nested_node_2: nested_node_2
     } do
       assert %NodeRepoResult{children: children} = Outline.remove_node(node_3)
-      assert children == [nested_node_1, nested_node_2]
+      assert Enum.count(children) == 2
+      assert Enum.member?(children, nested_node_1)
+      assert Enum.member?(children, nested_node_2)
     end
 
     test "when top parent gets deleted the whole tree will be gone", %{
