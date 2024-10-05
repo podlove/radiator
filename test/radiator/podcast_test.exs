@@ -2,6 +2,7 @@ defmodule Radiator.PodcastTest do
   use Radiator.DataCase
 
   import Radiator.PodcastFixtures
+  import Radiator.AccountsFixtures
 
   alias Radiator.Podcast
   alias Radiator.Podcast.{Episode, Network, Show}
@@ -95,6 +96,33 @@ defmodule Radiator.PodcastTest do
 
     test "create_show/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Podcast.create_show(@invalid_attrs)
+    end
+
+    test "create_show/2 with valid data creates a show with hosts" do
+      network = network_fixture()
+      valid_attrs = %{title: "some title", network_id: network.id}
+
+      hosts = [
+        user_fixture(%{email: "bob@example.com"}),
+        user_fixture(%{email: "jim@example.com"})
+      ]
+
+      assert {:ok, %Show{} = show} = Podcast.create_show(valid_attrs, hosts)
+      assert show.title == "some title"
+      assert show.network_id == network.id
+      show = Repo.preload(show, :hosts)
+      assert show.hosts == hosts
+    end
+
+    test "create_show/2 with invalid data returns error changeset" do
+      invalid_attrs = %{title: nil, network_id: nil}
+
+      hosts = [
+        user_fixture(%{email: "bob@example.com"}),
+        user_fixture(%{email: "jim@example.com"})
+      ]
+
+      assert {:error, %Ecto.Changeset{}} = Podcast.create_show(invalid_attrs, hosts)
     end
 
     test "update_show/2 with valid data updates the show" do

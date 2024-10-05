@@ -13,6 +13,24 @@ defmodule Radiator.AccountsTest do
     end
   end
 
+  describe "search_users/2" do
+    test "returns matching users" do
+      user1 = user_fixture(%{email: "foo@example.com"})
+      _user2 = user_fixture(%{email: "bar@example.com"})
+      assert Accounts.search_users("foo@exampl") == [user1]
+      assert Accounts.search_users("unknown@example.com") == []
+    end
+
+    test "respects the limit" do
+      for i <- 1..20 do
+        user_fixture(%{email: "user#{i}@example.com"})
+      end
+
+      assert length(Accounts.search_users("user", 5)) == 5
+      assert length(Accounts.search_users("user", 15)) == 15
+    end
+  end
+
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
       refute Accounts.get_user_by_email("unknown@example.com")

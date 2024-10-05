@@ -288,6 +288,7 @@ defmodule RadiatorWeb.CoreComponents do
   attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
   attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
+  attr :class, :string, default: nil
 
   attr :rest, :global,
     include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
@@ -311,7 +312,7 @@ defmodule RadiatorWeb.CoreComponents do
       end)
 
     ~H"""
-    <div>
+    <div class={@class}>
       <label class="flex items-center gap-4 text-sm leading-6 text-zinc-600">
         <input type="hidden" name={@name} value="false" disabled={@rest[:disabled]} />
         <input
@@ -332,7 +333,7 @@ defmodule RadiatorWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div>
+    <div class={@class}>
       <.label for={@id}><%= @label %></.label>
       <select
         id={@id}
@@ -351,7 +352,7 @@ defmodule RadiatorWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div>
+    <div class={@class}>
       <.label for={@id}><%= @label %></.label>
       <textarea
         id={@id}
@@ -371,7 +372,7 @@ defmodule RadiatorWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div>
+    <div class={@class}>
       <.label for={@id}><%= @label %></.label>
       <input
         type={@type}

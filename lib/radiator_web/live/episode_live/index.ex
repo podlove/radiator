@@ -22,7 +22,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
     socket
     |> assign(:page_title, show.title)
-    # |> assign(:page_description, "")
+    |> assign(:page_description, show.description)
     |> assign(:show, show)
     |> assign(:episodes, show.episodes)
     |> assign(action: nil, episode: nil, form: nil)

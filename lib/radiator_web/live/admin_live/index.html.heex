@@ -53,6 +53,56 @@
       <h3 class="text-xl">Create Show</h3>
       <.form :let={f} for={@form} id="show-form" phx-change="validate" phx-submit="save">
         <.input field={f[:title]} type="text" label="Title" />
+        <.input field={f[:description]} type="text" label="Description" />
+        <div class="mt-4 flex items-end">
+          <.input
+            field={f[:host_email]}
+            type="text"
+            label="Add Hosts"
+            class="flex-grow"
+            placeholder="Search by email"
+            phx-debounce="300"
+            list="host-suggestions"
+            autocomplete="off"
+            phx-change="suggest_hosts"
+          />
+          <datalist id="host-suggestions">
+            <%= for suggestion <- @host_suggestions do %>
+              <option value={suggestion.email} />
+            <% end %>
+          </datalist>
+          <button
+            type="button"
+            class="ml-2 bg-[#df7366] text-white rounded px-4 py-2"
+            phx-click="add_host"
+          >
+            Add
+          </button>
+        </div>
+
+        <div class="mt-4 mb-4">
+          <h4 class="text-lg font-medium">Selected Hosts</h4>
+          <%= if Enum.empty?(@selected_hosts) do %>
+            <p class="mt-2 text-sm text-gray-500 italic">No hosts yet</p>
+          <% else %>
+            <ul class="mt-2 space-y-2">
+              <%= for host <- @selected_hosts do %>
+                <li class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+                  <span><%= host.email %></span>
+                  <button
+                    type="button"
+                    class="px-2 py-1 text-sm text-red-600 hover:text-red-800"
+                    phx-click="remove_host"
+                    phx-value-host-id={host.id}
+                  >
+                    Remove
+                  </button>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </div>
+
         <input name={f[:network_id].name} type="hidden" value={f[:network_id].value} />
         <div class="flex items-center justify-between gap-6 mt-2">
           <div

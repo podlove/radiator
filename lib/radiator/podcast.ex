@@ -7,7 +7,7 @@ defmodule Radiator.Podcast do
   import Ecto.Query, warn: false
   alias Radiator.Repo
 
-  alias Radiator.Podcast.{Episode, Network, Show}
+  alias Radiator.Podcast.{Episode, Network, Show, ShowHosts}
 
   @doc """
   Returns the list of networks.
@@ -185,6 +185,39 @@ defmodule Radiator.Podcast do
     %Show{}
     |> Show.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Creates a show with hosts.
+
+  ## Examples
+
+      iex> create_show(%{field: value}, [%User{}])
+      {:ok, %Show{}}
+
+      iex> create_show(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_show(attrs, hosts) do
+    Repo.transaction(fn ->
+      case create_show(attrs) do
+        {:ok, show} ->
+          associate_hosts(show, hosts)
+          show
+
+        {:error, changeset} ->
+          Repo.rollback(changeset)
+      end
+    end)
+  end
+
+  defp associate_hosts(show, hosts) do
+    Enum.each(hosts, fn host ->
+      %ShowHosts{}
+      |> ShowHosts.changeset(%{show_id: show.id, user_id: host.id})
+      |> Repo.insert!()
+    end)
   end
 
   @doc """
