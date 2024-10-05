@@ -16,8 +16,8 @@ defmodule Radiator.ResourcesFixtures do
       attrs
       |> Enum.into(%{
         size_bytes: 42,
-        start_bytes: 42,
-        url: "some url",
+        start_bytes: 23,
+        url: "https://elixirschool.com",
         node_id: node_id
       })
       |> Resources.create_url()

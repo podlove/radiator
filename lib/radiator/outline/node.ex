@@ -5,6 +5,7 @@ defmodule Radiator.Outline.Node do
   use Ecto.Schema
   import Ecto.Changeset
   alias Radiator.Podcast.Episode
+  alias Radiator.Resources.Url
 
   @derive {Jason.Encoder, only: [:uuid, :content, :creator_id, :parent_id, :prev_id]}
 
@@ -17,6 +18,7 @@ defmodule Radiator.Outline.Node do
     field :level, :integer, virtual: true
 
     belongs_to :episode, Episode
+    has_many :urls, Url, foreign_key: :node_id
 
     timestamps(type: :utc_datetime)
   end

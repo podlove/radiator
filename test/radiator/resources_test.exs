@@ -8,33 +8,30 @@ defmodule Radiator.ResourcesbTest do
   alias Radiator.Resources
   alias Radiator.Resources.Url
 
-  describe "urls" do
-    setup do
-      node =
-        OutlineFixtures.node_fixture()
-        |> Repo.preload([:episode])
+  @invalid_attrs %{url: nil, start_bytes: nil, size_bytes: nil}
 
-      episode = node.episode
+  describe "list_urls_by_episode/0" do
+    setup :set_up_single_url
 
-      %{
-        episode: episode,
-        node: node
-      }
-    end
-
-    @invalid_attrs %{url: nil, start_bytes: nil, size_bytes: nil}
-
-    test "list_urls/0 returns all urls", %{episode: episode, node: node} do
+    test "returns all urls of an episode", %{episode: episode, node: node} do
       url = url_fixture(node_id: node.uuid)
-      assert Resources.list_urls(episode.id) == [url]
+      assert Resources.list_urls_by_episode(episode.id) == [url]
     end
+  end
+
+  describe "get_url!/1" do
+    setup :set_up_single_url
 
     test "get_url!/1 returns the url with given id" do
       url = url_fixture()
       assert Resources.get_url!(url.id) == url
     end
+  end
 
-    test "create_url/1 with valid data creates a url", %{node: node} do
+  describe "create_url!/1" do
+    setup :set_up_single_url
+
+    test "creates a url with valid data", %{node: node} do
       valid_attrs = %{url: "some url", start_bytes: 42, size_bytes: 42, node_id: node.uuid}
 
       assert {:ok, %Url{} = url} = Resources.create_url(valid_attrs)
@@ -43,11 +40,32 @@ defmodule Radiator.ResourcesbTest do
       assert url.size_bytes == 42
     end
 
-    test "create_url/1 with invalid data returns error changeset" do
+    test "with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Resources.create_url(@invalid_attrs)
     end
+  end
 
-    test "update_url/2 with valid data updates the url" do
+  describe "rebuild_node_urls/2" do
+    setup :set_up_single_url
+
+    test "rebuilds all urls for a node" do
+      url_text = "https://hexdocs.pm"
+      node = OutlineFixtures.node_fixture()
+      old_url = url_fixture(node_id: node.uuid)
+
+      assert [%Url{url: ^url_text, start_bytes: 42, size_bytes: 42}] =
+               Resources.rebuild_node_urls(node.uuid, [
+                 %{url: url_text, start_bytes: 42, size_bytes: 42}
+               ])
+
+      assert_raise Ecto.NoResultsError, fn -> Resources.get_url!(old_url.id) end
+    end
+  end
+
+  describe "update_url/2" do
+    setup :set_up_single_url
+
+    test "with valid data updates the url" do
       url = url_fixture()
       update_attrs = %{url: "some updated url", start_bytes: 43, size_bytes: 43}
 
@@ -57,21 +75,45 @@ defmodule Radiator.ResourcesbTest do
       assert url.size_bytes == 43
     end
 
-    test "update_url/2 with invalid data returns error changeset" do
+    test "with invalid data returns error changeset" do
       url = url_fixture()
       assert {:error, %Ecto.Changeset{}} = Resources.update_url(url, @invalid_attrs)
       assert url == Resources.get_url!(url.id)
     end
+  end
 
-    test "delete_url/1 deletes the url" do
+  describe "delete_url/1" do
+    test " deletes the url" do
       url = url_fixture()
       assert {:ok, %Url{}} = Resources.delete_url(url)
       assert_raise Ecto.NoResultsError, fn -> Resources.get_url!(url.id) end
     end
+  end
 
-    test "change_url/1 returns a url changeset" do
+  describe "delete_urls_for_node/1" do
+    test "deletes all urls from a node" do
+      node = OutlineFixtures.node_fixture()
+      url = url_fixture(node_id: node.uuid)
+
+      assert 1 = Resources.delete_urls_for_node(node)
+      assert_raise Ecto.NoResultsError, fn -> Resources.get_url!(url.id) end
+    end
+  end
+
+  describe "change_url/1" do
+    test "returns a url changeset" do
       url = url_fixture()
       assert %Ecto.Changeset{} = Resources.change_url(url)
     end
+  end
+
+  def set_up_single_url(_) do
+    node =
+      OutlineFixtures.node_fixture()
+      |> Repo.preload([:episode])
+
+    episode = node.episode
+
+    {:ok, episode: episode, node: node}
   end
 end

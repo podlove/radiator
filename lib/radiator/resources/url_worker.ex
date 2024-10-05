@@ -15,15 +15,15 @@ defmodule Radiator.Resources.UrlWorker do
 
   def perform(node_id, content) do
     result = UrlExtractor.extract_urls(content)
-    # TODO - handle old existing urls for this node, error handling!
-    Enum.each(result, fn info ->
-      {:ok, _url} =
-        info
-        |> Map.put(:node_id, node_id)
-        |> Map.put(:url, info.parsed_url)
-        |> Resources.create_url()
-    end)
 
+    url_attributes =
+      Enum.map(result, fn info ->
+        info
+        |> Map.put(:url, info.parsed_url)
+        |> Map.delete(:parsed_url)
+      end)
+
+    _created_urls = Resources.rebuild_node_urls(node_id, url_attributes)
     :ok
   end
 end
