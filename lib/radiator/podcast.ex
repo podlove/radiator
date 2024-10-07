@@ -212,12 +212,92 @@ defmodule Radiator.Podcast do
     end)
   end
 
+  # Fills the list of associate hosts of a show by adding users to hosts list.
+  # Suggested to run inside a transaction.
   defp associate_hosts(show, hosts) do
     Enum.each(hosts, fn host ->
       %ShowHosts{}
       |> ShowHosts.changeset(%{show_id: show.id, user_id: host.id})
       |> Repo.insert!()
     end)
+  end
+
+  @doc """
+  Updates a show with hosts.
+
+  ## Examples
+
+      iex> update_show(show, %{field: new_value}, [%User{}])
+      {:ok, %Show{}}
+
+      iex> update_show(show, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_show(%Show{} = show, attrs, hosts) do
+    Repo.transaction(fn ->
+      case update_show(show, attrs) do
+        {:ok, show} ->
+          update_associate_hosts(show, hosts)
+          show
+
+        {:error, changeset} ->
+          Repo.rollback(changeset)
+      end
+    end)
+  end
+
+  # Takes two lists and removes intersections between them.
+  # Returns a tuple with the first list without the intersection and the second list without the intersection.
+  # ## Examples
+  #     iex> remove_intersections([1, 2, 3, 4], [3, 4, 5, 6])
+  #     {[1, 2], [5, 6]}
+  defp remove_intersections(list_a, list_b) when is_list(list_a) and is_list(list_b) do
+    intersection = Enum.filter(list_a, fn x -> x in list_b end)
+
+    list_a_without_intersection = Enum.filter(list_a, fn x -> x not in intersection end)
+    list_b_without_intersection = Enum.filter(list_b, fn x -> x not in intersection end)
+
+    {list_a_without_intersection, list_b_without_intersection}
+  end
+
+  # Updates the list of associate hosts of a show by adding or removing users to hosts list.
+  # Suggested to run inside a transaction.
+  defp update_associate_hosts(show, hosts) do
+    show = Repo.preload(show, :hosts)
+
+    # intersection contains unchanged hosts -> ignore them
+    {remove_hosts, add_hosts} = remove_intersections(show.hosts, hosts)
+
+    # Add users to hosts
+    Enum.each(add_hosts, fn host ->
+      %ShowHosts{}
+      |> ShowHosts.changeset(%{show_id: show.id, user_id: host.id})
+      |> Repo.insert!()
+    end)
+
+    # Remove users from hosts
+    remove_host_ids = Enum.map(remove_hosts, fn host -> host.id end)
+
+    if !Enum.empty?(remove_host_ids) do
+      count_removable_hosts = length(remove_host_ids)
+
+      from(s in ShowHosts,
+        where:
+          s.show_id == ^show.id and
+            s.user_id in ^remove_host_ids
+      )
+      |> Repo.delete_all()
+      |> case do
+        {^count_removable_hosts, nil} ->
+          :ok
+
+        {count_removed, _} ->
+          Repo.rollback(
+            "Couldn't remove all hosts (expect: #{count_removable_hosts} vs. #{count_removed})."
+          )
+      end
+    end
   end
 
   @doc """
