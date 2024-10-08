@@ -63,51 +63,45 @@ defmodule RadiatorWeb.OutlineComponents do
     <aside>
       <h3 class="text-base font-semibold leading-7 text-gray-600">Shortcuts</h3>
       <dl class="divide-y divide-gray-100">
-        <div class="grid grid-cols-3 gap-4 px-0 py-2">
-          <dt class="text-sm font-medium leading-6 text-gray-600">Add note</dt>
-          <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">
+        <div class="grid grid-cols-4 gap-4 px-0 py-2">
+          <dt class="text-sm font-small leading-6 text-gray-600">Add note</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ↵
           </dd>
+          <dt class="text-sm font-small leading-6 text-gray-600">Collapse</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700"></dd>
         </div>
-        <div class="grid grid-cols-3 gap-4 px-0 py-2">
-          <dt class="text-sm font-medium leading-6 text-gray-600">Cursor up</dt>
-          <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">
+        <div class="grid grid-cols-4 gap-4 px-0 py-2">
+          <dt class="text-sm font-small leading-6 text-gray-600">Cursor up</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ↑
           </dd>
+          <dt class="text-sm font-small leading-6 text-gray-600">Expand</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700"></dd>
         </div>
-        <div class="grid grid-cols-3 gap-4 px-0 py-2">
-          <dt class="text-sm font-medium leading-6 text-gray-600">Cursor down</dt>
-          <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">
+        <div class="grid grid-cols-4 gap-4 px-0 py-2">
+          <dt class="text-sm font-small leading-6 text-gray-600">Cursor down</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ↓
           </dd>
+          <dt class="text-sm font-small leading-6 text-gray-600">Move node up</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⌥↑</dd>
         </div>
-        <div class="grid grid-cols-3 gap-4 px-0 py-2">
-          <dt class="text-sm font-medium leading-6 text-gray-600">Indent</dt>
-          <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">
+
+        <div class="grid grid-cols-4 gap-4 px-0 py-2">
+          <dt class="text-sm font-small leading-6 text-gray-600">Indent</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ⇥
           </dd>
+
+          <dt class="text-sm font-small leading-6 text-gray-600">Move node down</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⌥↓</dd>
         </div>
-        <div class="grid grid-cols-3 gap-4 px-0 py-2">
-          <dt class="text-sm font-medium leading-6 text-gray-600">Outdent</dt>
-          <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">
+        <div class="grid grid-cols-4 gap-4 px-0 py-2">
+          <dt class="text-sm font-small leading-6 text-gray-600">Outdent</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ⇧⇥
           </dd>
-        </div>
-        <div class="grid grid-cols-3 gap-4 px-0 py-2">
-          <dt class="text-sm font-medium leading-6 text-gray-600">Collapse</dt>
-          <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700"></dd>
-        </div>
-        <div class="grid grid-cols-3 gap-4 px-0 py-2">
-          <dt class="text-sm font-medium leading-6 text-gray-600">Expand</dt>
-          <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700"></dd>
-        </div>
-        <div class="grid grid-cols-3 gap-4 px-0 py-2">
-          <dt class="text-sm font-medium leading-6 text-gray-600">Move node up</dt>
-          <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">⌥↑</dd>
-        </div>
-        <div class="grid grid-cols-3 gap-4 px-0 py-2">
-          <dt class="text-sm font-medium leading-6 text-gray-600">Move node down</dt>
-          <dd class="col-span-2 mt-0 text-sm leading-6 text-gray-700">⌥↓</dd>
         </div>
       </dl>
     </aside>
