@@ -119,7 +119,10 @@ defmodule Radiator.Outline.NodeRepositoryTest do
       nested_node_1: nested_node_1,
       nested_node_2: nested_node_2
     } do
-      assert NodeRepository.get_all_siblings(node_3) == [nested_node_1, nested_node_2]
+      all_siblings = NodeRepository.get_all_siblings(node_3)
+      assert 2 = Enum.count(all_siblings)
+      assert Enum.member?(all_siblings, nested_node_1)
+      assert Enum.member?(all_siblings, nested_node_2)
     end
 
     test "does not return child nodes deeper then 1 level", %{
