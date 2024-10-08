@@ -35,6 +35,12 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:ok)
   end
 
+  def update(
+        %{event: %NodeContentChangedEvent{event_id: <<_::binary-size(36)>> <> ":" <> id}},
+        %{id: id} = socket
+      ),
+      do: reply(socket, :ok)
+
   def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: content}}, socket) do
     socket
     |> push_event("set_content", %{uuid: node_id, content: content})
