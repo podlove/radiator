@@ -285,16 +285,60 @@ defmodule Radiator.Podcast do
   end
 
   @doc """
-  Returns the list of episodes.
+  Returns the query for list of episodes exluding the once that are marked as deleted.
 
   ## Examples
 
-      iex> list_episodes()
+      iex> list_available_episodes_query()
+      %Ecto.Query{}
+
+  """
+  def list_available_episodes_query do
+    from e in Episode,
+      where: [is_deleted: false],
+      order_by: [desc: e.number]
+  end
+
+  @doc """
+  Returns the query for list of episodes including the (soft) deleted once.
+
+  ## Examples
+
+      iex> list_all_episodes_query()
+      %Ecto.Query{}
+
+  """
+  def list_all_episodes_query do
+    from e in Episode,
+      order_by: [desc: e.number]
+  end
+
+  @doc """
+  Returns the list of episodes exluding the once that are marked as deleted.
+
+  ## Examples
+
+      iex> list_available_episodes()
       [%Episode{}, ...]
 
   """
-  def list_episodes do
-    Repo.all(Episode)
+  def list_available_episodes do
+    list_available_episodes_query()
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the list of episodes including the (soft) deleted once.
+
+  ## Examples
+
+      iex> list_all_episodes()
+      [%Episode{}, ...]
+
+  """
+  def list_all_episodes do
+    list_all_episodes_query()
+    |> Repo.all()
   end
 
   @doc """
@@ -330,7 +374,10 @@ defmodule Radiator.Podcast do
 
   def get_current_episode_for_show(show_id) do
     Repo.one(
-      from e in Episode, where: e.show_id == ^show_id, order_by: [desc: e.number], limit: 1
+      from e in Episode,
+        where: [show_id: ^show_id, is_deleted: false],
+        order_by: [desc: e.number],
+        limit: 1
     )
   end
 
@@ -356,7 +403,7 @@ defmodule Radiator.Podcast do
     query =
       from e in Episode,
         select: max(e.number),
-        where: [show_id: ^show_id]
+        where: [show_id: ^show_id, is_deleted: false]
 
     max_number = Repo.one(query) || 0
     max_number + 1
@@ -393,7 +440,9 @@ defmodule Radiator.Podcast do
 
   """
   def delete_episode(%Episode{} = episode) do
-    Repo.delete(episode)
+    episode
+    |> Episode.changeset(%{is_deleted: true})
+    |> Repo.update()
   end
 
   @doc """

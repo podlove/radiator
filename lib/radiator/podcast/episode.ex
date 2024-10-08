@@ -14,6 +14,8 @@ defmodule Radiator.Podcast.Episode do
     field :number, :integer
     field :publish_date, :date
     field :slug, :string
+    field :is_deleted, :boolean, default: false
+    field :deleted_at, :utc_datetime
 
     belongs_to :show, Show
 
@@ -23,10 +25,11 @@ defmodule Radiator.Podcast.Episode do
   @doc false
   def changeset(episode, attrs) do
     episode
-    |> cast(attrs, [:title, :show_id, :number, :publish_date, :slug])
+    |> cast(attrs, [:title, :show_id, :number, :publish_date, :slug, :is_deleted, :deleted_at])
     |> validate_required([:title, :show_id, :number])
     |> validate_length(:title, min: 3)
     |> maybe_update_slug()
+    |> validate_deleted_at()
   end
 
   defp maybe_update_slug(changeset) do
@@ -41,6 +44,21 @@ defmodule Radiator.Podcast.Episode do
 
         changeset
         |> put_change(:slug, new_slug)
+    end
+  end
+
+  defp validate_deleted_at(changeset) do
+    # Check if the is_deleted has changed
+    case get_change(changeset, :is_deleted) do
+      true ->
+        now = DateTime.utc_now() |> DateTime.truncate(:second)
+        put_change(changeset, :deleted_at, now)
+
+      false ->
+        put_change(changeset, :deleted_at, nil)
+
+      nil ->
+        changeset
     end
   end
 end
