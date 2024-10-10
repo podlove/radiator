@@ -6,6 +6,7 @@ defmodule Radiator.Resources do
 
   import Ecto.Query, warn: false
 
+  alias Radiator.Outline.Node
   alias Radiator.Repo
   alias Radiator.Resources.Url
 
@@ -16,11 +17,11 @@ defmodule Radiator.Resources do
 
   ## Examples
 
-      iex> list_urls(episode_id)
+      iex> list_urls_by_episode(episode_id)
       [%Url{}, ...]
 
   """
-  def list_urls(episode_id) do
+  def list_urls_by_episode(episode_id) do
     query =
       from u in Url,
         join: n in assoc(u, :node),
@@ -44,6 +45,28 @@ defmodule Radiator.Resources do
 
   """
   def get_url!(id), do: Repo.get!(Url, id)
+
+  @doc """
+    creates all URL entities for a node. Before all existing URLs for this
+    node get deleted.
+  """
+  def rebuild_node_urls(node_id, url_attributes) do
+    {:ok, created_urls} =
+      Repo.transaction(fn ->
+        _number_of_nodes = delete_urls_for_node(node_id)
+
+        Enum.map(url_attributes, fn attributes ->
+          {:ok, url} =
+            attributes
+            |> Map.put(:node_id, node_id)
+            |> create_url()
+
+          url
+        end)
+      end)
+
+    created_urls
+  end
 
   @doc """
   Creates a url.
@@ -95,6 +118,23 @@ defmodule Radiator.Resources do
   """
   def delete_url(%Url{} = url) do
     Repo.delete(url)
+  end
+
+  @doc """
+  Deletes all urls for a given node.
+  Returns the number of deleted urls.
+  ## Examples
+
+      iex> delete_urls_for_node(node_id)
+      42
+
+  """
+  def delete_urls_for_node(%Node{uuid: node_id}), do: delete_urls_for_node(node_id)
+
+  def delete_urls_for_node(node_id) when is_binary(node_id) do
+    query = from u in Url, where: u.node_id == ^node_id
+    {number_of_nodes, nil} = Repo.delete_all(query)
+    number_of_nodes
   end
 
   @doc """
