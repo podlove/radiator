@@ -148,7 +148,6 @@ defmodule RadiatorWeb.AdminLive.Index do
 
     socket
     |> assign(:networks, Podcast.list_networks(preload: :shows))
-    # |> stream_delete(:networks, network)}
     |> reply(:noreply)
   end
 
