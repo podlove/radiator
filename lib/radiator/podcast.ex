@@ -245,27 +245,14 @@ defmodule Radiator.Podcast do
     end)
   end
 
-  # Takes two lists and removes intersections between them.
-  # Returns a tuple with the first list without the intersection and the second list without the intersection.
-  # ## Examples
-  #     iex> remove_intersections([1, 2, 3, 4], [3, 4, 5, 6])
-  #     {[1, 2], [5, 6]}
-  defp remove_intersections(list_a, list_b) when is_list(list_a) and is_list(list_b) do
-    intersection = Enum.filter(list_a, fn x -> x in list_b end)
-
-    list_a_without_intersection = Enum.filter(list_a, fn x -> x not in intersection end)
-    list_b_without_intersection = Enum.filter(list_b, fn x -> x not in intersection end)
-
-    {list_a_without_intersection, list_b_without_intersection}
-  end
-
   # Updates the list of associate hosts of a show by adding or removing users to hosts list.
   # Suggested to run inside a transaction.
   defp update_associate_hosts(show, hosts) do
     show = Repo.preload(show, :hosts)
 
     # intersection contains unchanged hosts -> ignore them
-    {remove_hosts, add_hosts} = remove_intersections(show.hosts, hosts)
+    remove_hosts = show.hosts -- hosts
+    add_hosts = hosts -- show.hosts
 
     # Add users to hosts
     Enum.each(add_hosts, fn host ->
