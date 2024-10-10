@@ -8,14 +8,15 @@
         </button>
       </h2>
       <div class="grid grid-cols-3 gap-6 sm:grid-cols-6">
-        <.link
-          :for={{show, i} <- Enum.with_index(network.shows)}
-          href={~p"/admin/podcast/#{show}"}
-          class="bg-[#f0f4f4] aspect-square rounded"
-        >
-          <img src={"/images/pic1#{i}.jpg"} alt="" />
-          <div class="p-2 text-center"><%= show.title %></div>
-        </.link>
+        <div :for={{show, i} <- Enum.with_index(network.shows)}>
+          <.link href={~p"/admin/podcast/#{show}"} class="bg-[#f0f4f4] aspect-square rounded">
+            <img src={"/images/pic1#{i}.jpg"} alt="" />
+            <div class="p-2 text-center"><%= show.title %></div>
+          </.link>
+          <button :if={@action != :edit_show} phx-click="edit_show" phx-value-show_id={show.id}>
+            <.icon name="hero-pencil-square" class="w-5 h-5" />
+          </button>
+        </div>
         <button
           :if={@action != :new_show}
           class="bg-[#df7366] text-white rounded"
@@ -49,7 +50,7 @@
       </.form>
     </div>
 
-    <div :if={@action == :new_show} class="p-4 my-4 bg-[#f0f4f4]">
+    <div :if={@action in [:new_show, :edit_show]} class="p-4 my-4 bg-[#f0f4f4]">
       <h3 class="text-xl">Create Show</h3>
       <.form :let={f} for={@form} id="show-form" phx-change="validate" phx-submit="save">
         <.input field={f[:title]} type="text" label="Title" />

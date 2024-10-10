@@ -141,6 +141,43 @@ defmodule Radiator.PodcastTest do
       assert show == Podcast.get_show!(show.id)
     end
 
+    test "update_show/2 with valid data updates the show by removing hosts" do
+      init_hosts = [
+        user_fixture(%{email: "bob@example.com"}),
+        user_fixture(%{email: "jim@example.com"})
+      ]
+
+      show = show_fixture(%{}, init_hosts)
+
+      assert {:ok, %Show{} = show} = Podcast.update_show(show, %{}, [])
+      show = Podcast.reload_assoc(show, [:hosts])
+      assert show.hosts == []
+    end
+
+    test "update_show/2 with valid data updates the show by adding hosts" do
+      updated_hosts = [
+        user_fixture(%{email: "bob@example.com"}),
+        user_fixture(%{email: "jim@example.com"})
+      ]
+
+      show = show_fixture(%{}, [])
+
+      assert {:ok, %Show{} = show} = Podcast.update_show(show, %{}, updated_hosts)
+      show = Podcast.reload_assoc(show, [:hosts])
+      assert show.hosts == updated_hosts
+    end
+
+    test "update_show/2 with valid data updates the show by adding and removing hosts" do
+      init_hosts = [user_fixture(%{email: "bob@example.com"})]
+      updated_hosts = [user_fixture(%{email: "jim@example.com"})]
+
+      show = show_fixture(%{}, init_hosts)
+
+      assert {:ok, %Show{} = show} = Podcast.update_show(show, %{}, updated_hosts)
+      show = Podcast.reload_assoc(show, [:hosts])
+      assert show.hosts == updated_hosts
+    end
+
     test "delete_show/1 deletes the show" do
       show = show_fixture()
       assert {:ok, %Show{}} = Podcast.delete_show(show)

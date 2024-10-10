@@ -42,6 +42,20 @@ defmodule RadiatorWeb.AdminLive.Index do
     |> reply(:noreply)
   end
 
+  def handle_event("edit_show", %{"show_id" => show_id}, socket) do
+    show = Podcast.get_show!(show_id, preload: [:hosts])
+    changeset = Podcast.change_show(show, %{})
+
+    socket
+    |> assign(:action, :edit_show)
+    |> assign(:show, show)
+    |> assign(:host_suggestions, [])
+    |> assign(:selected_hosts, show.hosts)
+    |> assign(:host_email, "")
+    |> assign(:form, to_form(changeset))
+    |> reply(:noreply)
+  end
+
   def handle_event("cancel", _params, socket) do
     socket
     |> assign(:action, nil)
@@ -125,6 +139,19 @@ defmodule RadiatorWeb.AdminLive.Index do
   end
 
   def handle_event("save", %{"show" => params}, socket) do
+    save_show(socket, socket.assigns.action, params)
+  end
+
+  def handle_event("delete", %{"id" => id}, socket) do
+    network = Podcast.get_network!(id)
+    {:ok, _} = Podcast.delete_network(network)
+
+    socket
+    |> assign(:networks, Podcast.list_networks(preload: :shows))
+    |> reply(:noreply)
+  end
+
+  defp save_show(socket, :new_show, params) do
     case Podcast.create_show(params, socket.assigns.selected_hosts) do
       {:ok, _show} ->
         socket
@@ -144,14 +171,24 @@ defmodule RadiatorWeb.AdminLive.Index do
     end
   end
 
-  def handle_event("delete", %{"id" => id}, socket) do
-    network = Podcast.get_network!(id)
-    {:ok, _} = Podcast.delete_network(network)
+  defp save_show(socket, :edit_show, params) do
+    case Podcast.update_show(socket.assigns.show, params, socket.assigns.selected_hosts) do
+      {:ok, _show} ->
+        socket
+        |> assign(:action, nil)
+        |> assign(:networks, Podcast.list_networks(preload: :shows))
+        |> assign(selected_hosts: [])
+        |> assign(host_suggestions: [])
+        |> assign(host_email: "")
+        |> put_flash(:info, "Show updated successfully")
+        |> reply(:noreply)
 
-    socket
-    |> assign(:networks, Podcast.list_networks(preload: :shows))
-    # |> stream_delete(:networks, network)}
-    |> reply(:noreply)
+      {:error, %Ecto.Changeset{} = changeset} ->
+        socket
+        |> assign(:form, to_form(changeset))
+        |> put_flash(:info, "Show could not be updated")
+        |> reply(:noreply)
+    end
   end
 
   defp get_bookmarklet(api_uri, socket) do

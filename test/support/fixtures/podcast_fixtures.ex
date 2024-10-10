@@ -22,7 +22,7 @@ defmodule Radiator.PodcastFixtures do
   @doc """
   Generate a show.
   """
-  def show_fixture(attrs \\ %{}) do
+  def show_fixture(attrs \\ %{}, hosts \\ []) do
     network = get_network(attrs)
 
     {:ok, show} =
@@ -31,7 +31,7 @@ defmodule Radiator.PodcastFixtures do
         title: "some title",
         network_id: network.id
       })
-      |> Podcast.create_show()
+      |> Podcast.create_show(hosts)
 
     show
   end
