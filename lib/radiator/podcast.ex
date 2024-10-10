@@ -216,9 +216,7 @@ defmodule Radiator.Podcast do
   # Suggested to run inside a transaction.
   defp associate_hosts(show, hosts) do
     Enum.each(hosts, fn host ->
-      %ShowHosts{}
-      |> ShowHosts.changeset(%{show_id: show.id, user_id: host.id})
-      |> Repo.insert!()
+      create_showhosts!(%{show_id: show.id, user_id: host.id})
     end)
   end
 
@@ -271,9 +269,7 @@ defmodule Radiator.Podcast do
 
     # Add users to hosts
     Enum.each(add_hosts, fn host ->
-      %ShowHosts{}
-      |> ShowHosts.changeset(%{show_id: show.id, user_id: host.id})
-      |> Repo.insert!()
+      create_showhosts!(%{show_id: show.id, user_id: host.id})
     end)
 
     # Remove users from hosts
@@ -362,6 +358,24 @@ defmodule Radiator.Podcast do
   """
   def reload_assoc(%Show{} = show, fields_or_query) do
     Repo.preload(show, fields_or_query, force: true)
+  end
+
+  @doc """
+  Creates ShowHosts, the association be show and user
+
+  ## Examples
+
+      iex> create_showhosts(%{field: value})
+       %ShowHosts{}
+
+      iex> create_showhosts(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_showhosts!(attrs \\ %{}) do
+    %ShowHosts{}
+    |> ShowHosts.changeset(attrs)
+    |> Repo.insert!()
   end
 
   @doc """
