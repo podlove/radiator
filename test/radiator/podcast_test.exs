@@ -193,9 +193,27 @@ defmodule Radiator.PodcastTest do
   describe "episodes" do
     @invalid_attrs %{title: nil}
 
-    test "list_episodes/0 returns all episodes" do
+    test "list_all_episodes/0 returns all episodes" do
+      deleted_episode =
+        episode_fixture(
+          is_deleted: true,
+          deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        )
+
+      assert Podcast.list_all_episodes() == [deleted_episode]
+    end
+
+    test "list_available_episodes/0 returns all episodes" do
       episode = episode_fixture()
-      assert Podcast.list_episodes() == [episode]
+
+      _deleted_episode =
+        episode_fixture(
+          is_deleted: true,
+          deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        )
+
+      found_episodes = Podcast.list_available_episodes()
+      assert found_episodes == [episode]
     end
 
     test "get_episode!/1 returns the episode with given id" do
@@ -238,7 +256,11 @@ defmodule Radiator.PodcastTest do
     test "delete_episode/1 deletes the episode" do
       episode = episode_fixture()
       assert {:ok, %Episode{}} = Podcast.delete_episode(episode)
-      assert_raise Ecto.NoResultsError, fn -> Podcast.get_episode!(episode.id) end
+      episode = Podcast.get_episode!(episode.id)
+      assert episode.is_deleted == true
+      assert episode.deleted_at != nil
+
+      assert Podcast.list_available_episodes() == []
     end
 
     test "change_episode/1 returns a episode changeset" do

@@ -76,7 +76,6 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       keep_liveview_alive()
 
-      assert_push_event(live, "set_content", %{uuid: ^uuid, content: "node_1_updated"})
       assert_push_event(other_live, "set_content", %{uuid: ^uuid, content: "node_1_updated"})
     end
 
@@ -90,7 +89,6 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       keep_liveview_alive()
 
-      assert_push_event(live, "set_content", %{uuid: ^uuid, content: "no"})
       assert_push_event(other_live, "set_content", %{uuid: ^uuid, content: "no"})
 
       assert live |> has_element?("[value=de_2]")

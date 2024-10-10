@@ -17,7 +17,9 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   @impl true
   def mount(%{"show" => show_id} = params, _session, socket) do
-    show = Podcast.get_show!(show_id, preload: :episodes)
+    show =
+      Podcast.get_show!(show_id, preload: [episodes: Podcast.list_available_episodes_query()])
+
     episode = get_selected_episode(params)
 
     socket
@@ -60,6 +62,10 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     params = Map.put(params, "show_id", socket.assigns.show.id)
 
     save_episode(socket, socket.assigns.live_action, params)
+  end
+
+  def handle_event("delete", params, socket) do
+    delete_episode(socket, params)
   end
 
   @impl true
@@ -120,7 +126,10 @@ defmodule RadiatorWeb.EpisodeLive.Index do
           "episode_id" => episode.id
         })
 
-        show = Podcast.reload_assoc(socket.assigns.show, [:episodes])
+        show =
+          Podcast.reload_assoc(socket.assigns.show,
+            episodes: Podcast.list_available_episodes_query()
+          )
 
         socket
         |> assign(:show, show)
@@ -137,7 +146,10 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   defp save_episode(socket, :edit, params) do
     case Podcast.update_episode(socket.assigns.episode, params) do
       {:ok, episode} ->
-        show = Podcast.reload_assoc(socket.assigns.show, [:episodes])
+        show =
+          Podcast.reload_assoc(socket.assigns.show,
+            episodes: Podcast.list_available_episodes_query()
+          )
 
         socket
         |> assign(:show, show)
@@ -148,6 +160,31 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         socket |> assign(form: to_form(changeset)) |> reply(:noreply)
+    end
+  end
+
+  defp delete_episode(socket, %{"id" => id}) do
+    id
+    |> Podcast.get_episode!()
+    |> Podcast.delete_episode()
+    |> case do
+      {:ok, _episode} ->
+        show =
+          Podcast.reload_assoc(socket.assigns.show,
+            episodes: Podcast.list_available_episodes_query()
+          )
+
+        socket
+        |> assign(:show, show)
+        |> assign(:episodes, show.episodes)
+        |> put_flash(:info, "Episode deleted")
+        |> push_patch(to: ~p"/admin/podcast/#{socket.assigns.show}")
+        |> reply(:noreply)
+
+      {:error, _changeset} ->
+        socket
+        |> put_flash(:error, "Failed to delete episode")
+        |> reply(:noreply)
     end
   end
 
