@@ -4,6 +4,7 @@ defmodule Radiator.Outline.Node do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  alias Radiator.Outline.Node
   alias Radiator.Podcast.Episode
   alias Radiator.Resources.Url
 
@@ -13,11 +14,11 @@ defmodule Radiator.Outline.Node do
   schema "outline_nodes" do
     field :content, :string
     field :creator_id, :integer
-    field :parent_id, Ecto.UUID
-    field :prev_id, Ecto.UUID
     field :level, :integer, virtual: true
 
     belongs_to :episode, Episode
+    belongs_to :parent, Node, references: :uuid, type: Ecto.UUID
+    belongs_to :prev, Node, references: :uuid, type: Ecto.UUID
     has_many :urls, Url, foreign_key: :node_id
 
     timestamps(type: :utc_datetime)
