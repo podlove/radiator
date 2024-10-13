@@ -355,6 +355,34 @@ defmodule Radiator.Outline do
     end
   end
 
+  @doc """
+
+  ## Examples
+      Returns the node below the given node, below in the sense of the expanced outline tree.
+      iex> get_node_below(node_id)
+      %Node{uuid: "074b755d-d095-4b9c-8445-ef1f7ea76d54"}
+  """
+  def get_node_below(node_id) do
+    node =
+      NodeRepository.get_node!(node_id)
+      |> Repo.preload(:parent)
+      |> Repo.preload(:prev)
+
+    children = node |> order_child_nodes()
+
+    if Enum.empty?(children) do
+      next_node = NodeRepository.get_next_node(node)
+
+      if next_node do
+        next_node
+      else
+        NodeRepository.get_next_node(node.parent)
+      end
+    else
+      hd(children)
+    end
+  end
+
   def get_node_id(nil), do: nil
   def get_node_id(%Node{} = node), do: node.uuid
 

@@ -232,6 +232,23 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def handle_event(
         "keydown",
+        %{"key" => "ArrowDown", "uuid" => uuid},
+        socket
+      ) do
+    node = Outline.get_node_below(uuid)
+
+    if node do
+      socket
+      |> push_event("focus_node", %{uuid: node.uuid})
+      |> reply(:noreply)
+    else
+      socket
+      |> reply(:noreply)
+    end
+  end
+
+  def handle_event(
+        "keydown",
         %{"key" => "Tab", "shiftKey" => false, "uuid" => uuid},
         socket
       ) do
