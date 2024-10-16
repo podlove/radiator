@@ -203,6 +203,23 @@ defmodule RadiatorWeb.OutlineComponent do
 
   def handle_event(
         "keydown",
+        %{"key" => "ArrowUp", "uuid" => uuid},
+        socket
+      ) do
+    node = Outline.get_node_above(uuid)
+
+    if node do
+      socket
+      |> push_event("focus_node", %{uuid: node.uuid})
+      |> reply(:noreply)
+    else
+      socket
+      |> reply(:noreply)
+    end
+  end
+
+  def handle_event(
+        "keydown",
         %{"key" => "ArrowDown", "altKey" => true, "uuid" => uuid},
         socket
       ) do
@@ -211,6 +228,23 @@ defmodule RadiatorWeb.OutlineComponent do
 
     socket
     |> reply(:noreply)
+  end
+
+  def handle_event(
+        "keydown",
+        %{"key" => "ArrowDown", "uuid" => uuid},
+        socket
+      ) do
+    node = Outline.get_node_below(uuid)
+
+    if node do
+      socket
+      |> push_event("focus_node", %{uuid: node.uuid})
+      |> reply(:noreply)
+    else
+      socket
+      |> reply(:noreply)
+    end
   end
 
   def handle_event(

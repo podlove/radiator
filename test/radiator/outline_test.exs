@@ -1338,4 +1338,78 @@ defmodule Radiator.OutlineTest do
                ["node_2", "node_3"]
     end
   end
+
+  describe "get_node_id_above/1" do
+    setup :complex_node_fixture
+
+    test "returns the node above the given node", %{
+      node_2: node_2,
+      node_3: node_3
+    } do
+      assert node_2 == Outline.get_node_above(node_3.uuid)
+    end
+
+    test "returns parent node if there is no prev", %{
+      nested_node_1: nested_node_1,
+      node_3: node_3
+    } do
+      assert node_3 == Outline.get_node_above(nested_node_1.uuid)
+    end
+
+    test "returns last child node of prev has children", %{
+      nested_node_2: nested_node_2,
+      node_4: node_4
+    } do
+      assert nested_node_2 == Outline.get_node_above(node_4.uuid)
+    end
+
+    test "returns nil if there is no node above", %{
+      parent_node: parent_node
+    } do
+      assert nil == Outline.get_node_above(parent_node.uuid)
+    end
+  end
+
+  describe "get_node_below/1" do
+    setup :complex_node_fixture
+
+    test "returns the node below the given node", %{
+      node_2: node_2,
+      node_3: node_3
+    } do
+      assert node_3 == Outline.get_node_below(node_2.uuid)
+    end
+
+    test "returns first child node if there is no next", %{
+      nested_node_1: nested_node_1,
+      node_3: node_3
+    } do
+      assert nested_node_1 == Outline.get_node_below(node_3.uuid)
+    end
+
+    test "returns next of parent of there is no next node", %{
+      nested_node_2: nested_node_2,
+      node_4: node_4
+    } do
+      assert node_4 == Outline.get_node_below(nested_node_2.uuid)
+    end
+
+    test "returns first child node if next has children", %{
+      node_3: node_3,
+      nested_node_1: nested_node_1
+    } do
+      assert nested_node_1 == Outline.get_node_below(node_3.uuid)
+    end
+
+    test "first child of root node", %{
+      parent_node: parent_node,
+      node_1: node_1
+    } do
+      assert node_1 == Outline.get_node_below(parent_node.uuid)
+    end
+
+    test "returns first ch if there is no node below", %{node_6: node_6} do
+      assert nil == Outline.get_node_below(node_6.uuid)
+    end
+  end
 end
