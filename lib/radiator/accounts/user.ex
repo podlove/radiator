@@ -12,6 +12,7 @@ defmodule Radiator.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
+    field :raindrop_token, :string, redact: true
 
     many_to_many :hosting_shows, Show, join_through: "show_hosts"
 
@@ -132,6 +133,14 @@ defmodule Radiator.Accounts.User do
   def confirm_changeset(user) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
     change(user, confirmed_at: now)
+  end
+
+  @doc """
+  Sets the raindrop token.
+  """
+  def set_raindrop_token_changeset(user, token) do
+    # FIXME encrypt the token
+    change(user, raindrop_token: token)
   end
 
   @doc """
