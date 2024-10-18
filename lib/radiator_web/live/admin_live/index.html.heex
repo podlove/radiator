@@ -8,14 +8,19 @@
         </button>
       </h2>
       <div class="grid grid-cols-3 gap-6 sm:grid-cols-6">
-        <div :for={{show, i} <- Enum.with_index(network.shows)}>
+        <div :for={{show, i} <- Enum.with_index(network.shows)} class="relative">
+          <button
+            :if={@action != :edit_show}
+            class="bg-[#f0f4f4] absolute top-0 right-0 px-2 py-1 rounded-bl opacity-50 hover:opacity-80"
+            phx-click="edit_show"
+            phx-value-show_id={show.id}
+          >
+            <.icon name="hero-pencil-square" class="w-5 h-5" />
+          </button>
           <.link href={~p"/admin/podcast/#{show}"} class="bg-[#f0f4f4] aspect-square rounded">
             <img src={"/images/pic1#{i}.jpg"} alt="" />
             <div class="p-2 text-center"><%= show.title %></div>
           </.link>
-          <button :if={@action != :edit_show} phx-click="edit_show" phx-value-show_id={show.id}>
-            <.icon name="hero-pencil-square" class="w-5 h-5" />
-          </button>
         </div>
         <button
           :if={@action != :new_show}
@@ -55,7 +60,7 @@
       <.form :let={f} for={@form} id="show-form" phx-change="validate" phx-submit="save">
         <.input field={f[:title]} type="text" label="Title" />
         <.input field={f[:description]} type="text" label="Description" />
-        <div class="mt-4 flex items-end">
+        <div class="flex items-end mt-4">
           <.input
             field={f[:host_email]}
             type="text"
@@ -84,7 +89,7 @@
         <div class="mt-4 mb-4">
           <h4 class="text-lg font-medium">Selected Hosts</h4>
           <%= if Enum.empty?(@selected_hosts) do %>
-            <p class="mt-2 text-sm text-gray-500 italic">No hosts yet</p>
+            <p class="mt-2 text-sm italic text-gray-500">No hosts yet</p>
           <% else %>
             <ul class="mt-2 space-y-2">
               <%= for host <- @selected_hosts do %>
