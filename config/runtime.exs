@@ -79,13 +79,26 @@ if config_env() == :prod do
     port: String.to_integer(System.get_env("SMTP_PORT")),
     retries: 2,
     no_mx_lookups: false
+end
 
-  config :radiator, :service,
-    raindrop: %{
-      client_id: System.get_env("RAINDROP_CLIENT_ID"),
-      client_secret: System.get_env("RAINDROP_CLIENT_SECRET"),
-      options: [],
-      url: "https://raindrop.io/oauth/access_token",
-      redirect_url: "https://radiator.metaebene.net/api/raindrop/auth/redirect"
-    }
+services = %{
+  raindrop: %{
+    client_id: System.get_env("RAINDROP_CLIENT_ID"),
+    client_secret: System.get_env("RAINDROP_CLIENT_SECRET"),
+    options: [],
+    url: "https://raindrop.io/oauth/access_token",
+    redirect_url: "https://radiator.metaebene.net/api/raindrop/auth/redirect"
+  }
+}
+
+config :radiator, raindrop: services.raindrop
+
+if config_env() == :test do
+  config :radiator,
+    raindrop:
+      Map.merge(services.raindrop, %{
+        client_id: "2sxB9zzcQ6u2GtozA2cOJeq04",
+        client_secret: "BZ0Tug8KPjXMO9zeBB231X5Z8AL0nvL5EoENMN",
+        options: [plug: {Req.Test, RadiatorWeb.Api.RaindropController}]
+      })
 end
