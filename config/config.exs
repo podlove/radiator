@@ -66,7 +66,8 @@ config :radiator, :service,
     client_id: System.get_env("RAINDROP_CLIENT_ID"),
     client_secret: System.get_env("RAINDROP_CLIENT_SECRET"),
     options: [],
-    url: "https://raindrop.io/oauth/access_token"
+    url: "https://raindrop.io/oauth/access_token",
+    redirect_url: "https://radiator.metaebene.net/api/raindrop/auth/redirect"
   }
 
 # Import environment specific config. This must remain at the bottom

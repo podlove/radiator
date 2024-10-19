@@ -2,10 +2,8 @@ defmodule RadiatorWeb.Api.RaindropController do
   use RadiatorWeb, :controller
 
   alias Radiator.Accounts
-
+  alias Radiator.RaindropClient
   require Logger
-
-  @raindrop Application.compile_env(:radiator, [:service, :raindrop])
 
   def auth_redirect(conn, %{"user_id" => user_id, "code" => code}) do
     %{host: host, request_path: request_path} = conn
@@ -15,14 +13,14 @@ defmodule RadiatorWeb.Api.RaindropController do
         method: :post,
         url: "https://raindrop.io/oauth/access_token",
         json: %{
-          client_id: @raindrop[:client_id],
-          client_secret: @raindrop[:client_secret],
+          client_id: RaindropClient.config()[:client_id],
+          client_secret: RaindropClient.config()[:client_secret],
           grant_type: "authorization_code",
           code: code,
           redirect_uri: host <> request_path
         }
       ]
-      |> Keyword.merge(@raindrop[:options])
+      |> Keyword.merge(RaindropClient.config()[:options])
       |> Req.request()
 
     Logger.error("Response from raindrop: #{inspect(response)}")
@@ -67,7 +65,7 @@ defmodule RadiatorWeb.Api.RaindropController do
           {"Authorization", "Bearer #{user.raindrop_access_token}"}
         ]
       ]
-      |> Keyword.merge(@raindrop[:options])
+      |> Keyword.merge(RaindropClient.config()[:options])
       |> Req.request()
       |> Req.run()
 

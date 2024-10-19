@@ -19,7 +19,7 @@ export function handleFocus({ uuid, user_name }: UserAction) {
 
 export function handleFocusNode({ uuid }: NodeData) {
   const input = document.getElementById(
-    `form-${uuid}_content`
+    `form-${uuid}_content`,
   ) as HTMLDivElement;
   input.focus();
 }
@@ -37,4 +37,9 @@ export function handleMoveNodes({ nodes }: { nodes: NodeData[] }) {
 export function handleSetContent({ uuid, content }: any) {
   const node = getNodeById(uuid)!;
   setValue(node, `#form-${uuid}_content`, content);
+}
+
+export function connectRaindrop({ url, client_id, redirect_uri }: any) {
+  console.log(url, client_id, redirect_uri);
+  alert(redirect_uri);
 }
