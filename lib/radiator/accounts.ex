@@ -247,6 +247,12 @@ defmodule Radiator.Accounts do
     end
   end
 
+  def update_raindrop_tokens(user, raindrop_access_token, raindrop_refresh_token, raindrop_expires_at) do
+    user
+    |> User.set_raindrop_token_changeset(raindrop_access_token, raindrop_refresh_token, raindrop_expires_at)
+    |> Repo.update()
+  end
+
   ## Session
 
   @doc """
