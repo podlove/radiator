@@ -12,7 +12,8 @@ defmodule Radiator.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
-    field :raindrop_token, :string, redact: true
+    field :raindrop_access_token, :string, redact: true
+    field :raindrop_refresh_token, :string, redact: true
 
     many_to_many :hosting_shows, Show, join_through: "show_hosts"
 
