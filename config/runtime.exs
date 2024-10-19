@@ -79,4 +79,13 @@ if config_env() == :prod do
     port: String.to_integer(System.get_env("SMTP_PORT")),
     retries: 2,
     no_mx_lookups: false
+
+  config :radiator, :service,
+    raindrop: %{
+      client_id: System.get_env("RAINDROP_CLIENT_ID"),
+      client_secret: System.get_env("RAINDROP_CLIENT_SECRET"),
+      options: [],
+      url: "https://raindrop.io/oauth/access_token",
+      redirect_url: "https://radiator.metaebene.net/api/raindrop/auth/redirect"
+    }
 end
