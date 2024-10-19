@@ -12,6 +12,9 @@ defmodule Radiator.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
+    field :raindrop_access_token, :string, redact: true
+    field :raindrop_refresh_token, :string, redact: true
+    field :raindrop_expires_at, :utc_datetime
 
     many_to_many :hosting_shows, Show, join_through: "show_hosts"
 
@@ -132,6 +135,17 @@ defmodule Radiator.Accounts.User do
   def confirm_changeset(user) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
     change(user, confirmed_at: now)
+  end
+
+  @doc """
+  Sets the raindrop tokens and expiration time.
+  """
+  def set_raindrop_token_changeset(user, access_token, refresh_token, expires_at) do
+    change(user,
+      raindrop_access_token: access_token,
+      raindrop_refresh_token: refresh_token,
+      raindrop_expires_at: expires_at
+    )
   end
 
   @doc """

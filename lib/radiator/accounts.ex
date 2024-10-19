@@ -247,6 +247,35 @@ defmodule Radiator.Accounts do
     end
   end
 
+  @doc """
+  Sets a users optional Raindrop tokens and expiration time.
+  Given a user id, access token, refresh token, and expiration time,
+
+  ## Examples
+
+      iex> update_raindrop_tokens(23, "11r4", "11vb", ~U[2024-11-02 11:54:31Z])
+      {:ok, %User{}}
+
+      iex> update_raindrop_tokens(42, "11r4", "11vb", ~U[2024-11-02 11:54:31Z])
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_raindrop_tokens(
+        user_id,
+        raindrop_access_token,
+        raindrop_refresh_token,
+        raindrop_expires_at
+      ) do
+    User
+    |> Radiator.Repo.get!(user_id)
+    |> User.set_raindrop_token_changeset(
+      raindrop_access_token,
+      raindrop_refresh_token,
+      raindrop_expires_at
+    )
+    |> Repo.update()
+  end
+
   ## Session
 
   @doc """

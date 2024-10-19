@@ -3,6 +3,7 @@ defmodule RadiatorWeb.AdminLive.Index do
 
   alias Radiator.Accounts
   alias Radiator.Podcast
+  alias Radiator.RaindropClient
   alias RadiatorWeb.Endpoint
 
   @impl true
@@ -13,6 +14,10 @@ defmodule RadiatorWeb.AdminLive.Index do
     |> assign(:page_description, "Tools to create and manage your prodcasts")
     |> assign(:networks, Podcast.list_networks(preload: :shows))
     |> assign(:bookmarklet, get_bookmarklet(Endpoint.url() <> "/api/v1/outline", socket))
+    |> assign(
+      :raindrop_url,
+      "https://raindrop.io/oauth/authorize?client_id=#{RaindropClient.config()[:client_id]}&redirect_uri=#{RaindropClient.config()[:redirect_url]}/#{socket.assigns.current_user.id}"
+    )
     |> reply(:ok)
   end
 
@@ -136,6 +141,11 @@ defmodule RadiatorWeb.AdminLive.Index do
      socket
      |> assign(host_suggestions: suggestions)
      |> assign(host_email: search)}
+  end
+
+  def handle_event("connect_raindrop", _params, socket) do
+    socket
+    |> reply(:noreply)
   end
 
   def handle_event("save", %{"show" => params}, socket) do

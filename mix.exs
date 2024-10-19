@@ -63,6 +63,7 @@ defmodule Radiator.MixProject do
       {:reply, "~> 0.2.0"},
       {:slugify, "~> 1.3"},
       {:swoosh, "~> 1.5"},
+      {:req, "~> 0.5"},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"}
