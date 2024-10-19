@@ -64,41 +64,41 @@ defmodule RadiatorWeb.OutlineComponents do
       <h3 class="text-base font-semibold leading-7 text-gray-600">Shortcuts</h3>
       <dl class="divide-y divide-gray-100">
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
-          <dt class="text-sm font-small leading-6 text-gray-600">Add note</dt>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Add note</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ↵
           </dd>
-          <dt class="text-sm font-small leading-6 text-gray-600">Collapse</dt>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Collapse</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700"></dd>
         </div>
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
-          <dt class="text-sm font-small leading-6 text-gray-600">Cursor up</dt>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Cursor up</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ↑
           </dd>
-          <dt class="text-sm font-small leading-6 text-gray-600">Expand</dt>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Expand</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700"></dd>
         </div>
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
-          <dt class="text-sm font-small leading-6 text-gray-600">Cursor down</dt>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Cursor down</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ↓
           </dd>
-          <dt class="text-sm font-small leading-6 text-gray-600">Move node up</dt>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Move node up</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⌥↑</dd>
         </div>
 
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
-          <dt class="text-sm font-small leading-6 text-gray-600">Indent</dt>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Indent</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ⇥
           </dd>
 
-          <dt class="text-sm font-small leading-6 text-gray-600">Move node down</dt>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Move node down</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⌥↓</dd>
         </div>
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
-          <dt class="text-sm font-small leading-6 text-gray-600">Outdent</dt>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Outdent</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ⇧⇥
           </dd>
@@ -177,6 +177,44 @@ defmodule RadiatorWeb.OutlineComponents do
       <p>old_next_id = <%= Outline.get_node_id(@event.old_next) %></p>
       <p>next_id = <%= Outline.get_node_id(@event.next) %></p>
     </div>
+    """
+  end
+
+  def url_preview(%{type: "youtube"} = assigns) do
+    ~H"""
+    <div><Core.icon name="hero-play" class="w-5 h-5" /> YOUTUBE</div>
+    <img src="/images/pic10.jpg" alt="" />
+    <!--<iframe
+      width="560"
+      height="315"
+      src={@url}
+      title="YouTube video player"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen
+    >
+    </iframe>-->
+    """
+  end
+
+  def url_preview(%{type: "wikipedia"} = assigns) do
+    ~H"""
+    <div><Core.icon name="hero-book-open" class="w-5 h-5" /> WIKIPEDIA</div>
+    """
+  end
+
+  def url_preview(%{type: "wikidata"} = assigns) do
+    ~H"""
+    <div>WIKIDATA</div>
+    """
+  end
+
+  def url_preview(%{type: "website"} = assigns) do
+    ~H"""
+    <div><Core.icon name="hero-globe-alt" class="w-5 h-5" /> Website</div>
+
+    <img src="/images/pic10.jpg" alt="" />
     """
   end
 end
