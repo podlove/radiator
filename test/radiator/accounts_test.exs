@@ -631,8 +631,13 @@ defmodule Radiator.AccountsTest do
     test "updates the raindrop tokens", %{user: user} do
       access_token = "ae261404-11r4-47c0-bce3-e18a423da828"
       refresh_token = "c8080368-fad2-4a3f-b2c9-71d3z85011vb"
-      expires_at = DateTime.utc_now() |> DateTime.shift(second: 1209599) |> DateTime.truncate(:second)
-      {:ok, user} = Accounts.update_raindrop_tokens(user, access_token, refresh_token, expires_at)
+
+      expires_at =
+        DateTime.utc_now() |> DateTime.shift(second: 1_209_599) |> DateTime.truncate(:second)
+
+      {:ok, user} =
+        Accounts.update_raindrop_tokens(user.id, access_token, refresh_token, expires_at)
+
       user = Repo.reload(user)
       assert user.raindrop_access_token == access_token
       assert user.raindrop_refresh_token == refresh_token

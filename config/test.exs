@@ -41,3 +41,11 @@ config :phoenix_live_view,
 
 # Enable tree consistency validator: crashes when tree is not valid!
 config :radiator, tree_consistency_validator: true
+
+config :radiator, :service,
+  raindrop: %{
+    client_id: "2sxB9zzcQ6u2GtozA2cOJeq04",
+    client_secret: "BZ0Tug8KPjXMO9zeBB231X5Z8AL0nvL5EoENMN",
+    options: [plug: {Req.Test, RadiatorWeb.Api.RaindropController}],
+    url: "https://raindrop.io/oauth/access_token"
+  }
