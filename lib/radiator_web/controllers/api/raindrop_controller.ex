@@ -6,8 +6,6 @@ defmodule RadiatorWeb.Api.RaindropController do
   require Logger
 
   def auth_redirect(conn, %{"user_id" => user_id, "code" => code}) do
-    %{host: host, request_path: request_path} = conn
-
     {:ok, response} =
       [
         method: :post,
@@ -17,7 +15,7 @@ defmodule RadiatorWeb.Api.RaindropController do
           client_secret: RaindropClient.config()[:client_secret],
           grant_type: "authorization_code",
           code: code,
-          redirect_uri: host <> request_path
+          redirect_uri: RaindropClient.redirect_uri(user_id)
         }
       ]
       |> Keyword.merge(RaindropClient.config()[:options])
