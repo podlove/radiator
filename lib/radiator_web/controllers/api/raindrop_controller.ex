@@ -6,38 +6,40 @@ defmodule RadiatorWeb.Api.RaindropController do
   require Logger
 
   def auth_redirect(conn, %{"user_id" => user_id, "code" => code}) do
-    Logger.error("Raindrop auth redirect code: #{code}")
+    Logger.error(
+      "Raindrop auth redirect code: #{code}, redirect_uri: #{RaindropClient.redirect_uri(user_id)}"
+    )
 
-    {:ok, response} =
-      [
-        method: :post,
-        url: "https://raindrop.io/oauth/access_token",
-        json: %{
-          client_id: RaindropClient.config()[:client_id],
-          client_secret: RaindropClient.config()[:client_secret],
-          grant_type: "authorization_code",
-          code: code,
-          redirect_uri: RaindropClient.redirect_uri(user_id)
-        }
-      ]
-      |> Keyword.merge(RaindropClient.config()[:options])
-      |> Req.request()
+    # {:ok, response} =
+    #   [
+    #     method: :post,
+    #     url: "https://raindrop.io/oauth/access_token",
+    #     json: %{
+    #       client_id: RaindropClient.config()[:client_id],
+    #       client_secret: RaindropClient.config()[:client_secret],
+    #       grant_type: "authorization_code",
+    #       code: code,
+    #       redirect_uri: RaindropClient.redirect_uri(user_id)
+    #     }
+    #   ]
+    #   |> Keyword.merge(RaindropClient.config()[:options])
+    #   |> Req.request()
 
-    Logger.error("Response from raindrop: #{inspect(response)}")
+    # Logger.error("Response from raindrop: #{inspect(response)}")
 
-    if response.body != "Unauthorized" && response.body["result"] do
-      expires_at =
-        DateTime.now!("Etc/UTC")
-        |> DateTime.shift(second: response.body["expires_in"])
-        |> DateTime.truncate(:second)
+    # if response.body != "Unauthorized" && response.body["result"] do
+    #   expires_at =
+    #     DateTime.now!("Etc/UTC")
+    #     |> DateTime.shift(second: response.body["expires_in"])
+    #     |> DateTime.truncate(:second)
 
-      Accounts.update_raindrop_tokens(
-        user_id,
-        response.body["access_token"],
-        response.body["refresh_token"],
-        expires_at
-      )
-    end
+    #   Accounts.update_raindrop_tokens(
+    #     user_id,
+    #     response.body["access_token"],
+    #     response.body["refresh_token"],
+    #     expires_at
+    #   )
+    # end
 
     conn
     |> put_resp_content_type("application/json")
