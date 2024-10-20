@@ -38,8 +38,3 @@ export function handleSetContent({ uuid, content }: any) {
   const node = getNodeById(uuid)!;
   setValue(node, `#form-${uuid}_content`, content);
 }
-
-export function connectRaindrop({ url, client_id, redirect_uri }: any) {
-  console.log(url, client_id, redirect_uri);
-  alert(redirect_uri);
-}

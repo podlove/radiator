@@ -5,7 +5,6 @@ import {
   handleFocusNode,
   handleMoveNodes,
   handleSetContent,
-  connectRaindrop,
 } from "./events/handler";
 import { keydown, toggleCollapse } from "./events/listener";
 
@@ -20,7 +19,6 @@ export const Hooks = {
       this.handleEvent("focus_node", handleFocusNode.bind(this));
       this.handleEvent("move_nodes", handleMoveNodes.bind(this));
       this.handleEvent("set_content", handleSetContent.bind(this));
-      this.handleEvent("connect_raindrop", connectRaindrop.bind(this));
       this.el.addEventListener("keydown", keydown.bind(this));
       this.el.addEventListener("toggle_collapse", toggleCollapse.bind(this));
 
