@@ -39,7 +39,7 @@ defmodule Radiator.MixProject do
       {:ecto_sql, "~> 3.10"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:finch, "~> 0.13"},
-      {:floki, ">= 0.30.0", only: :test},
+      {:floki, ">= 0.30.0", override: true},
       {:gen_smtp, "~> 1.1"},
       {:gen_stage, "~> 1.2"},
       {:gettext, "~> 0.20"},
@@ -50,7 +50,7 @@ defmodule Radiator.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:jason, "~> 1.2"},
+      {:jason, "~> 1.2", override: true},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
@@ -66,7 +66,10 @@ defmodule Radiator.MixProject do
       {:req, "~> 0.5"},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
-      {:telemetry_poller, "~> 1.0"}
+      {:telemetry_poller, "~> 1.0"},
+      {:web_inspector, git: "https://github.com/eteubert/web_inspector.git"},
+      {:timex, "~> 3.7"},
+      {:req, "~> 0.5"}
     ]
   end
 

@@ -4,7 +4,7 @@ defmodule Radiator.Resources.UrlWorker do
   """
   alias __MODULE__
   alias Radiator.Resources
-  alias Radiator.Resources.UrlExtractor
+  alias Radiator.NodeAnalyzer
 
   def extract_urls(node_id, content) do
     Radiator.Job.start_job(
@@ -14,14 +14,7 @@ defmodule Radiator.Resources.UrlWorker do
   end
 
   def perform(node_id, content) do
-    result = UrlExtractor.extract_urls(content)
-
-    url_attributes =
-      Enum.map(result, fn info ->
-        info
-        |> Map.put(:url, info.parsed_url)
-        |> Map.delete(:parsed_url)
-      end)
+    url_attributes = NodeAnalyzer.analyze(content)
 
     _created_urls = Resources.rebuild_node_urls(node_id, url_attributes)
     :ok
