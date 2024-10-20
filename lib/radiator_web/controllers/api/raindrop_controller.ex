@@ -7,6 +7,7 @@ defmodule RadiatorWeb.Api.RaindropController do
 
   def auth_redirect(conn, %{"user_id" => user_id, "code" => code}) do
     Logger.error("Raindrop auth redirect code: #{code}")
+
     {:ok, response} =
       [
         method: :post,
