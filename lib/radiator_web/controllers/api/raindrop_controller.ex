@@ -7,7 +7,7 @@ defmodule RadiatorWeb.Api.RaindropController do
 
   def auth_redirect(conn, %{"user_id" => user_id, "code" => code}) do
     Logger.error(
-      "Raindrop auth redirect code: #{code}, redirect_uri: #{RaindropClient.redirect_uri(user_id)}"
+      "Raindrop auth redirect code: #{code}, redirect_uri: #{RaindropClient.redirect_uri()}"
     )
 
     {:ok, response} =
@@ -19,7 +19,7 @@ defmodule RadiatorWeb.Api.RaindropController do
           client_secret: RaindropClient.config()[:client_secret],
           grant_type: "authorization_code",
           code: code,
-          redirect_uri: RaindropClient.redirect_uri(user_id)
+          redirect_uri: RaindropClient.redirect_uri()
         }
       ]
       |> Keyword.merge(RaindropClient.config()[:options])
