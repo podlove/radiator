@@ -16,6 +16,11 @@ defmodule Radiator.RaindropClient do
     |> URI.parse()
     |> URI.append_path("/#{user_id}")
     |> URI.to_string()
-    |> URI.encode()
+  end
+
+  def redirect_uri do
+    config()[:redirect_url]
+    |> URI.parse()
+    |> URI.to_string()
   end
 end
