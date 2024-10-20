@@ -23,7 +23,7 @@
           name={form[:prev_id].name}
           value={form[:prev_id].value}
         />
-        <.input
+        <OutlineComponents.outline_input
           class="content"
           type="text"
           field={form[:content]}
@@ -35,7 +35,6 @@
           phx-value-uuid={form[:uuid].value}
           phx-value-parent={form[:parent_id].value}
           phx-value-prev={form[:prev_id].value}
-          phx-throttle="1000"
           phx-target={@myself}
         />
       </OutlineComponents.outline_form>
