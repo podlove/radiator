@@ -28,8 +28,7 @@ defmodule RadiatorWeb.Router do
     pipe_through :api
 
     post "/v1/outline", OutlineController, :create
-
-    get "/raindrop/auth/redirect/:user_id", RaindropController, :auth_redirect
+    get "/raindrop/auth/redirect", RaindropController, :auth_redirect
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

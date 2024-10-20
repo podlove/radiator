@@ -51,7 +51,7 @@ defmodule RadiatorWeb.Api.RaindropControllerTest do
       query_string = URI.encode_query(%{code: code})
 
       url =
-        ~p"/api/raindrop/auth/redirect/#{user.id}"
+        ~p"/api/raindrop/auth/redirect?user_id={user.id}"
         |> URI.parse()
         |> URI.append_query(query_string)
         |> URI.to_string()
@@ -64,7 +64,7 @@ defmodule RadiatorWeb.Api.RaindropControllerTest do
       query_string = URI.encode_query(%{error: "blah"})
 
       url =
-        ~p"/api/raindrop/auth/redirect/#{user.id}"
+        ~p"/api/raindrop/auth/redirect?user_id=#{user.id}"
         |> URI.parse()
         |> URI.append_query(query_string)
         |> URI.to_string()

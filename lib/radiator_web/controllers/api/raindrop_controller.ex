@@ -19,7 +19,7 @@ defmodule RadiatorWeb.Api.RaindropController do
           client_secret: RaindropClient.config()[:client_secret],
           grant_type: "authorization_code",
           code: code,
-          redirect_uri: RaindropClient.redirect_uri()
+          redirect_uri: RaindropClient.redirect_uri(user_id)
         }
       ]
       |> Keyword.merge(RaindropClient.config()[:options])
