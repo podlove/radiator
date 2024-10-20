@@ -16,7 +16,7 @@ defmodule RadiatorWeb.AdminLive.Index do
     |> assign(:bookmarklet, get_bookmarklet(Endpoint.url() <> "/api/v1/outline", socket))
     |> assign(
       :raindrop_url,
-      "https://raindrop.io/oauth/authorize?client_id=#{RaindropClient.config()[:client_id]}&redirect_uri=#{RaindropClient.redirect_uri(socket.assigns.current_user.id)}"
+      "https://raindrop.io/oauth/authorize?client_id=#{RaindropClient.config()[:client_id]}&redirect_uri=#{RaindropClient.redirect_uri_encoded(socket.assigns.current_user.id)}"
     )
     |> reply(:ok)
   end

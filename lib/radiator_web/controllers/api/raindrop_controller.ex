@@ -6,6 +6,7 @@ defmodule RadiatorWeb.Api.RaindropController do
   require Logger
 
   def auth_redirect(conn, %{"user_id" => user_id, "code" => code}) do
+    Logger.error("Raindrop auth redirect code: #{code}")
     {:ok, response} =
       [
         method: :post,
@@ -23,7 +24,7 @@ defmodule RadiatorWeb.Api.RaindropController do
 
     Logger.error("Response from raindrop: #{inspect(response)}")
 
-    if response.body != "Unauthorized" do
+    if response.body != "Unauthorized" && response.body["result"] do
       expires_at =
         DateTime.now!("Etc/UTC")
         |> DateTime.shift(second: response.body["expires_in"])

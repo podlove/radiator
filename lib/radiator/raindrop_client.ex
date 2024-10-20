@@ -5,6 +5,12 @@ defmodule Radiator.RaindropClient do
 
   def config, do: Application.fetch_env!(:radiator, :raindrop)
 
+  def redirect_uri_encoded(user_id) do
+      user_id
+      |> redirect_uri()
+      |> URI.encode()
+  end
+
   def redirect_uri(user_id) do
     config()[:redirect_url]
     |> URI.parse()
