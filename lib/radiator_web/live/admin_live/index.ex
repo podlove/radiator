@@ -15,6 +15,10 @@ defmodule RadiatorWeb.AdminLive.Index do
     |> assign(:networks, Podcast.list_networks(preload: :shows))
     |> assign(:bookmarklet, get_bookmarklet(Endpoint.url() <> "/api/v1/outline", socket))
     |> assign(
+      :raindrop_access,
+      RaindropClient.access_enabled?(socket.assigns.current_user.id)
+    )
+    |> assign(
       :raindrop_url,
       "https://raindrop.io/oauth/authorize?client_id=#{RaindropClient.config()[:client_id]}&redirect_uri=#{RaindropClient.redirect_uri_encoded(socket.assigns.current_user.id)}"
     )
@@ -145,6 +149,18 @@ defmodule RadiatorWeb.AdminLive.Index do
 
   def handle_event("connect_raindrop", _params, socket) do
     socket
+    |> assign(
+      :raindrop_access,
+      RaindropClient.access_enabled?(socket.assigns.current_user.id)
+    )
+    |> reply(:noreply)
+  end
+
+  def handle_event("show_raindrop_collections", _params, socket) do
+    items = RaindropClient.get_collections(socket.assigns.current_user.id)
+
+    socket
+    |> push_event("show_raindrop_collections", %{items: items})
     |> reply(:noreply)
   end
 
