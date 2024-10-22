@@ -1,4 +1,6 @@
 defmodule Radiator.NodeAnalyzer.UrlAnalyzer do
+  @moduledoc false
+
   @behaviour Radiator.NodeAnalyzer
 
   require Logger

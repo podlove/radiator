@@ -3,8 +3,8 @@ defmodule Radiator.Resources.UrlWorker do
   job to extract urls from content and persist URLs
   """
   alias __MODULE__
-  alias Radiator.Resources
   alias Radiator.NodeAnalyzer
+  alias Radiator.Resources
 
   def extract_urls(node_id, content) do
     Radiator.Job.start_job(

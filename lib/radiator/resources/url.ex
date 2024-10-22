@@ -6,6 +6,7 @@ defmodule Radiator.Resources.Url do
   import Ecto.Changeset
 
   defmodule Data do
+    @moduledoc false
     use Ecto.Schema
 
     embedded_schema do
