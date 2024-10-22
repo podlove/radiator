@@ -5,6 +5,7 @@ import {
   handleFocusNode,
   handleMoveNodes,
   handleSetContent,
+  showRaindropCollections,
 } from "./events/handler";
 import { keydown, toggleCollapse } from "./events/listener";
 
@@ -59,6 +60,16 @@ export const Hooks = {
       nodes.forEach((node: HTMLDivElement) => {
         moveNode(node);
       });
+    },
+  },
+  admin: {
+    selector: "#raindrop-panel",
+    mounted() {
+      this.handleEvent(
+        console.log("#raindrop, mounted!!!"),
+        "show_raindrop_collections",
+        showRaindropCollections.bind(this),
+      );
     },
   },
 };

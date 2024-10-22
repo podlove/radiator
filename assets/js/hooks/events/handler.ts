@@ -38,3 +38,8 @@ export function handleSetContent({ uuid, content }: any) {
   const node = getNodeById(uuid)!;
   setValue(node, `#form-${uuid}_content`, content);
 }
+
+export function showRaindropCollections({ items }: any) {
+  console.log(items);
+  alert(items[0]);
+}
