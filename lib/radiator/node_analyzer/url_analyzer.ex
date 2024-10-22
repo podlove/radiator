@@ -71,7 +71,7 @@ defmodule Radiator.NodeAnalyzer.UrlAnalyzer do
     [{0..(String.length(string) - 1), string}]
   end
 
-  defp add_ranges(string, [{_first..prev_last, _string} | _rest] = acc) do
+  defp add_ranges(string, [{_first..prev_last//_, _string} | _rest] = acc) do
     first = prev_last + 1
     last = prev_last + max(String.length(string), 1)
     [{first..last, string} | acc]
