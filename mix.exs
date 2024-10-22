@@ -61,15 +61,14 @@ defmodule Radiator.MixProject do
       {:phoenix, "~> 1.7.14"},
       {:postgrex, ">= 0.0.0"},
       {:reply, "~> 0.2.0"},
+      {:req, "~> 0.5"},
       {:slugify, "~> 1.3"},
       {:swoosh, "~> 1.5"},
-      {:req, "~> 0.5"},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:web_inspector, git: "https://github.com/eteubert/web_inspector.git"},
       {:timex, "~> 3.7"},
-      {:req, "~> 0.5"}
+      {:web_inspector, git: "https://github.com/eteubert/web_inspector.git"}
     ]
   end
 
