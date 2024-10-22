@@ -15,8 +15,7 @@ export const Hooks = {
   outline: {
     selector: ".node",
     mounted() {
-      console.log("#outline, mounted!!!", this.el),
-        this.handleEvent("blur", handleBlur.bind(this));
+      this.handleEvent("blur", handleBlur.bind(this));
       this.handleEvent("focus", handleFocus.bind(this));
       this.handleEvent("focus_node", handleFocusNode.bind(this));
       this.handleEvent("move_nodes", handleMoveNodes.bind(this));
@@ -64,13 +63,11 @@ export const Hooks = {
     },
   },
   raindrop: {
-    // selector: "#raindrop-panel",
     mounted() {
-      console.log("#raindrop, mounted!!!", this.el),
-        this.handleEvent(
-          "show_raindrop_collections",
-          showRaindropCollections.bind(this),
-        );
+      this.handleEvent(
+        "show_raindrop_collections",
+        showRaindropCollections.bind(this),
+      );
     },
   },
 };
