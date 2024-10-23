@@ -4,5 +4,5 @@ defmodule Radiator.NodeAnalyzer.DummyAnalyzer do
 
   def match?(_node), do: true
 
-  def analyze(_node), do: {:ok, []}
+  def analyze(_node), do: []
 end

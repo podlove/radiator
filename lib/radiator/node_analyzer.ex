@@ -18,7 +18,9 @@ defmodule Radiator.NodeAnalyzer do
   @callback match?(content :: String.t()) :: boolean
   @callback analyze(content :: String.t()) :: {:ok, any()}
 
-  @spec analyze(Node.t()) :: list()
+  # @spec analyze(Node.t()) :: list()
+  # @spec analyze(String.t()) :: list()
+  # @impl true
   def analyze(content) do
     analyzers()
     |> Enum.filter(& &1.match?(content))
