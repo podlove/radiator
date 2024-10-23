@@ -13,7 +13,7 @@ defmodule Radiator.NodeAnalyzer do
       [{:ok, ["example"]}]
   """
 
-  alias Radiator.Outline.Node
+  # alias Radiator.Outline.Node
 
   @callback match?(content :: String.t()) :: boolean
   @callback analyze(content :: String.t()) :: {:ok, any()}
