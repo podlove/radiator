@@ -4,12 +4,12 @@ defmodule Radiator.NodeAnalyzerTest do
 
   alias Radiator.NodeAnalyzer
   alias Radiator.NodeAnalyzer.DummyAnalyzer
-  alias Radiator.Outline.Node
+  # alias Radiator.Outline.Node
 
   test "analyze/2 returns a list of results from all analyzers" do
     # assert NodeAnalyzer.do_analyze(%Node{}, [DummyAnalyzer]) == [{:ok, []}]
     # assert NodeAnalyzer.do_analyze(%Node{}, []) == [{:ok, []}]
     assert NodeAnalyzer.do_analyze("", [DummyAnalyzer]) == [{:ok, []}]
-    assert NodeAnalyzer.do_analyze("", []) == [{:ok, []}]
+    assert NodeAnalyzer.do_analyze("", []) == []
   end
 end
