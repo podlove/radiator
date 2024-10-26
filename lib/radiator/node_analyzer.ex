@@ -7,9 +7,9 @@ defmodule Radiator.NodeAnalyzer do
       iex> defmodule ExampleAnalyzer do
       ...>   @behaviour Radiator.NodeAnalyzer
       ...>   def match?(_node), do: true
-      ...>   def analyze(_node), do: {:ok, ["example"]}
+      ...>   def analyze(_node), do: [{:ok, ["example"]}]
       ...> end
-      iex> Radiator.NodeAnalyzer.analyze(%Radiator.Outline.Node{})
+      iex> Radiator.NodeAnalyzer.do_analyze("", [ExampleAnalyzer])
       [{:ok, ["example"]}]
   """
 
@@ -18,11 +18,10 @@ defmodule Radiator.NodeAnalyzer do
   @callback match?(content :: String.t()) :: boolean
   @callback analyze(content :: String.t()) :: {:ok, any()}
 
-  # @spec analyze(Node.t()) :: list()
-  # @spec analyze(String.t()) :: list()
-  # @impl true
-  def analyze(content) do
-    analyzers()
+  # @spec analyze(Node.t(), list()) :: list()
+  # @spec analyze(String.t(), list()) :: list()
+  def do_analyze(content, analyzers \\ analyzers()) do
+    analyzers
     |> Enum.filter(& &1.match?(content))
     |> Enum.flat_map(& &1.analyze(content))
   end

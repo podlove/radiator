@@ -1,6 +1,7 @@
 defmodule Radiator.NodeAnalyzer.UrlAnalyzer do
-  @moduledoc false
-
+  @moduledoc """
+  Analyzes URLs in content with the help of the WebInspector (https://github.com/eteubert/web_inspector).
+  """
   @behaviour Radiator.NodeAnalyzer
 
   require Logger
