@@ -3,17 +3,20 @@ defmodule Radiator.NodeAnalyzer.UrlAnalyzer do
   Analyzes URLs in content with the help of the WebInspector (https://github.com/eteubert/web_inspector).
   Implements the `Radiator.NodeAnalyzer` behaviour.
   """
+
+  alias Radiator.Outline.Node
+
   @behaviour Radiator.NodeAnalyzer
 
   require Logger
 
   @impl true
-  def match?(content) do
+  def match?(%Node{content: content}) do
     extract_uris(content) != []
   end
 
   @impl true
-  def analyze(content) do
+  def analyze(%Node{content: content}) do
     for {range, uri} <- extract_uris(content) do
       data =
         case analyze_uri(uri) do

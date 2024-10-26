@@ -26,8 +26,8 @@ defmodule Radiator.Outline.NodeChangeListener do
     {:ok, []}
   end
 
-  def handle_info(%NodeContentChangedEvent{node_id: node_id, content: content}, state) do
-    scan_content_for_urls(node_id, content)
+  def handle_info(%NodeContentChangedEvent{node_id: node_id}, state) do
+    scan_content_for_urls(node_id)
     {:noreply, state}
   end
 
@@ -52,9 +52,5 @@ defmodule Radiator.Outline.NodeChangeListener do
     {:noreply, state}
   end
 
-  defp scan_content_for_urls(_node_id, nil), do: nil
-
-  defp scan_content_for_urls(node_id, content) do
-    UrlWorker.extract_urls(node_id, content)
-  end
+  defp scan_content_for_urls(node_id), do: UrlWorker.extract_urls(node_id)
 end

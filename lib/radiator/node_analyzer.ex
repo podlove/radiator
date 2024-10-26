@@ -9,24 +9,27 @@ defmodule Radiator.NodeAnalyzer do
       ...>   def match?(_node), do: true
       ...>   def analyze(_node), do: [%{data: "example"}]
       ...> end
-      iex> Radiator.NodeAnalyzer.do_analyze("", [ExampleAnalyzer])
+      iex> Radiator.NodeAnalyzer.do_analyze(%Radiator.Outline.Node{}, [ExampleAnalyzer])
       [%{data: "example"}]
   """
 
-  # alias Radiator.Outline.Node
+  alias Radiator.Outline.Node
 
-  @callback match?(content :: String.t()) :: boolean
-  @callback analyze(content :: String.t()) :: list(map())
+  @callback match?(node :: Node.t()) :: boolean
+  @callback analyze(node :: Node.t()) :: list(map())
 
-  # @spec analyze(Node.t(), list()) :: list()
-  # @spec analyze(String.t(), list()) :: list()
-  def do_analyze(content, analyzers \\ analyzers()) do
+  @doc """
+  Analyzes a node with the given analyzers by calling
+  `match?/1` and `analyze/1` on each analyzer.
+
+  The analyzers need to be modules that implement the `Radiator.NodeAnalyzer` behaviour.
+  """
+  def do_analyze(%Node{} = node, analyzers \\ analyzers()) do
     analyzers
-    |> Enum.filter(& &1.match?(content))
-    |> Enum.flat_map(& &1.analyze(content))
+    |> Enum.filter(& &1.match?(node))
+    |> Enum.flat_map(& &1.analyze(node))
   end
 
-  @spec analyzers() :: [module()]
   defp analyzers do
     {:ok, modules} = :application.get_key(:radiator, :modules)
 

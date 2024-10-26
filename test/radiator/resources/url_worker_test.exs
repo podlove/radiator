@@ -7,15 +7,14 @@ defmodule Radiator.Resources.UrlWorkerTest do
 
   describe "extract_url_positions/1" do
     test "extracts urls in text" do
-      node_id = OutlineFixtures.node_fixture().uuid
-
       content = """
         bad: https://www.theatlantic.com/politics/archive/2024/10/donald-trump-elon-musk-butler/680174/
         racism: https://www.newyorker.com/magazine/2024/10/14/trumps-dangerous-immigration-obsession
         what else?
       """
 
-      UrlWorker.perform(node_id, content)
+      node_id = OutlineFixtures.node_fixture(content: content).uuid
+      UrlWorker.perform(node_id)
 
       updated_node =
         Node
