@@ -7,16 +7,16 @@ defmodule Radiator.NodeAnalyzer do
       iex> defmodule ExampleAnalyzer do
       ...>   @behaviour Radiator.NodeAnalyzer
       ...>   def match?(_node), do: true
-      ...>   def analyze(_node), do: [{:ok, ["example"]}]
+      ...>   def analyze(_node), do: [%{data: "example"}]
       ...> end
       iex> Radiator.NodeAnalyzer.do_analyze("", [ExampleAnalyzer])
-      [{:ok, ["example"]}]
+      [%{data: "example"}]
   """
 
   # alias Radiator.Outline.Node
 
   @callback match?(content :: String.t()) :: boolean
-  @callback analyze(content :: String.t()) :: {:ok, any()}
+  @callback analyze(content :: String.t()) :: list(map())
 
   # @spec analyze(Node.t(), list()) :: list()
   # @spec analyze(String.t(), list()) :: list()

@@ -14,7 +14,8 @@ defmodule Radiator.Resources.UrlWorker do
   end
 
   def perform(node_id, content) do
-    url_attributes = NodeAnalyzer.do_analyze(content)
+    analyzers = [Radiator.NodeAnalyzer.UrlAnalyzer]
+    url_attributes = NodeAnalyzer.do_analyze(content, analyzers)
     _created_urls = Resources.rebuild_node_urls(node_id, url_attributes)
     :ok
   end
