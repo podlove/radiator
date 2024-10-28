@@ -27,7 +27,7 @@ defmodule RadiatorWeb.Api.RaindropController do
 
     Logger.error("Response from raindrop: #{inspect(response)}")
 
-    if response.body != "Unauthorized" && response.body["result"] do
+    if response.body != "Unauthorized" && !is_nil(response.body["access_token"]) do
       expires_at =
         DateTime.now!("Etc/UTC")
         |> DateTime.shift(second: response.body["expires_in"])
@@ -52,27 +52,5 @@ defmodule RadiatorWeb.Api.RaindropController do
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(400, Jason.encode!(%{message: "error"}))
-  end
-
-  # Authorization: Bearer ae261404-11r4-47c0-bce3-e18a423da828
-  def get_bookmarks(conn, _params) do
-    # GENERATED DUMMY CODE!!!!
-    user = Accounts.get_user!(conn.assigns[:access_token])
-
-    response =
-      [
-        method: :get,
-        url: "https://api.raindrop.io/rest/v1/collections",
-        headers: [
-          {"Authorization", "Bearer #{user.raindrop_access_token}"}
-        ]
-      ]
-      |> Keyword.merge(RaindropClient.config()[:options])
-      |> Req.request()
-      |> Req.run()
-
-    conn
-    |> put_resp_content_type("application/json")
-    |> send_resp(200, Jason.encode!(response.body))
   end
 end
