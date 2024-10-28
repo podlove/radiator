@@ -3,25 +3,24 @@ defmodule Radiator.Resources.UrlWorker do
   job to extract urls from content and persist URLs
   """
   alias __MODULE__
+  alias Radiator.NodeAnalyzer
+  alias Radiator.Outline.NodeRepository
   alias Radiator.Resources
-  alias Radiator.Resources.UrlExtractor
 
-  def extract_urls(node_id, content) do
+  def extract_urls(node_id) do
     Radiator.Job.start_job(
-      worker: &UrlWorker.perform/2,
-      arguments: [node_id: node_id, content: content]
+      worker: &UrlWorker.perform/1,
+      arguments: [node_id: node_id]
     )
   end
 
-  def perform(node_id, content) do
-    result = UrlExtractor.extract_urls(content)
+  def perform(node_id) do
+    analyzers = [Radiator.NodeAnalyzer.UrlAnalyzer]
 
     url_attributes =
-      Enum.map(result, fn info ->
-        info
-        |> Map.put(:url, info.parsed_url)
-        |> Map.delete(:parsed_url)
-      end)
+      node_id
+      |> NodeRepository.get_node!()
+      |> NodeAnalyzer.do_analyze(analyzers)
 
     _created_urls = Resources.rebuild_node_urls(node_id, url_attributes)
     :ok

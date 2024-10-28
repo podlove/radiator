@@ -18,6 +18,7 @@ defmodule Radiator.ResourcesFixtures do
         size_bytes: 42,
         start_bytes: 23,
         url: "https://elixirschool.com",
+        meta_data: %{title: "Elixir School"},
         node_id: node_id
       })
       |> Resources.create_url()
