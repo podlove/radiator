@@ -5,8 +5,12 @@ defmodule Radiator.Resources.Url do
   use Ecto.Schema
   import Ecto.Changeset
 
-  defmodule Data do
-    @moduledoc false
+  defmodule MetaData do
+    @moduledoc """
+    Meta data for a URL depending on the analyzers.
+    Under construction!
+    A Youtube URL will have different meta data than a normal web page for instance
+    """
     use Ecto.Schema
 
     embedded_schema do
@@ -24,7 +28,7 @@ defmodule Radiator.Resources.Url do
     field :start_bytes, :integer
     field :size_bytes, :integer
 
-    embeds_one :data, Data
+    embeds_one :meta_data, MetaData
 
     belongs_to :node, Radiator.Outline.Node, type: :binary_id, references: :uuid
     timestamps(type: :utc_datetime)
@@ -35,6 +39,6 @@ defmodule Radiator.Resources.Url do
     url
     |> cast(attrs, [:url, :start_bytes, :size_bytes, :node_id])
     |> validate_required([:url, :start_bytes, :size_bytes, :node_id])
-    |> cast_embed(:data, with: &Data.changeset/2)
+    |> cast_embed(:meta_data, with: &MetaData.changeset/2)
   end
 end

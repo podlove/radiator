@@ -3,7 +3,7 @@ defmodule Radiator.Repo.Migrations.AddDataToUrls do
 
   def change do
     alter table(:urls) do
-      add :data, :map, null: false, default: %{}
+      add :meta_data, :map, null: false, default: %{}
     end
   end
 end
