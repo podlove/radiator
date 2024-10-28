@@ -33,6 +33,19 @@ defmodule RadiatorWeb.AdminLive.Index do
 
     socket
     |> assign(:action, :new_network)
+    |> assign(:page_title, "New Network")
+    |> assign(:network, network)
+    |> assign(:form, to_form(changeset))
+    |> reply(:noreply)
+  end
+
+  def handle_event("edit_network", %{"network_id" => network_id}, socket) do
+    network = Podcast.get_network!(network_id)
+    changeset = Podcast.change_network(network, %{})
+
+    socket
+    |> assign(:action, :edit_network)
+    |> assign(:page_title, "Edit Network")
     |> assign(:network, network)
     |> assign(:form, to_form(changeset))
     |> reply(:noreply)
@@ -44,6 +57,7 @@ defmodule RadiatorWeb.AdminLive.Index do
 
     socket
     |> assign(:action, :new_show)
+    |> assign(:page_title, "New Show")
     |> assign(:show, show)
     |> assign(:host_suggestions, [])
     |> assign(:selected_hosts, [])
@@ -58,6 +72,7 @@ defmodule RadiatorWeb.AdminLive.Index do
 
     socket
     |> assign(:action, :edit_show)
+    |> assign(:page_title, "Edit Show")
     |> assign(:show, show)
     |> assign(:host_suggestions, [])
     |> assign(:selected_hosts, show.hosts)
@@ -69,6 +84,7 @@ defmodule RadiatorWeb.AdminLive.Index do
   def handle_event("cancel", _params, socket) do
     socket
     |> assign(:action, nil)
+    |> assign(:page_title, "Admin Dashboard")
     |> reply(:noreply)
   end
 
