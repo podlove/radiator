@@ -55,6 +55,8 @@ defmodule Radiator.NodeAnalyzer.UrlAnalyzer do
   end
 
   @spec extract_uris(String.t()) :: [{Range.t(), String.t()}]
+  defp extract_uris(nil), do: []
+
   defp extract_uris(content) do
     content
     |> String.split(~r/\s+/, trim: false, include_captures: true)
