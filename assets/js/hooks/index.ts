@@ -9,6 +9,7 @@ import {
 import { keydown, toggleCollapse } from "./events/listener";
 
 import Sortable from "../../vendor/sortable";
+import Quill from "../../vendor/quill";
 
 export const Hooks = {
   outline: {
