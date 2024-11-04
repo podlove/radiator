@@ -119,7 +119,12 @@ defmodule RadiatorWeb.OutlineComponent do
   end
 
   @impl true
-  def handle_event("save", %{"node" => %{"uuid" => uuid, "content" => content}}, socket) do
+  def handle_event("noop", _params, socket) do
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event("save", %{"uuid" => uuid, "content" => content}, socket) do
     user_id = socket.assigns.user_id
     Dispatch.change_node_content(uuid, content, user_id, generate_event_id(socket.id))
 
@@ -127,40 +132,33 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
-  def handle_event("new", _params, socket) do
-    # This is noop
-    # We use handle_event("keydown", %{"key" => "Enter"}, _} instead, to get the cursor position as well.
-    socket
-    |> reply(:noreply)
-  end
+  # def handle_event("focus", %{"uuid" => uuid}, socket) do
+  #   id = socket.assigns.user_id
+  #   [name | _] = String.split(socket.assigns.user.email, "@")
 
-  def handle_event("focus", %{"uuid" => uuid}, socket) do
-    id = socket.assigns.user_id
-    [name | _] = String.split(socket.assigns.user.email, "@")
+  #   Endpoint.broadcast("outline", "focus", %{uuid: uuid, user_id: id, user_name: name})
 
-    Endpoint.broadcast("outline", "focus", %{uuid: uuid, user_id: id, user_name: name})
+  #   socket
+  #   |> reply(:noreply)
+  # end
 
-    socket
-    |> reply(:noreply)
-  end
+  # def handle_event("blur", %{"uuid" => uuid}, socket) do
+  #   id = socket.assigns.user_id
+  #   [name | _] = String.split(socket.assigns.user.email, "@")
 
-  def handle_event("blur", %{"uuid" => uuid}, socket) do
-    id = socket.assigns.user_id
-    [name | _] = String.split(socket.assigns.user.email, "@")
+  #   Endpoint.broadcast("outline", "blur", %{uuid: uuid, user_id: id, user_name: name})
 
-    Endpoint.broadcast("outline", "blur", %{uuid: uuid, user_id: id, user_name: name})
-
-    socket
-    |> reply(:noreply)
-  end
+  #   socket
+  #   |> reply(:noreply)
+  # end
 
   def handle_event(
-        "keydown",
-        %{"key" => "Enter", "uuid" => uuid, "value" => value, "selection" => selection},
+        "new",
+        %{"uuid" => uuid, "content" => content, "selection" => selection},
         socket
       ) do
-    {first, _} = String.split_at(value, selection["start"])
-    {_, last} = String.split_at(value, selection["end"])
+    {first, _} = String.split_at(content, selection["start"])
+    {_, last} = String.split_at(content, selection["end"])
 
     user_id = socket.assigns.user_id
     Dispatch.change_node_content(uuid, first, user_id, generate_event_id(socket.id))
@@ -179,79 +177,75 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
-  def handle_event("keydown", %{"key" => key, "uuid" => uuid, "value" => ""}, socket)
-      when key in ["Backspace", "Delete"] do
-    user_id = socket.assigns.user_id
-    Dispatch.delete_node(uuid, user_id, generate_event_id(socket.id))
+  # def handle_event("keydown", %{"key" => key, "uuid" => uuid, "value" => ""}, socket)
+  #     when key in ["Backspace", "Delete"] do
+  #   user_id = socket.assigns.user_id
+  #   Dispatch.delete_node(uuid, user_id, generate_event_id(socket.id))
 
-    socket
-    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
-    |> reply(:noreply)
-  end
+  #   socket
+  #   |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
+  #   |> reply(:noreply)
+  # end
 
-  def handle_event(
-        "keydown",
-        %{"key" => "ArrowUp", "altKey" => true, "uuid" => uuid},
-        socket
-      ) do
-    user_id = socket.assigns.user_id
-    Dispatch.move_up(uuid, user_id, generate_event_id(socket.id))
+  # def handle_event(
+  #       "keydown",
+  #       %{"key" => "ArrowUp", "altKey" => true, "uuid" => uuid},
+  #       socket
+  #     ) do
+  #   user_id = socket.assigns.user_id
+  #   Dispatch.move_up(uuid, user_id, generate_event_id(socket.id))
 
-    socket
-    |> reply(:noreply)
-  end
+  #   socket
+  #   |> reply(:noreply)
+  # end
 
-  def handle_event(
-        "keydown",
-        %{"key" => "ArrowUp", "uuid" => uuid},
-        socket
-      ) do
-    node = Outline.get_node_above(uuid)
+  # def handle_event(
+  #       "keydown",
+  #       %{"key" => "ArrowUp", "uuid" => uuid},
+  #       socket
+  #     ) do
+  #   node = Outline.get_node_above(uuid)
 
-    if node do
-      socket
-      |> push_event("focus_node", %{uuid: node.uuid})
-      |> reply(:noreply)
-    else
-      socket
-      |> reply(:noreply)
-    end
-  end
+  #   if node do
+  #     socket
+  #     |> push_event("focus_node", %{uuid: node.uuid})
+  #     |> reply(:noreply)
+  #   else
+  #     socket
+  #     |> reply(:noreply)
+  #   end
+  # end
 
-  def handle_event(
-        "keydown",
-        %{"key" => "ArrowDown", "altKey" => true, "uuid" => uuid},
-        socket
-      ) do
-    user_id = socket.assigns.user_id
-    Dispatch.move_down(uuid, user_id, generate_event_id(socket.id))
+  # def handle_event(
+  #       "keydown",
+  #       %{"key" => "ArrowDown", "altKey" => true, "uuid" => uuid},
+  #       socket
+  #     ) do
+  #   user_id = socket.assigns.user_id
+  #   Dispatch.move_down(uuid, user_id, generate_event_id(socket.id))
 
-    socket
-    |> reply(:noreply)
-  end
+  #   socket
+  #   |> reply(:noreply)
+  # end
 
-  def handle_event(
-        "keydown",
-        %{"key" => "ArrowDown", "uuid" => uuid},
-        socket
-      ) do
-    node = Outline.get_node_below(uuid)
+  # def handle_event(
+  #       "keydown",
+  #       %{"key" => "ArrowDown", "uuid" => uuid},
+  #       socket
+  #     ) do
+  #   node = Outline.get_node_below(uuid)
 
-    if node do
-      socket
-      |> push_event("focus_node", %{uuid: node.uuid})
-      |> reply(:noreply)
-    else
-      socket
-      |> reply(:noreply)
-    end
-  end
+  #   if node do
+  #     socket
+  #     |> push_event("focus_node", %{uuid: node.uuid})
+  #     |> reply(:noreply)
+  #   else
+  #     socket
+  #     |> reply(:noreply)
+  #   end
+  # end
 
-  def handle_event(
-        "keydown",
-        %{"key" => "Tab", "shiftKey" => false, "uuid" => uuid},
-        socket
-      ) do
+  def handle_event("indent", %{"uuid" => uuid}, socket) do
     user_id = socket.assigns.user_id
     Dispatch.indent_node(uuid, user_id, generate_event_id(socket.id))
 
@@ -259,19 +253,10 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
-  def handle_event(
-        "keydown",
-        %{"key" => "Tab", "shiftKey" => true, "uuid" => uuid},
-        socket
-      ) do
+  def handle_event("outdent", %{"uuid" => uuid}, socket) do
     user_id = socket.assigns.user_id
     Dispatch.outdent_node(uuid, user_id, generate_event_id(socket.id))
 
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_event("keydown", _params, socket) do
     socket
     |> reply(:noreply)
   end

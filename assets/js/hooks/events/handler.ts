@@ -2,7 +2,7 @@ import { NodeData, UserAction } from "../types";
 import {
   getNodeById,
   moveNode,
-  setValue,
+  setData,
   addEditingUserLabel,
   removeEditingUserLabel,
 } from "../node";
@@ -19,7 +19,7 @@ export function handleFocus({ uuid, user_name }: UserAction) {
 
 export function handleFocusNode({ uuid }: NodeData) {
   const input = document.getElementById(
-    `form-${uuid}_content`,
+    `form-${uuid}_content`
   ) as HTMLDivElement;
   input.focus();
 }
@@ -27,14 +27,16 @@ export function handleFocusNode({ uuid }: NodeData) {
 export function handleMoveNodes({ nodes }: { nodes: NodeData[] }) {
   nodes.forEach(({ uuid, parent_id, prev_id }: NodeData) => {
     const node = getNodeById(uuid)!;
-    setValue(node, ".parent_id", parent_id || "");
-    setValue(node, ".prev_id", prev_id || "");
+    setData(node, "parent", parent_id || "");
+    setData(node, "prev", prev_id || "");
 
     moveNode(node);
   });
 }
 
 export function handleSetContent({ uuid, content }: any) {
-  const node = getNodeById(uuid)!;
-  setValue(node, `#form-${uuid}_content`, content);
+  // const node = getNodeById(uuid)!;
+  // setValue(node, `#form-${uuid}_content`, content);
+
+  document.getElementById(`nodes-form-${uuid}-editor`)!.innerHTML = content;
 }

@@ -16,8 +16,8 @@ export function moveNode(node: HTMLDivElement): NodeData {
 
 function getNodeData(node: HTMLDivElement): NodeData {
   const uuid = getUUID(node);
-  const parent_id = getValue(node, ".parent_id");
-  const prev_id = getValue(node, ".prev_id");
+  const parent_id = getData(node, "parent");
+  const prev_id = getData(node, "prev");
   const content = getContent(node);
 
   return { uuid, parent_id, prev_id, content };
@@ -28,22 +28,20 @@ function getUUID(node: HTMLDivElement) {
 }
 
 function getContent(node: HTMLDivElement) {
-  const input = node.querySelector("input[type=text]") as HTMLInputElement;
-  return input.value;
+  const content = node.querySelector(".editor") as HTMLDivElement;
+  return content.innerHTML;
 }
 
-function getValue(node: HTMLDivElement, selector: string) {
-  const input = node.querySelector(selector) as HTMLInputElement;
-  return input.value as UUID;
+function getData(node: HTMLDivElement, selector: string) {
+  const content = node.querySelector(".editor") as HTMLDivElement;
+  if (!content) return undefined;
+
+  return content.getAttribute(`data-${selector}`) as UUID;
 }
 
-export function setValue(
-  node: HTMLDivElement,
-  selector: string,
-  value: string
-) {
-  const input = node.querySelector(selector) as HTMLInputElement;
-  input.value = value;
+export function setData(node: HTMLDivElement, selector: string, value: string) {
+  const content = node.querySelector(".editor") as HTMLDivElement;
+  content.setAttribute(`data-${selector}`, value);
 }
 
 export function getNodeById(uuid: UUID | undefined) {

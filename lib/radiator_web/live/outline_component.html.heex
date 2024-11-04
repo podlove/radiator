@@ -5,39 +5,35 @@
     <div :for={{id, form} <- @streams.nodes} id={id} class="relative group node">
       <OutlineComponents.outline_form
         for={form}
-        phx-change="save"
-        phx-submit="new"
+        phx-change="noop"
+        phx-submit="noop"
         phx-target={@myself}
         class="ml-5"
       >
-        <input class="uuid" type="hidden" name={form[:uuid].name} value={form[:uuid].value} />
-        <input
-          class="parent_id"
-          type="hidden"
-          name={form[:parent_id].name}
-          value={form[:parent_id].value}
-        />
-        <input
-          class="prev_id"
-          type="hidden"
-          name={form[:prev_id].name}
-          value={form[:prev_id].value}
-        />
-        <OutlineComponents.outline_input
-          class="content"
-          type="text"
-          field={form[:content]}
-          placeholder="Content..."
-          phx-mounted={form.action == :self && JS.focus()}
-          phx-focus="focus"
-          phx-blur="blur"
-          phx-keydown="keydown"
-          phx-value-uuid={form[:uuid].value}
-          phx-value-parent={form[:parent_id].value}
-          phx-value-prev={form[:prev_id].value}
-          phx-target={@myself}
-        />
+        <!--
+        <.input field={form[:selected]} type="checkbox" />
+        <.input field={form[:completed]} type="checkbox" />
+        <span>
+          ampel
+          rot
+          gelb
+          grün
+        </span>
+        <.icon name="hero-circle" class="w-5 h-5" />
+        <.icon name="hero-check-circle" class="w-5 h-5" />
+        <.icon name="hero-ellipsis-vertical" class="w-5 h-5" />
+        -->
       </OutlineComponents.outline_form>
+
+      <div
+        id={id <> "-editor"}
+        class="px-1 py-2 ml-5 editor focus:outline-none"
+        contenteditable
+        data-uuid={form[:uuid].value}
+        data-parent={form[:parent_id].value}
+        data-prev={form[:prev_id].value}
+      ><%= raw(form[:content].value) %></div>
+
       <div class="absolute top-0 right-0 z-10 text-xs text-white editing"></div>
       <div class="ml-4 peer children group-data-[collapsed]:hidden"></div>
       <button
