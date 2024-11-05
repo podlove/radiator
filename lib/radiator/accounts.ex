@@ -6,7 +6,7 @@ defmodule Radiator.Accounts do
   import Ecto.Query, warn: false
   alias Radiator.Repo
 
-  alias Radiator.Accounts.{User, UserNotifier, UserToken}
+  alias Radiator.Accounts.{User, UserNotifier, UserToken, WebService}
 
   ## Database getters
 
@@ -248,6 +248,25 @@ defmodule Radiator.Accounts do
   end
 
   @doc """
+    Get the user's Raindrop tokens if they exist.
+
+  ## Examples
+
+      iex> get_raindrop_tokens(23, "11r4", "11vb", ~U[2024-11-02 11:54:31Z])
+      %WebService{}
+
+      iex> get_raindrop_tokens(42, "11r4", "11vb", ~U[2024-11-02 11:54:31Z])
+      nil
+
+  """
+  def get_raindrop_tokens(user_id) do
+    WebService
+    |> where([w], w.user_id == ^user_id)
+    |> where([w], w.service_name == "raindrop")
+    |> Repo.one()
+  end
+
+  @doc """
   Sets a users optional Raindrop tokens and expiration time.
   Given a user id, access token, refresh token, and expiration time,
 
@@ -266,14 +285,21 @@ defmodule Radiator.Accounts do
         raindrop_refresh_token,
         raindrop_expires_at
       ) do
-    User
-    |> Radiator.Repo.get!(user_id)
-    |> User.set_raindrop_token_changeset(
-      raindrop_access_token,
-      raindrop_refresh_token,
-      raindrop_expires_at
+    %WebService{}
+    |> WebService.changeset(%{
+      service_name: "raindrop",
+      user_id: user_id,
+      data: %{
+        access_token: raindrop_access_token,
+        refresh_token: raindrop_refresh_token,
+        expires_at: raindrop_expires_at
+      }
+    })
+    |> Repo.insert(
+      on_conflict: {:replace_all_except, [:id, :created_at]},
+      conflict_target: [:user_id, :service_name],
+      set: [updated_at: DateTime.utc_now()]
     )
-    |> Repo.update()
   end
 
   ## Session
