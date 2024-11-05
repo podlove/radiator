@@ -1,9 +1,9 @@
-defmodule Radiator.Resources.UrlWorkerTest do
+defmodule Radiator.Resources.NodeChangedWorkerTest do
   use Radiator.DataCase
 
   alias Radiator.Outline.Node
   alias Radiator.OutlineFixtures
-  alias Radiator.Resources.UrlWorker
+  alias Radiator.Resources.NodeChangedWorker
 
   describe "extract_url_positions/1" do
     test "extracts urls in text" do
@@ -14,7 +14,7 @@ defmodule Radiator.Resources.UrlWorkerTest do
       """
 
       node_id = OutlineFixtures.node_fixture(content: content).uuid
-      UrlWorker.perform(node_id)
+      NodeChangedWorker.perform(node_id)
 
       updated_node =
         Node

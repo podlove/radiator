@@ -13,7 +13,7 @@ defmodule Radiator.Outline.NodeChangeListener do
   }
 
   alias Radiator.Outline.Dispatch
-  alias Radiator.Resources.UrlWorker
+  alias Radiator.Resources.NodeChangedWorker
 
   require Logger
 
@@ -52,5 +52,5 @@ defmodule Radiator.Outline.NodeChangeListener do
     {:noreply, state}
   end
 
-  defp scan_content_for_urls(node_id), do: UrlWorker.extract_urls(node_id)
+  defp scan_content_for_urls(node_id), do: NodeChangedWorker.trigger_analyze(node_id)
 end
