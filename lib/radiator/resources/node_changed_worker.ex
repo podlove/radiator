@@ -1,4 +1,4 @@
-defmodule Radiator.Resources.UrlWorker do
+defmodule Radiator.Resources.NodeChangedWorker do
   @moduledoc """
   job to extract urls from content and persist URLs
   """
@@ -7,9 +7,9 @@ defmodule Radiator.Resources.UrlWorker do
   alias Radiator.Outline.NodeRepository
   alias Radiator.Resources
 
-  def extract_urls(node_id) do
+  def trigger_analyze(node_id) do
     Radiator.Job.start_job(
-      worker: &UrlWorker.perform/1,
+      worker: &NodeChangedWorker.perform/1,
       arguments: [node_id: node_id]
     )
   end
