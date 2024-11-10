@@ -1,4 +1,4 @@
-defmodule Radiator.RaindropClient do
+defmodule Radiator.Accounts.RaindropClient do
   @moduledoc """
     Client for Raindrop API
   """
@@ -31,8 +31,7 @@ defmodule Radiator.RaindropClient do
   def access_enabled?(user_id) do
     not_enabled =
       user_id
-      |> Accounts.get_user!()
-      |> Map.get(:raindrop_access_token)
+      |> Accounts.get_raindrop_tokens()
       |> is_nil()
 
     !not_enabled
@@ -42,17 +41,23 @@ defmodule Radiator.RaindropClient do
   Get all collections for a user
   """
   def get_collections(user_id) do
-    user = Accounts.get_user!(user_id)
+    service =
+      user_id
+      |> Accounts.get_raindrop_tokens()
 
-    [
-      method: :get,
-      url: "https://api.raindrop.io/rest/v1/collections",
-      headers: [
-        {"Authorization", "Bearer #{user.raindrop_access_token}"}
+    if is_nil(service) do
+      {:error, :unauthorized}
+    else
+      [
+        method: :get,
+        url: "https://api.raindrop.io/rest/v1/collections",
+        headers: [
+          {"Authorization", "Bearer #{service.data.access_token}"}
+        ]
       ]
-    ]
-    |> Req.request()
-    |> parse_collection_response()
+      |> Req.request()
+      |> parse_collection_response()
+    end
   end
 
   defp parse_collection_response({:ok, %Req.Response{status: 401}}) do

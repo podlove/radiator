@@ -2,7 +2,7 @@ defmodule RadiatorWeb.Api.RaindropController do
   use RadiatorWeb, :controller
 
   alias Radiator.Accounts
-  alias Radiator.RaindropClient
+  alias Radiator.Accounts.RaindropClient
   require Logger
 
   def auth_redirect(conn, %{"user_id" => user_id, "code" => code}) do
