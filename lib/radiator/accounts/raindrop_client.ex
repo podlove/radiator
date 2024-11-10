@@ -2,6 +2,8 @@ defmodule Radiator.Accounts.RaindropClient do
   @moduledoc """
     Client for Raindrop API
   """
+  require Logger
+
   alias Radiator.Accounts
 
   def config, do: Application.fetch_env!(:radiator, :raindrop)
@@ -44,6 +46,7 @@ defmodule Radiator.Accounts.RaindropClient do
     service =
       user_id
       |> Accounts.get_raindrop_tokens()
+      |> refresh_token_if()
 
     if is_nil(service) do
       {:error, :unauthorized}
@@ -58,6 +61,80 @@ defmodule Radiator.Accounts.RaindropClient do
       |> Req.request()
       |> parse_collection_response()
     end
+  end
+
+  @doc """
+    first time fetching access token and storing it as webservice entry
+  """
+  def init_and_store_access_token(user_id, code) do
+    {:ok, response} =
+      [
+        method: :post,
+        url: "https://raindrop.io/oauth/access_token",
+        json: %{
+          client_id: config()[:client_id],
+          client_secret: config()[:client_secret],
+          grant_type: "authorization_code",
+          code: code,
+          redirect_uri: redirect_uri()
+        }
+      ]
+      |> Keyword.merge(config()[:options])
+      |> Req.request()
+
+    parse_access_token_response(response, user_id)
+  end
+
+  defp refresh_token_if(service) do
+    if DateTime.before?(service.data.expires_at, DateTime.utc_now()) do
+      {:ok, response} =
+        [
+          method: :post,
+          url: "https://raindrop.io/oauth/access_token",
+          headers: [
+            {"Content-Type", "application/json"}
+          ],
+          json: %{
+            client_id: config()[:client_id],
+            client_secret: config()[:client_secret],
+            grant_type: "refresh_token",
+            refresh_token: service.data.refresh_token
+          }
+        ]
+        |> Req.request()
+
+      parse_access_token_response(response, service.user_id)
+    else
+      service
+    end
+  end
+
+  defp parse_access_token_response(
+         %Req.Response{
+           body: %{
+             "access_token" => access_token,
+             "refresh_token" => refresh_token,
+             "expires_in" => expires_in
+           }
+         },
+         user_id
+       ) do
+    expires_at =
+      DateTime.now!("Etc/UTC")
+      |> DateTime.shift(second: expires_in)
+      |> DateTime.truncate(:second)
+
+    Accounts.update_raindrop_tokens(
+      user_id,
+      access_token,
+      refresh_token,
+      expires_at
+    )
+  end
+
+  defp parse_access_token_response(response, _user_id) do
+    Logger.error("Error fetching access token: #{inspect(response)}")
+    {:error, :unauthorized}
   end
 
   defp parse_collection_response({:ok, %Req.Response{status: 401}}) do
