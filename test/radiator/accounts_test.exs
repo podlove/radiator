@@ -5,6 +5,7 @@ defmodule Radiator.AccountsTest do
 
   import Radiator.AccountsFixtures
   alias Radiator.Accounts.{User, UserToken, WebService}
+  alias Radiator.PodcastFixtures
 
   describe "list_users/0" do
     test "returns all users" do
@@ -693,6 +694,55 @@ defmodule Radiator.AccountsTest do
       %WebService{} = service = Accounts.get_raindrop_tokens(user.id)
       assert service.data.access_token == "new-access-token"
       assert service.data.refresh_token == "new-refresh-token"
+    end
+  end
+
+  describe "connect_show_with_rainbow/3" do
+    setup do
+      %{web_service: raindrop_service_fixture(), show: PodcastFixtures.show_fixture()}
+    end
+
+    test "saves a show - collection connection in collection_mappings", %{
+      web_service: web_service,
+      show: show
+    } do
+      Accounts.connect_show_with_raindrop(web_service.user_id, show.id, 42)
+
+      service = Accounts.get_raindrop_tokens(web_service.user_id)
+      assert service.data.collection_mappings == %{"#{show.id}" => 42}
+    end
+
+    test "can add multiple shows", %{
+      web_service: web_service,
+      show: show
+    } do
+      Accounts.connect_show_with_raindrop(web_service.user_id, show.id, 42)
+
+      second_show = PodcastFixtures.show_fixture()
+      third_show = PodcastFixtures.show_fixture()
+
+      Accounts.connect_show_with_raindrop(web_service.user_id, second_show.id, 23)
+      Accounts.connect_show_with_raindrop(web_service.user_id, third_show.id, 666)
+
+      service = Accounts.get_raindrop_tokens(web_service.user_id)
+
+      assert service.data.collection_mappings == %{
+               "#{show.id}" => 42,
+               "#{second_show.id}" => 23,
+               "#{third_show.id}" => 666
+             }
+    end
+
+    test "can override  show", %{
+      web_service: web_service,
+      show: show
+    } do
+      Accounts.connect_show_with_raindrop(web_service.user_id, show.id, 42)
+
+      Accounts.connect_show_with_raindrop(web_service.user_id, show.id, 23)
+      service = Accounts.get_raindrop_tokens(web_service.user_id)
+
+      assert service.data.collection_mappings == %{"#{show.id}" => 23}
     end
   end
 end

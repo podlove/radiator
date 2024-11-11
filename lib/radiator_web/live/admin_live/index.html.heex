@@ -138,19 +138,12 @@
           <h4 class="text-lg font-medium">Raindrop Integration</h4>
           <%= if @raindrop_access do %>
             <p class="mt-2 text-sm italic text-gray-500">
-              <button
-                type="button"
-                class="px-2 py-1 text-sm text-red-600 hover:text-red-800"
-                phx-click="show_raindrop_collections"
-              >
-                <img src="/images/raindrop.jpg" alt="" width="32" />
-                <.input
-                  type="select"
-                  field={f[:raindrop_collection]}
-                  options={@raindrop_collections}
-                  prompt="Please select a collection for the show"
-                />
-              </button>
+              <.input
+                type="select"
+                field={f[:raindrop_collection]}
+                options={@raindrop_collections}
+                prompt="Please select a collection for the show"
+              />
             </p>
           <% else %>
             <a href={@raindrop_url} target="_blank">

@@ -252,10 +252,10 @@ defmodule Radiator.Accounts do
 
   ## Examples
 
-      iex> get_raindrop_tokens(23, "11r4", "11vb", ~U[2024-11-02 11:54:31Z])
+      iex> get_raindrop_tokens(23)
       %WebService{}
 
-      iex> get_raindrop_tokens(42, "11r4", "11vb", ~U[2024-11-02 11:54:31Z])
+      iex> get_raindrop_tokens(42)
       nil
 
   """
@@ -301,6 +301,30 @@ defmodule Radiator.Accounts do
       set: [updated_at: DateTime.utc_now()]
     )
   end
+
+  @doc """
+     Radiator.Accounts.connect_show_with_raindrop(1, 23, 42)
+  """
+  def connect_show_with_raindrop(user_id, show_id, collection_id) do
+    case get_raindrop_tokens(user_id) do
+      nil ->
+        {:error, "No Raindrop tokens found"}
+
+      %{data: data} = service ->
+        data =
+          Map.update!(data, :collection_mappings, fn mappings ->
+            Map.put(mappings, show_id_to_collection_id(show_id), collection_id)
+          end)
+          |> Map.from_struct()
+
+        service
+        |> WebService.changeset(%{data: data})
+        |> Repo.update()
+    end
+  end
+
+  defp show_id_to_collection_id(show_id) when is_integer(show_id), do: Integer.to_string(show_id)
+  defp show_id_to_collection_id(show_id), do: show_id
 
   ## Session
 

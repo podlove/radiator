@@ -12,11 +12,12 @@ defmodule Radiator.Accounts.WebService do
   schema "web_services" do
     field :service_name, :string
 
-    embeds_one :data, RaindropService do
+    embeds_one :data, RaindropService, on_replace: :delete, primary_key: false do
       field :access_token, :string, redact: true
       field :refresh_token, :string, redact: true
       field :expires_at, :utc_datetime
-      field :collection_mappings, :map
+      # Show ID => Raindrop Collection ID
+      field :collection_mappings, :map, default: %{}
     end
 
     belongs_to :user, User
