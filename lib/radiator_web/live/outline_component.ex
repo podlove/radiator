@@ -19,19 +19,17 @@ defmodule RadiatorWeb.OutlineComponent do
 
   @impl true
   def update(%{event: %NodeInsertedEvent{event_id: event_id, node: node, next: nil}}, socket) do
-    action = get_action(socket.id, event_id)
-
     socket
-    |> stream_insert(:nodes, to_change_form(node, %{}, action))
+    |> stream_insert(:nodes, to_change_form(node, %{}))
+    |> focus_self(node.uuid, event_id)
     |> reply(:ok)
   end
 
   def update(%{event: %NodeInsertedEvent{event_id: event_id, node: node, next: next}}, socket) do
-    action = get_action(socket.id, event_id)
-
     socket
-    |> stream_insert(:nodes, to_change_form(node, %{}, action))
+    |> stream_insert(:nodes, to_change_form(node, %{}))
     |> push_event("move_nodes", %{nodes: [next]})
+    |> focus_self(node.uuid, event_id)
     |> reply(:ok)
   end
 
@@ -100,10 +98,10 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:ok)
   end
 
-  def update(%{event: %Phoenix.Socket.Broadcast{event: event, payload: _payload}}, socket)
+  def update(%{event: %Phoenix.Socket.Broadcast{event: event, payload: payload}}, socket)
       when event in ["focus", "blur"] do
     socket
-    # |> push_event(event, payload)
+    |> push_event(event, payload)
     |> reply(:ok)
   end
 
@@ -124,6 +122,26 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
+  def handle_event("focus", %{"uuid" => uuid}, socket) do
+    id = socket.assigns.user_id
+    [name | _] = String.split(socket.assigns.user.email, "@")
+
+    Endpoint.broadcast("outline", "focus", %{uuid: uuid, user_id: id, user_name: name})
+
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event("blur", %{"uuid" => uuid}, socket) do
+    id = socket.assigns.user_id
+    [name | _] = String.split(socket.assigns.user.email, "@")
+
+    Endpoint.broadcast("outline", "blur", %{uuid: uuid, user_id: id, user_name: name})
+
+    socket
+    |> reply(:noreply)
+  end
+
   def handle_event("save", %{"uuid" => uuid, "content" => content}, socket) do
     user_id = socket.assigns.user_id
     Dispatch.change_node_content(uuid, content, user_id, generate_event_id(socket.id))
@@ -131,26 +149,6 @@ defmodule RadiatorWeb.OutlineComponent do
     socket
     |> reply(:noreply)
   end
-
-  # def handle_event("focus", %{"uuid" => uuid}, socket) do
-  #   id = socket.assigns.user_id
-  #   [name | _] = String.split(socket.assigns.user.email, "@")
-
-  #   Endpoint.broadcast("outline", "focus", %{uuid: uuid, user_id: id, user_name: name})
-
-  #   socket
-  #   |> reply(:noreply)
-  # end
-
-  # def handle_event("blur", %{"uuid" => uuid}, socket) do
-  #   id = socket.assigns.user_id
-  #   [name | _] = String.split(socket.assigns.user.email, "@")
-
-  #   Endpoint.broadcast("outline", "blur", %{uuid: uuid, user_id: id, user_name: name})
-
-  #   socket
-  #   |> reply(:noreply)
-  # end
 
   def handle_event(
         "new",
@@ -164,86 +162,70 @@ defmodule RadiatorWeb.OutlineComponent do
     Dispatch.change_node_content(uuid, first, user_id, generate_event_id(socket.id))
 
     episode_id = socket.assigns.episode_id
-
-    params = %{
-      "prev_id" => uuid,
-      "content" => last,
-      "episode_id" => episode_id
-    }
-
+    params = %{"prev_id" => uuid, "content" => last, "episode_id" => episode_id}
     Dispatch.insert_node(params, user_id, generate_event_id(socket.id))
 
     socket
     |> reply(:noreply)
   end
 
-  # def handle_event("keydown", %{"key" => key, "uuid" => uuid, "value" => ""}, socket)
-  #     when key in ["Backspace", "Delete"] do
-  #   user_id = socket.assigns.user_id
-  #   Dispatch.delete_node(uuid, user_id, generate_event_id(socket.id))
+  def handle_event("merge_prev", %{"uuid" => uuid, "content" => content}, socket) do
+    prev_node = Outline.get_node_above(uuid)
 
-  #   socket
-  #   |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
-  #   |> reply(:noreply)
-  # end
+    if prev_node do
+      user_id = socket.assigns.user_id
 
-  # def handle_event(
-  #       "keydown",
-  #       %{"key" => "ArrowUp", "altKey" => true, "uuid" => uuid},
-  #       socket
-  #     ) do
-  #   user_id = socket.assigns.user_id
-  #   Dispatch.move_up(uuid, user_id, generate_event_id(socket.id))
+      Dispatch.change_node_content(
+        prev_node.uuid,
+        "#{prev_node.content}#{content}",
+        user_id,
+        generate_event_id(socket.id)
+      )
 
-  #   socket
-  #   |> reply(:noreply)
-  # end
+      Dispatch.delete_node(uuid, user_id, generate_event_id(socket.id))
+    end
 
-  # def handle_event(
-  #       "keydown",
-  #       %{"key" => "ArrowUp", "uuid" => uuid},
-  #       socket
-  #     ) do
-  #   node = Outline.get_node_above(uuid)
+    socket
+    # |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
+    |> reply(:noreply)
+  end
 
-  #   if node do
-  #     socket
-  #     |> push_event("focus_node", %{uuid: node.uuid})
-  #     |> reply(:noreply)
-  #   else
-  #     socket
-  #     |> reply(:noreply)
-  #   end
-  # end
+  def handle_event("merge_next", %{"uuid" => uuid, "content" => content}, socket) do
+    next_node = Outline.get_node_below(uuid)
 
-  # def handle_event(
-  #       "keydown",
-  #       %{"key" => "ArrowDown", "altKey" => true, "uuid" => uuid},
-  #       socket
-  #     ) do
-  #   user_id = socket.assigns.user_id
-  #   Dispatch.move_down(uuid, user_id, generate_event_id(socket.id))
+    if next_node do
+      user_id = socket.assigns.user_id
 
-  #   socket
-  #   |> reply(:noreply)
-  # end
+      Dispatch.change_node_content(
+        uuid,
+        "#{content}#{next_node.content}",
+        user_id,
+        generate_event_id(socket.id)
+      )
 
-  # def handle_event(
-  #       "keydown",
-  #       %{"key" => "ArrowDown", "uuid" => uuid},
-  #       socket
-  #     ) do
-  #   node = Outline.get_node_below(uuid)
+      Dispatch.delete_node(next_node.uuid, user_id, generate_event_id(socket.id))
+    end
 
-  #   if node do
-  #     socket
-  #     |> push_event("focus_node", %{uuid: node.uuid})
-  #     |> reply(:noreply)
-  #   else
-  #     socket
-  #     |> reply(:noreply)
-  #   end
-  # end
+    socket
+    # |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
+    |> reply(:noreply)
+  end
+
+  def handle_event("move_up", %{"uuid" => uuid}, socket) do
+    user_id = socket.assigns.user_id
+    Dispatch.move_up(uuid, user_id, generate_event_id(socket.id))
+
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event("move_down", %{"uuid" => uuid}, socket) do
+    user_id = socket.assigns.user_id
+    Dispatch.move_down(uuid, user_id, generate_event_id(socket.id))
+
+    socket
+    |> reply(:noreply)
+  end
 
   def handle_event("indent", %{"uuid" => uuid}, socket) do
     user_id = socket.assigns.user_id
@@ -270,8 +252,12 @@ defmodule RadiatorWeb.OutlineComponent do
     to_form(changeset, as: "node", id: "form-#{changeset.data.uuid}")
   end
 
-  defp get_action(id, <<_::binary-size(36)>> <> ":" <> id), do: :self
-  defp get_action(_id, _event_id), do: nil
+  defp focus_self(%{id: id} = socket, uuid, <<_::binary-size(36)>> <> ":" <> id) do
+    socket
+    |> push_event("focus_node", %{uuid: uuid})
+  end
+
+  defp focus_self(socket, _uuid, _event_id), do: socket
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
 end

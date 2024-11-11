@@ -1,14 +1,19 @@
 import { CollapseParams } from "../types";
-import { getNodeById } from "../node";
+import {
+  getNodeById,
+  getNodeData,
+  getPrevNode,
+  getNextNode,
+  focusNode,
+} from "../node";
 
 let watchdog;
 const watchdogInterval = 400;
 
 export function input(event: KeyboardEvent) {
   const target = event.target as HTMLDivElement;
-
-  const uuid = target.getAttribute("data-uuid");
-  const content = target.innerHTML;
+  const node = target.parentNode as HTMLDivElement;
+  const { uuid, content } = getNodeData(node);
 
   clearTimeout(watchdog);
   watchdog = setTimeout(() => {
@@ -18,7 +23,16 @@ export function input(event: KeyboardEvent) {
 
 export function keydown(event: KeyboardEvent) {
   const target = event.target as HTMLDivElement;
-  const uuid = target.getAttribute("data-uuid");
+  const node = target.parentNode as HTMLDivElement;
+  const { uuid, content } = getNodeData(node);
+
+  const selection = window.getSelection();
+  const range = selection?.getRangeAt(0);
+  const start = range!.startOffset;
+  const end = range!.endOffset;
+
+  const cursorAtStart = start == 0 && end == 0;
+  const cursorAtEnd = start == content?.length && end == content?.length;
 
   if (event.key == "Tab") {
     event.preventDefault();
@@ -30,15 +44,8 @@ export function keydown(event: KeyboardEvent) {
     }
   }
 
-  if (event.key === "Enter" && !event.shiftKey) {
+  if (event.key == "Enter" && !event.shiftKey) {
     event.preventDefault();
-
-    const selection = window.getSelection();
-    const range = selection?.getRangeAt(0);
-    const start = range!.startOffset;
-    const end = range!.endOffset;
-
-    const content = target.innerHTML;
 
     this.pushEventTo(this.el.phxHookId, "new", {
       uuid,
@@ -46,11 +53,49 @@ export function keydown(event: KeyboardEvent) {
       selection: { start, end },
     });
   }
+
+  if (event.key == "Backspace" && cursorAtStart) {
+    event.preventDefault();
+
+    const prevNode = getPrevNode(node);
+    if (prevNode) {
+      this.pushEventTo(this.el.phxHookId, "merge_prev", { uuid, content });
+      focusNode(prevNode);
+    }
+  }
+
+  if (event.key == "Delete" && cursorAtEnd) {
+    event.preventDefault();
+
+    const nextNode = getNextNode(node);
+    if (nextNode) {
+      this.pushEventTo(this.el.phxHookId, "merge_next", { uuid, content });
+      focusNode(nextNode);
+    }
+  }
+
+  if (event.key == "ArrowUp") {
+    if (event.altKey == true) {
+      this.pushEventTo(this.el.phxHookId, "move_up", { uuid });
+    } else if (cursorAtStart) {
+      const prevNode = getPrevNode(node);
+      prevNode && focusNode(prevNode);
+    }
+  }
+
+  if (event.key == "ArrowDown") {
+    if (event.altKey == true) {
+      this.pushEventTo(this.el.phxHookId, "move_down", { uuid });
+    } else if (cursorAtEnd) {
+      const nextNode = getNextNode(node);
+      nextNode && focusNode(nextNode, true);
+    }
+  }
 }
 
 export function toggleCollapse({ detail: { uuid } }: CollapseParams) {
   const node = getNodeById(uuid);
-  node!.toggleAttribute("data-collapsed");
+  node?.toggleAttribute("data-collapsed");
 
   const collapsedStatus = localStorage.getItem(this.el.id) || "{}";
   const collapsed = JSON.parse(collapsedStatus);

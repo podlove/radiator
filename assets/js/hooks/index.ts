@@ -8,8 +8,8 @@ import {
 } from "./events/handler";
 import { input, keydown, toggleCollapse } from "./events/listener";
 
-import Sortable from "../../vendor/sortable";
-import Quill from "../../vendor/quill";
+// import Sortable from "../../vendor/sortable";
+// import Quill from "../../vendor/quill";
 
 export const Hooks = {
   outline: {
@@ -26,7 +26,7 @@ export const Hooks = {
       //   theme: "snow",
       // };
 
-      // this.quill = new Quill(".editor", options);
+      // this.quill = new Quill(".content", options);
 
       // this.quill.on("text-change", (delta, oldDelta, source) => {
       //   if (source == "api") {
@@ -41,9 +41,9 @@ export const Hooks = {
       //   }
       // });
 
-      // this.handleEvent("blur", handleBlur.bind(this));
-      // this.handleEvent("focus", handleFocus.bind(this));
-      // this.handleEvent("focus_node", handleFocusNode.bind(this));
+      this.handleEvent("blur", handleBlur.bind(this));
+      this.handleEvent("focus", handleFocus.bind(this));
+      this.handleEvent("focus_node", handleFocusNode.bind(this));
       this.handleEvent("move_nodes", handleMoveNodes.bind(this));
 
       this.handleEvent("set_content", handleSetContent.bind(this));
