@@ -1,7 +1,13 @@
 <div id={@id}>
   <OutlineComponents.keyboard_shortcuts />
 
-  <div id={[@id, "-stream"]} class="my-6" phx-hook="outline" phx-update="stream">
+  <div
+    id={[@id, "-stream"]}
+    class="my-6"
+    phx-hook="outline"
+    phx-update="stream"
+    phx-target={@myself}
+  >
     <div
       :for={{id, form} <- @streams.nodes}
       id={id}
@@ -11,10 +17,10 @@
     >
       <OutlineComponents.outline_form
         for={form}
+        class="ml-5"
         phx-change="noop"
         phx-submit="noop"
         phx-target={@myself}
-        class="ml-5"
       >
         <!--
         <.input field={form[:selected]} type="checkbox" />
