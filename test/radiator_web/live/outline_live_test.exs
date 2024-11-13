@@ -11,8 +11,8 @@ defmodule RadiatorWeb.OutlineLiveTest do
   describe "Episode outline nodes" do
     setup %{conn: conn} do
       user = user_fixture()
-      %{id: show_id} = show_fixture()
-      %{id: episode_id} = episode_fixture(%{show_id: show_id})
+      show = show_fixture()
+      %{id: episode_id} = episode_fixture(%{show_id: show.id})
 
       node_1 =
         node_fixture(
@@ -48,8 +48,9 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       %{
         conn: log_in_user(conn, user),
-        url: ~p"/admin/podcast/#{show_id}",
-        episode_id: episode_id,
+        user: user,
+        url: ~p"/admin/podcast/#{show}",
+        stream_id: "#outline-#{episode_id}-stream",
         nodes: [node_1, node_2, node_2_1, node_3]
       }
     end
@@ -63,18 +64,38 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert html =~ node_3.content
     end
 
-    # assert view
-    #    |> element("#inactive")
-    #    |> render_blur() =~ "Tap to wake"
+    test "focus node", %{conn: conn, user: user, url: url, nodes: [%{uuid: uuid} | _]} do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _other_html} = live(conn, url)
 
-    # assert view
-    #    |> element("#inactive")
-    #    |> render_focus() =~ "Tap to wake"
+      assert live
+             |> element("#nodes-form-#{uuid}-content")
+             |> render_focus()
+
+      keep_liveview_alive()
+
+      assert_push_event(other_live, "focus", %{uuid: ^uuid, user_id: user_id})
+      assert user_id == user.id
+    end
+
+    test "blur node", %{conn: conn, user: user, url: url, nodes: [%{uuid: uuid} | _]} do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _other_html} = live(conn, url)
+
+      assert live
+             |> element("#nodes-form-#{uuid}-content")
+             |> render_blur()
+
+      keep_liveview_alive()
+
+      assert_push_event(other_live, "blur", %{uuid: ^uuid, user_id: user_id})
+      assert user_id == user.id
+    end
 
     test "update node content", %{
       conn: conn,
       url: url,
-      episode_id: episode_id,
+      stream_id: stream_id,
       nodes: [%{uuid: uuid} | _]
     } do
       {:ok, live, _html} = live(conn, url)
@@ -83,7 +104,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
       params = %{"uuid" => uuid, "content" => "node_1_updated"}
 
       assert live
-             |> element("#outline-#{episode_id}-stream")
+             |> element(stream_id)
              |> render_hook(:save, params)
 
       keep_liveview_alive()
@@ -94,170 +115,247 @@ defmodule RadiatorWeb.OutlineLiveTest do
     test "insert a new node", %{
       conn: conn,
       url: url,
-      episode_id: episode_id,
-      nodes: [_, %{uuid: uuid} | _]
+      stream_id: stream_id,
+      nodes: [%{uuid: uuid} | _]
     } do
       {:ok, live, _html} = live(conn, url)
       {:ok, other_live, _html} = live(conn, url)
 
       params = %{
         "uuid" => uuid,
-        "content" => "node_1_updated",
+        "content" => "node_1",
         "selection" => %{"start" => 2, "end" => 2}
       }
 
       assert live
-             |> element("#outline-#{episode_id}-stream")
+             |> element(stream_id)
              |> render_hook(:new, params)
 
       keep_liveview_alive()
 
       assert_push_event(other_live, "set_content", %{uuid: ^uuid, content: "no"})
-
-      assert live |> has_element?("#nodes-form-#{uuid}-content", "no")
-      assert other_live |> has_element?("#nodes-form-#{uuid}-content", "no")
     end
 
-    #   test "move node up", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, _, node_3]} do
-    #     {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
-    #     {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+    test "move node up", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [node_1, node_2, _, node_3]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
 
-    #     assert live
-    #            |> element("#form-#{node_2.uuid}_content")
-    #            |> render_keydown(%{"key" => "ArrowUp", "altKey" => true})
+      params = %{"uuid" => node_2.uuid}
 
-    #     keep_liveview_alive()
+      assert live
+             |> element(stream_id)
+             |> render_hook(:move_up, params)
 
-    #     node_2_uuid = node_2.uuid
-    #     assert_push_event(live, "move_nodes", %{nodes: nodes})
-    #     assert_push_event(live, "focus_node", %{uuid: ^node_2_uuid})
+      keep_liveview_alive()
 
-    #     assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
-    #     assert_push_event(other_live, "focus_node", %{uuid: ^node_2_uuid})
+      node_2_uuid = node_2.uuid
+      assert_push_event(live, "move_nodes", %{nodes: nodes})
+      assert_push_event(live, "focus_node", %{uuid: ^node_2_uuid})
 
-    #     node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
+      assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
 
-    #     assert length(nodes) == 3
-    #     assert node_map[node_1.uuid].parent_id == node_1.parent_id
-    #     assert node_map[node_1.uuid].prev_id == node_2.uuid
+      node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
 
-    #     assert node_map[node_2.uuid].parent_id == node_2.parent_id
-    #     assert node_map[node_2.uuid].prev_id == nil
+      assert length(nodes) == 3
+      assert node_map[node_1.uuid].parent_id == node_1.parent_id
+      assert node_map[node_1.uuid].prev_id == node_2.uuid
 
-    #     assert node_map[node_3.uuid].parent_id == node_3.parent_id
-    #     assert node_map[node_3.uuid].prev_id == node_1.uuid
+      assert node_map[node_2.uuid].parent_id == node_2.parent_id
+      assert node_map[node_2.uuid].prev_id == nil
 
-    #     assert other_nodes == nodes
-    #   end
+      assert node_map[node_3.uuid].parent_id == node_3.parent_id
+      assert node_map[node_3.uuid].prev_id == node_1.uuid
 
-    #   test "move node down", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, _, node_3]} do
-    #     {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
-    #     {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      assert other_nodes == nodes
+    end
 
-    #     assert live
-    #            |> element("#form-#{node_1.uuid}_content")
-    #            |> render_keydown(%{"key" => "ArrowDown", "altKey" => true})
+    test "move node down", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [node_1, node_2, _, node_3]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
 
-    #     keep_liveview_alive()
+      params = %{"uuid" => node_1.uuid}
 
-    #     node_1_uuid = node_1.uuid
-    #     assert_push_event(live, "move_nodes", %{nodes: nodes})
-    #     assert_push_event(live, "focus_node", %{uuid: ^node_1_uuid})
+      assert live
+             |> element(stream_id)
+             |> render_hook(:move_down, params)
 
-    #     assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
-    #     assert_push_event(other_live, "focus_node", %{uuid: ^node_1_uuid})
+      keep_liveview_alive()
 
-    #     node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
+      node_1_uuid = node_1.uuid
+      assert_push_event(live, "move_nodes", %{nodes: nodes})
+      assert_push_event(live, "focus_node", %{uuid: ^node_1_uuid})
 
-    #     assert length(nodes) == 3
-    #     assert node_map[node_1.uuid].parent_id == node_1.parent_id
-    #     assert node_map[node_1.uuid].prev_id == node_2.uuid
+      assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
 
-    #     assert node_map[node_2.uuid].parent_id == node_2.parent_id
-    #     assert node_map[node_2.uuid].prev_id == nil
+      node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
 
-    #     assert node_map[node_3.uuid].parent_id == node_3.parent_id
-    #     assert node_map[node_3.uuid].prev_id == node_1.uuid
+      assert length(nodes) == 3
+      assert node_map[node_1.uuid].parent_id == node_1.parent_id
+      assert node_map[node_1.uuid].prev_id == node_2.uuid
 
-    #     assert other_nodes == nodes
-    #   end
+      assert node_map[node_2.uuid].parent_id == node_2.parent_id
+      assert node_map[node_2.uuid].prev_id == nil
 
-    #   test "indent node", %{conn: conn, show_id: show_id, nodes: [node_1, node_2, _, node_3]} do
-    #     {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
-    #     {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      assert node_map[node_3.uuid].parent_id == node_3.parent_id
+      assert node_map[node_3.uuid].prev_id == node_1.uuid
 
-    #     assert live
-    #            |> element("#form-#{node_2.uuid}_content")
-    #            |> render_keydown(%{"key" => "Tab", "shiftKey" => false})
+      assert other_nodes == nodes
+    end
 
-    #     keep_liveview_alive()
+    test "indent node", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [node_1, node_2, _, node_3]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
 
-    #     node_2_uuid = node_2.uuid
-    #     assert_push_event(live, "move_nodes", %{nodes: nodes})
-    #     assert_push_event(live, "focus_node", %{uuid: ^node_2_uuid})
+      params = %{"uuid" => node_2.uuid}
 
-    #     assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
-    #     assert_push_event(other_live, "focus_node", %{uuid: ^node_2_uuid})
+      assert live
+             |> element(stream_id)
+             |> render_hook(:indent, params)
 
-    #     node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
+      keep_liveview_alive()
 
-    #     assert length(nodes) == 3
-    #     assert node_map[node_1.uuid].parent_id == nil
-    #     assert node_map[node_1.uuid].prev_id == nil
+      node_2_uuid = node_2.uuid
+      assert_push_event(live, "move_nodes", %{nodes: nodes})
+      assert_push_event(live, "focus_node", %{uuid: ^node_2_uuid})
 
-    #     assert node_map[node_2.uuid].parent_id == node_1.uuid
-    #     assert node_map[node_2.uuid].prev_id == nil
+      assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
 
-    #     assert node_map[node_3.uuid].parent_id == nil
-    #     assert node_map[node_3.uuid].prev_id == node_1.uuid
+      node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
 
-    #     assert other_nodes == nodes
-    #   end
+      assert length(nodes) == 3
+      assert node_map[node_1.uuid].parent_id == nil
+      assert node_map[node_1.uuid].prev_id == nil
 
-    #   test "outdent node", %{conn: conn, show_id: show_id, nodes: [_, node_2, node_2_1, node_3]} do
-    #     {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
-    #     {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      assert node_map[node_2.uuid].parent_id == node_1.uuid
+      assert node_map[node_2.uuid].prev_id == nil
 
-    #     assert live
-    #            |> element("#form-#{node_2_1.uuid}_content")
-    #            |> render_keydown(%{"key" => "Tab", "shiftKey" => true})
+      assert node_map[node_3.uuid].parent_id == nil
+      assert node_map[node_3.uuid].prev_id == node_1.uuid
 
-    #     keep_liveview_alive()
+      assert other_nodes == nodes
+    end
 
-    #     node_2_1_uuid = node_2_1.uuid
-    #     assert_push_event(live, "move_nodes", %{nodes: nodes})
-    #     assert_push_event(live, "focus_node", %{uuid: ^node_2_1_uuid})
+    test "outdent node", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [_, node_2, node_2_1, node_3]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
 
-    #     assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
-    #     assert_push_event(other_live, "focus_node", %{uuid: ^node_2_1_uuid})
+      params = %{"uuid" => node_2_1.uuid}
 
-    #     node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
+      assert live
+             |> element(stream_id)
+             |> render_hook(:outdent, params)
 
-    #     assert length(nodes) == 2
-    #     assert node_map[node_2_1.uuid].parent_id == nil
-    #     assert node_map[node_2_1.uuid].prev_id == node_2.uuid
+      keep_liveview_alive()
 
-    #     assert node_map[node_3.uuid].parent_id == nil
-    #     assert node_map[node_3.uuid].prev_id == node_2_1.uuid
+      node_2_1_uuid = node_2_1.uuid
+      assert_push_event(live, "move_nodes", %{nodes: nodes})
+      assert_push_event(live, "focus_node", %{uuid: ^node_2_1_uuid})
 
-    #     assert other_nodes == nodes
-    #   end
+      assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
 
-    #   # test "move node around", %{conn: conn, show: show, episode: episode, nodes: [node_1 | _]} do
+      node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
 
-    #   test "delete node", %{conn: conn, show_id: show_id, nodes: [_, _, _, node_3]} do
-    #     {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
-    #     {:ok, other_live, _html} = live(conn, ~p"/admin/podcast/#{show_id}")
+      assert length(nodes) == 2
+      assert node_map[node_2_1.uuid].parent_id == nil
+      assert node_map[node_2_1.uuid].prev_id == node_2.uuid
 
-    #     assert live
-    #            |> element("#form-#{node_3.uuid}_content")
-    #            |> render_keydown(%{"key" => "Delete", "value" => ""})
+      assert node_map[node_3.uuid].parent_id == nil
+      assert node_map[node_3.uuid].prev_id == node_2_1.uuid
 
-    #     keep_liveview_alive()
+      assert other_nodes == nodes
+    end
 
-    #     refute live |> has_element?("#form-#{node_3.uuid}")
-    #     refute other_live |> has_element?("#form-#{node_3.uuid}")
-    #   end
+    # test "move node around", %{conn: conn, url: url,  nodes: nodes} do
+
+    test "delete node by merging with prev", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [node_1, node_2, _, node_3]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
+
+      params = %{"uuid" => node_2.uuid, "content" => node_2.content}
+
+      assert live
+             |> element(stream_id)
+             |> render_hook(:merge_prev, params)
+
+      keep_liveview_alive()
+
+      node_1_uuid = node_1.uuid
+      node_3_uuid = node_3.uuid
+      content = node_1.content <> node_2.content
+      assert_push_event(other_live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
+
+      assert_push_event(live, "move_nodes", %{nodes: [moved_node]})
+      assert_push_event(other_live, "move_nodes", %{nodes: [other_moved_node]})
+
+      assert %{uuid: ^node_3_uuid, parent_id: nil, prev_id: ^node_1_uuid} = moved_node
+      assert moved_node == other_moved_node
+
+      refute live |> has_element?("#nodes-form-#{node_2.uuid}")
+      refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
+
+      assert live |> has_element?("#nodes-form-#{node_1.uuid}")
+      assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
+    end
+
+    test "delete node by merging with next", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [node_1, node_2, _, node_3]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
+
+      params = %{"uuid" => node_1.uuid, "content" => node_1.content}
+
+      assert live
+             |> element(stream_id)
+             |> render_hook(:merge_next, params)
+
+      keep_liveview_alive()
+
+      node_1_uuid = node_1.uuid
+      node_3_uuid = node_3.uuid
+      content = node_1.content <> node_2.content
+      assert_push_event(other_live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
+
+      assert_push_event(live, "move_nodes", %{nodes: [moved_node]})
+      assert_push_event(other_live, "move_nodes", %{nodes: [other_moved_node]})
+
+      assert %{uuid: ^node_3_uuid, parent_id: nil, prev_id: ^node_1_uuid} = moved_node
+      assert moved_node == other_moved_node
+
+      refute live |> has_element?("#nodes-form-#{node_2.uuid}")
+      refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
+
+      assert live |> has_element?("#nodes-form-#{node_1.uuid}")
+      assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
+    end
   end
 
   defp keep_liveview_alive do

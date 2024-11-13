@@ -48,6 +48,7 @@ defmodule RadiatorWeb.OutlineComponent do
   def update(
         %{
           event: %NodeMovedEvent{
+            event_id: event_id,
             node: node,
             next: next,
             old_prev: old_prev,
@@ -61,13 +62,14 @@ defmodule RadiatorWeb.OutlineComponent do
 
     socket
     |> push_event("move_nodes", %{nodes: nodes})
-    |> push_event("focus_node", %{uuid: node.uuid})
+    |> focus_self(node.uuid, event_id)
     |> reply(:ok)
   end
 
   def update(
         %{
           event: %NodeMovedEvent{
+            event_id: event_id,
             node: node,
             next: next,
             old_prev: old_prev,
@@ -81,7 +83,7 @@ defmodule RadiatorWeb.OutlineComponent do
 
     socket
     |> push_event("move_nodes", %{nodes: nodes})
-    |> push_event("focus_node", %{uuid: node.uuid})
+    |> focus_self(node.uuid, event_id)
     |> reply(:ok)
   end
 
