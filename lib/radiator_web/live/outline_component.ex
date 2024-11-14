@@ -188,7 +188,6 @@ defmodule RadiatorWeb.OutlineComponent do
     end
 
     socket
-    # |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
     |> reply(:noreply)
   end
 
@@ -209,7 +208,6 @@ defmodule RadiatorWeb.OutlineComponent do
     end
 
     socket
-    # |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
     |> reply(:noreply)
   end
 
