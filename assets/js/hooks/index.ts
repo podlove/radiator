@@ -6,20 +6,49 @@ import {
   handleMoveNodes,
   handleSetContent,
 } from "./events/handler";
-import { keydown, toggleCollapse } from "./events/listener";
+import { input, keydown, toggleCollapse } from "./events/listener";
 
-import Sortable from "../../vendor/sortable";
-import Quill from "../../vendor/quill";
+// import Sortable from "../../vendor/sortable";
+// import Quill from "../../vendor/quill";
 
 export const Hooks = {
   outline: {
     selector: ".node",
     mounted() {
+      // const toolbarOptions = ["bold", "italic", "underline", "strike", "link"];
+
+      // const options = {
+      //   // debug: "info",
+      //   modules: {
+      //     toolbar: toolbarOptions,
+      //   },
+      //   placeholder: "Create an Node ...",
+      //   theme: "snow",
+      // };
+
+      // this.quill = new Quill(".content", options);
+
+      // this.quill.on("text-change", (delta, oldDelta, source) => {
+      //   if (source == "api") {
+      //     console.log("An API call triggered this change.");
+      //   } else if (source == "user") {
+      //     console.log(this);
+      //     // This sends the event of
+      //     // def handle_event("text-editor", %{"text_content" => content}, socket) do
+      //     this.pushEventTo(this.el.phxHookId, "text-editor", {
+      //       text_content: this.quill.getContents(),
+      //     });
+      //   }
+      // });
+
       this.handleEvent("blur", handleBlur.bind(this));
       this.handleEvent("focus", handleFocus.bind(this));
       this.handleEvent("focus_node", handleFocusNode.bind(this));
       this.handleEvent("move_nodes", handleMoveNodes.bind(this));
+
       this.handleEvent("set_content", handleSetContent.bind(this));
+
+      this.el.addEventListener("input", input.bind(this));
       this.el.addEventListener("keydown", keydown.bind(this));
       this.el.addEventListener("toggle_collapse", toggleCollapse.bind(this));
 
@@ -54,6 +83,9 @@ export const Hooks = {
       // });
     },
     updated() {
+      // delete this.quill;
+      // console.log("jey", this.quill);
+
       // this.sortable.destroy();
 
       const nodes = this.el.querySelectorAll(this.selector);

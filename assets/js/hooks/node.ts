@@ -14,10 +14,10 @@ export function moveNode(node: HTMLDivElement): NodeData {
   return { uuid, parent_id, prev_id };
 }
 
-function getNodeData(node: HTMLDivElement): NodeData {
+export function getNodeData(node: HTMLDivElement): NodeData {
   const uuid = getUUID(node);
-  const parent_id = getValue(node, ".parent_id");
-  const prev_id = getValue(node, ".prev_id");
+  const parent_id = getData(node, "parent");
+  const prev_id = getData(node, "prev");
   const content = getContent(node);
 
   return { uuid, parent_id, prev_id, content };
@@ -27,29 +27,55 @@ function getUUID(node: HTMLDivElement) {
   return node.id.split("nodes-form-")[1] as UUID;
 }
 
+function getData(node: HTMLDivElement, selector: string) {
+  const data = node.getAttribute(`data-${selector}`);
+  if (!data) return undefined;
+  return data as UUID;
+}
+
 function getContent(node: HTMLDivElement) {
-  const input = node.querySelector("input[type=text]") as HTMLInputElement;
-  return input.value;
+  const content = node.querySelector(".content") as HTMLDivElement;
+  return content.innerHTML;
 }
 
-function getValue(node: HTMLDivElement, selector: string) {
-  const input = node.querySelector(selector) as HTMLInputElement;
-  return input.value as UUID;
+export function setData(node: HTMLDivElement, selector: string, value: string) {
+  node.setAttribute(`data-${selector}`, value);
+  return node;
 }
 
-export function setValue(
-  node: HTMLDivElement,
-  selector: string,
-  value: string
-) {
-  const input = node.querySelector(selector) as HTMLInputElement;
-  input.value = value;
+export function setContent(node: HTMLDivElement, value: string) {
+  const content = node.querySelector(".content") as HTMLDivElement;
+  content.innerHTML = value;
+  return node;
+}
+
+export function focusNode(node: HTMLDivElement, toEnd: boolean = false) {
+  const content = node.querySelector(".content") as HTMLDivElement;
+
+  const offset = content.childNodes.length;
+
+  const range = document.createRange();
+  const selection = window.getSelection();
+  range.setStart(content, offset);
+  range.collapse(true);
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+
+  return node;
 }
 
 export function getNodeById(uuid: UUID | undefined) {
   if (!uuid) return null;
 
   return document.getElementById(`nodes-form-${uuid}`) as HTMLDivElement;
+}
+
+export function getPrevNode(node: HTMLDivElement) {
+  return node.previousSibling as HTMLDivElement | null;
+}
+
+export function getNextNode(node: HTMLDivElement) {
+  return node.nextSibling as HTMLDivElement | null;
 }
 
 /*
@@ -88,10 +114,7 @@ export function addEditingUserLabel(node: HTMLDivElement, user_name: string) {
   )}">${user_name}</span>`;
 }
 
-export function removeEditingUserLabel(
-  node: HTMLDivElement,
-  user_name: string
-) {
-  const span = node!.querySelector(`#${user_name}`)!;
-  span.remove();
+export function removeEditingUserLabel(user_name: string) {
+  const span = document.getElementById(user_name);
+  span && span.remove();
 }

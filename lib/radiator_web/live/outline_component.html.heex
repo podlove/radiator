@@ -1,47 +1,56 @@
 <div id={@id}>
   <OutlineComponents.keyboard_shortcuts />
 
-  <div id={[@id, "-stream"]} class="my-6" phx-hook="outline" phx-update="stream">
-    <div :for={{id, form} <- @streams.nodes} id={id} class="relative group node">
+  <div
+    id={[@id, "-stream"]}
+    class="my-6"
+    phx-hook="outline"
+    phx-update="stream"
+    phx-target={@myself}
+  >
+    <div
+      :for={{id, form} <- @streams.nodes}
+      id={id}
+      class="relative group node"
+      data-parent={form[:parent_id].value}
+      data-prev={form[:prev_id].value}
+    >
       <OutlineComponents.outline_form
         for={form}
-        phx-change="save"
-        phx-submit="new"
-        phx-target={@myself}
         class="ml-5"
+        phx-change="noop"
+        phx-submit="noop"
+        phx-target={@myself}
       >
-        <input class="uuid" type="hidden" name={form[:uuid].name} value={form[:uuid].value} />
-        <input
-          class="parent_id"
-          type="hidden"
-          name={form[:parent_id].name}
-          value={form[:parent_id].value}
-        />
-        <input
-          class="prev_id"
-          type="hidden"
-          name={form[:prev_id].name}
-          value={form[:prev_id].value}
-        />
-        <OutlineComponents.outline_input
-          class="content"
-          type="text"
-          field={form[:content]}
-          placeholder="Content..."
-          phx-mounted={form.action == :self && JS.focus()}
-          phx-focus="focus"
-          phx-blur="blur"
-          phx-keydown="keydown"
-          phx-value-uuid={form[:uuid].value}
-          phx-value-parent={form[:parent_id].value}
-          phx-value-prev={form[:prev_id].value}
-          phx-target={@myself}
-        />
+        <!--
+        <.input field={form[:selected]} type="checkbox" />
+        <.input field={form[:completed]} type="checkbox" />
+        <span>
+          ampel
+          rot
+          gelb
+          grün
+        </span>
+        <.icon name="hero-circle" class="w-5 h-5" />
+        <.icon name="hero-check-circle" class="w-5 h-5" />
+        <.icon name="hero-ellipsis-vertical" class="w-5 h-5" />
+        -->
       </OutlineComponents.outline_form>
+
+      <div
+        id={[id, "-content"]}
+        class="px-1 py-0.5 ml-5 content focus:outline-none"
+        contenteditable
+        phx-value-uuid={form[:uuid].value}
+        phx-focus="focus"
+        phx-blur="blur"
+        phx-target={@myself}
+      ><%= raw(form[:content].value) %></div>
+
       <div class="absolute top-0 right-0 z-10 text-xs text-white editing"></div>
       <div class="ml-4 peer children group-data-[collapsed]:hidden"></div>
       <button
-        class="absolute peer-empty:hidden top-3 left-0 handle group-data-[collapsed]:-rotate-90 duration-200 z-10"
+        class="absolute peer-empty:hidden top-1.5 left-0 handle group-data-[collapsed]:-rotate-90 duration-200 z-10"
         phx-click={JS.dispatch("toggle_collapse", detail: %{uuid: form.data.uuid})}
       >
         <svg width="20" height="20" viewBox="0 0 20 20" class="text-gray-500 rotate-90">
@@ -55,7 +64,7 @@
       </button>
       <a
         href={"##{form.data.uuid}"}
-        class="absolute left-0 hidden text-gray-500 handle peer-empty:block top-3"
+        class="absolute left-0 hidden text-gray-500 handle peer-empty:block top-1.5"
       >
         <svg viewBox="0 0 18 18" fill="currentColor" class="w-5 h-5">
           <circle cx="9" cy="9" r="3.5"></circle>
