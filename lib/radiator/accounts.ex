@@ -260,9 +260,11 @@ defmodule Radiator.Accounts do
 
   """
   def get_raindrop_tokens(user_id) do
+    service_name = WebService.raindrop_service_name()
+
     WebService
     |> where([w], w.user_id == ^user_id)
-    |> where([w], w.service_name == "raindrop")
+    |> where([w], w.service_name == ^service_name)
     |> Repo.one()
   end
 
@@ -287,7 +289,7 @@ defmodule Radiator.Accounts do
       ) do
     %WebService{}
     |> WebService.changeset(%{
-      service_name: "raindrop",
+      service_name: WebService.raindrop_service_name(),
       user_id: user_id,
       data: %{
         access_token: raindrop_access_token,

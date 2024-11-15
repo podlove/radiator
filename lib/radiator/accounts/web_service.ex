@@ -9,6 +9,8 @@ defmodule Radiator.Accounts.WebService do
 
   alias Radiator.Accounts.User
 
+  @raindrop_service_name "raindrop"
+
   schema "web_services" do
     field :service_name, :string
 
@@ -38,4 +40,6 @@ defmodule Radiator.Accounts.WebService do
     |> cast(attrs, [:access_token, :refresh_token, :expires_at, :collection_mappings])
     |> validate_required([:access_token, :refresh_token, :expires_at])
   end
+
+  def raindrop_service_name, do: @raindrop_service_name
 end
