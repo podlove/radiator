@@ -8,7 +8,7 @@ import {
 } from "./events/handler";
 import { input, keydown, toggleCollapse } from "./events/listener";
 
-// import Sortable from "../../vendor/sortable";
+import Sortable from "../../vendor/sortable";
 // import Quill from "../../vendor/quill";
 
 export const Hooks = {
@@ -61,26 +61,21 @@ export const Hooks = {
         node.toggleAttribute("data-collapsed", !!collapsed[uuid]);
       });
 
-      // const nestedSortables = [].slice.call(
-      //   document.querySelectorAll(".children")
-      // );
+      const nestedSortables = [...document.querySelectorAll(".children")];
+      nestedSortables.forEach((element) => {
+        // const el = document.getElementById('items');
+        // const sortable = Sortable.create(el);
+        new Sortable(element, {
+          // group: "nested",
+          group: this.el.id,
+          handle: ".handle",
+          // ghostClass: 'blue-background-class',
+          animation: 150,
+          fallbackOnBody: true,
+          swapThreshold: 0.65,
 
-      // // Loop through each nested sortable element
-      // for (var i = 0; i < nestedSortables.length; i++) {
-      //   new Sortable(nestedSortables[i], {
-      //     group: this.el.id,
-      //     handle: ".handle",
-      //     animation: 150,
-      //     fallbackOnBody: true,
-      //     swapThreshold: 0.65,
-      //   });
-      // }
-
-      // this.sortable = Sortable.create(this.el, {
-      //   group: "nested",
-      //   handle: ".handle",
-      //   animation: 150,
-      // });
+        });
+      });
     },
     updated() {
       // delete this.quill;
