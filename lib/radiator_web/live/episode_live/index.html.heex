@@ -1,8 +1,15 @@
 <div class="grid grid-cols-12 gap-24">
   <aside class="col-span-12 sm:col-span-4">
+    <.link patch={~p"/admin/podcast/#{@show}/inbox"} class="bg-[#444460] block text-white rounded">
+      <span class="inline-block w-24 py-2 mr-4 text-center">
+        <.icon name="hero-inbox-arrow-down" class="w-8 h-8" />
+      </span>
+      INBOX
+    </.link>
+
     <.link
       patch={~p"/admin/podcast/#{@show}/new"}
-      class="block w-full my-4 rounded text-white bg-[#df7366] px-8 py-2 text-center"
+      class="block my-8 rounded text-white bg-[#df7366] px-8 py-2 text-center"
     >
       Create Episode
     </.link>
