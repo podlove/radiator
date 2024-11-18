@@ -1,5 +1,13 @@
 import Config
 
+config :beacon,
+  radiator: [
+    site: :radiator,
+    repo: Radiator.Repo,
+    endpoint: RadiatorWeb.Endpoint,
+    router: RadiatorWeb.Router
+  ]
+
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration

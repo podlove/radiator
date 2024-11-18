@@ -1,7 +1,13 @@
 defmodule RadiatorWeb.Router do
   use RadiatorWeb, :router
 
+  use Beacon.Router
+  use Beacon.LiveAdmin.Router
   import RadiatorWeb.UserAuth
+
+  pipeline :beacon_admin do
+    plug Beacon.LiveAdmin.Plug
+  end
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -15,6 +21,12 @@ defmodule RadiatorWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  scope "/" do
+    pipe_through [:browser, :beacon_admin]
+    beacon_live_admin "/admin"
+    beacon_site "/cms", site: :radiator
   end
 
   scope "/", RadiatorWeb do

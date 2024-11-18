@@ -26,6 +26,7 @@ defmodule Radiator.Application do
       {Finch, name: Radiator.Finch},
       RadiatorWeb.Endpoint,
       {CommandQueue, name: CommandQueue},
+      {Beacon, [sites: [Application.fetch_env!(:beacon, :radiator)]]},
       {CommandProcessor, name: CommandProcessor, subscribe_to: [{CommandQueue, max_demand: 1}]},
       {NodeChangeListener, name: NodeChangeListener},
       {Registry, keys: :unique, name: Radiator.JobRegistry},

@@ -33,6 +33,8 @@ defmodule Radiator.MixProject do
   defp deps do
     [
       {:argon2_elixir, "~> 4.1"},
+      {:beacon_live_admin, "~> 0.2"},
+      {:beacon, "~> 0.2"},
       {:bandit, "~> 1.5"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dns_cluster, "~> 0.2"},
@@ -70,7 +72,9 @@ defmodule Radiator.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:tidewave, "~> 0.1", only: :dev},
-      {:web_inspector, git: "https://github.com/eteubert/web_inspector.git"}
+      {:timex, "~> 3.7"},
+      {:web_inspector, git: "https://github.com/eteubert/web_inspector.git"},
+      {:igniter, "~> 0.4"}
     ]
   end
 
