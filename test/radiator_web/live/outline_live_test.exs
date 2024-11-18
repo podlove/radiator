@@ -285,7 +285,37 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_nodes == nodes
     end
 
-    # test "move node around", %{conn: conn, url: url,  nodes: nodes} do
+    test "move node to different position", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [node_1, node_2, node_2_1 | _]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
+
+      params = %{"uuid" => node_2_1.uuid, "prev_id" => node_1.uuid}
+
+      assert live
+             |> element(stream_id)
+             |> render_hook(:move, params)
+
+      keep_liveview_alive()
+
+      assert_push_event(live, "move_nodes", %{nodes: nodes})
+      assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
+
+      node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
+
+      assert length(nodes) == 2
+      assert node_map[node_2_1.uuid].parent_id == nil
+      assert node_map[node_2_1.uuid].prev_id == node_1.uuid
+
+      assert node_map[node_2.uuid].parent_id == nil
+      assert node_map[node_2.uuid].prev_id == node_2_1.uuid
+
+      assert other_nodes == nodes
+    end
 
     test "delete node by merging with prev", %{
       conn: conn,

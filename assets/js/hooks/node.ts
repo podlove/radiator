@@ -70,6 +70,10 @@ export function getNodeById(uuid: UUID | undefined) {
   return document.getElementById(`nodes-form-${uuid}`) as HTMLDivElement;
 }
 
+export function getParentNode(node: HTMLDivElement) {
+  return node.closest(".node") as HTMLDivElement | null;
+}
+
 export function getPrevNode(node: HTMLDivElement) {
   return node.previousSibling as HTMLDivElement | null;
 }

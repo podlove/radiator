@@ -1,4 +1,4 @@
-import { moveNode } from "./node";
+import { getNodeData, getParentNode, getPrevNode, moveNode } from "./node";
 import {
   handleBlur,
   handleFocus,
@@ -74,6 +74,25 @@ export const Hooks = {
           fallbackOnBody: true,
           swapThreshold: 0.65,
 
+          onEnd: (event) => {
+            const node = event.item;
+            const { uuid } = getNodeData(node);
+
+            const parentNode = getParentNode(node);
+            const prevNode = getPrevNode(node);
+
+            const parentData = parentNode && getNodeData(parentNode);
+            const parent_id = parentData?.uuid;
+
+            const prevData = prevNode && getNodeData(prevNode);
+            const prev_id = prevData?.uuid;
+
+            this.pushEventTo(this.el.phxHookId, "move", {
+              uuid,
+              parent_id,
+              prev_id,
+            });
+          },
         });
       });
     },

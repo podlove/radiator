@@ -227,6 +227,18 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
+  def handle_event("move", %{"uuid" => uuid} = params, socket) do
+    user_id = socket.assigns.user_id
+
+    Dispatch.move_node(uuid, user_id, generate_event_id(socket.id),
+      parent_id: params["parent_id"],
+      prev_id: params["prev_id"]
+    )
+
+    socket
+    |> reply(:noreply)
+  end
+
   def handle_event("indent", %{"uuid" => uuid}, socket) do
     user_id = socket.assigns.user_id
     Dispatch.indent_node(uuid, user_id, generate_event_id(socket.id))
