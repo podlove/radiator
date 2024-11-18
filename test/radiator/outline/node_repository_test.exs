@@ -4,6 +4,7 @@ defmodule Radiator.Outline.NodeRepositoryTest do
   alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepository
   alias Radiator.PodcastFixtures
+  alias Radiator.ResourcesFixtures
 
   import Radiator.OutlineFixtures
   import Ecto.Query, warn: false
@@ -77,6 +78,29 @@ defmodule Radiator.Outline.NodeRepositoryTest do
       assert NodeRepository.list_nodes_by_node_container(node2.outline_node_container_id) == [
                node2
              ]
+    end
+  end
+
+  describe "list_nodes_by_episode/1" do
+    test "returns only nodes of this episode" do
+      node1 = node_fixture()
+      node2 = node_fixture()
+
+      assert NodeRepository.list_nodes_by_episode(node1.episode_id) |> Enum.map(& &1.uuid) == [
+               node1.uuid
+             ]
+
+      assert NodeRepository.list_nodes_by_episode(node2.episode_id) |> Enum.map(& &1.uuid) == [
+               node2.uuid
+             ]
+    end
+
+    test "preloads optional associated URLs" do
+      node = node_fixture()
+      url = ResourcesFixtures.url_fixture(node_id: node.uuid)
+      [loaded_node] = NodeRepository.list_nodes_by_episode(node.episode_id)
+      assert loaded_node.uuid == node.uuid
+      assert loaded_node.urls == [url]
     end
   end
 
