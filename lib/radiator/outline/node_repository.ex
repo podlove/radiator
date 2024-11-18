@@ -59,6 +59,7 @@ defmodule Radiator.Outline.NodeRepository do
 
   @doc """
   Returns the list of nodes for an episode.
+  Called by the liveview to fetch all nodes for an episode.
 
   ## Examples
 
@@ -69,7 +70,8 @@ defmodule Radiator.Outline.NodeRepository do
 
   def list_nodes_by_episode(episode_id) do
     Node
-    |> where([p], p.episode_id == ^episode_id)
+    |> where([n], n.episode_id == ^episode_id)
+    |> preload(:urls)
     |> Repo.all()
     |> Enum.group_by(& &1.parent_id)
     |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)
