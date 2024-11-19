@@ -43,7 +43,7 @@ defmodule RadiatorWeb do
         layouts: [html: RadiatorWeb.Layouts]
 
       import Plug.Conn
-      import RadiatorWeb.Gettext
+      use Gettext, backend: RadiatorWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -88,7 +88,7 @@ defmodule RadiatorWeb do
 
       # Core UI components and translation
       import RadiatorWeb.CoreComponents
-      import RadiatorWeb.Gettext
+      use Gettext, backend: RadiatorWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
