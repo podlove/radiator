@@ -289,6 +289,61 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+    Splits a node at the given position. The content of the node will be split,
+    the original node will be updated with the content before the split and a new
+    node will be created with the content after the split.
+
+    The split is a selection with a start and stop index. What is in between will be
+    deleted.
+  """
+  def split_node(_node_id, {start, stop}) when start > stop do
+    {:error, :invalid_range}
+  end
+
+  def split_node(node_id, {start, stop}) do
+    # missing transaction!!
+    case NodeRepository.get_node(node_id) do
+      nil ->
+        {:error, :not_found}
+
+      node ->
+        {orig_node_content, new_node_content} = multisplit(node.content, start, stop)
+
+        {:ok, updated_node} =
+          node
+          |> Node.update_content_changeset(%{content: orig_node_content})
+          |> Repo.update()
+
+        node_attrs = %{
+          "content" => new_node_content,
+          "episode_id" => node.episode_id,
+          "parent_id" => node.parent_id,
+          "prev_id" => node.uuid
+        }
+
+        {:ok, %NodeRepoResult{node: new_node, next: old_next_node}} =
+          insert_node(node_attrs)
+
+        {:ok,
+         %NodeRepoResult{
+           node: updated_node,
+           next: get_node_result_info(new_node),
+           episode_id: updated_node.episode_id,
+           old_next: get_node_result_info(old_next_node)
+         }}
+    end
+  end
+
+  defp multisplit(nil, _start, _stop), do: {"", ""}
+
+  defp multisplit(string, start, stop) do
+    {first, _} = String.split_at(string, start)
+    {_, last} = String.split_at(string, stop)
+
+    {first, last}
+  end
+
+  @doc """
   Removes a node from the tree and deletes it from the repository.
   Recursivly deletes all children if there are some.
   ## Examples

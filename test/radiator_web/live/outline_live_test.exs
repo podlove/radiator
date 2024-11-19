@@ -124,7 +124,8 @@ defmodule RadiatorWeb.OutlineLiveTest do
       params = %{
         "uuid" => uuid,
         "content" => "node_1",
-        "selection" => %{"start" => 2, "end" => 2}
+        "start" => 2,
+        "stop" => 2
       }
 
       assert live
