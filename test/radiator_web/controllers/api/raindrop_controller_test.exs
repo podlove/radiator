@@ -1,11 +1,12 @@
 defmodule RadiatorWeb.Api.RaindropControllerTest do
   use RadiatorWeb.ConnCase, async: true
 
+  alias Radiator.Accounts.RaindropClient
   alias Radiator.AccountsFixtures
 
   describe "GET /raindrop/auth/redirect/:user_id" do
     setup %{conn: conn} do
-      raindrop = Radiator.RaindropClient.config()
+      raindrop = RaindropClient.config()
       %{host: host, path: path} = URI.parse(raindrop.url)
 
       %{
