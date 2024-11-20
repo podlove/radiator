@@ -23,7 +23,7 @@ defmodule RadiatorWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/" do
+  scope "/beacon" do
     pipe_through [:browser, :beacon_admin]
     beacon_live_admin "/admin"
     beacon_site "/cms", site: :radiator
