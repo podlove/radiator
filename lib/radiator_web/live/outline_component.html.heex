@@ -11,7 +11,11 @@
     <div
       :for={{id, form} <- @streams.nodes}
       id={id}
-      class="relative group node"
+      class={[
+        "relative group node",
+        "drag-item:focus-within:ring-0 drag-item:focus-within:ring-offset-0",
+        "drag-ghost:bg-zinc-300 drag-ghost:border-0 drag-ghost:ring-0"
+      ]}
       data-parent={form[:parent_id].value}
       data-prev={form[:prev_id].value}
     >
@@ -39,7 +43,7 @@
 
       <div
         id={[id, "-content"]}
-        class="px-1 py-0.5 ml-5 content focus:outline-none"
+        class="px-1 py-0.5 ml-5 content focus:outline-none drag-ghost:opacity-0"
         contenteditable
         phx-value-uuid={form[:uuid].value}
         phx-focus="focus"

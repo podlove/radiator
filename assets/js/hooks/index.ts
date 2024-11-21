@@ -63,17 +63,17 @@ export const Hooks = {
 
       const nestedSortables = [...document.querySelectorAll(".children")];
       nestedSortables.forEach((element) => {
-        // const el = document.getElementById('items');
-        // const sortable = Sortable.create(el);
+        // const el = document.getElementById('item');
+        // const sortable = Sortable.create(el, options);
         new Sortable(element, {
-          // group: "nested",
           group: this.el.id,
-          handle: ".handle",
-          // ghostClass: 'blue-background-class',
           animation: 150,
+          delay: 100,
+          dragClass: "drag-item",
+          ghostClass: "drag-ghost",
+          handle: ".handle",
           fallbackOnBody: true,
           swapThreshold: 0.65,
-
           onEnd: (event) => {
             const node = event.item;
             const { uuid } = getNodeData(node);
