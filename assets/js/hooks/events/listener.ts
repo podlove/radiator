@@ -30,6 +30,18 @@ export function input(event: KeyboardEvent) {
 
 export function keydown(event: KeyboardEvent) {
   const target = event.target as HTMLDivElement;
+  if (target == this.el) {
+    if (event.key == "Delete" || event.key == "Backspace") {
+      const nodes = this.el.querySelectorAll(".node:has(> .selected:checked)");
+      nodes.forEach((node: HTMLDivElement) => {
+        const { uuid } = getNodeData(node);
+        this.pushEventTo(this.el.phxHookId, "delete", { uuid });
+      });
+    }
+
+    return;
+  }
+
   const node = target.parentNode as HTMLDivElement;
   const { uuid, content } = getNodeData(node);
 

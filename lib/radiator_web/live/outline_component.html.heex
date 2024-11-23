@@ -3,10 +3,11 @@
 
   <div
     id={[@id, "-stream"]}
-    class="children"
+    class="children focus:outline-none"
     phx-hook="outline"
     phx-update="stream"
     phx-target={@myself}
+    tabindex="0"
   >
     <div
       :for={{id, form} <- @streams.nodes}
@@ -20,7 +21,7 @@
       data-parent={form[:parent_id].value}
       data-prev={form[:prev_id].value}
     >
-      <input class="my-2 peer selected" type="checkbox" />
+      <input class="hidden my-2 peer selected" type="checkbox" />
       <OutlineComponents.outline_form
         for={form}
         class=""

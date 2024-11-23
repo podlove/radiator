@@ -396,6 +396,27 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert live |> has_element?("#nodes-form-#{node_1.uuid}")
       assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
     end
+
+    test "delete node", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [_node_1, node_2 | _]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
+
+      params = %{"uuid" => node_2.uuid}
+
+      assert live
+             |> element(stream_id)
+             |> render_hook(:delete, params)
+
+      keep_liveview_alive()
+
+      refute live |> has_element?("#nodes-form-#{node_2.uuid}")
+      refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
+    end
   end
 
   defp keep_liveview_alive do
