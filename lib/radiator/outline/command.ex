@@ -9,7 +9,8 @@ defmodule Radiator.Outline.Command do
     MoveDownCommand,
     MoveNodeCommand,
     MoveUpCommand,
-    OutdentNodeCommand
+    OutdentNodeCommand,
+    SplitNodeCommand
   }
 
   @move_commands [
@@ -67,6 +68,15 @@ defmodule Radiator.Outline.Command do
       event_id: event_id,
       user_id: user_id,
       node_id: node_id
+    }
+  end
+
+  def build("split_node", node_id, selection, user_id, event_id) do
+    %SplitNodeCommand{
+      event_id: event_id,
+      user_id: user_id,
+      node_id: node_id,
+      selection: selection
     }
   end
 

@@ -15,6 +15,12 @@ defmodule Radiator.Outline.Dispatch do
     |> CommandQueue.enqueue()
   end
 
+  def split_node(node_id, selection, user_id, event_id) do
+    "split_node"
+    |> Command.build(node_id, selection, user_id, event_id)
+    |> CommandQueue.enqueue()
+  end
+
   def indent_node(node_id, user_id, event_id) do
     "indent_node"
     |> Command.build(node_id, user_id, event_id)

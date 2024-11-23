@@ -17,7 +17,8 @@ defmodule Radiator.Outline.CommandProcessor do
     MoveDownCommand,
     MoveNodeCommand,
     MoveUpCommand,
-    OutdentNodeCommand
+    OutdentNodeCommand,
+    SplitNodeCommand
   }
 
   alias Radiator.Outline.Dispatch
@@ -123,6 +124,27 @@ defmodule Radiator.Outline.CommandProcessor do
     :ok
   end
 
+  defp process_command(
+         %SplitNodeCommand{
+           node_id: node_id,
+           selection: selection
+         } = command
+       ) do
+    {:ok, %NodeRepoResult{node: node, next: next, episode_id: episode_id, old_next: old_next}} =
+      node_id
+      |> Outline.split_node(selection)
+
+    # broadcast two events
+    handle_insert_node_result(
+      {:ok, %NodeRepoResult{node: next, next: old_next, episode_id: episode_id}},
+      command
+    )
+
+    # for the second event, we need to generate a new event_id
+    command = Map.put(command, :event_id, Ecto.UUID.generate())
+    handle_change_node_content_result({:ok, node}, command)
+  end
+
   defp handle_insert_node_result(
          {:ok, %NodeRepoResult{node: node, next: next, episode_id: episode_id}},
          command
@@ -171,7 +193,7 @@ defmodule Radiator.Outline.CommandProcessor do
     :error
   end
 
-  def handle_change_node_content_result({:ok, node}, %ChangeNodeContentCommand{} = command) do
+  def handle_change_node_content_result({:ok, node}, command) do
     %NodeContentChangedEvent{
       node_id: node.uuid,
       content: node.content,

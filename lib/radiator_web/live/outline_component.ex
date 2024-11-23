@@ -18,26 +18,21 @@ defmodule RadiatorWeb.OutlineComponent do
   alias RadiatorWeb.OutlineComponents
 
   @impl true
-  def update(%{event: %NodeInsertedEvent{event_id: event_id, node: node, next: nil}}, socket) do
+  def update(%{event: %NodeInsertedEvent{event_id: event_id, node: node}}, socket) do
     socket
     |> stream_insert(:nodes, to_change_form(node, %{}))
     |> focus_self(node.uuid, event_id)
     |> reply(:ok)
   end
 
-  def update(%{event: %NodeInsertedEvent{event_id: event_id, node: node, next: next}}, socket) do
-    socket
-    |> stream_insert(:nodes, to_change_form(node, %{}))
-    |> push_event("move_nodes", %{nodes: [next]})
-    |> focus_self(node.uuid, event_id)
-    |> reply(:ok)
-  end
+  # TODO: beim zusammenziehen von nodes ist es wichtig, dass wir
+  # (also der verursacher) auch den neuen content erhalten
 
-  def update(
-        %{event: %NodeContentChangedEvent{event_id: <<_::binary-size(36)>> <> ":" <> id}},
-        %{id: id} = socket
-      ),
-      do: reply(socket, :ok)
+  # def update(
+  #       %{event: %NodeContentChangedEvent{event_id: <<_::binary-size(36)>> <> ":" <> id}},
+  #       %{id: id} = socket
+  #     ),
+  #     do: reply(socket, :ok)
 
   def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: content}}, socket) do
     socket
@@ -152,20 +147,9 @@ defmodule RadiatorWeb.OutlineComponent do
     |> reply(:noreply)
   end
 
-  def handle_event(
-        "new",
-        %{"uuid" => uuid, "content" => content, "selection" => selection},
-        socket
-      ) do
-    {first, _} = String.split_at(content, selection["start"])
-    {_, last} = String.split_at(content, selection["end"])
-
+  def handle_event("new", %{"uuid" => uuid, "start" => start, "stop" => stop}, socket) do
     user_id = socket.assigns.user_id
-    Dispatch.change_node_content(uuid, first, user_id, generate_event_id(socket.id))
-
-    episode_id = socket.assigns.episode_id
-    params = %{"prev_id" => uuid, "content" => last, "episode_id" => episode_id}
-    Dispatch.insert_node(params, user_id, generate_event_id(socket.id))
+    Dispatch.split_node(uuid, {start, stop}, user_id, generate_event_id(socket.id))
 
     socket
     |> reply(:noreply)

@@ -333,6 +333,8 @@ defmodule Radiator.Outline.NodeRepository do
   )
   SELECT * FROM node_tree;
   """
+  def get_node_tree(nil), do: {:error, "episode_id is nil"}
+
   def get_node_tree(episode_id) do
     node_tree_initial_query =
       Node

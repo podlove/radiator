@@ -29,10 +29,10 @@ export function keydown(event: KeyboardEvent) {
   const selection = window.getSelection();
   const range = selection?.getRangeAt(0);
   const start = range!.startOffset;
-  const end = range!.endOffset;
+  const stop = range!.endOffset;
 
-  const cursorAtStart = start == 0 && end == 0;
-  const cursorAtEnd = start == content?.length && end == content?.length;
+  const cursorAtStart = start == 0 && stop == 0;
+  const cursorAtEnd = start == content?.length && stop == content?.length;
 
   if (event.key == "Tab") {
     event.preventDefault();
@@ -47,11 +47,7 @@ export function keydown(event: KeyboardEvent) {
   if (event.key == "Enter" && !event.shiftKey) {
     event.preventDefault();
 
-    this.pushEventTo(this.el.phxHookId, "new", {
-      uuid,
-      content,
-      selection: { start, end },
-    });
+    this.pushEventTo(this.el.phxHookId, "new", { uuid, start, stop });
   }
 
   if (event.key == "Backspace" && cursorAtStart) {

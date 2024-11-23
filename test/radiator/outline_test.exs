@@ -731,6 +731,24 @@ defmodule Radiator.OutlineTest do
     end
   end
 
+  describe "split_node/2" do
+    setup :simple_node_fixture
+
+    test "returns updated node", %{
+      node_1: node_1
+    } do
+      start = 2
+
+      {:ok, %Radiator.Outline.NodeRepoResult{node: node}} =
+        Outline.split_node(node_1.uuid, {2, 3})
+
+      assert node.uuid == node_1.uuid
+      assert node.episode_id == node_1.episode_id
+      {new_content, _} = String.split_at(node_1.content, start)
+      assert node.content == new_content
+    end
+  end
+
   describe "indent_node/1 - simple context" do
     setup :simple_node_fixture
 
