@@ -28,11 +28,11 @@ defmodule RadiatorWeb.OutlineComponent do
   # TODO: beim zusammenziehen von nodes ist es wichtig, dass wir
   # (also der verursacher) auch den neuen content erhalten
 
-  # def update(
-  #       %{event: %NodeContentChangedEvent{event_id: <<_::binary-size(36)>> <> ":" <> id}},
-  #       %{id: id} = socket
-  #     ),
-  #     do: reply(socket, :ok)
+  def update(
+        %{event: %NodeContentChangedEvent{event_id: <<_::binary-size(36)>> <> ":" <> id}},
+        %{id: id} = socket
+      ),
+      do: reply(socket, :ok)
 
   def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: content}}, socket) do
     socket
