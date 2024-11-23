@@ -74,8 +74,9 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       keep_liveview_alive()
 
-      assert_push_event(other_live, "focus", %{uuid: ^uuid, user_id: user_id})
-      assert user_id == user.id
+      user_id = user.id
+      assert_push_event(live, "focus", %{uuid: ^uuid, user_id: ^user_id})
+      assert_push_event(other_live, "focus", %{uuid: ^uuid, user_id: ^user_id})
     end
 
     test "blur node", %{conn: conn, user: user, url: url, nodes: [%{uuid: uuid} | _]} do
@@ -88,8 +89,9 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       keep_liveview_alive()
 
-      assert_push_event(other_live, "blur", %{uuid: ^uuid, user_id: user_id})
-      assert user_id == user.id
+      user_id = user.id
+      assert_push_event(live, "blur", %{uuid: ^uuid, user_id: ^user_id})
+      assert_push_event(other_live, "blur", %{uuid: ^uuid, user_id: ^user_id})
     end
 
     test "update node content", %{
@@ -112,7 +114,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert_push_event(other_live, "set_content", %{uuid: ^uuid, content: "node_1_updated"})
     end
 
-    test "insert a new node", %{
+    test "split node", %{
       conn: conn,
       url: url,
       stream_id: stream_id,
@@ -134,7 +136,11 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       keep_liveview_alive()
 
+      assert_push_event(live, "set_content", %{uuid: ^uuid, content: "no"})
       assert_push_event(other_live, "set_content", %{uuid: ^uuid, content: "no"})
+
+      assert live |> has_element?(".node", "de_1")
+      assert other_live |> has_element?(".node", "de_1")
     end
 
     test "move node up", %{

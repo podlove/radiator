@@ -327,7 +327,7 @@ defmodule Radiator.Outline do
         {:ok,
          %NodeRepoResult{
            node: updated_node,
-           next: get_node_result_info(new_node),
+           next: new_node,
            episode_id: updated_node.episode_id,
            old_next: get_node_result_info(old_next_node)
          }}
