@@ -64,6 +64,36 @@ defmodule Radiator.Accounts.RaindropClient do
   end
 
   @doc """
+  Returns a string list of URLs in a collection
+  """
+  def list_urls_in_collection(user_id, collection_id) do
+    service =
+      user_id
+      |> Accounts.get_raindrop_tokens()
+      |> refresh_token_if()
+
+    if is_nil(service) do
+      {:error, :unauthorized}
+    else
+      {:ok, %Req.Response{} = response} =
+        [
+          method: :get,
+          url: "https://api.raindrop.io/rest/v1/raindrops/#{collection_id}",
+          headers: [
+            {"Authorization", "Bearer #{service.data.access_token}"}
+          ]
+        ]
+        |> Req.request()
+
+      response.body
+      |> Map.get("items")
+      |> Enum.map(fn item ->
+        Map.get(item, "link")
+      end)
+    end
+  end
+
+  @doc """
     first time fetching access token and storing it as webservice entry
   """
   def init_and_store_access_token(user_id, code) do
