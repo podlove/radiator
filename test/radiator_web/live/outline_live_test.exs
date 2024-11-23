@@ -309,7 +309,10 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       keep_liveview_alive()
 
+      node_2_1_uuid = node_2_1.uuid
       assert_push_event(live, "move_nodes", %{nodes: nodes})
+      assert_push_event(live, "focus_node", %{uuid: ^node_2_1_uuid})
+
       assert_push_event(other_live, "move_nodes", %{nodes: other_nodes})
 
       node_map = nodes |> Enum.map(fn node -> {node.uuid, node} end) |> Map.new()
@@ -324,7 +327,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_nodes == nodes
     end
 
-    test "delete node by merging with prev", %{
+    test "merge with prev node", %{
       conn: conn,
       url: url,
       stream_id: stream_id,
@@ -359,7 +362,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
     end
 
-    test "delete node by merging with next", %{
+    test "merging with next node", %{
       conn: conn,
       url: url,
       stream_id: stream_id,
