@@ -6,7 +6,7 @@ import {
   handleMoveNodes,
   handleSetContent,
 } from "./events/handler";
-import { input, keydown, toggleCollapse } from "./events/listener";
+import { input, click, keydown, toggleCollapse } from "./events/listener";
 
 import Sortable from "../../vendor/sortable";
 // import Quill from "../../vendor/quill";
@@ -48,6 +48,7 @@ export const Hooks = {
 
       this.handleEvent("set_content", handleSetContent.bind(this));
 
+      this.el.addEventListener("click", click.bind(this));
       this.el.addEventListener("input", input.bind(this));
       this.el.addEventListener("keydown", keydown.bind(this));
       this.el.addEventListener("toggle_collapse", toggleCollapse.bind(this));

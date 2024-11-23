@@ -7,8 +7,15 @@ import {
   focusNode,
 } from "../node";
 
-let watchdog;
+// let watchdog;
 const watchdogInterval = 400;
+
+export function click(event: MouseEvent) {
+  const target = event.target as HTMLDivElement;
+  const select = target!.querySelector("input.selected") as HTMLInputElement;
+
+  select.checked = !select.checked;
+}
 
 export function input(event: KeyboardEvent) {
   const target = event.target as HTMLDivElement;
@@ -16,10 +23,13 @@ export function input(event: KeyboardEvent) {
   const { uuid, content } = getNodeData(node);
 
   this.pushEventTo(this.el.phxHookId, "save", { uuid, content });
-  //clearTimeout(watchdog);
-  //watchdog = setTimeout(() => {
-  //  this.pushEventTo(this.el.phxHookId, "save", { uuid, content });
-  //}, watchdogInterval);
+
+  /*
+    clearTimeout(watchdog);
+    watchdog = setTimeout(() => {
+      this.pushEventTo(this.el.phxHookId, "save", { uuid, content });
+    }, watchdogInterval);
+  */
 }
 
 export function keydown(event: KeyboardEvent) {

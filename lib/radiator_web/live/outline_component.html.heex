@@ -20,6 +20,7 @@
       data-parent={form[:parent_id].value}
       data-prev={form[:prev_id].value}
     >
+      <input class="my-2 peer selected" type="checkbox" />
       <OutlineComponents.outline_form
         for={form}
         class=""
@@ -28,10 +29,9 @@
         phx-target={@myself}
       >
         <!--
-        <.icon name="hero-check-circle" class="w-5 h-5" />
         <.icon name="hero-ellipsis-vertical" class="w-5 h-5" />
+        <.icon name="hero-check-circle" class="w-5 h-5" />
         <.icon name="hero-cog-6-tooth" class="w-5 h-5" />
-        <.input field={form[:selected]} type="checkbox" />
         <.input field={form[:checked]} type="checkbox" />
 
         <.input field={form[:priority]} type="radio" value="red"/>
@@ -61,7 +61,7 @@
       </button>
       <div
         id={[id, "-content"]}
-        class="flex-1 px-1 py-0.5 content focus:outline-none drag-ghost:opacity-0"
+        class="peer-checked:bg-yellow-100 inline-block pr-4 px-1 py-0.5 content focus:outline-none drag-ghost:opacity-0"
         contenteditable
         phx-value-uuid={form[:uuid].value}
         phx-focus="focus"
