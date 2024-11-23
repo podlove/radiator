@@ -15,10 +15,11 @@ export function input(event: KeyboardEvent) {
   const node = target.parentNode as HTMLDivElement;
   const { uuid, content } = getNodeData(node);
 
-  clearTimeout(watchdog);
-  watchdog = setTimeout(() => {
-    this.pushEventTo(this.el.phxHookId, "save", { uuid, content });
-  }, watchdogInterval);
+  this.pushEventTo(this.el.phxHookId, "save", { uuid, content });
+  //clearTimeout(watchdog);
+  //watchdog = setTimeout(() => {
+  //  this.pushEventTo(this.el.phxHookId, "save", { uuid, content });
+  //}, watchdogInterval);
 }
 
 export function keydown(event: KeyboardEvent) {
