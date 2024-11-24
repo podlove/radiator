@@ -60,7 +60,7 @@ defmodule Radiator.MixProject do
       {:phoenix_live_view, "~> 1.0.0-rc.1", override: true},
       {:phoenix, "~> 1.7.14"},
       {:postgrex, ">= 0.0.0"},
-      {:reply, "~> 0.2.0"},
+      {:reply, "~> 1.0"},
       {:req, "~> 0.5"},
       {:slugify, "~> 1.3"},
       {:swoosh, "~> 1.5"},
