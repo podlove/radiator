@@ -53,11 +53,16 @@ alias Radiator.Outline.NodeRepository
   })
 
 {:ok, node1} =
-  NodeRepository.create_node(%{"content" => "Node 1", "episode_id" => current_episode.id})
+  NodeRepository.create_node(%{
+    "content" => "Node 1",
+    "show_id" => current_episode.show_id,
+    "episode_id" => current_episode.id
+  })
 
 {:ok, node2} =
   NodeRepository.create_node(%{
     "content" => "Node 2",
+    "show_id" => current_episode.show_id,
     "episode_id" => current_episode.id,
     "prev_id" => node1.uuid
   })
@@ -65,6 +70,7 @@ alias Radiator.Outline.NodeRepository
 {:ok, node3} =
   NodeRepository.create_node(%{
     "content" => "Node 3",
+    "show_id" => current_episode.show_id,
     "episode_id" => current_episode.id,
     "prev_id" => node2.uuid
   })
@@ -72,6 +78,7 @@ alias Radiator.Outline.NodeRepository
 {:ok, _node4} =
   NodeRepository.create_node(%{
     "content" => "Node 4",
+    "show_id" => current_episode.show_id,
     "episode_id" => current_episode.id,
     "prev_id" => node3.uuid
   })
@@ -79,6 +86,7 @@ alias Radiator.Outline.NodeRepository
 {:ok, node21} =
   NodeRepository.create_node(%{
     "content" => "Node 2.1",
+    "show_id" => current_episode.show_id,
     "episode_id" => current_episode.id,
     "parent_id" => node2.uuid
   })
@@ -86,6 +94,7 @@ alias Radiator.Outline.NodeRepository
 {:ok, _node22} =
   NodeRepository.create_node(%{
     "content" => "Node 2.2",
+    "show_id" => current_episode.show_id,
     "episode_id" => current_episode.id,
     "parent_id" => node2.uuid,
     "prev_id" => node21.uuid
@@ -94,6 +103,7 @@ alias Radiator.Outline.NodeRepository
 {:ok, node211} =
   NodeRepository.create_node(%{
     "content" => "Node 2.1.1",
+    "show_id" => current_episode.show_id,
     "episode_id" => current_episode.id,
     "parent_id" => node21.uuid
   })
@@ -101,10 +111,15 @@ alias Radiator.Outline.NodeRepository
 {:ok, _node212} =
   NodeRepository.create_node(%{
     "content" => "Node 2.1.2",
+    "show_id" => current_episode.show_id,
     "episode_id" => current_episode.id,
     "parent_id" => node21.uuid,
     "prev_id" => node211.uuid
   })
 
 {:ok, _past_parent_node} =
-  NodeRepository.create_node(%{"content" => "Old Content", "episode_id" => past_episode.id})
+  NodeRepository.create_node(%{
+    "content" => "Old Content",
+    "show_id" => current_episode.show_id,
+    "episode_id" => past_episode.id
+  })
