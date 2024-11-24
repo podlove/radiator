@@ -62,7 +62,7 @@ defmodule Radiator.Outline.NodeRepository do
 
   ## Examples
 
-      iex> list_nodes(123)
+      iex> list_nodes_by_episode(123)
       [%Node{}, ...]
 
   """
@@ -73,6 +73,25 @@ defmodule Radiator.Outline.NodeRepository do
     |> Repo.all()
     |> Enum.group_by(& &1.parent_id)
     |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)
+    |> List.flatten()
+  end
+
+  @doc """
+  Returns the list of nodes for a show.
+
+  ## Examples
+
+      iex> _list_nodes_by_show(123)
+      [%Node{}, ...]
+
+  """
+
+  def _list_nodes_by_show(show_id) do
+    Node
+    |> where([p], p.show_id == ^show_id)
+    |> Repo.all()
+    # |> Enum.group_by(& &1.parent_id)
+    # |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)
     |> List.flatten()
   end
 
