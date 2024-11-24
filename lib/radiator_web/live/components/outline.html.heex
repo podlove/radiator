@@ -13,15 +13,16 @@
       :for={{id, form} <- @streams.nodes}
       id={id}
       class={[
-        "group node",
+        "node group",
         "drag-item:focus-within:ring-0 drag-item:focus-within:ring-offset-0",
         "drag-ghost:bg-zinc-300 drag-ghost:border-0 drag-ghost:ring-0",
-        "flex flex-wrap"
+        "flex flex-wrap place-items-start"
       ]}
       data-parent={form[:parent_id].value}
       data-prev={form[:prev_id].value}
     >
       <input class="hidden my-2 peer selected" type="checkbox" />
+      <button><.icon name="hero-ellipsis-vertical" class="invisible w-5 h-5 group-hover:visible" /></button>
       <OutlineComponents.outline_form
         for={form}
         class=""
@@ -30,7 +31,6 @@
         phx-target={@myself}
       >
         <!--
-        <.icon name="hero-ellipsis-vertical" class="w-5 h-5" />
         <.icon name="hero-check-circle" class="w-5 h-5" />
         <.icon name="hero-cog-6-tooth" class="w-5 h-5" />
         <.input field={form[:checked]} type="checkbox" />
