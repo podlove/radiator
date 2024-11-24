@@ -48,7 +48,6 @@ defmodule Radiator.Outline.Node do
       :_type
     ])
     |> put_uuid()
-    |> validate_required([:episode_id])
     |> validate_required([:show_id])
     |> validate_format(:uuid, ~r/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
     |> unique_constraint(:uuid, name: "outline_nodes_pkey")
