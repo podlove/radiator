@@ -381,6 +381,15 @@ defmodule Radiator.Podcast do
   end
 
   @doc """
+  Lists all episodes for a given show.
+  """
+  def list_episodes_for_show(show_id) do
+    list_available_episodes_query()
+    |> where([e], e.show_id == ^show_id)
+    |> Repo.all()
+  end
+
+  @doc """
   Returns the query for list of episodes including the (soft) deleted once.
 
   ## Examples

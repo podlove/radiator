@@ -292,6 +292,17 @@ defmodule Radiator.Outline.NodeRepository do
     |> Repo.one()
   end
 
+  # @TODO needed?
+  def get_root_node_for_show(show_id) do
+    Node
+    |> where([p], p.show_id == ^show_id)
+    # |> where([p], is_nil(p.episode_id))
+    # |> where([p], is_nil(p.parent_id))
+    # |> where([p], is_nil(p.prev_id))
+    |> where([p], p._type == :global_root)
+    |> Repo.one()
+  end
+
   @doc """
   Returns all direct child nodes of a given node.
   ## Examples
