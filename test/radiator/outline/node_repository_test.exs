@@ -13,7 +13,7 @@ defmodule Radiator.Outline.NodeRepositoryTest do
   describe "create_node/1" do
     test "with valid data creates a node" do
       episode = PodcastFixtures.episode_fixture()
-      valid_attrs = %{content: "some content", episode_id: episode.id}
+      valid_attrs = %{content: "some content", episode_id: episode.id, show_id: episode.show_id}
 
       assert {:ok, %Node{} = node} = NodeRepository.create_node(valid_attrs)
       assert node.content == "some content"
@@ -22,7 +22,13 @@ defmodule Radiator.Outline.NodeRepositoryTest do
     test "can have a creator" do
       episode = PodcastFixtures.episode_fixture()
       user = %{id: 2}
-      valid_attrs = %{content: "some content", episode_id: episode.id, creator_id: user.id}
+
+      valid_attrs = %{
+        content: "some content",
+        episode_id: episode.id,
+        show_id: episode.show_id,
+        creator_id: user.id
+      }
 
       assert {:ok, %Node{} = node} = NodeRepository.create_node(valid_attrs)
       assert node.content == "some content"
