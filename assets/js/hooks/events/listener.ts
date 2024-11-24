@@ -1,11 +1,8 @@
 import { CollapseParams } from "../types";
-import {
-  getNodeById,
-  getNodeData,
-  getPrevNode,
-  getNextNode,
-  focusNode,
-} from "../node";
+import { processEvent } from "./listener/process";
+import { getNodeById, getNodeData } from "../node";
+
+import mapping from "./../mapping.json";
 
 // let watchdog;
 const watchdogInterval = 400;
@@ -30,82 +27,18 @@ export function input(event: KeyboardEvent) {
 
 export function keydown(event: KeyboardEvent) {
   const target = event.target as HTMLDivElement;
-  if (target == this.el) {
-    if (event.key == "Delete" || event.key == "Backspace") {
-      const nodes = this.el.querySelectorAll(".node:has(> .selected:checked)");
-      nodes.forEach((node: HTMLDivElement) => {
-        const { uuid } = getNodeData(node);
-        this.pushEventTo(this.el.phxHookId, "delete", { uuid });
-      });
-    }
 
-    return;
+  let action: string | undefined;
+  const type = target == this.el ? "node" : "content";
+  for (const conf of mapping[type]) {
+    if (conf["shiftKey"] && conf["shiftKey"] != event.shiftKey) continue;
+    if (conf["altKey"] && conf["altKey"] != event.altKey) continue;
+    if (conf.key != event.key) continue;
+
+    action = conf.action;
   }
 
-  const node = target.parentNode as HTMLDivElement;
-  const { uuid, content } = getNodeData(node);
-
-  const selection = window.getSelection();
-  const range = selection?.getRangeAt(0);
-  const start = range!.startOffset;
-  const stop = range!.endOffset;
-
-  const cursorAtStart = start == 0 && stop == 0;
-  const cursorAtEnd = start == content?.length && stop == content?.length;
-
-  if (event.key == "Tab") {
-    event.preventDefault();
-
-    if (event.shiftKey) {
-      this.pushEventTo(this.el.phxHookId, "outdent", { uuid });
-    } else {
-      this.pushEventTo(this.el.phxHookId, "indent", { uuid });
-    }
-  }
-
-  if (event.key == "Enter" && !event.shiftKey) {
-    event.preventDefault();
-
-    this.pushEventTo(this.el.phxHookId, "new", { uuid, start, stop });
-  }
-
-  if (event.key == "Backspace" && cursorAtStart) {
-    event.preventDefault();
-
-    const prevNode = getPrevNode(node);
-    if (prevNode) {
-      this.pushEventTo(this.el.phxHookId, "merge_prev", { uuid, content });
-      focusNode(prevNode);
-    }
-  }
-
-  if (event.key == "Delete" && cursorAtEnd) {
-    event.preventDefault();
-
-    const nextNode = getNextNode(node);
-    if (nextNode) {
-      this.pushEventTo(this.el.phxHookId, "merge_next", { uuid, content });
-      focusNode(nextNode);
-    }
-  }
-
-  if (event.key == "ArrowUp") {
-    if (event.altKey == true) {
-      this.pushEventTo(this.el.phxHookId, "move_up", { uuid });
-    } else if (cursorAtStart) {
-      const prevNode = getPrevNode(node);
-      prevNode && focusNode(prevNode);
-    }
-  }
-
-  if (event.key == "ArrowDown") {
-    if (event.altKey == true) {
-      this.pushEventTo(this.el.phxHookId, "move_down", { uuid });
-    } else if (cursorAtEnd) {
-      const nextNode = getNextNode(node);
-      nextNode && focusNode(nextNode, true);
-    }
-  }
+  action && processEvent.call(this, action, event);
 }
 
 export function toggleCollapse({ detail: { uuid } }: CollapseParams) {

@@ -1,0 +1,54 @@
+{
+  "content": [
+    {
+      "action": "new_empty_node",
+      "key": "Enter"
+    },
+    {
+      "action": "indent",
+      "key": "Tab",
+      "shiftKey": false
+    },
+    {
+      "action": "outdent",
+      "key": "Tab",
+      "shiftKey": true
+    },
+    {
+      "action": "move_up",
+      "key": "ArrowUp",
+      "altKey": true
+    },
+    {
+      "action": "move_down",
+      "key": "ArrowDown",
+      "altKey": true
+    },
+    {
+      "action": "focus_prev",
+      "key": "ArrowUp"
+    },
+    {
+      "action": "focus_next",
+      "key": "ArrowDown"
+    },
+    {
+      "action": "merge_prev",
+      "key": "Backspace"
+    },
+    {
+      "action": "merge_next",
+      "key": "Delete"
+    }
+  ],
+  "node": [
+    {
+      "action": "delete",
+      "key": "Delete"
+    },
+    {
+      "action": "delete",
+      "key": "Backspace"
+    }
+  ]
+}
