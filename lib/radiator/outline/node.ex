@@ -11,9 +11,14 @@ defmodule Radiator.Outline.Node do
   @derive {Jason.Encoder, only: [:uuid, :content, :creator_id, :parent_id, :prev_id]}
 
   @primary_key {:uuid, :binary_id, autogenerate: false}
+
   schema "outline_nodes" do
     field :content, :string
     field :creator_id, :integer
+
+    field :_type, Ecto.Enum,
+      values: [:node, :global_root, :global_inbox, :episode_inbox, :episode_root]
+
     field :level, :integer, virtual: true
 
     belongs_to :episode, Episode
@@ -39,7 +44,8 @@ defmodule Radiator.Outline.Node do
       :creator_id,
       :parent_id,
       :prev_id,
-      :show_id
+      :show_id,
+      :_type
     ])
     |> put_uuid()
     |> validate_required([:episode_id])
