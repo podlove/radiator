@@ -13,7 +13,7 @@ defmodule Radiator.OutlineTest do
 
   describe "node_tree" do
     test "generate from template" do
-      %{id: episode_id} = episode_fixture()
+      %{id: episode_id, show_id: show_id} = episode_fixture()
 
       nodes =
         [
@@ -39,7 +39,7 @@ defmodule Radiator.OutlineTest do
            ]},
           {"node-5"}
         ]
-        |> node_tree_fixture(%{episode_id: episode_id})
+        |> node_tree_fixture(%{episode_id: episode_id, show_id: show_id})
 
       assert length(nodes) == 13
       assert Enum.all?(nodes, &match?(%Node{episode_id: ^episode_id}, &1))
@@ -150,6 +150,23 @@ defmodule Radiator.OutlineTest do
 
       {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
       assert new_node.prev_id == nested_node_1.uuid
+    end
+
+    test "the show_id gets set - even if not given", %{
+      node_3: node_3,
+      nested_node_1: nested_node_1
+    } do
+      node_attrs = %{
+        "content" => "new node",
+        "episode_id" => node_3.episode_id,
+        "parent_id" => node_3.uuid,
+        "prev_id" => nested_node_1.uuid
+      }
+
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+
+      episode = Podcast.get_episode!(node_3.episode_id)
+      assert new_node.show_id == episode.show_id
     end
 
     test "the next node - if existing - changes its prev_id and gets returned", %{

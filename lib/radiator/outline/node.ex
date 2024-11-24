@@ -5,7 +5,7 @@ defmodule Radiator.Outline.Node do
   use Ecto.Schema
   import Ecto.Changeset
   alias Radiator.Outline.Node
-  alias Radiator.Podcast.Episode
+  alias Radiator.Podcast.{Episode, Show}
   alias Radiator.Resources.Url
 
   @derive {Jason.Encoder, only: [:uuid, :content, :creator_id, :parent_id, :prev_id]}
@@ -17,6 +17,7 @@ defmodule Radiator.Outline.Node do
     field :level, :integer, virtual: true
 
     belongs_to :episode, Episode
+    belongs_to :show, Show
     belongs_to :parent, Node, references: :uuid, type: Ecto.UUID
     belongs_to :prev, Node, references: :uuid, type: Ecto.UUID
     has_many :urls, Url, foreign_key: :node_id
@@ -31,9 +32,18 @@ defmodule Radiator.Outline.Node do
   """
   def insert_changeset(node, attributes) do
     node
-    |> cast(attributes, [:uuid, :content, :episode_id, :creator_id, :parent_id, :prev_id])
+    |> cast(attributes, [
+      :uuid,
+      :content,
+      :episode_id,
+      :creator_id,
+      :parent_id,
+      :prev_id,
+      :show_id
+    ])
     |> put_uuid()
     |> validate_required([:episode_id])
+    # |> validate_required([:show_id]) # TODO
     |> validate_format(:uuid, ~r/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
     |> unique_constraint(:uuid, name: "outline_nodes_pkey")
   end
