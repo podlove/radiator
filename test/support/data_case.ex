@@ -66,6 +66,7 @@ defmodule Radiator.DataCase do
     node_1 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: nil,
         prev_id: nil,
         content: "node_1"
@@ -74,6 +75,7 @@ defmodule Radiator.DataCase do
     node_2 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: nil,
         prev_id: node_1.uuid,
         content: "node_2"
@@ -96,6 +98,7 @@ defmodule Radiator.DataCase do
     node_1 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: nil,
         prev_id: nil,
         content: "node_1"
@@ -104,6 +107,7 @@ defmodule Radiator.DataCase do
     node_2 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: node_1.uuid,
         prev_id: nil,
         content: "node_2"
@@ -121,6 +125,7 @@ defmodule Radiator.DataCase do
     parent_node =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: nil,
         prev_id: nil,
         content: "root of all evil"
@@ -129,6 +134,7 @@ defmodule Radiator.DataCase do
     node_1 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: parent_node.uuid,
         prev_id: nil,
         content: "node_1"
@@ -137,6 +143,7 @@ defmodule Radiator.DataCase do
     node_2 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: parent_node.uuid,
         prev_id: node_1.uuid,
         content: "node_2"
@@ -145,6 +152,7 @@ defmodule Radiator.DataCase do
     node_3 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: parent_node.uuid,
         prev_id: node_2.uuid,
         content: "node_3"
@@ -153,6 +161,7 @@ defmodule Radiator.DataCase do
     node_4 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: parent_node.uuid,
         prev_id: node_3.uuid,
         content: "node_4"
@@ -161,6 +170,7 @@ defmodule Radiator.DataCase do
     node_5 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: parent_node.uuid,
         prev_id: node_4.uuid,
         content: "node_5"
@@ -169,6 +179,7 @@ defmodule Radiator.DataCase do
     node_6 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: parent_node.uuid,
         prev_id: node_5.uuid,
         content: "node_6"
@@ -177,6 +188,7 @@ defmodule Radiator.DataCase do
     nested_node_1 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: node_3.uuid,
         prev_id: nil,
         content: "nested_node_1"
@@ -185,6 +197,7 @@ defmodule Radiator.DataCase do
     nested_node_2 =
       node_fixture(
         episode_id: episode.id,
+        show_id: episode.show_id,
         parent_id: node_3.uuid,
         prev_id: nested_node_1.uuid,
         content: "nested_node_2"

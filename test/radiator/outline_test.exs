@@ -13,7 +13,7 @@ defmodule Radiator.OutlineTest do
 
   describe "node_tree" do
     test "generate from template" do
-      %{id: episode_id} = episode_fixture()
+      %{id: episode_id, show_id: show_id} = episode_fixture()
 
       nodes =
         [
@@ -39,7 +39,7 @@ defmodule Radiator.OutlineTest do
            ]},
           {"node-5"}
         ]
-        |> node_tree_fixture(%{episode_id: episode_id})
+        |> node_tree_fixture(%{episode_id: episode_id, show_id: show_id})
 
       assert length(nodes) == 13
       assert Enum.all?(nodes, &match?(%Node{episode_id: ^episode_id}, &1))
