@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.OutlineComponent do
+defmodule RadiatorWeb.Components.Outline do
   @moduledoc false
   use RadiatorWeb, :live_component
 

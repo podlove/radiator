@@ -76,7 +76,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   def handle_info(%{topic: "outline"} = event, socket) do
     id = "outline-#{socket.assigns.selected_episode.id}"
-    send_update(RadiatorWeb.OutlineComponent, id: id, event: event)
+    send_update(RadiatorWeb.Components.Outline, id: id, event: event)
 
     socket
     |> reply(:noreply)
@@ -84,7 +84,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   defp proxy_event(event, socket) do
     id = "outline-#{socket.assigns.selected_episode.id}"
-    send_update(RadiatorWeb.OutlineComponent, id: id, event: event)
+    send_update(RadiatorWeb.Components.Outline, id: id, event: event)
 
     socket
     |> stream_event(event)
