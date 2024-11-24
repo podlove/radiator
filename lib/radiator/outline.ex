@@ -21,6 +21,8 @@ defmodule Radiator.Outline do
   alias Radiator.Outline.NodeRepoResult
   alias Radiator.Outline.NodeRepository
   alias Radiator.Outline.Validations, as: NodeValidator
+  alias Radiator.Podcast
+  alias Radiator.Podcast.Episode
   alias Radiator.Repo
 
   require Logger
@@ -74,7 +76,7 @@ defmodule Radiator.Outline do
   # if a previous node is given, the new node will be inserted after the previous node
   # if no parent is given, the new node will be inserted as a root node
   # if no previous node is given, the new node will be inserted as the first child of the parent node
-  def insert_node(attrs) do
+  def insert_node(%{"show_id" => _show_id} = attrs) do
     Repo.transaction(fn ->
       prev_id = attrs["prev_id"]
       parent_id = attrs["parent_id"]
@@ -104,6 +106,14 @@ defmodule Radiator.Outline do
           Repo.rollback("Insert node failed. Unknown error")
       end
     end)
+  end
+
+  def insert_node(%{"episode_id" => episode_id} = attrs) do
+    %Episode{show_id: show_id} = Podcast.get_episode!(episode_id)
+
+    attrs
+    |> Map.put("show_id", show_id)
+    |> insert_node()
   end
 
   @doc """
