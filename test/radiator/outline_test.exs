@@ -17,32 +17,42 @@ defmodule Radiator.OutlineTest do
 
       nodes =
         [
-          {"node-1"},
-          {"node-2",
-           [
-             {"node-2_1"},
-             {"node-2_2"},
-             {"node-2_3"}
-           ]},
-          {"node-3"},
+          "node-1",
+          {"node-2", ["node-2_1", "node-2_2", "node-2_3"]},
+          "node-3",
           {"node-4",
            [
-             {"node-4_1",
-              [
-                {"node-4_1_1"},
-                {"node-4_1_2",
-                 [
-                   {"node-4_1_2_1"}
-                 ]}
-              ]},
-             {"node-4_2"}
+             {
+               "node-4_1",
+               [
+                 "node-4_1_1",
+                 {"node-4_1_2", ["node-4_1_2_1"]}
+               ]
+             },
+             "node-4_2"
            ]},
-          {"node-5"}
+          "node-5"
         ]
         |> node_tree_fixture(%{episode_id: episode_id, show_id: show_id})
 
       assert length(nodes) == 13
       assert Enum.all?(nodes, &match?(%Node{episode_id: ^episode_id}, &1))
+
+      assert [
+               %{uuid: uuid_1, content: "node-1", parent_id: nil, prev_id: nil},
+               %{uuid: uuid_2, content: "node-2", parent_id: nil, prev_id: uuid_1},
+               %{uuid: uuid_2_1, content: "node-2_1", parent_id: uuid_2, prev_id: nil},
+               %{uuid: uuid_2_2, content: "node-2_2", parent_id: nil, prev_id: uuid_2_1},
+               %{uuid: _, content: "node-2_3", parent_id: nil, prev_id: uuid_2_2},
+               %{uuid: uuid_3, content: "node-3", parent_id: nil, prev_id: uuid_2},
+               %{uuid: uuid_4, content: "node-4", parent_id: nil, prev_id: uuid_3},
+               %{uuid: uuid_4_1, content: "node-4_1", parent_id: uuid_4, prev_id: nil},
+               %{uuid: uuid_4_1_1, content: "node-4_1_1", parent_id: uuid_4_1, prev_id: nil},
+               %{uuid: uuid_4_1_2, content: "node-4_1_2", parent_id: nil, prev_id: uuid_4_1_1},
+               %{uuid: _, content: "node-4_1_2_1", parent_id: uuid_4_1_2, prev_id: nil},
+               %{uuid: _, content: "node-4_2", parent_id: nil, prev_id: uuid_4_1},
+               %{uuid: _, content: "node-5", parent_id: nil, prev_id: uuid_4}
+             ] = nodes
     end
   end
 

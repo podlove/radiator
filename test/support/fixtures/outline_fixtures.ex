@@ -34,50 +34,42 @@ defmodule Radiator.OutlineFixtures do
   @doc """
   Generate a tree of nodes based on a human readable pseudo syntax.
   [
-    {"node-1"},
+    "node-1",
     {"node-2", [
-      {"node-2_1"},
+      "node-2_1",
       {"node-2_2", [
-        {"node-2_2_1"}
+        "node-2_2_1"
       ]}
     ]},
-    {"node-3"}
+    "node-3"
   ]
-  |> node_tree_fixture(%{episode_id: episode.id})
-
+  |> node_tree_fixture(%{show_id: show.id})
   """
-  def node_tree_fixture(content, attrs, siblings \\ [])
+  def node_tree_fixture(content, attrs \\ %{})
 
-  def node_tree_fixture({content}, attrs, []) do
+  def node_tree_fixture(content, attrs) when is_bitstring(content) do
     attrs
-    |> Map.merge(%{content: content, parent_id: attrs[:parent_id], prev_id: nil})
+    |> Map.merge(%{content: content})
     |> node_fixture()
-    |> List.wrap()
   end
 
-  def node_tree_fixture({content}, attrs, [%{uuid: prev_id} | _]) do
-    attrs
-    |> Map.merge(%{content: content, parent_id: nil, prev_id: prev_id})
-    |> node_fixture()
-    |> List.wrap()
+  def node_tree_fixture({content, list}, attrs) do
+    node = node_tree_fixture(content, attrs)
+    child_attrs = Map.merge(attrs, %{parent_id: node.uuid, prev_id: nil})
+
+    [node, [node_tree_fixture(list, child_attrs)]]
   end
 
-  def node_tree_fixture({content, nodes}, attrs, siblings) when is_list(nodes) do
-    [node] = node_tree_fixture({content}, attrs, siblings)
-
-    attrs = Map.put(attrs, :parent_id, node.uuid)
-
-    children =
-      Enum.reduce(nodes, [], fn content, acc ->
-        acc ++ node_tree_fixture(content, attrs, acc)
-      end)
-
-    [node | children]
+  def node_tree_fixture([content], attrs) do
+    [node_tree_fixture(content, attrs)]
   end
 
-  def node_tree_fixture(nodes, attrs, _siblings) when is_list(nodes) do
-    Enum.reduce(nodes, [], fn content, acc ->
-      acc ++ node_tree_fixture(content, attrs, acc)
-    end)
+  def node_tree_fixture([content | tail], attrs) do
+    nodes = node_tree_fixture(content, attrs)
+
+    %{uuid: prev_uuid} = nodes |> List.wrap() |> List.first()
+    child_attrs = Map.merge(attrs, %{parent_id: nil, prev_id: prev_uuid})
+
+    List.flatten([nodes | node_tree_fixture(tail, child_attrs)])
   end
 end
