@@ -81,7 +81,7 @@ export function processEvent(action, event) {
       break;
 
     default:
-      console.log(`MISSING MAPPING FOR ACTION: ${action}`);
+      console.error(`MISSING MAPPING FOR ACTION: ${action}`);
       break;
   }
 }
