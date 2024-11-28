@@ -191,9 +191,7 @@ defmodule Radiator.Podcast do
           |> Show.changeset(attrs)
           |> Repo.insert()
 
-        {show_root, global_inbox} = NodeRepository.create_nodes_for_show(show.id)
-
-        up
+        {_show_root, _global_inbox} = NodeRepository.create_nodes_for_show(show.id)
       end)
 
     IO.inspect(result, label: "result")
