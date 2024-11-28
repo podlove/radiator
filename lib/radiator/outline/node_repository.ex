@@ -33,7 +33,7 @@ defmodule Radiator.Outline.NodeRepository do
   def create_nodes_for_show(show_id) do
     # create a root node for a show
     {:ok, show_root} =
-      NodeRepository.create_node(%{
+      create_node(%{
         show_id: show_id,
         parent_id: nil,
         prev_id: nil,
@@ -41,7 +41,7 @@ defmodule Radiator.Outline.NodeRepository do
       })
 
     {:ok, global_inbox} =
-      NodeRepository.create_node(%{
+      create_node(%{
         show_id: show_id,
         parent_id: show_root.uuid,
         prev_id: nil,

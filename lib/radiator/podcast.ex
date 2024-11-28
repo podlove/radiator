@@ -7,6 +7,7 @@ defmodule Radiator.Podcast do
   import Ecto.Query, warn: false
   alias Radiator.Repo
 
+  alias Radiator.Outline.NodeRepository
   alias Radiator.Podcast.{Episode, Network, Show, ShowHosts}
 
   @doc """
@@ -183,19 +184,16 @@ defmodule Radiator.Podcast do
   """
   def create_show(attrs \\ %{}) do
     # also need to create the nodes for the show
-    # start a transaction
-    result =
-      Repo.transaction(fn ->
-        show =
-          %Show{}
-          |> Show.changeset(attrs)
-          |> Repo.insert()
+    # start a transaction =
+    Repo.transaction(fn ->
+      {:ok, show} =
+        %Show{}
+        |> Show.changeset(attrs)
+        |> Repo.insert()
 
-        {_show_root, _global_inbox} = NodeRepository.create_nodes_for_show(show.id)
-      end)
-
-    IO.inspect(result, label: "result")
-    result
+      {_show_root, _global_inbox} = NodeRepository.create_nodes_for_show(show.id)
+      show
+    end)
   end
 
   @doc """

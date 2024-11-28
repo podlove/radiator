@@ -23,7 +23,7 @@ defmodule Radiator.PodcastFixtures do
   Generate a show.
   """
   def show_fixture(attrs \\ %{}, hosts \\ []) do
-    network = get_network(attrs)
+    network = extract_network(attrs)
 
     {:ok, show} =
       attrs
@@ -40,7 +40,7 @@ defmodule Radiator.PodcastFixtures do
   Generate a episode.
   """
   def episode_fixture(attrs \\ %{}) do
-    show = get_show(attrs)
+    show = extract_show(attrs)
     number = Podcast.get_next_episode_number(show.id)
 
     {:ok, episode} =
@@ -55,9 +55,9 @@ defmodule Radiator.PodcastFixtures do
     episode
   end
 
-  defp get_network(%{network_id: id}), do: Podcast.get_network!(id)
-  defp get_network(_), do: network_fixture()
+  defp extract_network(%{network_id: id}), do: Podcast.get_network!(id)
+  defp extract_network(_), do: network_fixture()
 
-  defp get_show(%{show_id: id}), do: Podcast.get_show!(id)
-  defp get_show(_), do: show_fixture()
+  defp extract_show(%{show_id: id}), do: Podcast.get_show!(id)
+  defp extract_show(_), do: show_fixture()
 end
