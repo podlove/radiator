@@ -184,16 +184,19 @@ defmodule Radiator.Podcast do
   def create_show(attrs \\ %{}) do
     # also need to create the nodes for the show
     # start a transaction
-    result = Repo.transaction(fn ->
-      show = %Show{}
-      |> Show.changeset(attrs)
-      |> Repo.insert()
+    result =
+      Repo.transaction(fn ->
+        show =
+          %Show{}
+          |> Show.changeset(attrs)
+          |> Repo.insert()
 
-      {show_root, global_inbox} = NodeRepository.create_nodes_for_show(show.id)
+        {show_root, global_inbox} = NodeRepository.create_nodes_for_show(show.id)
 
-      up
+        up
+      end)
 
-    end)
+    IO.inspect(result, label: "result")
     result
   end
 

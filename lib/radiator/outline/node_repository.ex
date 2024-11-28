@@ -47,6 +47,7 @@ defmodule Radiator.Outline.NodeRepository do
         prev_id: nil,
         _type: "global_inbox"
       })
+
     {show_root, global_inbox}
   end
 
