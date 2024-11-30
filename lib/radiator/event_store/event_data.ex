@@ -20,6 +20,6 @@ defmodule Radiator.EventStore.EventData do
   def changeset(event, attrs) do
     event
     |> cast(attrs, [:uuid, :event_type, :data, :user_id])
-    |> validate_required([:uuid, :event_type, :user_id])
+    |> validate_required([:uuid, :event_type])
   end
 end

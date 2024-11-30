@@ -3,7 +3,10 @@ defmodule Radiator.Resources.NodeChangedWorker do
   job to extract urls from content and persist URLs
   """
   alias __MODULE__
+  alias Radiator.EventStore
   alias Radiator.NodeAnalyzer
+  alias Radiator.Outline.Dispatch
+  alias Radiator.Outline.Event.UrlsAnalyzedEvent
   alias Radiator.Outline.NodeRepository
   alias Radiator.Resources
 
@@ -16,13 +19,20 @@ defmodule Radiator.Resources.NodeChangedWorker do
 
   def perform(node_id) do
     analyzers = [Radiator.NodeAnalyzer.UrlAnalyzer]
+    node = NodeRepository.get_node!(node_id)
+    url_attributes = NodeAnalyzer.do_analyze(node, analyzers)
+    url_resources = Resources.rebuild_node_urls(node_id, url_attributes)
 
-    url_attributes =
-      node_id
-      |> NodeRepository.get_node!()
-      |> NodeAnalyzer.do_analyze(analyzers)
+    if url_resources != [] do
+      %UrlsAnalyzedEvent{
+        node_id: node_id,
+        urls: url_resources,
+        episode_id: node.episode_id
+      }
+      |> EventStore.persist_event()
+      |> Dispatch.broadcast()
+    end
 
-    _created_urls = Resources.rebuild_node_urls(node_id, url_attributes)
     :ok
   end
 end
