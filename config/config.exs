@@ -16,7 +16,7 @@ config :radiator, RadiatorWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: RadiatorWeb.ErrorHTML, json: RadiatorWeb.ErrorJSON],
+    formats: [html: Beacon.Web.ErrorHTML, json: RadiatorWeb.ErrorJSON],
     layout: false
   ],
   pubsub_server: Radiator.PubSub,

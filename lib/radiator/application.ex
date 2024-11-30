@@ -29,6 +29,7 @@ defmodule Radiator.Application do
       # Start to serve requests, typically the last entry
       RadiatorWeb.Endpoint,
       {CommandQueue, name: CommandQueue},
+      {Beacon, [sites: [Application.fetch_env!(:beacon, :radiator)]]},
       {CommandProcessor, name: CommandProcessor, subscribe_to: [{CommandQueue, max_demand: 1}]},
       {NodeChangeListener, name: NodeChangeListener},
       {Registry, keys: :unique, name: Radiator.JobRegistry},
