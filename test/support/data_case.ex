@@ -128,13 +128,13 @@ defmodule Radiator.DataCase do
     {_show_root, _global_inbox} = NodeRepository.create_virtual_nodes_for_show(show.id)
     episode = PodcastFixtures.episode_fixture()
 
-    {_show_root, _global_inbox} = NodeRepository.create_virtual_nodes_for_episode(episode)
+    {episode_root, _eposide_inbox} = NodeRepository.create_virtual_nodes_for_episode(episode)
 
     parent_node =
       node_fixture(
         episode_id: episode.id,
         show_id: episode.show_id,
-        parent_id: nil,
+        parent_id: episode_root.uuid,
         prev_id: nil,
         content: "root of all evil"
       )

@@ -78,9 +78,9 @@ defmodule Radiator.Outline do
   # if no previous node is given, the new node will be inserted as the first child of the parent node
   def insert_node(%{"show_id" => _show_id} = attrs) do
     Repo.transaction(fn ->
-      prev_id = attrs["prev_id"]
-      parent_id = attrs["parent_id"]
       episode_id = attrs["episode_id"]
+      prev_id = attrs["prev_id"]
+      parent_id = convert_parent_id_to_intern(attrs["parent_id"], episode_id)
 
       prev_node = NodeRepository.get_node_if(prev_id)
       parent_node = find_parent_node(prev_node, parent_id)
@@ -107,6 +107,13 @@ defmodule Radiator.Outline do
       end
     end)
   end
+
+  defp convert_parent_id_to_intern(nil, episode_id) do
+    {episode_root, _} = NodeRepository.get_virtual_nodes_for_episode(episode_id)
+    episode_root.uuid
+  end
+  
+  defp convert_parent_id_to_intern(parent_id, _episode_id), do: parent_id
 
   def insert_node(%{"episode_id" => episode_id} = attrs) do
     %Episode{show_id: show_id} = Podcast.get_episode!(episode_id)

@@ -80,6 +80,9 @@ defmodule Radiator.Outline.NodeRepository do
     {episode_root, episode_inbox}
   end
 
+  @doc """
+    TODO add documentation
+  """
   def get_virtual_nodes_for_show(show_id) do
     [node_1, node_2] =
       Node
@@ -88,6 +91,23 @@ defmodule Radiator.Outline.NodeRepository do
       |> Repo.all()
 
     if node_1._type == :global_root do
+      {node_1, node_2}
+    else
+      {node_2, node_1}
+    end
+  end
+
+  @doc """
+    TODO add documentation
+  """
+  def get_virtual_nodes_for_episode(episode_id) do
+    [node_1, node_2] =
+      Node
+      |> where([p], p.episode_id == ^episode_id)
+      |> where([p], p._type in [:episode_root, :episode_inbox])
+      |> Repo.all()
+
+    if node_1._type == :episode_root do
       {node_1, node_2}
     else
       {node_2, node_1}

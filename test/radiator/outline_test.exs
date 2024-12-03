@@ -264,6 +264,23 @@ defmodule Radiator.OutlineTest do
       assert NodeRepository.get_node!(nested_node_2.uuid).prev_id == nested_node_1.uuid
     end
 
+    test "when parent node is nil it will be set to the episode root", %{
+      parent_node: parent_node
+    } do
+      node_attrs = %{"parent_id" => nil, "episode_id" => parent_node.episode_id}
+      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      # do not test result since it will be altered
+      # but fetching if from the repo with low level functions will return the true value
+      {episode_root, _} = NodeRepository.get_virtual_nodes_for_episode(parent_node.episode_id)
+      assert NodeRepository.get_node!(new_node.uuid).parent_id == episode_root.uuid
+    end
+
+    test "when parent node is not given it will be set to the episode root", %{
+      parent_node: parent_node
+      } do
+
+      end
+
     test "without a parent node the inserted node will be put at the top", %{
       parent_node: parent_node
     } do
