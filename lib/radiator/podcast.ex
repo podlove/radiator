@@ -171,6 +171,47 @@ defmodule Radiator.Podcast do
   end
 
   @doc """
+  Gets a single show and preloads its virtual nodes (root and inbox) in a single query.
+  Sets the virtual attributes root_node_id and inbox_node_id.
+
+  ## Examples
+
+      iex> get_show(123)
+      %Show{root_node_id: "uuid-1", inbox_node_id: "uuid-2"}
+
+      iex> get_show(456)
+      nil
+
+  """
+  def get_show(id, preload: preload) do
+    Show
+    |> join(:inner, [s], n in Node,
+      on: n.show_id == s.id and n._type in [:global_root, :global_inbox])
+    |> where([s, _], s.id == ^id)
+    |> select([s, n], %{
+      show: s,
+      nodes: n
+    })
+    |> Repo.all()
+    # |> Repo.preload(preload) # FIXME
+    |> case do
+      [] ->
+        nil
+      nodes_and_show ->
+        show = hd(nodes_and_show).show
+        {root_id, inbox_id} = nodes_and_show
+          |> Enum.map(& &1.nodes)
+          |> Enum.reduce({nil, nil}, fn node, {root, inbox} ->
+            case node._type do
+              :global_root -> {node.uuid, inbox}
+              :global_inbox -> {root, node.uuid}
+            end
+          end)
+        %{show | root_node_id: root_id, inbox_node_id: inbox_id}
+    end
+  end
+
+  @doc """
   Creates a show.
 
   ## Examples
