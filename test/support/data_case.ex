@@ -16,6 +16,7 @@ defmodule Radiator.DataCase do
 
   use ExUnit.CaseTemplate
   alias Ecto.Adapters.SQL.Sandbox
+  alias Radiator.Outline.NodeRepository
   alias Radiator.PodcastFixtures
 
   import Radiator.OutlineFixtures
@@ -93,7 +94,10 @@ defmodule Radiator.DataCase do
   end
 
   def simple_node_fixture_hierachical(_) do
-    episode = PodcastFixtures.episode_fixture()
+    show = PodcastFixtures.show_fixture()
+    {_show_root, _global_inbox} = NodeRepository.create_virtual_nodes_for_show(show.id)
+
+    episode = PodcastFixtures.episode_fixture(show_id: show.id)
 
     node_1 =
       node_fixture(
@@ -120,7 +124,11 @@ defmodule Radiator.DataCase do
   end
 
   def complex_node_fixture(_) do
+    show = PodcastFixtures.show_fixture()
+    {_show_root, _global_inbox} = NodeRepository.create_virtual_nodes_for_show(show.id)
     episode = PodcastFixtures.episode_fixture()
+
+    {_show_root, _global_inbox} = NodeRepository.create_virtual_nodes_for_episode(episode)
 
     parent_node =
       node_fixture(

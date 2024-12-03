@@ -191,7 +191,7 @@ defmodule Radiator.Podcast do
         |> Show.changeset(attrs)
         |> Repo.insert()
 
-      {_show_root, _global_inbox} = NodeRepository.create_nodes_for_show(show.id)
+      {_show_root, _global_inbox} = NodeRepository.create_virtual_nodes_for_show(show.id)
       show
     end)
   end

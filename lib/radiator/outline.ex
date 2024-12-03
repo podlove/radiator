@@ -482,7 +482,11 @@ defmodule Radiator.Outline do
 
     Repo.transaction(fn ->
       old_next_node =
-        NodeRepository.get_node_by_parent_and_prev(get_node_id(parent_node), node.uuid, node.episode_id)
+        NodeRepository.get_node_by_parent_and_prev(
+          get_node_id(parent_node),
+          node.uuid,
+          node.episode_id
+        )
 
       new_next_node =
         NodeRepository.get_node_by_parent_and_prev(new_parent_id, new_prev_id, node.episode_id)

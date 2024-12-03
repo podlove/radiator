@@ -30,7 +30,7 @@ defmodule Radiator.Outline.NodeRepository do
   Creates the internal nodes for a show, this is the global root
   and the global inbox.
   """
-  def create_nodes_for_show(show_id) do
+  def create_virtual_nodes_for_show(show_id) do
     # create a root node for a show
     {:ok, show_root} =
       create_node(%{
@@ -49,6 +49,49 @@ defmodule Radiator.Outline.NodeRepository do
       })
 
     {show_root, global_inbox}
+  end
+
+  @doc """
+  Creates the internal nodes for an episode, this is the episode root
+  and the episode inbox.
+  """
+  def create_virtual_nodes_for_episode(%{id: episode_id, show_id: show_id}) do
+    # create a root node for a show
+    {show_root, _global_inbox} = get_virtual_nodes_for_show(show_id)
+
+    {:ok, episode_root} =
+      create_node(%{
+        episode_id: episode_id,
+        show_id: show_id,
+        parent_id: show_root.uuid,
+        prev_id: nil,
+        _type: "episode_root"
+      })
+
+    {:ok, episode_inbox} =
+      create_node(%{
+        episode_id: episode_id,
+        show_id: show_id,
+        parent_id: episode_root.uuid,
+        prev_id: nil,
+        _type: "episode_inbox"
+      })
+
+    {episode_root, episode_inbox}
+  end
+
+  def get_virtual_nodes_for_show(show_id) do
+    [node_1, node_2] =
+      Node
+      |> where([p], p.show_id == ^show_id)
+      |> where([p], p._type in [:global_root, :global_inbox])
+      |> Repo.all()
+
+    if node_1._type == :global_root do
+      {node_1, node_2}
+    else
+      {node_2, node_1}
+    end
   end
 
   @doc """
