@@ -12,9 +12,10 @@ defmodule Radiator.Podcast.Show do
   schema "shows" do
     field :title, :string
     field :description, :string
+    field :root_node_id, :binary_id, virtual: true
+    field :inbox_node_id, :binary_id, virtual: true
 
     belongs_to :network, Network
-
     has_many(:episodes, Episode)
     has_many(:outline_nodes, Node)
     many_to_many(:hosts, User, join_through: "show_hosts")

@@ -27,6 +27,95 @@ defmodule Radiator.Outline.NodeRepository do
   end
 
   @doc """
+  Creates the internal nodes for a show, this is the global root
+  and the global inbox.
+  """
+  def create_virtual_nodes_for_show(show_id) do
+    # create a root node for a show
+    {:ok, show_root} =
+      create_node(%{
+        show_id: show_id,
+        parent_id: nil,
+        prev_id: nil,
+        _type: "global_root"
+      })
+
+    {:ok, global_inbox} =
+      create_node(%{
+        show_id: show_id,
+        parent_id: show_root.uuid,
+        prev_id: nil,
+        _type: "global_inbox"
+      })
+
+    {show_root, global_inbox}
+  end
+
+  @doc """
+  Creates the internal nodes for an episode, this is the episode root
+  and the episode inbox.
+  """
+  def create_virtual_nodes_for_episode(%{id: episode_id, show_id: show_id}) do
+    # create a root node for a show
+    {show_root, _global_inbox} = get_virtual_nodes_for_show(show_id)
+
+    {:ok, episode_root} =
+      create_node(%{
+        episode_id: episode_id,
+        show_id: show_id,
+        parent_id: show_root.uuid,
+        prev_id: nil,
+        _type: "episode_root"
+      })
+
+    {:ok, episode_inbox} =
+      create_node(%{
+        episode_id: episode_id,
+        show_id: show_id,
+        parent_id: episode_root.uuid,
+        prev_id: nil,
+        _type: "episode_inbox"
+      })
+
+    {episode_root, episode_inbox}
+  end
+
+  @doc """
+    returns the virtual nodes of a show
+    TODO: perhaps these should be stored in the show itself?
+  """
+  def get_virtual_nodes_for_show(show_id) do
+    [node_1, node_2] =
+      Node
+      |> where([p], p.show_id == ^show_id)
+      |> where([p], p._type in [:global_root, :global_inbox])
+      |> Repo.all()
+
+    if node_1._type == :global_root do
+      {node_1, node_2}
+    else
+      {node_2, node_1}
+    end
+  end
+
+  @doc """
+    TODO add documentation
+  """
+  def get_virtual_nodes_for_episode(episode_id) do
+    [node_1, node_2] =
+      Node
+      |> where([p], p.episode_id == ^episode_id)
+      |> where([p], p._type in [:episode_root, :episode_inbox])
+      |> Repo.all()
+
+    if node_1._type == :episode_root do
+      {node_1, node_2}
+    else
+      {node_2, node_1}
+    end
+  end
+
+  @doc """
   Deletes a node from the repository.
 
   ## Examples
@@ -62,7 +151,7 @@ defmodule Radiator.Outline.NodeRepository do
 
   ## Examples
 
-      iex> list_nodes(123)
+      iex> list_nodes_by_episode(123)
       [%Node{}, ...]
 
   """
@@ -73,6 +162,25 @@ defmodule Radiator.Outline.NodeRepository do
     |> Repo.all()
     |> Enum.group_by(& &1.parent_id)
     |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)
+    |> List.flatten()
+  end
+
+  @doc """
+  Returns the list of nodes for a show.
+
+  ## Examples
+
+      iex> _list_nodes_by_show(123)
+      [%Node{}, ...]
+
+  """
+
+  def _list_nodes_by_show(show_id) do
+    Node
+    |> where([p], p.show_id == ^show_id)
+    |> Repo.all()
+    # |> Enum.group_by(& &1.parent_id)
+    # |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)
     |> List.flatten()
   end
 
@@ -150,17 +258,20 @@ defmodule Radiator.Outline.NodeRepository do
   end
 
   @doc """
-  Gets a single node defined by the given prev_id and parent_id.
+  Gets a single node defined by the given prev_id and parent_id and the
+  episode id.
+
   Returns `nil` if the Node cannot be found.
   ## Examples
-            iex> get_node_by_parent_and_prev("5adf3b360fb0", "380d56cf")
+            iex> get_node_by_parent_and_prev("5adf3b360fb0", "380d56cf", 23)
             nil
 
-            iex> get_node_by_parent_and_prev("5e3f5a0422a4", "b78a976d")
+            iex> get_node_by_parent_and_prev("5e3f5a0422a4", "b78a976d", 23)
             %Node{uuid: "33b2a1dac9b1", parent_id: "5e3f5a0422a4", prev_id: "b78a976d"}
   """
-  def get_node_by_parent_and_prev(parent_id, prev_id) do
+  def get_node_by_parent_and_prev(parent_id, prev_id, episode_id) do
     Node
+    |> where(episode_id: ^episode_id)
     |> where_prev_node_equals(prev_id)
     |> where_parent_node_equals(parent_id)
     |> Repo.one()
@@ -270,6 +381,17 @@ defmodule Radiator.Outline.NodeRepository do
   def get_parent_node(node) do
     Node
     |> where([n], n.uuid == ^node.parent_id)
+    |> Repo.one()
+  end
+
+  # @TODO needed?
+  def get_root_node_for_show(show_id) do
+    Node
+    |> where([p], p.show_id == ^show_id)
+    # |> where([p], is_nil(p.episode_id))
+    # |> where([p], is_nil(p.parent_id))
+    # |> where([p], is_nil(p.prev_id))
+    |> where([p], p._type == :global_root)
     |> Repo.one()
   end
 

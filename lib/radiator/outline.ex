@@ -78,9 +78,9 @@ defmodule Radiator.Outline do
   # if no previous node is given, the new node will be inserted as the first child of the parent node
   def insert_node(%{"show_id" => _show_id} = attrs) do
     Repo.transaction(fn ->
-      prev_id = attrs["prev_id"]
-      parent_id = attrs["parent_id"]
       episode_id = attrs["episode_id"]
+      prev_id = attrs["prev_id"]
+      parent_id = convert_parent_id_to_intern(attrs["parent_id"], episode_id)
 
       prev_node = NodeRepository.get_node_if(prev_id)
       parent_node = find_parent_node(prev_node, parent_id)
@@ -115,6 +115,13 @@ defmodule Radiator.Outline do
     |> Map.put("show_id", show_id)
     |> insert_node()
   end
+
+  defp convert_parent_id_to_intern(nil, episode_id) do
+    {episode_root, _} = NodeRepository.get_virtual_nodes_for_episode(episode_id)
+    episode_root.uuid
+  end
+
+  defp convert_parent_id_to_intern(parent_id, _episode_id), do: parent_id
 
   @doc """
   Intends a node given by its id (by using the tab key).
@@ -239,6 +246,12 @@ defmodule Radiator.Outline do
 
   def move_node(_node_id, prev_id: other_id, parent_id: other_id) when not is_nil(other_id) do
     {:error, :parent_and_prev_not_consistent}
+  end
+
+  def move_node(node_id, prev_id: new_prev_id, parent_id: nil) do
+    node = NodeRepository.get_node(node_id)
+    intern_parent = convert_parent_id_to_intern(nil, node.episode_id)
+    move_node(node_id, prev_id: new_prev_id, parent_id: intern_parent)
   end
 
   def move_node(node_id, prev_id: new_prev_id, parent_id: new_parent_id) do
@@ -482,10 +495,14 @@ defmodule Radiator.Outline do
 
     Repo.transaction(fn ->
       old_next_node =
-        NodeRepository.get_node_by_parent_and_prev(get_node_id(parent_node), node.uuid)
+        NodeRepository.get_node_by_parent_and_prev(
+          get_node_id(parent_node),
+          node.uuid,
+          node.episode_id
+        )
 
       new_next_node =
-        NodeRepository.get_node_by_parent_and_prev(new_parent_id, new_prev_id)
+        NodeRepository.get_node_by_parent_and_prev(new_parent_id, new_prev_id, node.episode_id)
 
       {:ok, node} = NodeRepository.move_node_if(node, new_parent_id, new_prev_id)
 
