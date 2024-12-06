@@ -108,13 +108,6 @@ defmodule Radiator.Outline do
     end)
   end
 
-  defp convert_parent_id_to_intern(nil, episode_id) do
-    {episode_root, _} = NodeRepository.get_virtual_nodes_for_episode(episode_id)
-    episode_root.uuid
-  end
-  
-  defp convert_parent_id_to_intern(parent_id, _episode_id), do: parent_id
-
   def insert_node(%{"episode_id" => episode_id} = attrs) do
     %Episode{show_id: show_id} = Podcast.get_episode!(episode_id)
 
@@ -122,6 +115,13 @@ defmodule Radiator.Outline do
     |> Map.put("show_id", show_id)
     |> insert_node()
   end
+
+  defp convert_parent_id_to_intern(nil, episode_id) do
+    {episode_root, _} = NodeRepository.get_virtual_nodes_for_episode(episode_id)
+    episode_root.uuid
+  end
+
+  defp convert_parent_id_to_intern(parent_id, _episode_id), do: parent_id
 
   @doc """
   Intends a node given by its id (by using the tab key).
@@ -246,6 +246,12 @@ defmodule Radiator.Outline do
 
   def move_node(_node_id, prev_id: other_id, parent_id: other_id) when not is_nil(other_id) do
     {:error, :parent_and_prev_not_consistent}
+  end
+
+  def move_node(node_id, prev_id: new_prev_id, parent_id: nil) do
+    node = NodeRepository.get_node(node_id)
+    intern_parent = convert_parent_id_to_intern(nil, node.episode_id)
+    move_node(node_id, prev_id: new_prev_id, parent_id: intern_parent)
   end
 
   def move_node(node_id, prev_id: new_prev_id, parent_id: new_parent_id) do

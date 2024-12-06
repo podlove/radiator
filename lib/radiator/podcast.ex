@@ -193,7 +193,7 @@ defmodule Radiator.Podcast do
       nodes: n
     })
     |> Repo.all()
-    # |> Repo.preload(preload) # FIXME
+    |> Repo.preload(preload) # FIXME
     |> case do
       [] ->
         nil

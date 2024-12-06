@@ -81,7 +81,8 @@ defmodule Radiator.Outline.NodeRepository do
   end
 
   @doc """
-    TODO add documentation
+    returns the virtual nodes of a show
+    TODO: perhaps these should be stored in the show itself?
   """
   def get_virtual_nodes_for_show(show_id) do
     [node_1, node_2] =

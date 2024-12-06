@@ -16,6 +16,8 @@ defmodule Radiator.Podcast.Episode do
     field :slug, :string
     field :is_deleted, :boolean, default: false
     field :deleted_at, :utc_datetime
+    field :root_node_id, :binary_id, virtual: true
+    field :inbox_node_id, :binary_id, virtual: true
 
     belongs_to :show, Show
 
