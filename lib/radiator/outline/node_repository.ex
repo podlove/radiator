@@ -6,6 +6,8 @@ defmodule Radiator.Outline.NodeRepository do
   import Ecto.Query, warn: false
 
   alias Radiator.Outline.Node
+  alias Radiator.Podcast
+  alias Radiator.Podcast.Show
   alias Radiator.Repo
 
   @doc """
@@ -49,6 +51,35 @@ defmodule Radiator.Outline.NodeRepository do
       })
 
     {show_root, global_inbox}
+  end
+
+  @doc """
+  Creates the internal nodes for an episode, this is the episode root
+  and the episode inbox.
+  """
+  def create_virtual_nodes_for_episode(%{id: episode_id, show_id: show_id}) do
+    # create a root node for a show
+    %Show{global_root_id: global_root_id} = Podcast.get_show!(show_id)
+
+    {:ok, episode_root} =
+      create_node(%{
+        episode_id: episode_id,
+        show_id: show_id,
+        parent_id: global_root_id,
+        prev_id: nil,
+        _type: "episode_root"
+      })
+
+    {:ok, episode_inbox} =
+      create_node(%{
+        episode_id: episode_id,
+        show_id: show_id,
+        parent_id: episode_root.uuid,
+        prev_id: nil,
+        _type: "episode_inbox"
+      })
+
+    {episode_root, episode_inbox}
   end
 
   @doc """

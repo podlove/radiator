@@ -6,6 +6,7 @@ defmodule Radiator.Podcast.Episode do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Radiator.Outline.Node
   alias Radiator.Podcast.Show
   @slug_max_length 500
 
@@ -18,6 +19,8 @@ defmodule Radiator.Podcast.Episode do
     field :deleted_at, :utc_datetime
 
     belongs_to :show, Show
+    belongs_to :episode_root, Node, type: :binary_id, references: :uuid
+    belongs_to :episode_inbox, Node, type: :binary_id, references: :uuid
 
     timestamps(type: :utc_datetime)
   end
@@ -30,6 +33,15 @@ defmodule Radiator.Podcast.Episode do
     |> validate_length(:title, min: 3)
     |> maybe_update_slug()
     |> validate_deleted_at()
+  end
+
+  @doc """
+  changeset for updating the show's root and inbox nodes
+  """
+  def changeset_tree(show, attrs) do
+    show
+    |> cast(attrs, [:episode_root_id, :episode_inbox_id])
+    |> validate_required([:episode_root_id, :episode_inbox_id])
   end
 
   defp maybe_update_slug(changeset) do

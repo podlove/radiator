@@ -499,9 +499,32 @@ defmodule Radiator.Podcast do
 
   """
   def create_episode(attrs \\ %{}) do
-    %Episode{}
-    |> Episode.changeset(attrs)
-    |> Repo.insert()
+    Repo.transaction(fn ->
+      result =
+        %Episode{}
+        |> Episode.changeset(attrs)
+        |> Repo.insert()
+
+      case result do
+        {:ok, episode} ->
+          # create the nodes for the show
+          {episode_root, episode_inbox} =
+            NodeRepository.create_virtual_nodes_for_episode(episode.id)
+
+          {:ok, episode} =
+            episode
+            |> Episode.changeset_tree(%{
+              episode_root_id: episode_root.uuid,
+              episode_inbox_id: episode_inbox.uuid
+            })
+            |> Repo.update()
+
+          episode
+
+        {:error, changeset} ->
+          Repo.rollback(changeset)
+      end
+    end)
   end
 
   def get_next_episode_number(show_id) do
