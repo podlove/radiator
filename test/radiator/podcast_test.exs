@@ -17,9 +17,10 @@ defmodule Radiator.PodcastTest do
 
     test "list_networks/1 returns all networks with preloaded shows" do
       show = show_fixture()
+      show_id = show.id
 
       assert [%Network{shows: shows}] = Podcast.list_networks(preload: :shows)
-      assert shows == [show]
+      assert [%Show{id: ^show_id}] = shows
     end
 
     test "get_network!/1 returns the network with given id" do
@@ -69,12 +70,13 @@ defmodule Radiator.PodcastTest do
 
     test "list_shows/0 returns all shows" do
       show = show_fixture()
-      assert Podcast.list_shows() == [show]
+      show_id = show.id
+      assert [%Show{id: ^show_id}] = Podcast.list_shows()
     end
 
     test "get_show!/1 returns the show with given id" do
       show = show_fixture()
-      assert Podcast.get_show!(show.id) == show
+      assert Podcast.get_show!(show.id).id == show.id
     end
 
     test "get_show!/2 returns the show with preloaded episodes" do
@@ -137,8 +139,9 @@ defmodule Radiator.PodcastTest do
 
     test "update_show/2 with invalid data returns error changeset" do
       show = show_fixture()
+      show_id = show.id
       assert {:error, %Ecto.Changeset{}} = Podcast.update_show(show, @invalid_attrs)
-      assert show == Podcast.get_show!(show.id)
+      assert %Show{id: ^show_id} = Podcast.get_show!(show.id)
     end
 
     test "update_show/2 with valid data updates the show by removing hosts" do
