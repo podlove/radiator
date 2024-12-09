@@ -16,7 +16,7 @@ defmodule RadiatorWeb.CoreComponents do
   """
   use Phoenix.Component
 
-  import RadiatorWeb.Gettext
+  use Gettext, backend: RadiatorWeb.Gettext
 
   alias Phoenix.HTML.Form
   alias Phoenix.HTML.FormField
