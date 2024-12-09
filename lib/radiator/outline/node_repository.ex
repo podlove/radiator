@@ -7,7 +7,7 @@ defmodule Radiator.Outline.NodeRepository do
 
   alias Radiator.Outline.Node
   alias Radiator.Podcast
-  alias Radiator.Podcast.Show
+  alias Radiator.Podcast.{Episode, Show}
   alias Radiator.Repo
 
   @doc """
@@ -57,7 +57,7 @@ defmodule Radiator.Outline.NodeRepository do
   Creates the internal nodes for an episode, this is the episode root
   and the episode inbox.
   """
-  def create_virtual_nodes_for_episode(%{id: episode_id, show_id: show_id}) do
+  def create_virtual_nodes_for_episode(%Episode{id: episode_id, show_id: show_id}) do
     # create a root node for a show
     %Show{global_root_id: global_root_id} = Podcast.get_show!(show_id)
 

@@ -509,7 +509,7 @@ defmodule Radiator.Podcast do
         {:ok, episode} ->
           # create the nodes for the show
           {episode_root, episode_inbox} =
-            NodeRepository.create_virtual_nodes_for_episode(episode.id)
+            NodeRepository.create_virtual_nodes_for_episode(episode)
 
           {:ok, episode} =
             episode
