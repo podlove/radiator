@@ -733,7 +733,7 @@ defmodule Radiator.AccountsTest do
              }
     end
 
-    test "can override  show", %{
+    test "can override show", %{
       web_service: web_service,
       show: show
     } do

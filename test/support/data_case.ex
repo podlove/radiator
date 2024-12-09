@@ -15,10 +15,11 @@ defmodule Radiator.DataCase do
   """
 
   use ExUnit.CaseTemplate
-  alias Ecto.Adapters.SQL.Sandbox
-  alias Radiator.PodcastFixtures
 
   import Radiator.OutlineFixtures
+
+  alias Ecto.Adapters.SQL.Sandbox
+  alias Radiator.PodcastFixtures
 
   using do
     quote do

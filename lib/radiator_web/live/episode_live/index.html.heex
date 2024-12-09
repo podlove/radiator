@@ -21,10 +21,10 @@
       >
         <.link navigate={~p"/admin/podcast/#{@show}/#{episode}"} class="flex gap-4 my-4">
           <img src={"/images/pic1#{i}.jpg"} alt="" width="100" />
-          <%= episode.number %>
-          <%= episode.title %>
+          {episode.number}
+          {episode.title}
           <br />
-          <%= episode.slug %>
+          {episode.slug}
         </.link>
       </li>
     </ol>
@@ -33,7 +33,7 @@
   <div class="col-span-12 sm:col-span-8">
     <section :if={@live_action in [:new, :edit]}>
       <div class="p-4 my-4 bg-[#f0f4f4]">
-        <h3 class="text-xl"><%= @title %></h3>
+        <h3 class="text-xl">{@title}</h3>
         <.form :let={f} for={@form} id="episode-form" phx-change="validate" phx-submit="save">
           <.input field={f[:number]} type="text" label="Number" />
           <.input field={f[:title]} type="text" label="Title" />
@@ -53,7 +53,7 @@
 
     <section :if={@selected_episode}>
       <.header class="text-2xl">
-        <%= @selected_episode.number %>: <%= @selected_episode.title %>
+        {@selected_episode.number}: {@selected_episode.title}
         <:actions>
           <.link
             navigate={~p"/admin/podcast/#{@show}/#{@selected_episode}/edit"}

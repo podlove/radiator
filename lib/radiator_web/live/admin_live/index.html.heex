@@ -2,7 +2,7 @@
   <section class="my-12">
     <div :for={network <- @networks}>
       <h2 class="flex my-4 text-2xl">
-        <%= network.title %>
+        {network.title}
         <button
           :if={@action != :edit_network}
           phx-click="edit_network"
@@ -37,7 +37,7 @@
             <div class="flex aspect-square">
               <img src={"/images/pic1#{i}.jpg"} alt="" />
             </div>
-            <div class="p-2 text-center"><%= show.title %></div>
+            <div class="p-2 text-center">{show.title}</div>
           </.link>
         </div>
         <button
@@ -55,7 +55,7 @@
     </div>
     <div :if={@action in [:new_network, :edit_network]} class="p-4 my-4 bg-[#f0f4f4]">
       <h3 class="flex justify-between text-xl">
-        <%= @page_title %>
+        {@page_title}
         <button phx-click="cancel"><.icon name="hero-x-circle" class="w-6 h-6" /></button>
       </h3>
       <.form :let={f} for={@form} id="network-form" phx-change="validate" phx-submit="save">
@@ -80,7 +80,7 @@
 
     <div :if={@action in [:new_show, :edit_show]} class="p-4 my-4 bg-[#f0f4f4]">
       <h3 class="flex justify-between text-xl">
-        <%= @page_title %>
+        {@page_title}
         <button phx-click="cancel"><.icon name="hero-x-circle" class="w-6 h-6" /></button>
       </h3>
       <.form :let={f} for={@form} id="show-form" phx-change="validate" phx-submit="save">
@@ -120,7 +120,7 @@
             <ul class="mt-2 space-y-2">
               <%= for host <- @selected_hosts do %>
                 <li class="flex items-center justify-between p-2 bg-gray-100 rounded-md">
-                  <span><%= host.email %></span>
+                  <span>{host.email}</span>
                   <button
                     type="button"
                     class="px-2 py-1 text-sm text-red-600 hover:text-red-800"

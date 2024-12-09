@@ -10,7 +10,7 @@
       content="Radiator is the 100% open source podcast hosting project for the next century of the internet."
     />
     <.live_title suffix=" · Radiator 🔥">
-      <%= assigns[:page_title] || "Radiator" %>
+      {assigns[:page_title] || "Radiator"}
     </.live_title>
     <!--<link rel="canonical" href="" />-->
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
@@ -18,6 +18,6 @@
     </script>
   </head>
   <body class="antialiased bg-white">
-    <%= @inner_content %>
+    {@inner_content}
   </body>
 </html>

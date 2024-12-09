@@ -44,9 +44,9 @@ defmodule RadiatorWeb.OutlineComponents do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
       <div class="bg-white">
-        <%= render_slot(@inner_block, f) %>
+        {render_slot(@inner_block, f)}
         <div :for={action <- @actions} class="flex items-center justify-between gap-6 mt-2">
-          <%= render_slot(action, f) %>
+          {render_slot(action, f)}
         </div>
       </div>
     </.form>
@@ -133,9 +133,9 @@ defmodule RadiatorWeb.OutlineComponents do
           class="rounded border-zinc-300 text-zinc-900 focus:ring-0"
           {@rest}
         />
-        <%= @label %>
+        {@label}
       </label>
-      <Core.error :for={msg <- @errors}><%= msg %></Core.error>
+      <Core.error :for={msg <- @errors}>{msg}</Core.error>
     </div>
     """
   end
@@ -143,7 +143,7 @@ defmodule RadiatorWeb.OutlineComponents do
   def outline_input(%{type: "select"} = assigns) do
     ~H"""
     <div class={@class}>
-      <Core.label for={@id}><%= @label %></Core.label>
+      <Core.label for={@id}>{@label}</Core.label>
       <select
         id={@id}
         name={@name}
@@ -151,10 +151,10 @@ defmodule RadiatorWeb.OutlineComponents do
         multiple={@multiple}
         {@rest}
       >
-        <option :if={@prompt} value=""><%= @prompt %></option>
-        <%= HTML.Form.options_for_select(@options, @value) %>
+        <option :if={@prompt} value="">{@prompt}</option>
+        {HTML.Form.options_for_select(@options, @value)}
       </select>
-      <Core.error :for={msg <- @errors}><%= msg %></Core.error>
+      <Core.error :for={msg <- @errors}>{msg}</Core.error>
     </div>
     """
   end
@@ -162,7 +162,7 @@ defmodule RadiatorWeb.OutlineComponents do
   def outline_input(%{type: "textarea"} = assigns) do
     ~H"""
     <div class={@class}>
-      <Core.label for={@id}><%= @label %></Core.label>
+      <Core.label for={@id}>{@label}</Core.label>
       <textarea
         id={@id}
         name={@name}
@@ -172,8 +172,8 @@ defmodule RadiatorWeb.OutlineComponents do
           @errors != [] && "border-rose-400 focus:border-rose-400"
         ]}
         {@rest}
-      ><%= HTML.Form.normalize_value("textarea", @value) %></textarea>
-      <Core.error :for={msg <- @errors}><%= msg %></Core.error>
+      >{HTML.Form.normalize_value("textarea", @value)}</textarea>
+      <Core.error :for={msg <- @errors}>{msg}</Core.error>
     </div>
     """
   end
@@ -182,7 +182,7 @@ defmodule RadiatorWeb.OutlineComponents do
   def outline_input(assigns) do
     ~H"""
     <div class={@class}>
-      <Core.label for={@id}><%= @label %></Core.label>
+      <Core.label for={@id}>{@label}</Core.label>
       <input
         type={@type}
         name={@name}
@@ -195,7 +195,7 @@ defmodule RadiatorWeb.OutlineComponents do
         ]}
         {@rest}
       />
-      <Core.error :for={msg <- @errors}><%= msg %></Core.error>
+      <Core.error :for={msg <- @errors}>{msg}</Core.error>
     </div>
     """
   end
@@ -273,11 +273,11 @@ defmodule RadiatorWeb.OutlineComponents do
     ~H"""
     <div class="px-2 bg-gray-200">
       <Core.icon name="hero-pencil-square-solid" class="w-5 h-5" />
-      <%= @event.event_id %>
+      {@event.event_id}
     </div>
     <div class="px-2 ml-8">
-      <pre><%= @event.node_id %> - NodeContentChanged</pre>
-      <p>content = <%= @event.content %></p>
+      <pre>{@event.node_id} - NodeContentChanged</pre>
+      <p>content = {@event.content}</p>
     </div>
     """
   end
@@ -286,10 +286,10 @@ defmodule RadiatorWeb.OutlineComponents do
     ~H"""
     <div class="px-2 bg-gray-200">
       <Core.icon name="hero-archive-box-x-mark-solid" class="w-5 h-5" />
-      <%= @event.event_id %>
+      {@event.event_id}
     </div>
     <div class="px-2 ml-8">
-      <pre><%= @event.node.uuid %> - NodeDeleted</pre>
+      <pre>{@event.node.uuid} - NodeDeleted</pre>
       <p>next node = ?</p>
       <p>child nodes = ?</p>
     </div>
@@ -300,14 +300,14 @@ defmodule RadiatorWeb.OutlineComponents do
     ~H"""
     <div class="px-2 bg-gray-200">
       <Core.icon name="hero-plus-solid" class="w-5 h-5" />
-      <%= @event.event_id %>
+      {@event.event_id}
     </div>
     <div class="px-2 ml-8">
-      <pre><%= @event.node.uuid %> - NodeInserted</pre>
-      <p>parent_id = <%= @event.node.parent_id %></p>
-      <p>prev_id = <%= @event.node.prev_id %></p>
-      <p>next_id = <%= Outline.get_node_id(@event.next) %></p>
-      <p>content = <%= @event.node.content %></p>
+      <pre>{@event.node.uuid} - NodeInserted</pre>
+      <p>parent_id = {@event.node.parent_id}</p>
+      <p>prev_id = {@event.node.prev_id}</p>
+      <p>next_id = {Outline.get_node_id(@event.next)}</p>
+      <p>content = {@event.node.content}</p>
     </div>
     """
   end
@@ -316,15 +316,15 @@ defmodule RadiatorWeb.OutlineComponents do
     ~H"""
     <div class="px-2 bg-gray-200">
       <Core.icon name="hero-arrows-pointing-out-solid" class="w-5 h-5" />
-      <%= @event.event_id %>
+      {@event.event_id}
     </div>
     <div class="px-2 ml-8">
-      <pre><%= @event.node.uuid %> - NodeMoved</pre>
-      <p>parent_id = <%= @event.node.parent_id %></p>
-      <p>prev_id = <%= @event.node.prev_id %></p>
-      <p>old_prev_id = <%= Outline.get_node_id(@event.old_prev) %></p>
-      <p>old_next_id = <%= Outline.get_node_id(@event.old_next) %></p>
-      <p>next_id = <%= Outline.get_node_id(@event.next) %></p>
+      <pre>{@event.node.uuid} - NodeMoved</pre>
+      <p>parent_id = {@event.node.parent_id}</p>
+      <p>prev_id = {@event.node.prev_id}</p>
+      <p>old_prev_id = {Outline.get_node_id(@event.old_prev)}</p>
+      <p>old_next_id = {Outline.get_node_id(@event.old_next)}</p>
+      <p>next_id = {Outline.get_node_id(@event.next)}</p>
     </div>
     """
   end

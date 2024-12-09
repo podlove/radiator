@@ -18,7 +18,7 @@
         </li>
         <!--
         <li class="inline-block">
-          <%= @current_user.email %>
+          {@current_user.email}
         </li>
         -->
         <li class="inline-block">
@@ -46,13 +46,13 @@
     </ul>
   </nav>
   <div class="p-6">
-    <h1 class="text-4xl"><%= assigns[:page_title] %></h1>
-    <p class="p-2"><%= assigns[:page_description] %></p>
+    <h1 class="text-4xl">{assigns[:page_title]}</h1>
+    <p class="p-2">{assigns[:page_description]}</p>
   </div>
 </header>
 <main class="px-4 py-20 sm:px-6 lg:px-8">
   <div class="max-w-6xl mx-auto">
     <.flash_group flash={@flash} />
-    <%= @inner_content %>
+    {@inner_content}
   </div>
 </main>

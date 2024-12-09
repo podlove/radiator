@@ -50,15 +50,14 @@ defmodule Radiator.MixProject do
        app: false,
        compile: false,
        depth: 1},
-      {:jason, "~> 1.2", override: true},
+      {:jason, "~> 1.2"},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      # TODO bump on release to {:phoenix_live_view, "~> 1.0.0"},
-      {:phoenix_live_view, "~> 1.0.0-rc.1", override: true},
-      {:phoenix, "~> 1.7.14"},
+      {:phoenix_live_view, "~> 1.0.0"},
+      {:phoenix, "~> 1.7.17"},
       {:postgrex, ">= 0.0.0"},
       {:reply, "~> 1.0"},
       {:req, "~> 0.5"},
@@ -67,7 +66,6 @@ defmodule Radiator.MixProject do
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:timex, "~> 3.7"},
       {:web_inspector, git: "https://github.com/eteubert/web_inspector.git"}
     ]
   end

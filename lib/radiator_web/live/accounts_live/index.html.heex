@@ -2,8 +2,8 @@
   <h1>Accounts</h1>
 
   <.table id="accounts" rows={@streams.users}>
-    <:col :let={{_id, user}} label="Id"><%= user.id %></:col>
-    <:col :let={{_id, user}} label="Email"><%= user.email %></:col>
+    <:col :let={{_id, user}} label="Id">{user.id}</:col>
+    <:col :let={{_id, user}} label="Email">{user.email}</:col>
     <:col :let={{_id, user}} label="API-Token">
       <%= if has_api_token(user) do %>
         <.icon name="hero-check-circle" class="w-5 h-5" />
