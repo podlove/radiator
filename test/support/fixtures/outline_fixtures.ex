@@ -72,4 +72,16 @@ defmodule Radiator.OutlineFixtures do
 
     List.flatten([nodes | node_tree_fixture(tail, child_attrs)])
   end
+
+  @doc """
+  Generate a node_container.
+  """
+  def node_container_fixture(attrs \\ %{}) do
+    {:ok, node_container} =
+      attrs
+      |> Enum.into(%{})
+      |> Radiator.Outline.create_node_container()
+
+    node_container
+  end
 end

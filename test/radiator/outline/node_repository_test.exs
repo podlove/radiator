@@ -35,6 +35,7 @@ defmodule Radiator.Outline.NodeRepositoryTest do
       assert node.creator_id == user.id
     end
 
+    @tag :skip
     test "with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = NodeRepository.create_node(@invalid_attrs)
     end

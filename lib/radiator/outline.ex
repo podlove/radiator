@@ -650,4 +650,100 @@ defmodule Radiator.Outline do
   end
 
   defp unwrap_transaction_result(result), do: result
+
+  alias Radiator.Outline.NodeContainer
+
+  @doc """
+  Returns the list of outline_node_containers.
+
+  ## Examples
+
+      iex> list_outline_node_containers()
+      [%NodeContainer{}, ...]
+
+  """
+  def list_outline_node_containers do
+    Repo.all(NodeContainer)
+  end
+
+  @doc """
+  Gets a single node_container.
+
+  Raises `Ecto.NoResultsError` if the Node container does not exist.
+
+  ## Examples
+
+      iex> get_node_container!(123)
+      %NodeContainer{}
+
+      iex> get_node_container!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_node_container!(id), do: Repo.get!(NodeContainer, id)
+
+  @doc """
+  Creates a node_container.
+
+  ## Examples
+
+      iex> create_node_container(%{field: value})
+      {:ok, %NodeContainer{}}
+
+      iex> create_node_container(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_node_container(attrs \\ %{}) do
+    %NodeContainer{}
+    |> NodeContainer.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a node_container.
+
+  ## Examples
+
+      iex> update_node_container(node_container, %{field: new_value})
+      {:ok, %NodeContainer{}}
+
+      iex> update_node_container(node_container, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_node_container(%NodeContainer{} = node_container, attrs) do
+    node_container
+    |> NodeContainer.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a node_container.
+
+  ## Examples
+
+      iex> delete_node_container(node_container)
+      {:ok, %NodeContainer{}}
+
+      iex> delete_node_container(node_container)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_node_container(%NodeContainer{} = node_container) do
+    Repo.delete(node_container)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking node_container changes.
+
+  ## Examples
+
+      iex> change_node_container(node_container)
+      %Ecto.Changeset{data: %NodeContainer{}}
+
+  """
+  def change_node_container(%NodeContainer{} = node_container, attrs \\ %{}) do
+    NodeContainer.changeset(node_container, attrs)
+  end
 end

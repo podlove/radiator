@@ -1457,4 +1457,44 @@ defmodule Radiator.OutlineTest do
       assert nil == Outline.get_node_below(node_6.uuid)
     end
   end
+
+  describe "outline_node_containers" do
+    alias Radiator.Outline.NodeContainer
+
+    import Radiator.OutlineFixtures
+
+    test "list_outline_node_containers/0 returns all outline_node_containers" do
+      node_container = node_container_fixture()
+      assert Outline.list_outline_node_containers() == [node_container]
+    end
+
+    test "get_node_container!/1 returns the node_container with given id" do
+      node_container = node_container_fixture()
+      assert Outline.get_node_container!(node_container.id) == node_container
+    end
+
+    test "create_node_container/1 with valid data creates a node_container" do
+      valid_attrs = %{}
+
+      assert {:ok, %NodeContainer{}} = Outline.create_node_container(valid_attrs)
+    end
+
+    test "update_node_container/2 with valid data updates the node_container" do
+      node_container = node_container_fixture()
+      update_attrs = %{}
+
+      assert {:ok, %NodeContainer{}} = Outline.update_node_container(node_container, update_attrs)
+    end
+
+    test "delete_node_container/1 deletes the node_container" do
+      node_container = node_container_fixture()
+      assert {:ok, %NodeContainer{}} = Outline.delete_node_container(node_container)
+      assert_raise Ecto.NoResultsError, fn -> Outline.get_node_container!(node_container.id) end
+    end
+
+    test "change_node_container/1 returns a node_container changeset" do
+      node_container = node_container_fixture()
+      assert %Ecto.Changeset{} = Outline.change_node_container(node_container)
+    end
+  end
 end
