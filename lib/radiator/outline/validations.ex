@@ -4,6 +4,8 @@ defmodule Radiator.Outline.Validations do
   """
   alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepository
+  alias Radiator.Podcast
+  alias Radiator.Podcast.Episode
 
   def validate_consistency_for_move(
         %{prev_id: new_prev_id, parent_id: new_parent_id},
@@ -43,7 +45,8 @@ defmodule Radiator.Outline.Validations do
   Returns :ok if the tree is valid
   """
   def validate_tree_for_episode(episode_id) do
-    {:ok, tree_nodes} = NodeRepository.get_node_tree(episode_id)
+    %Episode{episode_root_id: episode_root_id} = Podcast.get_episode!(episode_id)
+    {:ok, tree_nodes} = NodeRepository.get_node_tree(episode_id, episode_root_id)
 
     if Enum.count(tree_nodes) == NodeRepository.count_nodes_by_episode(episode_id) do
       validate_tree_nodes(tree_nodes)

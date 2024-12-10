@@ -6,6 +6,8 @@ defmodule Radiator.Outline.NodeRepository do
   import Ecto.Query, warn: false
 
   alias Radiator.Outline.Node
+  alias Radiator.Podcast
+  alias Radiator.Podcast.{Episode, Show}
   alias Radiator.Repo
 
   @doc """
@@ -24,6 +26,60 @@ defmodule Radiator.Outline.NodeRepository do
     %Node{}
     |> Node.insert_changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Creates the internal nodes for a show, this is the global root
+  and the global inbox.
+  """
+  def create_virtual_nodes_for_show(show_id) do
+    # create a root node for a show
+    {:ok, show_root} =
+      create_node(%{
+        show_id: show_id,
+        parent_id: nil,
+        prev_id: nil,
+        _type: "global_root"
+      })
+
+    {:ok, global_inbox} =
+      create_node(%{
+        show_id: show_id,
+        parent_id: show_root.uuid,
+        prev_id: nil,
+        _type: "global_inbox"
+      })
+
+    {show_root, global_inbox}
+  end
+
+  @doc """
+  Creates the internal nodes for an episode, this is the episode root
+  and the episode inbox.
+  """
+  def create_virtual_nodes_for_episode(%Episode{id: episode_id, show_id: show_id}) do
+    # create a root node for a show
+    %Show{global_root_id: global_root_id} = Podcast.get_show!(show_id)
+
+    {:ok, episode_root} =
+      create_node(%{
+        episode_id: episode_id,
+        show_id: show_id,
+        parent_id: global_root_id,
+        prev_id: nil,
+        _type: "episode_root"
+      })
+
+    {:ok, episode_inbox} =
+      create_node(%{
+        episode_id: episode_id,
+        show_id: show_id,
+        parent_id: global_root_id,
+        prev_id: nil,
+        _type: "episode_inbox"
+      })
+
+    {episode_root, episode_inbox}
   end
 
   @doc """
@@ -70,6 +126,7 @@ defmodule Radiator.Outline.NodeRepository do
   def list_nodes_by_episode(episode_id) do
     Node
     |> where([p], p.episode_id == ^episode_id)
+    |> where([p], p._type == :node)
     |> Repo.all()
     |> Enum.group_by(& &1.parent_id)
     |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)
@@ -150,17 +207,21 @@ defmodule Radiator.Outline.NodeRepository do
   end
 
   @doc """
-  Gets a single node defined by the given prev_id and parent_id.
+  Gets a single node defined by the given prev_id and parent_id and the
+  episode id.
+  TODO: episode id should become a general container id (outline_tree_id)
+
   Returns `nil` if the Node cannot be found.
   ## Examples
-            iex> get_node_by_parent_and_prev("5adf3b360fb0", "380d56cf")
+            iex> get_node_by_parent_and_prev("5adf3b360fb0", "380d56cf", 23)
             nil
 
-            iex> get_node_by_parent_and_prev("5e3f5a0422a4", "b78a976d")
+            iex> get_node_by_parent_and_prev("5e3f5a0422a4", "b78a976d", 23)
             %Node{uuid: "33b2a1dac9b1", parent_id: "5e3f5a0422a4", prev_id: "b78a976d"}
   """
-  def get_node_by_parent_and_prev(parent_id, prev_id) do
+  def get_node_by_parent_and_prev(parent_id, prev_id, episode_id) do
     Node
+    |> where(episode_id: ^episode_id)
     |> where_prev_node_equals(prev_id)
     |> where_parent_node_equals(parent_id)
     |> Repo.one()
@@ -333,18 +394,20 @@ defmodule Radiator.Outline.NodeRepository do
   )
   SELECT * FROM node_tree;
   """
-  def get_node_tree(nil), do: {:error, "episode_id is nil"}
+  def get_node_tree(nil, _), do: {:error, "episode_id is nil"}
 
-  def get_node_tree(episode_id) do
+  def get_node_tree(episode_id, parent_id) do
+
     node_tree_initial_query =
       Node
-      |> where([n], is_nil(n.parent_id))
+      |> where([n], n.parent_id == ^parent_id)
       |> where([n], n.episode_id == ^episode_id)
       |> select([n], %{
         uuid: n.uuid,
         content: n.content,
         parent_id: n.parent_id,
         prev_id: n.prev_id,
+        _type: n._type,
         level: 0
       })
 
@@ -357,6 +420,7 @@ defmodule Radiator.Outline.NodeRepository do
           outline_node.content,
           outline_node.parent_id,
           outline_node.prev_id,
+          outline_node._type,
           node_tree.level + 1
         ]
 
@@ -373,6 +437,7 @@ defmodule Radiator.Outline.NodeRepository do
         content: n.content,
         parent_id: n.parent_id,
         prev_id: n.prev_id,
+        _type: n._type,
         level: n.level
       })
       |> Repo.all()
@@ -381,6 +446,7 @@ defmodule Radiator.Outline.NodeRepository do
                        content: content,
                        parent_id: parent_id,
                        prev_id: prev_id,
+                       _type: type,
                        level: level
                      } ->
         %Node{
@@ -389,6 +455,7 @@ defmodule Radiator.Outline.NodeRepository do
           parent_id: binaray_uuid_to_ecto_uuid(parent_id),
           prev_id: binaray_uuid_to_ecto_uuid(prev_id),
           level: level,
+          _type: type,
           episode_id: episode_id
         }
       end)

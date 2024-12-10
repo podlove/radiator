@@ -21,8 +21,11 @@ defmodule Radiator.Outline.Node do
 
     field :level, :integer, virtual: true
 
+    # @deprecated
     belongs_to :episode, Episode
+    # @deprecated
     belongs_to :show, Show
+
     belongs_to :parent, Node, references: :uuid, type: Ecto.UUID
     belongs_to :prev, Node, references: :uuid, type: Ecto.UUID
     has_many :urls, Url, foreign_key: :node_id
