@@ -393,18 +393,20 @@ defmodule Radiator.Outline.NodeRepository do
   )
   SELECT * FROM node_tree;
   """
-  def get_node_tree(nil), do: {:error, "episode_id is nil"}
+  def get_node_tree(nil, _), do: {:error, "episode_id is nil"}
 
-  def get_node_tree(episode_id) do
+  def get_node_tree(episode_id, parent_id) do
+
     node_tree_initial_query =
       Node
-      |> where([n], is_nil(n.parent_id))
+      |> where([n], n.parent_id == ^parent_id)
       |> where([n], n.episode_id == ^episode_id)
       |> select([n], %{
         uuid: n.uuid,
         content: n.content,
         parent_id: n.parent_id,
         prev_id: n.prev_id,
+        _type: n._type,
         level: 0
       })
 
@@ -417,6 +419,7 @@ defmodule Radiator.Outline.NodeRepository do
           outline_node.content,
           outline_node.parent_id,
           outline_node.prev_id,
+          outline_node._type,
           node_tree.level + 1
         ]
 
@@ -433,6 +436,7 @@ defmodule Radiator.Outline.NodeRepository do
         content: n.content,
         parent_id: n.parent_id,
         prev_id: n.prev_id,
+        _type: n._type,
         level: n.level
       })
       |> Repo.all()
@@ -441,6 +445,7 @@ defmodule Radiator.Outline.NodeRepository do
                        content: content,
                        parent_id: parent_id,
                        prev_id: prev_id,
+                       _type: type,
                        level: level
                      } ->
         %Node{
@@ -449,6 +454,7 @@ defmodule Radiator.Outline.NodeRepository do
           parent_id: binaray_uuid_to_ecto_uuid(parent_id),
           prev_id: binaray_uuid_to_ecto_uuid(prev_id),
           level: level,
+          _type: type,
           episode_id: episode_id
         }
       end)

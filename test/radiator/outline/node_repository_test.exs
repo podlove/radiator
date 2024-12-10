@@ -150,11 +150,12 @@ defmodule Radiator.Outline.NodeRepositoryTest do
   describe "get_node_tree/1" do
     setup :complex_node_fixture
 
-    test "returns all nodes from a episode", %{parent_node: parent_node} do
-      episode_id = parent_node.episode_id
-      assert {:ok, tree} = NodeRepository.get_node_tree(episode_id)
+    test "returns all nodes from a episode", %{episode: %{id: episode_id, episode_root_id: episode_root_id}} do
+      assert {:ok, tree} = NodeRepository.get_node_tree(episode_id, episode_root_id)
+      IO.inspect(tree, label: "tree")
 
       all_nodes = NodeRepository.list_nodes_by_episode(episode_id)
+      IO.inspect(all_nodes, label: "all_nodes")
 
       assert Enum.count(tree) == Enum.count(all_nodes)
 
@@ -165,18 +166,16 @@ defmodule Radiator.Outline.NodeRepositoryTest do
     end
 
     test "does not return a node from another episode", %{
-      parent_node: parent_node
+      episode: %{id: episode_id, episode_root_id: episode_root_id}
     } do
-      episode_id = parent_node.episode_id
       other_node = node_fixture(parent_id: nil, prev_id: nil, content: "other content")
       assert other_node.episode_id != episode_id
-      {:ok, tree} = NodeRepository.get_node_tree(episode_id)
+      {:ok, tree} = NodeRepository.get_node_tree(episode_id, episode_root_id)
       assert Enum.filter(tree, fn n -> n.uuid == other_node.uuid end) == []
     end
 
-    test "returns nodes sorted by level", %{parent_node: parent_node} do
-      episode_id = parent_node.episode_id
-      {:ok, tree} = NodeRepository.get_node_tree(episode_id)
+    test "returns nodes sorted by level", %{episode: %{id: episode_id, episode_root_id: episode_root_id}} do
+      {:ok, tree} = NodeRepository.get_node_tree(episode_id, episode_root_id)
 
       Enum.reduce(tree, 0, fn node, current_level ->
         if node.parent_id != nil do

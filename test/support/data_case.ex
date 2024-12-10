@@ -16,6 +16,10 @@ defmodule Radiator.DataCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL.Sandbox
+  alias Radiator.Outline.NodeRepository
+  alias Radiator.PodcastFixtures
+
   import Radiator.OutlineFixtures
 
   alias Ecto.Adapters.SQL.Sandbox
@@ -121,13 +125,14 @@ defmodule Radiator.DataCase do
   end
 
   def complex_node_fixture(_) do
-    episode = PodcastFixtures.episode_fixture()
+    show = PodcastFixtures.show_fixture()
+    episode = PodcastFixtures.episode_fixture(show: show)
 
     parent_node =
       node_fixture(
         episode_id: episode.id,
         show_id: episode.show_id,
-        parent_id: nil,
+        parent_id: episode.episode_root_id,
         prev_id: nil,
         content: "root of all evil"
       )
