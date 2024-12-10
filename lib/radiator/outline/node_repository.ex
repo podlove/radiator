@@ -74,7 +74,7 @@ defmodule Radiator.Outline.NodeRepository do
       create_node(%{
         episode_id: episode_id,
         show_id: show_id,
-        parent_id: episode_root.uuid,
+        parent_id: global_root_id,
         prev_id: nil,
         _type: "episode_inbox"
       })
@@ -126,6 +126,7 @@ defmodule Radiator.Outline.NodeRepository do
   def list_nodes_by_episode(episode_id) do
     Node
     |> where([p], p.episode_id == ^episode_id)
+    |> where([p], p._type == :node)
     |> Repo.all()
     |> Enum.group_by(& &1.parent_id)
     |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)

@@ -17,7 +17,6 @@ defmodule Radiator.DataCase do
   use ExUnit.CaseTemplate
 
   alias Ecto.Adapters.SQL.Sandbox
-  alias Radiator.Outline.NodeRepository
   alias Radiator.PodcastFixtures
 
   import Radiator.OutlineFixtures
