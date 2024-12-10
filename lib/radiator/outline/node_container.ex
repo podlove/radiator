@@ -1,4 +1,8 @@
 defmodule Radiator.Outline.NodeContainer do
+  @moduledoc """
+  The node container holds all nodes of a tree/outline.
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
 

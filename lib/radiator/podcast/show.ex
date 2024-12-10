@@ -4,9 +4,12 @@ defmodule Radiator.Podcast.Show do
     A show can have many episodes.
   """
   use Ecto.Schema
+
   import Ecto.Changeset
+
   alias Radiator.Accounts.User
   alias Radiator.Outline.Node
+  alias Radiator.Outline.NodeContainer
   alias Radiator.Podcast.{Episode, Network}
 
   schema "shows" do
@@ -14,6 +17,9 @@ defmodule Radiator.Podcast.Show do
     field :description, :string
 
     belongs_to :network, Network
+
+    belongs_to :inbox_node_container, NodeContainer
+    belongs_to :outline_node_container, NodeContainer
 
     has_many(:episodes, Episode)
     has_many(:outline_nodes, Node)

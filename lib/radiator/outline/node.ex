@@ -5,6 +5,7 @@ defmodule Radiator.Outline.Node do
   use Ecto.Schema
   import Ecto.Changeset
   alias Radiator.Outline.Node
+  alias Radiator.Outline.NodeContainer
   alias Radiator.Podcast.{Episode, Show}
   alias Radiator.Resources.Url
 
@@ -21,7 +22,7 @@ defmodule Radiator.Outline.Node do
 
     field :level, :integer, virtual: true
 
-    belongs_to :outline_node_container, Radiator.Outline.NodeContainer
+    belongs_to :outline_node_container, NodeContainer
 
     belongs_to :episode, Episode
     belongs_to :show, Show

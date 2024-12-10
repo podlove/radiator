@@ -4,9 +4,12 @@ defmodule Radiator.Podcast.Episode do
     Episodes are numbered inside a show.
   """
   use Ecto.Schema
+
   import Ecto.Changeset
 
+  alias Radiator.Outline.NodeContainer
   alias Radiator.Podcast.Show
+
   @slug_max_length 500
 
   schema "episodes" do
@@ -18,6 +21,9 @@ defmodule Radiator.Podcast.Episode do
     field :deleted_at, :utc_datetime
 
     belongs_to :show, Show
+
+    belongs_to :inbox_node_container, NodeContainer
+    belongs_to :outline_node_container, NodeContainer
 
     timestamps(type: :utc_datetime)
   end
