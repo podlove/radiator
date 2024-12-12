@@ -7,6 +7,7 @@ defmodule Radiator.Podcast do
   import Ecto.Query, warn: false
   alias Radiator.Repo
 
+  alias Radiator.Outline.NodeContainer
   alias Radiator.Podcast.{Episode, Network, Show, ShowHosts}
 
   @doc """
@@ -181,10 +182,25 @@ defmodule Radiator.Podcast do
       {:error, %Ecto.Changeset{}}
 
   """
+
   def create_show(attrs \\ %{}) do
-    %Show{}
-    |> Show.changeset(attrs)
-    |> Repo.insert()
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:inbox, NodeContainer.changeset(%NodeContainer{}, %{}))
+    |> Ecto.Multi.insert(:root, NodeContainer.changeset(%NodeContainer{}, %{}))
+    |> Ecto.Multi.insert(:show, fn %{root: root, inbox: inbox} ->
+      %Show{}
+      |> Show.changeset(attrs)
+      |> Ecto.Changeset.put_assoc(:inbox_node_container, inbox)
+      |> Ecto.Changeset.put_assoc(:outline_node_container, root)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{show: show}} ->
+        {:ok, show}
+
+      {:error, _tag, error, _others} ->
+        {:error, error}
+    end
   end
 
   @doc """
