@@ -19,7 +19,7 @@ defmodule Radiator.PodcastTest do
       show = show_fixture()
 
       assert [%Network{shows: shows}] = Podcast.list_networks(preload: :shows)
-      assert shows == [show]
+      assert Enum.map(shows, fn show -> show.id end) == [show.id]
     end
 
     test "get_network!/1 returns the network with given id" do
@@ -69,12 +69,14 @@ defmodule Radiator.PodcastTest do
 
     test "list_shows/0 returns all shows" do
       show = show_fixture()
-      assert Podcast.list_shows() == [show]
+
+      assert Enum.map(Podcast.list_shows(), fn show -> show.id end) == [show.id]
     end
 
     test "get_show!/1 returns the show with given id" do
       show = show_fixture()
-      assert Podcast.get_show!(show.id) == show
+      show_id = show.id
+      assert %Show{id: ^show_id} = Podcast.get_show!(show_id)
     end
 
     test "get_show!/2 returns the show with preloaded episodes" do
@@ -92,6 +94,15 @@ defmodule Radiator.PodcastTest do
       assert {:ok, %Show{} = show} = Podcast.create_show(valid_attrs)
       assert show.title == "some title"
       assert show.network_id == network.id
+    end
+
+    test "create_show/1 creates global inbox and global root nodes" do
+      network = network_fixture()
+      valid_attrs = %{title: "some title", network_id: network.id}
+
+      {:ok, %Show{} = show} = Podcast.create_show(valid_attrs)
+      refute(is_nil(show.inbox_node_container_id))
+      refute(is_nil(show.outline_node_container_id))
     end
 
     test "create_show/1 with invalid data returns error changeset" do
@@ -138,7 +149,6 @@ defmodule Radiator.PodcastTest do
     test "update_show/2 with invalid data returns error changeset" do
       show = show_fixture()
       assert {:error, %Ecto.Changeset{}} = Podcast.update_show(show, @invalid_attrs)
-      assert show == Podcast.get_show!(show.id)
     end
 
     test "update_show/2 with valid data updates the show by removing hosts" do

@@ -687,16 +687,13 @@ defmodule Radiator.Outline do
 
   ## Examples
 
-      iex> create_node_container(%{field: value})
+      iex> create_node_container
       {:ok, %NodeContainer{}}
 
-      iex> create_node_container(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
   """
-  def create_node_container(attrs \\ %{}) do
+  def create_node_container do
     %NodeContainer{}
-    |> NodeContainer.changeset(attrs)
+    |> NodeContainer.changeset(%{})
     |> Repo.insert()
   end
 

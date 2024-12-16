@@ -1474,9 +1474,7 @@ defmodule Radiator.OutlineTest do
     end
 
     test "create_node_container/1 with valid data creates a node_container" do
-      valid_attrs = %{}
-
-      assert {:ok, %NodeContainer{}} = Outline.create_node_container(valid_attrs)
+      assert {:ok, %NodeContainer{}} = Outline.create_node_container()
     end
 
     test "update_node_container/2 with valid data updates the node_container" do
