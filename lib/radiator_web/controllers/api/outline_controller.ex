@@ -10,6 +10,7 @@ defmodule RadiatorWeb.Api.OutlineController do
       token
       |> decode_token()
       |> get_user_by_token()
+      # Deprecated: for bookmarklet
       |> create_node(content, episode)
       |> get_response()
 
