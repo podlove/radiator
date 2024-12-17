@@ -331,7 +331,8 @@ defmodule Radiator.Outline do
           "content" => new_node_content,
           "episode_id" => node.episode_id,
           "parent_id" => node.parent_id,
-          "prev_id" => node.uuid
+          "prev_id" => node.uuid,
+          "outline_node_container_id" => node.outline_node_container_id
         }
 
         {:ok, %NodeRepoResult{node: new_node, next: old_next_node}} =

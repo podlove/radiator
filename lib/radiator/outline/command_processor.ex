@@ -5,9 +5,9 @@ defmodule Radiator.Outline.CommandProcessor do
 
   alias Radiator.EventStore
   alias Radiator.Outline
-  alias Radiator.Outline.NodeRepoResult
-
   alias Radiator.Outline.Command
+  alias Radiator.Outline.NodeRepoResult
+  alias Radiator.Podcast
 
   alias Radiator.Outline.Command.{
     ChangeNodeContentCommand,
@@ -54,6 +54,7 @@ defmodule Radiator.Outline.CommandProcessor do
 
   defp process_command(%InsertNodeCommand{payload: payload, user_id: user_id} = command) do
     payload
+    |> add_node_container()
     |> Map.merge(%{"user_id" => user_id})
     |> Outline.insert_node()
     |> handle_insert_node_result(command)
@@ -215,5 +216,14 @@ defmodule Radiator.Outline.CommandProcessor do
   def handle_change_node_content_result({:error, changeset}, _command) do
     Logger.error("Update node content failed. #{inspect(changeset)}")
     :error
+  end
+
+  defp add_node_container(%{"outline_node_container_id" => _outline_node_container_id} = payload),
+    do: payload
+
+  defp add_node_container(%{"episode_id" => episode_id} = payload) do
+    episode = Podcast.get_episode!(episode_id)
+
+    Map.put(payload, "outline_node_container_id", episode.outline_node_container_id)
   end
 end

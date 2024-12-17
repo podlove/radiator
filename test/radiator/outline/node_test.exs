@@ -36,6 +36,7 @@ defmodule Radiator.Outline.NodeTest do
         "uuid" => uuid,
         "episode_id" => episode.id,
         "show_id" => episode.show_id,
+        "outline_node_container_id" => episode.outline_node_container_id,
         "content" => "Node Content"
       }
 
@@ -48,6 +49,7 @@ defmodule Radiator.Outline.NodeTest do
       attributes = %{
         "episode_id" => episode.id,
         "show_id" => episode.show_id,
+        "outline_node_container_id" => episode.outline_node_container_id,
         "content" => "Node Content"
       }
 
@@ -62,6 +64,7 @@ defmodule Radiator.Outline.NodeTest do
         "uuid" => "not-a-uuid",
         "episode_id" => episode.id,
         "show_id" => episode.show_id,
+        "outline_node_container_id" => episode.outline_node_container_id,
         "content" => "Node Content"
       }
 

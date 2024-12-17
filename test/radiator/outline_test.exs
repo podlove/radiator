@@ -82,6 +82,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "node 3.1",
         "episode_id" => node_3.episode_id,
+        "outline_node_container_id" => node_3.outline_node_container_id,
         "parent_id" => node_3.parent_id,
         "prev_id" => node_3.uuid
       }
@@ -104,6 +105,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
+        "outline_node_container_id" => node_3.outline_node_container_id,
         "parent_id" => node_3.uuid,
         "prev_id" => nested_node_1.uuid
       }
@@ -123,6 +125,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
+        "outline_node_container_id" => node_3.outline_node_container_id,
         "parent_id" => node_3.uuid,
         "prev_id" => nested_node_1.uuid
       }
@@ -139,6 +142,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
+        "outline_node_container_id" => node_3.outline_node_container_id,
         "parent_id" => node_3.uuid,
         "prev_id" => nested_node_1.uuid
       }
@@ -154,6 +158,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
+        "outline_node_container_id" => node_3.outline_node_container_id,
         "parent_id" => node_3.uuid,
         "prev_id" => nested_node_1.uuid
       }
@@ -169,6 +174,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
+        "outline_node_container_id" => node_3.outline_node_container_id,
         "parent_id" => node_3.uuid,
         "prev_id" => nested_node_1.uuid
       }
@@ -186,7 +192,8 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_2.episode_id,
-        "prev_id" => node_2.uuid
+        "prev_id" => node_2.uuid,
+        "outline_node_container_id" => node_2.outline_node_container_id
       }
 
       {:ok, %{next: %{uuid: next_id}, node: new_node}} = Outline.insert_node(node_attrs)
@@ -201,6 +208,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
+        "outline_node_container_id" => node_3.outline_node_container_id,
         "prev_id" => nested_node_1.uuid
       }
 
@@ -216,6 +224,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
+        "outline_node_container_id" => node_3.outline_node_container_id,
         "parent_id" => node_3.uuid,
         "prev_id" => nested_node_1.uuid
       }
@@ -235,6 +244,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
+        "outline_node_container_id" => node_3.outline_node_container_id,
         "parent_id" => node_3.uuid,
         "prev_id" => nested_node_2.uuid
       }
@@ -254,6 +264,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => node_3.episode_id,
+        "outline_node_container_id" => node_3.outline_node_container_id,
         "parent_id" => node_3.uuid
       }
 
@@ -269,7 +280,13 @@ defmodule Radiator.OutlineTest do
     } do
       # another node in another episode without parent and prev node
       node_fixture(parent_id: nil, prev_id: nil)
-      node_attrs = %{"content" => "new node", "episode_id" => parent_node.episode_id}
+
+      node_attrs = %{
+        "content" => "new node",
+        "episode_id" => parent_node.episode_id,
+        "outline_node_container_id" => parent_node.outline_node_container_id
+      }
+
       {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
 
       assert new_node.prev_id == nil
@@ -285,6 +302,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => parent_node.episode_id,
+        "outline_node_container_id" => parent_node.outline_node_container_id,
         "parent_id" => parent_node.uuid,
         "prev_id" => nested_node_1.uuid
       }
@@ -302,6 +320,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => parent_node.episode_id,
+        "outline_node_container_id" => parent_node.outline_node_container_id,
         "parent_id" => parent_node.uuid,
         "prev_id" => bad_parent_node.uuid
       }
@@ -323,6 +342,7 @@ defmodule Radiator.OutlineTest do
       node_attrs = %{
         "content" => "new node",
         "episode_id" => another_episode.id,
+        "outline_node_container_id" => another_episode.outline_node_container_id,
         "prev_id" => nested_node_1.uuid
       }
 

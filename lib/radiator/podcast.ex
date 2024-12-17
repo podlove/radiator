@@ -182,7 +182,6 @@ defmodule Radiator.Podcast do
       {:error, %Ecto.Changeset{}}
 
   """
-
   def create_show(attrs \\ %{}) do
     Ecto.Multi.new()
     |> Ecto.Multi.insert(:inbox, NodeContainer.changeset(%NodeContainer{}, %{}))
@@ -474,6 +473,7 @@ defmodule Radiator.Podcast do
       from e in Episode,
         where: [show_id: ^show_id, is_deleted: false],
         order_by: [desc: e.number],
+        preload: [:inbox_node_container, :outline_node_container],
         limit: 1
     )
   end
@@ -491,9 +491,23 @@ defmodule Radiator.Podcast do
 
   """
   def create_episode(attrs \\ %{}) do
-    %Episode{}
-    |> Episode.changeset(attrs)
-    |> Repo.insert()
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:inbox, NodeContainer.changeset(%NodeContainer{}, %{}))
+    |> Ecto.Multi.insert(:root, NodeContainer.changeset(%NodeContainer{}, %{}))
+    |> Ecto.Multi.insert(:episode, fn %{root: root, inbox: inbox} ->
+      %Episode{}
+      |> Episode.changeset(attrs)
+      |> Ecto.Changeset.put_assoc(:inbox_node_container, inbox)
+      |> Ecto.Changeset.put_assoc(:outline_node_container, root)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{episode: episode}} ->
+        {:ok, episode}
+
+      {:error, _tag, error, _others} ->
+        {:error, error}
+    end
   end
 
   def get_next_episode_number(show_id) do
