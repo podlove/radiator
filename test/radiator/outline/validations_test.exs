@@ -24,6 +24,7 @@ defmodule Radiator.Outline.ValidationsTest do
         %{
           episode_id: episode_id,
           show_id: show_id,
+          outline_node_container_id: node_1.outline_node_container_id,
           parent_id: node_1.uuid,
           prev_id: nil,
           content: "child of node 1"
@@ -40,6 +41,7 @@ defmodule Radiator.Outline.ValidationsTest do
         %{
           episode_id: episode_id,
           show_id: show_id,
+          outline_node_container_id: node_2.outline_node_container_id,
           parent_id: node_2.parent_id,
           prev_id: node_2.prev_id
         }
@@ -56,6 +58,7 @@ defmodule Radiator.Outline.ValidationsTest do
         %{
           episode_id: episode_id,
           show_id: show_id,
+          outline_node_container_id: node_2.outline_node_container_id,
           parent_id: node_2.parent_id,
           prev_id: node_2.prev_id
         }
@@ -66,12 +69,13 @@ defmodule Radiator.Outline.ValidationsTest do
     end
 
     test "when a parent has two childs with prev_id nil the tree is invalid", %{
-      nested_node_1: %Node{episode_id: episode_id, parent_id: parent_id, show_id: show_id}
+      nested_node_1: %Node{episode_id: episode_id, parent_id: parent_id, show_id: show_id} = nested_node_1
     } do
       {:ok, %Node{} = _node_invalid} =
         %{
           episode_id: episode_id,
           show_id: show_id,
+          outline_node_container_id: nested_node_1.outline_node_container_id,
           parent_id: parent_id,
           prev_id: nil,
           content: "invalid node"
@@ -90,6 +94,7 @@ defmodule Radiator.Outline.ValidationsTest do
         %{
           episode_id: episode_id,
           show_id: show_id,
+          outline_node_container_id: nested_node_2.outline_node_container_id,
           parent_id: parent_node.uuid,
           prev_id: nested_node_2.uuid
         }
