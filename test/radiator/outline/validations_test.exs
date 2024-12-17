@@ -69,7 +69,8 @@ defmodule Radiator.Outline.ValidationsTest do
     end
 
     test "when a parent has two childs with prev_id nil the tree is invalid", %{
-      nested_node_1: %Node{episode_id: episode_id, parent_id: parent_id, show_id: show_id} = nested_node_1
+      nested_node_1:
+        %Node{episode_id: episode_id, parent_id: parent_id, show_id: show_id} = nested_node_1
     } do
       {:ok, %Node{} = _node_invalid} =
         %{

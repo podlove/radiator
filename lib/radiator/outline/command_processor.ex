@@ -5,8 +5,8 @@ defmodule Radiator.Outline.CommandProcessor do
 
   alias Radiator.EventStore
   alias Radiator.Outline
-  alias Radiator.Outline.NodeRepoResult
   alias Radiator.Outline.Command
+  alias Radiator.Outline.NodeRepoResult
   alias Radiator.Podcast
 
   alias Radiator.Outline.Command.{
