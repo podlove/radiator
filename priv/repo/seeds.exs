@@ -56,6 +56,7 @@ alias Radiator.Outline.NodeRepository
   NodeRepository.create_node(%{
     "content" => "Node 1",
     "show_id" => current_episode.show_id,
+    "outline_node_container_id" => current_episode.outline_node_container_id,
     "episode_id" => current_episode.id
   })
 
@@ -63,6 +64,7 @@ alias Radiator.Outline.NodeRepository
   NodeRepository.create_node(%{
     "content" => "Node 2",
     "show_id" => current_episode.show_id,
+    "outline_node_container_id" => current_episode.outline_node_container_id,
     "episode_id" => current_episode.id,
     "prev_id" => node1.uuid
   })
@@ -71,6 +73,7 @@ alias Radiator.Outline.NodeRepository
   NodeRepository.create_node(%{
     "content" => "Node 3",
     "show_id" => current_episode.show_id,
+    "outline_node_container_id" => current_episode.outline_node_container_id,
     "episode_id" => current_episode.id,
     "prev_id" => node2.uuid
   })
@@ -79,6 +82,7 @@ alias Radiator.Outline.NodeRepository
   NodeRepository.create_node(%{
     "content" => "Node 4",
     "show_id" => current_episode.show_id,
+    "outline_node_container_id" => current_episode.outline_node_container_id,
     "episode_id" => current_episode.id,
     "prev_id" => node3.uuid
   })
@@ -87,6 +91,7 @@ alias Radiator.Outline.NodeRepository
   NodeRepository.create_node(%{
     "content" => "Node 2.1",
     "show_id" => current_episode.show_id,
+    "outline_node_container_id" => current_episode.outline_node_container_id,
     "episode_id" => current_episode.id,
     "parent_id" => node2.uuid
   })
@@ -95,6 +100,7 @@ alias Radiator.Outline.NodeRepository
   NodeRepository.create_node(%{
     "content" => "Node 2.2",
     "show_id" => current_episode.show_id,
+    "outline_node_container_id" => current_episode.outline_node_container_id,
     "episode_id" => current_episode.id,
     "parent_id" => node2.uuid,
     "prev_id" => node21.uuid
@@ -104,6 +110,7 @@ alias Radiator.Outline.NodeRepository
   NodeRepository.create_node(%{
     "content" => "Node 2.1.1",
     "show_id" => current_episode.show_id,
+    "outline_node_container_id" => current_episode.outline_node_container_id,
     "episode_id" => current_episode.id,
     "parent_id" => node21.uuid
   })
@@ -112,14 +119,8 @@ alias Radiator.Outline.NodeRepository
   NodeRepository.create_node(%{
     "content" => "Node 2.1.2",
     "show_id" => current_episode.show_id,
+    "outline_node_container_id" => current_episode.outline_node_container_id,
     "episode_id" => current_episode.id,
     "parent_id" => node21.uuid,
     "prev_id" => node211.uuid
-  })
-
-{:ok, _past_parent_node} =
-  NodeRepository.create_node(%{
-    "content" => "Old Content",
-    "show_id" => current_episode.show_id,
-    "episode_id" => past_episode.id
   })
