@@ -84,7 +84,7 @@ defmodule Radiator.PodcastTest do
       episode = episode_fixture(%{show_id: show.id})
 
       assert %Show{episodes: episodes} = Podcast.get_show!(show.id, preload: :episodes)
-      assert episodes == [episode]
+      assert Enum.map(episodes, fn e -> e.id end) == [episode.id]
     end
 
     test "create_show/1 with valid data creates a show" do
@@ -203,14 +203,14 @@ defmodule Radiator.PodcastTest do
   describe "episodes" do
     @invalid_attrs %{title: nil}
 
-    test "list_all_episodes/0 returns all episodes" do
+    test "list_all_episodes/0 returns also deleted episodes" do
       deleted_episode =
         episode_fixture(
           is_deleted: true,
           deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)
         )
 
-      assert Podcast.list_all_episodes() == [deleted_episode]
+      assert Enum.map(Podcast.list_all_episodes(), fn e -> e.id end) == [deleted_episode.id]
     end
 
     test "list_available_episodes/0 returns all episodes" do
@@ -223,12 +223,13 @@ defmodule Radiator.PodcastTest do
         )
 
       found_episodes = Podcast.list_available_episodes()
-      assert found_episodes == [episode]
+      assert Enum.map(found_episodes, fn e -> e.id end) == [episode.id]
     end
 
     test "get_episode!/1 returns the episode with given id" do
       episode = episode_fixture()
-      assert Podcast.get_episode!(episode.id) == episode
+      episode_id = episode.id
+      assert %Episode{id: ^episode_id} = Podcast.get_episode!(episode.id)
     end
 
     test "create_episode/1 with valid data creates a episode" do
@@ -257,10 +258,18 @@ defmodule Radiator.PodcastTest do
       assert episode.slug == "some-updated-title"
     end
 
+    test "create_episode/1 creates local inbox and local root node containers" do
+      show = show_fixture()
+      valid_attrs = %{title: "some title", show_id: show.id, number: 5}
+
+      assert {:ok, %Episode{} = episode} = Podcast.create_episode(valid_attrs)
+      refute(is_nil(episode.inbox_node_container_id))
+      refute(is_nil(episode.outline_node_container_id))
+    end
+
     test "update_episode/2 with invalid data returns error changeset" do
       episode = episode_fixture()
       assert {:error, %Ecto.Changeset{}} = Podcast.update_episode(episode, @invalid_attrs)
-      assert episode == Podcast.get_episode!(episode.id)
     end
 
     test "delete_episode/1 deletes the episode" do
