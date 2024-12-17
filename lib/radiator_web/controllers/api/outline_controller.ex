@@ -10,7 +10,7 @@ defmodule RadiatorWeb.Api.OutlineController do
       token
       |> decode_token()
       |> get_user_by_token()
-      |> create_node(content, episode.id)
+      |> create_node(content, episode)
       |> get_response()
 
     conn
@@ -32,11 +32,13 @@ defmodule RadiatorWeb.Api.OutlineController do
   defp create_node(nil, _, _), do: {:error, :user}
   defp create_node(_, _, nil), do: {:error, :episode}
 
-  defp create_node(user, content, episode_id) do
+  defp create_node(user, content, episode) do
+
     Outline.insert_node(%{
       "content" => content,
       "creator_id" => user.id,
-      "episode_id" => episode_id
+      "episode_id" => episode.id,
+      "outline_node_container_id" => episode.outline_node_container_id
     })
   end
 
