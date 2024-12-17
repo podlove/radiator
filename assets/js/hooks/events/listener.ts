@@ -11,7 +11,7 @@ export function click(event: MouseEvent) {
   const target = event.target as HTMLDivElement;
   const select = target!.querySelector("input.selected") as HTMLInputElement;
 
-  select.checked = !select.checked;
+  select && (select.checked = !select.checked);
 }
 
 export function input(event: KeyboardEvent) {
@@ -21,7 +21,7 @@ export function input(event: KeyboardEvent) {
 
   // clearTimeout(watchdog);
   // watchdog = setTimeout(() => {
-  this.pushEventTo(this.el.phxHookId, "save", { uuid, content });
+  this.pushEventTo(this.el, "save", { uuid, content });
   // }, watchdogInterval);
 }
 

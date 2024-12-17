@@ -15,34 +15,34 @@ export function processEvent(action, event) {
   switch (action) {
     case "new_empty_node":
       event.preventDefault();
-      this.pushEventTo(this.el.phxHookId, "new", { uuid, start, stop });
+      this.pushEventTo(this.el, "new", { uuid, start, stop });
       break;
 
     case "indent":
       event.preventDefault();
-      this.pushEventTo(this.el.phxHookId, "indent", { uuid });
+      this.pushEventTo(this.el, "indent", { uuid });
       break;
 
     case "outdent":
       event.preventDefault();
-      this.pushEventTo(this.el.phxHookId, "outdent", { uuid });
+      this.pushEventTo(this.el, "outdent", { uuid });
       break;
 
     case "move_up":
       event.preventDefault();
-      this.pushEventTo(this.el.phxHookId, "move_up", { uuid });
+      this.pushEventTo(this.el, "move_up", { uuid });
       break;
 
     case "move_down":
       event.preventDefault();
-      this.pushEventTo(this.el.phxHookId, "move_down", { uuid });
+      this.pushEventTo(this.el, "move_down", { uuid });
       break;
 
     case "merge_prev":
       const prevNode = getPrevNode(node);
       if (cursorAtStart && prevNode) {
         event.preventDefault();
-        this.pushEventTo(this.el.phxHookId, "merge_prev", { uuid, content });
+        this.pushEventTo(this.el, "merge_prev", { uuid, content });
         focusNode(prevNode);
       }
       break;
@@ -51,7 +51,7 @@ export function processEvent(action, event) {
       const nextNode = getNextNode(node);
       if (cursorAtEnd && nextNode) {
         event.preventDefault();
-        this.pushEventTo(this.el.phxHookId, "merge_next", { uuid, content });
+        this.pushEventTo(this.el, "merge_next", { uuid, content });
         focusNode(nextNode);
       }
       break;
@@ -76,7 +76,7 @@ export function processEvent(action, event) {
       const nodes = this.el.querySelectorAll(".node:has(> .selected:checked)");
       nodes.forEach((node: HTMLDivElement) => {
         const { uuid } = getNodeData(node);
-        this.pushEventTo(this.el.phxHookId, "delete", { uuid });
+        this.pushEventTo(this.el, "delete", { uuid });
       });
       break;
 
