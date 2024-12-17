@@ -33,7 +33,6 @@ defmodule RadiatorWeb.Api.OutlineController do
   defp create_node(_, _, nil), do: {:error, :episode}
 
   defp create_node(user, content, episode) do
-
     Outline.insert_node(%{
       "content" => content,
       "creator_id" => user.id,
