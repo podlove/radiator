@@ -5,6 +5,7 @@ defmodule RadiatorWeb.OutlineComponents do
   use Phoenix.Component
 
   alias Phoenix.HTML
+  alias Phoenix.LiveView.JS
 
   alias RadiatorWeb.CoreComponents, as: Core
 
@@ -16,6 +17,85 @@ defmodule RadiatorWeb.OutlineComponents do
     NodeInsertedEvent,
     NodeMovedEvent
   }
+
+  attr :id, :string, required: true
+  attr :form, :any, required: true
+  attr :target, :any, required: true
+
+  slot :inner_block, required: true
+
+  def node(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      class={[
+        "node group flex flex-wrap",
+        "drag-item:focus-within:ring-0 drag-item:focus-within:ring-offset-0",
+        "drag-ghost:bg-zinc-300 drag-ghost:border-0 drag-ghost:ring-0"
+      ]}
+      data-parent={@form[:parent_id].value}
+      data-prev={@form[:prev_id].value}
+    >
+      <!--
+      <button>
+        <Core.icon name="hero-ellipsis-vertical" class="invisible w-5 h-5 group-hover:visible" />
+      </button>
+      -->
+      <.outline_form for={@form} phx-change="noop" phx-submit="noop" phx-target={@target}>
+        <!--
+        <Core.icon name="hero-check-circle" class="w-5 h-5" />
+        <Core.icon name="hero-cog-6-tooth" class="w-5 h-5" />
+        <Core.input field={@form[:checked]} type="checkbox" />
+
+        <Core.input field={@form[:priority]} type="radio" value="red" />
+        <Core.input field={@form[:priority]} type="radio" value="yellow" />
+        <Core.input field={@form[:priority]} type="radio" value="green" />
+        -->
+      </.outline_form>
+      <div class="ml-4 peer/children w-full order-last children group-data-[collapsed]:hidden"></div>
+      <input
+        class="my-1 selected peer/selected"
+        type="checkbox"
+        phx-click={JS.dispatch("toggle_select", detail: %{uuid: @form.data.uuid})}
+      />
+      <span class="hidden py-1 text-gray-500 handle peer-empty/children:block">
+        <.circle />
+      </span>
+      <button
+        class="handle py-1 text-gray-500 block peer-empty/children:hidden group-data-[collapsed]:-rotate-90 duration-200"
+        phx-click={JS.dispatch("toggle_collapse", detail: %{uuid: @form.data.uuid})}
+      >
+        <.triangle />
+      </button>
+      <div
+        id={[@id, "-content"]}
+        class="peer-checked/selected:bg-yellow-100 inline-block pr-4 px-1 py-0.5 content focus:outline-none drag-ghost:opacity-0"
+        contenteditable
+        phx-value-uuid={@form[:uuid].value}
+        phx-focus="focus"
+        phx-blur="blur"
+        phx-target={@target}
+      >{HTML.raw(@form[:content].value)}</div>
+      <div class="text-xs text-white editing"></div>
+    </div>
+    """
+  end
+
+  def triangle(assigns) do
+    ~H"""
+    <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 rotate-90">
+      <polygon points="7,5 7,15 15,10" />
+    </svg>
+    """
+  end
+
+  def circle(assigns) do
+    ~H"""
+    <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
+      <circle cx="10" cy="10" r="3.5"></circle>
+    </svg>
+    """
+  end
 
   @doc """
   Renders an outline form.

@@ -3,76 +3,19 @@
 
   <div
     id={[@id, "-stream"]}
-    class="children focus:outline-none"
+    class="relative children focus:outline-none"
     phx-hook="outline"
     phx-update="stream"
     phx-target={@myself}
     tabindex="0"
   >
-    <div
+    <OutlineComponents.node
       :for={{id, form} <- @streams.nodes}
       id={id}
-      class={[
-        "node group",
-        "drag-item:focus-within:ring-0 drag-item:focus-within:ring-offset-0",
-        "drag-ghost:bg-zinc-300 drag-ghost:border-0 drag-ghost:ring-0",
-        "flex flex-wrap place-items-start"
-      ]}
-      data-parent={form[:parent_id].value}
-      data-prev={form[:prev_id].value}
+      form={form}
+      target={@myself}
     >
-      <input class="hidden my-2 peer selected" type="checkbox" />
-      <button>
-        <.icon name="hero-ellipsis-vertical" class="invisible w-5 h-5 group-hover:visible" />
-      </button>
-      <OutlineComponents.outline_form
-        for={form}
-        class=""
-        phx-change="noop"
-        phx-submit="noop"
-        phx-target={@myself}
-      >
-        <!--
-        <.icon name="hero-check-circle" class="w-5 h-5" />
-        <.icon name="hero-cog-6-tooth" class="w-5 h-5" />
-        <.input field={form[:checked]} type="checkbox" />
-
-        <.input field={form[:priority]} type="radio" value="red"/>
-        <.input field={form[:priority]} type="radio" value="yellow"/>
-        <.input field={form[:priority]} type="radio" value="green"/>
-        -->
-      </OutlineComponents.outline_form>
-      <!--
-      <a href={"##{form.data.uuid}"} class="py-1 text-gray-500 handle">
-        <svg viewBox="0 0 18 18" fill="currentColor" class="w-5 h-5">
-          <circle cx="9" cy="9" r="3.5"></circle>
-        </svg>
-      </a>
-      -->
-      <button
-        class="handle group-data-[collapsed]:-rotate-90 duration-200"
-        phx-click={JS.dispatch("toggle_collapse", detail: %{uuid: form.data.uuid})}
-      >
-        <svg width="20" height="20" viewBox="0 0 20 20" class="text-gray-500 rotate-90">
-          <path
-            d="M13.75 9.56879C14.0833 9.76124 14.0833 10.2424 13.75 10.4348L8.5 13.4659C8.16667 13.6584 7.75 13.4178 7.75 13.0329L7.75 6.97072C7.75 6.58582 8.16667 6.34525 8.5 6.5377L13.75 9.56879Z"
-            stroke="none"
-            fill="currentColor"
-          >
-          </path>
-        </svg>
-      </button>
-      <div
-        id={[id, "-content"]}
-        class="peer-checked:bg-yellow-100 inline-block pr-4 px-1 py-0.5 content focus:outline-none drag-ghost:opacity-0"
-        contenteditable
-        phx-value-uuid={form[:uuid].value}
-        phx-focus="focus"
-        phx-blur="blur"
-        phx-target={@myself}
-      ><%= raw(form[:content].value) %></div>
-      <div class="text-xs text-white editing"></div>
-      <div class="w-full ml-4 children group-data-[collapsed]:hidden"></div>
-    </div>
+      {form[:content].value}
+    </OutlineComponents.node>
   </div>
 </div>
