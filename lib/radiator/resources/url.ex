@@ -31,13 +31,14 @@ defmodule Radiator.Resources.Url do
     embeds_one :meta_data, MetaData
 
     belongs_to :node, Radiator.Outline.Node, type: :binary_id, references: :uuid
+    belongs_to :episode, Radiator.Podcast.Episode
     timestamps(type: :utc_datetime)
   end
 
   @doc false
   def changeset(url, attrs) do
     url
-    |> cast(attrs, [:url, :start_bytes, :size_bytes, :node_id])
+    |> cast(attrs, [:url, :start_bytes, :size_bytes, :node_id, :episode_id])
     |> validate_required([:url, :start_bytes, :size_bytes, :node_id])
     |> cast_embed(:meta_data, with: &MetaData.changeset/2)
   end

@@ -52,10 +52,17 @@ defmodule Radiator.ResourcesbTest do
       url_text = "https://hexdocs.pm"
       node = OutlineFixtures.node_fixture()
       old_url = url_fixture(node_id: node.uuid)
+      episode_id = node.episode_id
 
-      assert [%Url{url: ^url_text, start_bytes: 42, size_bytes: 42}] =
+      assert [%Url{url: ^url_text, start_bytes: 42, size_bytes: 42, episode_id: ^episode_id}] =
                Resources.rebuild_node_urls(node.uuid, [
-                 %{url: url_text, start_bytes: 42, size_bytes: 42}
+                 %{
+                   url: url_text,
+                   start_bytes: 42,
+                   size_bytes: 42,
+                   node_id: node.uuid,
+                   episode_id: episode_id
+                 }
                ])
 
       assert_raise Ecto.NoResultsError, fn -> Resources.get_url!(old_url.id) end

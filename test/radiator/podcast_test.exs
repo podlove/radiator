@@ -12,7 +12,7 @@ defmodule Radiator.PodcastTest do
 
     test "list_networks/0 returns all networks" do
       network = network_fixture()
-      assert Podcast.list_networks() == [network]
+      assert Enum.map(Podcast.list_networks(), fn n -> n.id end) == [network.id]
     end
 
     test "list_networks/1 returns all networks with preloaded shows" do

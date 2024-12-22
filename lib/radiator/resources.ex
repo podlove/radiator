@@ -58,7 +58,6 @@ defmodule Radiator.Resources do
         Enum.map(url_attributes, fn attributes ->
           {:ok, url} =
             attributes
-            |> Map.put(:node_id, node_id)
             |> create_url()
 
           url

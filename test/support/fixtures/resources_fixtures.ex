@@ -4,12 +4,14 @@ defmodule Radiator.ResourcesFixtures do
   entities via the `Radiator.Resources` context.
   """
   alias Radiator.OutlineFixtures
+  alias Radiator.PodcastFixtures
   alias Radiator.Resources
 
   @doc """
   Generate a url.
   """
   def url_fixture(attrs \\ %{}) do
+    episode_id = get_episode_id(attrs)
     node_id = get_node_id(attrs)
 
     {:ok, url} =
@@ -19,7 +21,8 @@ defmodule Radiator.ResourcesFixtures do
         start_bytes: 23,
         url: "https://elixirschool.com",
         meta_data: %{title: "Elixir School"},
-        node_id: node_id
+        node_id: node_id,
+        episode_id: episode_id
       })
       |> Resources.create_url()
 
@@ -28,4 +31,7 @@ defmodule Radiator.ResourcesFixtures do
 
   defp get_node_id(%{node_id: id}), do: id
   defp get_node_id(_), do: OutlineFixtures.node_fixture().uuid
+
+  defp get_episode_id(%{episode_id: id}), do: id
+  defp get_episode_id(_), do: PodcastFixtures.episode_fixture().id
 end
