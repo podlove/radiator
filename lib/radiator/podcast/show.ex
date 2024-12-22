@@ -8,7 +8,6 @@ defmodule Radiator.Podcast.Show do
   import Ecto.Changeset
 
   alias Radiator.Accounts.User
-  alias Radiator.Outline.Node
   alias Radiator.Outline.NodeContainer
   alias Radiator.Podcast.{Episode, Network}
 
@@ -22,7 +21,6 @@ defmodule Radiator.Podcast.Show do
     belongs_to :outline_node_container, NodeContainer
 
     has_many(:episodes, Episode)
-    has_many(:outline_nodes, Node)
     many_to_many(:hosts, User, join_through: "show_hosts")
 
     timestamps(type: :utc_datetime)
