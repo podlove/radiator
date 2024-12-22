@@ -70,7 +70,7 @@ defmodule Radiator.Outline.Dispatch do
       :ok =
         event
         |> Event.outline_node_container_id()
-        |> Validations.validate_tree_for_episode()
+        |> Validations.validate_tree_for_outline_node_container()
     end
 
     Phoenix.PubSub.broadcast(Radiator.PubSub, "events", event)
