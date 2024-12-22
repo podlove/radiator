@@ -63,11 +63,10 @@ defmodule Radiator.Outline do
   # if a previous node is given, the new node will be inserted after the previous node
   # if no parent is given, the new node will be inserted as a root node
   # if no previous node is given, the new node will be inserted as the first child of the parent node
-  def insert_node(%{"show_id" => _show_id} = attrs) do
+  def insert_node(%{"outline_node_container_id" => outline_node_container_id} = attrs) do
     Repo.transaction(fn ->
       prev_id = attrs["prev_id"]
       parent_id = attrs["parent_id"]
-      outline_node_container_id = attrs["outline_node_container_id"]
 
       prev_node = NodeRepository.get_node_if(prev_id)
       parent_node = find_parent_node(prev_node, parent_id)

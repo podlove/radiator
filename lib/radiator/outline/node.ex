@@ -40,7 +40,6 @@ defmodule Radiator.Outline.Node do
       :creator_id,
       :parent_id,
       :prev_id,
-      :show_id,
       :outline_node_container_id
     ])
     |> put_uuid()
