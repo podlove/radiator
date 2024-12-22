@@ -16,11 +16,16 @@ defmodule Radiator.Resources.NodeChangedWorker do
 
   def perform(node_id) do
     analyzers = [Radiator.NodeAnalyzer.UrlAnalyzer]
+    node = NodeRepository.get_node!(node_id)
 
     url_attributes =
-      node_id
-      |> NodeRepository.get_node!()
+      node
       |> NodeAnalyzer.do_analyze(analyzers)
+      |> Enum.map(fn attributes ->
+        attributes
+        |> Map.put(:node_id, node_id)
+        |> Map.put(:episode_id, node.episode_id)
+      end)
 
     _created_urls = Resources.rebuild_node_urls(node_id, url_attributes)
     :ok
