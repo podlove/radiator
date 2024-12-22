@@ -13,14 +13,14 @@ defmodule Radiator.Outline.NodeTest do
       uuid = Ecto.UUID.generate()
 
       node1 =
-        %Node{uuid: uuid, episode_id: episode.id}
+        %Node{uuid: uuid, outline_node_container_id: episode.outline_node_container_id}
         |> Node.insert_changeset(%{content: "some content"})
         |> Ecto.Changeset.apply_changes()
 
       assert node1.uuid == uuid
 
       node2 =
-        %Node{episode_id: episode.id}
+        %Node{outline_node_container_id: episode.outline_node_container_id}
         |> Node.insert_changeset(%{content: "some other content"})
         |> Ecto.Changeset.apply_changes()
 
@@ -34,8 +34,6 @@ defmodule Radiator.Outline.NodeTest do
 
       attributes = %{
         "uuid" => uuid,
-        "episode_id" => episode.id,
-        "show_id" => episode.show_id,
         "outline_node_container_id" => episode.outline_node_container_id,
         "content" => "Node Content"
       }
@@ -48,7 +46,6 @@ defmodule Radiator.Outline.NodeTest do
 
       attributes = %{
         "episode_id" => episode.id,
-        "show_id" => episode.show_id,
         "outline_node_container_id" => episode.outline_node_container_id,
         "content" => "Node Content"
       }
@@ -63,7 +60,6 @@ defmodule Radiator.Outline.NodeTest do
       attributes = %{
         "uuid" => "not-a-uuid",
         "episode_id" => episode.id,
-        "show_id" => episode.show_id,
         "outline_node_container_id" => episode.outline_node_container_id,
         "content" => "Node Content"
       }
