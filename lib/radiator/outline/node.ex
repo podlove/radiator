@@ -17,9 +17,6 @@ defmodule Radiator.Outline.Node do
     field :content, :string
     field :creator_id, :integer
 
-    field :_type, Ecto.Enum,
-      values: [:node, :global_root, :global_inbox, :episode_inbox, :episode_root]
-
     field :level, :integer, virtual: true
 
     belongs_to :outline_node_container, NodeContainer
@@ -48,7 +45,6 @@ defmodule Radiator.Outline.Node do
       :parent_id,
       :prev_id,
       :show_id,
-      :_type,
       :outline_node_container_id
     ])
     |> put_uuid()
