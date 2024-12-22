@@ -42,10 +42,10 @@ defmodule Radiator.Outline.Validations do
   Validates a tree for an episode.
   Returns :ok if the tree is valid
   """
-  def validate_tree_for_episode(episode_id) do
-    {:ok, tree_nodes} = NodeRepository.get_node_tree(episode_id)
+  def validate_tree_for_outline_node_container(outline_node_container_id) do
+    {:ok, tree_nodes} = NodeRepository.get_node_tree(outline_node_container_id)
 
-    if Enum.count(tree_nodes) == NodeRepository.count_nodes_by_episode(episode_id) do
+    if Enum.count(tree_nodes) == NodeRepository.count_nodes_by_outline_node_container(outline_node_container_id) do
       validate_tree_nodes(tree_nodes)
     else
       {:error, :node_count_not_consistent}

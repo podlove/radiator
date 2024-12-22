@@ -6,7 +6,6 @@ defmodule Radiator.Outline.Node do
   import Ecto.Changeset
   alias Radiator.Outline.Node
   alias Radiator.Outline.NodeContainer
-  alias Radiator.Podcast.{Episode, Show}
   alias Radiator.Resources.Url
 
   @derive {Jason.Encoder, only: [:uuid, :content, :creator_id, :parent_id, :prev_id]}
@@ -21,8 +20,6 @@ defmodule Radiator.Outline.Node do
 
     belongs_to :outline_node_container, NodeContainer
 
-    belongs_to :episode, Episode
-    belongs_to :show, Show
     belongs_to :parent, Node, references: :uuid, type: Ecto.UUID
     belongs_to :prev, Node, references: :uuid, type: Ecto.UUID
     has_many :urls, Url, foreign_key: :node_id
@@ -40,11 +37,9 @@ defmodule Radiator.Outline.Node do
     |> cast(attributes, [
       :uuid,
       :content,
-      :episode_id,
       :creator_id,
       :parent_id,
       :prev_id,
-      :show_id,
       :outline_node_container_id
     ])
     |> put_uuid()

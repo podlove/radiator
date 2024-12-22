@@ -59,17 +59,16 @@ defmodule Radiator.Outline.NodeRepository do
 
   @doc """
   Returns the list of nodes for an episode.
-
+  TODO should not be dependend on Outline module
   ## Examples
 
       iex> list_nodes(123)
       [%Node{}, ...]
 
   """
-
-  def list_nodes_by_episode(episode_id) do
+  def list_nodes_by_node_container(outline_node_container_id) do
     Node
-    |> where([p], p.episode_id == ^episode_id)
+    |> where([p], p.outline_node_container_id == ^outline_node_container_id)
     |> Repo.all()
     |> Enum.group_by(& &1.parent_id)
     |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)
@@ -81,13 +80,13 @@ defmodule Radiator.Outline.NodeRepository do
 
   ## Examples
 
-      iex> count_nodes_by_episode(123)
+      iex> count_nodes_by_outline_node_container(123)
       3
 
   """
-  def count_nodes_by_episode(episode_id) do
+  def count_nodes_by_outline_node_container(outline_node_container_id) do
     Node
-    |> where([p], p.episode_id == ^episode_id)
+    |> where([p], p.outline_node_container_id == ^outline_node_container_id)
     |> Repo.aggregate(:count)
   end
 
@@ -223,15 +222,15 @@ defmodule Radiator.Outline.NodeRepository do
         iex> get_next_node(%Node{prev_id: 42})
         %Node{uuid: 42}
   """
-  def get_next_node(%Node{episode_id: episode_id, uuid: node_id, parent_id: parent_id}) do
-    get_next_node(episode_id, node_id, parent_id)
+  def get_next_node(%Node{outline_node_container_id: outline_node_container_id, uuid: node_id, parent_id: parent_id}) do
+    get_next_node(outline_node_container_id, node_id, parent_id)
   end
 
   @doc """
   get_next_node/3
   Returns the next node of a node defined by episode, previd and parent_id in the outline tree.
 
-  Since the previous id and the parent id of a node might be nil, we need to pass the episode_id
+  Since the previous id and the parent id of a node might be nil, we need to pass the outline_node_container_id
   to find the correct node.
 
   ## Examples
@@ -239,11 +238,11 @@ defmodule Radiator.Outline.NodeRepository do
         nil
 
         iex> get_next_node(42, "33b2a1dac9b1", "9d76aad4")
-        %Node{episode_id: 42, prev_id: "33b2a1dac9b1", parent_id: "9d76aad4"}
+        %Node{outline_node_container_id: 42, prev_id: "33b2a1dac9b1", parent_id: "9d76aad4"}
   """
-  def get_next_node(episode_id, prev_id, parent_id) do
+  def get_next_node(outline_node_container_id, prev_id, parent_id) do
     Node
-    |> where(episode_id: ^episode_id)
+    |> where(outline_node_container_id: ^outline_node_container_id)
     |> where_prev_node_equals(prev_id)
     |> where_parent_node_equals(parent_id)
     |> Repo.one()
@@ -325,7 +324,7 @@ defmodule Radiator.Outline.NodeRepository do
   WITH RECURSIVE node_tree AS (
         SELECT uuid, content, parent_id, prev_id, 0 AS level
         FROM outline_nodes
-        WHERE episode_id = ?::integer and parent_id is NULL
+        WHERE outline_node_container_id = ?::integer and parent_id is NULL
      UNION ALL
         SELECT outline_nodes.uuid, outline_nodes.content, outline_nodes.parent_id, outline_nodes.prev_id, node_tree.level + 1
         FROM outline_nodes
@@ -333,13 +332,13 @@ defmodule Radiator.Outline.NodeRepository do
   )
   SELECT * FROM node_tree;
   """
-  def get_node_tree(nil), do: {:error, "episode_id is nil"}
+  def get_node_tree(nil), do: {:error, "outline_node_container_id is nil"}
 
-  def get_node_tree(episode_id) do
+  def get_node_tree(outline_node_container_id) do
     node_tree_initial_query =
       Node
       |> where([n], is_nil(n.parent_id))
-      |> where([n], n.episode_id == ^episode_id)
+      |> where([n], n.outline_node_container_id == ^outline_node_container_id)
       |> select([n], %{
         uuid: n.uuid,
         content: n.content,
@@ -389,7 +388,7 @@ defmodule Radiator.Outline.NodeRepository do
           parent_id: binaray_uuid_to_ecto_uuid(parent_id),
           prev_id: binaray_uuid_to_ecto_uuid(prev_id),
           level: level,
-          episode_id: episode_id
+          outline_node_container_id: outline_node_container_id
         }
       end)
 

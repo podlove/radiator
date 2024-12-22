@@ -65,13 +65,13 @@ defmodule Radiator.Outline.NodeRepositoryTest do
     end
   end
 
-  describe "list_nodes_by_episode/1" do
+  describe "list_nodes_by_node_container/1" do
     test "list_nodes/1 returns only nodes of this episode" do
       node1 = node_fixture()
       node2 = node_fixture()
 
-      assert NodeRepository.list_nodes_by_episode(node1.episode_id) == [node1]
-      assert NodeRepository.list_nodes_by_episode(node2.episode_id) == [node2]
+      assert NodeRepository.list_nodes_by_node_container(node1.outline_node_container_id) == [node1]
+      assert NodeRepository.list_nodes_by_node_container(node2.outline_node_container_id) == [node2]
     end
   end
 
@@ -159,10 +159,10 @@ defmodule Radiator.Outline.NodeRepositoryTest do
     setup :complex_node_fixture
 
     test "returns all nodes from a episode", %{parent_node: parent_node} do
-      episode_id = parent_node.episode_id
-      assert {:ok, tree} = NodeRepository.get_node_tree(episode_id)
+      outline_node_container_id = parent_node.outline_node_container_id
+      assert {:ok, tree} = NodeRepository.get_node_tree(outline_node_container_id)
 
-      all_nodes = NodeRepository.list_nodes_by_episode(episode_id)
+      all_nodes = NodeRepository.list_nodes_by_node_container(outline_node_container_id)
 
       assert Enum.count(tree) == Enum.count(all_nodes)
 
@@ -172,19 +172,19 @@ defmodule Radiator.Outline.NodeRepositoryTest do
       end)
     end
 
-    test "does not return a node from another episode", %{
+    test "does not return a node from another container", %{
       parent_node: parent_node
     } do
-      episode_id = parent_node.episode_id
+      outline_node_container_id = parent_node.outline_node_container_id
       other_node = node_fixture(parent_id: nil, prev_id: nil, content: "other content")
-      assert other_node.episode_id != episode_id
-      {:ok, tree} = NodeRepository.get_node_tree(episode_id)
+      assert other_node.outline_node_container_id != outline_node_container_id
+      {:ok, tree} = NodeRepository.get_node_tree(outline_node_container_id)
       assert Enum.filter(tree, fn n -> n.uuid == other_node.uuid end) == []
     end
 
     test "returns nodes sorted by level", %{parent_node: parent_node} do
-      episode_id = parent_node.episode_id
-      {:ok, tree} = NodeRepository.get_node_tree(episode_id)
+      outline_node_container_id = parent_node.outline_node_container_id
+      {:ok, tree} = NodeRepository.get_node_tree(outline_node_container_id)
 
       Enum.reduce(tree, 0, fn node, current_level ->
         if node.parent_id != nil do
@@ -208,7 +208,7 @@ defmodule Radiator.Outline.NodeRepositoryTest do
       nested_node_2: nested_node_2,
       parent_node: parent_node
     } do
-      {:ok, tree} = NodeRepository.get_node_tree(parent_node.episode_id)
+      {:ok, tree} = NodeRepository.get_node_tree(parent_node.outline_node_container_id)
       assert_level_for_node(tree, parent_node, 0)
       assert_level_for_node(tree, node_1, 1)
       assert_level_for_node(tree, node_2, 1)
@@ -223,13 +223,13 @@ defmodule Radiator.Outline.NodeRepositoryTest do
     test "tree can have more than one parent node", %{
       parent_node: parent_node
     } do
-      episode_id = parent_node.episode_id
+      outline_node_container_id = parent_node.outline_node_container_id
 
       other_parent_node =
         node_fixture(
           parent_id: nil,
           prev_id: parent_node.uuid,
-          episode_id: episode_id,
+          outline_node_container_id: outline_node_container_id,
           content: "also a parent"
         )
 
@@ -237,11 +237,11 @@ defmodule Radiator.Outline.NodeRepositoryTest do
         node_fixture(
           parent_id: nil,
           prev_id: other_parent_node.uuid,
-          episode_id: episode_id,
+          outline_node_container_id: outline_node_container_id,
           content: "even another root element"
         )
 
-      {:ok, tree} = NodeRepository.get_node_tree(parent_node.episode_id)
+      {:ok, tree} = NodeRepository.get_node_tree(parent_node.outline_node_container_id)
       assert_level_for_node(tree, parent_node, 0)
       assert_level_for_node(tree, other_parent_node, 0)
       assert_level_for_node(tree, third_parent_node, 0)
