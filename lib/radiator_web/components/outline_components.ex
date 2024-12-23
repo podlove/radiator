@@ -54,7 +54,7 @@ defmodule RadiatorWeb.OutlineComponents do
       </.outline_form>
       <div class="ml-4 peer/children w-full order-last children group-data-[collapsed]:hidden"></div>
       <input
-        class="my-1 selected peer/selected"
+        class="invisible my-1 group-hover:visible selected peer/selected"
         type="checkbox"
         phx-click={JS.dispatch("toggle_select", detail: %{uuid: @form.data.uuid})}
       />
