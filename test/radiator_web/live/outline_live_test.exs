@@ -132,7 +132,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       assert live
              |> element(stream_id)
-             |> render_hook(:new, params)
+             |> render_hook(:split, params)
 
       keep_liveview_alive()
 

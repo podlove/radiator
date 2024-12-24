@@ -13,9 +13,9 @@ export function processEvent(action, event) {
   const cursorAtEnd = start == content?.length && stop == content?.length;
 
   switch (action) {
-    case "new_empty_node":
+    case "split":
       event.preventDefault();
-      this.pushEventTo(this.el, "new", { uuid, start, stop });
+      this.pushEventTo(this.el, "split", { uuid, start, stop });
       break;
 
     case "indent":

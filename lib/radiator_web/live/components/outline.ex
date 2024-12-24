@@ -147,7 +147,7 @@ defmodule RadiatorWeb.Components.Outline do
     |> reply(:noreply)
   end
 
-  def handle_event("new", %{"uuid" => uuid, "start" => start, "stop" => stop}, socket) do
+  def handle_event("split", %{"uuid" => uuid, "start" => start, "stop" => stop}, socket) do
     user_id = socket.assigns.user_id
     Dispatch.split_node(uuid, {start, stop}, user_id, generate_event_id(socket.id))
 

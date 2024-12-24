@@ -1,7 +1,7 @@
 {
   "content": [
     {
-      "action": "new_empty_node",
+      "action": "split",
       "key": "Enter"
     },
     {
