@@ -18,7 +18,9 @@ defmodule Radiator.Outline.CommandProcessor do
     MoveNodeCommand,
     MoveUpCommand,
     OutdentNodeCommand,
-    SplitNodeCommand
+    SplitNodeCommand,
+    MergePrevNodeCommand,
+    MergeNextNodeCommand
   }
 
   alias Radiator.Outline.Dispatch
@@ -144,6 +146,22 @@ defmodule Radiator.Outline.CommandProcessor do
     # for the second event, we need to generate a new event_id
     command = Map.put(command, :event_id, Ecto.UUID.generate())
     handle_change_node_content_result({:ok, node}, command)
+  end
+
+  defp process_command(%MergePrevNodeCommand{node_id: _node_id} = _command) do
+    # node_id has a prev node?
+
+    # get content from current node -> append content to prev node
+
+    # delete current node
+  end
+
+  defp process_command(%MergeNextNodeCommand{node_id: _node_id} = _command) do
+    # node_id has a next node?
+
+    # get content from next node -> append content to current node
+
+    # delete next node
   end
 
   defp handle_insert_node_result(
