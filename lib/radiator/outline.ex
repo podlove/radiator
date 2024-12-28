@@ -48,6 +48,7 @@ defmodule Radiator.Outline do
 
   @doc """
     Returns a list of all child nodes.
+    TODO: check wether we really need this function
     """
     def list_nodes_by_container_sorted(container_id) do
       NodeRepository.list_nodes_by_node_container(container_id)

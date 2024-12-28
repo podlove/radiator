@@ -1326,10 +1326,10 @@ defmodule Radiator.OutlineTest do
     setup :complex_node_fixture
 
     test "returns all nodes from a container", %{parent_node: parent_node} do
-      episode_id = parent_node.episode_id
-      tree = Outline.list_nodes_by_episode_sorted(episode_id)
+      outline_node_container_id = parent_node.outline_node_container_id
+      tree = Outline.list_nodes_by_container_sorted(outline_node_container_id)
 
-      all_nodes = NodeRepository.list_nodes_by_episode(episode_id)
+      all_nodes = NodeRepository.list_nodes_by_node_container(outline_node_container_id)
 
       assert Enum.count(tree) == Enum.count(all_nodes)
 
@@ -1342,23 +1342,23 @@ defmodule Radiator.OutlineTest do
     test "does not return a node from another container", %{
       parent_node: parent_node
     } do
-      episode_id = parent_node.episode_id
+      outline_node_container_id = parent_node.outline_node_container_id
       other_node = node_fixture(parent_id: nil, prev_id: nil, content: "other content")
-      assert other_node.episode_id != episode_id
-      tree = Outline.list_nodes_by_episode_sorted(episode_id)
+      assert other_node.outline_node_container_id != outline_node_container_id
+      tree = Outline.list_nodes_by_container_sorted(outline_node_container_id)
       assert Enum.filter(tree, fn n -> n.uuid == other_node.uuid end) == []
     end
 
     test "tree can have more than one parent node", %{
       parent_node: parent_node
     } do
-      episode_id = parent_node.episode_id
+      outline_node_container_id = parent_node.outline_node_container_id
 
       other_parent_node =
         node_fixture(
           parent_id: nil,
           prev_id: parent_node.uuid,
-          episode_id: episode_id,
+          outline_node_container_id: outline_node_container_id,
           content: "also a parent"
         )
 
@@ -1366,11 +1366,11 @@ defmodule Radiator.OutlineTest do
         node_fixture(
           parent_id: nil,
           prev_id: other_parent_node.uuid,
-          episode_id: episode_id,
+          outline_node_container_id: outline_node_container_id,
           content: "even another root element"
         )
 
-      tree = Outline.list_nodes_by_episode_sorted(parent_node.episode_id)
+      tree = Outline.list_nodes_by_episode_sorted(parent_node.outline_node_container_id)
 
       num_nodes_without_parents =
         tree
@@ -1381,14 +1381,13 @@ defmodule Radiator.OutlineTest do
   end
 
   describe "order_child_nodes/1" do
-    setup :complex_node_fixture
 
     test "get child nodes in correct order" do
-      episode = episode_fixture()
+      node_container = node_container_fixture()
 
       node_1 =
         node_fixture(
-          episode_id: episode.id,
+          episode_id: node_container.id,
           parent_id: nil,
           prev_id: nil,
           content: "node_1"
@@ -1396,7 +1395,7 @@ defmodule Radiator.OutlineTest do
 
       node_3 =
         node_fixture(
-          episode_id: episode.id,
+          episode_id: node_container.id,
           parent_id: node_1.uuid,
           prev_id: nil,
           content: "node_3"
@@ -1404,7 +1403,7 @@ defmodule Radiator.OutlineTest do
 
       node_2 =
         node_fixture(
-          episode_id: episode.id,
+          episode_id: node_container.id,
           parent_id: node_1.uuid,
           prev_id: node_3.uuid,
           content: "node_2"
