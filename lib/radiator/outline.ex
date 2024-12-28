@@ -47,6 +47,14 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+    Returns a list of all child nodes.
+    """
+    def list_nodes_by_container_sorted(container_id) do
+      NodeRepository.list_nodes_by_node_container(container_id)
+    end
+
+
+  @doc """
   Inserts a node.
 
   ## Examples

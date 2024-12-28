@@ -349,7 +349,7 @@ defmodule Radiator.OutlineTest do
       parent_node: parent_node,
       nested_node_1: nested_node_1
     } do
-      count_nodes = NodeRepository.count_nodes_by_episode(parent_node.episode_id)
+      count_nodes = NodeRepository.count_nodes_by_outline_node_container(parent_node.outline_node_container_id)
 
       {:ok, another_episode} =
         Podcast.create_episode(%{title: "current episode", show_id: episode.show_id, number: 23})
@@ -361,7 +361,7 @@ defmodule Radiator.OutlineTest do
       }
 
       {:error, _error_message} = Outline.insert_node(node_attrs)
-      new_count_nodes = NodeRepository.count_nodes_by_episode(parent_node.episode_id)
+      new_count_nodes = NodeRepository.count_nodes_by_outline_node_container(parent_node.outline_node_container_id)
       # count stays the same
       assert new_count_nodes == count_nodes
     end
@@ -1245,23 +1245,23 @@ defmodule Radiator.OutlineTest do
 
     test "works for last element in list", %{
       node_6: node_6,
-      episode: %{id: episode_id}
+      episode: %{outline_node_container_id: outline_node_container_id}
     } do
-      count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
+      count_nodes = NodeRepository.count_nodes_by_outline_node_container(outline_node_container_id)
       assert %NodeRepoResult{} = Outline.remove_node(node_6)
-      new_count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
+      new_count_nodes = NodeRepository.count_nodes_by_outline_node_container(outline_node_container_id)
       assert new_count_nodes == count_nodes - 1
     end
 
     test "works for first element in list", %{
       node_1: node_1,
       node_2: node_2,
-      episode: %{id: episode_id}
+      episode: %{outline_node_container_id: outline_node_container_id}
     } do
 
-      count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
+      count_nodes = NodeRepository.count_nodes_by_outline_node_container(outline_node_container_id)
       assert %NodeRepoResult{} = Outline.remove_node(node_1)
-      new_count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
+      new_count_nodes = NodeRepository.count_nodes_by_outline_node_container(outline_node_container_id)
       assert new_count_nodes == count_nodes - 1
 
       node_2 = NodeRepository.get_node!(node_2.uuid)
@@ -1322,10 +1322,10 @@ defmodule Radiator.OutlineTest do
     end
   end
 
-  describe "list_nodes_by_episode_sorted/1" do
+  describe "list_nodes_by_container_sorted/1" do
     setup :complex_node_fixture
 
-    test "returns all nodes from a episode", %{parent_node: parent_node} do
+    test "returns all nodes from a container", %{parent_node: parent_node} do
       episode_id = parent_node.episode_id
       tree = Outline.list_nodes_by_episode_sorted(episode_id)
 
@@ -1339,7 +1339,7 @@ defmodule Radiator.OutlineTest do
       end)
     end
 
-    test "does not return a node from another episode", %{
+    test "does not return a node from another container", %{
       parent_node: parent_node
     } do
       episode_id = parent_node.episode_id
