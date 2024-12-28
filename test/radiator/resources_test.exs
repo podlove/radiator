@@ -52,7 +52,10 @@ defmodule Radiator.ResourcesbTest do
     test "rebuilds all urls for a node" do
       url_text = "https://hexdocs.pm"
       episode = PodcastFixtures.episode_fixture()
-      node = OutlineFixtures.node_fixture(outline_node_container_id: episode.outline_node_container_id)
+
+      node =
+        OutlineFixtures.node_fixture(outline_node_container_id: episode.outline_node_container_id)
+
       old_url = url_fixture(node_id: node.uuid)
       episode_id = episode.id
 
@@ -118,6 +121,7 @@ defmodule Radiator.ResourcesbTest do
 
   def set_up_single_url(_) do
     episode = PodcastFixtures.episode_fixture()
+
     node =
       OutlineFixtures.node_fixture(outline_node_container_id: episode.outline_node_container_id)
 

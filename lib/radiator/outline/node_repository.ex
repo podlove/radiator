@@ -152,16 +152,16 @@ defmodule Radiator.Outline.NodeRepository do
   Gets a single node defined by the given prev_id and parent_id.
   Returns `nil` if the Node cannot be found.
   ## Examples
-            iex> get_node_by_parent_and_prev("5adf3b360fb0", "380d56cf")
+            iex> get_node_by_parent_and_prev(23, "5adf3b360fb0", "380d56cf")
             nil
 
-            iex> get_node_by_parent_and_prev("5e3f5a0422a4", "b78a976d")
+            iex> get_node_by_parent_and_prev(42, "5e3f5a0422a4", "b78a976d")
             %Node{uuid: "33b2a1dac9b1", parent_id: "5e3f5a0422a4", prev_id: "b78a976d"}
   """
-  def get_node_by_parent_and_prev(parent_id, prev_id) do
+  def get_node_by_parent_and_prev(container_id, parent_id, prev_id) do
     Node
-    |> where_prev_node_equals(prev_id)
-    |> where_parent_node_equals(parent_id)
+    |> where_prev_node_equals(container_id, prev_id)
+    |> where_parent_node_equals(container_id, parent_id)
     |> Repo.one()
   end
 

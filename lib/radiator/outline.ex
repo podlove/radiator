@@ -47,13 +47,12 @@ defmodule Radiator.Outline do
   end
 
   @doc """
-    Returns a list of all child nodes.
-    TODO: check wether we really need this function
-    """
-    def list_nodes_by_container_sorted(container_id) do
-      NodeRepository.list_nodes_by_node_container(container_id)
-    end
-
+  Returns a list of all child nodes.
+  TODO: check wether we really need this function
+  """
+  def list_nodes_by_container_sorted(container_id) do
+    NodeRepository.list_nodes_by_node_container(container_id)
+  end
 
   @doc """
   Inserts a node.
@@ -488,10 +487,18 @@ defmodule Radiator.Outline do
 
     Repo.transaction(fn ->
       old_next_node =
-        NodeRepository.get_node_by_parent_and_prev(get_node_id(parent_node), node.uuid)
+        NodeRepository.get_node_by_parent_and_prev(
+          node.outline_node_container_id,
+          get_node_id(parent_node),
+          node.uuid
+        )
 
       new_next_node =
-        NodeRepository.get_node_by_parent_and_prev(new_parent_id, new_prev_id)
+        NodeRepository.get_node_by_parent_and_prev(
+          node.outline_node_container_id,
+          new_parent_id,
+          new_prev_id
+        )
 
       {:ok, node} = NodeRepository.move_node_if(node, new_parent_id, new_prev_id)
 
