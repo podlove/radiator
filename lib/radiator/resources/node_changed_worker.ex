@@ -3,6 +3,7 @@ defmodule Radiator.Resources.NodeChangedWorker do
   job to extract urls from content and persist URLs
   """
   alias __MODULE__
+  alias Radiator.EpisodeOutliner
   alias Radiator.NodeAnalyzer
   alias Radiator.Outline.NodeRepository
   alias Radiator.Resources
@@ -18,13 +19,15 @@ defmodule Radiator.Resources.NodeChangedWorker do
     analyzers = [Radiator.NodeAnalyzer.UrlAnalyzer]
     node = NodeRepository.get_node!(node_id)
 
+    episode_id = EpisodeOutliner.episode_id_for_node(node)
+
     url_attributes =
       node
       |> NodeAnalyzer.do_analyze(analyzers)
       |> Enum.map(fn attributes ->
         attributes
         |> Map.put(:node_id, node_id)
-        |> Map.put(:episode_id, node.episode_id)
+        |> Map.put(:episode_id, episode_id)
       end)
 
     _created_urls = Resources.rebuild_node_urls(node_id, url_attributes)

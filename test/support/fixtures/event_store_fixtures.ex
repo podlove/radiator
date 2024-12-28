@@ -68,10 +68,17 @@ defmodule Radiator.EventStoreFixtures do
 
   def node_moved_event_fixture(user_id: user_id) do
     node = OutlineFixtures.node_fixture()
-    _parent = OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
-    _prev = OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
+
+    _parent =
+      OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
+
+    _prev =
+      OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
+
     next = OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
-    old_next = OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
+
+    old_next =
+      OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
 
     old_prev =
       OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
