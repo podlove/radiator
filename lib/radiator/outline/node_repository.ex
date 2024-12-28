@@ -247,8 +247,8 @@ defmodule Radiator.Outline.NodeRepository do
   def get_next_node(outline_node_container_id, prev_id, parent_id) do
     Node
     |> where(outline_node_container_id: ^outline_node_container_id)
-    |> where_prev_node_equals(prev_id)
-    |> where_parent_node_equals(parent_id)
+    |> where_prev_node_equals(outline_node_container_id, prev_id)
+    |> where_parent_node_equals(outline_node_container_id, parent_id)
     |> Repo.one()
   end
 
@@ -399,11 +399,28 @@ defmodule Radiator.Outline.NodeRepository do
     {:ok, tree}
   end
 
-  defp where_prev_node_equals(node, nil), do: where(node, [n], is_nil(n.prev_id))
-  defp where_prev_node_equals(node, prev_id), do: where(node, [n], n.prev_id == ^prev_id)
+  defp where_prev_node_equals(node, outline_node_container_id, nil) do
+    node
+    |> where([n], is_nil(n.prev_id))
+    |> where([n], n.outline_node_container_id == ^outline_node_container_id)
+  end
+  defp where_prev_node_equals(node, outline_node_container_id, prev_id)do
+    node
+    |> where([n], n.prev_id == ^prev_id)
+    |> where([n], n.outline_node_container_id == ^outline_node_container_id)
+  end
 
-  defp where_parent_node_equals(node, nil), do: where(node, [n], is_nil(n.parent_id))
-  defp where_parent_node_equals(node, parent_id), do: where(node, [n], n.parent_id == ^parent_id)
+  defp where_parent_node_equals(node, outline_node_container_id, nil) do
+    node
+    |> where([n], is_nil(n.parent_id))
+    |> where([n], n.outline_node_container_id == ^outline_node_container_id)
+  end
+
+  defp where_parent_node_equals(node, outline_node_container_id, parent_id) do
+    node
+    |> where([n], n.parent_id == ^parent_id)
+    |> where([n], n.outline_node_container_id == ^outline_node_container_id)
+  end
 
   defp binaray_uuid_to_ecto_uuid(nil), do: nil
 
