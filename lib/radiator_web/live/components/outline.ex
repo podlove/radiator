@@ -2,7 +2,6 @@ defmodule RadiatorWeb.Components.Outline do
   @moduledoc false
   use RadiatorWeb, :live_component
 
-  alias Radiator.EpisodeOutliner
   alias Radiator.Outline
   alias Radiator.Outline.Dispatch
 
@@ -95,7 +94,7 @@ defmodule RadiatorWeb.Components.Outline do
   end
 
   def update(%{container_id: id} = assigns, socket) do
-    nodes = Outliner.list_nodes_by_container_sorted(id)
+    nodes = Outline.list_nodes_by_container_sorted(id)
     node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
 
     socket
