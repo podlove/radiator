@@ -131,13 +131,24 @@ defmodule Radiator.Outline.CommandProcessor do
            selection: selection
          } = command
        ) do
-    {:ok, %NodeRepoResult{node: node, next: next, outline_node_container_id: outline_node_container_id, old_next: old_next}} =
+    {:ok,
+     %NodeRepoResult{
+       node: node,
+       next: next,
+       outline_node_container_id: outline_node_container_id,
+       old_next: old_next
+     }} =
       node_id
       |> Outline.split_node(selection)
 
     # broadcast two events
     handle_insert_node_result(
-      {:ok, %NodeRepoResult{node: next, next: old_next, outline_node_container_id: outline_node_container_id}},
+      {:ok,
+       %NodeRepoResult{
+         node: next,
+         next: old_next,
+         outline_node_container_id: outline_node_container_id
+       }},
       command
     )
 
@@ -147,7 +158,12 @@ defmodule Radiator.Outline.CommandProcessor do
   end
 
   defp handle_insert_node_result(
-         {:ok, %NodeRepoResult{node: node, next: next, outline_node_container_id: outline_node_container_id}},
+         {:ok,
+          %NodeRepoResult{
+            node: node,
+            next: next,
+            outline_node_container_id: outline_node_container_id
+          }},
          command
        ) do
     %NodeInsertedEvent{

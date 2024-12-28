@@ -44,7 +44,7 @@ defmodule Radiator.Outline.ValidationsTest do
         |> NodeRepository.create_node()
 
       assert {:error, :prev_id_not_consistent} =
-        Validations.validate_tree_for_outline_node_container(outline_node_container_id)
+               Validations.validate_tree_for_outline_node_container(outline_node_container_id)
     end
 
     test "when a nodes has a non connected prev_id the tree is invalid", %{
@@ -64,7 +64,8 @@ defmodule Radiator.Outline.ValidationsTest do
 
     test "when a parent has two childs with prev_id nil the tree is invalid", %{
       nested_node_1:
-        %Node{outline_node_container_id: outline_node_container_id, parent_id: parent_id} = nested_node_1
+        %Node{outline_node_container_id: outline_node_container_id, parent_id: parent_id} =
+          nested_node_1
     } do
       {:ok, %Node{} = _node_invalid} =
         %{

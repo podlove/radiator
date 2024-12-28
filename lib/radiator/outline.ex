@@ -72,7 +72,8 @@ defmodule Radiator.Outline do
       parent_node = find_parent_node(prev_node, parent_id)
 
       # find Node which has been previously connected to prev_node
-      next_node = NodeRepository.get_next_node(outline_node_container_id, prev_id, get_node_id(parent_node))
+      next_node =
+        NodeRepository.get_next_node(outline_node_container_id, prev_id, get_node_id(parent_node))
 
       with true <- parent_and_prev_consistent?(parent_node, prev_node),
            true <- container_valid?(outline_node_container_id, parent_node, prev_node),
@@ -82,7 +83,11 @@ defmodule Radiator.Outline do
              |> NodeRepository.create_node(),
            {:ok, _node_to_move} <-
              NodeRepository.move_node_if(next_node, get_node_id(parent_node), node.uuid) do
-        %NodeRepoResult{node: node, next: get_node_result_info(next_node), outline_node_container_id: outline_node_container_id}
+        %NodeRepoResult{
+          node: node,
+          next: get_node_result_info(next_node),
+          outline_node_container_id: outline_node_container_id
+        }
       else
         false ->
           Repo.rollback("Insert node failed. Parent and prev node are not consistent.")
@@ -432,11 +437,25 @@ defmodule Radiator.Outline do
   def get_node_id(nil), do: nil
   def get_node_id(%Node{} = node), do: node.uuid
 
-  defp container_valid?(outline_node_container_id, %Node{outline_node_container_id: outline_node_container_id}, %Node{outline_node_container_id: outline_node_container_id}),
-    do: true
+  defp container_valid?(
+         outline_node_container_id,
+         %Node{outline_node_container_id: outline_node_container_id},
+         %Node{outline_node_container_id: outline_node_container_id}
+       ),
+       do: true
 
-  defp container_valid?(outline_node_container_id, %Node{outline_node_container_id: outline_node_container_id}, nil), do: true
-  defp container_valid?(outline_node_container_id, nil, %Node{outline_node_container_id: outline_node_container_id}), do: true
+  defp container_valid?(
+         outline_node_container_id,
+         %Node{outline_node_container_id: outline_node_container_id},
+         nil
+       ),
+       do: true
+
+  defp container_valid?(outline_node_container_id, nil, %Node{
+         outline_node_container_id: outline_node_container_id
+       }),
+       do: true
+
   defp container_valid?(_outline_node_container_id, nil, nil), do: true
   defp container_valid?(_outline_node_container_id, _parent_node, _prev_node), do: false
 

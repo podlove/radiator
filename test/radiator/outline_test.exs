@@ -61,7 +61,11 @@ defmodule Radiator.OutlineTest do
         |> node_tree_fixture(%{outline_node_container_id: outline_node_container_id})
 
       assert length(nodes) == 13
-      assert Enum.all?(nodes, &match?(%Node{outline_node_container_id: ^outline_node_container_id}, &1))
+
+      assert Enum.all?(
+               nodes,
+               &match?(%Node{outline_node_container_id: ^outline_node_container_id}, &1)
+             )
 
       assert [
                %{uuid: uuid_1, content: "node-1", parent_id: nil, prev_id: nil},

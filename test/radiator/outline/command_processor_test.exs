@@ -19,12 +19,17 @@ defmodule Radiator.Outline.CommandProcessorTest do
         "episode_id" => episode.id
       }
 
-      num_nodes = NodeRepository.count_nodes_by_outline_node_container(episode.outline_node_container_id)
+      num_nodes =
+        NodeRepository.count_nodes_by_outline_node_container(episode.outline_node_container_id)
+
       command = Command.build("insert_node", attributes, user.id, event_id)
       CommandProcessor.handle_events([command], 0, nil)
 
       # assert a node has been created
-      assert num_nodes + 1 == NodeRepository.count_nodes_by_outline_node_container(episode.outline_node_container_id)
+      assert num_nodes + 1 ==
+               NodeRepository.count_nodes_by_outline_node_container(
+                 episode.outline_node_container_id
+               )
     end
 
     test "insert_node creates and stores an event", %{

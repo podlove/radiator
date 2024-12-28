@@ -222,7 +222,11 @@ defmodule Radiator.Outline.NodeRepository do
         iex> get_next_node(%Node{prev_id: 42})
         %Node{uuid: 42}
   """
-  def get_next_node(%Node{outline_node_container_id: outline_node_container_id, uuid: node_id, parent_id: parent_id}) do
+  def get_next_node(%Node{
+        outline_node_container_id: outline_node_container_id,
+        uuid: node_id,
+        parent_id: parent_id
+      }) do
     get_next_node(outline_node_container_id, node_id, parent_id)
   end
 

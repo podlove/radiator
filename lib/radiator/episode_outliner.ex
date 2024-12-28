@@ -1,6 +1,8 @@
 defmodule Radiator.EpisodeOutliner do
+  @moduledoc """
+    perhaps an intermediate module to connect the outliner and the episode
+  """
   alias Radiator.Outline.NodeRepository
-  # alias Radiator.Outline
   alias Radiator.Podcast
   alias Radiator.Podcast.Episode
 

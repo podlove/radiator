@@ -70,8 +70,13 @@ defmodule Radiator.Outline.NodeRepositoryTest do
       node1 = node_fixture()
       node2 = node_fixture()
 
-      assert NodeRepository.list_nodes_by_node_container(node1.outline_node_container_id) == [node1]
-      assert NodeRepository.list_nodes_by_node_container(node2.outline_node_container_id) == [node2]
+      assert NodeRepository.list_nodes_by_node_container(node1.outline_node_container_id) == [
+               node1
+             ]
+
+      assert NodeRepository.list_nodes_by_node_container(node2.outline_node_container_id) == [
+               node2
+             ]
     end
   end
 

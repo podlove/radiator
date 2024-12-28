@@ -45,5 +45,6 @@ defmodule Radiator.Outline.Event do
   def event_type(%NodeDeletedEvent{} = _event), do: "NodeDeletedEvent"
   def event_type(%NodeMovedEvent{} = _event), do: "NodeMovedEvent"
 
-  def outline_node_container_id(%{outline_node_container_id: outline_node_container_id}), do: outline_node_container_id
+  def outline_node_container_id(%{outline_node_container_id: outline_node_container_id}),
+    do: outline_node_container_id
 end
