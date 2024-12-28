@@ -11,8 +11,33 @@ defmodule Radiator.OutlineTest do
   alias Radiator.Outline.NodeRepository
   alias Radiator.Podcast
 
-  describe "node_tree" do
-    test "generate from template" do
+  describe "generate nodes from template" do
+    test "single node" do
+      %{id: episode_id} = episode_fixture()
+
+      assert %Node{} = node = "node-1" |> node_tree_fixture(%{episode_id: episode_id})
+      assert [%Node{}] = list = ["node-1"] |> node_tree_fixture(%{episode_id: episode_id})
+
+      assert %{content: "node-1", parent_id: nil, prev_id: nil, episode_id: ^episode_id} = node
+      assert [%{content: "node-1", parent_id: nil, prev_id: nil, episode_id: ^episode_id}] = list
+    end
+
+    test "list of nodes" do
+      %{id: episode_id} = episode_fixture()
+
+      nodes = ["node-1", "node-2", "node-3"] |> node_tree_fixture(%{episode_id: episode_id})
+
+      assert length(nodes) == 3
+      assert Enum.all?(nodes, &match?(%Node{episode_id: ^episode_id}, &1))
+
+      assert [
+               %{uuid: uuid_1, content: "node-1", parent_id: nil, prev_id: nil},
+               %{uuid: uuid_2, content: "node-2", parent_id: nil, prev_id: uuid_1},
+               %{uuid: _uuid_3, content: "node-3", parent_id: nil, prev_id: uuid_2}
+             ] = nodes
+    end
+
+    test "tree of nodes" do
       %{id: episode_id, show_id: show_id} = episode_fixture()
 
       nodes =
