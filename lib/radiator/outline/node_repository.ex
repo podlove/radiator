@@ -404,7 +404,8 @@ defmodule Radiator.Outline.NodeRepository do
     |> where([n], is_nil(n.prev_id))
     |> where([n], n.outline_node_container_id == ^outline_node_container_id)
   end
-  defp where_prev_node_equals(node, outline_node_container_id, prev_id)do
+
+  defp where_prev_node_equals(node, outline_node_container_id, prev_id) do
     node
     |> where([n], n.prev_id == ^prev_id)
     |> where([n], n.outline_node_container_id == ^outline_node_container_id)
