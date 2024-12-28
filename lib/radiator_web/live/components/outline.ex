@@ -152,41 +152,17 @@ defmodule RadiatorWeb.Components.Outline do
     |> reply(:noreply)
   end
 
-  def handle_event("merge_prev", %{"uuid" => uuid, "content" => content}, socket) do
-    prev_node = Outline.get_node_above(uuid)
-
-    if prev_node do
-      user_id = socket.assigns.user_id
-
-      Dispatch.change_node_content(
-        prev_node.uuid,
-        "#{prev_node.content}#{content}",
-        user_id,
-        generate_event_id(socket.id)
-      )
-
-      Dispatch.delete_node(uuid, user_id, generate_event_id(socket.id))
-    end
+  def handle_event("merge_prev", %{"uuid" => uuid}, socket) do
+    user_id = socket.assigns.user_id
+    Dispatch.merge_prev(uuid, user_id, generate_event_id(socket.id))
 
     socket
     |> reply(:noreply)
   end
 
-  def handle_event("merge_next", %{"uuid" => uuid, "content" => content}, socket) do
-    next_node = Outline.get_node_below(uuid)
-
-    if next_node do
-      user_id = socket.assigns.user_id
-
-      Dispatch.change_node_content(
-        uuid,
-        "#{content}#{next_node.content}",
-        user_id,
-        generate_event_id(socket.id)
-      )
-
-      Dispatch.delete_node(next_node.uuid, user_id, generate_event_id(socket.id))
-    end
+  def handle_event("merge_next", %{"uuid" => uuid}, socket) do
+    user_id = socket.assigns.user_id
+    Dispatch.merge_next(uuid, user_id, generate_event_id(socket.id))
 
     socket
     |> reply(:noreply)
