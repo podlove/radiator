@@ -145,10 +145,10 @@ defmodule Radiator.OutlineTest do
 
     test "creates a new node in the tree", %{
       node_3: node_3,
-      nested_node_1: nested_node_1
+      nested_node_1: nested_node_1,
+      episode: %{outline_node_container_id: node_container_id}
     } do
-      count_nodes = NodeRepository.count_nodes_by_episode(node_3.episode_id)
-
+      count_nodes = NodeRepository.count_nodes_by_outline_node_container(node_container_id)
       node_attrs = %{
         "content" => "new node",
         "outline_node_container_id" => node_3.outline_node_container_id,
@@ -157,7 +157,7 @@ defmodule Radiator.OutlineTest do
       }
 
       Outline.insert_node(node_attrs)
-      new_count_nodes = NodeRepository.count_nodes_by_episode(node_3.episode_id)
+      new_count_nodes = NodeRepository.count_nodes_by_outline_node_container(node_container_id)
       assert new_count_nodes == count_nodes + 1
     end
 
@@ -331,7 +331,7 @@ defmodule Radiator.OutlineTest do
       parent_node: parent_node
     } do
       bad_parent_node =
-        node_fixture(episode_id: parent_node.episode_id, parent_id: nil, prev_id: nil)
+        node_fixture(outline_node_container_id: parent_node.outline_node_container_id, parent_id: nil, prev_id: nil)
 
       node_attrs = %{
         "content" => "new node",
@@ -1244,9 +1244,9 @@ defmodule Radiator.OutlineTest do
     end
 
     test "works for last element in list", %{
-      node_6: node_6
+      node_6: node_6,
+      episode: %{id: episode_id}
     } do
-      episode_id = node_6.episode_id
       count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
       assert %NodeRepoResult{} = Outline.remove_node(node_6)
       new_count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
@@ -1255,9 +1255,9 @@ defmodule Radiator.OutlineTest do
 
     test "works for first element in list", %{
       node_1: node_1,
-      node_2: node_2
+      node_2: node_2,
+      episode: %{id: episode_id}
     } do
-      episode_id = node_1.episode_id
 
       count_nodes = NodeRepository.count_nodes_by_episode(episode_id)
       assert %NodeRepoResult{} = Outline.remove_node(node_1)
@@ -1499,7 +1499,8 @@ defmodule Radiator.OutlineTest do
 
     test "list_outline_node_containers/0 returns all outline_node_containers" do
       node_container = node_container_fixture()
-      assert Outline.list_outline_node_containers() == [node_container]
+      all_containers = Outline.list_outline_node_containers()
+      assert Enum.find(all_containers, fn nc -> nc.id == node_container.id end) == node_container
     end
 
     test "get_node_container!/1 returns the node_container with given id" do
