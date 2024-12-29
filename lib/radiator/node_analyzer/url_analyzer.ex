@@ -39,10 +39,6 @@ defmodule Radiator.NodeAnalyzer.UrlAnalyzer do
     |> unfurl()
   end
 
-  defp unfurl(nil) do
-    {:error, :no_url}
-  end
-
   defp unfurl(uri) do
     case WebInspector.unfurl(URI.to_string(uri)) do
       {:ok, data} ->

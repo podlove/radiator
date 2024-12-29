@@ -48,19 +48,6 @@ defmodule Radiator.OutlineFixtures do
   """
   def node_tree_fixture(content, attrs \\ %{})
 
-  def node_tree_fixture(content, attrs) when is_bitstring(content) do
-    attrs
-    |> Map.merge(%{content: content})
-    |> node_fixture()
-  end
-
-  def node_tree_fixture({content, list}, attrs) do
-    node = node_tree_fixture(content, attrs)
-    child_attrs = Map.merge(attrs, %{parent_id: node.uuid, prev_id: nil})
-
-    [node, [node_tree_fixture(list, child_attrs)]]
-  end
-
   def node_tree_fixture([content], attrs) do
     [node_tree_fixture(content, attrs)]
   end
@@ -72,6 +59,19 @@ defmodule Radiator.OutlineFixtures do
     child_attrs = Map.merge(attrs, %{parent_id: nil, prev_id: prev_uuid})
 
     List.flatten([nodes | node_tree_fixture(tail, child_attrs)])
+  end
+
+  def node_tree_fixture({content, list}, attrs) do
+    node = node_tree_fixture(content, attrs)
+    child_attrs = Map.merge(attrs, %{parent_id: node.uuid, prev_id: nil})
+
+    [node, [node_tree_fixture(list, child_attrs)]]
+  end
+
+  def node_tree_fixture(content, attrs) when is_bitstring(content) do
+    attrs
+    |> Map.merge(%{content: content})
+    |> node_fixture()
   end
 
   @doc """

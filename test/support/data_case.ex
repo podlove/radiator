@@ -64,30 +64,13 @@ defmodule Radiator.DataCase do
   def simple_node_fixture(_) do
     episode = PodcastFixtures.episode_fixture()
 
-    node_1 =
-      node_fixture(
-        episode_id: episode.id,
-        show_id: episode.show_id,
-        outline_node_container_id: episode.outline_node_container_id,
-        parent_id: nil,
-        prev_id: nil,
-        content: "node_1"
-      )
+    attrs = %{
+      episode_id: episode.id,
+      show_id: episode.show_id,
+      outline_node_container_id: episode.outline_node_container_id
+    }
 
-    node_2 =
-      node_fixture(
-        episode_id: episode.id,
-        show_id: episode.show_id,
-        outline_node_container_id: episode.outline_node_container_id,
-        parent_id: nil,
-        prev_id: node_1.uuid,
-        content: "node_2"
-      )
-
-    assert node_2.prev_id == node_1.uuid
-    assert node_1.prev_id == nil
-    assert node_1.parent_id == nil
-    assert node_2.parent_id == nil
+    [node_1, node_2] = ["node_1", "node_2"] |> node_tree_fixture(attrs)
 
     %{
       node_1: node_1,
@@ -97,6 +80,25 @@ defmodule Radiator.DataCase do
 
   def simple_node_fixture_hierachical(_) do
     episode = PodcastFixtures.episode_fixture()
+
+    attrs = %{
+      episode_id: episode.id,
+      show_id: episode.show_id,
+      outline_node_container_id: episode.outline_node_container_id
+    }
+
+    nodes =
+      [
+        "node-1",
+        {"node-2", ["node-2_1"]}
+      ]
+      |> node_tree_fixture(attrs)
+
+    assert [
+             %{uuid: uuid_1, content: "node-1", parent_id: nil, prev_id: nil},
+             %{uuid: uuid_2, content: "node-2", parent_id: nil, prev_id: uuid_1},
+             %{uuid: _uuid_2_1, content: "node-2_1", parent_id: uuid_2, prev_id: nil}
+           ] = nodes
 
     node_1 =
       node_fixture(
