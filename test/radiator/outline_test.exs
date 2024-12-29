@@ -192,23 +192,6 @@ defmodule Radiator.OutlineTest do
       assert new_node.prev_id == nested_node_1.uuid
     end
 
-    test "the show_id gets set - even if not given", %{
-      node_3: node_3,
-      nested_node_1: nested_node_1
-    } do
-      node_attrs = %{
-        "content" => "new node",
-        "outline_node_container_id" => node_3.outline_node_container_id,
-        "parent_id" => node_3.uuid,
-        "prev_id" => nested_node_1.uuid
-      }
-
-      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
-
-      episode = Podcast.get_episode!(node_3.episode_id)
-      assert new_node.show_id == episode.show_id
-    end
-
     test "the next node - if existing - changes its prev_id and gets returned", %{
       node_2: node_2,
       node_3: node_3
@@ -817,7 +800,7 @@ defmodule Radiator.OutlineTest do
         Outline.split_node(node_1.uuid, {2, 3})
 
       assert node.uuid == node_1.uuid
-      assert node.episode_id == node_1.episode_id
+      assert node.outline_node_container_id == node_1.outline_node_container_id
       {new_content, _} = String.split_at(node_1.content, start)
       assert node.content == new_content
     end
@@ -1001,7 +984,7 @@ defmodule Radiator.OutlineTest do
     } do
       nested_node_3 =
         node_fixture(
-          episode_id: episode.id,
+          outline_node_container_id: episode.outline_node_container_id,
           parent_id: node_3.uuid,
           prev_id: nested_node_2.uuid,
           content: "nested_node_3"
@@ -1009,7 +992,7 @@ defmodule Radiator.OutlineTest do
 
       nested_node_4 =
         node_fixture(
-          episode_id: episode.id,
+          outline_node_container_id: episode.outline_node_container_id,
           parent_id: node_3.uuid,
           prev_id: nested_node_3.uuid,
           content: "nested_node_4"
@@ -1392,7 +1375,7 @@ defmodule Radiator.OutlineTest do
           content: "even another root element"
         )
 
-      tree = Outline.list_nodes_by_episode_sorted(parent_node.outline_node_container_id)
+      tree = Outline.list_nodes_by_container_sorted(parent_node.outline_node_container_id)
 
       num_nodes_without_parents =
         tree
@@ -1408,7 +1391,7 @@ defmodule Radiator.OutlineTest do
 
       node_1 =
         node_fixture(
-          episode_id: node_container.id,
+          outline_node_container_id: node_container.id,
           parent_id: nil,
           prev_id: nil,
           content: "node_1"
@@ -1416,7 +1399,7 @@ defmodule Radiator.OutlineTest do
 
       node_3 =
         node_fixture(
-          episode_id: node_container.id,
+          outline_node_container_id: node_container.id,
           parent_id: node_1.uuid,
           prev_id: nil,
           content: "node_3"
@@ -1424,7 +1407,7 @@ defmodule Radiator.OutlineTest do
 
       node_2 =
         node_fixture(
-          episode_id: node_container.id,
+          outline_node_container_id: node_container.id,
           parent_id: node_1.uuid,
           prev_id: node_3.uuid,
           content: "node_2"

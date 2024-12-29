@@ -12,7 +12,9 @@ defmodule RadiatorWeb.OutlineLiveTest do
     setup %{conn: conn} do
       user = user_fixture()
       show = show_fixture()
-      %{id: episode_id, outline_node_container_id: outline_node_container_id} = episode_fixture(%{show_id: show.id})
+
+      %{id: episode_id, outline_node_container_id: outline_node_container_id} =
+        episode_fixture(%{show_id: show.id})
 
       node_1 =
         node_fixture(
