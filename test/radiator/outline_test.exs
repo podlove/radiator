@@ -38,7 +38,7 @@ defmodule Radiator.OutlineTest do
     end
 
     test "tree of nodes" do
-      %{outline_node_container_id: outline_node_container_id, show_id: show_id} = episode_fixture()
+      %{outline_node_container_id: outline_node_container_id} = episode_fixture()
 
       nodes =
         [
