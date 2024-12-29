@@ -16,6 +16,7 @@ defmodule Radiator.Outline do
   @moduledoc """
   The Outline context.
   """
+  import Ecto.Query
 
   alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepoResult
@@ -344,6 +345,56 @@ defmodule Radiator.Outline do
     {_, last} = String.split_at(string, stop)
 
     {first, last}
+  end
+
+  def merge_prev_node(_node_id) do
+    nil
+  end
+
+  def merge_next_node(%Node{} = node) do
+    merge_next_node(node, NodeRepository.get_next_node(node))
+  end
+
+  def merge_next_node(node_id), do: merge_next_node(NodeRepository.get_node!(node_id))
+
+  def merge_next_node(%Node{} = _node, nil), do: {:error, :no_next_node}
+
+  def merge_next_node(
+        %Node{uuid: node_id} = node,
+        %Node{uuid: next_node_id, content: content_of_next_node} = next_node
+      ) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.update_all(
+      :update_childrens,
+      fn _ ->
+        from(n in Node, where: n.parent_id == ^next_node_id, update: [set: [parent_id: ^node_id]])
+      end,
+      []
+    )
+    |> Ecto.Multi.update(:update_content, fn _changes ->
+      Node.update_content_changeset(node, %{content: node.content <> content_of_next_node})
+    end)
+    |> Ecto.Multi.run(:delete_next_node, fn _, _ ->
+      %NodeRepoResult{node: deleted_node, next: updated_next_node} = remove_node(next_node)
+      {:ok, %{deleted_node: deleted_node, updated_next_node: updated_next_node}}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, result} ->
+        node = result.update_content
+
+        {:ok,
+         %NodeRepoResult{
+           node: result.update_content,
+           old_next: result.delete_next_node.deleted_node,
+           next: result.delete_next_node.updated_next_node,
+           children: NodeRepository.get_all_siblings(node),
+           outline_node_container_id: node.outline_node_container_id
+         }}
+
+      {:error, _tag, error, _others} ->
+        {:error, error}
+    end
   end
 
   @doc """

@@ -167,12 +167,49 @@ defmodule Radiator.Outline.CommandProcessor do
     # delete current node
   end
 
-  defp process_command(%MergeNextNodeCommand{node_id: _node_id} = _command) do
-    # node_id has a next node?
+  defp process_command(%MergeNextNodeCommand{node_id: node_id} = command) do
+    case Outline.merge_next_node(node_id) do
+      {:ok,
+       %NodeRepoResult{
+         node: node,
+         old_next: deleted_node,
+         next: next,
+         children: children,
+         outline_node_container_id: outline_node_container_id
+       }} ->
+        %NodeDeletedEvent{
+          node: deleted_node,
+          outline_node_container_id: outline_node_container_id,
+          event_id: command.event_id,
+          user_id: command.user_id,
+          children: [],
+          next: next
+        }
+        |> persist_and_broadcast_event()
 
-    # get content from next node -> append content to current node
+        %NodeContentChangedEvent{
+          node_id: node.uuid,
+          content: node.content,
+          user_id: command.user_id,
+          event_id: Ecto.UUID.generate(),
+          outline_node_container_id: node.outline_node_container_id
+        }
+        |> persist_and_broadcast_event()
 
-    # delete next node
+        Enum.each(children, fn child ->
+          %NodeMovedEvent{
+            node: child,
+            user_id: command.user_id,
+            event_id: Ecto.UUID.generate(),
+            children: [],
+            outline_node_container_id: child.outline_node_container_id
+          }
+          |> persist_and_broadcast_event()
+        end)
+
+      {:error, error} ->
+        Logger.error("Merge next node failed. #{inspect(error)}")
+    end
   end
 
   defp handle_insert_node_result(
@@ -191,8 +228,7 @@ defmodule Radiator.Outline.CommandProcessor do
       next: next,
       outline_node_container_id: outline_node_container_id
     }
-    |> EventStore.persist_event()
-    |> Dispatch.broadcast()
+    |> persist_and_broadcast_event()
 
     {:ok, node}
   end
@@ -217,8 +253,7 @@ defmodule Radiator.Outline.CommandProcessor do
       children: result.children,
       outline_node_container_id: result.outline_node_container_id
     }
-    |> EventStore.persist_event()
-    |> Dispatch.broadcast()
+    |> persist_and_broadcast_event()
 
     {:ok, node}
   end
@@ -236,8 +271,7 @@ defmodule Radiator.Outline.CommandProcessor do
       event_id: command.event_id,
       outline_node_container_id: node.outline_node_container_id
     }
-    |> EventStore.persist_event()
-    |> Dispatch.broadcast()
+    |> persist_and_broadcast_event()
 
     {:ok, node}
   end
@@ -259,5 +293,11 @@ defmodule Radiator.Outline.CommandProcessor do
     episode = Podcast.get_episode!(episode_id)
 
     Map.put(payload, "outline_node_container_id", episode.outline_node_container_id)
+  end
+
+  defp persist_and_broadcast_event(event) do
+    event
+    |> EventStore.persist_event()
+    |> Dispatch.broadcast()
   end
 end
