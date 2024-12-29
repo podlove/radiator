@@ -12,11 +12,11 @@ defmodule RadiatorWeb.OutlineLiveTest do
     setup %{conn: conn} do
       user = user_fixture()
       show = show_fixture()
-      %{id: episode_id} = episode_fixture(%{show_id: show.id})
+      %{id: episode_id, outline_node_container_id: outline_node_container_id} = episode_fixture(%{show_id: show.id})
 
       node_1 =
         node_fixture(
-          episode_id: episode_id,
+          outline_node_container_id: outline_node_container_id,
           parent_id: nil,
           prev_id: nil,
           content: "node_1"
@@ -24,7 +24,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       node_2 =
         node_fixture(
-          episode_id: episode_id,
+          outline_node_container_id: outline_node_container_id,
           parent_id: nil,
           prev_id: node_1.uuid,
           content: "node_2"
@@ -32,7 +32,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       node_2_1 =
         node_fixture(
-          episode_id: episode_id,
+          outline_node_container_id: outline_node_container_id,
           parent_id: node_2.uuid,
           prev_id: nil,
           content: "node_2_1"
@@ -40,7 +40,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       node_3 =
         node_fixture(
-          episode_id: episode_id,
+          outline_node_container_id: outline_node_container_id,
           parent_id: nil,
           prev_id: node_2.uuid,
           content: "node_3"
