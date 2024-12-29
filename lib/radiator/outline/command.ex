@@ -6,6 +6,8 @@ defmodule Radiator.Outline.Command do
     DeleteNodeCommand,
     IndentNodeCommand,
     InsertNodeCommand,
+    MergeNextNodeCommand,
+    MergePrevNodeCommand,
     MoveDownCommand,
     MoveNodeCommand,
     MoveUpCommand,
@@ -65,6 +67,22 @@ defmodule Radiator.Outline.Command do
 
   def build("move_down", node_id, user_id, event_id) do
     %MoveDownCommand{
+      event_id: event_id,
+      user_id: user_id,
+      node_id: node_id
+    }
+  end
+
+  def build("merge_prev", node_id, user_id, event_id) do
+    %MergePrevNodeCommand{
+      event_id: event_id,
+      user_id: user_id,
+      node_id: node_id
+    }
+  end
+
+  def build("merge_next", node_id, user_id, event_id) do
+    %MergeNextNodeCommand{
       event_id: event_id,
       user_id: user_id,
       node_id: node_id

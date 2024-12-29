@@ -277,6 +277,7 @@ defmodule Radiator.Outline.NodeRepository do
   end
 
   @doc """
+  TODO wrong name: sibling is "geschwister" in german
   Returns all direct child nodes of a given node.
   ## Examples
         iex> get_all_siblings(%Node{})
