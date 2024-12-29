@@ -39,20 +39,16 @@ export function processEvent(action, event) {
       break;
 
     case "merge_prev":
-      const prevNode = getPrevNode(node);
-      if (cursorAtStart && prevNode) {
+      if (cursorAtStart) {
         event.preventDefault();
-        this.pushEventTo(this.el, "merge_prev", { uuid, content });
-        focusNode(prevNode);
+        this.pushEventTo(this.el, "merge_prev", { uuid });
       }
       break;
 
     case "merge_next":
-      const nextNode = getNextNode(node);
-      if (cursorAtEnd && nextNode) {
+      if (cursorAtEnd) {
         event.preventDefault();
-        this.pushEventTo(this.el, "merge_next", { uuid, content });
-        focusNode(nextNode);
+        this.pushEventTo(this.el, "merge_next", { uuid });
       }
       break;
 
