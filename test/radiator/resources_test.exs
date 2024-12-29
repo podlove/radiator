@@ -15,7 +15,7 @@ defmodule Radiator.ResourcesbTest do
     setup :set_up_single_url
 
     test "returns all urls of an episode", %{episode: episode, node: node} do
-      url = url_fixture(node_id: node.uuid)
+      url = url_fixture(node_id: node.uuid, episode_id: episode.id)
       assert Resources.list_urls_by_episode(episode.id) == [url]
     end
   end

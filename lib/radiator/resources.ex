@@ -24,8 +24,7 @@ defmodule Radiator.Resources do
   def list_urls_by_episode(episode_id) do
     query =
       from u in Url,
-        join: n in assoc(u, :node),
-        where: n.episode_id == ^episode_id
+        where: u.episode_id == ^episode_id
 
     Repo.all(query)
   end
