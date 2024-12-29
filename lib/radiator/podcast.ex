@@ -453,6 +453,13 @@ defmodule Radiator.Podcast do
   """
   def get_episode!(id), do: Repo.get!(Episode, id)
 
+  def get_episode_by_container_id(container_id) do
+    Repo.one(
+      from e in Episode,
+        where: e.outline_node_container_id == ^container_id
+    )
+  end
+
   @doc """
     Finds the newest (TODO: not published ) episode for a show.
     Returns %Episode{} or `nil` and expects an id of the show.

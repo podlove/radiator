@@ -25,7 +25,7 @@ defmodule Radiator.Outline.Event do
   def payload(%NodeDeletedEvent{} = event) do
     %{
       node: event.node,
-      episode_id: event.episode_id,
+      outline_node_container_id: event.outline_node_container_id,
       children: event.children,
       next: event.next
     }
@@ -45,5 +45,6 @@ defmodule Radiator.Outline.Event do
   def event_type(%NodeDeletedEvent{} = _event), do: "NodeDeletedEvent"
   def event_type(%NodeMovedEvent{} = _event), do: "NodeMovedEvent"
 
-  def episode_id(%{episode_id: episode_id}), do: episode_id
+  def outline_node_container_id(%{outline_node_container_id: outline_node_container_id}),
+    do: outline_node_container_id
 end

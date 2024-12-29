@@ -93,8 +93,8 @@ defmodule RadiatorWeb.Components.Outline do
     |> reply(:ok)
   end
 
-  def update(%{episode_id: id} = assigns, socket) do
-    nodes = Outline.list_nodes_by_episode_sorted(id)
+  def update(%{container_id: id} = assigns, socket) do
+    nodes = Outline.list_nodes_by_container_sorted(id)
     node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
 
     socket
