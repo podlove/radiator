@@ -39,7 +39,7 @@ defmodule Radiator.Resources.Url do
   def changeset(url, attrs) do
     url
     |> cast(attrs, [:url, :start_bytes, :size_bytes, :node_id, :episode_id])
-    |> validate_required([:url, :start_bytes, :size_bytes, :node_id, :episode_id])
+    |> validate_required([:url, :start_bytes, :size_bytes, :node_id])
     |> cast_embed(:meta_data, with: &MetaData.changeset/2)
   end
 end
