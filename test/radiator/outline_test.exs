@@ -872,6 +872,45 @@ defmodule Radiator.OutlineTest do
     end
   end
 
+  describe "merge_prev_node/1" do
+    setup :complex_node_fixture
+
+    test "merges two nodes into one", %{
+      node_2: node_2,
+      node_3: node_3,
+      nested_node_1: nested_node_1,
+      nested_node_2: nested_node_2,
+      node_4: node_4
+    } do
+      {:ok, result} = Outline.merge_prev_node(node_3)
+
+      node_2 = Repo.reload!(node_2)
+      node_4 = Repo.reload!(node_4)
+      nested_node_1 = Repo.reload!(nested_node_1)
+      nested_node_2 = Repo.reload!(nested_node_2)
+      assert is_nil(NodeRepository.get_node(node_3.uuid))
+      assert nested_node_2.parent_id == node_2.uuid
+      assert nested_node_1.parent_id == node_2.uuid
+      assert node_4.prev_id == node_2.uuid
+      assert node_2.content == "node_2node_3"
+
+      assert result.node.uuid == node_2.uuid
+      assert result.old_next.uuid == node_3.uuid
+      assert result.next.uuid == node_4.uuid
+      assert Enum.count(result.children) == 2
+    end
+
+    test "ignores command when there is no prev node", %{
+      node_1: node_1
+    } do
+      old_content = node_1.content
+      assert is_nil(NodeRepository.get_prev_node(node_1))
+      {:error, :no_prev_node} = Outline.merge_prev_node(node_1)
+      node_1 = Repo.reload!(node_1)
+      assert old_content == node_1.content
+    end
+  end
+
   describe "indent_node/1 - simple context" do
     setup :simple_node_fixture
 

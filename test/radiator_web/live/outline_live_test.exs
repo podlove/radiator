@@ -191,6 +191,52 @@ defmodule RadiatorWeb.OutlineLiveTest do
       refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
     end
 
+    test "merge node with prev", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [node_1, node_2, node_2_1, node_3]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
+
+      params = %{"uuid" => node_2.uuid}
+
+      assert live
+             |> element(stream_id)
+             |> render_hook(:merge_prev, params)
+
+      keep_liveview_alive()
+
+      node_1_uuid = node_1.uuid
+      node_3_uuid = node_3.uuid
+      node_2_1_uuid = node_2_1.uuid
+      content = node_1.content <> node_2.content
+
+      assert_push_event(live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
+      assert_push_event(other_live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
+
+      assert_push_event(live, "move_nodes", %{
+        nodes: [%{uuid: ^node_3_uuid, prev_id: ^node_1_uuid}]
+      })
+
+      assert_push_event(other_live, "move_nodes", %{
+        nodes: [%{uuid: ^node_3_uuid, prev_id: ^node_1_uuid}]
+      })
+
+      assert_push_event(live, "move_nodes", %{nodes: [moved_child_node]})
+      assert_push_event(other_live, "move_nodes", %{nodes: [other_moved_child_node]})
+
+      assert %{uuid: ^node_2_1_uuid} = moved_child_node
+      assert moved_child_node == other_moved_child_node
+
+      assert live |> has_element?("#nodes-form-#{node_1.uuid}")
+      assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
+
+      refute live |> has_element?("#nodes-form-#{node_2.uuid}")
+      refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
+    end
+
     test "move node up", %{
       conn: conn,
       url: url,
