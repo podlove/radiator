@@ -14,13 +14,13 @@ defmodule Radiator.Outline.CommandProcessor do
     DeleteNodeCommand,
     IndentNodeCommand,
     InsertNodeCommand,
+    MergeNextNodeCommand,
+    MergePrevNodeCommand,
     MoveDownCommand,
     MoveNodeCommand,
     MoveUpCommand,
     OutdentNodeCommand,
-    SplitNodeCommand,
-    MergePrevNodeCommand,
-    MergeNextNodeCommand
+    SplitNodeCommand
   }
 
   alias Radiator.Outline.Dispatch

@@ -6,13 +6,13 @@ defmodule Radiator.Outline.Command do
     DeleteNodeCommand,
     IndentNodeCommand,
     InsertNodeCommand,
+    MergeNextNodeCommand,
+    MergePrevNodeCommand,
     MoveDownCommand,
     MoveNodeCommand,
     MoveUpCommand,
     OutdentNodeCommand,
-    SplitNodeCommand,
-    MergePrevNodeCommand,
-    MergeNextNodeCommand
+    SplitNodeCommand
   }
 
   @move_commands [
