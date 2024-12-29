@@ -15,20 +15,46 @@ defmodule Radiator.OutlineTest do
     test "single node" do
       %{outline_node_container_id: outline_node_container_id} = episode_fixture()
 
-      assert %Node{} = node = "node-1" |> node_tree_fixture(%{outline_node_container_id: outline_node_container_id})
-      assert [%Node{}] = list = ["node-1"] |> node_tree_fixture(%{outline_node_container_id: outline_node_container_id})
+      assert %Node{} =
+               node =
+               "node-1"
+               |> node_tree_fixture(%{outline_node_container_id: outline_node_container_id})
 
-      assert %{content: "node-1", parent_id: nil, prev_id: nil, outline_node_container_id: ^outline_node_container_id} = node
-      assert [%{content: "node-1", parent_id: nil, prev_id: nil, outline_node_container_id: ^outline_node_container_id}] = list
+      assert [%Node{}] =
+               list =
+               ["node-1"]
+               |> node_tree_fixture(%{outline_node_container_id: outline_node_container_id})
+
+      assert %{
+               content: "node-1",
+               parent_id: nil,
+               prev_id: nil,
+               outline_node_container_id: ^outline_node_container_id
+             } = node
+
+      assert [
+               %{
+                 content: "node-1",
+                 parent_id: nil,
+                 prev_id: nil,
+                 outline_node_container_id: ^outline_node_container_id
+               }
+             ] = list
     end
 
     test "list of nodes" do
       %{outline_node_container_id: outline_node_container_id} = episode_fixture()
 
-      nodes = ["node-1", "node-2", "node-3"] |> node_tree_fixture(%{outline_node_container_id: outline_node_container_id})
+      nodes =
+        ["node-1", "node-2", "node-3"]
+        |> node_tree_fixture(%{outline_node_container_id: outline_node_container_id})
 
       assert length(nodes) == 3
-      assert Enum.all?(nodes, &match?(%Node{outline_node_container_id: ^outline_node_container_id}, &1))
+
+      assert Enum.all?(
+               nodes,
+               &match?(%Node{outline_node_container_id: ^outline_node_container_id}, &1)
+             )
 
       assert [
                %{uuid: uuid_1, content: "node-1", parent_id: nil, prev_id: nil},
