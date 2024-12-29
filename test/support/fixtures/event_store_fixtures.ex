@@ -35,7 +35,7 @@ defmodule Radiator.EventStoreFixtures do
 
   def node_inserted_event_fixture(user_id: user_id) do
     node = OutlineFixtures.node_fixture()
-    next = OutlineFixtures.node_fixture(episode_id: node.episode_id)
+    next = OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
 
     %NodeInsertedEvent{
       node: node,
@@ -68,13 +68,20 @@ defmodule Radiator.EventStoreFixtures do
 
   def node_moved_event_fixture(user_id: user_id) do
     node = OutlineFixtures.node_fixture()
-    _parent = OutlineFixtures.node_fixture(episode_id: node.episode_id)
-    _prev = OutlineFixtures.node_fixture(episode_id: node.episode_id)
-    next = OutlineFixtures.node_fixture(episode_id: node.episode_id)
-    old_next = OutlineFixtures.node_fixture(episode_id: node.episode_id)
+
+    _parent =
+      OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
+
+    _prev =
+      OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
+
+    next = OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
+
+    old_next =
+      OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
 
     old_prev =
-      OutlineFixtures.node_fixture(episode_id: node.episode_id)
+      OutlineFixtures.node_fixture(outline_node_container_id: node.outline_node_container_id)
 
     %NodeMovedEvent{
       node: %{uuid: node.uuid, parent_id: node.parent_id, prev_id: node.prev_id},

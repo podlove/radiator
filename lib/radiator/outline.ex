@@ -8,7 +8,7 @@ defmodule Radiator.Outline.NodeRepoResult do
     :old_next,
     :next,
     :children,
-    :episode_id
+    :outline_node_container_id
   ]
 end
 
@@ -21,8 +21,6 @@ defmodule Radiator.Outline do
   alias Radiator.Outline.NodeRepoResult
   alias Radiator.Outline.NodeRepository
   alias Radiator.Outline.Validations, as: NodeValidator
-  alias Radiator.Podcast
-  alias Radiator.Podcast.Episode
   alias Radiator.Repo
 
   require Logger
@@ -51,12 +49,8 @@ defmodule Radiator.Outline do
   @doc """
   Returns a list of all child nodes.
   """
-  def list_nodes_by_episode_sorted(episode_id) do
-    episode_id
-    |> NodeRepository.list_nodes_by_episode()
-    |> Enum.group_by(& &1.parent_id)
-    |> Enum.map(fn {_parent_id, children} -> order_sibling_nodes(children) end)
-    |> List.flatten()
+  def list_nodes_by_container_sorted(container_id) do
+    NodeRepository.list_nodes_by_node_container(container_id)
   end
 
   @doc """
@@ -76,27 +70,31 @@ defmodule Radiator.Outline do
   # if a previous node is given, the new node will be inserted after the previous node
   # if no parent is given, the new node will be inserted as a root node
   # if no previous node is given, the new node will be inserted as the first child of the parent node
-  def insert_node(%{"show_id" => _show_id} = attrs) do
+  def insert_node(%{"outline_node_container_id" => outline_node_container_id} = attrs) do
     Repo.transaction(fn ->
       prev_id = attrs["prev_id"]
       parent_id = attrs["parent_id"]
-      episode_id = attrs["episode_id"]
 
       prev_node = NodeRepository.get_node_if(prev_id)
       parent_node = find_parent_node(prev_node, parent_id)
 
       # find Node which has been previously connected to prev_node
-      next_node = NodeRepository.get_next_node(episode_id, prev_id, get_node_id(parent_node))
+      next_node =
+        NodeRepository.get_next_node(outline_node_container_id, prev_id, get_node_id(parent_node))
 
       with true <- parent_and_prev_consistent?(parent_node, prev_node),
-           true <- episode_valid?(episode_id, parent_node, prev_node),
+           true <- container_valid?(outline_node_container_id, parent_node, prev_node),
            {:ok, node} <-
              attrs
              |> set_parent_id_if(parent_node)
              |> NodeRepository.create_node(),
            {:ok, _node_to_move} <-
              NodeRepository.move_node_if(next_node, get_node_id(parent_node), node.uuid) do
-        %NodeRepoResult{node: node, next: get_node_result_info(next_node), episode_id: episode_id}
+        %NodeRepoResult{
+          node: node,
+          next: get_node_result_info(next_node),
+          outline_node_container_id: outline_node_container_id
+        }
       else
         false ->
           Repo.rollback("Insert node failed. Parent and prev node are not consistent.")
@@ -106,14 +104,6 @@ defmodule Radiator.Outline do
           Repo.rollback("Insert node failed. Unknown error")
       end
     end)
-  end
-
-  def insert_node(%{"episode_id" => episode_id} = attrs) do
-    %Episode{show_id: show_id} = Podcast.get_episode!(episode_id)
-
-    attrs
-    |> Map.put("show_id", show_id)
-    |> insert_node()
   end
 
   @doc """
@@ -329,10 +319,9 @@ defmodule Radiator.Outline do
 
         node_attrs = %{
           "content" => new_node_content,
-          "episode_id" => node.episode_id,
+          "outline_node_container_id" => node.outline_node_container_id,
           "parent_id" => node.parent_id,
-          "prev_id" => node.uuid,
-          "outline_node_container_id" => node.outline_node_container_id
+          "prev_id" => node.uuid
         }
 
         {:ok, %NodeRepoResult{node: new_node, next: old_next_node}} =
@@ -342,7 +331,7 @@ defmodule Radiator.Outline do
          %NodeRepoResult{
            node: updated_node,
            next: new_node,
-           episode_id: updated_node.episode_id,
+           outline_node_container_id: updated_node.outline_node_container_id,
            old_next: get_node_result_info(old_next_node)
          }}
     end
@@ -391,7 +380,7 @@ defmodule Radiator.Outline do
       node: deleted_node,
       next: get_node_result_info(updated_next_node),
       children: all_children ++ recursive_deleted_children,
-      episode_id: node.episode_id
+      outline_node_container_id: node.outline_node_container_id
     }
   end
 
@@ -455,13 +444,27 @@ defmodule Radiator.Outline do
   def get_node_id(nil), do: nil
   def get_node_id(%Node{} = node), do: node.uuid
 
-  defp episode_valid?(episode_id, %Node{episode_id: episode_id}, %Node{episode_id: episode_id}),
-    do: true
+  defp container_valid?(
+         outline_node_container_id,
+         %Node{outline_node_container_id: outline_node_container_id},
+         %Node{outline_node_container_id: outline_node_container_id}
+       ),
+       do: true
 
-  defp episode_valid?(episode_id, %Node{episode_id: episode_id}, nil), do: true
-  defp episode_valid?(episode_id, nil, %Node{episode_id: episode_id}), do: true
-  defp episode_valid?(_episode_id, nil, nil), do: true
-  defp episode_valid?(_episode_id, _parent_node, _prev_node), do: false
+  defp container_valid?(
+         outline_node_container_id,
+         %Node{outline_node_container_id: outline_node_container_id},
+         nil
+       ),
+       do: true
+
+  defp container_valid?(outline_node_container_id, nil, %Node{
+         outline_node_container_id: outline_node_container_id
+       }),
+       do: true
+
+  defp container_valid?(_outline_node_container_id, nil, nil), do: true
+  defp container_valid?(_outline_node_container_id, _parent_node, _prev_node), do: false
 
   defp set_parent_id_if(attrs, nil), do: attrs
   defp set_parent_id_if(attrs, %Node{uuid: uuid}), do: Map.put_new(attrs, "parent_id", uuid)
@@ -478,15 +481,23 @@ defmodule Radiator.Outline do
   defp do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node) do
     node_repo_result = %NodeRepoResult{
       node: get_node_result_info(node),
-      episode_id: node.episode_id
+      outline_node_container_id: node.outline_node_container_id
     }
 
     Repo.transaction(fn ->
       old_next_node =
-        NodeRepository.get_node_by_parent_and_prev(get_node_id(parent_node), node.uuid)
+        NodeRepository.get_node_by_parent_and_prev(
+          node.outline_node_container_id,
+          get_node_id(parent_node),
+          node.uuid
+        )
 
       new_next_node =
-        NodeRepository.get_node_by_parent_and_prev(new_parent_id, new_prev_id)
+        NodeRepository.get_node_by_parent_and_prev(
+          node.outline_node_container_id,
+          new_parent_id,
+          new_prev_id
+        )
 
       {:ok, node} = NodeRepository.move_node_if(node, new_parent_id, new_prev_id)
 
@@ -573,10 +584,10 @@ defmodule Radiator.Outline do
   defp do_move_up(%Node{}, nil), do: {:error, :no_previous_node}
 
   defp do_move_up(
-         %Node{episode_id: episode_id, parent_id: parent_id} = node,
+         %Node{outline_node_container_id: outline_node_container_id, parent_id: parent_id} = node,
          %Node{} = prev_node
        ) do
-    next_node = NodeRepository.get_next_node(episode_id, node.uuid, parent_id)
+    next_node = NodeRepository.get_next_node(outline_node_container_id, node.uuid, parent_id)
 
     {:ok, updated_node} = NodeRepository.move_node_if(node, parent_id, prev_node.prev_id)
     {:ok, updated_prev_node} = NodeRepository.move_node_if(prev_node, parent_id, node.uuid)
@@ -584,7 +595,7 @@ defmodule Radiator.Outline do
 
     %NodeRepoResult{
       node: get_node_result_info(updated_node),
-      episode_id: episode_id,
+      outline_node_container_id: outline_node_container_id,
       old_prev: get_node_result_info(updated_prev_node),
       old_next: get_node_result_info(updated_next_node)
     }
@@ -593,7 +604,7 @@ defmodule Radiator.Outline do
   defp do_move_down(%Node{}, nil), do: {:error, :no_next_node}
 
   defp do_move_down(
-         %Node{episode_id: episode_id, parent_id: parent_id} = node,
+         %Node{outline_node_container_id: outline_node_container_id, parent_id: parent_id} = node,
          %Node{} = next_node
        ) do
     new_next_node = NodeRepository.get_next_node(next_node)
@@ -606,7 +617,7 @@ defmodule Radiator.Outline do
 
     %NodeRepoResult{
       node: get_node_result_info(updated_node),
-      episode_id: episode_id,
+      outline_node_container_id: outline_node_container_id,
       old_next: get_node_result_info(updated_next_node),
       next: get_node_result_info(updated_new_next_node)
     }

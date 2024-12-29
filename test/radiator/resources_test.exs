@@ -5,6 +5,7 @@ defmodule Radiator.ResourcesbTest do
   import Radiator.ResourcesFixtures
 
   alias Radiator.OutlineFixtures
+  alias Radiator.PodcastFixtures
   alias Radiator.Resources
   alias Radiator.Resources.Url
 
@@ -14,7 +15,7 @@ defmodule Radiator.ResourcesbTest do
     setup :set_up_single_url
 
     test "returns all urls of an episode", %{episode: episode, node: node} do
-      url = url_fixture(node_id: node.uuid)
+      url = url_fixture(node_id: node.uuid, episode_id: episode.id)
       assert Resources.list_urls_by_episode(episode.id) == [url]
     end
   end
@@ -50,9 +51,13 @@ defmodule Radiator.ResourcesbTest do
 
     test "rebuilds all urls for a node" do
       url_text = "https://hexdocs.pm"
-      node = OutlineFixtures.node_fixture()
+      episode = PodcastFixtures.episode_fixture()
+
+      node =
+        OutlineFixtures.node_fixture(outline_node_container_id: episode.outline_node_container_id)
+
       old_url = url_fixture(node_id: node.uuid)
-      episode_id = node.episode_id
+      episode_id = episode.id
 
       assert [%Url{url: ^url_text, start_bytes: 42, size_bytes: 42, episode_id: ^episode_id}] =
                Resources.rebuild_node_urls(node.uuid, [
@@ -115,11 +120,10 @@ defmodule Radiator.ResourcesbTest do
   end
 
   def set_up_single_url(_) do
-    node =
-      OutlineFixtures.node_fixture()
-      |> Repo.preload([:episode])
+    episode = PodcastFixtures.episode_fixture()
 
-    episode = node.episode
+    node =
+      OutlineFixtures.node_fixture(outline_node_container_id: episode.outline_node_container_id)
 
     {:ok, episode: episode, node: node}
   end

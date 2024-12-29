@@ -114,7 +114,7 @@ defmodule Radiator.Outline.CommandProcessor do
 
         %NodeDeletedEvent{
           node: result.node,
-          episode_id: result.episode_id,
+          outline_node_container_id: result.outline_node_container_id,
           event_id: command.event_id,
           user_id: command.user_id,
           children: result.children,
@@ -133,13 +133,24 @@ defmodule Radiator.Outline.CommandProcessor do
            selection: selection
          } = command
        ) do
-    {:ok, %NodeRepoResult{node: node, next: next, episode_id: episode_id, old_next: old_next}} =
+    {:ok,
+     %NodeRepoResult{
+       node: node,
+       next: next,
+       outline_node_container_id: outline_node_container_id,
+       old_next: old_next
+     }} =
       node_id
       |> Outline.split_node(selection)
 
     # broadcast two events
     handle_insert_node_result(
-      {:ok, %NodeRepoResult{node: next, next: old_next, episode_id: episode_id}},
+      {:ok,
+       %NodeRepoResult{
+         node: next,
+         next: old_next,
+         outline_node_container_id: outline_node_container_id
+       }},
       command
     )
 
@@ -165,7 +176,12 @@ defmodule Radiator.Outline.CommandProcessor do
   end
 
   defp handle_insert_node_result(
-         {:ok, %NodeRepoResult{node: node, next: next, episode_id: episode_id}},
+         {:ok,
+          %NodeRepoResult{
+            node: node,
+            next: next,
+            outline_node_container_id: outline_node_container_id
+          }},
          command
        ) do
     %NodeInsertedEvent{
@@ -173,7 +189,7 @@ defmodule Radiator.Outline.CommandProcessor do
       event_id: command.event_id,
       user_id: command.user_id,
       next: next,
-      episode_id: episode_id
+      outline_node_container_id: outline_node_container_id
     }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
@@ -199,7 +215,7 @@ defmodule Radiator.Outline.CommandProcessor do
       event_id: command.event_id,
       next: result.next,
       children: result.children,
-      episode_id: result.episode_id
+      outline_node_container_id: result.outline_node_container_id
     }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
@@ -218,7 +234,7 @@ defmodule Radiator.Outline.CommandProcessor do
       content: node.content,
       user_id: command.user_id,
       event_id: command.event_id,
-      episode_id: node.episode_id
+      outline_node_container_id: node.outline_node_container_id
     }
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
