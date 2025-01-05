@@ -145,6 +145,98 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_live |> has_element?(".node", "de_1")
     end
 
+    test "merge node with next", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [node_1, node_2, node_2_1, node_3]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
+
+      params = %{"uuid" => node_1.uuid}
+
+      assert live
+             |> element(stream_id)
+             |> render_hook(:merge_next, params)
+
+      keep_liveview_alive()
+
+      node_1_uuid = node_1.uuid
+      node_3_uuid = node_3.uuid
+      node_2_1_uuid = node_2_1.uuid
+      content = node_1.content <> node_2.content
+
+      assert_push_event(live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
+      assert_push_event(other_live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
+
+      assert_push_event(live, "move_nodes", %{
+        nodes: [%{uuid: ^node_3_uuid, prev_id: ^node_1_uuid}]
+      })
+
+      assert_push_event(other_live, "move_nodes", %{
+        nodes: [%{uuid: ^node_3_uuid, prev_id: ^node_1_uuid}]
+      })
+
+      assert_push_event(live, "move_nodes", %{nodes: [moved_node]})
+      assert_push_event(other_live, "move_nodes", %{nodes: [other_moved_node]})
+
+      assert %{uuid: ^node_2_1_uuid} = moved_node
+      assert moved_node == other_moved_node
+
+      assert live |> has_element?("#nodes-form-#{node_1.uuid}")
+      assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
+
+      refute live |> has_element?("#nodes-form-#{node_2.uuid}")
+      refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
+    end
+
+    test "merge node with prev", %{
+      conn: conn,
+      url: url,
+      stream_id: stream_id,
+      nodes: [node_1, node_2, node_2_1, node_3]
+    } do
+      {:ok, live, _html} = live(conn, url)
+      {:ok, other_live, _html} = live(conn, url)
+
+      params = %{"uuid" => node_2.uuid}
+
+      assert live
+             |> element(stream_id)
+             |> render_hook(:merge_prev, params)
+
+      keep_liveview_alive()
+
+      node_1_uuid = node_1.uuid
+      node_3_uuid = node_3.uuid
+      node_2_1_uuid = node_2_1.uuid
+      content = node_1.content <> node_2.content
+
+      assert_push_event(live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
+      assert_push_event(other_live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
+
+      assert_push_event(live, "move_nodes", %{
+        nodes: [%{uuid: ^node_3_uuid, prev_id: ^node_1_uuid}]
+      })
+
+      assert_push_event(other_live, "move_nodes", %{
+        nodes: [%{uuid: ^node_3_uuid, prev_id: ^node_1_uuid}]
+      })
+
+      assert_push_event(live, "move_nodes", %{nodes: [moved_child_node]})
+      assert_push_event(other_live, "move_nodes", %{nodes: [other_moved_child_node]})
+
+      assert %{uuid: ^node_2_1_uuid} = moved_child_node
+      assert moved_child_node == other_moved_child_node
+
+      assert live |> has_element?("#nodes-form-#{node_1.uuid}")
+      assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
+
+      refute live |> has_element?("#nodes-form-#{node_2.uuid}")
+      refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
+    end
+
     test "move node up", %{
       conn: conn,
       url: url,
@@ -329,75 +421,75 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_nodes == nodes
     end
 
-    test "merge with prev node", %{
-      conn: conn,
-      url: url,
-      stream_id: stream_id,
-      nodes: [node_1, node_2, _, node_3]
-    } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+    #     test "merge with prev node", %{
+    #       conn: conn,
+    #       url: url,
+    #       stream_id: stream_id,
+    #       nodes: [node_1, node_2, _, node_3]
+    #     } do
+    #       {:ok, live, _html} = live(conn, url)
+    #       {:ok, other_live, _html} = live(conn, url)
 
-      params = %{"uuid" => node_2.uuid, "content" => node_2.content}
+    #       params = %{"uuid" => node_2.uuid, "content" => node_2.content}
 
-      assert live
-             |> element(stream_id)
-             |> render_hook(:merge_prev, params)
+    #       assert live
+    #              |> element(stream_id)
+    #              |> render_hook(:merge_prev, params)
 
-      keep_liveview_alive()
+    #       keep_liveview_alive()
 
-      node_1_uuid = node_1.uuid
-      node_3_uuid = node_3.uuid
-      content = node_1.content <> node_2.content
-      assert_push_event(other_live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
+    #       node_1_uuid = node_1.uuid
+    #       node_3_uuid = node_3.uuid
+    #       content = node_1.content <> node_2.content
+    #       assert_push_event(other_live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
 
-      assert_push_event(live, "move_nodes", %{nodes: [moved_node]})
-      assert_push_event(other_live, "move_nodes", %{nodes: [other_moved_node]})
+    #       assert_push_event(live, "move_nodes", %{nodes: [moved_node]})
+    #       assert_push_event(other_live, "move_nodes", %{nodes: [other_moved_node]})
 
-      assert %{uuid: ^node_3_uuid, parent_id: nil, prev_id: ^node_1_uuid} = moved_node
-      assert moved_node == other_moved_node
+    #       assert %{uuid: ^node_3_uuid, parent_id: nil, prev_id: ^node_1_uuid} = moved_node
+    #       assert moved_node == other_moved_node
 
-      refute live |> has_element?("#nodes-form-#{node_2.uuid}")
-      refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
+    #       refute live |> has_element?("#nodes-form-#{node_2.uuid}")
+    #       refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
 
-      assert live |> has_element?("#nodes-form-#{node_1.uuid}")
-      assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
-    end
+    #       assert live |> has_element?("#nodes-form-#{node_1.uuid}")
+    #       assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
+    #     end
+    # #
+    # test "merging with next node", %{
+    #   conn: conn,
+    #   url: url,
+    #   stream_id: stream_id,
+    #   nodes: [node_1, node_2, _, node_3]
+    # } do
+    #   {:ok, live, _html} = live(conn, url)
+    #   {:ok, other_live, _html} = live(conn, url)
 
-    test "merging with next node", %{
-      conn: conn,
-      url: url,
-      stream_id: stream_id,
-      nodes: [node_1, node_2, _, node_3]
-    } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+    #   params = %{"uuid" => node_1.uuid, "content" => node_1.content}
 
-      params = %{"uuid" => node_1.uuid, "content" => node_1.content}
+    #   assert live
+    #          |> element(stream_id)
+    #          |> render_hook(:merge_next, params)
 
-      assert live
-             |> element(stream_id)
-             |> render_hook(:merge_next, params)
+    #   keep_liveview_alive()
 
-      keep_liveview_alive()
+    #   node_1_uuid = node_1.uuid
+    #   node_3_uuid = node_3.uuid
+    #   content = node_1.content <> node_2.content
+    #   assert_push_event(other_live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
 
-      node_1_uuid = node_1.uuid
-      node_3_uuid = node_3.uuid
-      content = node_1.content <> node_2.content
-      assert_push_event(other_live, "set_content", %{uuid: ^node_1_uuid, content: ^content})
+    #   assert_push_event(live, "move_nodes", %{nodes: [moved_node]})
+    #   assert_push_event(other_live, "move_nodes", %{nodes: [other_moved_node]})
 
-      assert_push_event(live, "move_nodes", %{nodes: [moved_node]})
-      assert_push_event(other_live, "move_nodes", %{nodes: [other_moved_node]})
+    #   assert %{uuid: ^node_3_uuid, parent_id: nil, prev_id: ^node_1_uuid} = moved_node
+    #   assert moved_node == other_moved_node
 
-      assert %{uuid: ^node_3_uuid, parent_id: nil, prev_id: ^node_1_uuid} = moved_node
-      assert moved_node == other_moved_node
+    #   refute live |> has_element?("#nodes-form-#{node_2.uuid}")
+    #   refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
 
-      refute live |> has_element?("#nodes-form-#{node_2.uuid}")
-      refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
-
-      assert live |> has_element?("#nodes-form-#{node_1.uuid}")
-      assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
-    end
+    #   assert live |> has_element?("#nodes-form-#{node_1.uuid}")
+    #   assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
+    # end
 
     test "delete node", %{
       conn: conn,

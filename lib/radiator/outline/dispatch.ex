@@ -21,6 +21,18 @@ defmodule Radiator.Outline.Dispatch do
     |> CommandQueue.enqueue()
   end
 
+  def merge_prev(node_id, user_id, event_id) do
+    "merge_prev"
+    |> Command.build(node_id, user_id, event_id)
+    |> CommandQueue.enqueue()
+  end
+
+  def merge_next(node_id, user_id, event_id) do
+    "merge_next"
+    |> Command.build(node_id, user_id, event_id)
+    |> CommandQueue.enqueue()
+  end
+
   def indent_node(node_id, user_id, event_id) do
     "indent_node"
     |> Command.build(node_id, user_id, event_id)
