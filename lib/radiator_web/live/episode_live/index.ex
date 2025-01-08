@@ -10,7 +10,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     NodeMovedEvent
   }
 
-  alias Radiator.Outline.NodeRepository
   alias Radiator.Podcast
   alias Radiator.Podcast.Episode
   alias RadiatorWeb.OutlineComponents
@@ -120,11 +119,11 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   defp save_episode(socket, :new, params) do
     case Podcast.create_episode(params) do
       {:ok, episode} ->
-        NodeRepository.create_node(%{
-          "uuid" => Ecto.UUID.generate(),
-          "creator_id" => socket.assigns.current_user.id,
-          "episode_id" => episode.id
-        })
+        Dispatch.insert_node(
+          %{"episode_id" => episode.id, "content" => ""},
+          socket.assigns.current_user.id,
+          Ecto.UUID.generate()
+        )
 
         show =
           Podcast.reload_assoc(socket.assigns.show,
