@@ -73,7 +73,7 @@ defmodule Radiator.Outline.NodeRepositoryTest do
 
       [result1] = NodeRepository.list_nodes_by_node_container(node1.outline_node_container_id)
       [result2] = NodeRepository.list_nodes_by_node_container(node2.outline_node_container_id)
-      
+
       assert result1.uuid == node1.uuid
       assert result2.uuid == node2.uuid
     end

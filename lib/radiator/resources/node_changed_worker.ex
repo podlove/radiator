@@ -38,7 +38,7 @@ defmodule Radiator.Resources.NodeChangedWorker do
       %UrlsAnalyzedEvent{
         node_id: node_id,
         urls: url_resources,
-        episode_id: node.episode_id
+        outline_node_container_id: node.outline_node_container_id
       }
       |> EventStore.persist_event()
       |> Dispatch.broadcast()

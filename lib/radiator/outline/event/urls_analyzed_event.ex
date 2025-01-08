@@ -1,4 +1,4 @@
 defmodule Radiator.Outline.Event.UrlsAnalyzedEvent do
   @moduledoc false
-  defstruct [:node_id, :urls, :episode_id, event_id: Ecto.UUID.generate()]
+  defstruct [:node_id, :urls, :outline_node_container_id, event_id: Ecto.UUID.generate()]
 end
