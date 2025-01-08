@@ -69,6 +69,7 @@ defmodule Radiator.Outline.NodeRepository do
   def list_nodes_by_node_container(outline_node_container_id) do
     Node
     |> where([p], p.outline_node_container_id == ^outline_node_container_id)
+    |> preload(:urls)
     |> Repo.all()
     |> Enum.group_by(& &1.parent_id)
     |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)

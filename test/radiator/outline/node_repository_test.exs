@@ -4,6 +4,7 @@ defmodule Radiator.Outline.NodeRepositoryTest do
   alias Radiator.Outline.Node
   alias Radiator.Outline.NodeRepository
   alias Radiator.PodcastFixtures
+  alias Radiator.ResourcesFixtures
 
   import Radiator.OutlineFixtures
   import Ecto.Query, warn: false
@@ -70,13 +71,20 @@ defmodule Radiator.Outline.NodeRepositoryTest do
       node1 = node_fixture()
       node2 = node_fixture()
 
-      assert NodeRepository.list_nodes_by_node_container(node1.outline_node_container_id) == [
-               node1
-             ]
+      [result1] = NodeRepository.list_nodes_by_node_container(node1.outline_node_container_id)
+      [result2] = NodeRepository.list_nodes_by_node_container(node2.outline_node_container_id)
 
-      assert NodeRepository.list_nodes_by_node_container(node2.outline_node_container_id) == [
-               node2
-             ]
+      assert result1.uuid == node1.uuid
+      assert result2.uuid == node2.uuid
+    end
+
+    test "preloads optional associated URLs" do
+      node = node_fixture()
+      node_id = node.uuid
+      url = ResourcesFixtures.url_fixture(node_id: node.uuid)
+
+      [%Node{uuid: ^node_id, urls: [^url]}] =
+        NodeRepository.list_nodes_by_node_container(node.outline_node_container_id)
     end
   end
 

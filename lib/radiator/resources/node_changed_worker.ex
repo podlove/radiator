@@ -4,7 +4,10 @@ defmodule Radiator.Resources.NodeChangedWorker do
   """
   alias __MODULE__
   alias Radiator.EpisodeOutliner
+  alias Radiator.EventStore
   alias Radiator.NodeAnalyzer
+  alias Radiator.Outline.Dispatch
+  alias Radiator.Outline.Event.UrlsAnalyzedEvent
   alias Radiator.Outline.NodeRepository
   alias Radiator.Resources
 
@@ -18,7 +21,6 @@ defmodule Radiator.Resources.NodeChangedWorker do
   def perform(node_id) do
     analyzers = [Radiator.NodeAnalyzer.UrlAnalyzer]
     node = NodeRepository.get_node!(node_id)
-
     episode_id = EpisodeOutliner.episode_id_for_node(node)
 
     url_attributes =
@@ -30,7 +32,18 @@ defmodule Radiator.Resources.NodeChangedWorker do
         |> Map.put(:episode_id, episode_id)
       end)
 
-    _created_urls = Resources.rebuild_node_urls(node_id, url_attributes)
+    url_resources = Resources.rebuild_node_urls(node_id, url_attributes)
+
+    if url_resources != [] do
+      %UrlsAnalyzedEvent{
+        node_id: node_id,
+        urls: url_resources,
+        outline_node_container_id: node.outline_node_container_id
+      }
+      |> EventStore.persist_event()
+      |> Dispatch.broadcast()
+    end
+
     :ok
   end
 end
