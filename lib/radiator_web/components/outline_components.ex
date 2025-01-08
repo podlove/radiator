@@ -21,6 +21,7 @@ defmodule RadiatorWeb.OutlineComponents do
   attr :id, :string, required: true
   attr :form, :any, required: true
   attr :target, :any, required: true
+  attr :readonly, :boolean, default: false
 
   slot :inner_block, required: true
 
@@ -70,12 +71,14 @@ defmodule RadiatorWeb.OutlineComponents do
       <div
         id={[@id, "-content"]}
         class="peer-checked/selected:bg-yellow-100 inline-block pr-4 px-1 py-0.5 content focus:outline-none drag-ghost:opacity-0"
-        contenteditable
+        contenteditable={!@readonly}
         phx-value-uuid={@form[:uuid].value}
         phx-focus="focus"
         phx-blur="blur"
         phx-target={@target}
-      >{HTML.raw(@form[:content].value)}</div>
+      >
+        {HTML.raw(@form[:content].value)}
+      </div>
       <div class="text-xs text-white editing"></div>
     </div>
     """
@@ -289,8 +292,8 @@ defmodule RadiatorWeb.OutlineComponents do
   """
   def keyboard_shortcuts(assigns) do
     ~H"""
-    <aside>
-      <h3 class="text-base font-semibold leading-7 text-gray-600">Shortcuts</h3>
+    <details>
+      <summary>Shortcuts</summary>
       <dl class="divide-y divide-gray-100">
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
           <dt class="text-sm leading-6 text-gray-600 font-small">Add note</dt>
@@ -333,17 +336,20 @@ defmodule RadiatorWeb.OutlineComponents do
           </dd>
         </div>
       </dl>
-    </aside>
+    </details>
     """
   end
 
   def event_logs(assigns) do
     ~H"""
-    <ul id="event_logs" class="" phx-update="stream" phx-page-loading>
-      <li :for={{id, event} <- @stream} id={id} class="my-4 border-2 rounded">
-        <.event_entry event={event} />
-      </li>
-    </ul>
+    <details>
+      <summary>EVENT-LOG</summary>
+      <ul id="event_logs" class="" phx-update="stream" phx-page-loading>
+        <li :for={{id, event} <- @stream} id={id} class="my-4 border-2 rounded">
+          <.event_entry event={event} />
+        </li>
+      </ul>
+    </details>
     """
   end
 

@@ -105,6 +105,7 @@ defmodule RadiatorWeb.Components.Outline do
 
     socket
     |> assign(assigns)
+    |> assign_new(:readonly, fn _ -> false end)
     # |> stream_configure(:nodes, dom_id: &"outline-node-#{&1.data.uuid}")
     |> stream(:nodes, node_forms)
     |> reply(:ok)
@@ -215,6 +216,17 @@ defmodule RadiatorWeb.Components.Outline do
   def handle_event("outdent", %{"uuid" => uuid}, socket) do
     user_id = socket.assigns.user_id
     Dispatch.outdent_node(uuid, user_id, generate_event_id(socket.id))
+
+    socket
+    |> reply(:noreply)
+  end
+
+  def handle_event(
+        "move_nodes_to_episode",
+        %{"episode_id" => episode_id, "uuid_list" => uuid_list},
+        socket
+      ) do
+    # IO.inspect({episode_id, uuid_list})
 
     socket
     |> reply(:noreply)
