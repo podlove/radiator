@@ -227,6 +227,7 @@ defmodule RadiatorWeb.Components.Outline do
         socket
       ) do
     # IO.inspect({episode_id, uuid_list})
+    Dispatch.move_nodes_to_episode(episode_id, String.split(uuid_list, ","))
 
     socket
     |> reply(:noreply)
