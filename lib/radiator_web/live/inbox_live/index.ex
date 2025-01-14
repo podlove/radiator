@@ -27,7 +27,7 @@ defmodule RadiatorWeb.InboxLive.Index do
     episode = get_selected_episode(%{"show" => socket.assigns.show.id})
 
     socket
-    |> push_event("move_selected_to_episode", %{episode_id: episode.id})
+    |> push_event("move_nodes_to_container", %{container_id: episode.outline_node_container_id})
     |> reply(:noreply)
   end
 

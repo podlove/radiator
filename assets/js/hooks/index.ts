@@ -23,7 +23,7 @@ export const Hooks = {
           });
       });
 
-      this.handleEvent("move_selected_to_episode", ({ episode_id }) => {
+      this.handleEvent("move_nodes_to_container", ({ container_id }) => {
         const selected = this.el.querySelectorAll("input.selected:checked");
 
         const uuid_list = Array.from(selected).map((node: any) => {
@@ -32,8 +32,8 @@ export const Hooks = {
           return uuid;
         });
 
-        this.pushEventTo(this.el, "move_nodes_to_episode", {
-          episode_id,
+        this.pushEventTo(this.el, "move_nodes_to_container", {
+          container_id,
           uuid_list,
         });
       });

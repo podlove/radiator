@@ -1,7 +1,6 @@
 defmodule Radiator.Outline.Dispatch do
   @moduledoc false
 
-  alias Radiator.EpisodeOutliner
   alias Radiator.Outline.{Command, CommandQueue, Event, Validations}
 
   def insert_node(attributes, user_id, event_id) do
@@ -73,12 +72,11 @@ defmodule Radiator.Outline.Dispatch do
     |> CommandQueue.enqueue()
   end
 
-  def move_nodes_to_episode(episode_id, node_ids) do
-    container_id = EpisodeOutliner.container_with_episode_id(episode_id)
-    move_nodes_to_container(container_id, node_ids)
-  end
+  # def move_nodes_to_container(episode_id, node_ids) do
+  #   container_id = EpisodeOutliner.container_with_episode_id(episode_id)
+  #   move_nodes_to_container(container_id, node_ids)
+  # end
 
-  ## generated code!!!
   def move_nodes_to_container(container_id, node_ids) do
     node_ids
     |> Enum.each(fn node_id ->
@@ -87,7 +85,6 @@ defmodule Radiator.Outline.Dispatch do
       |> CommandQueue.enqueue()
     end)
   end
-
 
   def subscribe do
     Phoenix.PubSub.subscribe(Radiator.PubSub, "events")

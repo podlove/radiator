@@ -222,12 +222,11 @@ defmodule RadiatorWeb.Components.Outline do
   end
 
   def handle_event(
-        "move_nodes_to_episode",
-        %{"episode_id" => episode_id, "uuid_list" => uuid_list},
+        "move_nodes_to_container",
+        %{"container_id" => container_id, "uuid_list" => uuid_list},
         socket
       ) do
-    # IO.inspect({episode_id, uuid_list})
-    Dispatch.move_nodes_to_episode(episode_id, String.split(uuid_list, ","))
+    Dispatch.move_nodes_to_container(container_id, uuid_list)
 
     socket
     |> reply(:noreply)
