@@ -12,7 +12,8 @@ defmodule Radiator.Outline.Command do
     MoveNodeCommand,
     MoveUpCommand,
     OutdentNodeCommand,
-    SplitNodeCommand
+    SplitNodeCommand,
+    MoveNodesToContainerCommand
   }
 
   @move_commands [
@@ -114,6 +115,15 @@ defmodule Radiator.Outline.Command do
       node_id: node_id,
       parent_id: parent_id,
       prev_id: prev_id
+    }
+  end
+
+  def build("move_nodes_to_container", container_id, node_ids, user_id, event_id) do
+    %MoveNodesToContainerCommand{
+      event_id: event_id,
+      user_id: user_id,
+      container_id: container_id,
+      node_ids: node_ids
     }
   end
 end

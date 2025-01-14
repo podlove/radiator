@@ -77,13 +77,10 @@ defmodule Radiator.Outline.Dispatch do
   #   move_nodes_to_container(container_id, node_ids)
   # end
 
-  def move_nodes_to_container(container_id, node_ids) do
-    node_ids
-    |> Enum.each(fn node_id ->
-      "move_node"
-      |> Command.build(node_id, container_id, nil, nil, nil)
-      |> CommandQueue.enqueue()
-    end)
+  def move_nodes_to_container(container_id, node_ids, user_id, event_id) do
+    "move_nodes_to_container"
+    |> Command.build(container_id, node_ids, user_id, event_id)
+    |> CommandQueue.enqueue()
   end
 
   def subscribe do
