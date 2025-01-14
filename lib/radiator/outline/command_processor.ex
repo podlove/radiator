@@ -20,7 +20,8 @@ defmodule Radiator.Outline.CommandProcessor do
     MoveNodeCommand,
     MoveUpCommand,
     OutdentNodeCommand,
-    SplitNodeCommand
+    SplitNodeCommand,
+    MoveNodesToContainerCommand
   }
 
   alias Radiator.Outline.Dispatch
@@ -29,7 +30,8 @@ defmodule Radiator.Outline.CommandProcessor do
     NodeContentChangedEvent,
     NodeDeletedEvent,
     NodeInsertedEvent,
-    NodeMovedEvent
+    NodeMovedEvent,
+    NodesMovedToContainerEvent
   }
 
   alias Radiator.Outline.NodeRepository
@@ -179,6 +181,36 @@ defmodule Radiator.Outline.CommandProcessor do
     end
   end
 
+  defp process_command(
+         %MoveNodesToContainerCommand{
+           container_id: new_container_id,
+           node_ids: node_ids,
+           user_id: user_id,
+           event_id: event_id
+         } = command
+       ) do
+    # Get all nodes that need to be moved
+    nodes = Enum.map(node_ids, &NodeRepository.get_node!/1)
+
+    # Ensure all nodes exist and are from the same container
+    with {:ok, old_container_id} <- validate_nodes_container(nodes),
+         :ok <- validate_container_exists(new_container_id),
+         {:ok, updated_nodes} <- move_nodes_to_new_container(nodes, new_container_id) do
+      # Create and broadcast the event
+      event = %NodesMovedToContainerEvent{
+        event_id: event_id,
+        user_id: user_id,
+        nodes: updated_nodes,
+        old_container_id: old_container_id,
+        new_container_id: new_container_id
+      }
+
+      {:ok, event}
+    else
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
   def handle_merge_result(
         %NodeRepoResult{
           node: node,
@@ -307,5 +339,36 @@ defmodule Radiator.Outline.CommandProcessor do
     event
     |> EventStore.persist_event()
     |> Dispatch.broadcast()
+  end
+
+  defp validate_nodes_container([first_node | _] = nodes) do
+    container_id = first_node.outline_node_container_id
+
+    if Enum.all?(nodes, &(&1.outline_node_container_id == container_id)) do
+      {:ok, container_id}
+    else
+      {:error, :nodes_from_different_containers}
+    end
+  end
+
+  defp validate_nodes_container([]), do: {:error, :no_nodes_provided}
+
+  defp validate_container_exists(container_id) do
+    case Repo.get(NodeContainer, container_id) do
+      nil -> {:error, :container_not_found}
+      _container -> :ok
+    end
+  end
+
+  defp move_nodes_to_new_container(nodes, new_container_id) do
+    # Start a transaction to ensure all nodes are moved atomically
+    Repo.transaction(fn ->
+      nodes
+      |> Enum.map(fn node ->
+        node
+        |> Node.move_container_changeset(%{outline_node_container_id: new_container_id})
+        |> Repo.update!()
+      end)
+    end)
   end
 end

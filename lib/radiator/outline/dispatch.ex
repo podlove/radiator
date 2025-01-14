@@ -77,7 +77,12 @@ defmodule Radiator.Outline.Dispatch do
   #   move_nodes_to_container(container_id, node_ids)
   # end
 
-  def move_nodes_to_container(container_id, node_ids, user_id, event_id) do
+  def move_nodes_to_container(container_id, node_ids) do
+    # Since this is called from the LiveView, we need to get the user_id from the socket
+    # You might need to adjust this based on how you're handling user authentication
+    user_id = "system"
+    event_id = Ecto.UUID.generate()
+
     "move_nodes_to_container"
     |> Command.build(container_id, node_ids, user_id, event_id)
     |> CommandQueue.enqueue()

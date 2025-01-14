@@ -10,4 +10,4 @@ defmodule Radiator.Outline.Command.MoveNodesToContainerCommand do
         }
 
   defstruct [:event_id, :user_id, :container_id, :node_ids]
-end 
+end
