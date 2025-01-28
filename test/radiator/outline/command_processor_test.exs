@@ -96,7 +96,7 @@ defmodule Radiator.Outline.CommandProcessorTest do
         node_ids: [node1.uuid, node2.uuid]
       }
 
-      assert {:ok, event} = CommandProcessor.process(command)
+      assert {:ok, event} = CommandProcessor.handle_events([command], 0, nil)
       assert event.old_container_id == old_container.id
       assert event.new_container_id == new_container.id
 
@@ -120,7 +120,8 @@ defmodule Radiator.Outline.CommandProcessorTest do
         node_ids: [node1.uuid, node2.uuid]
       }
 
-      assert {:error, :nodes_from_different_containers} = CommandProcessor.process(command)
+      assert {:error, :nodes_from_different_containers} =
+               CommandProcessor.handle_events([command], 0, nil)
     end
   end
 

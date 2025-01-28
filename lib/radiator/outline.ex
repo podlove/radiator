@@ -320,6 +320,18 @@ defmodule Radiator.Outline do
     # end
   end
 
+  # defp validate_nodes_container([first_node | _] = nodes) do
+  #   container_id = first_node.outline_node_container_id
+
+  #   if Enum.all?(nodes, &(&1.outline_node_container_id == container_id)) do
+  #     {:ok, container_id}
+  #   else
+  #     {:error, :nodes_from_different_containers}
+  #   end
+  # end
+
+  # defp validate_nodes_container([]), do: {:error, :no_nodes_provided}
+
   defp concat_nodes(_nodes) do
     # Iterate over all nodes, first node will get prev_id of nil
     # the next node will get the prev_id of the previous node
