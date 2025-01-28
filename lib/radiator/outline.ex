@@ -19,6 +19,7 @@ defmodule Radiator.Outline do
   import Ecto.Query
 
   alias Radiator.Outline.Node
+  alias Radiator.Outline.NodeContainer
   alias Radiator.Outline.NodeRepoResult
   alias Radiator.Outline.NodeRepository
   alias Radiator.Outline.Validations, as: NodeValidator
@@ -277,7 +278,6 @@ defmodule Radiator.Outline do
     nodes = Enum.map(node_ids, &NodeRepository.get_node!/1)
 
     # Ensure all nodes exist and are from the same container
-    remove_results =
       with {:ok, _old_container_id} <- validate_nodes_container(nodes),
            :ok <- validate_container_exists(new_container_id),
            {:ok, concated_nodes} <- concat_nodes(nodes),
@@ -285,9 +285,11 @@ defmodule Radiator.Outline do
            {:ok, _updated_nodes} <- add_nodes_to_new_container(concated_nodes, new_container_id) do
         # IO.inspect("All good")
         %NodeRepoResult{}
+      else
+        {:error, reason} ->
+          Logger.error("Move nodes to container failed. #{inspect(reason)}")
+          {:error, reason}
       end
-
-    {:ok, remove_results}
   end
 
   defp validate_container_exists(container_id) do
@@ -305,19 +307,19 @@ defmodule Radiator.Outline do
     end)
   end
 
-  defp validate_nodes_container(_node_ids) do
+  defp validate_nodes_container(nodes) do
     # Enum.map(node_ids, &NodeRepository.get_node!/1)
     # container_id = nodes
     # |> hd()
     # |> get_node_id()
     # |> NodeRepository.get_node!()
     # |> get_node_container_id()
-
-    # if Enum.all?(nodes, fn node -> node |> get_node_container_id() == container_id end) do
-    #   {:ok, container_id}
-    # else
-    #   {:error, :container_mismatch}
-    # end
+    container_id = hd(nodes).outline_node_container_id
+    if Enum.all?(nodes, fn node -> node.outline_node_container_id == container_id end) do
+      {:ok, container_id}
+    else
+      {:error, :container_mismatch}
+    end
   end
 
   # defp validate_nodes_container([first_node | _] = nodes) do
