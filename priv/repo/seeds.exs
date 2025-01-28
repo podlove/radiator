@@ -11,7 +11,7 @@
 # and so on) as they will fail if something goes wrong.
 
 alias Radiator.{Accounts, Podcast}
-alias Radiator.Outline.NodeRepository
+alias Radiator.Outline
 
 {:ok, _user_bob} =
   Accounts.register_user(%{email: "bob@radiator.de", password: "supersupersecret"})
@@ -52,75 +52,61 @@ alias Radiator.Outline.NodeRepository
     publish_date: Date.utc_today() |> Date.add(23)
   })
 
-{:ok, node1} =
-  NodeRepository.create_node(%{
+container_id = current_episode.outline_node_container_id
+
+{:ok, %{node: node1}} =
+  Outline.insert_node(%{
     "content" => "Node 1",
-    "show_id" => current_episode.show_id,
-    "outline_node_container_id" => current_episode.outline_node_container_id,
-    "episode_id" => current_episode.id
+    "outline_node_container_id" => container_id
   })
 
-{:ok, node2} =
-  NodeRepository.create_node(%{
+{:ok, %{node: node2}} =
+  Outline.insert_node(%{
     "content" => "Node 2",
-    "show_id" => current_episode.show_id,
-    "outline_node_container_id" => current_episode.outline_node_container_id,
-    "episode_id" => current_episode.id,
+    "outline_node_container_id" => container_id,
     "prev_id" => node1.uuid
   })
 
-{:ok, node3} =
-  NodeRepository.create_node(%{
+{:ok, %{node: node3}} =
+  Outline.insert_node(%{
     "content" => "Node 3",
-    "show_id" => current_episode.show_id,
-    "outline_node_container_id" => current_episode.outline_node_container_id,
-    "episode_id" => current_episode.id,
+    "outline_node_container_id" => container_id,
     "prev_id" => node2.uuid
   })
 
-{:ok, _node4} =
-  NodeRepository.create_node(%{
+{:ok, %{node: _node4}} =
+  Outline.insert_node(%{
     "content" => "Node 4",
-    "show_id" => current_episode.show_id,
-    "outline_node_container_id" => current_episode.outline_node_container_id,
-    "episode_id" => current_episode.id,
+    "outline_node_container_id" => container_id,
     "prev_id" => node3.uuid
   })
 
-{:ok, node21} =
-  NodeRepository.create_node(%{
+{:ok, %{node: node21}} =
+  Outline.insert_node(%{
     "content" => "Node 2.1",
-    "show_id" => current_episode.show_id,
-    "outline_node_container_id" => current_episode.outline_node_container_id,
-    "episode_id" => current_episode.id,
+    "outline_node_container_id" => container_id,
     "parent_id" => node2.uuid
   })
 
-{:ok, _node22} =
-  NodeRepository.create_node(%{
+{:ok, %{node: _node22}} =
+  Outline.insert_node(%{
     "content" => "Node 2.2",
-    "show_id" => current_episode.show_id,
-    "outline_node_container_id" => current_episode.outline_node_container_id,
-    "episode_id" => current_episode.id,
+    "outline_node_container_id" => container_id,
     "parent_id" => node2.uuid,
     "prev_id" => node21.uuid
   })
 
-{:ok, node211} =
-  NodeRepository.create_node(%{
+{:ok, %{node: node211}} =
+  Outline.insert_node(%{
     "content" => "Node 2.1.1",
-    "show_id" => current_episode.show_id,
-    "outline_node_container_id" => current_episode.outline_node_container_id,
-    "episode_id" => current_episode.id,
+    "outline_node_container_id" => container_id,
     "parent_id" => node21.uuid
   })
 
-{:ok, _node212} =
-  NodeRepository.create_node(%{
+{:ok, %{node: _node212}} =
+  Outline.insert_node(%{
     "content" => "Node 2.1.2",
-    "show_id" => current_episode.show_id,
-    "outline_node_container_id" => current_episode.outline_node_container_id,
-    "episode_id" => current_episode.id,
+    "outline_node_container_id" => container_id,
     "parent_id" => node21.uuid,
     "prev_id" => node211.uuid
   })

@@ -6,7 +6,13 @@ import {
   handleMoveNodes,
   handleSetContent,
 } from "./events/handler";
-import { input, click, keydown, toggleCollapse } from "./events/listener";
+import {
+  input,
+  click,
+  keydown,
+  toggleCollapse,
+  selectTree,
+} from "./events/listener";
 
 import Sortable from "../../vendor/sortable";
 // import Quill from "../../vendor/quill";
@@ -37,6 +43,8 @@ export const Hooks = {
           uuid_list,
         });
       });
+
+      this.el.addEventListener("click", selectTree.bind(this));
 
       const nodes = this.el.querySelectorAll(this.selector);
       nodes.forEach((node: HTMLDivElement) => {
@@ -87,7 +95,12 @@ export const Hooks = {
         });
       });
     },
-    updated() {},
+    updated() {
+      const nodes = this.el.querySelectorAll(this.selector);
+      nodes.forEach((node: HTMLDivElement) => {
+        moveNode(node);
+      });
+    },
   },
   outline: {
     selector: ".node",

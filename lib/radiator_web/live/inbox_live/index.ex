@@ -24,14 +24,14 @@ defmodule RadiatorWeb.InboxLive.Index do
   end
 
   def handle_event("move_selected_to_next_episode", _params, socket) do
-    episode = get_selected_episode(%{"show" => socket.assigns.show.id})
+    episode = get_current_episode_for_show(%{"show" => socket.assigns.show.id})
 
     socket
     |> push_event("move_nodes_to_container", %{container_id: episode.outline_node_container_id})
     |> reply(:noreply)
   end
 
-  defp get_selected_episode(%{"show" => show_id}) do
+  defp get_current_episode_for_show(%{"show" => show_id}) do
     Podcast.get_current_episode_for_show(show_id)
   end
 end

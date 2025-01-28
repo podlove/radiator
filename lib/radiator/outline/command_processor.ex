@@ -185,30 +185,25 @@ defmodule Radiator.Outline.CommandProcessor do
          %MoveNodesToContainerCommand{
            container_id: new_container_id,
            node_ids: node_ids,
-           user_id: user_id,
-           event_id: event_id
-         } = command
+           user_id: _user_id,
+           event_id: _event_id
+         } = _command
        ) do
-    # Get all nodes that need to be moved
-    nodes = Enum.map(node_ids, &NodeRepository.get_node!/1)
+    result = Outline.move_nodes_to_container(new_container_id, node_ids)
 
-    # Ensure all nodes exist and are from the same container
-    with {:ok, old_container_id} <- validate_nodes_container(nodes),
-         :ok <- validate_container_exists(new_container_id),
-         {:ok, updated_nodes} <- move_nodes_to_new_container(nodes, new_container_id) do
-      # Create and broadcast the event
-      event = %NodesMovedToContainerEvent{
-        event_id: event_id,
-        user_id: user_id,
-        nodes: updated_nodes,
-        old_container_id: old_container_id,
-        new_container_id: new_container_id
-      }
+    # # Create and broadcast the event
+    #   event = %NodesMovedToContainerEvent{
+    #     event_id: event_id,
+    #     user_id: user_id,
+    #     nodes: updated_nodes,
+    #     old_container_id: old_container_id,
+    #     new_container_id: new_container_id
+    #   }
 
-      {:ok, event}
-    else
-      {:error, reason} -> {:error, reason}
-    end
+    {:ok, result}
+    # else
+    #   {:error, reason} -> {:error, reason}
+    # end
   end
 
   def handle_merge_result(
@@ -358,17 +353,5 @@ defmodule Radiator.Outline.CommandProcessor do
       nil -> {:error, :container_not_found}
       _container -> :ok
     end
-  end
-
-  defp move_nodes_to_new_container(nodes, new_container_id) do
-    # Start a transaction to ensure all nodes are moved atomically
-    Repo.transaction(fn ->
-      nodes
-      |> Enum.map(fn node ->
-        node
-        |> Node.move_container_changeset(%{outline_node_container_id: new_container_id})
-        |> Repo.update!()
-      end)
-    end)
   end
 end
