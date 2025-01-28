@@ -278,18 +278,18 @@ defmodule Radiator.Outline do
     nodes = Enum.map(node_ids, &NodeRepository.get_node!/1)
 
     # Ensure all nodes exist and are from the same container
-      with {:ok, _old_container_id} <- validate_nodes_container(nodes),
-           :ok <- validate_container_exists(new_container_id),
-           {:ok, concated_nodes} <- concat_nodes(nodes),
-           {:ok, _remove_results} <- remove_nodes_from_container(concated_nodes),
-           {:ok, _updated_nodes} <- add_nodes_to_new_container(concated_nodes, new_container_id) do
-        # IO.inspect("All good")
-        %NodeRepoResult{}
-      else
-        {:error, reason} ->
-          Logger.error("Move nodes to container failed. #{inspect(reason)}")
-          {:error, reason}
-      end
+    with {:ok, _old_container_id} <- validate_nodes_container(nodes),
+         :ok <- validate_container_exists(new_container_id),
+         {:ok, _remove_results} <- remove_nodes_from_container(nodes),
+         {:ok, concated_nodes} <- concat_nodes(nodes),
+         {:ok, _updated_nodes} <- add_nodes_to_new_container(concated_nodes, new_container_id) do
+      # IO.inspect("All good")
+      %NodeRepoResult{}
+    else
+      {:error, reason} ->
+        Logger.error("Move nodes to container failed. #{inspect(reason)}")
+        {:error, reason}
+    end
   end
 
   defp validate_container_exists(container_id) do
@@ -308,13 +308,8 @@ defmodule Radiator.Outline do
   end
 
   defp validate_nodes_container(nodes) do
-    # Enum.map(node_ids, &NodeRepository.get_node!/1)
-    # container_id = nodes
-    # |> hd()
-    # |> get_node_id()
-    # |> NodeRepository.get_node!()
-    # |> get_node_container_id()
     container_id = hd(nodes).outline_node_container_id
+
     if Enum.all?(nodes, fn node -> node.outline_node_container_id == container_id end) do
       {:ok, container_id}
     else
@@ -533,7 +528,7 @@ defmodule Radiator.Outline do
       { %NodeRepoResult{} }
 
   """
-  def remove_node(%Node{} = node, delete_node \\ true) do
+  def remove_node(%Node{} = node, do_delete_node \\ true) do
     next_node = NodeRepository.get_next_node(node)
     prev_node = NodeRepository.get_prev_node(node)
 
@@ -552,7 +547,7 @@ defmodule Radiator.Outline do
       |> List.flatten()
 
     # finally delete the node itself from the database
-    if delete_node do
+    if do_delete_node do
       {:ok, deleted_node} = NodeRepository.delete_node(node)
 
       %NodeRepoResult{
