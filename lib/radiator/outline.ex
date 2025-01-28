@@ -283,17 +283,19 @@ defmodule Radiator.Outline do
            {:ok, concated_nodes} <- concat_nodes(nodes),
            {:ok, _remove_results} <- remove_nodes_from_container(concated_nodes),
            {:ok, _updated_nodes} <- add_nodes_to_new_container(concated_nodes, new_container_id) do
-        IO.inspect("All good")
+        # IO.inspect("All good")
         %NodeRepoResult{}
       end
 
     {:ok, remove_results}
   end
 
-  defp validate_container_exists(_container_id) do
-    :ok
+  defp validate_container_exists(container_id) do
+    case Repo.get!(NodeContainer, container_id) do
+      nil -> {:error, :container_not_found}
+      _container -> :ok
+    end
   end
-
 
   defp remove_nodes_from_container(nodes) do
     # update prev and next ids on old container for all left nodes
@@ -538,6 +540,7 @@ defmodule Radiator.Outline do
     # finally delete the node itself from the database
     if delete_node do
       {:ok, deleted_node} = NodeRepository.delete_node(node)
+
       %NodeRepoResult{
         node: deleted_node,
         next: get_node_result_info(updated_next_node),

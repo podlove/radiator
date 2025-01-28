@@ -18,10 +18,10 @@ defmodule Radiator.Outline.CommandProcessor do
     MergePrevNodeCommand,
     MoveDownCommand,
     MoveNodeCommand,
+    MoveNodesToContainerCommand,
     MoveUpCommand,
     OutdentNodeCommand,
-    SplitNodeCommand,
-    MoveNodesToContainerCommand
+    SplitNodeCommand
   }
 
   alias Radiator.Outline.Dispatch
@@ -31,7 +31,7 @@ defmodule Radiator.Outline.CommandProcessor do
     NodeDeletedEvent,
     NodeInsertedEvent,
     NodeMovedEvent,
-    NodesMovedToContainerEvent
+    # NodesMovedToContainerEvent
   }
 
   alias Radiator.Outline.NodeRepository
@@ -336,22 +336,15 @@ defmodule Radiator.Outline.CommandProcessor do
     |> Dispatch.broadcast()
   end
 
-  defp validate_nodes_container([first_node | _] = nodes) do
-    container_id = first_node.outline_node_container_id
+  # defp validate_nodes_container([first_node | _] = nodes) do
+  #   container_id = first_node.outline_node_container_id
 
-    if Enum.all?(nodes, &(&1.outline_node_container_id == container_id)) do
-      {:ok, container_id}
-    else
-      {:error, :nodes_from_different_containers}
-    end
-  end
+  #   if Enum.all?(nodes, &(&1.outline_node_container_id == container_id)) do
+  #     {:ok, container_id}
+  #   else
+  #     {:error, :nodes_from_different_containers}
+  #   end
+  # end
 
-  defp validate_nodes_container([]), do: {:error, :no_nodes_provided}
-
-  defp validate_container_exists(container_id) do
-    case Repo.get(NodeContainer, container_id) do
-      nil -> {:error, :container_not_found}
-      _container -> :ok
-    end
-  end
+  # defp validate_nodes_container([]), do: {:error, :no_nodes_provided}
 end
