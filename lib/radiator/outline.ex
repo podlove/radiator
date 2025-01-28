@@ -269,20 +269,31 @@ defmodule Radiator.Outline do
     move_node(node_id, prev_id: new_prev_id, parent_id: parent_id)
   end
 
+  @doc """
+  Move a list of nodes to another container.
+  """
   def move_nodes_to_container(new_container_id, node_ids) do
     # Get all nodes that need to be moved
     nodes = Enum.map(node_ids, &NodeRepository.get_node!/1)
 
     # Ensure all nodes exist and are from the same container
-    with {:ok, _old_container_id} <- validate_nodes_container(nodes),
-         :ok <- validate_container_exists(new_container_id),
-         {:ok, concated_nodes} <- concat_nodes(nodes),
-         {:ok, remove_results} <- remove_nodes_from_container(concated_nodes),
-         {:ok, updated_nodes} <- add_nodes_to_new_container(concated_nodes, new_container_id) do
-         IO.inspect("All good")
-    end
-    remove_results
+    remove_results =
+      with {:ok, _old_container_id} <- validate_nodes_container(nodes),
+           :ok <- validate_container_exists(new_container_id),
+           {:ok, concated_nodes} <- concat_nodes(nodes),
+           {:ok, _remove_results} <- remove_nodes_from_container(concated_nodes),
+           {:ok, _updated_nodes} <- add_nodes_to_new_container(concated_nodes, new_container_id) do
+        IO.inspect("All good")
+        %NodeRepoResult{}
+      end
+
+    {:ok, remove_results}
   end
+
+  defp validate_container_exists(_container_id) do
+    :ok
+  end
+
 
   defp remove_nodes_from_container(nodes) do
     # update prev and next ids on old container for all left nodes
@@ -292,8 +303,7 @@ defmodule Radiator.Outline do
     end)
   end
 
-  defp validate_nodes_container(node_ids) do
-
+  defp validate_nodes_container(_node_ids) do
     # Enum.map(node_ids, &NodeRepository.get_node!/1)
     # container_id = nodes
     # |> hd()
@@ -308,15 +318,12 @@ defmodule Radiator.Outline do
     # end
   end
 
-  defp concat_nodes(nodes) do
+  defp concat_nodes(_nodes) do
     # Iterate over all nodes, first node will get prev_id of nil
     # the next node will get the prev_id of the previous node
-
   end
 
-  defp move_nodes_to_new_container(nodes, new_container_id) do
-
-
+  defp add_nodes_to_new_container(_nodes, _container_id) do
     # Start a transaction to ensure all nodes are moved atomically
     # Repo.transaction(fn ->
     #   nodes
@@ -327,6 +334,8 @@ defmodule Radiator.Outline do
     #     |> Repo.update!()
     #   end)
     # end)
+    # # FIXME: Implement
+    {:ok, nil}
   end
 
   @doc """
@@ -527,17 +536,22 @@ defmodule Radiator.Outline do
       |> List.flatten()
 
     # finally delete the node itself from the database
-    if (delete_node) do
+    if delete_node do
       {:ok, deleted_node} = NodeRepository.delete_node(node)
+      %NodeRepoResult{
+        node: deleted_node,
+        next: get_node_result_info(updated_next_node),
+        children: all_children ++ recursive_deleted_children,
+        outline_node_container_id: node.outline_node_container_id
+      }
+    else
+      %NodeRepoResult{
+        node: node,
+        next: get_node_result_info(updated_next_node),
+        children: all_children ++ recursive_deleted_children,
+        outline_node_container_id: node.outline_node_container_id
+      }
     end
-
-
-    %NodeRepoResult{
-      node: deleted_node,
-      next: get_node_result_info(updated_next_node),
-      children: all_children ++ recursive_deleted_children,
-      outline_node_container_id: node.outline_node_container_id
-    }
   end
 
   @doc """

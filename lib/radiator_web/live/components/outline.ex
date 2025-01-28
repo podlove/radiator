@@ -227,7 +227,13 @@ defmodule RadiatorWeb.Components.Outline do
         socket
       ) do
     user_id = socket.assigns.user_id
-    Dispatch.move_nodes_to_container(container_id, uuid_list, user_id, generate_event_id(socket.id))
+
+    Dispatch.move_nodes_to_container(
+      container_id,
+      uuid_list,
+      user_id,
+      generate_event_id(socket.id)
+    )
 
     socket
     |> reply(:noreply)

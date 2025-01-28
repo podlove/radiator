@@ -17,7 +17,7 @@
     <ol id="episodes-list">
       <li :for={episode <- @episodes} id={"episode-#{episode.id}"}>
         <.link navigate={~p"/admin/podcast/#{@show}/#{episode}"} class="flex gap-4 my-4">
-          <img src={"/images/pic15.jpg"} alt="" width="100" />
+          <img src="/images/pic15.jpg" alt="" width="100" />
           {episode.number}
           {episode.title}
           <br />
