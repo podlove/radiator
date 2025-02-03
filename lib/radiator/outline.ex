@@ -34,7 +34,7 @@ defmodule Radiator.Outline do
 
   def order_child_nodes(%Node{} = node) do
     node
-    |> NodeRepository.get_all_siblings()
+    |> NodeRepository.get_all_siblings(node.outline_node_container_id)
     |> order_sibling_nodes()
   end
 
@@ -483,7 +483,11 @@ defmodule Radiator.Outline do
            node: result.update_content,
            old_next: result.delete_node.deleted_node,
            next: result.delete_node.updated_next_node,
-           children: NodeRepository.get_all_siblings(updated_prev_node),
+           children:
+             NodeRepository.get_all_siblings(
+               updated_prev_node,
+               updated_prev_node.outline_node_container_id
+             ),
            outline_node_container_id: updated_prev_node.outline_node_container_id
          }}
 
@@ -529,7 +533,7 @@ defmodule Radiator.Outline do
            node: result.update_content,
            old_next: result.delete_next_node.deleted_node,
            next: result.delete_next_node.updated_next_node,
-           children: NodeRepository.get_all_siblings(node),
+           children: NodeRepository.get_all_siblings(node, node.outline_node_container_id),
            outline_node_container_id: node.outline_node_container_id
          }}
 
@@ -555,7 +559,7 @@ defmodule Radiator.Outline do
       NodeRepository.move_node_if(next_node, node.parent_id, get_node_id(prev_node))
 
     # no tail recursion but we dont have too much levels in a tree
-    all_children = node |> NodeRepository.get_all_siblings()
+    all_children = node |> NodeRepository.get_all_siblings(node.outline_node_container_id)
 
     recursive_deleted_children =
       all_children

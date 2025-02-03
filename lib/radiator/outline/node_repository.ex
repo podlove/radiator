@@ -280,21 +280,26 @@ defmodule Radiator.Outline.NodeRepository do
   TODO wrong name: sibling is "geschwister" in german
   Returns all direct child nodes of a given node.
   ## Examples
-        iex> get_all_siblings(%Node{})
+        iex> get_all_siblings(%Node{}, "42")
         [%Node{}, %Node{}]
 
   """
-  def get_all_siblings(nil) do
+  def get_all_siblings(nil, container_id) do
     Node
     |> where([n], is_nil(n.parent_id))
+    |> where([n], n.outline_node_container_id == ^container_id)
     |> Repo.all()
   end
 
-  def get_all_siblings(node) do
+  def get_all_siblings(node, container_id) do
     Node
     |> where([n], n.parent_id == ^node.uuid)
+    |> where([n], n.outline_node_container_id == ^container_id)
     |> Repo.all()
   end
+
+  def get_all_siblings(%Node{outline_node_container_id: container_id} = node),
+    do: get_all_siblings(node, container_id)
 
   @doc """
   get all children of a node. there is no limit of levels.
@@ -304,7 +309,7 @@ defmodule Radiator.Outline.NodeRepository do
         [%Node{}, %Node{}]
   """
   def get_all_children(node) do
-    siblings = node |> get_all_siblings()
+    siblings = node |> get_all_siblings(node.outline_node_container_id)
 
     children =
       siblings
