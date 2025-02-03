@@ -281,7 +281,7 @@ defmodule Radiator.Outline do
     with {:ok, _old_container_id} <- validate_nodes_container(nodes),
          :ok <- validate_container_exists(new_container_id),
          {:ok, _remove_results} <- remove_nodes_from_container(nodes),
-         {:ok, concated_nodes} <- concat_nodes(nodes),
+         concated_nodes <- concat_nodes(nodes),
          {:ok, _updated_nodes} <- add_nodes_to_new_container(concated_nodes, new_container_id) do
       # IO.inspect("All good")
       %NodeRepoResult{}
@@ -301,10 +301,22 @@ defmodule Radiator.Outline do
 
   defp remove_nodes_from_container(nodes) do
     # update prev and next ids on old container for all left nodes
-    nodes
-    |> Enum.map(fn node ->
-      remove_node(node, false)
-    end)
+    result =
+      nodes
+      |> Enum.map(fn node ->
+        remove_node(node, false)
+      end)
+      # |> IO.inspect(label: "remove_nodes_from_container")
+      |> Enum.reduce(%NodeRepoResult{}, fn result, %NodeRepoResult{node: node} ->
+        # TODO: generated code which looked not so bad at the first glance
+        %NodeRepoResult{
+          node: node,
+          next: result.next,
+          children: result.children ++ [node]
+        }
+      end)
+
+    {:ok, result}
   end
 
   defp validate_nodes_container(nodes) do
@@ -329,9 +341,20 @@ defmodule Radiator.Outline do
 
   # defp validate_nodes_container([]), do: {:error, :no_nodes_provided}
 
-  defp concat_nodes(_nodes) do
+  defp concat_nodes(nodes) do
     # Iterate over all nodes, first node will get prev_id of nil
     # the next node will get the prev_id of the previous node
+
+    Enum.reduce(nodes, [], fn node, node_list ->
+      case node_list do
+        [] ->
+          [%Node{node | prev_id: nil}]
+
+        [prev_node | _] ->
+          [%Node{node | prev_id: prev_node.uuid} | node_list]
+      end
+    end)
+    |> Enum.reverse()
   end
 
   defp add_nodes_to_new_container(_nodes, _container_id) do
