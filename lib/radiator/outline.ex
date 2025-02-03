@@ -282,8 +282,8 @@ defmodule Radiator.Outline do
          :ok <- validate_container_exists(new_container_id),
          {:ok, _remove_results} <- remove_nodes_from_container(nodes),
          concated_nodes <- concat_nodes(nodes),
-         {:ok, _updated_nodes} <- add_nodes_to_new_container(concated_nodes, new_container_id) do
-      # IO.inspect("All good")
+         {:ok, updated_nodes} <- add_nodes_to_new_container(concated_nodes, new_container_id) do
+      {:ok, updated_nodes}
       %NodeRepoResult{}
     else
       {:error, reason} ->
@@ -357,19 +357,15 @@ defmodule Radiator.Outline do
     |> Enum.reverse()
   end
 
-  defp add_nodes_to_new_container(_nodes, _container_id) do
-    # Start a transaction to ensure all nodes are moved atomically
-    # Repo.transaction(fn ->
-    #   nodes
-    #   |> Enum.map(fn node ->
-
-    #     node
-    #     |> Node.move_container_changeset(%{outline_node_container_id: new_container_id})
-    #     |> Repo.update!()
-    #   end)
-    # end)
-    # # FIXME: Implement
-    {:ok, nil}
+  defp add_nodes_to_new_container(nodes, container_id) do
+    Repo.transaction(fn ->
+      nodes
+      |> Enum.map(fn node ->
+        node
+        |> Node.move_container_changeset(%{outline_node_container_id: container_id})
+        |> Repo.update!()
+      end)
+    end)
   end
 
   @doc """
