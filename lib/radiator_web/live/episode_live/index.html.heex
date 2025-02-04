@@ -14,13 +14,14 @@
       Create Episode
     </.link>
 
-    <ol>
+    <ol id="episodes-list">
       <li
-        :for={{episode, i} <- Enum.with_index(@episodes)}
+        :for={episode <- @episodes}
+        id={"episode-#{episode.id}"}
         class={[episode.id == @selected_episode.id && "bg-[#f0f4f4]"]}
       >
         <.link navigate={~p"/admin/podcast/#{@show}/#{episode}"} class="flex gap-4 my-4">
-          <img src={"/images/pic1#{i}.jpg"} alt="" width="100" />
+          <img src="/images/pic15.jpg" alt="" width="100" />
           {episode.number}
           {episode.title}
           <br />
@@ -81,7 +82,6 @@
     </section>
 
     <section>
-      <h4 class="text-lg">EVENT-LOG</h4>
       <OutlineComponents.event_logs stream={@streams.event_logs} />
     </section>
   </div>

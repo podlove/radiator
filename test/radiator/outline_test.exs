@@ -1329,6 +1329,12 @@ defmodule Radiator.OutlineTest do
       assert_raise Ecto.NoResultsError, fn -> NodeRepository.get_node!(node.uuid) end
     end
 
+    test "does not delete the node when false is passed as second argument (do_delete_node)" do
+      node = node_fixture()
+      assert %NodeRepoResult{} = Outline.remove_node(node, false)
+      assert node_4 = NodeRepository.get_node!(node.uuid)
+    end
+
     test "next node must be updated", %{
       node_2: node_2,
       node_3: node_3,

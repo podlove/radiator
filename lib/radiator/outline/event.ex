@@ -7,7 +7,8 @@ defmodule Radiator.Outline.Event do
     NodeContentChangedEvent,
     NodeDeletedEvent,
     NodeInsertedEvent,
-    NodeMovedEvent
+    NodeMovedEvent,
+    NodeMovedToNewContainer
   }
 
   def payload(%NodeInsertedEvent{} = event) do
@@ -40,10 +41,23 @@ defmodule Radiator.Outline.Event do
     }
   end
 
+  def payload(%NodeMovedToNewContainer{} = event) do
+    %{
+      node: event.node,
+      old_prev: event.old_prev,
+      old_next: event.old_next,
+      next: event.next,
+      # TODO which container id to take (or both)
+      outline_node_container_id: event.outline_node_container_id,
+      children: event.children
+    }
+  end
+
   def event_type(%NodeInsertedEvent{} = _event), do: "NodeInsertedEvent"
   def event_type(%NodeContentChangedEvent{} = _event), do: "NodeContentChangedEvent"
   def event_type(%NodeDeletedEvent{} = _event), do: "NodeDeletedEvent"
   def event_type(%NodeMovedEvent{} = _event), do: "NodeMovedEvent"
+  def event_type(%NodeMovedToNewContainer{} = _event), do: "NodeMovedToNewContainer"
 
   def outline_node_container_id(%{outline_node_container_id: outline_node_container_id}),
     do: outline_node_container_id

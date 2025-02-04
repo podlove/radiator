@@ -16,6 +16,14 @@ defmodule Radiator.EpisodeOutliner do
     Podcast.get_episode_by_container_id(outline_node_container_id)
   end
 
+  @doc """
+    Not yet sure wether we want this
+    Note: Will crash when episode does not exist
+  """
+  def container_with_episode_id(episode_id) do
+    Podcast.get_episode!(episode_id).outline_node_container_id
+  end
+
   defp episode_id(nil), do: nil
   defp episode_id(%Episode{id: id}), do: id
 end

@@ -1,3 +1,62 @@
 <div class="grid grid-cols-12 gap-24">
-  INBOX
+  <aside class="col-span-12 sm:col-span-4">
+    <.link patch={~p"/admin/podcast/#{@show}/inbox"} class="bg-[#444460] block text-white rounded">
+      <span class="inline-block w-24 py-2 mr-4 text-center">
+        <.icon name="hero-inbox-arrow-down" class="w-8 h-8" />
+      </span>
+      INBOX
+    </.link>
+
+    <.link
+      patch={~p"/admin/podcast/#{@show}/new"}
+      class="block my-8 rounded text-white bg-[#df7366] px-8 py-2 text-center"
+    >
+      Create Episode
+    </.link>
+
+    <ol id="episodes-list">
+      <li :for={episode <- @episodes} id={"episode-#{episode.id}"}>
+        <.link navigate={~p"/admin/podcast/#{@show}/#{episode}"} class="flex gap-4 my-4">
+          <img src="/images/pic15.jpg" alt="" width="100" />
+          {episode.number}
+          {episode.title}
+          <br />
+          {episode.slug}
+        </.link>
+      </li>
+    </ol>
+  </aside>
+
+  <div class="col-span-12 sm:col-span-8">
+    <section>
+      <.header class="text-2xl">
+        INBOX
+        <:actions>
+          <button
+            class="my-8 rounded text-white bg-[#df7366] px-2 text-center text-sm"
+            phx-click="select_all"
+          >
+            select_all
+          </button>
+        </:actions>
+        <:actions>
+          <button
+            class="my-8 rounded text-white bg-[#df7366] px-2 text-center text-sm"
+            phx-click="move_selected_to_next_episode"
+          >
+            move_selected_to_next_episode
+          </button>
+        </:actions>
+      </.header>
+
+      <.live_component
+        id={"outline-#{@show.id}"}
+        module={RadiatorWeb.Components.Outline}
+        container_id={@show.inbox_node_container_id}
+        user_id={@current_user.id}
+        user={@current_user}
+        readonly={true}
+      />
+    </section>
+  </div>
 </div>

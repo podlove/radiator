@@ -51,3 +51,16 @@ export function toggleCollapse({ detail: { uuid } }: CollapseParams) {
   collapsed[uuid] = !collapsed[uuid];
   localStorage.setItem(this.el.id, JSON.stringify(collapsed));
 }
+
+export function selectTree(event: MouseEvent) {
+  const target = event.target as HTMLElement
+  const node = target.closest(".node")
+
+  if (!node) return;
+
+  const children = node.querySelectorAll(".node");
+  children.forEach((child) => {
+    const input = child.querySelector("input.selected") as HTMLInputElement;
+    input.checked = true;
+  });
+}

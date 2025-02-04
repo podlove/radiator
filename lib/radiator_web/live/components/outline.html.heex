@@ -1,10 +1,8 @@
 <div id={@id}>
-  <OutlineComponents.keyboard_shortcuts />
-
   <div
     id={[@id, "-stream"]}
     class="relative children focus:outline-none"
-    phx-hook="outline"
+    phx-hook={if @readonly, do: "inbox", else: "outline"}
     phx-update="stream"
     phx-target={@myself}
     tabindex="0"
@@ -14,8 +12,11 @@
       id={id}
       form={form}
       target={@myself}
+      readonly={@readonly}
     >
       {form[:content].value}
     </OutlineComponents.node>
   </div>
+
+  <OutlineComponents.keyboard_shortcuts />
 </div>

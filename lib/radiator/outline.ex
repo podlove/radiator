@@ -19,6 +19,7 @@ defmodule Radiator.Outline do
   import Ecto.Query
 
   alias Radiator.Outline.Node
+  alias Radiator.Outline.NodeContainer
   alias Radiator.Outline.NodeRepoResult
   alias Radiator.Outline.NodeRepository
   alias Radiator.Outline.Validations, as: NodeValidator
@@ -33,7 +34,7 @@ defmodule Radiator.Outline do
 
   def order_child_nodes(%Node{} = node) do
     node
-    |> NodeRepository.get_all_siblings()
+    |> NodeRepository.get_all_siblings(node.outline_node_container_id)
     |> order_sibling_nodes()
   end
 
@@ -270,6 +271,72 @@ defmodule Radiator.Outline do
   end
 
   @doc """
+  Move a list of nodes to another container.
+  """
+  def move_node_to_container(new_container_id, node_id) do
+    # Get all nodes that need to be moved
+    node = NodeRepository.get_node!(node_id)
+    old_container_id = node.outline_node_container_id
+
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:remove_node_from_container, fn _, _ ->
+      {:ok, remove_node(node, false)}
+    end)
+    |> Ecto.Multi.run(:move_old_root, fn _, _ ->
+      old_root = NodeRepository.get_root_node(new_container_id)
+      NodeRepository.move_node_if(old_root, node.uuid, nil)
+
+      {:ok,
+       %NodeRepoResult{
+         node: old_root
+       }}
+    end)
+    |> Ecto.Multi.run(:add_node_to_new_container, fn _, multi_map ->
+      add_node_to_new_container(node, new_container_id)
+      NodeRepository.move_node_if(node, nil, nil)
+
+      new_children =
+        multi_map.remove_node_from_container.children
+        |> Enum.map(fn child ->
+          add_node_to_new_container(child, new_container_id)
+        end)
+
+      {:ok,
+       %NodeRepoResult{
+         node: node,
+         children: new_children
+       }}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok,
+       %{
+         remove_node_from_container: remove_node_result,
+         move_old_root: move_old_root_result,
+         add_node_to_new_container: add_node_result
+       }} ->
+        {:ok,
+         %NodeRepoResult{
+           node: add_node_result.node,
+           old_prev: remove_node_result.old_prev,
+           old_next: remove_node_result.old_next,
+           next: move_old_root_result.node,
+           outline_node_container_id: old_container_id,
+           children: remove_node_result.children ++ add_node_result.children
+         }}
+
+      {:error, _tag, error, _others} ->
+        {:error, error}
+    end
+  end
+
+  defp add_node_to_new_container(node, container_id) do
+    node
+    |> Node.move_container_changeset(%{outline_node_container_id: container_id})
+    |> Repo.update!()
+  end
+
+  @doc """
   Updates a nodes content.
 
   ## Examples
@@ -384,7 +451,11 @@ defmodule Radiator.Outline do
            node: result.update_content,
            old_next: result.delete_node.deleted_node,
            next: result.delete_node.updated_next_node,
-           children: NodeRepository.get_all_siblings(updated_prev_node),
+           children:
+             NodeRepository.get_all_siblings(
+               updated_prev_node,
+               updated_prev_node.outline_node_container_id
+             ),
            outline_node_container_id: updated_prev_node.outline_node_container_id
          }}
 
@@ -430,7 +501,7 @@ defmodule Radiator.Outline do
            node: result.update_content,
            old_next: result.delete_next_node.deleted_node,
            next: result.delete_next_node.updated_next_node,
-           children: NodeRepository.get_all_siblings(node),
+           children: NodeRepository.get_all_siblings(node, node.outline_node_container_id),
            outline_node_container_id: node.outline_node_container_id
          }}
 
@@ -448,7 +519,7 @@ defmodule Radiator.Outline do
       { %NodeRepoResult{} }
 
   """
-  def remove_node(%Node{} = node) do
+  def remove_node(%Node{} = node, do_delete_node \\ true) do
     next_node = NodeRepository.get_next_node(node)
     prev_node = NodeRepository.get_prev_node(node)
 
@@ -456,25 +527,34 @@ defmodule Radiator.Outline do
       NodeRepository.move_node_if(next_node, node.parent_id, get_node_id(prev_node))
 
     # no tail recursion but we dont have too much levels in a tree
-    all_children = node |> NodeRepository.get_all_siblings()
+    all_children = node |> NodeRepository.get_all_siblings(node.outline_node_container_id)
 
     recursive_deleted_children =
       all_children
       |> Enum.map(fn child_node ->
-        %NodeRepoResult{children: children} = remove_node(child_node)
+        %NodeRepoResult{children: children} = remove_node(child_node, do_delete_node)
         children
       end)
       |> List.flatten()
 
     # finally delete the node itself from the database
-    {:ok, deleted_node} = NodeRepository.delete_node(node)
+    if do_delete_node do
+      {:ok, deleted_node} = NodeRepository.delete_node(node)
 
-    %NodeRepoResult{
-      node: deleted_node,
-      next: get_node_result_info(updated_next_node),
-      children: all_children ++ recursive_deleted_children,
-      outline_node_container_id: node.outline_node_container_id
-    }
+      %NodeRepoResult{
+        node: deleted_node,
+        next: get_node_result_info(updated_next_node),
+        children: all_children ++ recursive_deleted_children,
+        outline_node_container_id: node.outline_node_container_id
+      }
+    else
+      %NodeRepoResult{
+        node: node,
+        next: get_node_result_info(updated_next_node),
+        children: all_children ++ recursive_deleted_children,
+        outline_node_container_id: node.outline_node_container_id
+      }
+    end
   end
 
   @doc """

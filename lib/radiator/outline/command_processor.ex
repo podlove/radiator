@@ -18,6 +18,7 @@ defmodule Radiator.Outline.CommandProcessor do
     MergePrevNodeCommand,
     MoveDownCommand,
     MoveNodeCommand,
+    MoveNodesToContainerCommand,
     MoveUpCommand,
     OutdentNodeCommand,
     SplitNodeCommand
@@ -29,7 +30,8 @@ defmodule Radiator.Outline.CommandProcessor do
     NodeContentChangedEvent,
     NodeDeletedEvent,
     NodeInsertedEvent,
-    NodeMovedEvent
+    NodeMovedEvent,
+    NodeMovedToNewContainer
   }
 
   alias Radiator.Outline.NodeRepository
@@ -177,6 +179,39 @@ defmodule Radiator.Outline.CommandProcessor do
       {:error, error} ->
         Logger.error("Merge next node failed. #{inspect(error)}")
     end
+  end
+
+  defp process_command(
+         %MoveNodesToContainerCommand{
+           container_id: new_container_id,
+           node_ids: node_ids,
+           user_id: user_id,
+           event_id: _event_id
+         } = _command
+       ) do
+    result =
+      Enum.reduce_while(node_ids, [], fn node_id, acc ->
+        case Outline.move_node_to_container(new_container_id, node_id) do
+          {:ok, result} ->
+            event =
+              %NodeMovedToNewContainer{
+                node: result.node,
+                old_outline_node_container_id: result.outline_node_container_id,
+                outline_node_container_id: new_container_id,
+                user_id: user_id,
+                event_id: Ecto.UUID.generate()
+              }
+
+            persist_and_broadcast_event(event)
+            {:cont, [{:ok, event} | acc]}
+
+          {:error, error} ->
+            Logger.error("Move nodes to container failed. #{inspect(error)}")
+            {:halt, [{:error, error} | acc]}
+        end
+      end)
+
+    hd(result)
   end
 
   def handle_merge_result(

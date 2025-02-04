@@ -1,12 +1,15 @@
 defmodule Radiator.Outline.CommandProcessorTest do
-  alias Radiator.Outline.NodeRepository
   use Radiator.DataCase
+
+  import Radiator.OutlineFixtures
 
   alias Radiator.AccountsFixtures
   alias Radiator.EventStore
   alias Radiator.Outline.{Command, CommandProcessor, CommandQueue, Dispatch, NodeRepository}
   alias Radiator.Outline.Command.InsertNodeCommand
+  alias Radiator.Outline.Command.MoveNodesToContainerCommand
   alias Radiator.Outline.Event.NodeInsertedEvent
+  alias Radiator.Outline.NodeRepository
   alias Radiator.PodcastFixtures
 
   describe "handle_events/2" do
@@ -76,6 +79,52 @@ defmodule Radiator.Outline.CommandProcessorTest do
 
       assert_receive(%NodeInsertedEvent{}, 1000)
     end
+  end
+
+  describe "move_nodes_to_container" do
+    test "successfully moves nodes to a new container" do
+      # Setup test data
+      old_container = node_container_fixture()
+      new_container = node_container_fixture()
+      node1 = node_fixture(%{outline_node_container_id: old_container.id})
+      node2 = node_fixture(%{outline_node_container_id: old_container.id})
+      user = AccountsFixtures.user_fixture()
+
+      command = %MoveNodesToContainerCommand{
+        event_id: Ecto.UUID.generate(),
+        user_id: user.id,
+        container_id: new_container.id,
+        node_ids: [node1.uuid, node2.uuid]
+      }
+
+      CommandProcessor.handle_events([command], 0, nil)
+      # TODO fix handle result
+      # assert event.old_container_id == old_container.id
+      # assert event.new_container_id == new_container.id
+
+      # Verify nodes were moved
+      assert Repo.reload!(node1).outline_node_container_id == new_container.id
+      assert Repo.reload!(node2).outline_node_container_id == new_container.id
+    end
+
+    # test "fails when nodes are from different containers" do
+    #   container1 = node_container_fixture()
+    #   container2 = node_container_fixture()
+    #   new_container = node_container_fixture()
+
+    #   node1 = node_fixture(%{outline_node_container_id: container1.id})
+    #   node2 = node_fixture(%{outline_node_container_id: container2.id})
+
+    #   command = %MoveNodesToContainerCommand{
+    #     event_id: Ecto.UUID.generate(),
+    #     user_id: "test_user",
+    #     container_id: new_container.id,
+    #     node_ids: [node1.uuid, node2.uuid]
+    #   }
+
+    #   assert {:error, :nodes_from_different_containers} =
+    #            CommandProcessor.handle_events([command], 0, nil)
+    # end
   end
 
   def prepare_outline(_) do

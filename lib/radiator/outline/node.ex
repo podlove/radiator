@@ -61,6 +61,12 @@ defmodule Radiator.Outline.Node do
     |> cast(attrs, [:parent_id, :prev_id])
   end
 
+  def move_container_changeset(node, attrs) do
+    node
+    |> cast(attrs, [:outline_node_container_id])
+    |> validate_required([:outline_node_container_id])
+  end
+
   defp put_uuid(%Ecto.Changeset{} = changeset) do
     case get_field(changeset, :uuid) do
       nil -> put_change(changeset, :uuid, Ecto.UUID.generate())

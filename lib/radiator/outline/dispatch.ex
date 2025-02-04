@@ -72,6 +72,12 @@ defmodule Radiator.Outline.Dispatch do
     |> CommandQueue.enqueue()
   end
 
+  def move_nodes_to_container(container_id, node_ids, user_id, event_id) do
+    "move_nodes_to_container"
+    |> Command.build(container_id, node_ids, user_id, event_id)
+    |> CommandQueue.enqueue()
+  end
+
   def subscribe do
     Phoenix.PubSub.subscribe(Radiator.PubSub, "events")
   end
