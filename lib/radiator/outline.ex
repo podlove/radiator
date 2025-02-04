@@ -276,6 +276,7 @@ defmodule Radiator.Outline do
   def move_node_to_container(new_container_id, node_id) do
     # Get all nodes that need to be moved
     node = NodeRepository.get_node!(node_id)
+    old_container_id = node.outline_node_container_id
 
     Ecto.Multi.new()
     |> Ecto.Multi.run(:remove_node_from_container, fn _ ->
@@ -289,12 +290,19 @@ defmodule Radiator.Outline do
         node: old_root
       }
     end)
-    |> Ecto.Multi.run(:add_node_to_new_container, fn _ ->
+    |> Ecto.Multi.run(:add_node_to_new_container, fn multi_map ->
       add_node_to_new_container(node, new_container_id)
       NodeRepository.move_node_if(node, nil, nil)
 
+      new_children =
+        multi_map.remove_node_from_container.children
+        |> Enum.map(fn child ->
+          add_node_to_new_container(child, new_container_id)
+        end)
+
       %NodeRepoResult{
-        node: node
+        node: node,
+        children: new_children
       }
     end)
     |> Repo.transaction()
@@ -311,7 +319,8 @@ defmodule Radiator.Outline do
            old_prev: remove_node_result.old_prev,
            old_next: remove_node_result.old_next,
            next: move_old_root_result.node,
-           outline_node_container_id: new_container_id
+           outline_node_container_id: old_container_id,
+           children: remove_node_result.children ++ add_node_result.children
          }}
 
       {:error, _tag, error, _others} ->

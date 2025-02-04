@@ -30,8 +30,8 @@ defmodule Radiator.Outline.CommandProcessor do
     NodeContentChangedEvent,
     NodeDeletedEvent,
     NodeInsertedEvent,
-    NodeMovedEvent
-    # NodesMovedToContainerEvent
+    NodeMovedEvent,
+    NodeMovedToNewContainer
   }
 
   alias Radiator.Outline.NodeRepository
@@ -185,16 +185,23 @@ defmodule Radiator.Outline.CommandProcessor do
          %MoveNodesToContainerCommand{
            container_id: new_container_id,
            node_ids: node_ids,
-           user_id: _user_id,
+           user_id: user_id,
            event_id: _event_id
          } = _command
        ) do
     Enum.reduce_while(node_ids, [], fn node_id, acc ->
       case Outline.move_node_to_container(new_container_id, node_id) do
-        {:ok, _result} ->
-          event = nil
-          # event = create_event(result, _command)
-          # persist_and_broadcast(event)
+        {:ok, result} ->
+          event =
+            %NodeMovedToNewContainer{
+              node: result.node,
+              old_outline_node_container_id: result.outline_node_container_id,
+              new_outline_node_container_id: new_container_id,
+              user_id: user_id,
+              event_id: Ecto.UUID.generate()
+            }
+
+          persist_and_broadcast_event(event)
           {:cont, [{:ok, event} | acc]}
 
         {:error, error} ->
@@ -202,16 +209,6 @@ defmodule Radiator.Outline.CommandProcessor do
           {:halt, [{:error, error} | acc]}
       end
     end)
-
-    # broadcast_events(events)
-    # # Create and broadcast the event
-    #   event = %NodesMovedToContainerEvent{
-    #     event_id: event_id,
-    #     user_id: user_id,
-    #     nodes: updated_nodes,
-    #     old_container_id: old_container_id,
-    #     new_container_id: new_container_id
-    #   }
   end
 
   def handle_merge_result(
