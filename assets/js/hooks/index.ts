@@ -51,15 +51,6 @@ export const Hooks = {
         moveNode(node);
       });
 
-      const episodes = document.getElementById("episodes-list");
-
-      new Sortable(episodes, {
-        group: this.el.id,
-        animation: 150,
-
-        sort: false,
-      });
-
       const nestedSortables = [...document.querySelectorAll(".children")];
       nestedSortables.forEach((element) => {
         new Sortable(element, {

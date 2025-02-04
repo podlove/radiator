@@ -1,20 +1,13 @@
-<div class="grid grid-cols-12 gap-24">
-  <aside class="col-span-12 sm:col-span-4">
-    <.link patch={~p"/admin/podcast/#{@show}/inbox"} class="bg-[#444460] block text-white rounded">
-      <span class="inline-block w-24 py-2 mr-4 text-center">
-        <.icon name="hero-inbox-arrow-down" class="w-8 h-8" />
-      </span>
-      INBOX
-    </.link>
-
+<div class="sm:grid sm:grid-cols-12 sm:gap-24">
+  <aside class="sm:col-span-4">
     <.link
       patch={~p"/admin/podcast/#{@show}/new"}
-      class="block my-8 rounded text-white bg-[#df7366] px-8 py-2 text-center"
+      class="block rounded text-white bg-[#df7366] px-8 py-2 text-center"
     >
       Create Episode
     </.link>
 
-    <ol id="episodes-list">
+    <ol id="episodes-list my-4">
       <li :for={episode <- @episodes} id={"episode-#{episode.id}"}>
         <.link navigate={~p"/admin/podcast/#{@show}/#{episode}"} class="flex gap-4 my-4">
           <img src="/images/pic15.jpg" alt="" width="100" />
@@ -27,7 +20,7 @@
     </ol>
   </aside>
 
-  <div class="col-span-12 sm:col-span-8">
+  <div class="sm:col-span-8">
     <section>
       <.header class="text-2xl">
         INBOX
