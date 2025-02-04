@@ -279,18 +279,19 @@ defmodule Radiator.Outline do
     old_container_id = node.outline_node_container_id
 
     Ecto.Multi.new()
-    |> Ecto.Multi.run(:remove_node_from_container, fn _ ->
-      remove_node(node, false)
+    |> Ecto.Multi.run(:remove_node_from_container, fn _, _ ->
+      {:ok, remove_node(node, false)}
     end)
-    |> Ecto.Multi.run(:move_old_root, fn _ ->
+    |> Ecto.Multi.run(:move_old_root, fn _, _ ->
       old_root = NodeRepository.get_root_node(new_container_id)
       NodeRepository.move_node_if(old_root, node.uuid, nil)
 
-      %NodeRepoResult{
-        node: old_root
-      }
+      {:ok,
+       %NodeRepoResult{
+         node: old_root
+       }}
     end)
-    |> Ecto.Multi.run(:add_node_to_new_container, fn multi_map ->
+    |> Ecto.Multi.run(:add_node_to_new_container, fn _, multi_map ->
       add_node_to_new_container(node, new_container_id)
       NodeRepository.move_node_if(node, nil, nil)
 
@@ -300,10 +301,11 @@ defmodule Radiator.Outline do
           add_node_to_new_container(child, new_container_id)
         end)
 
-      %NodeRepoResult{
-        node: node,
-        children: new_children
-      }
+      {:ok,
+       %NodeRepoResult{
+         node: node,
+         children: new_children
+       }}
     end)
     |> Repo.transaction()
     |> case do

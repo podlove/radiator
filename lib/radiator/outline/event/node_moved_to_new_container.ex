@@ -8,7 +8,7 @@ defmodule Radiator.Outline.Event.NodeMovedToNewContainer do
     :old_next,
     :next,
     :old_outline_node_container_id,
-    :new_outline_node_container_id,
+    :outline_node_container_id,
     :children
   ]
 end
