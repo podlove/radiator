@@ -277,6 +277,17 @@ defmodule Radiator.Outline.NodeRepository do
   end
 
   @doc """
+    TODO
+  """
+  def get_root_node(container_id) do
+    Node
+    |> where([n], is_nil(n.parent_id))
+    |> where([n], is_nil(n.prev_id))
+    |> where([n], n.outline_node_container_id == ^container_id)
+    |> Repo.one()
+  end
+
+  @doc """
   TODO wrong name: sibling is "geschwister" in german
   Returns all direct child nodes of a given node.
   ## Examples

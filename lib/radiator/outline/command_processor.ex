@@ -189,8 +189,21 @@ defmodule Radiator.Outline.CommandProcessor do
            event_id: _event_id
          } = _command
        ) do
-    result = Outline.move_nodes_to_container(new_container_id, node_ids)
+    Enum.reduce_while(node_ids, [], fn node_id, acc ->
+      case Outline.move_node_to_container(new_container_id, node_id) do
+        {:ok, _result} ->
+          event = nil
+          # event = create_event(result, _command)
+          # persist_and_broadcast(event)
+          {:cont, [{:ok, event} | acc]}
 
+        {:error, error} ->
+          Logger.error("Move nodes to container failed. #{inspect(error)}")
+          {:halt, [{:error, error} | acc]}
+      end
+    end)
+
+    # broadcast_events(events)
     # # Create and broadcast the event
     #   event = %NodesMovedToContainerEvent{
     #     event_id: event_id,
@@ -199,11 +212,6 @@ defmodule Radiator.Outline.CommandProcessor do
     #     old_container_id: old_container_id,
     #     new_container_id: new_container_id
     #   }
-
-    {:ok, result}
-    # else
-    #   {:error, reason} -> {:error, reason}
-    # end
   end
 
   def handle_merge_result(

@@ -273,98 +273,56 @@ defmodule Radiator.Outline do
   @doc """
   Move a list of nodes to another container.
   """
-  def move_nodes_to_container(new_container_id, node_ids) do
+  def move_node_to_container(new_container_id, node_id) do
     # Get all nodes that need to be moved
-    nodes = Enum.map(node_ids, &NodeRepository.get_node!/1)
+    node = NodeRepository.get_node!(node_id)
 
-    # Ensure all nodes exist and are from the same container
-    with {:ok, _old_container_id} <- validate_nodes_container(nodes),
-         :ok <- validate_container_exists(new_container_id),
-         {:ok, _remove_results} <- remove_nodes_from_container(nodes),
-         concated_nodes <- concat_nodes(nodes),
-         {:ok, updated_nodes} <- add_nodes_to_new_container(concated_nodes, new_container_id) do
-      {:ok, updated_nodes}
-      %NodeRepoResult{}
-    else
-      {:error, reason} ->
-        Logger.error("Move nodes to container failed. #{inspect(reason)}")
-        {:error, reason}
-    end
-  end
-
-  defp validate_container_exists(container_id) do
-    case Repo.get!(NodeContainer, container_id) do
-      nil -> {:error, :container_not_found}
-      _container -> :ok
-    end
-  end
-
-  defp remove_nodes_from_container(nodes) do
-    # update prev and next ids on old container for all left nodes
-    result =
-      nodes
-      |> Enum.map(fn node ->
-        remove_node(node, false)
-      end)
-      |> Enum.reduce(%NodeRepoResult{}, fn result, %NodeRepoResult{node: node} ->
-        # TODO: generated code which looked not so bad at the first glance
-        %NodeRepoResult{
-          node: node,
-          next: result.next,
-          children: result.children ++ [node]
-        }
-      end)
-
-    {:ok, result}
-  end
-
-  defp validate_nodes_container(nodes) do
-    container_id = hd(nodes).outline_node_container_id
-
-    if Enum.all?(nodes, fn node -> node.outline_node_container_id == container_id end) do
-      {:ok, container_id}
-    else
-      {:error, :container_mismatch}
-    end
-  end
-
-  # defp validate_nodes_container([first_node | _] = nodes) do
-  #   container_id = first_node.outline_node_container_id
-
-  #   if Enum.all?(nodes, &(&1.outline_node_container_id == container_id)) do
-  #     {:ok, container_id}
-  #   else
-  #     {:error, :nodes_from_different_containers}
-  #   end
-  # end
-
-  # defp validate_nodes_container([]), do: {:error, :no_nodes_provided}
-
-  defp concat_nodes(nodes) do
-    # Iterate over all nodes, first node will get prev_id of nil
-    # the next node will get the prev_id of the previous node
-
-    Enum.reduce(nodes, [], fn node, node_list ->
-      case node_list do
-        [] ->
-          [%Node{node | prev_id: nil}]
-
-        [prev_node | _] ->
-          [%Node{node | prev_id: prev_node.uuid} | node_list]
-      end
+    Ecto.Multi.new()
+    |> Ecto.Multi.run(:remove_node_from_container, fn _ ->
+      remove_node(node, false)
     end)
-    |> Enum.reverse()
+    |> Ecto.Multi.run(:move_old_root, fn _ ->
+      old_root = NodeRepository.get_root_node(new_container_id)
+      NodeRepository.move_node_if(old_root, node.uuid, nil)
+
+      %NodeRepoResult{
+        node: old_root
+      }
+    end)
+    |> Ecto.Multi.run(:add_node_to_new_container, fn _ ->
+      add_node_to_new_container(node, new_container_id)
+      NodeRepository.move_node_if(node, nil, nil)
+
+      %NodeRepoResult{
+        node: node
+      }
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok,
+       %{
+         remove_node_from_container: remove_node_result,
+         move_old_root: move_old_root_result,
+         add_node_to_new_container: add_node_result
+       }} ->
+        {:ok,
+         %NodeRepoResult{
+           node: add_node_result.node,
+           old_prev: remove_node_result.old_prev,
+           old_next: remove_node_result.old_next,
+           next: move_old_root_result.node,
+           outline_node_container_id: new_container_id
+         }}
+
+      {:error, _tag, error, _others} ->
+        {:error, error}
+    end
   end
 
-  defp add_nodes_to_new_container(nodes, container_id) do
-    Repo.transaction(fn ->
-      nodes
-      |> Enum.map(fn node ->
-        node
-        |> Node.move_container_changeset(%{outline_node_container_id: container_id})
-        |> Repo.update!()
-      end)
-    end)
+  defp add_node_to_new_container(node, container_id) do
+    node
+    |> Node.move_container_changeset(%{outline_node_container_id: container_id})
+    |> Repo.update!()
   end
 
   @doc """
@@ -563,7 +521,7 @@ defmodule Radiator.Outline do
     recursive_deleted_children =
       all_children
       |> Enum.map(fn child_node ->
-        %NodeRepoResult{children: children} = remove_node(child_node)
+        %NodeRepoResult{children: children} = remove_node(child_node, do_delete_node)
         children
       end)
       |> List.flatten()
