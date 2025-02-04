@@ -306,7 +306,6 @@ defmodule Radiator.Outline do
       |> Enum.map(fn node ->
         remove_node(node, false)
       end)
-      # |> IO.inspect(label: "remove_nodes_from_container")
       |> Enum.reduce(%NodeRepoResult{}, fn result, %NodeRepoResult{node: node} ->
         # TODO: generated code which looked not so bad at the first glance
         %NodeRepoResult{
