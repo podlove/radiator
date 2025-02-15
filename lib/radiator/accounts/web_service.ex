@@ -8,20 +8,14 @@ defmodule Radiator.Accounts.WebService do
   import Ecto.Changeset
 
   alias Radiator.Accounts.User
+  alias Radiator.Accounts.WebService.RaindropService
 
   @raindrop_service_name "raindrop"
 
   schema "web_services" do
     field :service_name, :string
 
-    embeds_one :data, RaindropService, on_replace: :delete, primary_key: false do
-      field :access_token, :string, redact: true
-      field :refresh_token, :string, redact: true
-      field :expires_at, :utc_datetime
-      # Show ID => Raindrop Collection ID
-      field :collection_mappings, :map, default: %{}
-    end
-
+    embeds_one :data, RaindropService, on_replace: :delete, primary_key: false
     belongs_to :user, User
 
     timestamps(type: :utc_datetime)
