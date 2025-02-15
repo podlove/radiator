@@ -15,7 +15,7 @@ defmodule Radiator.Accounts.WebService do
   schema "web_services" do
     field :service_name, :string
 
-    embeds_one :data, RaindropService, on_replace: :delete, primary_key: false
+    embeds_one :data, RaindropService, on_replace: :delete
     belongs_to :user, User
 
     timestamps(type: :utc_datetime)
