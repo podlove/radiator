@@ -1,9 +1,9 @@
 defmodule Radiator.AccountsTest do
   use Radiator.DataCase
 
-  alias Radiator.Accounts
-
   import Radiator.AccountsFixtures
+
+  alias Radiator.Accounts
   alias Radiator.Accounts.{User, UserToken, WebService}
   alias Radiator.PodcastFixtures
 
