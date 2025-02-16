@@ -31,6 +31,7 @@ defmodule Radiator.Application do
       {CommandQueue, name: CommandQueue},
       {CommandProcessor, name: CommandProcessor, subscribe_to: [{CommandQueue, max_demand: 1}]},
       {NodeChangeListener, name: NodeChangeListener},
+      {Radiator.Scheduler, []},
       {Registry, keys: :unique, name: Radiator.JobRegistry},
       {DynamicSupervisor, job_runner_config}
     ]
