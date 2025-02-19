@@ -31,7 +31,16 @@ defmodule Radiator.Application do
       {CommandQueue, name: CommandQueue},
       {CommandProcessor, name: CommandProcessor, subscribe_to: [{CommandQueue, max_demand: 1}]},
       {NodeChangeListener, name: NodeChangeListener},
-      {Radiator.Scheduler, []},
+      {Radiator.Scheduler,
+       [
+         task: fn ->
+           nil
+           # Your scheduled task here
+           # Logger.info("Running daily task")
+         end,
+         # Optional, defaults to 24 hours
+         interval: 24 * 60 * 60 * 1000
+       ]},
       {Registry, keys: :unique, name: Radiator.JobRegistry},
       {DynamicSupervisor, job_runner_config}
     ]
