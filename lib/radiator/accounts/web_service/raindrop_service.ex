@@ -2,7 +2,7 @@ defmodule Radiator.Accounts.WebService.RaindropService do
   @moduledoc """
   embedded schema for raindrop service
   """
-  import Ecto.Changeset
+  # import Ecto.Changeset
   use Ecto.Schema
 
   embedded_schema do
