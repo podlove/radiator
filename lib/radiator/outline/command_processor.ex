@@ -238,8 +238,8 @@ defmodule Radiator.Outline.CommandProcessor do
         event =
           %NodeMovedToNewContainer{
             node: repo_result.node,
-            outline_node_container_id: new_container_id,
-            old_outline_node_container_id: repo_result.outline_node_container_id,
+            container_id: new_container_id,
+            old_container_id: repo_result.container_id,
             user_id: user_id,
             event_id: event_id,
             old_prev: repo_result.old_prev,

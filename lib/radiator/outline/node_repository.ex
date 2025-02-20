@@ -221,18 +221,18 @@ defmodule Radiator.Outline.NodeRepository do
         %Node{uuid: 42}
   """
   def get_next_node(%Node{
-        outline_node_container_id: outline_node_container_id,
+        container_id: container_id,
         uuid: node_id,
         parent_id: parent_id
       }) do
-    get_next_node(outline_node_container_id, node_id, parent_id)
+    get_next_node(container_id, node_id, parent_id)
   end
 
   @doc """
   get_next_node/3
   Returns the next node of a node defined by episode, previd and parent_id in the outline tree.
 
-  Since the previous id and the parent id of a node might be nil, we need to pass the outline_node_container_id
+  Since the previous id and the parent id of a node might be nil, we need to pass the container_id
   to find the correct node.
 
   ## Examples
@@ -240,13 +240,13 @@ defmodule Radiator.Outline.NodeRepository do
         nil
 
         iex> get_next_node(42, "33b2a1dac9b1", "9d76aad4")
-        %Node{outline_node_container_id: 42, prev_id: "33b2a1dac9b1", parent_id: "9d76aad4"}
+        %Node{container_id: 42, prev_id: "33b2a1dac9b1", parent_id: "9d76aad4"}
   """
-  def get_next_node(outline_node_container_id, prev_id, parent_id) do
+  def get_next_node(container_id, prev_id, parent_id) do
     Node
-    |> where(outline_node_container_id: ^outline_node_container_id)
-    |> where_prev_node_equals(outline_node_container_id, prev_id)
-    |> where_parent_node_equals(outline_node_container_id, parent_id)
+    |> where(container_id: ^container_id)
+    |> where_prev_node_equals(container_id, prev_id)
+    |> where_parent_node_equals(container_id, parent_id)
     |> Repo.one()
   end
 
@@ -296,18 +296,18 @@ defmodule Radiator.Outline.NodeRepository do
   def get_all_siblings(nil, container_id) do
     Node
     |> where([n], is_nil(n.parent_id))
-    |> where([n], n.outline_node_container_id == ^container_id)
+    |> where([n], n.container_id == ^container_id)
     |> Repo.all()
   end
 
   def get_all_siblings(node, container_id) do
     Node
     |> where([n], n.parent_id == ^node.uuid)
-    |> where([n], n.outline_node_container_id == ^container_id)
+    |> where([n], n.container_id == ^container_id)
     |> Repo.all()
   end
 
-  def get_all_siblings(%Node{outline_node_container_id: container_id} = node),
+  def get_all_siblings(%Node{container_id: container_id} = node),
     do: get_all_siblings(node, container_id)
 
   @doc """
@@ -318,7 +318,7 @@ defmodule Radiator.Outline.NodeRepository do
         [%Node{}, %Node{}]
   """
   def get_all_children(node) do
-    siblings = node |> get_all_siblings(node.outline_node_container_id)
+    siblings = node |> get_all_siblings(node.container_id)
 
     children =
       siblings
@@ -343,7 +343,7 @@ defmodule Radiator.Outline.NodeRepository do
   WITH RECURSIVE node_tree AS (
         SELECT uuid, content, parent_id, prev_id, 0 AS level
         FROM outline_nodes
-        WHERE outline_node_container_id = ?::integer and parent_id is NULL
+        WHERE container_id = ?::integer and parent_id is NULL
      UNION ALL
         SELECT outline_nodes.uuid, outline_nodes.content, outline_nodes.parent_id, outline_nodes.prev_id, node_tree.level + 1
         FROM outline_nodes
@@ -351,13 +351,13 @@ defmodule Radiator.Outline.NodeRepository do
   )
   SELECT * FROM node_tree;
   """
-  def get_node_tree(nil), do: {:error, "outline_node_container_id is nil"}
+  def get_node_tree(nil), do: {:error, "container_id is nil"}
 
-  def get_node_tree(outline_node_container_id) do
+  def get_node_tree(container_id) do
     node_tree_initial_query =
       Node
       |> where([n], is_nil(n.parent_id))
-      |> where([n], n.outline_node_container_id == ^outline_node_container_id)
+      |> where([n], n.container_id == ^container_id)
       |> select([n], %{
         uuid: n.uuid,
         content: n.content,
@@ -407,35 +407,35 @@ defmodule Radiator.Outline.NodeRepository do
           parent_id: binaray_uuid_to_ecto_uuid(parent_id),
           prev_id: binaray_uuid_to_ecto_uuid(prev_id),
           level: level,
-          outline_node_container_id: outline_node_container_id
+          container_id: container_id
         }
       end)
 
     {:ok, tree}
   end
 
-  defp where_prev_node_equals(node, outline_node_container_id, nil) do
+  defp where_prev_node_equals(node, container_id, nil) do
     node
     |> where([n], is_nil(n.prev_id))
-    |> where([n], n.outline_node_container_id == ^outline_node_container_id)
+    |> where([n], n.container_id == ^container_id)
   end
 
-  defp where_prev_node_equals(node, outline_node_container_id, prev_id) do
+  defp where_prev_node_equals(node, container_id, prev_id) do
     node
     |> where([n], n.prev_id == ^prev_id)
-    |> where([n], n.outline_node_container_id == ^outline_node_container_id)
+    |> where([n], n.container_id == ^container_id)
   end
 
-  defp where_parent_node_equals(node, outline_node_container_id, nil) do
+  defp where_parent_node_equals(node, container_id, nil) do
     node
     |> where([n], is_nil(n.parent_id))
-    |> where([n], n.outline_node_container_id == ^outline_node_container_id)
+    |> where([n], n.container_id == ^container_id)
   end
 
-  defp where_parent_node_equals(node, outline_node_container_id, parent_id) do
+  defp where_parent_node_equals(node, container_id, parent_id) do
     node
     |> where([n], n.parent_id == ^parent_id)
-    |> where([n], n.outline_node_container_id == ^outline_node_container_id)
+    |> where([n], n.container_id == ^container_id)
   end
 
   defp binaray_uuid_to_ecto_uuid(nil), do: nil
