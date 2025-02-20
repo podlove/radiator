@@ -1,6 +1,8 @@
 defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
+  import Extension.Map
+
   alias Radiator.Outline.Dispatch
 
   alias Radiator.Outline.Event.{

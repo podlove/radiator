@@ -14,7 +14,7 @@
     <PodcastComponents.episode_list
       show_id={@show.id}
       episodes={@episodes}
-      selected={@selected_episode.id}
+      selected={mget(@selected_episode, :id)}
     />
   </aside>
 
