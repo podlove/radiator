@@ -599,7 +599,7 @@ defmodule RadiatorWeb.CoreComponents do
     <span class={[@name, @class]} />
     """
   end
-  
+
   def icon(%{name: "pi-" <> _} = assigns) do
     ~H"""
     <span class={[@name, @class]} />

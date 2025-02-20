@@ -1332,7 +1332,7 @@ defmodule Radiator.OutlineTest do
     test "does not delete the node when false is passed as second argument (do_delete_node)" do
       node = node_fixture()
       assert %NodeRepoResult{} = Outline.remove_node(node, false)
-      assert node_4 = NodeRepository.get_node!(node.uuid)
+      assert _node_4 = NodeRepository.get_node!(node.uuid)
     end
 
     test "next node must be updated", %{

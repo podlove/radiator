@@ -12,6 +12,8 @@ export function processEvent(action, event) {
   const cursorAtStart = start == 0 && stop == 0;
   const cursorAtEnd = start == content?.length && stop == content?.length;
 
+  // pushEventTo(selectorOrTarget, event, payload, (reply, ref) => ...)
+
   switch (action) {
     case "split":
       event.preventDefault();

@@ -61,27 +61,21 @@ export const Hooks = {
           ghostClass: "drag-ghost",
           handle: ".handle",
 
-          put: false,
-          sort: false,
+          // put: false,
+          // sort: false,
 
           // fallbackOnBody: true,
-          //  swapThreshold: 0.65,
+          // swapThreshold: 0.65,
           onEnd: (event) => {
-            console.log(event);
+            const to = event.to.parentNode;
 
-            //   const node = event.item;
-            //   const { uuid } = getNodeData(node);
-            //   const parentNode = getParentNode(node);
-            //   const prevNode = getPrevNode(node);
-            //   const parentData = parentNode && getNodeData(parentNode);
-            //   const parent_id = parentData?.uuid;
-            //   const prevData = prevNode && getNodeData(prevNode);
-            //   const prev_id = prevData?.uuid;
-            //   this.pushEventTo(this.el.phxHookId, "move", {
-            //     uuid,
-            //     parent_id,
-            //     prev_id,
-            //   });
+            const { uuid: uuid_item } = getNodeData(event.item);
+            const { uuid: uuid_target } = getNodeData(to);
+
+            this.pushEventTo(this.el.phxHookId, "move", {
+              uuid_item,
+              uuid_target,
+            });
           },
         });
       });
