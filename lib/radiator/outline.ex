@@ -35,7 +35,7 @@ defmodule Radiator.Outline do
 
   def order_child_nodes(%Node{} = node) do
     node
-    |> NodeRepository.get_all_siblings(node.outline_node_container_id)
+    |> NodeRepository.get_all_siblings(node.container_id)
     |> order_sibling_nodes()
   end
 
@@ -562,7 +562,7 @@ defmodule Radiator.Outline do
       NodeRepository.move_node_if(next_node, node.parent_id, get_node_id(prev_node))
 
     # no tail recursion but we dont have too much levels in a tree
-    all_children = node |> NodeRepository.get_all_siblings(node.outline_node_container_id)
+    all_children = node |> NodeRepository.get_all_siblings(node.container_id)
 
     recursive_deleted_children =
       all_children
@@ -652,26 +652,26 @@ defmodule Radiator.Outline do
   def get_node_id(node), do: Extension.Map.safe_get(node, :uuid)
 
   defp container_valid?(
-         outline_node_container_id,
-         %Node{outline_node_container_id: outline_node_container_id},
-         %Node{outline_node_container_id: outline_node_container_id}
+         container_id,
+         %Node{container_id: container_id},
+         %Node{container_id: container_id}
        ),
        do: true
 
   defp container_valid?(
-         outline_node_container_id,
-         %Node{outline_node_container_id: outline_node_container_id},
+         container_id,
+         %Node{container_id: container_id},
          nil
        ),
        do: true
 
-  defp container_valid?(outline_node_container_id, nil, %Node{
-         outline_node_container_id: outline_node_container_id
+  defp container_valid?(container_id, nil, %Node{
+         container_id: container_id
        }),
        do: true
 
-  defp container_valid?(_outline_node_container_id, nil, nil), do: true
-  defp container_valid?(_outline_node_container_id, _parent_node, _prev_node), do: false
+  defp container_valid?(_container_id, nil, nil), do: true
+  defp container_valid?(_container_id, _parent_node, _prev_node), do: false
 
   defp find_parent_node(%Node{parent_id: parent_id}, nil) do
     NodeRepository.get_node_if(parent_id)
@@ -685,20 +685,20 @@ defmodule Radiator.Outline do
   defp do_move_node(node, new_prev_id, new_parent_id, prev_node, parent_node) do
     node_repo_result = %NodeRepoResult{
       node: get_node_result_info(node),
-      outline_node_container_id: node.outline_node_container_id
+      outline_node_container_id: node.container_id
     }
 
     Repo.transaction(fn ->
       old_next_node =
         NodeRepository.get_node_by_parent_and_prev(
-          node.outline_node_container_id,
+          node.container_id,
           get_node_id(parent_node),
           node.uuid
         )
 
       new_next_node =
         NodeRepository.get_node_by_parent_and_prev(
-          node.outline_node_container_id,
+          node.container_id,
           new_parent_id,
           new_prev_id
         )
@@ -788,10 +788,10 @@ defmodule Radiator.Outline do
   defp do_move_up(%Node{}, nil), do: {:error, :no_previous_node}
 
   defp do_move_up(
-         %Node{outline_node_container_id: outline_node_container_id, parent_id: parent_id} = node,
+         %Node{container_id: container_id, parent_id: parent_id} = node,
          %Node{} = prev_node
        ) do
-    next_node = NodeRepository.get_next_node(outline_node_container_id, node.uuid, parent_id)
+    next_node = NodeRepository.get_next_node(container_id, node.uuid, parent_id)
 
     {:ok, updated_node} = NodeRepository.move_node_if(node, parent_id, prev_node.prev_id)
     {:ok, updated_prev_node} = NodeRepository.move_node_if(prev_node, parent_id, node.uuid)
@@ -799,7 +799,7 @@ defmodule Radiator.Outline do
 
     %NodeRepoResult{
       node: get_node_result_info(updated_node),
-      outline_node_container_id: outline_node_container_id,
+      outline_node_container_id: container_id,
       old_prev: get_node_result_info(updated_prev_node),
       old_next: get_node_result_info(updated_next_node)
     }
@@ -808,7 +808,7 @@ defmodule Radiator.Outline do
   defp do_move_down(%Node{}, nil), do: {:error, :no_next_node}
 
   defp do_move_down(
-         %Node{outline_node_container_id: outline_node_container_id, parent_id: parent_id} = node,
+         %Node{container_id: container_id, parent_id: parent_id} = node,
          %Node{} = next_node
        ) do
     new_next_node = NodeRepository.get_next_node(next_node)
@@ -821,7 +821,7 @@ defmodule Radiator.Outline do
 
     %NodeRepoResult{
       node: get_node_result_info(updated_node),
-      outline_node_container_id: outline_node_container_id,
+      outline_node_container_id: container_id,
       old_next: get_node_result_info(updated_next_node),
       next: get_node_result_info(updated_new_next_node)
     }

@@ -18,8 +18,7 @@ defmodule Radiator.Outline.Node do
 
     field :level, :integer, virtual: true
 
-    belongs_to :outline_node_container, NodeContainer
-
+    belongs_to :container, NodeContainer
     belongs_to :parent, Node, references: :uuid, type: Ecto.UUID
     belongs_to :prev, Node, references: :uuid, type: Ecto.UUID
     has_many :urls, Url, foreign_key: :node_id
@@ -40,10 +39,10 @@ defmodule Radiator.Outline.Node do
       :creator_id,
       :parent_id,
       :prev_id,
-      :outline_node_container_id
+      :container_id
     ])
     |> put_uuid()
-    # |> validate_required([:outline_node_container_id])
+    # |> validate_required([:container_id])
     |> validate_format(:uuid, ~r/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
     |> unique_constraint(:uuid, name: "outline_nodes_pkey")
   end
@@ -63,8 +62,8 @@ defmodule Radiator.Outline.Node do
 
   def move_container_changeset(node, attrs) do
     node
-    |> cast(attrs, [:outline_node_container_id, :parent_id, :prev_id])
-    |> validate_required([:outline_node_container_id])
+    |> cast(attrs, [:container_id, :parent_id, :prev_id])
+    |> validate_required([:container_id])
   end
 
   defp put_uuid(%Ecto.Changeset{} = changeset) do

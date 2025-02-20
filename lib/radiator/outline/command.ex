@@ -118,6 +118,25 @@ defmodule Radiator.Outline.Command do
     }
   end
 
+  def build(
+        "move_node_to_container",
+        container_id,
+        node_id,
+        parent_id,
+        prev_id,
+        user_id,
+        event_id
+      ) do
+    %MoveNodeToContainerCommand{
+      event_id: event_id,
+      user_id: user_id,
+      container_id: container_id,
+      node_id: node_id,
+      parent_id: parent_id,
+      prev_id: prev_id
+    }
+  end
+
   def build("move_node", node_id, parent_id, prev_id, user_id, event_id) do
     %MoveNodeCommand{
       event_id: event_id,
