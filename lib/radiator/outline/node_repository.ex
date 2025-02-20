@@ -44,25 +44,11 @@ defmodule Radiator.Outline.NodeRepository do
   end
 
   @doc """
-  Returns the list of nodes.
-
-  ## Examples
-
-      iex> list_nodes()
-      [%Node{}, ...]
-
-  """
-  def list_nodes do
-    Node
-    |> Repo.all()
-  end
-
-  @doc """
-  Returns the list of nodes for an episode.
+  Returns the list of nodes for an container.
   TODO should not be dependend on Outline module
   ## Examples
 
-      iex> list_nodes(123)
+      iex> list_nodes_by_node_container(123)
       [%Node{}, ...]
 
   """
