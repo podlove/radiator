@@ -41,9 +41,7 @@ defmodule RadiatorWeb.OutlineComponents do
       <button>
         <Core.icon name="hero-ellipsis-vertical" class="invisible w-5 h-5 group-hover:visible" />
       </button>
-      -->
       <.outline_form for={@form} phx-change="noop" phx-submit="noop" phx-target={@target}>
-        <!--
         <Core.icon name="hero-check-circle" class="w-5 h-5" />
         <Core.icon name="hero-cog-6-tooth" class="w-5 h-5" />
         <Core.input field={@form[:checked]} type="checkbox" />
@@ -51,19 +49,19 @@ defmodule RadiatorWeb.OutlineComponents do
         <Core.input field={@form[:priority]} type="radio" value="red" />
         <Core.input field={@form[:priority]} type="radio" value="yellow" />
         <Core.input field={@form[:priority]} type="radio" value="green" />
-        -->
       </.outline_form>
+      -->
       <div class="ml-4 peer/children w-full order-last children group-data-[collapsed]:hidden"></div>
       <input
         class="invisible my-1 group-hover:visible selected peer/selected"
         type="checkbox"
         phx-click={JS.dispatch("toggle_select", detail: %{uuid: @form.data.uuid})}
       />
-      <span class="hidden py-1 text-gray-500 handle peer-empty/children:block">
+      <span class="hidden py-1 text-gray-500 cursor-pointer handle peer-empty/children:block">
         <.circle />
       </span>
       <button
-        class="handle py-1 text-gray-500 block peer-empty/children:hidden group-data-[collapsed]:-rotate-90 duration-200"
+        class="handle cursor-pointer py-1 text-gray-500 block peer-empty/children:hidden group-data-[collapsed]:-rotate-90 duration-200"
         phx-click={JS.dispatch("toggle_collapse", detail: %{uuid: @form.data.uuid})}
       >
         <.triangle />
