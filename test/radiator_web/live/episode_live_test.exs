@@ -54,7 +54,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       {:ok, live, _html} = live(conn, ~p"/admin/podcast/#{show.id}")
 
       assert live
-             |> element(~s|aside a:fl-contains("Create Episode")|)
+             |> element(~s|aside a[title="Create Episode"]|)
              |> render_click() =~ "New Episode"
 
       assert_patch(live, ~p"/admin/podcast/#{show.id}/new")

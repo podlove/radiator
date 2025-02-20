@@ -13,6 +13,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   alias Radiator.Podcast
   alias Radiator.Podcast.Episode
   alias RadiatorWeb.OutlineComponents
+  alias RadiatorWeb.PodcastComponents
 
   @impl true
   def mount(%{"show" => show_id} = params, _session, socket) do
