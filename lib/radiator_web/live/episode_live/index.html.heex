@@ -19,12 +19,13 @@
   </aside>
 
   <div class="sm:col-span-8">
-    <.link patch={~p"/admin/podcast/#{@show}/inbox"} class="bg-[#444460] block text-white rounded">
-      <span class="inline-block w-24 py-2 mr-4 text-center">
-        <.icon name="hero-inbox-arrow-down" class="w-8 h-8" />
-      </span>
-      INBOX
-    </.link>
+    <.live_component
+      :if={@selected_episode}
+      id="inbox"
+      module={RadiatorWeb.Components.Inbox}
+      selected_episode={@selected_episode}
+      current_user={@current_user}
+    />
 
     <section :if={@live_action in [:new, :edit]}>
       <div class="p-4 my-4 bg-[#f0f4f4]">
@@ -74,6 +75,8 @@
         user={@current_user}
       />
     </section>
+
+    <OutlineComponents.keyboard_shortcuts />
 
     <section>
       <OutlineComponents.event_logs stream={@streams.event_logs} />

@@ -221,6 +221,8 @@ defmodule RadiatorWeb.Components.Outline do
     |> reply(:noreply)
   end
 
+  # def move_node_to_container (container_id, uuid, parent_id, prev_id)
+
   def handle_event(
         "move_nodes_to_container",
         %{"container_id" => container_id, "uuid_list" => uuid_list},
