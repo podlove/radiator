@@ -4,7 +4,7 @@ defmodule Extension.Map do
   Won't break if map is nil
   """
 
-  def mget(map, key, default \\ nil)
-  def mget(nil, _key, _default), do: nil
-  def mget(map, key, default) when is_map(map), do: Map.get(map, key, default)
+  def safe_get(map, key, default \\ nil)
+  def safe_get(nil, _key, _default), do: nil
+  def safe_get(map, key, default) when is_map(map), do: Map.get(map, key, default)
 end
