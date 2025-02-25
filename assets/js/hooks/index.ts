@@ -37,7 +37,6 @@ export const Hooks = {
           const { uuid } = getNodeData(parent);
           return uuid;
         });
-
         this.pushEventTo(this.el, "move_nodes_to_container", {
           container_id,
           uuid_list,
@@ -68,13 +67,15 @@ export const Hooks = {
           // swapThreshold: 0.65,
           onEnd: (event) => {
             const to = event.to.parentNode;
+            const container_id = to.closest(".container").dataset.container;
+            const { uuid } = getNodeData(event.item);
+            const { parent_id, prev_id } = getNodeData(to);
 
-            const { uuid: uuid_item } = getNodeData(event.item);
-            const { uuid: uuid_target } = getNodeData(to);
-
-            this.pushEventTo(this.el.phxHookId, "move", {
-              uuid_item,
-              uuid_target,
+            this.pushEventTo(this.el, "move_node_to_container", {
+              container_id,
+              uuid,
+              parent_id,
+              prev_id,
             });
           },
         });

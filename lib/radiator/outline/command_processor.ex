@@ -379,7 +379,7 @@ defmodule Radiator.Outline.CommandProcessor do
 
   defp persist_and_broadcast_event(event) do
     event
-    |> EventStore.persist_event()
+    # |> EventStore.persist_event()
     |> Dispatch.broadcast()
   end
 end

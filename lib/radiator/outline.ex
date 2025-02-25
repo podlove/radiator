@@ -102,6 +102,7 @@ defmodule Radiator.Outline do
       with true <- parent_and_prev_consistent?(parent_node, prev_node),
            true <- container_valid?(outline_node_container_id, parent_node, prev_node),
            {:ok, node} <-
+
              NodeRepository.move_node_if(
                node,
                outline_node_container_id,
@@ -303,15 +304,15 @@ defmodule Radiator.Outline do
     |> Ecto.Multi.run(:remove_node_from_container, fn _, _ ->
       {:ok, remove_node(node, false)}
     end)
-    |> Ecto.Multi.run(:move_old_root, fn _, _ ->
-      old_root = NodeRepository.get_root_node(container_id)
-      NodeRepository.move_node_if(old_root, node.uuid, nil)
+    # |> Ecto.Multi.run(:move_old_root, fn _, _ ->
+    #   old_root = NodeRepository.get_root_node(container_id)
+    #   NodeRepository.move_node_if(old_root, node.uuid, nil)
 
-      {:ok,
-       %NodeRepoResult{
-         node: old_root
-       }}
-    end)
+    #   {:ok,
+    #    %NodeRepoResult{
+    #      node: old_root
+    #    }}
+    # end)
     |> Ecto.Multi.run(:add_node_to_new_container, fn _, multi_map ->
       {:ok, moved_node} =
         insert_node(
@@ -343,7 +344,6 @@ defmodule Radiator.Outline do
       {:ok,
        %{
          remove_node_from_container: remove_node_result,
-         move_old_root: move_old_root_result,
          add_node_to_new_container: add_node_result
        }} ->
         {:ok,
@@ -351,7 +351,6 @@ defmodule Radiator.Outline do
            node: add_node_result.node,
            old_prev: remove_node_result.old_prev,
            old_next: remove_node_result.old_next,
-           next: move_old_root_result.node,
            outline_node_container_id: old_container_id,
            children: remove_node_result.children ++ add_node_result.children
          }}

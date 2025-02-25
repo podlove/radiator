@@ -1,10 +1,11 @@
 <div id={@id}>
   <div
     id={[@id, "-stream"]}
-    class="relative children focus:outline-none"
+    class="relative children focus:outline-none container"
     phx-hook={if @readonly, do: "inbox", else: "outline"}
     phx-update="stream"
     phx-target={@myself}
+    data-container={@container_id}
     tabindex="0"
   >
     <OutlineComponents.node
