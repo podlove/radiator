@@ -193,27 +193,64 @@ defmodule Radiator.Outline.CommandProcessor do
     result =
       Enum.reduce_while(node_ids, [], fn _node_id, _acc ->
         nil
-      #   case Outline.move_node_to_container(new_container_id, node_id) do
-      #     {:ok, result} ->
-      #       event =
-      #         %NodeMovedToNewContainer{
-      #           node: result.node,
-      #           old_outline_node_container_id: result.outline_node_container_id,
-      #           outline_node_container_id: new_container_id,
-      #           user_id: user_id,
-      #           event_id: Ecto.UUID.generate()
-      #         }
+        #   case Outline.move_node_to_container(new_container_id, node_id) do
+        #     {:ok, result} ->
+        #       event =
+        #         %NodeMovedToNewContainer{
+        #           node: result.node,
+        #           old_outline_node_container_id: result.outline_node_container_id,
+        #           outline_node_container_id: new_container_id,
+        #           user_id: user_id,
+        #           event_id: Ecto.UUID.generate()
+        #         }
 
-      #       persist_and_broadcast_event(event)
-      #       {:cont, [{:ok, event} | acc]}
+        #       persist_and_broadcast_event(event)
+        #       {:cont, [{:ok, event} | acc]}
 
-      #     {:error, error} ->
-      #       Logger.error("Move nodes to container failed. #{inspect(error)}")
-      #       {:halt, [{:error, error} | acc]}
-      #   end
+        #     {:error, error} ->
+        #       Logger.error("Move nodes to container failed. #{inspect(error)}")
+        #       {:halt, [{:error, error} | acc]}
+        #   end
       end)
 
     hd(result)
+  end
+
+  defp process_command(
+         %MoveNodeToContainerCommand{
+           container_id: new_container_id,
+           node_id: node_id,
+           user_id: user_id,
+           event_id: event_id,
+           parent_id: parent_id,
+           prev_id: prev_id
+         } = _command
+       ) do
+    case Outline.move_node_to_container(new_container_id, node_id,
+           parent_id: parent_id,
+           prev_id: prev_id
+         ) do
+      {:ok, repo_result} ->
+        event =
+          %NodeMovedToNewContainer{
+            node: repo_result.node,
+            outline_node_container_id: new_container_id,
+            old_outline_node_container_id: repo_result.outline_node_container_id,
+            user_id: user_id,
+            event_id: event_id,
+            old_prev: repo_result.old_prev,
+            old_next: repo_result.old_next,
+            next: repo_result.next,
+            children: repo_result.children
+          }
+
+        persist_and_broadcast_event(event)
+        {:ok, repo_result.node}
+
+      {:error, error} ->
+        Logger.error("Move nodes to container failed. #{inspect(error)}")
+        {:error, error}
+    end
   end
 
   def handle_merge_result(

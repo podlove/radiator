@@ -141,7 +141,8 @@ defmodule Radiator.OutlineTest do
         "prev_id" => node_3.uuid
       }
 
-      assert {:ok, %{node: %Node{uuid: node3_1_uuid} = node}} = Outline.create_and_insert_node(node_attrs)
+      assert {:ok, %{node: %Node{uuid: node3_1_uuid} = node}} =
+               Outline.create_and_insert_node(node_attrs)
 
       assert node.parent_id == node_3.parent_id
       assert node.prev_id == node_3.uuid
@@ -228,7 +229,9 @@ defmodule Radiator.OutlineTest do
         "outline_node_container_id" => node_2.outline_node_container_id
       }
 
-      {:ok, %{next: %{uuid: next_id}, node: new_node}} = Outline.create_and_insert_node(node_attrs)
+      {:ok, %{next: %{uuid: next_id}, node: new_node}} =
+        Outline.create_and_insert_node(node_attrs)
+
       assert node_3.uuid == next_id
       assert NodeRepository.get_node!(node_3.uuid).prev_id == new_node.uuid
     end

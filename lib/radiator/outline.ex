@@ -88,9 +88,8 @@ defmodule Radiator.Outline do
         %{"outline_node_container_id" => outline_node_container_id} = params,
         %Node{} = node
       ) do
-
-      prev_id = params["prev_id"]
-      parent_id = params["parent_id"]
+    prev_id = params["prev_id"]
+    parent_id = params["parent_id"]
 
     Repo.transaction(fn ->
       prev_node = NodeRepository.get_node_if(prev_id)
@@ -105,7 +104,10 @@ defmodule Radiator.Outline do
            {:ok, node} <-
              NodeRepository.move_node_if(
                node,
-               outline_node_container_id, get_node_id(parent_node), get_node_id(prev_node)),
+               outline_node_container_id,
+               get_node_id(parent_node),
+               get_node_id(prev_node)
+             ),
            {:ok, _node_to_move} <-
              NodeRepository.move_node_if(next_node, get_node_id(parent_node), node.uuid) do
         %NodeRepoResult{
@@ -289,9 +291,9 @@ defmodule Radiator.Outline do
   @doc """
   Move a node to another container.
   """
-  def move_node_to_container(new_container_id, node_id,
-        parent_id: _parent_id,
-        prev_id: _new_prev_id
+  def move_node_to_container(container_id, node_id,
+        parent_id: parent_id,
+        prev_id: prev_id
       ) do
     # Get all nodes that need to be moved
     node = NodeRepository.get_node!(node_id)
@@ -302,7 +304,7 @@ defmodule Radiator.Outline do
       {:ok, remove_node(node, false)}
     end)
     |> Ecto.Multi.run(:move_old_root, fn _, _ ->
-      old_root = NodeRepository.get_root_node(new_container_id)
+      old_root = NodeRepository.get_root_node(container_id)
       NodeRepository.move_node_if(old_root, node.uuid, nil)
 
       {:ok,
@@ -311,18 +313,28 @@ defmodule Radiator.Outline do
        }}
     end)
     |> Ecto.Multi.run(:add_node_to_new_container, fn _, multi_map ->
-      add_node_to_new_container(node, new_container_id)
-      NodeRepository.move_node_if(node, nil, nil)
+      {:ok, moved_node} =
+        insert_node(
+          %{
+            "outline_node_container_id" => container_id,
+            "parent_id" => parent_id,
+            "prev_id" => prev_id
+          },
+          node
+        )
+
+      # NodeRepository.move_node_if(node, nil, nil)
 
       new_children =
         multi_map.remove_node_from_container.children
         |> Enum.map(fn child ->
-          add_node_to_new_container(child, new_container_id)
+          {:ok, moved_child} = insert_node(%{"outline_node_container_id" => container_id}, child)
+          moved_child
         end)
 
       {:ok,
        %NodeRepoResult{
-         node: node,
+         node: moved_node,
          children: new_children
        }}
     end)
@@ -349,11 +361,16 @@ defmodule Radiator.Outline do
     end
   end
 
-  defp add_node_to_new_container(node, container_id) do
-    node
-    |> Node.move_container_changeset(%{outline_node_container_id: container_id})
-    |> Repo.update!()
-  end
+  # defp add_node_to_new_container(node, container_id) do
+  #   insert_node( %{"outline_node_container_id" => container_id, "parent_id"})
+  #   def insert_node(
+  #           %{"outline_node_container_id" => outline_node_container_id} = params,
+  #           %Node{} = node
+
+  #   node
+  #   |> Node.move_container_changeset(%{outline_node_container_id: container_id})
+  #   |> Repo.update!()
+  # end
 
   @doc """
   Updates a nodes content.
