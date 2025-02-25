@@ -9,7 +9,7 @@ defmodule Radiator.Outline.NodeRepoResult do
     :old_next,
     :next,
     :children,
-    :outline_node_container_id
+    :container_id
   ]
 end
 
@@ -74,7 +74,6 @@ defmodule Radiator.Outline do
   # if a previous node is given, the new node will be inserted after the previous node
   # if no parent is given, the new node will be inserted as a root node
   # if no previous node is given, the new node will be inserted as the first child of the parent node
-
   def create_and_insert_node(params) do
     params
     |> Map.take(["content", "creator_id"])
@@ -98,10 +97,10 @@ defmodule Radiator.Outline do
 
       # find Node which has been previously connected to prev_node
       next_node =
-        NodeRepository.get_next_node(outline_node_container_id, prev_id, get_node_id(parent_node))
+        NodeRepository.get_next_node(container_id, prev_id, get_node_id(parent_node))
 
       with true <- parent_and_prev_consistent?(parent_node, prev_node),
-           true <- container_valid?(outline_node_container_id, parent_node, prev_node),
+           true <- container_valid?(container_id, parent_node, prev_node),
            {:ok, node} <-
              NodeRepository.move_node_if(
                node,
@@ -114,7 +113,7 @@ defmodule Radiator.Outline do
         %NodeRepoResult{
           node: node,
           next: get_node_result_info(next_node),
-          outline_node_container_id: outline_node_container_id
+          container_id: container_id
         }
       else
         false ->
