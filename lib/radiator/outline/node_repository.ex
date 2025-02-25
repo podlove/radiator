@@ -190,6 +190,18 @@ defmodule Radiator.Outline.NodeRepository do
     |> Repo.update()
   end
 
+  def move_node_if(nil, _container_id, _parent_node_id, _prev_node_id), do: {:ok, nil}
+
+  def move_node_if(node, container_id, parent_id, prev_id) do
+    node
+    |> Node.move_container_changeset(%{
+      outline_node_container_id: container_id,
+      parent_id: parent_id,
+      prev_id: prev_id
+    })
+    |> Repo.update()
+  end
+
   @doc """
   Returns the previous node of a given node in the outline tree.
   Returns `nil` if prev_id of the node is nil.
