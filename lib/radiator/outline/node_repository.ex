@@ -58,7 +58,7 @@ defmodule Radiator.Outline.NodeRepository do
   end
 
   @doc """
-  Returns the list of nodes for an episode.
+  Returns the list of nodes for an container.
   TODO should not be dependend on Outline module
   ## Examples
 
