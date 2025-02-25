@@ -489,9 +489,9 @@ defmodule Radiator.Outline do
            children:
              NodeRepository.get_all_siblings(
                updated_prev_node,
-               updated_prev_node.outline_node_container_id
+               updated_prev_node.container_id
              ),
-           outline_node_container_id: updated_prev_node.outline_node_container_id
+           outline_node_container_id: updated_prev_node.container_id
          }}
 
       {:error, _tag, error, _others} ->
@@ -536,8 +536,8 @@ defmodule Radiator.Outline do
            node: result.update_content,
            old_next: result.delete_next_node.deleted_node,
            next: result.delete_next_node.updated_next_node,
-           children: NodeRepository.get_all_siblings(node, node.outline_node_container_id),
-           outline_node_container_id: node.outline_node_container_id
+           children: NodeRepository.get_all_siblings(node, node.container_id),
+           outline_node_container_id: node.container_id
          }}
 
       {:error, _tag, error, _others} ->
@@ -580,14 +580,14 @@ defmodule Radiator.Outline do
         node: deleted_node,
         next: get_node_result_info(updated_next_node),
         children: all_children ++ recursive_deleted_children,
-        outline_node_container_id: node.outline_node_container_id
+        outline_node_container_id: node.container_id
       }
     else
       %NodeRepoResult{
         node: node,
         next: get_node_result_info(updated_next_node),
         children: all_children ++ recursive_deleted_children,
-        outline_node_container_id: node.outline_node_container_id
+        outline_node_container_id: node.container_id
       }
     end
   end
