@@ -19,7 +19,7 @@ defmodule Radiator.OutlineFixtures do
       attrs
       |> Enum.into(%{
         content: "some content",
-        outline_node_container_id: episode.outline_node_container_id
+        container_id: episode.outline_node_container_id
       })
       |> NodeRepository.create_node()
 
