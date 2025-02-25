@@ -52,9 +52,9 @@ defmodule Radiator.Outline.NodeRepository do
       [%Node{}, ...]
 
   """
-  def list_nodes_by_node_container(outline_node_container_id) do
+  def list_nodes_by_node_container(container_id) do
     Node
-    |> where([p], p.outline_node_container_id == ^outline_node_container_id)
+    |> where([p], p.container_id == ^container_id)
     |> Repo.all()
     |> Enum.group_by(& &1.parent_id)
     |> Enum.map(fn {_parent_id, children} -> Radiator.Outline.order_sibling_nodes(children) end)
@@ -70,9 +70,9 @@ defmodule Radiator.Outline.NodeRepository do
       3
 
   """
-  def count_nodes_by_outline_node_container(outline_node_container_id) do
+  def count_nodes_by_outline_node_container(container_id) do
     Node
-    |> where([p], p.outline_node_container_id == ^outline_node_container_id)
+    |> where([p], p.container_id == ^container_id)
     |> Repo.aggregate(:count)
   end
 
