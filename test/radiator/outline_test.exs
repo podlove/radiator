@@ -817,6 +817,26 @@ defmodule Radiator.OutlineTest do
     end
   end
 
+  describe "move_node_to_container/3" do
+    setup :complex_node_fixture
+
+    test "move node 3 and 4", %{
+      node_3: node_3,
+      node_4: node_4
+    } do
+      node_to_move = node_fixture(
+        parent_id: nil,
+        prev_id: nil
+      )
+      Outline.move_node_to_container(node_3.outline_node_container_id, node_to_move.uuid, [parent_id: node_4.parent_id, prev_id: node_3.uuid])
+      node_to_move = Repo.reload!(node_to_move)
+      node_4 = Repo.reload!(node_4)
+      assert node_to_move.outline_node_container_id == node_3.outline_node_container_id
+      assert node_to_move.prev_id == node_3.uuid
+      assert node_to_move.parent_id == node_3.parent_id
+      assert node_4.prev_id == node_to_move.uuid
+    end
+  end
   describe "split_node/2" do
     setup :simple_node_fixture
 
