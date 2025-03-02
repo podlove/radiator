@@ -1,13 +1,10 @@
 defmodule Radiator.Outline.CommandProcessorTest do
   use Radiator.DataCase
 
-  import Radiator.OutlineFixtures
-
   alias Radiator.AccountsFixtures
   alias Radiator.EventStore
   alias Radiator.Outline.{Command, CommandProcessor, CommandQueue, Dispatch, NodeRepository}
   alias Radiator.Outline.Command.InsertNodeCommand
-  alias Radiator.Outline.Command.MoveNodesToContainerCommand
   alias Radiator.Outline.Event.NodeInsertedEvent
   alias Radiator.Outline.NodeRepository
   alias Radiator.PodcastFixtures
