@@ -10,8 +10,8 @@ defmodule Radiator.Outline.Command do
     MergePrevNodeCommand,
     MoveDownCommand,
     MoveNodeCommand,
-    MoveNodeToContainerCommand,
     MoveNodesToContainerCommand,
+    MoveNodeToContainerCommand,
     MoveUpCommand,
     OutdentNodeCommand,
     SplitNodeCommand

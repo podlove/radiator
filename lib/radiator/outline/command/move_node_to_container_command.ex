@@ -1,7 +1,5 @@
 defmodule Radiator.Outline.Command.MoveNodeToContainerCommand do
-  @moduledoc """
-
-  """
+  @moduledoc false
   @type t() :: %__MODULE__{
           event_id: binary(),
           user_id: binary(),
