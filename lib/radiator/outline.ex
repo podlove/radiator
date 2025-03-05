@@ -2,6 +2,7 @@ defmodule Radiator.Outline.NodeRepoResult do
   @moduledoc """
     Generic result structure for node operations.
   """
+  @derive Jason.Encoder
   defstruct [
     :node,
     :old_prev,
