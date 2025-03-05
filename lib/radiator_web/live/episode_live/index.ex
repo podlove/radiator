@@ -9,7 +9,8 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     NodeContentChangedEvent,
     NodeDeletedEvent,
     NodeInsertedEvent,
-    NodeMovedEvent
+    NodeMovedEvent,
+    NodeMovedToNewContainer
   }
 
   alias Radiator.Podcast
@@ -75,6 +76,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   def handle_info(%NodeContentChangedEvent{} = event, socket), do: proxy_event(event, socket)
   def handle_info(%NodeMovedEvent{} = event, socket), do: proxy_event(event, socket)
   def handle_info(%NodeDeletedEvent{} = event, socket), do: proxy_event(event, socket)
+  def handle_info(%NodeMovedToNewContainer{} = event, socket), do: proxy_event(event, socket)
 
   def handle_info(%{topic: "outline"} = event, socket) do
     id = "outline-#{socket.assigns.selected_episode.id}"

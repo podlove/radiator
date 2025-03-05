@@ -130,7 +130,7 @@ defmodule Radiator.OutlineTest do
     end
   end
 
-  describe "insert_node/1" do
+  describe "create_and_insert_node/1" do
     setup :complex_node_fixture
 
     test "node can be inserted after another node", %{node_3: node_3, node_4: node_4} do
@@ -141,7 +141,8 @@ defmodule Radiator.OutlineTest do
         "prev_id" => node_3.uuid
       }
 
-      assert {:ok, %{node: %Node{uuid: node3_1_uuid} = node}} = Outline.insert_node(node_attrs)
+      assert {:ok, %{node: %Node{uuid: node3_1_uuid} = node}} =
+               Outline.create_and_insert_node(node_attrs)
 
       assert node.parent_id == node_3.parent_id
       assert node.prev_id == node_3.uuid
@@ -163,7 +164,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_1.uuid
       }
 
-      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.create_and_insert_node(node_attrs)
       nested_node_2 = Repo.reload!(nested_node_2)
       assert nested_node_2.prev_id == new_node.uuid
       assert nested_node_2.parent_id == node_3.uuid
@@ -183,7 +184,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_1.uuid
       }
 
-      Outline.insert_node(node_attrs)
+      Outline.create_and_insert_node(node_attrs)
       new_count_nodes = NodeRepository.count_nodes_by_outline_node_container(node_container_id)
       assert new_count_nodes == count_nodes + 1
     end
@@ -199,7 +200,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_1.uuid
       }
 
-      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.create_and_insert_node(node_attrs)
       assert new_node.parent_id == node_3.uuid
     end
 
@@ -214,7 +215,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_1.uuid
       }
 
-      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.create_and_insert_node(node_attrs)
       assert new_node.prev_id == nested_node_1.uuid
     end
 
@@ -228,7 +229,9 @@ defmodule Radiator.OutlineTest do
         "outline_node_container_id" => node_2.outline_node_container_id
       }
 
-      {:ok, %{next: %{uuid: next_id}, node: new_node}} = Outline.insert_node(node_attrs)
+      {:ok, %{next: %{uuid: next_id}, node: new_node}} =
+        Outline.create_and_insert_node(node_attrs)
+
       assert node_3.uuid == next_id
       assert NodeRepository.get_node!(node_3.uuid).prev_id == new_node.uuid
     end
@@ -243,7 +246,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_1.uuid
       }
 
-      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.create_and_insert_node(node_attrs)
       assert new_node.parent_id == node_3.uuid
     end
 
@@ -259,7 +262,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_1.uuid
       }
 
-      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.create_and_insert_node(node_attrs)
 
       assert NodeRepository.get_node!(nested_node_2.uuid).prev_id == new_node.uuid
       assert new_node.prev_id == nested_node_1.uuid
@@ -278,7 +281,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_2.uuid
       }
 
-      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.create_and_insert_node(node_attrs)
 
       assert NodeRepository.get_node!(nested_node_2.uuid).prev_id == nested_node_1.uuid
       assert new_node.prev_id == nested_node_2.uuid
@@ -296,7 +299,7 @@ defmodule Radiator.OutlineTest do
         "parent_id" => node_3.uuid
       }
 
-      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.create_and_insert_node(node_attrs)
 
       assert new_node.prev_id == nil
       assert NodeRepository.get_node!(nested_node_1.uuid).prev_id == new_node.uuid
@@ -314,7 +317,7 @@ defmodule Radiator.OutlineTest do
         "outline_node_container_id" => parent_node.outline_node_container_id
       }
 
-      {:ok, %{node: new_node}} = Outline.insert_node(node_attrs)
+      {:ok, %{node: new_node}} = Outline.create_and_insert_node(node_attrs)
 
       assert new_node.prev_id == nil
       assert new_node.parent_id == nil
@@ -334,7 +337,7 @@ defmodule Radiator.OutlineTest do
       }
 
       {:error, "Insert node failed. Parent and prev node are not consistent."} =
-        Outline.insert_node(node_attrs)
+        Outline.create_and_insert_node(node_attrs)
     end
 
     test "parent node and prev node need to be consistent (2)", %{
@@ -355,7 +358,7 @@ defmodule Radiator.OutlineTest do
       }
 
       {:error, _error_message} =
-        Outline.insert_node(node_attrs)
+        Outline.create_and_insert_node(node_attrs)
     end
 
     test "in case of error no node gets inserted", %{
@@ -377,7 +380,7 @@ defmodule Radiator.OutlineTest do
         "prev_id" => nested_node_1.uuid
       }
 
-      {:error, _error_message} = Outline.insert_node(node_attrs)
+      {:error, _error_message} = Outline.create_and_insert_node(node_attrs)
 
       new_count_nodes =
         NodeRepository.count_nodes_by_outline_node_container(
@@ -811,6 +814,33 @@ defmodule Radiator.OutlineTest do
     } do
       {:error, :parent_and_prev_not_consistent} =
         Outline.move_node(node_1.uuid, prev_id: nested_node_1.uuid, parent_id: nil)
+    end
+  end
+
+  describe "move_node_to_container/3" do
+    setup :complex_node_fixture
+
+    test "move node 3 and 4", %{
+      node_3: node_3,
+      node_4: node_4
+    } do
+      node_to_move =
+        node_fixture(
+          parent_id: nil,
+          prev_id: nil
+        )
+
+      Outline.move_node_to_container(node_3.outline_node_container_id, node_to_move.uuid,
+        parent_id: node_4.parent_id,
+        prev_id: node_3.uuid
+      )
+
+      node_to_move = Repo.reload!(node_to_move)
+      node_4 = Repo.reload!(node_4)
+      assert node_to_move.outline_node_container_id == node_3.outline_node_container_id
+      assert node_to_move.prev_id == node_3.uuid
+      assert node_to_move.parent_id == node_3.parent_id
+      assert node_4.prev_id == node_to_move.uuid
     end
   end
 
