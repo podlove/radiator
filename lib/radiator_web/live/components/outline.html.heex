@@ -1,21 +1,20 @@
-<div id={@id}>
-  <div
-    id={[@id, "-stream"]}
-    class="relative children focus:outline-none container"
-    phx-hook={if @readonly, do: "inbox", else: "outline"}
-    phx-update="stream"
-    phx-target={@myself}
-    data-container={@container_id}
-    tabindex="0"
+<div
+  id={[@id, "-stream"]}
+  class="container relative children focus:outline-none"
+  phx-hook={if @readonly, do: "inbox", else: "outline"}
+  phx-update="stream"
+  phx-target={@myself}
+  data-container={@container_id}
+  tabindex="0"
+  data-group={@group}
+>
+  <OutlineComponents.node
+    :for={{id, form} <- @streams.nodes}
+    id={id}
+    form={form}
+    target={@myself}
+    readonly={@readonly}
   >
-    <OutlineComponents.node
-      :for={{id, form} <- @streams.nodes}
-      id={id}
-      form={form}
-      target={@myself}
-      readonly={@readonly}
-    >
-      {form[:content].value}
-    </OutlineComponents.node>
-  </div>
+    {form[:content].value}
+  </OutlineComponents.node>
 </div>

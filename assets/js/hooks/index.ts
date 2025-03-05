@@ -50,10 +50,10 @@ export const Hooks = {
         moveNode(node);
       });
 
-      const nestedSortables = [...document.querySelectorAll(".children")];
+      const nestedSortables = [...this.el.querySelectorAll(".children")];
       nestedSortables.forEach((element) => {
         new Sortable(element, {
-          group: this.el.id,
+          group: this.el.dataset.group,
           // animation: 150,
           // delay: 100,
           dragClass: "drag-item",
@@ -138,12 +138,12 @@ export const Hooks = {
         node.toggleAttribute("data-collapsed", !!collapsed[uuid]);
       });
 
-      const nestedSortables = [...document.querySelectorAll(".children")];
+      const nestedSortables = [...this.el.querySelectorAll(".children")];
       nestedSortables.forEach((element) => {
         // const el = document.getElementById('item');
         // const sortable = Sortable.create(el, options);
         new Sortable(element, {
-          group: this.el.id,
+          group: this.el.dataset.group,
           animation: 150,
           delay: 100,
           dragClass: "drag-item",
