@@ -140,7 +140,7 @@ defmodule Radiator.Outline.CommandProcessor do
      %NodeRepoResult{
        node: node,
        next: next,
-       outline_node_container_id: outline_node_container_id,
+       container_id: container_id,
        old_next: old_next
      }} =
       node_id
@@ -152,7 +152,7 @@ defmodule Radiator.Outline.CommandProcessor do
        %NodeRepoResult{
          node: next,
          next: old_next,
-         outline_node_container_id: outline_node_container_id
+         container_id: container_id
        }},
       command
     )

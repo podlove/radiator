@@ -85,7 +85,7 @@ defmodule Radiator.Outline do
   end
 
   def insert_node(
-        %{"outline_node_container_id" => outline_node_container_id} = params,
+        %{"container_id" => container_id} = params,
         %Node{} = node
       ) do
     prev_id = params["prev_id"]
@@ -104,7 +104,7 @@ defmodule Radiator.Outline do
            {:ok, node} <-
              NodeRepository.move_node_if(
                node,
-               outline_node_container_id,
+               container_id,
                get_node_id(parent_node),
                get_node_id(prev_node)
              ),
