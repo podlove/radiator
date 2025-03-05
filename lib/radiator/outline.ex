@@ -103,7 +103,6 @@ defmodule Radiator.Outline do
       with true <- parent_and_prev_consistent?(parent_node, prev_node),
            true <- container_valid?(outline_node_container_id, parent_node, prev_node),
            {:ok, node} <-
-
              NodeRepository.move_node_if(
                node,
                outline_node_container_id,

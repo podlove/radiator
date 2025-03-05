@@ -194,7 +194,10 @@ defmodule Radiator.Outline.CommandProcessor do
       Enum.reduce_while(node_ids, [], fn node_id, acc ->
         nil
 
-        case Outline.move_node_to_container(new_container_id, node_id, [parent_id: nil, prev_id: nil]) do
+        case Outline.move_node_to_container(new_container_id, node_id,
+               parent_id: nil,
+               prev_id: nil
+             ) do
           {:ok, result} ->
             event =
               %NodeMovedToNewContainer{
