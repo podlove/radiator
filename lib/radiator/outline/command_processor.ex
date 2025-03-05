@@ -117,7 +117,7 @@ defmodule Radiator.Outline.CommandProcessor do
 
         %NodeDeletedEvent{
           node: result.node,
-          outline_node_container_id: result.outline_node_container_id,
+          container_id: result.container_id,
           event_id: command.event_id,
           user_id: command.user_id,
           children: result.children,
@@ -202,8 +202,8 @@ defmodule Radiator.Outline.CommandProcessor do
             event =
               %NodeMovedToNewContainer{
                 node: result.node,
-                old_outline_node_container_id: result.outline_node_container_id,
-                outline_node_container_id: new_container_id,
+                old_container_id: result.container_id,
+                container_id: new_container_id,
                 user_id: user_id,
                 event_id: Ecto.UUID.generate()
               }
@@ -263,13 +263,13 @@ defmodule Radiator.Outline.CommandProcessor do
           old_next: deleted_node,
           next: next,
           children: children,
-          outline_node_container_id: outline_node_container_id
+          container_id: container_id
         },
         command
       ) do
     %NodeDeletedEvent{
       node: deleted_node,
-      outline_node_container_id: outline_node_container_id,
+      container_id: container_id,
       event_id: command.event_id,
       user_id: command.user_id,
       children: [],
@@ -282,7 +282,7 @@ defmodule Radiator.Outline.CommandProcessor do
       content: node.content,
       user_id: command.user_id,
       event_id: Ecto.UUID.generate(),
-      outline_node_container_id: node.outline_node_container_id
+      container_id: node.container_id
     }
     |> persist_and_broadcast_event()
 
@@ -292,7 +292,7 @@ defmodule Radiator.Outline.CommandProcessor do
         user_id: command.user_id,
         event_id: Ecto.UUID.generate(),
         children: [],
-        outline_node_container_id: child.outline_node_container_id
+        container_id: child.container_id
       }
       |> persist_and_broadcast_event()
     end)
@@ -303,7 +303,7 @@ defmodule Radiator.Outline.CommandProcessor do
           %NodeRepoResult{
             node: node,
             next: next,
-            outline_node_container_id: outline_node_container_id
+            container_id: container_id
           }},
          command
        ) do
@@ -312,7 +312,7 @@ defmodule Radiator.Outline.CommandProcessor do
       event_id: command.event_id,
       user_id: command.user_id,
       next: next,
-      outline_node_container_id: outline_node_container_id
+      container_id: container_id
     }
     |> persist_and_broadcast_event()
 
@@ -337,7 +337,7 @@ defmodule Radiator.Outline.CommandProcessor do
       event_id: command.event_id,
       next: result.next,
       children: result.children,
-      outline_node_container_id: result.outline_node_container_id
+      container_id: result.container_id
     }
     |> persist_and_broadcast_event()
 
@@ -355,7 +355,7 @@ defmodule Radiator.Outline.CommandProcessor do
       content: node.content,
       user_id: command.user_id,
       event_id: command.event_id,
-      outline_node_container_id: node.outline_node_container_id
+      container_id: node.container_id
     }
     |> persist_and_broadcast_event()
 
@@ -372,13 +372,13 @@ defmodule Radiator.Outline.CommandProcessor do
     :error
   end
 
-  defp add_node_container(%{"outline_node_container_id" => _outline_node_container_id} = payload),
+  defp add_node_container(%{"container_id" => _container_id} = payload),
     do: payload
 
   defp add_node_container(%{"episode_id" => episode_id} = payload) do
     episode = Podcast.get_episode!(episode_id)
 
-    Map.put(payload, "outline_node_container_id", episode.outline_node_container_id)
+    Map.put(payload, "container_id", episode.container_id)
   end
 
   defp persist_and_broadcast_event(event) do
