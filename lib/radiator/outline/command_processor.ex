@@ -208,7 +208,31 @@ defmodule Radiator.Outline.CommandProcessor do
                 event_id: Ecto.UUID.generate()
               }
 
-            persist_and_broadcast_event(event)
+            %NodeDeletedEvent{
+              node: result.node,
+              outline_node_container_id: result.outline_node_container_id,
+              event_id: Ecto.UUID.generate(),
+              user_id: user_id,
+              children:
+                Enum.filter(
+                  result.children,
+                  &(&1.outline_node_container_id == result.outline_node_container_id)
+                ),
+              next: result.old_next
+            }
+            |> persist_and_broadcast_event()
+
+            %NodeInsertedEvent{
+              node: result.node,
+              event_id: Ecto.UUID.generate(),
+              user_id: user_id,
+              next: result.next,
+              outline_node_container_id: new_container_id
+            }
+            |> persist_and_broadcast_event()
+
+            # persist_and_broadcast_event(event)
+
             {:cont, [{:ok, event} | acc]}
 
           {:error, error} ->
