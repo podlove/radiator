@@ -826,14 +826,14 @@ defmodule Radiator.OutlineTest do
           prev_id: nil
         )
 
-      Outline.move_node_to_container(node_3.outline_node_container_id, node_to_move.uuid,
+      Outline.move_node_to_container(node_3.container_id, node_to_move.uuid,
         parent_id: node_4.parent_id,
         prev_id: node_3.uuid
       )
 
       node_to_move = Repo.reload!(node_to_move)
       node_4 = Repo.reload!(node_4)
-      assert node_to_move.outline_node_container_id == node_3.outline_node_container_id
+      assert node_to_move.container_id == node_3.container_id
       assert node_to_move.prev_id == node_3.uuid
       assert node_to_move.parent_id == node_3.parent_id
       assert node_4.prev_id == node_to_move.uuid

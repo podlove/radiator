@@ -316,7 +316,7 @@ defmodule Radiator.Outline do
       {:ok, moved_node} =
         insert_node(
           %{
-            "outline_node_container_id" => container_id,
+            "container_id" => container_id,
             "parent_id" => parent_id,
             "prev_id" => prev_id
           },
@@ -328,7 +328,7 @@ defmodule Radiator.Outline do
       new_children =
         multi_map.remove_node_from_container.children
         |> Enum.map(fn child ->
-          {:ok, moved_child} = insert_node(%{"outline_node_container_id" => container_id}, child)
+          {:ok, moved_child} = insert_node(%{"container_id" => container_id}, child)
           moved_child
         end)
 

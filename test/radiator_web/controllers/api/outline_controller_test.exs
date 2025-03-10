@@ -45,10 +45,10 @@ defmodule RadiatorWeb.Api.OutlineControllerTest do
 
       %{"uuid" => uuid} = json_response(conn, 200)
 
-      outline_node_container_id =
+      container_id =
         Podcast.get_current_episode_for_show(show_id).outline_node_container_id
 
-      assert %{content: "new node content", container_id: ^outline_node_container_id} =
+      assert %{content: "new node content", container_id: ^container_id} =
                NodeRepository.get_node!(uuid)
     end
 

@@ -98,7 +98,7 @@ defmodule Radiator.Outline.Dispatch do
     if Application.get_env(:radiator, :tree_consistency_validator, false) do
       :ok =
         event
-        |> Event.outline_node_container_id()
+        |> Event.container_id()
         |> Validations.validate_tree_for_outline_node_container()
     end
 

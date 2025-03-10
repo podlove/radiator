@@ -58,41 +58,41 @@ inbox_id = current_episode.inbox_node_container_id
 {:ok, node1} =
   NodeRepository.create_node(%{
     "content" => "Node 1",
-    "outline_node_container_id" => container_id
+    "container_id" => container_id
   })
 
 {:ok, node2} =
   NodeRepository.create_node(%{
     "content" => "Node 2",
-    "outline_node_container_id" => container_id,
+    "container_id" => container_id,
     "prev_id" => node1.uuid
   })
 
 {:ok, node3} =
   NodeRepository.create_node(%{
     "content" => "Node 3",
-    "outline_node_container_id" => container_id,
+    "container_id" => container_id,
     "prev_id" => node2.uuid
   })
 
 {:ok, _node4} =
   NodeRepository.create_node(%{
     "content" => "Node 4",
-    "outline_node_container_id" => container_id,
+    "container_id" => container_id,
     "prev_id" => node3.uuid
   })
 
 {:ok, node21} =
   NodeRepository.create_node(%{
     "content" => "Node 2.1",
-    "outline_node_container_id" => container_id,
+    "container_id" => container_id,
     "parent_id" => node2.uuid
   })
 
 {:ok, _node22} =
   NodeRepository.create_node(%{
     "content" => "Node 2.2",
-    "outline_node_container_id" => container_id,
+    "container_id" => container_id,
     "parent_id" => node2.uuid,
     "prev_id" => node21.uuid
   })
@@ -100,14 +100,14 @@ inbox_id = current_episode.inbox_node_container_id
 {:ok, node211} =
   NodeRepository.create_node(%{
     "content" => "Node 2.1.1",
-    "outline_node_container_id" => container_id,
+    "container_id" => container_id,
     "parent_id" => node21.uuid
   })
 
 {:ok, _node212} =
   NodeRepository.create_node(%{
     "content" => "Node 2.1.2",
-    "outline_node_container_id" => container_id,
+    "container_id" => container_id,
     "parent_id" => node21.uuid,
     "prev_id" => node211.uuid
   })
@@ -115,7 +115,7 @@ inbox_id = current_episode.inbox_node_container_id
 {:ok, inbox1} =
   NodeRepository.create_node(%{
     "content" => "Raindrop",
-    "outline_node_container_id" => inbox_id,
+    "container_id" => inbox_id,
     "parent_id" => nil,
     "prev_id" => nil
   })
@@ -123,7 +123,7 @@ inbox_id = current_episode.inbox_node_container_id
 {:ok, inbox11} =
   NodeRepository.create_node(%{
     "content" => "Inbox 1",
-    "outline_node_container_id" => inbox_id,
+    "container_id" => inbox_id,
     "parent_id" => inbox1.uuid,
     "prev_id" => nil
   })
@@ -131,7 +131,7 @@ inbox_id = current_episode.inbox_node_container_id
 {:ok, _inbox12} =
   NodeRepository.create_node(%{
     "content" => "Inbox 2",
-    "outline_node_container_id" => inbox_id,
+    "container_id" => inbox_id,
     "parent_id" => inbox1.uuid,
     "prev_id" => inbox11.uuid
   })

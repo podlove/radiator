@@ -54,7 +54,7 @@ defmodule Radiator.ResourcesbTest do
       episode = PodcastFixtures.episode_fixture()
 
       node =
-        OutlineFixtures.node_fixture(outline_node_container_id: episode.outline_node_container_id)
+        OutlineFixtures.node_fixture(container_id: episode.outline_node_container_id)
 
       old_url = url_fixture(node_id: node.uuid)
       episode_id = episode.id
@@ -123,7 +123,7 @@ defmodule Radiator.ResourcesbTest do
     episode = PodcastFixtures.episode_fixture()
 
     node =
-      OutlineFixtures.node_fixture(outline_node_container_id: episode.outline_node_container_id)
+      OutlineFixtures.node_fixture(container_id: episode.outline_node_container_id)
 
     {:ok, episode: episode, node: node}
   end

@@ -181,7 +181,7 @@ defmodule Radiator.Outline.NodeRepository do
   def move_node_if(node, container_id, parent_id, prev_id) do
     node
     |> Node.move_container_changeset(%{
-      outline_node_container_id: container_id,
+      container_id: container_id,
       parent_id: parent_id,
       prev_id: prev_id
     })
@@ -281,7 +281,7 @@ defmodule Radiator.Outline.NodeRepository do
     Node
     |> where([n], is_nil(n.parent_id))
     |> where([n], is_nil(n.prev_id))
-    |> where([n], n.outline_node_container_id == ^container_id)
+    |> where([n], n.container_id == ^container_id)
     |> Repo.one()
   end
 
