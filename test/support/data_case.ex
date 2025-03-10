@@ -65,7 +65,7 @@ defmodule Radiator.DataCase do
     episode = PodcastFixtures.episode_fixture()
 
     attrs = %{
-      outline_node_container_id: episode.outline_node_container_id
+      container_id: episode.outline_node_container_id
     }
 
     [node_1, node_2] = ["node_1", "node_2"] |> node_tree_fixture(attrs)
@@ -80,7 +80,7 @@ defmodule Radiator.DataCase do
     episode = PodcastFixtures.episode_fixture()
 
     attrs = %{
-      outline_node_container_id: episode.outline_node_container_id
+      container_id: episode.outline_node_container_id
     }
 
     nodes =

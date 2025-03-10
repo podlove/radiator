@@ -13,7 +13,7 @@ defmodule Radiator.OutlineTest do
 
   describe "generate nodes from template" do
     test "single node" do
-      %{container_id: container_id} = episode_fixture()
+      %{outline_node_container_id: container_id} = episode_fixture()
 
       assert %Node{} =
                node =
@@ -43,7 +43,7 @@ defmodule Radiator.OutlineTest do
     end
 
     test "list of nodes" do
-      %{container_id: container_id} = episode_fixture()
+      %{outline_node_container_id: container_id} = episode_fixture()
 
       nodes =
         ["node-1", "node-2", "node-3"]
@@ -64,7 +64,7 @@ defmodule Radiator.OutlineTest do
     end
 
     test "tree of nodes" do
-      %{container_id: container_id} = episode_fixture()
+      %{outline_node_container_id: container_id} = episode_fixture()
 
       nodes =
         [
@@ -173,7 +173,7 @@ defmodule Radiator.OutlineTest do
     test "creates a new node in the tree", %{
       node_3: node_3,
       nested_node_1: nested_node_1,
-      episode: %{container_id: node_container_id}
+      episode: %{outline_node_container_id: node_container_id}
     } do
       count_nodes = NodeRepository.count_nodes_by_outline_node_container(node_container_id)
 
@@ -374,7 +374,7 @@ defmodule Radiator.OutlineTest do
 
       node_attrs = %{
         "content" => "new node",
-        "container_id" => another_episode.container_id,
+        "container_id" => another_episode.outline_node_container_id,
         "prev_id" => nested_node_1.uuid
       }
 
@@ -1115,7 +1115,7 @@ defmodule Radiator.OutlineTest do
     } do
       nested_node_3 =
         node_fixture(
-          container_id: episode.container_id,
+          container_id: episode.outline_node_container_id,
           parent_id: node_3.uuid,
           prev_id: nested_node_2.uuid,
           content: "nested_node_3"
@@ -1123,7 +1123,7 @@ defmodule Radiator.OutlineTest do
 
       nested_node_4 =
         node_fixture(
-          container_id: episode.container_id,
+          container_id: episode.outline_node_container_id,
           parent_id: node_3.uuid,
           prev_id: nested_node_3.uuid,
           content: "nested_node_4"
@@ -1378,7 +1378,7 @@ defmodule Radiator.OutlineTest do
 
     test "works for last element in list", %{
       node_6: node_6,
-      episode: %{container_id: container_id}
+      episode: %{outline_node_container_id: container_id}
     } do
       count_nodes =
         NodeRepository.count_nodes_by_outline_node_container(container_id)
@@ -1394,7 +1394,7 @@ defmodule Radiator.OutlineTest do
     test "works for first element in list", %{
       node_1: node_1,
       node_2: node_2,
-      episode: %{container_id: container_id}
+      episode: %{outline_node_container_id: container_id}
     } do
       count_nodes =
         NodeRepository.count_nodes_by_outline_node_container(container_id)
