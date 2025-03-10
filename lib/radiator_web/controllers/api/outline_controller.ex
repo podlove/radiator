@@ -38,7 +38,7 @@ defmodule RadiatorWeb.Api.OutlineController do
       "content" => content,
       "creator_id" => user.id,
       "episode_id" => episode.id,
-      "outline_node_container_id" => episode.outline_node_container_id
+      "container_id" => episode.outline_node_container_id
     })
   end
 

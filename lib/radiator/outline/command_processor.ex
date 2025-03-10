@@ -378,7 +378,7 @@ defmodule Radiator.Outline.CommandProcessor do
   defp add_node_container(%{"episode_id" => episode_id} = payload) do
     episode = Podcast.get_episode!(episode_id)
 
-    Map.put(payload, "container_id", episode.container_id)
+    Map.put(payload, "container_id", episode.outline_node_container_id)
   end
 
   defp persist_and_broadcast_event(event) do
