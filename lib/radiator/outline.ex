@@ -108,11 +108,11 @@ defmodule Radiator.Outline do
                get_node_id(parent_node),
                get_node_id(prev_node)
              ),
-           {:ok, _node_to_move} <-
+           {:ok, node_to_move} <-
              NodeRepository.move_node_if(next_node, get_node_id(parent_node), node.uuid) do
         %NodeRepoResult{
           node: node,
-          next: get_node_result_info(next_node),
+          next: get_node_result_info(node_to_move),
           container_id: container_id
         }
       else
