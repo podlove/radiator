@@ -18,9 +18,10 @@ defmodule RadiatorWeb.Components.Outline do
   alias RadiatorWeb.OutlineComponents
 
   @impl true
-  def update(%{event: %NodeInsertedEvent{event_id: event_id, node: node}}, socket) do
+  def update(%{event: %NodeInsertedEvent{event_id: event_id, node: node, next: next}}, socket) do
     socket
     |> stream_insert(:nodes, to_change_form(node, %{}))
+    |> push_event("move_nodes", %{nodes: [next]})
     |> focus_self(node.uuid, event_id)
     |> reply(:ok)
   end
