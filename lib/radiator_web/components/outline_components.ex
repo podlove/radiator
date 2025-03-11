@@ -340,7 +340,7 @@ defmodule RadiatorWeb.OutlineComponents do
 
   def event_logs(assigns) do
     ~H"""
-    <details>
+    <details open>
       <summary>EVENT-LOG</summary>
       <ul id="event_logs" class="" phx-update="stream" phx-page-loading>
         <li :for={{id, event} <- @stream} id={id} class="my-4 border-2 rounded">
