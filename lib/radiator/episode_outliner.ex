@@ -12,8 +12,8 @@ defmodule Radiator.EpisodeOutliner do
     |> episode_id()
   end
 
-  def episode_for_node(%Node{outline_node_container_id: outline_node_container_id}) do
-    Podcast.get_episode_by_container_id(outline_node_container_id)
+  def episode_for_node(%Node{container_id: container_id}) do
+    Podcast.get_episode_by_container_id(container_id)
   end
 
   @doc """

@@ -18,7 +18,7 @@ defmodule Radiator.Outline.NodeRepositoryTest do
         content: "some content",
         episode_id: episode.id,
         show_id: episode.show_id,
-        outline_node_container_id: episode.outline_node_container_id
+        container_id: episode.outline_node_container_id
       }
 
       assert {:ok, %Node{} = node} = NodeRepository.create_node(valid_attrs)
@@ -33,7 +33,7 @@ defmodule Radiator.Outline.NodeRepositoryTest do
         content: "some content",
         episode_id: episode.id,
         show_id: episode.show_id,
-        outline_node_container_id: episode.outline_node_container_id,
+        container_id: episode.outline_node_container_id,
         creator_id: user.id
       }
 
@@ -55,26 +55,16 @@ defmodule Radiator.Outline.NodeRepositoryTest do
     end
   end
 
-  describe "list_nodes/0" do
-    test "returns all nodes" do
-      node1 = node_fixture()
-      node2 = node_fixture()
-
-      assert Enum.member?(NodeRepository.list_nodes(), node1)
-      assert Enum.member?(NodeRepository.list_nodes(), node2)
-    end
-  end
-
   describe "list_nodes_by_node_container/1" do
     test "list_nodes/1 returns only nodes of this episode" do
       node1 = node_fixture()
       node2 = node_fixture()
 
-      assert NodeRepository.list_nodes_by_node_container(node1.outline_node_container_id) == [
+      assert NodeRepository.list_nodes_by_node_container(node1.container_id) == [
                node1
              ]
 
-      assert NodeRepository.list_nodes_by_node_container(node2.outline_node_container_id) == [
+      assert NodeRepository.list_nodes_by_node_container(node2.container_id) == [
                node2
              ]
     end
@@ -164,10 +154,10 @@ defmodule Radiator.Outline.NodeRepositoryTest do
     setup :complex_node_fixture
 
     test "returns all nodes from a episode", %{parent_node: parent_node} do
-      outline_node_container_id = parent_node.outline_node_container_id
-      assert {:ok, tree} = NodeRepository.get_node_tree(outline_node_container_id)
+      container_id = parent_node.container_id
+      assert {:ok, tree} = NodeRepository.get_node_tree(container_id)
 
-      all_nodes = NodeRepository.list_nodes_by_node_container(outline_node_container_id)
+      all_nodes = NodeRepository.list_nodes_by_node_container(container_id)
 
       assert Enum.count(tree) == Enum.count(all_nodes)
 
@@ -180,16 +170,16 @@ defmodule Radiator.Outline.NodeRepositoryTest do
     test "does not return a node from another container", %{
       parent_node: parent_node
     } do
-      outline_node_container_id = parent_node.outline_node_container_id
+      container_id = parent_node.container_id
       other_node = node_fixture(parent_id: nil, prev_id: nil, content: "other content")
-      assert other_node.outline_node_container_id != outline_node_container_id
-      {:ok, tree} = NodeRepository.get_node_tree(outline_node_container_id)
+      assert other_node.container_id != container_id
+      {:ok, tree} = NodeRepository.get_node_tree(container_id)
       assert Enum.filter(tree, fn n -> n.uuid == other_node.uuid end) == []
     end
 
     test "returns nodes sorted by level", %{parent_node: parent_node} do
-      outline_node_container_id = parent_node.outline_node_container_id
-      {:ok, tree} = NodeRepository.get_node_tree(outline_node_container_id)
+      container_id = parent_node.container_id
+      {:ok, tree} = NodeRepository.get_node_tree(container_id)
 
       Enum.reduce(tree, 0, fn node, current_level ->
         if node.parent_id != nil do
@@ -213,7 +203,7 @@ defmodule Radiator.Outline.NodeRepositoryTest do
       nested_node_2: nested_node_2,
       parent_node: parent_node
     } do
-      {:ok, tree} = NodeRepository.get_node_tree(parent_node.outline_node_container_id)
+      {:ok, tree} = NodeRepository.get_node_tree(parent_node.container_id)
       assert_level_for_node(tree, parent_node, 0)
       assert_level_for_node(tree, node_1, 1)
       assert_level_for_node(tree, node_2, 1)
@@ -228,13 +218,13 @@ defmodule Radiator.Outline.NodeRepositoryTest do
     test "tree can have more than one parent node", %{
       parent_node: parent_node
     } do
-      outline_node_container_id = parent_node.outline_node_container_id
+      container_id = parent_node.container_id
 
       other_parent_node =
         node_fixture(
           parent_id: nil,
           prev_id: parent_node.uuid,
-          outline_node_container_id: outline_node_container_id,
+          container_id: container_id,
           content: "also a parent"
         )
 
@@ -242,11 +232,11 @@ defmodule Radiator.Outline.NodeRepositoryTest do
         node_fixture(
           parent_id: nil,
           prev_id: other_parent_node.uuid,
-          outline_node_container_id: outline_node_container_id,
+          container_id: container_id,
           content: "even another root element"
         )
 
-      {:ok, tree} = NodeRepository.get_node_tree(parent_node.outline_node_container_id)
+      {:ok, tree} = NodeRepository.get_node_tree(parent_node.container_id)
       assert_level_for_node(tree, parent_node, 0)
       assert_level_for_node(tree, other_parent_node, 0)
       assert_level_for_node(tree, third_parent_node, 0)

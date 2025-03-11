@@ -9,7 +9,7 @@ defmodule Radiator.Outline.NodeContainer do
   alias Radiator.Outline.Node
 
   schema "outline_node_containers" do
-    has_many :outline_nodes, Node, foreign_key: :outline_node_container_id
+    has_many :outline_nodes, Node, foreign_key: :container_id
 
     timestamps(type: :utc_datetime)
   end

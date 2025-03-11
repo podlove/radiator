@@ -18,7 +18,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       node_1 =
         node_fixture(
-          outline_node_container_id: outline_node_container_id,
+          container_id: outline_node_container_id,
           parent_id: nil,
           prev_id: nil,
           content: "node_1"
@@ -26,7 +26,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       node_2 =
         node_fixture(
-          outline_node_container_id: outline_node_container_id,
+          container_id: outline_node_container_id,
           parent_id: nil,
           prev_id: node_1.uuid,
           content: "node_2"
@@ -34,7 +34,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       node_2_1 =
         node_fixture(
-          outline_node_container_id: outline_node_container_id,
+          container_id: outline_node_container_id,
           parent_id: node_2.uuid,
           prev_id: nil,
           content: "node_2_1"
@@ -42,7 +42,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
       node_3 =
         node_fixture(
-          outline_node_container_id: outline_node_container_id,
+          container_id: outline_node_container_id,
           parent_id: nil,
           prev_id: node_2.uuid,
           content: "node_3"

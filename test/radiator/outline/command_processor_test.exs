@@ -87,7 +87,7 @@ defmodule Radiator.Outline.CommandProcessorTest do
       # Setup test data
       old_container = OutlineFixtures.node_container_fixture()
       new_container = OutlineFixtures.node_container_fixture()
-      node = OutlineFixtures.node_fixture(%{outline_node_container_id: old_container.id})
+      node = OutlineFixtures.node_fixture(%{container_id: old_container.id})
       user = AccountsFixtures.user_fixture()
 
       command = %MoveNodeToContainerCommand{
@@ -101,7 +101,7 @@ defmodule Radiator.Outline.CommandProcessorTest do
 
       CommandProcessor.handle_events([command], 0, nil)
       moved_node = Repo.reload!(node)
-      assert moved_node.outline_node_container_id == new_container.id
+      assert moved_node.container_id == new_container.id
       assert moved_node.parent_id == nil
       assert moved_node.prev_id == nil
     end
