@@ -1,6 +1,6 @@
-import { CollapseParams } from "../types";
 import { processEvent } from "./listener/process";
-import { getNodeById, getNodeData } from "../node";
+import { getNodeDataByTarget } from "../node";
+import { setCollapse } from "../store";
 
 import mapping from "./../mapping.json";
 
@@ -8,16 +8,21 @@ import mapping from "./../mapping.json";
 const watchdogInterval = 400;
 
 export function click(event: MouseEvent) {
-  const target = event.target as HTMLDivElement;
-  const select = target!.querySelector("input.selected") as HTMLInputElement;
+  let action: string | undefined;
 
-  select && (select.checked = !select.checked);
+  for (const conf of mapping["click"]) {
+    if (conf["metaKey"] != event.metaKey) continue;
+
+    action = conf.action;
+  }
+
+  action && processEvent.call(this, action, event);
 }
 
 export function input(event: KeyboardEvent) {
   const target = event.target as HTMLDivElement;
-  const node = target.parentNode as HTMLDivElement;
-  const { uuid, content } = getNodeData(node);
+  const { uuid } = getNodeDataByTarget(target);
+  const content = target.innerHTML;
 
   // clearTimeout(watchdog);
   // watchdog = setTimeout(() => {
@@ -26,11 +31,9 @@ export function input(event: KeyboardEvent) {
 }
 
 export function keydown(event: KeyboardEvent) {
-  const target = event.target as HTMLDivElement;
-
   let action: string | undefined;
-  const type = target == this.el ? "node" : "content";
-  for (const conf of mapping[type]) {
+
+  for (const conf of mapping["keydown"]) {
     if (conf["shiftKey"] && conf["shiftKey"] != event.shiftKey) continue;
     if (conf["altKey"] && conf["altKey"] != event.altKey) continue;
     if (conf.key != event.key) continue;
@@ -38,23 +41,19 @@ export function keydown(event: KeyboardEvent) {
     action = conf.action;
   }
 
-  action && processEvent.call(this, action, event);
+  action && processEvent.call(this, event, action);
 }
 
-export function toggleCollapse({ detail: { uuid } }: CollapseParams) {
-  const node = getNodeById(uuid);
-  node?.toggleAttribute("data-collapsed");
+export function storeCollapse(event: MouseEvent) {
+  const target = event.target as HTMLDivElement;
+  const { uuid, collapsed } = getNodeDataByTarget(target);
 
-  const collapsedStatus = localStorage.getItem(this.el.id) || "{}";
-  const collapsed = JSON.parse(collapsedStatus);
-
-  collapsed[uuid] = !collapsed[uuid];
-  localStorage.setItem(this.el.id, JSON.stringify(collapsed));
+  setCollapse.call(this, uuid, collapsed);
 }
 
 export function selectTree(event: MouseEvent) {
-  const target = event.target as HTMLElement
-  const node = target.closest(".node")
+  const target = event.target as HTMLElement;
+  const node = target.closest(".node");
 
   if (!node) return;
 

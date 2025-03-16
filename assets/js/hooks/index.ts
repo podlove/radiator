@@ -10,9 +10,11 @@ import {
   input,
   click,
   keydown,
-  toggleCollapse,
+  storeCollapse,
   selectTree,
 } from "./events/listener";
+import { restoreCollapsedStatus } from "./store";
+import { moveNodesToCorrectPosition } from "./tree";
 
 import Sortable from "../../vendor/sortable";
 // import Quill from "../../vendor/quill";
@@ -92,7 +94,6 @@ export const Hooks = {
     selector: ".node",
     mounted() {
       // const toolbarOptions = ["bold", "italic", "underline", "strike", "link"];
-
       // const options = {
       //   // debug: "info",
       //   modules: {
@@ -101,9 +102,7 @@ export const Hooks = {
       //   placeholder: "Create an Node ...",
       //   theme: "snow",
       // };
-
       // this.quill = new Quill(".content", options);
-
       // this.quill.on("text-change", (delta, oldDelta, source) => {
       //   if (source == "api") {
       //     console.log("An API call triggered this change.");
@@ -121,68 +120,53 @@ export const Hooks = {
       this.handleEvent("focus", handleFocus.bind(this));
       this.handleEvent("focus_node", handleFocusNode.bind(this));
       this.handleEvent("move_nodes", handleMoveNodes.bind(this));
-
       this.handleEvent("set_content", handleSetContent.bind(this));
 
       this.el.addEventListener("click", click.bind(this));
       this.el.addEventListener("input", input.bind(this));
       this.el.addEventListener("keydown", keydown.bind(this));
-      this.el.addEventListener("toggle_collapse", toggleCollapse.bind(this));
+      this.el.addEventListener("store_collapse", storeCollapse.bind(this));
 
-      const collapsedStatus = localStorage.getItem(this.el.id) || "{}";
-      const collapsed = JSON.parse(collapsedStatus);
+      moveNodesToCorrectPosition.call(this);
+      restoreCollapsedStatus.call(this);
 
-      const nodes = this.el.querySelectorAll(this.selector);
-      nodes.forEach((node: HTMLDivElement) => {
-        const { uuid } = moveNode(node);
-        node.toggleAttribute("data-collapsed", !!collapsed[uuid]);
-      });
-
-      const nestedSortables = [...this.el.querySelectorAll(".children")];
-      nestedSortables.forEach((element) => {
-        // const el = document.getElementById('item');
-        // const sortable = Sortable.create(el, options);
-        new Sortable(element, {
-          group: this.el.dataset.group,
-          animation: 150,
-          delay: 100,
-          dragClass: "drag-item",
-          ghostClass: "drag-ghost",
-          handle: ".handle",
-          fallbackOnBody: true,
-          swapThreshold: 0.65,
-          onEnd: (event) => {
-            const node = event.item;
-            const { uuid } = getNodeData(node);
-
-            const parentNode = getParentNode(node);
-            const prevNode = getPrevNode(node);
-
-            const parentData = parentNode && getNodeData(parentNode);
-            const parent_id = parentData?.uuid;
-
-            const prevData = prevNode && getNodeData(prevNode);
-            const prev_id = prevData?.uuid;
-
-            this.pushEventTo(this.el.phxHookId, "move", {
-              uuid,
-              parent_id,
-              prev_id,
-            });
-          },
-        });
-      });
+      // const nestedSortables = [...this.el.querySelectorAll(".children")];
+      // nestedSortables.forEach((element) => {
+      //   // const el = document.getElementById('item');
+      //   // const sortable = Sortable.create(el, options);
+      //   new Sortable(element, {
+      //     group: this.el.dataset.group,
+      //     animation: 150,
+      //     delay: 100,
+      //     dragClass: "drag-item",
+      //     ghostClass: "drag-ghost",
+      //     handle: ".handle",
+      //     fallbackOnBody: true,
+      //     swapThreshold: 0.65,
+      //     onEnd: (event) => {
+      //       const node = event.item;
+      //       const { uuid } = getNodeData(node);
+      //       const parentNode = getParentNode(node);
+      //       const prevNode = getPrevNode(node);
+      //       const parentData = parentNode && getNodeData(parentNode);
+      //       const parent_id = parentData?.uuid;
+      //       const prevData = prevNode && getNodeData(prevNode);
+      //       const prev_id = prevData?.uuid;
+      //       this.pushEventTo(this.el.phxHookId, "move", {
+      //         uuid,
+      //         parent_id,
+      //         prev_id,
+      //       });
+      //     },
+      //   });
+      // });
     },
     updated() {
       // delete this.quill;
       // console.log("jey", this.quill);
-
       // this.sortable.destroy();
 
-      const nodes = this.el.querySelectorAll(this.selector);
-      nodes.forEach((node: HTMLDivElement) => {
-        moveNode(node);
-      });
+      moveNodesToCorrectPosition.call(this);
     },
   },
 };

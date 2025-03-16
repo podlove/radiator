@@ -108,9 +108,9 @@ module.exports = {
         'pi': ({ name, fullPath }) => {
           let content = fs.readFileSync(fullPath).toString().replace(/\r?\n|\r/g, '')
           return {
-            [`--pi-${name}`]: `url('data:image/svg+xml;utf8,${content}')`,
-            '-webkit-mask': `var(--pi-${name})`,
-            'mask': `var(--pi-${name})`,
+            [`--ph-${name}`]: `url('data:image/svg+xml;utf8,${content}')`,
+            '-webkit-mask': `var(--ph-${name})`,
+            'mask': `var(--ph-${name})`,
             'background-color': 'currentColor',
             'vertical-align': 'middle',
             'display': 'inline-block',

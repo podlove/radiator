@@ -36,6 +36,5 @@ export function handleMoveNodes({ nodes }: { nodes: NodeData[] }) {
 }
 
 export function handleSetContent({ uuid, content }: any) {
-  const node = getNodeById(uuid)!;
-  setContent(node, content);
+  setContent(uuid, content);
 }

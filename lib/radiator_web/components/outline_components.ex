@@ -26,75 +26,119 @@ defmodule RadiatorWeb.OutlineComponents do
   slot :inner_block, required: true
 
   def node(assigns) do
+    #   <.outline_form for={@form} phx-change="noop" phx-submit="noop" phx-target={@target}>
+    #     <Core.icon name="hero-check-circle" class="w-5 h-5" />
+    #     <Core.icon name="hero-cog-6-tooth" class="w-5 h-5" />
+
+    #     <Core.input field={@form[:checked]} type="checkbox" />
+
+    #     <Core.input field={@form[:priority]} type="radio" value="red" />
+    #     <Core.input field={@form[:priority]} type="radio" value="yellow" />
+    #     <Core.input field={@form[:priority]} type="radio" value="green" />
+    #   </.outline_form>
+    #   <div class="text-xs text-gray-500 editing"><span>Alice</span><span>Bob</span></div>
+    #   <.drop_line />
+
+    assigns =
+      assigns
+      |> assign_new(:uuid, fn -> assigns.form[:uuid].value end)
+      |> assign_new(:content, fn -> HTML.raw(assigns.form[:content].value) end)
+
     ~H"""
     <div
       id={@id}
       class={[
-        "node group flex flex-wrap",
+        "node relative pl-4 group",
         "drag-item:focus-within:ring-0 drag-item:focus-within:ring-offset-0",
         "drag-ghost:bg-zinc-300 drag-ghost:border-0 drag-ghost:ring-0"
       ]}
+      data-uuid={@uuid}
       data-parent={@form[:parent_id].value}
       data-prev={@form[:prev_id].value}
     >
-      <!--
-      <button>
-        <Core.icon name="hero-ellipsis-vertical" class="invisible w-5 h-5 group-hover:visible" />
-      </button>
-      <.outline_form for={@form} phx-change="noop" phx-submit="noop" phx-target={@target}>
-        <Core.icon name="hero-check-circle" class="w-5 h-5" />
-        <Core.icon name="hero-cog-6-tooth" class="w-5 h-5" />
-        <Core.input field={@form[:checked]} type="checkbox" />
-
-        <Core.input field={@form[:priority]} type="radio" value="red" />
-        <Core.input field={@form[:priority]} type="radio" value="yellow" />
-        <Core.input field={@form[:priority]} type="radio" value="green" />
-      </.outline_form>
-      -->
-      <div class="ml-4 peer/children w-full order-last children group-data-[collapsed]:hidden"></div>
-      <input
-        class="invisible my-1 group-hover:visible selected peer/selected"
-        type="checkbox"
-        phx-click={JS.dispatch("toggle_select", detail: %{uuid: @form.data.uuid})}
-      />
-      <span class="hidden py-1 text-gray-500 cursor-pointer handle peer-empty/children:block">
-        <.circle />
-      </span>
-      <button
-        class="handle cursor-pointer py-1 text-gray-500 block peer-empty/children:hidden group-data-[collapsed]:-rotate-90 duration-200"
-        phx-click={JS.dispatch("toggle_collapse", detail: %{uuid: @form.data.uuid})}
-      >
-        <.triangle />
-      </button>
-      <div
-        id={[@id, "-content"]}
-        class="peer-checked/selected:bg-yellow-100 inline-block pr-4 px-1 py-0.5 content focus:outline-none drag-ghost:opacity-0"
-        contenteditable={!@readonly}
-        phx-value-uuid={@form[:uuid].value}
-        phx-focus="focus"
-        phx-blur="blur"
-        phx-target={@target}
-      >
-        {HTML.raw(@form[:content].value)}
+      <div tabindex="-1" class="flex flex-wrap items-center [.selected>&]:bg-indigo-50">
+        <.bullet_handle class="handle" />
+        <.node_content uuid={@uuid} target={@target} readonly={@readonly}>{@content}</.node_content>
       </div>
-      <div class="text-xs text-white editing"></div>
+      <div class="ml-2 border-l-2 children peer group-[.collapsed]:hidden"></div>
+      <.collapse class="absolute left-0 -translate-y-1/2 top-3 peer-empty:hidden" />
     </div>
     """
   end
 
-  def triangle(assigns) do
+  attr :class, :string, default: nil
+
+  def bullet_handle(assigns) do
     ~H"""
-    <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 rotate-90">
-      <polygon points="7,5 7,15 15,10" />
-    </svg>
+    <a href="#" class={["text-gray-600 rounded-full hover:bg-gray-300", @class]}>
+      <.circle />
+    </a>
+    """
+  end
+
+  attr :class, :string, default: nil
+
+  defp collapse(assigns) do
+    ~H"""
+    <button
+      class={[
+        "text-gray-600 rounded-full hover:bg-gray-300",
+        "duration-200 rotate-0 group-[.collapsed]:-rotate-90",
+        @class
+      ]}
+      phx-click={
+        JS.toggle_class("collapsed", to: {:closest, ".node"}) |> JS.dispatch("store_collapse")
+      }
+    >
+      <.triangle />
+    </button>
     """
   end
 
   def circle(assigns) do
     ~H"""
-    <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-      <circle cx="10" cy="10" r="3.5"></circle>
+    <svg width="18" height="18" viewBox="0 0 18 18">
+      <circle cx="9" cy="9" r="3.5" fill="currentColor" />
     </svg>
+    """
+  end
+
+  def triangle(assigns) do
+    ~H"""
+    <svg height="18" width="18" viewBox="0 0 18 18">
+      <polygon points="6,7 12,7 9,12" fill="currentColor" />
+    </svg>
+    """
+  end
+
+  def drop_line(assigns) do
+    ~H"""
+    <div class="drop-line">
+      <div class="border-t-4 rounded-full"></div>
+    </div>
+    """
+  end
+
+  attr :uuid, :any, required: true
+  attr :target, :any, required: true
+  attr :readonly, :boolean, default: false
+
+  slot :inner_block, required: true
+
+  def node_content(assigns) do
+    ~H"""
+    <div
+      class={[
+        "content",
+        "flex-1 px-1 focus:outline-none group-data-[selected]:bg-blue-200",
+        "drag-ghost:opacity-0"
+      ]}
+      contenteditable={!@readonly}
+      phx-value-uuid={@uuid}
+      phx-focus="focus"
+      phx-blur="blur"
+      phx-target={@target}
+    >{render_slot(@inner_block)}</div>
     """
   end
 
@@ -331,6 +375,10 @@ defmodule RadiatorWeb.OutlineComponents do
           <dt class="text-sm leading-6 text-gray-600 font-small">Outdent</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
             ⇧⇥
+          </dd>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Select node</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
+            ⌘ + Click
           </dd>
         </div>
       </dl>

@@ -1,7 +1,14 @@
-import { getNodeData, getPrevNode, getNextNode, focusNode } from "../../node";
+import {
+  getNodeData,
+  getPrevNode,
+  getNextNode,
+  focusNode,
+  getDomNodeByTarget,
+} from "../../node";
 
-export function processEvent(action, event) {
-  const node = event.target.parentNode as HTMLDivElement;
+export function processEvent(event, action) {
+  const node = getDomNodeByTarget(event.target);
+
   const { uuid, content } = getNodeData(node);
 
   const selection = window.getSelection();
@@ -15,6 +22,11 @@ export function processEvent(action, event) {
   // pushEventTo(selectorOrTarget, event, payload, (reply, ref) => ...)
 
   switch (action) {
+    case "toggle_select":
+      event.preventDefault();
+      node.classList.toggle("selected");
+      break;
+
     case "split":
       event.preventDefault();
       this.pushEventTo(this.el, "split", { uuid, start, stop });

@@ -1,5 +1,11 @@
 {
-  "content": [
+  "click": [
+    {
+      "action": "toggle_select",
+      "metaKey": true
+    }
+  ],
+  "keydown": [
     {
       "action": "split",
       "key": "Enter"
@@ -39,16 +45,6 @@
     {
       "action": "merge_next",
       "key": "Delete"
-    }
-  ],
-  "node": [
-    {
-      "action": "delete",
-      "key": "Delete"
-    },
-    {
-      "action": "delete",
-      "key": "Backspace"
     }
   ]
 }

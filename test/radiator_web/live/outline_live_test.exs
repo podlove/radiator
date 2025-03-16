@@ -71,7 +71,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
       {:ok, other_live, _other_html} = live(conn, url)
 
       assert live
-             |> element("#nodes-form-#{uuid}-content")
+             |> element("#nodes-form-#{uuid} .content")
              |> render_focus()
 
       keep_liveview_alive()
@@ -86,7 +86,7 @@ defmodule RadiatorWeb.OutlineLiveTest do
       {:ok, other_live, _other_html} = live(conn, url)
 
       assert live
-             |> element("#nodes-form-#{uuid}-content")
+             |> element("#nodes-form-#{uuid} .content")
              |> render_blur()
 
       keep_liveview_alive()

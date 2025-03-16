@@ -1,5 +1,18 @@
 import { NodeData, UUID } from "./types";
 
+export function getNodeDataByTarget(target: HTMLDivElement): NodeData {
+  const domNode = getDomNodeByTarget(target);
+
+  return getNodeDataByDomNode(domNode);
+}
+
+export function getNodeDataByDomNode(node: HTMLDivElement): NodeData {
+  const uuid = getUUID(node);
+  const collapsed = node.classList.contains("collapsed");
+
+  return { uuid, collapsed };
+}
+
 export function moveNode(node: HTMLDivElement): NodeData {
   const { uuid, parent_id, prev_id } = getNodeData(node);
   const parentNode = getNodeById(parent_id);
@@ -7,8 +20,10 @@ export function moveNode(node: HTMLDivElement): NodeData {
 
   if (prevNode) {
     prevNode.after(node);
+    //insertBefore
   } else if (parentNode) {
     parentNode.querySelector(".children")!.prepend(node);
+    //appendChild
   }
 
   return { uuid, parent_id, prev_id };
@@ -23,8 +38,8 @@ export function getNodeData(node: HTMLDivElement): NodeData {
   return { uuid, parent_id, prev_id, content };
 }
 
-function getUUID(node: HTMLDivElement) {
-  return node.id.split("nodes-form-")[1] as UUID;
+export function getUUID(node: HTMLDivElement) {
+  return node.dataset.uuid as UUID;
 }
 
 function getData(node: HTMLDivElement, selector: string) {
@@ -34,6 +49,7 @@ function getData(node: HTMLDivElement, selector: string) {
 }
 
 function getContent(node: HTMLDivElement) {
+  // const content = node.querySelector(".content") as HTMLDivElement;
   const content = node.querySelector(".content") as HTMLDivElement;
   return content.innerHTML;
 }
@@ -43,10 +59,12 @@ export function setData(node: HTMLDivElement, selector: string, value: string) {
   return node;
 }
 
-export function setContent(node: HTMLDivElement, value: string) {
-  const content = node.querySelector(".content") as HTMLDivElement;
+export function setContent(uuid: UUID, value: string) {
+  const domNode = getNodeById(uuid);
+  const content = domNode?.querySelector(".content") as HTMLDivElement;
   content.innerHTML = value;
-  return node;
+
+  return domNode;
 }
 
 export function focusNode(node: HTMLDivElement, toEnd: boolean = false) {
@@ -67,7 +85,12 @@ export function focusNode(node: HTMLDivElement, toEnd: boolean = false) {
 export function getNodeById(uuid: UUID | undefined) {
   if (!uuid) return null;
 
+  //return document.querySelector(`[data-uuid="${uuid}"]`) as HTMLDivElement;
   return document.getElementById(`nodes-form-${uuid}`) as HTMLDivElement;
+}
+
+export function getDomNodeByTarget(target: HTMLDivElement) {
+  return target.closest(".node") as HTMLDivElement;
 }
 
 export function getParentNode(node: HTMLDivElement) {
@@ -122,3 +145,39 @@ export function removeEditingUserLabel(user_name: string) {
   const span = document.getElementById(user_name);
   span && span.remove();
 }
+
+/*
+private getCursorPosition = (): number => {
+  const selection: Selection | null = window.getSelection();
+  if (!selection) {
+      return 0;
+  }
+
+  if (selection.rangeCount) {
+      const range: Range = selection.getRangeAt(0);
+      if (range.commonAncestorContainer.parentNode === this.tasktext) {
+          return range.endOffset;
+      }
+  }
+
+  return 0;
+}
+
+private setCursorPosition = (pos: number): void => {
+  if (!this.tasktext.childNodes || !this.tasktext.childNodes.length) {
+      return;
+  }
+
+  const range: Range = document.createRange();
+  range.setStart(this.tasktext.childNodes[0], pos);
+  range.collapse(true);
+
+  const sel: Selection | null = window.getSelection();
+  if (!sel) {
+      return;
+  }
+
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+*/

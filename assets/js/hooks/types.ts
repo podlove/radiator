@@ -5,10 +5,6 @@ export type UserAction = {
   user_name: string;
 };
 
-export type CollapseParams = {
-  detail: UserAction;
-};
-
 export interface NodeData {
   uuid: UUID;
   content?: string;
@@ -16,4 +12,5 @@ export interface NodeData {
   parent_id?: UUID;
   prev_id?: UUID;
   collapsed?: boolean;
+  selected?: boolean;
 }
