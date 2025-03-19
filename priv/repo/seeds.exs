@@ -36,7 +36,7 @@ alias Radiator.Outline.NodeRepository
     network_id: network.id
   })
 
-{:ok, past_episode} =
+{:ok, _past_episode} =
   Podcast.create_episode(%{
     title: "past episode",
     show_id: show.id,
