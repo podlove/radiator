@@ -22,7 +22,6 @@ defmodule Radiator.Podcast.Episode do
 
     belongs_to :show, Show
 
-    belongs_to :inbox_node_container, NodeContainer
     belongs_to :outline_node_container, NodeContainer
 
     timestamps(type: :utc_datetime)
