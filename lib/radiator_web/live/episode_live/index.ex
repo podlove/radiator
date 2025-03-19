@@ -21,7 +21,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
   @impl true
   def mount(%{"show" => show_id} = params, _session, socket) do
     show =
-      Podcast.get_show!(show_id, preload: [episodes: Podcast.list_available_episodes_query()])
+      Podcast.get_show_preloaded!(show_id)
 
     episode = get_selected_episode(params)
 

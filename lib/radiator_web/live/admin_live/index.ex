@@ -80,7 +80,7 @@ defmodule RadiatorWeb.AdminLive.Index do
   end
 
   def handle_event("edit_show", %{"show_id" => show_id}, socket) do
-    show = Podcast.get_show!(show_id, preload: [:hosts])
+    show = Podcast.get_show_preloaded!(show_id)
     changeset = Podcast.change_show(show, %{})
 
     socket

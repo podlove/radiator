@@ -150,24 +150,32 @@ defmodule Radiator.Podcast do
   def get_show!(id), do: Repo.get!(Show, id)
 
   @doc """
-  Gets a single show with preloaded associations.
+  Gets a single show with preloaded hosts and episodes.
 
   Raises `Ecto.NoResultsError` if the Show does not exist.
 
   ## Examples
 
-      iex> get_show!(123, preload: :episodes)
+      iex> get_show_preloaded!(123)
       %Show{}
 
-      iex> get_show!(456, preload: :episodes)
+      iex> get_show_preloaded!(456)
       ** (Ecto.NoResultsError)
 
   """
 
-  def get_show!(id, preload: preload) do
-    Show
-    |> Repo.get!(id)
-    |> Repo.preload(preload)
+  def get_show_preloaded!(id) do
+    show =
+      Show
+      |> Repo.get!(id)
+      |> Repo.preload([:hosts, :episodes])
+
+    updated_episodes =
+      Enum.map(show.episodes, fn e ->
+        Map.put(e, :inbox_node_container_id, show.inbox_node_container_id)
+      end)
+
+    %{show | episodes: updated_episodes}
   end
 
   @doc """
@@ -449,7 +457,14 @@ defmodule Radiator.Podcast do
       ** (Ecto.NoResultsError)
 
   """
-  def get_episode!(id), do: Repo.get!(Episode, id)
+  def get_episode!(id) do
+    episode =
+      Episode
+      |> Repo.get!(id)
+      |> Repo.preload(:show)
+
+    Map.put(episode, :inbox_node_container_id, episode.show.inbox_node_container_id)
+  end
 
   def get_episode_by_container_id(container_id) do
     Repo.one(

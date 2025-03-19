@@ -79,11 +79,11 @@ defmodule Radiator.PodcastTest do
       assert %Show{id: ^show_id} = Podcast.get_show!(show_id)
     end
 
-    test "get_show!/2 returns the show with preloaded episodes" do
+    test "get_show_preloaded!/1 returns the show with preloaded episodes" do
       show = show_fixture()
       episode = episode_fixture(%{show_id: show.id})
 
-      assert %Show{episodes: episodes} = Podcast.get_show!(show.id, preload: :episodes)
+      assert %Show{episodes: episodes} = Podcast.get_show_preloaded!(show.id)
       assert episodes |> Enum.map(& &1.id) == [episode.id]
     end
 
