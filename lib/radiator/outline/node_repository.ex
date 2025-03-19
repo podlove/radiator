@@ -66,11 +66,11 @@ defmodule Radiator.Outline.NodeRepository do
 
   ## Examples
 
-      iex> count_nodes_by_outline_node_container(123)
+      iex> count_nodes_by_container(123)
       3
 
   """
-  def count_nodes_by_outline_node_container(container_id) do
+  def count_nodes_by_container(container_id) do
     Node
     |> where([p], p.container_id == ^container_id)
     |> Repo.aggregate(:count)
