@@ -19,9 +19,9 @@ defmodule Radiator.Podcast.Episode do
     field :slug, :string
     field :is_deleted, :boolean, default: false
     field :deleted_at, :utc_datetime
-
+    field :inbox_node_container_id, :integer, virtual: true
     belongs_to :show, Show
-
+    has_one :inbox_node_container, through: [:show, :inbox_node_container]
     belongs_to :outline_node_container, NodeContainer
 
     timestamps(type: :utc_datetime)

@@ -258,12 +258,11 @@ defmodule Radiator.PodcastTest do
       assert episode.slug == "some-updated-title"
     end
 
-    test "create_episode/1 creates local inbox and local root node containers" do
+    test "create_episode/1 creates node container" do
       show = show_fixture()
       valid_attrs = %{title: "some title", show_id: show.id, number: 5}
 
       assert {:ok, %Episode{} = episode} = Podcast.create_episode(valid_attrs)
-      refute(is_nil(episode.inbox_node_container_id))
       refute(is_nil(episode.outline_node_container_id))
     end
 
@@ -298,7 +297,7 @@ defmodule Radiator.PodcastTest do
 
     test "get_current_episode_for_show/1 returns episdoe for show" do
       episode = episode_fixture()
-      assert episode == Podcast.get_current_episode_for_show(episode.show_id)
+      assert episode.id == Podcast.get_current_episode_for_show(episode.show_id).id
     end
 
     test "get_current_episode_for_show/1 returns the episode with the highest number" do
@@ -307,7 +306,15 @@ defmodule Radiator.PodcastTest do
       # and not just the newest
       episode_new = episode_fixture(number: 23, show_id: show.id)
       _episode_old = episode_fixture(number: 22, show_id: show.id)
-      assert episode_new == Podcast.get_current_episode_for_show(show.id)
+      assert episode_new.id == Podcast.get_current_episode_for_show(show.id).id
+    end
+
+    test "get_current_episode_for_show/1 sets the inbox_container_id virtual field from show" do
+      show = show_fixture()
+      episode_fixture(number: 23, show_id: show.id)
+
+      assert show.inbox_node_container_id ==
+               Podcast.get_current_episode_for_show(show.id).inbox_node_container_id
     end
   end
 end
