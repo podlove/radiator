@@ -1,5 +1,7 @@
 defmodule Radiator.Outline.Command.MoveNodeToContainerCommand do
-  @moduledoc false
+  @moduledoc """
+    Command to move a node to an specific place in a given container
+  """
   @type t() :: %__MODULE__{
           event_id: binary(),
           user_id: binary(),
