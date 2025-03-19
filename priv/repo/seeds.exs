@@ -53,7 +53,7 @@ alias Radiator.Outline.NodeRepository
   })
 
 container_id = current_episode.outline_node_container_id
-inbox_id = current_episode.inbox_node_container_id
+inbox_id = show.inbox_node_container_id
 
 {:ok, node1} =
   NodeRepository.create_node(%{
