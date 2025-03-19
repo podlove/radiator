@@ -16,9 +16,7 @@ defmodule Radiator.Podcast.Show do
     field :description, :string
 
     belongs_to :network, Network
-
     belongs_to :inbox_node_container, NodeContainer
-    belongs_to :outline_node_container, NodeContainer
 
     has_many(:episodes, Episode)
     many_to_many(:hosts, User, join_through: "show_hosts")

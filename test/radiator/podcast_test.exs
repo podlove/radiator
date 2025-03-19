@@ -12,14 +12,13 @@ defmodule Radiator.PodcastTest do
 
     test "list_networks/0 returns all networks" do
       network = network_fixture()
-      assert Enum.map(Podcast.list_networks(), fn n -> n.id end) == [network.id]
+      assert Podcast.list_networks() |> Enum.map(& &1.id) == [network.id]
     end
 
     test "list_networks/1 returns all networks with preloaded shows" do
       show = show_fixture()
-
       assert [%Network{shows: shows}] = Podcast.list_networks(preload: :shows)
-      assert Enum.map(shows, fn show -> show.id end) == [show.id]
+      assert shows |> Enum.map(& &1.id) == [show.id]
     end
 
     test "get_network!/1 returns the network with given id" do
@@ -68,9 +67,10 @@ defmodule Radiator.PodcastTest do
     @invalid_attrs %{title: nil}
 
     test "list_shows/0 returns all shows" do
+      assert Podcast.list_shows() == []
       show = show_fixture()
 
-      assert Enum.map(Podcast.list_shows(), fn show -> show.id end) == [show.id]
+      assert Podcast.list_shows() |> Enum.map(& &1.id) == [show.id]
     end
 
     test "get_show!/1 returns the show with given id" do
@@ -84,7 +84,7 @@ defmodule Radiator.PodcastTest do
       episode = episode_fixture(%{show_id: show.id})
 
       assert %Show{episodes: episodes} = Podcast.get_show!(show.id, preload: :episodes)
-      assert Enum.map(episodes, fn e -> e.id end) == [episode.id]
+      assert episodes |> Enum.map(& &1.id) == [episode.id]
     end
 
     test "create_show/1 with valid data creates a show" do
@@ -102,7 +102,6 @@ defmodule Radiator.PodcastTest do
 
       {:ok, %Show{} = show} = Podcast.create_show(valid_attrs)
       refute(is_nil(show.inbox_node_container_id))
-      refute(is_nil(show.outline_node_container_id))
     end
 
     test "create_show/1 with invalid data returns error changeset" do
@@ -222,8 +221,7 @@ defmodule Radiator.PodcastTest do
           deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)
         )
 
-      found_episodes = Podcast.list_available_episodes()
-      assert Enum.map(found_episodes, fn e -> e.id end) == [episode.id]
+      assert Podcast.list_available_episodes() |> Enum.map(& &1.id) == [episode.id]
     end
 
     test "get_episode!/1 returns the episode with given id" do
@@ -258,12 +256,11 @@ defmodule Radiator.PodcastTest do
       assert episode.slug == "some-updated-title"
     end
 
-    test "create_episode/1 creates local inbox and local root node containers" do
+    test "create_episode/1 creates node container" do
       show = show_fixture()
       valid_attrs = %{title: "some title", show_id: show.id, number: 5}
 
       assert {:ok, %Episode{} = episode} = Podcast.create_episode(valid_attrs)
-      refute(is_nil(episode.inbox_node_container_id))
       refute(is_nil(episode.outline_node_container_id))
     end
 
@@ -298,7 +295,7 @@ defmodule Radiator.PodcastTest do
 
     test "get_current_episode_for_show/1 returns episdoe for show" do
       episode = episode_fixture()
-      assert episode == Podcast.get_current_episode_for_show(episode.show_id)
+      assert episode.id == Podcast.get_current_episode_for_show(episode.show_id).id
     end
 
     test "get_current_episode_for_show/1 returns the episode with the highest number" do
@@ -307,7 +304,15 @@ defmodule Radiator.PodcastTest do
       # and not just the newest
       episode_new = episode_fixture(number: 23, show_id: show.id)
       _episode_old = episode_fixture(number: 22, show_id: show.id)
-      assert episode_new == Podcast.get_current_episode_for_show(show.id)
+      assert episode_new.id == Podcast.get_current_episode_for_show(show.id).id
+    end
+
+    test "get_current_episode_for_show/1 sets the inbox_container_id virtual field from show" do
+      show = show_fixture()
+      episode_fixture(number: 23, show_id: show.id)
+
+      assert show.inbox_node_container_id ==
+               Podcast.get_current_episode_for_show(show.id).inbox_node_container_id
     end
   end
 end

@@ -185,12 +185,10 @@ defmodule Radiator.Podcast do
   def create_show(attrs \\ %{}) do
     Ecto.Multi.new()
     |> Ecto.Multi.insert(:inbox, NodeContainer.changeset(%NodeContainer{}, %{}))
-    |> Ecto.Multi.insert(:root, NodeContainer.changeset(%NodeContainer{}, %{}))
-    |> Ecto.Multi.insert(:show, fn %{root: root, inbox: inbox} ->
+    |> Ecto.Multi.insert(:show, fn %{inbox: inbox} ->
       %Show{}
       |> Show.changeset(attrs)
       |> Ecto.Changeset.put_assoc(:inbox_node_container, inbox)
-      |> Ecto.Changeset.put_assoc(:outline_node_container, root)
     end)
     |> Repo.transaction()
     |> case do
@@ -480,9 +478,10 @@ defmodule Radiator.Podcast do
       from e in Episode,
         where: [show_id: ^show_id, is_deleted: false],
         order_by: [desc: e.number],
-        preload: [:inbox_node_container, :outline_node_container],
+        preload: [:show, :outline_node_container],
         limit: 1
     )
+    |> set_inbox_in_episode()
   end
 
   @doc """
@@ -499,13 +498,11 @@ defmodule Radiator.Podcast do
   """
   def create_episode(attrs \\ %{}) do
     Ecto.Multi.new()
-    |> Ecto.Multi.insert(:inbox, NodeContainer.changeset(%NodeContainer{}, %{}))
-    |> Ecto.Multi.insert(:root, NodeContainer.changeset(%NodeContainer{}, %{}))
-    |> Ecto.Multi.insert(:episode, fn %{root: root, inbox: inbox} ->
+    |> Ecto.Multi.insert(:container, NodeContainer.changeset(%NodeContainer{}, %{}))
+    |> Ecto.Multi.insert(:episode, fn %{container: container} ->
       %Episode{}
       |> Episode.changeset(attrs)
-      |> Ecto.Changeset.put_assoc(:inbox_node_container, inbox)
-      |> Ecto.Changeset.put_assoc(:outline_node_container, root)
+      |> Ecto.Changeset.put_assoc(:outline_node_container, container)
     end)
     |> Repo.transaction()
     |> case do
@@ -574,5 +571,12 @@ defmodule Radiator.Podcast do
   """
   def change_episode(%Episode{} = episode, attrs \\ %{}) do
     Episode.changeset(episode, attrs)
+  end
+
+  defp set_inbox_in_episode(nil), do: nil
+
+  defp set_inbox_in_episode(%Episode{show: show} = episode) do
+    episode
+    |> Map.put(:inbox_node_container_id, show.inbox_node_container_id)
   end
 end
