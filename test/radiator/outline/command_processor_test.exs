@@ -18,7 +18,7 @@ defmodule Radiator.Outline.CommandProcessorTest do
       attributes = %{
         "title" => "Node Title",
         "content" => "Node Content",
-        "episode_id" => episode.id
+        "container_id" => episode.outline_node_container_id
       }
 
       num_nodes =
