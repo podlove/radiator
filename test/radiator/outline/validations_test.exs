@@ -14,7 +14,7 @@ defmodule Radiator.Outline.ValidationsTest do
     test "validates a tree", %{
       node_1: %Node{container_id: container_id}
     } do
-      assert :ok = Validations.validate_tree_for_outline_node_container(container_id)
+      assert :ok = Validations.validate_tree_for_container(container_id)
     end
 
     test "a level might have different subtrees", %{
@@ -29,7 +29,7 @@ defmodule Radiator.Outline.ValidationsTest do
         }
         |> NodeRepository.create_node()
 
-      assert :ok = Validations.validate_tree_for_outline_node_container(container_id)
+      assert :ok = Validations.validate_tree_for_container(container_id)
     end
 
     test "when two nodes share the same prev_id the tree is invalid", %{
@@ -44,7 +44,7 @@ defmodule Radiator.Outline.ValidationsTest do
         |> NodeRepository.create_node()
 
       assert {:error, :prev_id_not_consistent} =
-               Validations.validate_tree_for_outline_node_container(container_id)
+               Validations.validate_tree_for_container(container_id)
     end
 
     test "when a nodes has a non connected prev_id the tree is invalid", %{
@@ -59,7 +59,7 @@ defmodule Radiator.Outline.ValidationsTest do
         |> NodeRepository.create_node()
 
       assert {:error, :prev_id_not_consistent} =
-               Validations.validate_tree_for_outline_node_container(container_id)
+               Validations.validate_tree_for_container(container_id)
     end
 
     test "when a parent has two childs with prev_id nil the tree is invalid", %{
@@ -77,7 +77,7 @@ defmodule Radiator.Outline.ValidationsTest do
         |> NodeRepository.create_node()
 
       assert {:error, :prev_id_not_consistent} =
-               Validations.validate_tree_for_outline_node_container(container_id)
+               Validations.validate_tree_for_container(container_id)
     end
 
     test "a tree with a node where parent and prev are not consistent is invalid", %{
@@ -92,7 +92,7 @@ defmodule Radiator.Outline.ValidationsTest do
         }
         |> NodeRepository.create_node()
 
-      result = Validations.validate_tree_for_outline_node_container(container_id)
+      result = Validations.validate_tree_for_container(container_id)
       assert {:error, :prev_id_not_consistent} = result
     end
   end
