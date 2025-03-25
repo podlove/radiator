@@ -4,7 +4,7 @@ defmodule Radiator.AccountsTest do
   import Radiator.AccountsFixtures
 
   alias Radiator.Accounts
-  alias Radiator.Accounts.{User, UserToken, WebService}
+  alias Radiator.Accounts.{User, UserToken}
   alias Radiator.PodcastFixtures
 
   describe "list_users/0" do

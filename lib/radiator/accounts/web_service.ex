@@ -26,7 +26,7 @@ defmodule Radiator.Accounts.WebService do
     service
     |> cast(attrs, [:service_name, :user_id])
     |> cast_embed(:data, required: true, with: &raindrop_changeset/2)
-    |> validate_required([:service_name, :data])
+    |> validate_required([:service_name, :user_id, :data])
   end
 
   def raindrop_changeset(service, attrs \\ %{}) do

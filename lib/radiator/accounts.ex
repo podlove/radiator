@@ -6,7 +6,12 @@ defmodule Radiator.Accounts do
   import Ecto.Query, warn: false
   alias Radiator.Repo
 
-  alias Radiator.Accounts.{User, UserNotifier, UserToken, WebService}
+  alias Radiator.Accounts.{
+    User,
+    UserNotifier,
+    UserToken,
+    WebService
+  }
 
   ## Database getters
 
@@ -515,5 +520,16 @@ defmodule Radiator.Accounts do
   def delete_user_api_token(token) do
     Repo.delete_all(UserToken.by_token_and_context_query(token, "api"))
     :ok
+  end
+
+  @doc """
+  Creates a web service associated with the given user.
+  """
+  def create_web_service(user_id, service_name, attributes) do
+    attrs = %{service_name: service_name, user_id: user_id, data: attributes}
+
+    %WebService{}
+    |> WebService.changeset(attrs)
+    |> Repo.insert()
   end
 end
