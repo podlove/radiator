@@ -57,10 +57,14 @@ defmodule Radiator.Outline.NodeChangeListener do
 
   defp scan_content_for_urls(node_id), do: NodeChangedWorker.trigger_analyze(node_id)
 
-  defp process_system_nodes_if(%NodeInsertedEvent{user_id: nil, node: %{content: "raindrop", container_id: container_id, uuid: uuid}}) do
+  defp process_system_nodes_if(%NodeInsertedEvent{
+         user_id: nil,
+         node: %{content: "raindrop", container_id: container_id, uuid: uuid}
+       }) do
     IO.inspect("System node inserted: uuid: #{uuid} container_id: #{container_id}")
 
     :ok
   end
+
   defp process_system_nodes_if(_), do: :ok
 end

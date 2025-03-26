@@ -2,7 +2,7 @@ defmodule RadiatorWeb.AdminLive.Index do
   use RadiatorWeb, :live_view
 
   alias Radiator.Accounts
-  alias  RadiatorWeb.AdminLive.Raindrop
+  alias RadiatorWeb.AdminLive.Raindrop
   alias Radiator.Podcast
   alias RadiatorWeb.Endpoint
 
@@ -178,7 +178,7 @@ defmodule RadiatorWeb.AdminLive.Index do
   defp save_show(socket, :new_show, params) do
     case Podcast.create_show(params, socket.assigns.selected_hosts) do
       {:ok, show} ->
-        save_raindrop(socket, show.id, params)
+        save_raindrop(socket, show, params)
 
         socket
         |> assign(:action, nil)
@@ -200,7 +200,7 @@ defmodule RadiatorWeb.AdminLive.Index do
   defp save_show(socket, :edit_show, params) do
     case Podcast.update_show(socket.assigns.show, params, socket.assigns.selected_hosts) do
       {:ok, show} ->
-        save_raindrop(socket, show.id, params)
+        save_raindrop(socket, show, params)
 
         socket
         |> assign(:action, nil)
@@ -219,12 +219,9 @@ defmodule RadiatorWeb.AdminLive.Index do
     end
   end
 
-  # defp save_raindrop(socket, show_id, %{"show" => %{"raindrop_collection" => collection_id}}) do
-  defp save_raindrop(socket, show_id, %{"raindrop_collection" => collection_id}) do
-    Accounts.Raindrop.connect_show_with_raindrop(socket.assigns.current_user.id, show_id, collection_id)
+  defp save_raindrop(socket, show, params) do
+    Raindrop.save_raindrop(socket.assigns.current_user.id, show, params)
   end
-
-  defp save_raindrop(_socket, _show_id, _params), do: nil
 
   defp get_bookmarklet(api_uri, socket) do
     token =

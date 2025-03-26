@@ -91,7 +91,10 @@ defmodule Radiator.Accounts.WebServiceTest do
       Raindrop.connect_show_with_raindrop(web_service.user_id, show.id, 42)
 
       service = Raindrop.get_raindrop_tokens(web_service.user_id)
-      assert service.data.collection_mappings == %{"#{show.id}" => 42}
+
+      assert Enum.map(service.data.mappings, &Map.from_struct/1) == [
+               %{collection_id: 42, node_id: nil, show_id: show.id}
+             ]
     end
 
     test "can add multiple shows", %{
@@ -108,11 +111,11 @@ defmodule Radiator.Accounts.WebServiceTest do
 
       service = Raindrop.get_raindrop_tokens(web_service.user_id)
 
-      assert service.data.collection_mappings == %{
-               "#{show.id}" => 42,
-               "#{second_show.id}" => 23,
-               "#{third_show.id}" => 666
-             }
+      assert Enum.map(service.data.mappings, &Map.from_struct/1) == [
+               %{collection_id: 42, node_id: nil, show_id: show.id},
+               %{node_id: nil, show_id: second_show.id, collection_id: 23},
+               %{node_id: nil, show_id: third_show.id, collection_id: 666}
+             ]
     end
 
     test "can override show", %{
@@ -124,7 +127,9 @@ defmodule Radiator.Accounts.WebServiceTest do
       Raindrop.connect_show_with_raindrop(web_service.user_id, show.id, 23)
       service = Raindrop.get_raindrop_tokens(web_service.user_id)
 
-      assert service.data.collection_mappings == %{"#{show.id}" => 23}
+      assert Enum.map(service.data.mappings, &Map.from_struct/1) == [
+               %{collection_id: 23, node_id: nil, show_id: show.id}
+             ]
     end
   end
 
