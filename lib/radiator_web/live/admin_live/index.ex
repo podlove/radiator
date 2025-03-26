@@ -242,7 +242,7 @@ defmodule RadiatorWeb.AdminLive.Index do
 
   # defp save_raindrop(socket, show_id, %{"show" => %{"raindrop_collection" => collection_id}}) do
   defp save_raindrop(socket, show_id, %{"raindrop_collection" => collection_id}) do
-    Accounts.connect_show_with_raindrop(socket.assigns.current_user.id, show_id, collection_id)
+    Accounts.Raindrop.connect_show_with_raindrop(socket.assigns.current_user.id, show_id, collection_id)
   end
 
   defp save_raindrop(_socket, _show_id, _params), do: nil

@@ -4,7 +4,7 @@ defmodule Radiator.Accounts.RaindropClient do
   """
   require Logger
 
-  alias Radiator.Accounts
+  alias Radiator.Accounts.Raindrop
 
   def config, do: Application.fetch_env!(:radiator, :raindrop)
 
@@ -33,7 +33,7 @@ defmodule Radiator.Accounts.RaindropClient do
   def access_enabled?(user_id) do
     not_enabled =
       user_id
-      |> Accounts.get_raindrop_tokens()
+      |> Raindrop.get_raindrop_tokens()
       |> is_nil()
 
     !not_enabled
@@ -45,7 +45,7 @@ defmodule Radiator.Accounts.RaindropClient do
   def get_collections(user_id) do
     service =
       user_id
-      |> Accounts.get_raindrop_tokens()
+      |> Raindrop.get_raindrop_tokens()
       |> refresh_token_if()
 
     if is_nil(service) do
@@ -69,7 +69,7 @@ defmodule Radiator.Accounts.RaindropClient do
   def list_urls_in_collection(user_id, collection_id) do
     service =
       user_id
-      |> Accounts.get_raindrop_tokens()
+      |> Raindrop.get_raindrop_tokens()
       |> refresh_token_if()
 
     if is_nil(service) do
@@ -154,7 +154,7 @@ defmodule Radiator.Accounts.RaindropClient do
       |> DateTime.shift(second: expires_in)
       |> DateTime.truncate(:second)
 
-    Accounts.update_raindrop_tokens(
+    Raindrop.update_raindrop_tokens(
       user_id,
       access_token,
       refresh_token,
