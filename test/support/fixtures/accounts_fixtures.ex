@@ -31,7 +31,7 @@ defmodule Radiator.AccountsFixtures do
 
   def raindrop_service_fixture(user \\ user_fixture()) do
     {:ok, service} =
-      Radiator.Accounts.update_raindrop_tokens(
+      Radiator.Accounts.Raindrop.update_raindrop_tokens(
         user.id,
         "ae261404-11r4-47c0-bce3-e18a423da828",
         "c8080368-fad2-4a3f-b2c9-71d3z85011vb",
