@@ -5,7 +5,6 @@ defmodule Radiator.AccountsTest do
 
   alias Radiator.Accounts
   alias Radiator.Accounts.{User, UserToken}
-  alias Radiator.PodcastFixtures
 
   describe "list_users/0" do
     test "returns all users" do
