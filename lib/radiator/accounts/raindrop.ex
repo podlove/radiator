@@ -1,4 +1,9 @@
 defmodule Radiator.Accounts.Raindrop do
+  @moduledoc """
+    Raindrop related functions for a user.
+    TODO: Think of a better name.
+  """
+
   import Ecto.Query, warn: false
     alias Radiator.Repo
 
