@@ -10,7 +10,7 @@ defmodule Radiator.Accounts.WebService.RaindropService do
     field :refresh_token, :string, redact: true
     field :expires_at, :utc_datetime
     # Show ID => Raindrop Collection ID
-    field :collection_mappings, :map, default: %{}
+    # field :collection_mappings, :map, default: %{}
 
     embeds_many :mappings, Mapping, on_replace: :delete, primary_key: false do
       field :show_id, :string
