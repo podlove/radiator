@@ -1,5 +1,5 @@
 defmodule Radiator.Accounts.WebServiceTest do
-  use Radiator.DataCase
+  use Radiator.DataCase, async: false
 
   import Radiator.AccountsFixtures
   alias Radiator.Accounts.Raindrop

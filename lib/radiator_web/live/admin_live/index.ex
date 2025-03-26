@@ -2,7 +2,7 @@ defmodule RadiatorWeb.AdminLive.Index do
   use RadiatorWeb, :live_view
 
   alias Radiator.Accounts
-  alias Radiator.Accounts.RaindropClient
+  alias  RadiatorWeb.AdminLive.Raindrop
   alias Radiator.Podcast
   alias RadiatorWeb.Endpoint
 
@@ -14,29 +14,8 @@ defmodule RadiatorWeb.AdminLive.Index do
     |> assign(:page_description, "Tools to create and manage your prodcasts")
     |> assign(:networks, Podcast.list_networks(preload: :shows))
     |> assign(:bookmarklet, get_bookmarklet(Endpoint.url() <> "/api/v1/outline", socket))
-    |> assign_raindrop(RaindropClient.access_enabled?(socket.assigns.current_user.id))
+    |> assign_raindrop()
     |> reply(:ok)
-  end
-
-  defp assign_raindrop(socket, true) do
-    items =
-      socket.assigns.current_user.id
-      |> RaindropClient.get_collections()
-      |> Enum.map(fn item -> {item["title"], item["_id"]} end)
-
-    socket
-    |> assign(:raindrop_access, true)
-    |> assign(:raindrop_collections, items)
-  end
-
-  defp assign_raindrop(socket, false) do
-    socket
-    |> assign(
-      :raindrop_url,
-      "https://raindrop.io/oauth/authorize?client_id=#{RaindropClient.config()[:client_id]}&redirect_uri=#{RaindropClient.redirect_uri_encoded(socket.assigns.current_user.id)}"
-    )
-    |> assign(:raindrop_access, false)
-    |> assign(:raindrop_collections, [])
   end
 
   @impl true
@@ -179,7 +158,7 @@ defmodule RadiatorWeb.AdminLive.Index do
 
   def handle_event("connect_raindrop", _params, socket) do
     socket
-    |> assign_raindrop(RaindropClient.access_enabled?(socket.assigns.current_user.id))
+    |> assign_raindrop()
     |> reply(:noreply)
   end
 
@@ -264,5 +243,27 @@ defmodule RadiatorWeb.AdminLive.Index do
     })()
     """
     |> String.replace(["\n", "  "], "")
+  end
+
+  defp assign_raindrop(socket) do
+    assign_raindrop(socket, Raindrop.user_has_raindrop?(socket.assigns.current_user.id))
+  end
+
+  defp assign_raindrop(socket, false) do
+    socket
+    |> assign(
+      :raindrop_url,
+      Raindrop.redirect_url(socket.assigns.current_user.id)
+    )
+    |> assign(:raindrop_access, false)
+    |> assign(:raindrop_collections, [])
+  end
+
+  defp assign_raindrop(socket, true) do
+    items = Raindrop.collections_for_user(socket.assigns.current_user.id)
+
+    socket
+    |> assign(:raindrop_access, true)
+    |> assign(:raindrop_collections, items)
   end
 end
