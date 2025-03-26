@@ -310,6 +310,7 @@ defmodule Radiator.Accounts do
   end
 
   @doc """
+    FIXME move to another module
      Radiator.Accounts.connect_show_with_raindrop(1, 23, 42)
   """
   def connect_show_with_raindrop(user_id, show_id, collection_id) do
@@ -318,6 +319,21 @@ defmodule Radiator.Accounts do
         {:error, "No Raindrop tokens found"}
 
       %{data: data} = service ->
+      # send command to create node for raindrop in inbox container of show
+        show = Radiator.Podcast.get_show!(show_id)
+        command = Radiator.Outline.Command.build(
+            "insert_node",
+            %{
+              "title" => "raindrop",
+              "content" => "raindrop",
+              "container_id" => show.inbox_node_container_id,
+              "parent_id" => nil
+            },
+            nil,
+            Ecto.UUID.generate()
+          )
+        Radiator.Outline.CommandQueue.enqueue(command)
+
         data =
           Map.update!(data, :collection_mappings, fn mappings ->
             Map.put(mappings, show_id_to_collection_id(show_id), collection_id)
