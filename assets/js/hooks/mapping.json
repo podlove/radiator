@@ -39,6 +39,17 @@
       "key": "ArrowDown"
     },
     {
+      "action": "collapse",
+      "key": "ArrowLeft",
+      "altKey": true
+    },
+    {
+      "action": "expand",
+      "key": "ArrowRight",
+      "altKey": true
+    },
+
+    {
       "action": "merge_prev",
       "key": "Backspace"
     },
