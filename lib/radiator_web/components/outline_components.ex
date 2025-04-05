@@ -338,48 +338,40 @@ defmodule RadiatorWeb.OutlineComponents do
       <summary>Shortcuts</summary>
       <dl class="divide-y divide-gray-100">
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
-          <dt class="text-sm leading-6 text-gray-600 font-small">Add note</dt>
-          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
-            ↵
-          </dd>
+          <dt class="text-sm leading-6 text-gray-600 font-small">Split note</dt>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">↵</dd>
+
           <dt class="text-sm leading-6 text-gray-600 font-small">Collapse</dt>
-          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700"></dd>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⌥←</dd>
         </div>
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
           <dt class="text-sm leading-6 text-gray-600 font-small">Cursor up</dt>
-          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
-            ↑
-          </dd>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">↑</dd>
+
           <dt class="text-sm leading-6 text-gray-600 font-small">Expand</dt>
-          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700"></dd>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⌥→</dd>
         </div>
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
           <dt class="text-sm leading-6 text-gray-600 font-small">Cursor down</dt>
-          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
-            ↓
-          </dd>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">↓</dd>
+
           <dt class="text-sm leading-6 text-gray-600 font-small">Move node up</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⌥↑</dd>
         </div>
 
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
           <dt class="text-sm leading-6 text-gray-600 font-small">Indent</dt>
-          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
-            ⇥
-          </dd>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⇥</dd>
 
           <dt class="text-sm leading-6 text-gray-600 font-small">Move node down</dt>
           <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⌥↓</dd>
         </div>
         <div class="grid grid-cols-4 gap-4 px-0 py-2">
           <dt class="text-sm leading-6 text-gray-600 font-small">Outdent</dt>
-          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
-            ⇧⇥
-          </dd>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⇧⇥</dd>
+
           <dt class="text-sm leading-6 text-gray-600 font-small">Select node</dt>
-          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">
-            ⌘ + Click
-          </dd>
+          <dd class="col-span-1 mt-0 text-sm leading-6 text-gray-700">⌘ + Click</dd>
         </div>
       </dl>
     </details>
