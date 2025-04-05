@@ -116,9 +116,9 @@ export const Hooks = {
       //   }
       // });
 
-      this.handleEvent("blur", handleBlur.bind(this));
-      this.handleEvent("focus", handleFocus.bind(this));
-      this.handleEvent("focus_node", handleFocusNode.bind(this));
+      //this.handleEvent("blur", handleBlur.bind(this));
+      //this.handleEvent("focus", handleFocus.bind(this));
+      //this.handleEvent("focus_node", handleFocusNode.bind(this));
       this.handleEvent("move_nodes", handleMoveNodes.bind(this));
       this.handleEvent("set_content", handleSetContent.bind(this));
 
