@@ -52,6 +52,9 @@ jobs:
       - name: Compiles without warnings
         run: mix compile --warnings-as-errors
 
+      - name: Compile for tests
+        run: MIX_ENV=test mix compile
+
   style_formatting:
     name: Code Style & Formatting
     runs-on: ubuntu-latest
