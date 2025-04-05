@@ -6,3 +6,10 @@ export function moveNodesToCorrectPosition() {
     moveNode(node);
   });
 }
+
+export function getDomNodeBefore(node: HTMLDivElement) {
+  const prevNode = node.previousSibling as HTMLDivElement | null;
+  return prevNode?.querySelectorAll(".node");
+}
+
+export function getDomNodeAfter(node: Node) {}

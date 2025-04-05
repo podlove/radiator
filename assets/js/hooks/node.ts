@@ -1,5 +1,27 @@
 import { NodeData, UUID } from "./types";
 
+export function getCursorPosition() {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount) {
+    const range = selection.getRangeAt(0);
+
+    return { start: range.startOffset, stop: range.endOffset };
+  }
+
+  return { start: 0, stop: 0 };
+}
+
+export function setCursorPosition(domNode: HTMLDivElement, position: number) {
+  const content = domNode.querySelector(".content");
+
+  const range = document.createRange();
+  range.setStart(content!, position);
+  range.collapse(true);
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+}
+
 export function getNodeDataByTarget(target: HTMLDivElement): NodeData {
   const domNode = getDomNodeByTarget(target);
 
@@ -145,39 +167,3 @@ export function removeEditingUserLabel(user_name: string) {
   const span = document.getElementById(user_name);
   span && span.remove();
 }
-
-/*
-private getCursorPosition = (): number => {
-  const selection: Selection | null = window.getSelection();
-  if (!selection) {
-      return 0;
-  }
-
-  if (selection.rangeCount) {
-      const range: Range = selection.getRangeAt(0);
-      if (range.commonAncestorContainer.parentNode === this.tasktext) {
-          return range.endOffset;
-      }
-  }
-
-  return 0;
-}
-
-private setCursorPosition = (pos: number): void => {
-  if (!this.tasktext.childNodes || !this.tasktext.childNodes.length) {
-      return;
-  }
-
-  const range: Range = document.createRange();
-  range.setStart(this.tasktext.childNodes[0], pos);
-  range.collapse(true);
-
-  const sel: Selection | null = window.getSelection();
-  if (!sel) {
-      return;
-  }
-
-  sel.removeAllRanges();
-  sel.addRange(range);
-}
-*/

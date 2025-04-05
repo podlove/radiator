@@ -10,7 +10,7 @@ import {
   input,
   click,
   keydown,
-  storeCollapse,
+  toggleCollapse,
   selectTree,
 } from "./events/listener";
 import { restoreCollapsedStatus } from "./store";
@@ -125,7 +125,7 @@ export const Hooks = {
       this.el.addEventListener("click", click.bind(this));
       this.el.addEventListener("input", input.bind(this));
       this.el.addEventListener("keydown", keydown.bind(this));
-      this.el.addEventListener("store_collapse", storeCollapse.bind(this));
+      this.el.addEventListener("toggle_collapse", toggleCollapse.bind(this));
 
       moveNodesToCorrectPosition.call(this);
       restoreCollapsedStatus.call(this);

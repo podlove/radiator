@@ -1,5 +1,9 @@
 import { processEvent } from "./listener/process";
-import { getNodeDataByTarget } from "../node";
+import {
+  getDomNodeByTarget,
+  getNodeDataByDomNode,
+  getNodeDataByTarget,
+} from "../node";
 import { setCollapse } from "../store";
 
 import mapping from "./../mapping.json";
@@ -16,7 +20,7 @@ export function click(event: MouseEvent) {
     action = conf.action;
   }
 
-  action && processEvent.call(this, action, event);
+  action && processEvent.call(this, event, action);
 }
 
 export function input(event: KeyboardEvent) {
@@ -44,9 +48,11 @@ export function keydown(event: KeyboardEvent) {
   action && processEvent.call(this, event, action);
 }
 
-export function storeCollapse(event: MouseEvent) {
+export function toggleCollapse(event: MouseEvent) {
   const target = event.target as HTMLDivElement;
-  const { uuid, collapsed } = getNodeDataByTarget(target);
+  const domNode = getDomNodeByTarget(target);
+  domNode.classList.toggle("collapsed");
+  const { uuid, collapsed } = getNodeDataByDomNode(domNode);
 
   setCollapse.call(this, uuid, collapsed);
 }

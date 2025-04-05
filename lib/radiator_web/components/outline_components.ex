@@ -86,9 +86,7 @@ defmodule RadiatorWeb.OutlineComponents do
         "duration-200 rotate-0 group-[.collapsed]:-rotate-90",
         @class
       ]}
-      phx-click={
-        JS.toggle_class("collapsed", to: {:closest, ".node"}) |> JS.dispatch("store_collapse")
-      }
+      phx-click={JS.dispatch("toggle_collapse")}
     >
       <.triangle />
     </button>
