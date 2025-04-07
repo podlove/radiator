@@ -5,6 +5,8 @@ export type UserAction = {
   user_name: string;
 };
 
+export type Node = HTMLDivElement;
+
 export interface NodeData {
   uuid: UUID;
   content?: string;

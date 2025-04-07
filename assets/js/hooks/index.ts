@@ -1,4 +1,5 @@
-import { getNodeData, getParentNode, getPrevNode, moveNode } from "./node";
+import { NodeData, Node, UUID } from "./types";
+
 import {
   handleBlur,
   handleFocus,
@@ -13,8 +14,13 @@ import {
   toggleCollapse,
   selectTree,
 } from "./events/listener";
-import { restoreCollapsedStatus } from "./store";
-import { moveNodesToCorrectPosition } from "./tree";
+import { getNodeData, getNodeDataByNode } from "./node";
+import {
+  moveNodesToCorrectPosition,
+  getParentNode,
+  getPrevNode,
+  restoreCollapsedStatus,
+} from "./tree";
 
 import Sortable from "../../vendor/sortable";
 // import Quill from "../../vendor/quill";
@@ -47,10 +53,7 @@ export const Hooks = {
 
       this.el.addEventListener("click", selectTree.bind(this));
 
-      const nodes = this.el.querySelectorAll(this.selector);
-      nodes.forEach((node: HTMLDivElement) => {
-        moveNode(node);
-      });
+      moveNodesToCorrectPosition.call(this);
 
       const nestedSortables = [...this.el.querySelectorAll(".children")];
       nestedSortables.forEach((element) => {
@@ -84,10 +87,7 @@ export const Hooks = {
       });
     },
     updated() {
-      const nodes = this.el.querySelectorAll(this.selector);
-      nodes.forEach((node: HTMLDivElement) => {
-        moveNode(node);
-      });
+      moveNodesToCorrectPosition.call(this);
     },
   },
   outline: {
@@ -130,40 +130,34 @@ export const Hooks = {
       moveNodesToCorrectPosition.call(this);
       restoreCollapsedStatus.call(this);
 
-      // const nestedSortables = [...this.el.querySelectorAll(".children")];
-      // nestedSortables.forEach((element) => {
-      //   // const el = document.getElementById('item');
-      //   // const sortable = Sortable.create(el, options);
-      //   new Sortable(element, {
-      //     group: this.el.dataset.group,
-      //     animation: 150,
-      //     delay: 100,
-      //     dragClass: "drag-item",
-      //     ghostClass: "drag-ghost",
-      //     handle: ".handle",
-      //     fallbackOnBody: true,
-      //     swapThreshold: 0.65,
-      //     onEnd: (event) => {
-      //       const node = event.item;
-      //       const { uuid } = getNodeData(node);
-      //       const parentNode = getParentNode(node);
-      //       const prevNode = getPrevNode(node);
-      //       const parentData = parentNode && getNodeData(parentNode);
-      //       const parent_id = parentData?.uuid;
-      //       const prevData = prevNode && getNodeData(prevNode);
-      //       const prev_id = prevData?.uuid;
-      //       this.pushEventTo(this.el.phxHookId, "move", {
-      //         uuid,
-      //         parent_id,
-      //         prev_id,
-      //       });
-      //     },
-      //   });
-      // });
+      const nestedSortables = [...this.el.querySelectorAll(".children")];
+      nestedSortables.forEach((element) => {
+        new Sortable(element, {
+          group: this.el.dataset.group,
+          animation: 150,
+          // delay: 100,
+          dragClass: "drag-item",
+          ghostClass: "drag-ghost",
+          handle: ".handle",
+          fallbackOnBody: true,
+          swapThreshold: 0.65,
+          onEnd: ({ item }) => {
+            const { uuid } = getNodeDataByNode(item);
+
+            const parentNode = getParentNode(item);
+            const prevNode = getPrevNode(item);
+
+            const parent_id = parentNode && getNodeDataByNode(parentNode).uuid;
+            const prev_id = prevNode && getNodeDataByNode(prevNode).uuid;
+
+            this.pushEventTo(this.el, "move", { uuid, parent_id, prev_id });
+          },
+        });
+      });
     },
     updated() {
       // delete this.quill;
-      // console.log("jey", this.quill);
+
       // this.sortable.destroy();
 
       moveNodesToCorrectPosition.call(this);

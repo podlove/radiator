@@ -1,4 +1,4 @@
-import { NodeData, UUID } from "./types";
+import { NodeData, Node, UUID } from "./types";
 
 export function getCursorPosition() {
   const selection = window.getSelection();
@@ -11,8 +11,8 @@ export function getCursorPosition() {
   return { start: 0, stop: 0 };
 }
 
-export function setCursorPosition(domNode: HTMLDivElement, position: number) {
-  const content = domNode.querySelector(".content");
+export function setCursorPosition(node: Node, position: number) {
+  const content = node.querySelector(".content");
 
   const range = document.createRange();
   range.setStart(content!, position);
@@ -23,73 +23,59 @@ export function setCursorPosition(domNode: HTMLDivElement, position: number) {
 }
 
 export function getNodeDataByTarget(target: HTMLDivElement): NodeData {
-  const domNode = getDomNodeByTarget(target);
+  const node = getNodeByTarget(target);
 
-  return getNodeDataByDomNode(domNode);
+  return getNodeDataByNode(node);
 }
 
-export function getNodeDataByDomNode(node: HTMLDivElement): NodeData {
+export function getNodeDataByNode(node: Node): NodeData {
   const uuid = getUUID(node);
+  const parent_id = getData(node, "parent") as UUID | undefined;
+  const prev_id = getData(node, "prev") as UUID | undefined;
   const collapsed = node.classList.contains("collapsed");
+  const content = getContent(node);
 
-  return { uuid, collapsed };
+  return { uuid, parent_id, prev_id, collapsed, content };
 }
 
-export function moveNode(node: HTMLDivElement): NodeData {
-  const { uuid, parent_id, prev_id } = getNodeData(node);
-  const parentNode = getNodeById(parent_id);
-  const prevNode = getNodeById(prev_id);
-
-  if (prevNode) {
-    prevNode.after(node);
-    //insertBefore
-  } else if (parentNode) {
-    parentNode.querySelector(".children")!.prepend(node);
-    //appendChild
-  }
-
-  return { uuid, parent_id, prev_id };
-}
-
-export function getNodeData(node: HTMLDivElement): NodeData {
+export function getNodeData(node: Node): NodeData {
   const uuid = getUUID(node);
-  const parent_id = getData(node, "parent");
-  const prev_id = getData(node, "prev");
+  const parent_id = getData(node, "parent") as UUID;
+  const prev_id = getData(node, "prev") as UUID;
   const content = getContent(node);
 
   return { uuid, parent_id, prev_id, content };
 }
 
-export function getUUID(node: HTMLDivElement) {
+export function getUUID(node: Node) {
   return node.dataset.uuid as UUID;
 }
 
-function getData(node: HTMLDivElement, selector: string) {
-  const data = node.getAttribute(`data-${selector}`);
-  if (!data) return undefined;
-  return data as UUID;
+function getData(node: Node, selector: string) {
+  return node.dataset[selector];
 }
 
-function getContent(node: HTMLDivElement) {
-  // const content = node.querySelector(".content") as HTMLDivElement;
+function getContent(node: Node) {
   const content = node.querySelector(".content") as HTMLDivElement;
-  return content.innerHTML;
+  // return content.innerHTML;
+  return content.innerText;
 }
 
-export function setData(node: HTMLDivElement, selector: string, value: string) {
-  node.setAttribute(`data-${selector}`, value);
+export function setData(node: Node, selector: string, value: string) {
+  node.dataset[selector] = value;
+
   return node;
 }
 
 export function setContent(uuid: UUID, value: string) {
-  const domNode = getNodeById(uuid);
-  const content = domNode?.querySelector(".content") as HTMLDivElement;
+  const node = getNodeById(uuid);
+  const content = node?.querySelector(".content") as HTMLDivElement;
   content.innerHTML = value;
 
-  return domNode;
+  return node;
 }
 
-export function focusNode(node: HTMLDivElement, toEnd: boolean = false) {
+export function focusNode(node: Node, toEnd: boolean = false) {
   const content = node.querySelector(".content") as HTMLDivElement;
 
   const offset = content.childNodes.length;
@@ -105,26 +91,19 @@ export function focusNode(node: HTMLDivElement, toEnd: boolean = false) {
 }
 
 export function getNodeById(uuid: UUID | undefined) {
-  if (!uuid) return null;
-
-  //return document.querySelector(`[data-uuid="${uuid}"]`) as HTMLDivElement;
-  return document.getElementById(`nodes-form-${uuid}`) as HTMLDivElement;
+  return document.getElementById(`nodes-form-${uuid}`) as Node | null;
 }
 
-export function getDomNodeByTarget(target: HTMLDivElement) {
-  return target.closest(".node") as HTMLDivElement;
+export function getNodeByTarget(target: HTMLDivElement) {
+  return target.closest(".node") as Node;
 }
 
-export function getParentNode(node: HTMLDivElement) {
-  return node.closest(".node") as HTMLDivElement | null;
+export function getPrevNode(node: Node) {
+  return node.previousSibling as Node | null;
 }
 
-export function getPrevNode(node: HTMLDivElement) {
-  return node.previousSibling as HTMLDivElement | null;
-}
-
-export function getNextNode(node: HTMLDivElement) {
-  return node.nextSibling as HTMLDivElement | null;
+export function getNextNode(node: Node) {
+  return node.nextSibling as Node | null;
 }
 
 /*

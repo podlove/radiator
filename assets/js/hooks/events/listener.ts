@@ -1,7 +1,7 @@
 import { processEvent } from "./listener/process";
 import {
-  getDomNodeByTarget,
-  getNodeDataByDomNode,
+  getNodeByTarget,
+  getNodeDataByNode,
   getNodeDataByTarget,
 } from "../node";
 import { setCollapse } from "../store";
@@ -50,9 +50,9 @@ export function keydown(event: KeyboardEvent) {
 
 export function toggleCollapse(event: MouseEvent) {
   const target = event.target as HTMLDivElement;
-  const domNode = getDomNodeByTarget(target);
-  domNode.classList.toggle("collapsed");
-  const { uuid, collapsed } = getNodeDataByDomNode(domNode);
+  const node = getNodeByTarget(target);
+  node.classList.toggle("collapsed");
+  const { uuid, collapsed } = getNodeDataByNode(node);
 
   setCollapse.call(this, uuid, collapsed);
 }

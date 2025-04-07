@@ -1,13 +1,14 @@
 import { NodeData, UserAction } from "../types";
+
 import {
   getNodeById,
-  moveNode,
   setData,
   setContent,
   focusNode,
   addEditingUserLabel,
   removeEditingUserLabel,
 } from "../node";
+import { moveNode } from "../tree";
 
 export function handleBlur({ uuid, user_name }: UserAction) {
   // const node = getNodeById(uuid)!;

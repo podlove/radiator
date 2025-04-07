@@ -3,20 +3,20 @@ import {
   getPrevNode,
   getNextNode,
   focusNode,
-  getDomNodeByTarget,
+  getNodeByTarget,
   getCursorPosition,
-  getNodeDataByDomNode,
+  getNodeDataByNode,
 } from "../../node";
 
-import { getDomNodeBefore } from "../../tree";
+import { getNodeBefore } from "../../tree";
 
 export function processEvent(
   event: KeyboardEvent | MouseEvent,
   action: string | undefined
 ) {
   const target = event.target as HTMLDivElement;
-  const domNode = getDomNodeByTarget(target);
-  const { uuid, content } = getNodeDataByDomNode(domNode);
+  const node = getNodeByTarget(target);
+  const { uuid, content } = getNodeDataByNode(node);
   const { start, stop } = getCursorPosition();
   const cursorAtStart = start == 0 && stop == 0;
   const cursorAtEnd = start == content?.length && stop == content?.length;
@@ -26,7 +26,7 @@ export function processEvent(
   switch (action) {
     case "toggle_select":
       event.preventDefault();
-      domNode.classList.toggle("selected");
+      node.classList.toggle("selected");
       break;
 
     case "split":
