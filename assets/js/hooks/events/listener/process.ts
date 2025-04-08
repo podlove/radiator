@@ -8,7 +8,7 @@ import {
   getNodeDataByNode,
 } from "../../node";
 
-import { getNodeBefore } from "../../tree";
+import { getNodeAbove, getNodeBelow } from "../../tree";
 
 export function processEvent(
   event: KeyboardEvent | MouseEvent,

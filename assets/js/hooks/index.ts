@@ -14,27 +14,23 @@ import {
   toggleCollapse,
   selectTree,
 } from "./events/listener";
-import { getNodeData, getNodeDataByNode } from "./node";
+import { getNodeData } from "./node";
 import {
   moveNodesToCorrectPosition,
-  getParentNode,
-  getPrevNode,
   restoreCollapsedStatus,
+  initSortableInbox,
+  initSortableOutline,
 } from "./tree";
 
-import Sortable from "../../vendor/sortable";
 // import Quill from "../../vendor/quill";
 
 export const Hooks = {
   inbox: {
-    selector: ".node",
     mounted() {
       this.handleEvent("select_all", () => {
-        this.el
-          .querySelectorAll("input.selected")
-          .forEach((node: HTMLInputElement) => {
-            node.checked = true;
-          });
+        this.el.querySelectorAll(".node").forEach((node: Node) => {
+          node.classList.toggle("selected");
+        });
       });
 
       this.handleEvent("move_nodes_to_container", ({ container_id }) => {
@@ -55,43 +51,13 @@ export const Hooks = {
 
       moveNodesToCorrectPosition.call(this);
 
-      const nestedSortables = [...this.el.querySelectorAll(".children")];
-      nestedSortables.forEach((element) => {
-        new Sortable(element, {
-          group: this.el.dataset.group,
-          // animation: 150,
-          // delay: 100,
-          dragClass: "drag-item",
-          ghostClass: "drag-ghost",
-          handle: ".handle",
-
-          // put: false,
-          // sort: false,
-
-          // fallbackOnBody: true,
-          // swapThreshold: 0.65,
-          onEnd: (event) => {
-            const to = event.to.parentNode;
-            const container_id = to.closest(".container").dataset.container;
-            const { uuid } = getNodeData(event.item);
-            const { parent_id, prev_id } = getNodeData(to);
-
-            this.pushEventTo(this.el, "move_node_to_container", {
-              container_id,
-              uuid,
-              parent_id,
-              prev_id,
-            });
-          },
-        });
-      });
+      initSortableInbox.call(this);
     },
     updated() {
       moveNodesToCorrectPosition.call(this);
     },
   },
   outline: {
-    selector: ".node",
     mounted() {
       // const toolbarOptions = ["bold", "italic", "underline", "strike", "link"];
       // const options = {
@@ -130,30 +96,7 @@ export const Hooks = {
       moveNodesToCorrectPosition.call(this);
       restoreCollapsedStatus.call(this);
 
-      const nestedSortables = [...this.el.querySelectorAll(".children")];
-      nestedSortables.forEach((element) => {
-        new Sortable(element, {
-          group: this.el.dataset.group,
-          animation: 150,
-          // delay: 100,
-          dragClass: "drag-item",
-          ghostClass: "drag-ghost",
-          handle: ".handle",
-          fallbackOnBody: true,
-          swapThreshold: 0.65,
-          onEnd: ({ item }) => {
-            const { uuid } = getNodeDataByNode(item);
-
-            const parentNode = getParentNode(item);
-            const prevNode = getPrevNode(item);
-
-            const parent_id = parentNode && getNodeDataByNode(parentNode).uuid;
-            const prev_id = prevNode && getNodeDataByNode(prevNode).uuid;
-
-            this.pushEventTo(this.el, "move", { uuid, parent_id, prev_id });
-          },
-        });
-      });
+      initSortableOutline.call(this);
     },
     updated() {
       // delete this.quill;
