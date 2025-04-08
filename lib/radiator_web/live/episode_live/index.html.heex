@@ -52,10 +52,7 @@
       <.header :if={@live_action not in [:new, :edit]} class="text-2xl">
         {@selected_episode.number}: {@selected_episode.title}
         <:actions>
-          <.link
-            navigate={~p"/admin/podcast/#{@show}/#{@selected_episode}/edit"}
-            class="flex gap-4 my-4"
-          >
+          <.link navigate={~p"/admin/podcast/#{@show}/#{@selected_episode}/edit"}>
             <.icon name="hero-pencil-square" class="w-5 h-5" />
           </.link>
           <.link
