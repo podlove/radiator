@@ -324,6 +324,28 @@ defmodule RadiatorWeb.OutlineComponents do
   end
 
   @doc """
+  Renders a toolbar with title.
+  """
+  attr :class, :string, default: nil
+  attr :rest, :global, doc: "the arbitrary HTML attributes to add to the flash container"
+
+  slot :inner_block, required: true
+  slot :actions
+
+  def toolbar(assigns) do
+    ~H"""
+    <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]} {@rest}>
+      <div>
+        <h1 class="text-lg font-semibold leading-8 text-zinc-800">
+          {render_slot(@inner_block)}
+        </h1>
+      </div>
+      <div class="flex-none">{render_slot(@actions)}</div>
+    </header>
+    """
+  end
+
+  @doc """
   Renders the keyboard shortcuts.
 
   ## Examples

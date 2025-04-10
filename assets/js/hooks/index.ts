@@ -1,4 +1,4 @@
-import { NodeData, Node, UUID } from "./types";
+import { Node } from "./types";
 
 import {
   handleBlur,
@@ -7,14 +7,8 @@ import {
   handleMoveNodes,
   handleSetContent,
 } from "./events/handler";
-import {
-  input,
-  click,
-  keydown,
-  toggleCollapse,
-  selectTree,
-} from "./events/listener";
-import { getNodeData } from "./node";
+import { input, click, keydown, toggleCollapse } from "./events/listener";
+
 import {
   moveNodesToCorrectPosition,
   restoreCollapsedStatus,
@@ -25,30 +19,35 @@ import {
 // import Quill from "../../vendor/quill";
 
 export const Hooks = {
+  toolbar: {
+    mounted() {
+      this.el.addEventListener("select_all", ({ detail }) => {
+        const container = document.getElementById(detail.id);
+        container
+          ?.querySelectorAll<HTMLDivElement>(".node .node")
+          .forEach((node) => {
+            node.classList.toggle("selected");
+          });
+      });
+
+      this.el.addEventListener("move_selected", ({ detail }) => {
+        // console.log(detail);
+        // console.log(container_id);
+        // const selected = this.el.querySelectorAll("input.selected:checked");
+        // const uuid_list = Array.from(selected).map((node: any) => {
+        //   const parent = node.closest(".node") as HTMLDivElement;
+        //   const { uuid } = getNodeData(parent);
+        //   return uuid;
+        // });
+        // this.pushEventTo(this.el, "move_nodes_to_container", {
+        //   container_id,
+        //   uuid_list,
+        // });
+      });
+    },
+  },
   inbox: {
     mounted() {
-      this.handleEvent("select_all", () => {
-        this.el.querySelectorAll(".node").forEach((node: Node) => {
-          node.classList.toggle("selected");
-        });
-      });
-
-      this.handleEvent("move_nodes_to_container", ({ container_id }) => {
-        const selected = this.el.querySelectorAll("input.selected:checked");
-
-        const uuid_list = Array.from(selected).map((node: any) => {
-          const parent = node.closest(".node") as HTMLDivElement;
-          const { uuid } = getNodeData(parent);
-          return uuid;
-        });
-        this.pushEventTo(this.el, "move_nodes_to_container", {
-          container_id,
-          uuid_list,
-        });
-      });
-
-      this.el.addEventListener("click", selectTree.bind(this));
-
       moveNodesToCorrectPosition.call(this);
 
       initSortableInbox.call(this);
