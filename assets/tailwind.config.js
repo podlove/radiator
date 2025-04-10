@@ -105,7 +105,7 @@ module.exports = {
         })
       })
       matchComponents({
-        'pi': ({ name, fullPath }) => {
+        'ph': ({ name, fullPath }) => {
           let content = fs.readFileSync(fullPath).toString().replace(/\r?\n|\r/g, '')
           return {
             [`--ph-${name}`]: `url('data:image/svg+xml;utf8,${content}')`,
