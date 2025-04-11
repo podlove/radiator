@@ -141,7 +141,4 @@ defmodule Radiator.Accounts.Raindrop do
         |> Repo.update()
     end
   end
-
-  # defp show_id_to_collection_id(show_id) when is_integer(show_id), do: Integer.to_string(show_id)
-  # defp show_id_to_collection_id(show_id), do: show_id
 end
