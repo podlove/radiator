@@ -3,6 +3,8 @@ defmodule Radiator.AccountsFixtures do
   This module defines test helpers for creating
   entities via the `Radiator.Accounts` context.
   """
+  alias Radiator.Accounts
+  alias Radiator.Accounts.Raindrop
 
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "hello world!"
@@ -18,7 +20,7 @@ defmodule Radiator.AccountsFixtures do
     {:ok, user} =
       attrs
       |> valid_user_attributes()
-      |> Radiator.Accounts.register_user()
+      |> Accounts.register_user()
 
     user
   end
@@ -31,7 +33,7 @@ defmodule Radiator.AccountsFixtures do
 
   def raindrop_service_fixture(user \\ user_fixture()) do
     {:ok, service} =
-      Radiator.Accounts.Raindrop.update_raindrop_tokens(
+      Raindrop.update_raindrop_tokens(
         user.id,
         "ae261404-11r4-47c0-bce3-e18a423da828",
         "c8080368-fad2-4a3f-b2c9-71d3z85011vb",
