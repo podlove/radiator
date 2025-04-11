@@ -2,6 +2,8 @@ defmodule Radiator.Outline.NodeChangeListener do
   @moduledoc """
   Genserver that listens to change events and starts jobs
   It is an eventconsumer that listens to changes in the outline and starts workers
+
+  Currently actions are hard coded but should be configurable in the future
   """
   use GenServer
 
@@ -31,7 +33,8 @@ defmodule Radiator.Outline.NodeChangeListener do
     {:noreply, state}
   end
 
-  def handle_info(%NodeInsertedEvent{} = _event, state) do
+  def handle_info(%NodeInsertedEvent{} = event, state) do
+    process_system_nodes_if(event)
     {:noreply, state}
   end
 
@@ -53,4 +56,13 @@ defmodule Radiator.Outline.NodeChangeListener do
   end
 
   defp scan_content_for_urls(node_id), do: NodeChangedWorker.trigger_analyze(node_id)
+
+  defp process_system_nodes_if(%NodeInsertedEvent{
+         user_id: nil,
+         node: %{content: "raindrop", container_id: _container_id, uuid: _uuid}
+       }) do
+    :ok
+  end
+
+  defp process_system_nodes_if(_), do: :ok
 end

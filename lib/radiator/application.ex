@@ -24,9 +24,6 @@ defmodule Radiator.Application do
       {Phoenix.PubSub, name: Radiator.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Radiator.Finch},
-      # Start a worker by calling: Radiator.Worker.start_link(arg)
-      # {Radiator.Worker, arg},
-      # Start to serve requests, typically the last entry
       RadiatorWeb.Endpoint,
       {CommandQueue, name: CommandQueue},
       {CommandProcessor, name: CommandProcessor, subscribe_to: [{CommandQueue, max_demand: 1}]},
