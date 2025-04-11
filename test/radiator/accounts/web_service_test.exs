@@ -132,31 +132,4 @@ defmodule Radiator.Accounts.WebServiceTest do
              ]
     end
   end
-
-  # describe "create/1" do
-  #   test "creates a web service" do
-  #     user = user_fixture()
-  #     attrs = %{access_token: "token", refresh_token: "refresh", expires_at: DateTime.utc_now()}
-  #     {:ok, web_service} = Accounts.create_web_service(user.id, "Raindrop", attrs)
-
-  #     assert web_service.service_name == "Raindrop"
-  #     assert web_service.user_id == user.id
-  #   end
-
-  #   test "returns an error when invalid" do
-  #     user = user_fixture()
-  #     attrs = %{access_token: "token", refresh_token: "refresh", expires_at: DateTime.utc_now()}
-  #     {:error, %Ecto.Changeset{errors: errors}} = Accounts.create_web_service(user.id, nil, attrs)
-  #     assert errors[:service_name] == {"can't be blank", [validation: :required]}
-  #   end
-
-  #   test "embeds access token, refresh token, and expires at" do
-  #     user = user_fixture()
-  #     attrs = %{access_token: "token", refresh_token: "refresh", expires_at: DateTime.utc_now()}
-  #     {:ok, web_service} = Accounts.create_web_service(user.id, "Raindrop", attrs)
-
-  #     assert web_service.data.access_token == "token"
-  #     assert web_service.data.refresh_token == "refresh"
-  #   end
-  # end
 end
