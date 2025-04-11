@@ -77,7 +77,7 @@ defmodule Radiator.Accounts.Raindrop do
       iex> connect_show_with_raindrop(999, 23, 42)
       {:error, "No Raindrop tokens found"}
   """
-  def connect_show_with_raindrop(user_id, show_id, collection_id) do
+  def connect_show_with_raindrop(user_id, show_id, collection_id, node_id \\ nil) do
     case get_raindrop_tokens(user_id) do
       nil ->
         {:error, "No Raindrop tokens found"}
