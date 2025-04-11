@@ -313,7 +313,7 @@ defmodule Radiator.Outline do
     #    }}
     # end)
     |> Ecto.Multi.run(:add_node_to_new_container, fn _, multi_map ->
-      {:ok, moved_node} =
+      {:ok, %NodeRepoResult{node: moved_node}} =
         insert_node(
           %{
             "container_id" => container_id,

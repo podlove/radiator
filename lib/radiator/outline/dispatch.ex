@@ -72,12 +72,10 @@ defmodule Radiator.Outline.Dispatch do
     |> CommandQueue.enqueue()
   end
 
-  def move_node_to_container(container_id_str, node_id, user_id, event_id,
+  def move_node_to_container(container_id, node_id, user_id, event_id,
         parent_id: parent_id,
         prev_id: prev_id
       ) do
-    container_id = String.to_integer(container_id_str)
-
     "move_node_to_container"
     |> Command.build(container_id, node_id, user_id, event_id, parent_id, prev_id)
     |> CommandQueue.enqueue()

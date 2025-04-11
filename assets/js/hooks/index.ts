@@ -15,6 +15,7 @@ import {
   initSortableInbox,
   initSortableOutline,
 } from "./tree";
+import { getNodeDataByNode } from "./node";
 
 // import Quill from "../../vendor/quill";
 
@@ -23,26 +24,32 @@ export const Hooks = {
     mounted() {
       this.el.addEventListener("select_all", ({ detail }) => {
         const container = document.getElementById(detail.id);
-        container
-          ?.querySelectorAll<HTMLDivElement>(".node .node")
-          .forEach((node) => {
+        container!
+          .querySelectorAll<HTMLDivElement>(".node .node")
+          .forEach((node: Node) => {
             node.classList.toggle("selected");
           });
       });
 
       this.el.addEventListener("move_selected", ({ detail }) => {
-        // console.log(detail);
-        // console.log(container_id);
-        // const selected = this.el.querySelectorAll("input.selected:checked");
-        // const uuid_list = Array.from(selected).map((node: any) => {
-        //   const parent = node.closest(".node") as HTMLDivElement;
-        //   const { uuid } = getNodeData(parent);
-        //   return uuid;
-        // });
-        // this.pushEventTo(this.el, "move_nodes_to_container", {
-        //   container_id,
-        //   uuid_list,
-        // });
+        const container_id = detail.container_target;
+        const target = document.getElementById("outline-2-stream");
+        [
+          ...document
+            .getElementById(detail.id)!
+            .querySelectorAll<HTMLDivElement>(".selected"),
+        ]
+          .reverse()
+          .forEach((node: Node) => {
+            const { uuid } = getNodeDataByNode(node);
+
+            this.pushEventTo(target, "move_node_to_container", {
+              container_id,
+              uuid,
+              parent_id: null,
+              prev_id: null,
+            });
+          });
       });
     },
   },

@@ -15,7 +15,8 @@ defmodule RadiatorWeb.OutlineComponents do
     NodeContentChangedEvent,
     NodeDeletedEvent,
     NodeInsertedEvent,
-    NodeMovedEvent
+    NodeMovedEvent,
+    NodeMovedToNewContainer
   }
 
   attr :id, :string, required: true
@@ -468,6 +469,22 @@ defmodule RadiatorWeb.OutlineComponents do
       <p>prev_id = {@event.node.prev_id}</p>
       <p>old_prev_id = {Outline.get_node_id(@event.old_prev)}</p>
       <p>old_next_id = {Outline.get_node_id(@event.old_next)}</p>
+      <p>next_id = {Outline.get_node_id(@event.next)}</p>
+    </div>
+    """
+  end
+
+  defp event_entry(%{event: %NodeMovedToNewContainer{}} = assigns) do
+    ~H"""
+    <div class="px-2 bg-gray-200">
+      <Core.icon name="hero-arrows-pointing-out-solid" class="w-5 h-5" />
+      {@event.event_id}
+    </div>
+    <div class="px-2 ml-8">
+      <pre>{@event.node.uuid} - NodeMovedToNewContainer</pre>
+      <p>parent_id = {@event.node.parent_id}</p>
+      <p>prev_id = {@event.node.prev_id}</p>
+      <p>container_id = {@event.container_id}</p>
       <p>next_id = {Outline.get_node_id(@event.next)}</p>
     </div>
     """

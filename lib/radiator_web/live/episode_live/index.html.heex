@@ -70,7 +70,12 @@
           <button
             class="rounded text-white bg-[#df7366] px-2 text-center text-sm"
             phx-click={
-              JS.dispatch("move_selected", detail: %{id: "inbox-#{@selected_episode.id}-stream"})
+              JS.dispatch("move_selected",
+                detail: %{
+                  id: "inbox-#{@selected_episode.id}-stream",
+                  container_target: @selected_episode.outline_node_container_id
+                }
+              )
             }
           >
             <.icon name="ph-arrow-bend-down-right" class="w-5 h-5" /> move_selected
