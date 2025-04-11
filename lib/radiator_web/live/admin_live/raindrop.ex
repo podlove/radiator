@@ -24,17 +24,17 @@ defmodule RadiatorWeb.AdminLive.Raindrop do
   def save_raindrop(user_id, show, %{"raindrop_collection" => collection_id}) do
     # send command to create node for raindrop in inbox container of show
     Command.build(
-        "insert_node",
-        %{
-          "title" => "raindrop",
-          "content" => "raindrop",
-          "container_id" => show.inbox_node_container_id,
-          "parent_id" => nil
-        },
-        nil,
-        Ecto.UUID.generate()
-      )
-      |> CommandQueue.enqueue()
+      "insert_node",
+      %{
+        "title" => "raindrop",
+        "content" => "raindrop",
+        "container_id" => show.inbox_node_container_id,
+        "parent_id" => nil
+      },
+      nil,
+      Ecto.UUID.generate()
+    )
+    |> CommandQueue.enqueue()
 
     Accounts.Raindrop.connect_show_with_raindrop(user_id, show.id, collection_id)
   end
