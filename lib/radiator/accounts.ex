@@ -437,15 +437,4 @@ defmodule Radiator.Accounts do
     Repo.delete_all(UserToken.by_token_and_context_query(token, "api"))
     :ok
   end
-
-  # @doc """
-  # Creates a web service associated with the given user.
-  # """
-  # def create_web_service(user_id, service_name, attributes) do
-  #   attrs = %{service_name: service_name, user_id: user_id, data: attributes}
-
-  #   %WebService{}
-  #   |> WebService.changeset(attrs)
-  #   |> Repo.insert()
-  # end
 end
