@@ -61,8 +61,6 @@ defmodule Radiator.Outline.NodeChangeListener do
          user_id: nil,
          node: %{content: "raindrop", container_id: container_id, uuid: uuid}
        }) do
-    IO.inspect("System node inserted: uuid: #{uuid} container_id: #{container_id}")
-
     :ok
   end
 
