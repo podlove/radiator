@@ -3,7 +3,6 @@ defmodule Radiator.Accounts.WebService.RaindropService do
   Embedded schema for raindrop service that handles OAuth tokens and collection mappings
   """
   use Ecto.Schema
-  # You should uncomment this as it might be needed for mappings
   import Ecto.Changeset
 
   @type t :: %__MODULE__{
@@ -17,7 +16,6 @@ defmodule Radiator.Accounts.WebService.RaindropService do
     field :access_token, :string, redact: true
     field :refresh_token, :string, redact: true
     field :expires_at, :utc_datetime
-    # Show ID => Raindrop Collection ID
 
     embeds_many :mappings, Mapping, on_replace: :delete, primary_key: false do
       field :show_id, :integer
