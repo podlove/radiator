@@ -83,12 +83,7 @@ defmodule Radiator.Accounts.Raindrop do
         {:error, "No Raindrop tokens found"}
 
       %{data: data} = service ->
-        new_mapping = %{
-          show_id: show_id,
-          collection_id: collection_id
-        }
-
-        updated_mappings = update_mappings(data.mappings, show_id, node_id)
+        updated_mappings = update_mappings(data.mappings, show_id, collection_id, node_id)
 
         service
         |> WebService.changeset(%{
@@ -104,10 +99,10 @@ defmodule Radiator.Accounts.Raindrop do
   end
 
   # Filter out any existing mapping with the same show_id and convert to maps
-  defp update_mappings(mappings, show_id, node_id) do
+  defp update_mappings(mappings, show_id, collection_id, node_id) do
     mappings
     |> Enum.reject(fn mapping -> mapping.show_id == show_id end)
     |> Enum.map(&Map.from_struct/1)
-    |> Kernel.++([%{show_id: show_id, node_id: node_id}])
+    |> Kernel.++([%{show_id: show_id, node_id: node_id, collection_id: collection_id}])
   end
 end
