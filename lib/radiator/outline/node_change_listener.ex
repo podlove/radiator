@@ -59,7 +59,7 @@ defmodule Radiator.Outline.NodeChangeListener do
 
   defp process_system_nodes_if(%NodeInsertedEvent{
          user_id: nil,
-         node: %{content: "raindrop", container_id: container_id, uuid: uuid}
+         node: %{content: "raindrop", container_id: _container_id, uuid: _uuid}
        }) do
     :ok
   end
