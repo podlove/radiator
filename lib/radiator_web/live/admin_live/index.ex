@@ -2,8 +2,8 @@ defmodule RadiatorWeb.AdminLive.Index do
   use RadiatorWeb, :live_view
 
   alias Radiator.Accounts
-  alias RadiatorWeb.AdminLive.Raindrop
   alias Radiator.Podcast
+  alias RadiatorWeb.AdminLive.Raindrop
   alias RadiatorWeb.Endpoint
 
   @impl true
