@@ -114,20 +114,7 @@ defmodule Radiator.Accounts.Raindrop do
         {:error, "No Raindrop tokens found"}
 
       %{data: data} = service ->
-        updated_mappings =
-          Enum.map(data.mappings, fn mapping ->
-            case mapping.show_id do
-              ^show_id ->
-                # Convert the struct to a map and update the node_id
-                mapping
-                |> Map.from_struct()
-                |> Map.put(:node_id, node_id)
-
-              _ ->
-                # Convert other mappings to maps as well
-                Map.from_struct(mapping)
-            end
-          end)
+        updated_mappings = update_mappings(data.mappings, show_id, node_id)
 
         service
         |> WebService.changeset(%{
@@ -140,5 +127,12 @@ defmodule Radiator.Accounts.Raindrop do
         })
         |> Repo.update()
     end
+  end
+
+  defp update_mappings(mappings, show_id, node_id) do
+    mappings
+    |> Enum.reject(fn mapping -> mapping.show_id == show_id end)
+    |> Enum.map(&Map.from_struct/1)
+    |> Kernel.++([%{show_id: show_id, node_id: node_id}])
   end
 end
