@@ -88,32 +88,6 @@ defmodule Radiator.Accounts.Raindrop do
           collection_id: collection_id
         }
 
-        # Filter out any existing mapping with the same show_id and convert to maps
-        updated_mappings =
-          data.mappings
-          |> Enum.reject(fn mapping -> mapping.show_id == show_id end)
-          |> Enum.map(&Map.from_struct/1)
-          |> Kernel.++([new_mapping])
-
-        service
-        |> WebService.changeset(%{
-          data: %{
-            access_token: data.access_token,
-            refresh_token: data.refresh_token,
-            expires_at: data.expires_at,
-            mappings: updated_mappings
-          }
-        })
-        |> Repo.update()
-    end
-  end
-
-  def save_raindrop_node(user_id, show_id, node_id) do
-    case get_raindrop_tokens(user_id) do
-      nil ->
-        {:error, "No Raindrop tokens found"}
-
-      %{data: data} = service ->
         updated_mappings = update_mappings(data.mappings, show_id, node_id)
 
         service
@@ -129,6 +103,7 @@ defmodule Radiator.Accounts.Raindrop do
     end
   end
 
+  # Filter out any existing mapping with the same show_id and convert to maps
   defp update_mappings(mappings, show_id, node_id) do
     mappings
     |> Enum.reject(fn mapping -> mapping.show_id == show_id end)
