@@ -5,7 +5,7 @@ defmodule Radiator.ResourcesFixtures do
   """
   alias Radiator.OutlineFixtures
   alias Radiator.PodcastFixtures
-  alias Radiator.Resources
+  alias Radiator.ResourcesRepository
 
   @doc """
   Generate a url.
@@ -24,7 +24,7 @@ defmodule Radiator.ResourcesFixtures do
         node_id: node_id,
         episode_id: episode_id
       })
-      |> Resources.create_url()
+      |> ResourcesRepository.create_url()
 
     url
   end
