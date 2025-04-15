@@ -1,4 +1,4 @@
-defmodule Radiator.ResourcesbTest do
+defmodule Radiator.ResourcesRepositoryTest do
   use Radiator.DataCase
 
   import Ecto.Query, warn: false
@@ -6,7 +6,7 @@ defmodule Radiator.ResourcesbTest do
 
   alias Radiator.OutlineFixtures
   alias Radiator.PodcastFixtures
-  alias Radiator.Resources
+  alias Radiator.ResourcesRepository
   alias Radiator.Resources.Url
 
   @invalid_attrs %{url: nil, start_bytes: nil, size_bytes: nil}
@@ -16,7 +16,7 @@ defmodule Radiator.ResourcesbTest do
 
     test "returns all urls of an episode", %{episode: episode, node: node} do
       url = url_fixture(node_id: node.uuid, episode_id: episode.id)
-      assert Resources.list_urls_by_episode(episode.id) == [url]
+      assert ResourcesRepository.list_urls_by_episode(episode.id) == [url]
     end
   end
 
@@ -25,7 +25,7 @@ defmodule Radiator.ResourcesbTest do
 
     test "get_url!/1 returns the url with given id" do
       url = url_fixture()
-      assert Resources.get_url!(url.id) == url
+      assert ResourcesRepository.get_url!(url.id) == url
     end
   end
 
@@ -35,14 +35,14 @@ defmodule Radiator.ResourcesbTest do
     test "creates a url with valid data", %{node: node} do
       valid_attrs = %{url: "some url", start_bytes: 42, size_bytes: 42, node_id: node.uuid}
 
-      assert {:ok, %Url{} = url} = Resources.create_url(valid_attrs)
+      assert {:ok, %Url{} = url} = ResourcesRepository.create_url(valid_attrs)
       assert url.url == "some url"
       assert url.start_bytes == 42
       assert url.size_bytes == 42
     end
 
     test "with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Resources.create_url(@invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = ResourcesRepository.create_url(@invalid_attrs)
     end
   end
 
@@ -60,7 +60,7 @@ defmodule Radiator.ResourcesbTest do
       episode_id = episode.id
 
       assert [%Url{url: ^url_text, start_bytes: 42, size_bytes: 42, episode_id: ^episode_id}] =
-               Resources.rebuild_node_urls(node.uuid, [
+               ResourcesRepository.rebuild_node_urls(node.uuid, [
                  %{
                    url: url_text,
                    start_bytes: 42,
@@ -70,7 +70,7 @@ defmodule Radiator.ResourcesbTest do
                  }
                ])
 
-      assert_raise Ecto.NoResultsError, fn -> Resources.get_url!(old_url.id) end
+      assert_raise Ecto.NoResultsError, fn -> ResourcesRepository.get_url!(old_url.id) end
     end
   end
 
@@ -81,7 +81,7 @@ defmodule Radiator.ResourcesbTest do
       url = url_fixture()
       update_attrs = %{url: "some updated url", start_bytes: 43, size_bytes: 43}
 
-      assert {:ok, %Url{} = url} = Resources.update_url(url, update_attrs)
+      assert {:ok, %Url{} = url} = ResourcesRepository.update_url(url, update_attrs)
       assert url.url == "some updated url"
       assert url.start_bytes == 43
       assert url.size_bytes == 43
@@ -89,16 +89,16 @@ defmodule Radiator.ResourcesbTest do
 
     test "with invalid data returns error changeset" do
       url = url_fixture()
-      assert {:error, %Ecto.Changeset{}} = Resources.update_url(url, @invalid_attrs)
-      assert url == Resources.get_url!(url.id)
+      assert {:error, %Ecto.Changeset{}} = ResourcesRepository.update_url(url, @invalid_attrs)
+      assert url == ResourcesRepository.get_url!(url.id)
     end
   end
 
   describe "delete_url/1" do
     test " deletes the url" do
       url = url_fixture()
-      assert {:ok, %Url{}} = Resources.delete_url(url)
-      assert_raise Ecto.NoResultsError, fn -> Resources.get_url!(url.id) end
+      assert {:ok, %Url{}} = ResourcesRepository.delete_url(url)
+      assert_raise Ecto.NoResultsError, fn -> ResourcesRepository.get_url!(url.id) end
     end
   end
 
@@ -107,15 +107,15 @@ defmodule Radiator.ResourcesbTest do
       node = OutlineFixtures.node_fixture()
       url = url_fixture(node_id: node.uuid)
 
-      assert 1 = Resources.delete_urls_for_node(node)
-      assert_raise Ecto.NoResultsError, fn -> Resources.get_url!(url.id) end
+      assert 1 = ResourcesRepository.delete_urls_for_node(node)
+      assert_raise Ecto.NoResultsError, fn -> ResourcesRepository.get_url!(url.id) end
     end
   end
 
   describe "change_url/1" do
     test "returns a url changeset" do
       url = url_fixture()
-      assert %Ecto.Changeset{} = Resources.change_url(url)
+      assert %Ecto.Changeset{} = ResourcesRepository.change_url(url)
     end
   end
 

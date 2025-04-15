@@ -6,7 +6,7 @@ defmodule Radiator.Resources.NodeChangedWorker do
   alias Radiator.EpisodeOutliner
   alias Radiator.NodeAnalyzer
   alias Radiator.Outline.NodeRepository
-  alias Radiator.Resources
+  alias Radiator.ResourcesRepository
 
   def trigger_analyze(node_id) do
     Radiator.Job.start_job(
@@ -30,7 +30,7 @@ defmodule Radiator.Resources.NodeChangedWorker do
         |> Map.put(:episode_id, episode_id)
       end)
 
-    _created_urls = Resources.rebuild_node_urls(node_id, url_attributes)
+    _created_urls = ResourcesRepository.rebuild_node_urls(node_id, url_attributes)
     :ok
   end
 end

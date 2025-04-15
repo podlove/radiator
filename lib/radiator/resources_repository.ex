@@ -1,4 +1,4 @@
-defmodule Radiator.Resources do
+defmodule Radiator.ResourcesRepository do
   @moduledoc """
   The Web context. All web related stuff, handing URLs,
   scraped Websites etc..
