@@ -62,7 +62,7 @@
           <button
             class="rounded text-white bg-[#df7366] px-2 text-center text-sm"
             phx-click={
-              JS.dispatch("select_all", detail: %{id: "inbox-#{@selected_episode.id}-stream"})
+              JS.dispatch("select_all", detail: %{source: "inbox-#{@selected_episode.id}-stream"})
             }
           >
             <.icon name="ph-list-checks" class="w-5 h-5" /> select_all
@@ -72,8 +72,9 @@
             phx-click={
               JS.dispatch("move_selected",
                 detail: %{
-                  id: "inbox-#{@selected_episode.id}-stream",
-                  container_target: @selected_episode.outline_node_container_id
+                  source: "inbox-#{@selected_episode.id}-stream",
+                  target: "outline-2-stream",
+                  container: @selected_episode.outline_node_container_id
                 }
               )
             }

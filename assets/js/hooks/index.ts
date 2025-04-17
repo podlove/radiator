@@ -23,18 +23,18 @@ export const Hooks = {
   toolbar: {
     mounted() {
       this.el.addEventListener("select_all", ({ detail }) => {
-        const container = document.getElementById(detail.id);
+        const container = document.getElementById(detail.source);
         container!.querySelectorAll<Node>(".node .node").forEach((node) => {
           node.classList.toggle("selected");
         });
       });
 
       this.el.addEventListener("move_selected", ({ detail }) => {
-        const container_id = detail.container_target;
-        const target = document.getElementById("outline-2-stream");
+        const container_id = detail.container;
+        const target = document.getElementById(detail.target);
         [
           ...document
-            .getElementById(detail.id)!
+            .getElementById(detail.source)!
             .querySelectorAll<Node>(".selected"),
         ]
           .reverse()
