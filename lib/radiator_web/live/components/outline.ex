@@ -94,13 +94,9 @@ defmodule RadiatorWeb.Components.Outline do
     |> reply(:ok)
   end
 
-  def update(
-        %{
-          event: %NodeMovedToNewContainer{node: node, container_id: _container_id, next: next}
-        },
-        socket
-      ) do
+  def update(%{event: %NodeMovedToNewContainer{node: node, next: next}}, socket) do
     socket
+    # |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node.uuid}")
     |> stream_insert(:nodes, to_change_form(node, %{}))
     |> push_event("move_nodes", %{nodes: [next]})
     |> reply(:ok)
