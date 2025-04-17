@@ -24,11 +24,9 @@ export const Hooks = {
     mounted() {
       this.el.addEventListener("select_all", ({ detail }) => {
         const container = document.getElementById(detail.id);
-        container!
-          .querySelectorAll<HTMLDivElement>(".node .node")
-          .forEach((node: Node) => {
-            node.classList.toggle("selected");
-          });
+        container!.querySelectorAll<Node>(".node .node").forEach((node) => {
+          node.classList.toggle("selected");
+        });
       });
 
       this.el.addEventListener("move_selected", ({ detail }) => {
@@ -37,10 +35,10 @@ export const Hooks = {
         [
           ...document
             .getElementById(detail.id)!
-            .querySelectorAll<HTMLDivElement>(".selected"),
+            .querySelectorAll<Node>(".selected"),
         ]
           .reverse()
-          .forEach((node: Node) => {
+          .forEach((node) => {
             const { uuid } = getNodeDataByNode(node);
 
             this.pushEventTo(target, "move_node_to_container", {
