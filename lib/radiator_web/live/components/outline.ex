@@ -233,35 +233,14 @@ defmodule RadiatorWeb.Components.Outline do
 
   def handle_event(
         "move_node_to_container",
-        %{
-          "container_id" => container_id,
-          "uuid" => node_id
-        } = params,
+        %{"container_id" => container_id, "uuid" => uuid} = params,
         socket
       ) do
     user_id = socket.assigns.user_id
 
-    Dispatch.move_node_to_container(container_id, node_id, user_id, generate_event_id(socket.id),
+    Dispatch.move_node_to_container(container_id, uuid, user_id, generate_event_id(socket.id),
       parent_id: params["parent_id"],
       prev_id: params["prev_id"]
-    )
-
-    socket
-    |> reply(:noreply)
-  end
-
-  def handle_event(
-        "move_nodes_to_container",
-        %{"container_id" => container_id, "uuid_list" => uuid_list},
-        socket
-      ) do
-    user_id = socket.assigns.user_id
-
-    Dispatch.move_nodes_to_container(
-      container_id,
-      uuid_list,
-      user_id,
-      generate_event_id(socket.id)
     )
 
     socket

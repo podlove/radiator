@@ -53,6 +53,8 @@ export const Hooks = {
   },
   inbox: {
     mounted() {
+      this.el.addEventListener("click", click.bind(this));
+
       moveNodesToCorrectPosition.call(this);
 
       initSortableInbox.call(this);

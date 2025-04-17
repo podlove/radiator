@@ -32,7 +32,7 @@ export function handleMoveNodes({ nodes }: { nodes: NodeData[] }) {
     setData(node, "parent", parent_id || "");
     setData(node, "prev", prev_id || "");
 
-    moveNode(node);
+    moveNode.call(this, node);
   });
 }
 

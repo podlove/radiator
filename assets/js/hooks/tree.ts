@@ -7,7 +7,7 @@ import Sortable from "../../vendor/sortable";
 
 export function moveNodesToCorrectPosition() {
   this.el.querySelectorAll(".node").forEach((node: Node) => {
-    moveNode(node);
+    moveNode.call(this, node);
   });
 }
 
@@ -22,8 +22,15 @@ export function restoreCollapsedStatus() {
 
 export function moveNode(node: Node): NodeData {
   const { uuid, parent_id, prev_id } = getNodeData(node);
-  const parentNode = getNodeById(parent_id);
-  const prevNode = getNodeById(prev_id);
+  //const parentNode = getNodeById(parent_id);
+  //const prevNode = getNodeById(prev_id);
+
+  const parentNode = this.el.querySelector(
+    `#nodes-form-${parent_id}`
+  ) as Node | null;
+  const prevNode = this.el.querySelector(
+    `#nodes-form-${prev_id}`
+  ) as Node | null;
 
   if (prevNode) {
     prevNode.after(node);
