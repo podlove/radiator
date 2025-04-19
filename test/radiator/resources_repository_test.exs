@@ -6,8 +6,8 @@ defmodule Radiator.ResourcesRepositoryTest do
 
   alias Radiator.OutlineFixtures
   alias Radiator.PodcastFixtures
-  alias Radiator.ResourcesRepository
   alias Radiator.Resources.Url
+  alias Radiator.ResourcesRepository
 
   @invalid_attrs %{url: nil, start_bytes: nil, size_bytes: nil}
 

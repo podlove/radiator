@@ -352,6 +352,25 @@ defmodule Radiator.Podcast do
   end
 
   @doc """
+  Returns a show with the given inbox node container id.
+
+  ## Examples
+
+      iex> get_show_with_inbox_id(container_id)
+      %Show{}
+
+      iex> get_show_with_inbox_id(container_id)
+      nil
+
+  """
+  def get_show_with_inbox_id(container_id) do
+    from(e in Show,
+      where: [inbox_node_container_id: ^container_id]
+    )
+    |> Repo.one()
+  end
+
+  @doc """
   A forced reload of preloaded associations.
   Usefull when only the associations have changed and Show does need to be reloaded.
 

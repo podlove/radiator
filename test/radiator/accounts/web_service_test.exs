@@ -132,4 +132,63 @@ defmodule Radiator.Accounts.WebServiceTest do
              ]
     end
   end
+
+  describe "set_inbox_node_for_raindrop/3" do
+    setup do
+      %{web_service: raindrop_service_fixture(), show: PodcastFixtures.show_fixture()}
+    end
+
+    test "sets a node_id for a show while preserving the collection_id", %{
+      web_service: web_service,
+      show: show
+    } do
+      # First connect a show with a collection
+      {:ok, _} = Raindrop.connect_show_with_raindrop(web_service.user_id, show.id, 42)
+
+      # Now set a node_id for this show
+      node_id = Ecto.UUID.generate()
+      {:ok, _} = Raindrop.set_inbox_node_for_raindrop(web_service.user_id, show.id, node_id)
+
+      # Get the updated service and check
+      service = Raindrop.get_raindrop_tokens(web_service.user_id)
+
+      mappings = Enum.map(service.data.mappings, &Map.from_struct/1)
+      assert length(mappings) == 1
+      mapping = List.first(mappings)
+      assert mapping.collection_id == 42
+      assert mapping.node_id == node_id
+      assert mapping.show_id == show.id
+    end
+
+    test "sets a node_id for a show without existing collection_id", %{
+      web_service: web_service,
+      show: show
+    } do
+      # Set a node_id directly without first creating a mapping
+      node_id = Ecto.UUID.generate()
+      {:ok, _} = Raindrop.set_inbox_node_for_raindrop(web_service.user_id, show.id, node_id)
+
+      # Get the updated service and check
+      service = Raindrop.get_raindrop_tokens(web_service.user_id)
+
+      mappings = Enum.map(service.data.mappings, &Map.from_struct/1)
+      assert length(mappings) == 1
+      mapping = List.first(mappings)
+      assert mapping.collection_id == nil
+      assert mapping.node_id == node_id
+      assert mapping.show_id == show.id
+    end
+
+    test "returns an error when no raindrop tokens are found", %{
+      show: show
+    } do
+      # Use a non-existent user ID
+      non_existent_user_id = 999_999
+      node_id = Ecto.UUID.generate()
+
+      result = Raindrop.set_inbox_node_for_raindrop(non_existent_user_id, show.id, node_id)
+
+      assert result == {:error, "No Raindrop tokens found"}
+    end
+  end
 end
