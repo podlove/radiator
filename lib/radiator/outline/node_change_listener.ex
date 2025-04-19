@@ -59,8 +59,26 @@ defmodule Radiator.Outline.NodeChangeListener do
 
   defp process_system_nodes_if(%NodeInsertedEvent{
          user_id: nil,
-         node: %{content: "raindrop", container_id: _container_id, uuid: _uuid}
+         node: %{content: "raindrop", container_id: container_id, uuid: raindrop_node_uuid}
        }) do
+    show = Radiator.Podcast.get_show_with_inbox_id(container_id)
+
+    case Radiator.Accounts.Raindrop.find_user_id_by_show_id(show.id) do
+      {:error, :not_found} ->
+        Logger.error("User not found for show #{show.id}")
+
+      {:ok, user_id} ->
+        service = Accounts.Raindrop.get_raindrop_tokens(user_id)
+
+        result =
+          Accounts.Raindrop.connect_show_with_raindrop(
+            user_id,
+            show_id,
+            mapping.collection_id,
+            raindrop_node_uuid
+          )
+    end
+
     :ok
   end
 

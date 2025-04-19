@@ -105,4 +105,39 @@ defmodule Radiator.Accounts.Raindrop do
     |> Enum.map(&Map.from_struct/1)
     |> Kernel.++([%{show_id: show_id, node_id: node_id, collection_id: collection_id}])
   end
+
+  @doc """
+  Finds the user_id associated with a given show_id through Raindrop mappings.
+  This is only a temporal hack, should be replaced because this might be ambigous in the future!!
+
+  ## Examples
+
+      iex> find_user_id_by_show_id(42)
+      {:ok, 23}
+
+      iex> find_user_id_by_show_id(999)
+      {:error, :not_found}
+
+  """
+  def find_user_id_by_show_id(show_id) do
+    service_name = WebService.raindrop_service_name()
+
+    query =
+      from(ws in "web_services",
+        where: ws.service_name == "raindrop",
+        join:
+          m in fragment(
+            "jsonb_array_elements(?->'mappings')",
+            ws.data
+          ),
+        where: fragment("(?->>'show_id')::int = ?", m, ^show_id),
+        where: fragment("?->'node_id' IS NULL", m),
+        select: ws.user_id
+      )
+
+    case Repo.one(query) do
+      nil -> {:error, :not_found}
+      user_id -> {:ok, user_id}
+    end
+  end
 end
