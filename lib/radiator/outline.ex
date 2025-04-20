@@ -87,6 +87,18 @@ defmodule Radiator.Outline do
   def insert_node(
         %{"container_id" => container_id} = params,
         %Node{} = node
+      )
+      when is_binary(container_id) do
+    {container_id, _} = Integer.parse(container_id)
+
+    params
+    |> Map.put("container_id", container_id)
+    |> insert_node(node)
+  end
+
+  def insert_node(
+        %{"container_id" => container_id} = params,
+        %Node{} = node
       ) do
     prev_id = params["prev_id"]
     parent_id = params["parent_id"]
