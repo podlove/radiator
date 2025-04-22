@@ -91,17 +91,25 @@ defmodule Radiator.Outline.Dispatch do
     Phoenix.PubSub.subscribe(Radiator.PubSub, "events")
   end
 
+  def subscribe(container_id) do
+    pubsub_channel = get_pubsub_channel(container_id)
+    Phoenix.PubSub.subscribe(Radiator.PubSub, pubsub_channel)
+  end
+
   def broadcast(event) do
+    container_id = Event.container_id(event)
+
     # if enabled validate tree and crash if tree got inconsistent
     if Application.get_env(:radiator, :tree_consistency_validator, false) do
-      :ok =
-        event
-        |> Event.container_id()
-        |> Validations.validate_tree_for_container()
+      :ok = Validations.validate_tree_for_container(container_id)
     end
 
+    pubsub_channel = get_pubsub_channel(container_id)
     Phoenix.PubSub.broadcast(Radiator.PubSub, "events", event)
+    Phoenix.PubSub.broadcast(Radiator.PubSub, pubsub_channel, event)
   end
+
+  defp get_pubsub_channel(container_id), do: "events-#{container_id}"
 
   # list_node different case, sync call
 end
