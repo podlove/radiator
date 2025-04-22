@@ -57,7 +57,7 @@ defmodule RadiatorWeb.OutlineComponents do
       data-parent={@form[:parent_id].value}
       data-prev={@form[:prev_id].value}
     >
-      <div tabindex="-1" class="flex flex-wrap items-center [.selected>&]:bg-indigo-50">
+      <div tabindex="-1" class="flex flex-wrap items-start [.selected>&]:bg-indigo-50">
         <.bullet_handle class="handle" />
         <.node_content uuid={@uuid} target={@target} readonly={@readonly}>{@content}</.node_content>
       </div>
@@ -71,7 +71,7 @@ defmodule RadiatorWeb.OutlineComponents do
 
   def bullet_handle(assigns) do
     ~H"""
-    <a href="#" class={["text-gray-600 rounded-full hover:bg-gray-300", @class]}>
+    <a href="#" class={["text-gray-600 my-1 rounded-full hover:bg-gray-300", @class]}>
       <.circle />
     </a>
     """
