@@ -67,8 +67,7 @@ export function setData(node: Node, selector: string, value: string) {
   return node;
 }
 
-export function setContent(uuid: UUID, value: string) {
-  const node = getNodeById(uuid);
+export function setContent(node: Node, value: string) {
   const content = node?.querySelector(".content") as HTMLDivElement;
   content.innerHTML = value;
 
