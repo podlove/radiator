@@ -1,9 +1,14 @@
-import { NodeData, Node } from "./types";
+import { NodeData, Node, UUID } from "./types";
 
-import { getNodeData, getNodeById, getNodeDataByNode } from "./node";
+import { getNodeData, getNodeDataByNode } from "./node";
 import { getCollapsedStatus } from "./store";
 
 import Sortable from "../../vendor/sortable";
+
+export function getNodeById(uuid: UUID | undefined) {
+  return document.getElementById(`nodes-form-${uuid}`) as Node | null;
+  //return this.el.querySelector(`#nodes-form-${uuid}`) as Node | null;
+}
 
 export function moveNodesToCorrectPosition() {
   this.el.querySelectorAll(".node").forEach((node: Node) => {

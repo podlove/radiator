@@ -1,24 +1,23 @@
 import { NodeData, UserAction } from "../types";
 
 import {
-  getNodeById,
   setData,
   setContent,
   focusNode,
   addEditingUserLabel,
   removeEditingUserLabel,
 } from "../node";
-import { moveNode } from "../tree";
+import { getNodeById, moveNode } from "../tree";
 
 export function handleBlur({ uuid, user_name }: UserAction) {
-  // const node = getNodeById(uuid)!;
-  removeEditingUserLabel(user_name);
+  //const node = getNodeById(uuid)!;
+  //removeEditingUserLabel(user_name);
 }
 
 export function handleFocus({ uuid, user_name }: UserAction) {
-  const node = getNodeById(uuid)!;
-  removeEditingUserLabel(user_name);
-  addEditingUserLabel(node, user_name);
+  //const node = getNodeById(uuid)!;
+  //removeEditingUserLabel(user_name);
+  //addEditingUserLabel(node, user_name);
 }
 
 export function handleFocusNode({ uuid }: NodeData) {

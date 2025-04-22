@@ -89,10 +89,6 @@ export function focusNode(node: Node, toEnd: boolean = false) {
   return node;
 }
 
-export function getNodeById(uuid: UUID | undefined) {
-  return document.getElementById(`nodes-form-${uuid}`) as Node | null;
-}
-
 export function getNodeByTarget(target: HTMLDivElement) {
   return target.closest(".node") as Node;
 }
