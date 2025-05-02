@@ -123,8 +123,8 @@ export function initSortableInbox() {
         const container_id = item.closest(".stream").dataset.container;
         const { uuid } = getNodeDataByNode(item);
 
-        const parentNode = getParentNode(item);
-        const prevNode = getPrevNode(item);
+        const parentNode = item.parentNode.closest(".node");
+        const prevNode = item.previousElementSibling;
 
         const parent_id = parentNode && getNodeDataByNode(parentNode).uuid;
         const prev_id = prevNode && getNodeDataByNode(prevNode).uuid;
