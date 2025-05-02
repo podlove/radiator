@@ -21,13 +21,13 @@ export function handleFocus({ uuid, user_name }: UserAction) {
 }
 
 export function handleFocusNode({ uuid }: NodeData) {
-  const node = getNodeById(uuid);
+  const node = getNodeById.call(this, uuid);
   node && focusNode(node);
 }
 
 export function handleMoveNodes({ nodes }: { nodes: NodeData[] }) {
   nodes.forEach(({ uuid, parent_id, prev_id }: NodeData) => {
-    const node = getNodeById(uuid)!;
+    const node = getNodeById.call(this, uuid)!;
     setData(node, "parent", parent_id || "");
     setData(node, "prev", prev_id || "");
 
@@ -36,7 +36,7 @@ export function handleMoveNodes({ nodes }: { nodes: NodeData[] }) {
 }
 
 export function handleSetContent({ uuid, content }: NodeData) {
-  const node = getNodeById(uuid);
+  const node = getNodeById.call(this, uuid);
 
   node && setContent(node, content || "");
 }

@@ -1,6 +1,7 @@
-defmodule RadiatorWeb.Components.Outline do
-  @moduledoc false
-  use RadiatorWeb, :live_component
+defmodule RadiatorWeb.OutlineLive.Index do
+  use RadiatorWeb, :live_view
+
+  alias Phoenix.Socket.Broadcast
 
   alias Radiator.Outline
   alias Radiator.Outline.Dispatch
@@ -19,103 +20,19 @@ defmodule RadiatorWeb.Components.Outline do
   alias RadiatorWeb.OutlineComponents
 
   @impl true
-  def update(%{event: %NodeInsertedEvent{event_id: event_id, node: node, next: next}}, socket) do
-    socket
-    |> stream_insert(:nodes, to_change_form(node, %{}))
-    |> push_event("move_nodes", %{nodes: [next]})
-    |> focus_self(node.uuid, event_id)
-    |> reply(:ok)
-  end
+  def mount(_params, %{"container_id" => container_id, "user_id" => user_id} = session, socket) do
+    Dispatch.subscribe(container_id)
+    RadiatorWeb.Endpoint.subscribe("outline")
 
-  def update(
-        %{event: %NodeContentChangedEvent{event_id: <<_::binary-size(36)>> <> ":" <> id}},
-        %{id: id} = socket
-      ),
-      do: socket |> reply(:ok)
-
-  def update(%{event: %NodeContentChangedEvent{node_id: node_id, content: content}}, socket) do
-    socket
-    |> push_event("set_content", %{uuid: node_id, content: content})
-    |> reply(:ok)
-  end
-
-  def update(
-        %{
-          event: %NodeMovedEvent{
-            event_id: event_id,
-            node: node,
-            next: next,
-            old_prev: old_prev,
-            old_next: old_next,
-            children: nil
-          }
-        },
-        socket
-      ) do
-    nodes = [node, next, old_prev, old_next] |> Enum.reject(&is_nil/1)
-
-    socket
-    |> push_event("move_nodes", %{nodes: nodes})
-    |> focus_self(node.uuid, event_id)
-    |> reply(:ok)
-  end
-
-  def update(
-        %{
-          event: %NodeMovedEvent{
-            event_id: event_id,
-            node: node,
-            next: next,
-            old_prev: old_prev,
-            old_next: old_next,
-            children: children
-          }
-        },
-        socket
-      ) do
-    nodes = ([node, next, old_prev, old_next] ++ children) |> Enum.reject(&is_nil/1)
-
-    socket
-    |> push_event("move_nodes", %{nodes: nodes})
-    |> focus_self(node.uuid, event_id)
-    |> reply(:ok)
-  end
-
-  def update(%{event: %NodeDeletedEvent{node: %{uuid: uuid}, next: nil}}, socket) do
-    socket
-    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
-    |> reply(:ok)
-  end
-
-  def update(%{event: %NodeDeletedEvent{node: %{uuid: uuid}, next: next}}, socket) do
-    socket
-    |> push_event("move_nodes", %{nodes: [next]})
-    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
-    |> reply(:ok)
-  end
-
-  def update(%{event: %NodeMovedToNewContainer{node: node, next: next}}, socket) do
-    socket
-    # |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node.uuid}")
-    |> stream_insert(:nodes, to_change_form(node, %{}))
-    |> push_event("move_nodes", %{nodes: [next]})
-    |> reply(:ok)
-  end
-
-  def update(%{event: %Phoenix.Socket.Broadcast{event: event, payload: payload}}, socket)
-      when event in ["focus", "blur"] do
-    socket
-    |> push_event(event, payload)
-    |> reply(:ok)
-  end
-
-  def update(%{container_id: id} = assigns, socket) do
-    nodes = Outline.list_nodes_by_container_sorted(id)
+    nodes = Outline.list_nodes_by_container_sorted(container_id)
     node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
 
     socket
-    |> assign(assigns)
-    |> assign_new(:readonly, fn _ -> false end)
+    |> assign(:id, "outline-#{container_id}")
+    |> assign(:container_id, container_id)
+    |> assign(:user_id, user_id)
+    |> assign(:readonly, Map.get(session, "readonly", false))
+    |> assign(:group, "outline")
     # |> stream_configure(:nodes, dom_id: &"outline-node-#{&1.data.uuid}")
     |> stream(:nodes, node_forms)
     |> reply(:ok)
@@ -129,9 +46,9 @@ defmodule RadiatorWeb.Components.Outline do
 
   def handle_event("focus", %{"uuid" => uuid}, socket) do
     id = socket.assigns.user_id
-    [name | _] = String.split(socket.assigns.user.email, "@")
+    # [name | _] = String.split(socket.assigns.user.email, "@")
 
-    Endpoint.broadcast("outline", "focus", %{uuid: uuid, user_id: id, user_name: name})
+    Endpoint.broadcast("outline", "focus", %{uuid: uuid, user_id: id, user_name: id})
 
     socket
     |> reply(:noreply)
@@ -139,9 +56,9 @@ defmodule RadiatorWeb.Components.Outline do
 
   def handle_event("blur", %{"uuid" => uuid}, socket) do
     id = socket.assigns.user_id
-    [name | _] = String.split(socket.assigns.user.email, "@")
+    # [name | _] = String.split(socket.assigns.user.email, "@")
 
-    Endpoint.broadcast("outline", "blur", %{uuid: uuid, user_id: id, user_name: name})
+    Endpoint.broadcast("outline", "blur", %{uuid: uuid, user_id: id, user_name: id})
 
     socket
     |> reply(:noreply)
@@ -246,6 +163,95 @@ defmodule RadiatorWeb.Components.Outline do
     socket
     |> reply(:noreply)
   end
+
+  @impl true
+  def handle_info(%NodeInsertedEvent{event_id: event_id, node: node, next: next}, socket) do
+    socket
+    |> stream_insert(:nodes, to_change_form(node, %{}))
+    |> push_event("move_nodes", %{nodes: [next]})
+    |> focus_self(node.uuid, event_id)
+    |> reply(:noreply)
+  end
+
+  def handle_info(
+        %NodeContentChangedEvent{event_id: <<_::binary-size(36)>> <> ":" <> id},
+        %{id: id} = socket
+      ),
+      do: socket |> reply(:noreply)
+
+  def handle_info(%NodeContentChangedEvent{node_id: node_id, content: content}, socket) do
+    socket
+    |> push_event("set_content", %{uuid: node_id, content: content})
+    |> reply(:noreply)
+  end
+
+  def handle_info(
+        %NodeMovedEvent{
+          event_id: event_id,
+          node: node,
+          next: next,
+          old_prev: old_prev,
+          old_next: old_next,
+          children: nil
+        },
+        socket
+      ) do
+    nodes = [node, next, old_prev, old_next] |> Enum.reject(&is_nil/1)
+
+    socket
+    |> push_event("move_nodes", %{nodes: nodes})
+    |> focus_self(node.uuid, event_id)
+    |> reply(:noreply)
+  end
+
+  def handle_info(
+        %NodeMovedEvent{
+          event_id: event_id,
+          node: node,
+          next: next,
+          old_prev: old_prev,
+          old_next: old_next,
+          children: children
+        },
+        socket
+      ) do
+    nodes = ([node, next, old_prev, old_next] ++ children) |> Enum.reject(&is_nil/1)
+
+    socket
+    |> push_event("move_nodes", %{nodes: nodes})
+    |> focus_self(node.uuid, event_id)
+    |> reply(:noreply)
+  end
+
+  def handle_info(%NodeDeletedEvent{node: %{uuid: uuid}, next: nil}, socket) do
+    socket
+    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
+    |> reply(:noreply)
+  end
+
+  def handle_info(%NodeDeletedEvent{node: %{uuid: uuid}, next: next}, socket) do
+    socket
+    |> push_event("move_nodes", %{nodes: [next]})
+    |> stream_delete_by_dom_id(:nodes, "nodes-form-#{uuid}")
+    |> reply(:noreply)
+  end
+
+  def handle_info(%NodeMovedToNewContainer{node: node, next: next}, socket) do
+    socket
+    # |> stream_delete_by_dom_id(:nodes, "nodes-form-#{node.uuid}")
+    |> stream_insert(:nodes, to_change_form(node, %{}))
+    |> push_event("move_nodes", %{nodes: [next]})
+    |> reply(:noreply)
+  end
+
+  def handle_info(%Broadcast{topic: "outline", event: event, payload: payload}, socket)
+      when event in ["focus", "blur"] do
+    socket
+    |> push_event(event, payload)
+    |> reply(:noreply)
+  end
+
+  # |> stream_event(event)
 
   defp to_change_form(node_or_changeset, params, action \\ nil) do
     changeset =

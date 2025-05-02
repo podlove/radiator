@@ -104,6 +104,9 @@ export const Hooks = {
 
       initSortableOutline.call(this);
     },
+    // beforeUpdate(e) {
+    //   console.log("beforeUpdate", e);
+    // },
     updated() {
       // delete this.quill;
 

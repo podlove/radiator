@@ -5,25 +5,14 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   alias Radiator.Outline.Dispatch
 
-  alias Radiator.Outline.Event.{
-    NodeContentChangedEvent,
-    NodeDeletedEvent,
-    NodeInsertedEvent,
-    NodeMovedEvent,
-    NodeMovedToNewContainer
-  }
-
   alias Radiator.Podcast
   alias Radiator.Podcast.Episode
   alias RadiatorWeb.OutlineComponents
   alias RadiatorWeb.PodcastComponents
 
   @impl true
-  def mount(%{"show" => show_id} = params, _session, socket) do
-    show =
-      Podcast.get_show_preloaded!(show_id)
-
-    episode = get_selected_episode(params)
+  def mount(%{"show" => show_id} = _params, _session, socket) do
+    show = Podcast.get_show_preloaded!(show_id)
 
     socket
     |> assign(:page_title, show.title)
@@ -31,20 +20,12 @@ defmodule RadiatorWeb.EpisodeLive.Index do
     |> assign(:show, show)
     |> assign(:episodes, show.episodes)
     |> assign(action: nil, episode: nil, form: nil)
-    |> stream_configure(:event_logs, dom_id: & &1.event_id)
-    |> stream(:event_logs, get_event_logs(episode))
     |> reply(:ok)
   end
 
   @impl true
   def handle_params(params, _uri, socket) do
     episode = get_selected_episode(params)
-
-    if connected?(socket) do
-      Dispatch.subscribe()
-
-      RadiatorWeb.Endpoint.subscribe("outline")
-    end
 
     socket
     |> apply_action(socket.assigns.live_action, params)
@@ -69,30 +50,6 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   def handle_event("delete", params, socket) do
     delete_episode(socket, params)
-  end
-
-  @impl true
-  def handle_info(%NodeInsertedEvent{} = event, socket), do: proxy_event(event, socket)
-  def handle_info(%NodeContentChangedEvent{} = event, socket), do: proxy_event(event, socket)
-  def handle_info(%NodeMovedEvent{} = event, socket), do: proxy_event(event, socket)
-  def handle_info(%NodeDeletedEvent{} = event, socket), do: proxy_event(event, socket)
-  def handle_info(%NodeMovedToNewContainer{} = event, socket), do: proxy_event(event, socket)
-
-  def handle_info(%{topic: "outline"} = event, socket) do
-    id = "outline-#{socket.assigns.selected_episode.id}"
-    send_update(RadiatorWeb.Components.Outline, id: id, event: event)
-
-    socket
-    |> reply(:noreply)
-  end
-
-  defp proxy_event(event, socket) do
-    id = "outline-#{socket.assigns.selected_episode.id}"
-    send_update(RadiatorWeb.Components.Outline, id: id, event: event)
-
-    socket
-    |> stream_event(event)
-    |> reply(:noreply)
   end
 
   defp apply_action(socket, :new, %{"show" => show_id}) do
@@ -198,17 +155,5 @@ defmodule RadiatorWeb.EpisodeLive.Index do
 
   defp get_selected_episode(%{"show" => show_id}) do
     Podcast.get_current_episode_for_show(show_id)
-  end
-
-  def get_event_logs(nil), do: []
-
-  def get_event_logs(_episode) do
-    # EventStore.list_event_data_by_episode(episode.id)
-    []
-  end
-
-  defp stream_event(socket, event) do
-    socket
-    |> stream_insert(:event_logs, event, at: 0)
   end
 end

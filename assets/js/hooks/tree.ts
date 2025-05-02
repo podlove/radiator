@@ -49,20 +49,32 @@ export function moveNode(node: Node): NodeData {
 }
 
 export function getParentNode(node: Node) {
-  const parentNode = node.parentNode as HTMLDivElement | null;
-  return parentNode?.closest(".node") as Node | null;
+  const { parent_id } = getNodeData(node);
+
+  return getNodeById.call(this, parent_id);
 }
 
 export function getPrevNode(node: Node) {
-  return node.previousElementSibling as Node | null;
+  const { prev_id } = getNodeData(node);
+
+  //previousElementSibling
+
+  return getNodeById.call(this, prev_id);
 }
 
 export function getNodeAbove(node: Node) {
-  const prevNode = node.previousSibling as Node | null;
-  return prevNode?.querySelectorAll(".node");
+  const prevNode = getPrevNode(node);
+
+  const prevNodeLastChild = prevNode.querySelectorAll(".node:last-child");
+
+  // pop last item
+
+  console.log(prevNodeLastChild || prevNode);
 }
 
-export function getNodeBelow(node: Node) {}
+export function getNodeBelow(node: Node) {
+  // console.log(2);
+}
 
 export function initSortableOutline() {
   const nestedSortables = [...this.el.querySelectorAll(".children"), this.el];
@@ -79,8 +91,8 @@ export function initSortableOutline() {
       onEnd: ({ item }) => {
         const { uuid } = getNodeDataByNode(item);
 
-        const parentNode = getParentNode(item);
-        const prevNode = getPrevNode(item);
+        const parentNode = item.parentNode.closest(".node");
+        const prevNode = item.previousElementSibling;
 
         const parent_id = parentNode && getNodeDataByNode(parentNode).uuid;
         const prev_id = prevNode && getNodeDataByNode(prevNode).uuid;
