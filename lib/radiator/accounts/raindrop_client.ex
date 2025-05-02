@@ -154,12 +154,15 @@ defmodule Radiator.Accounts.RaindropClient do
       |> DateTime.shift(second: expires_in)
       |> DateTime.truncate(:second)
 
-    Raindrop.update_raindrop_tokens(
-      user_id,
-      access_token,
-      refresh_token,
-      expires_at
-    )
+    {:ok, service} =
+      Raindrop.update_raindrop_tokens(
+        user_id,
+        access_token,
+        refresh_token,
+        expires_at
+      )
+
+    service
   end
 
   defp parse_access_token_response(response, _user_id) do
