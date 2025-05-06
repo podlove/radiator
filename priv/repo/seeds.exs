@@ -122,16 +122,24 @@ inbox_id = show.inbox_node_container_id
 
 {:ok, inbox11} =
   NodeRepository.create_node(%{
-    "content" => "Inbox 1",
+    "content" => "https://metaebene.me",
     "container_id" => inbox_id,
     "parent_id" => inbox1.uuid,
     "prev_id" => nil
   })
 
-{:ok, _inbox12} =
+{:ok, inbox12} =
   NodeRepository.create_node(%{
-    "content" => "Inbox 2",
+    "content" => "https://freakshow.fm",
     "container_id" => inbox_id,
     "parent_id" => inbox1.uuid,
     "prev_id" => inbox11.uuid
+  })
+
+{:ok, _inbox13} =
+  NodeRepository.create_node(%{
+    "content" => "https://logbuch-netzpolitik.de",
+    "container_id" => inbox_id,
+    "parent_id" => inbox1.uuid,
+    "prev_id" => inbox12.uuid
   })
