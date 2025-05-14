@@ -515,6 +515,7 @@ defmodule Radiator.Podcast do
         preload: [:show, :outline_node_container],
         limit: 1
     )
+    |> set_inbox_in_episode()
   end
 
   @doc """
@@ -604,5 +605,12 @@ defmodule Radiator.Podcast do
   """
   def change_episode(%Episode{} = episode, attrs \\ %{}) do
     Episode.changeset(episode, attrs)
+  end
+
+  defp set_inbox_in_episode(nil), do: nil
+
+  defp set_inbox_in_episode(%Episode{show: show} = episode) do
+    episode
+    |> Map.put(:inbox_node_container_id, show.inbox_node_container_id)
   end
 end
