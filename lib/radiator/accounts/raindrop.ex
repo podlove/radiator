@@ -124,7 +124,7 @@ defmodule Radiator.Accounts.Raindrop do
 
     query =
       from(ws in "web_services",
-        where: ws.service_name == "raindrop",
+        where: ws.service_name == ^service_name,
         join:
           m in fragment(
             "jsonb_array_elements(?->'mappings')",
