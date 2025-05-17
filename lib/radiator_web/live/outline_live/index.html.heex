@@ -3,7 +3,7 @@
   class="children stream"
   phx-hook={if @readonly, do: "inbox", else: "outline"}
   phx-update="stream"
-  phx-target={["#", @id]}
+  phx-target={"##{@id}"}
   data-container={@container_id}
   tabindex="0"
   data-group={@group}
@@ -12,7 +12,7 @@
     :for={{id, form} <- @streams.nodes}
     id={id}
     form={form}
-    target={["#", @id]}
+    target={"##{@id}"}
     readonly={@readonly}
   >
     {form[:content].value}
