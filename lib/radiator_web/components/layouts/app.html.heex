@@ -10,7 +10,7 @@
           Home
         </.link>
       </li>
-      <%= if @current_user do %>
+      <%= if Map.get(@socket.assigns, :current_user) do %>
         <li class="inline-block">
           <.link href={~p"/admin"} class="px-4 py-2">
             Admin
