@@ -66,6 +66,7 @@ defmodule Radiator.MixProject do
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
+      {:tidewave, "~> 0.1", only: :dev},
       {:web_inspector, git: "https://github.com/eteubert/web_inspector.git"}
     ]
   end
