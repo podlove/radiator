@@ -33,8 +33,16 @@ defmodule Radiator.Accounts.WebService.RaindropService do
   end
 
   defp mapping_changeset(mapping, attrs) do
-    mapping
-    |> cast(attrs, [:show_id, :collection_id, :node_id])
-    |> validate_required([:show_id, :collection_id])
+    changeset =
+      mapping
+      |> cast(attrs, [:show_id, :collection_id, :node_id])
+      |> validate_required([:show_id])
+
+    # Make collection_id required only if node_id is not being set
+    if get_change(changeset, :node_id) do
+      changeset
+    else
+      validate_required(changeset, [:collection_id])
+    end
   end
 end
