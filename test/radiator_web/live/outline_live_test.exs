@@ -6,6 +6,8 @@ defmodule RadiatorWeb.OutlineLiveTest do
   import Radiator.PodcastFixtures
   import Radiator.OutlineFixtures
 
+  alias RadiatorWeb.OutlineLive
+
   @additional_keep_alive 2000
 
   describe "Episode outline nodes" do
@@ -51,14 +53,25 @@ defmodule RadiatorWeb.OutlineLiveTest do
       %{
         conn: log_in_user(conn, user),
         user: user,
-        url: ~p"/admin/podcast/#{show}",
         stream_id: "#outline-#{outline_node_container_id}-stream",
-        nodes: [node_1, node_2, node_2_1, node_3]
+        nodes: [node_1, node_2, node_2_1, node_3],
+        outline_node_container_id: outline_node_container_id
       }
     end
 
-    test "lists all nodes", %{conn: conn, url: url, nodes: [node_1, node_2, node_2_1, node_3]} do
-      {:ok, _live, html} = live(conn, url)
+    test "lists all nodes", %{
+      conn: conn,
+      user: user,
+      outline_node_container_id: container_id,
+      nodes: [node_1, node_2, node_2_1, node_3]
+    } do
+      session = %{
+        "container_id" => container_id,
+        "user_id" => user.id
+      }
+
+      {:ok, _live, html} =
+        live_isolated(conn, OutlineLive.Index, session: session)
 
       assert html =~ node_1.content
       assert html =~ node_2.content
@@ -66,10 +79,14 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert html =~ node_3.content
     end
 
-    @tag :skip
-    test "focus node", %{conn: conn, user: user, url: url, nodes: [%{uuid: uuid} | _]} do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _other_html} = live(conn, url)
+    test "focus node", %{
+      conn: conn,
+      outline_node_container_id: outline_node_container_id,
+      user: user,
+      nodes: [%{uuid: uuid} | _]
+    } do
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       assert live
              |> element("#nodes-form-#{uuid} .content")
@@ -82,10 +99,14 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert_push_event(other_live, "focus", %{uuid: ^uuid, user_id: ^user_id})
     end
 
-    @tag :skip
-    test "blur node", %{conn: conn, user: user, url: url, nodes: [%{uuid: uuid} | _]} do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _other_html} = live(conn, url)
+    test "blur node", %{
+      conn: conn,
+      user: user,
+      outline_node_container_id: outline_node_container_id,
+      nodes: [%{uuid: uuid} | _]
+    } do
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       assert live
              |> element("#nodes-form-#{uuid} .content")
@@ -98,15 +119,15 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert_push_event(other_live, "blur", %{uuid: ^uuid, user_id: ^user_id})
     end
 
-    @tag :skip
     test "update node content", %{
       conn: conn,
-      url: url,
+      user: user,
       stream_id: stream_id,
-      nodes: [%{uuid: uuid} | _]
+      nodes: [%{uuid: uuid} | _],
+      outline_node_container_id: outline_node_container_id
     } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _other_html} = live(conn, url)
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       params = %{"uuid" => uuid, "content" => "node_1_updated"}
 
@@ -115,19 +136,18 @@ defmodule RadiatorWeb.OutlineLiveTest do
              |> render_hook(:save, params)
 
       keep_liveview_alive()
-
       assert_push_event(other_live, "set_content", %{uuid: ^uuid, content: "node_1_updated"})
     end
 
-    @tag :skip
     test "split node", %{
       conn: conn,
-      url: url,
+      user: user,
+      outline_node_container_id: outline_node_container_id,
       stream_id: stream_id,
       nodes: [%{uuid: uuid} | _]
     } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       params = %{
         "uuid" => uuid,
@@ -149,15 +169,15 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_live |> has_element?(".node", "de_1")
     end
 
-    @tag :skip
     test "merge node with next", %{
       conn: conn,
-      url: url,
+      user: user,
+      outline_node_container_id: outline_node_container_id,
       stream_id: stream_id,
       nodes: [node_1, node_2, node_2_1, node_3]
     } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       params = %{"uuid" => node_1.uuid}
 
@@ -196,15 +216,15 @@ defmodule RadiatorWeb.OutlineLiveTest do
       refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
     end
 
-    @tag :skip
     test "merge node with prev", %{
       conn: conn,
-      url: url,
+      user: user,
+      outline_node_container_id: outline_node_container_id,
       stream_id: stream_id,
       nodes: [node_1, node_2, node_2_1, node_3]
     } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       params = %{"uuid" => node_2.uuid}
 
@@ -243,15 +263,15 @@ defmodule RadiatorWeb.OutlineLiveTest do
       refute other_live |> has_element?("#nodes-form-#{node_2.uuid}")
     end
 
-    @tag :skip
     test "move node up", %{
       conn: conn,
-      url: url,
+      user: user,
+      outline_node_container_id: outline_node_container_id,
       stream_id: stream_id,
       nodes: [node_1, node_2, _, node_3]
     } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       params = %{"uuid" => node_2.uuid}
 
@@ -282,15 +302,15 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_nodes == nodes
     end
 
-    @tag :skip
     test "move node down", %{
       conn: conn,
-      url: url,
+      user: user,
+      outline_node_container_id: outline_node_container_id,
       stream_id: stream_id,
       nodes: [node_1, node_2, _, node_3]
     } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       params = %{"uuid" => node_1.uuid}
 
@@ -321,15 +341,15 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_nodes == nodes
     end
 
-    @tag :skip
     test "indent node", %{
       conn: conn,
-      url: url,
+      user: user,
+      outline_node_container_id: outline_node_container_id,
       stream_id: stream_id,
       nodes: [node_1, node_2, _, node_3]
     } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       params = %{"uuid" => node_2.uuid}
 
@@ -360,15 +380,15 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_nodes == nodes
     end
 
-    @tag :skip
     test "outdent node", %{
       conn: conn,
-      url: url,
+      user: user,
+      outline_node_container_id: outline_node_container_id,
       stream_id: stream_id,
       nodes: [_, node_2, node_2_1, node_3]
     } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       params = %{"uuid" => node_2_1.uuid}
 
@@ -396,15 +416,15 @@ defmodule RadiatorWeb.OutlineLiveTest do
       assert other_nodes == nodes
     end
 
-    @tag :skip
     test "move node to different position", %{
       conn: conn,
-      url: url,
+      user: user,
+      outline_node_container_id: outline_node_container_id,
       stream_id: stream_id,
       nodes: [node_1, node_2, node_2_1 | _]
     } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       params = %{"uuid" => node_2_1.uuid, "prev_id" => node_1.uuid}
 
@@ -504,15 +524,15 @@ defmodule RadiatorWeb.OutlineLiveTest do
     #   assert other_live |> has_element?("#nodes-form-#{node_1.uuid}")
     # end
 
-    @tag :skip
     test "delete node", %{
       conn: conn,
-      url: url,
+      user: user,
+      outline_node_container_id: outline_node_container_id,
       stream_id: stream_id,
       nodes: [_node_1, node_2 | _]
     } do
-      {:ok, live, _html} = live(conn, url)
-      {:ok, other_live, _html} = live(conn, url)
+      live = render_live_view(conn, outline_node_container_id, user.id)
+      other_live = render_live_view(conn, outline_node_container_id, user.id)
 
       params = %{"uuid" => node_2.uuid}
 
@@ -529,5 +549,17 @@ defmodule RadiatorWeb.OutlineLiveTest do
 
   defp keep_liveview_alive do
     :timer.sleep(@additional_keep_alive)
+  end
+
+  defp render_live_view(conn, container_id, user_id) do
+    session = %{
+      "container_id" => container_id,
+      "user_id" => user_id
+    }
+
+    {:ok, live, _html} =
+      live_isolated(conn, OutlineLive.Index, session: session)
+
+    live
   end
 end
