@@ -59,6 +59,7 @@ defmodule Radiator.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.0.0"},
       {:phoenix, "~> 1.7.17"},
+      {:plug, "~> 1.17"},
       {:postgrex, ">= 0.0.0"},
       {:reply, "~> 1.0"},
       {:req, "~> 0.5"},
@@ -67,6 +68,7 @@ defmodule Radiator.MixProject do
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
+      {:tidewave, "~> 0.1", only: :dev},
       {:web_inspector, git: "https://github.com/eteubert/web_inspector.git"}
     ]
   end
