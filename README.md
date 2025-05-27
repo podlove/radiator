@@ -33,5 +33,6 @@ Open a Terminal and run the following commands
 #### Setup and Start Radiator
 
 - Run `mix setup` to install and setup dependencies
-- Start Radiator with `mix phx.server`
+- Start Radiator with `iex -S mix phx.server`
 - Visit [`localhost:4000`](http://localhost:4000) from your browser
+- Use LiveDebugger on [`localhost:4007`](http://localhost:4007) if needed
