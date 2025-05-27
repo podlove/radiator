@@ -2,7 +2,7 @@
 
 Radiator is the 100% open source podcast hosting project for the next century of the internet.
 
-[![Test](https://github.com/podlove/radiator/actions/workflows/test.yml/badge.svg)](https://github.com/podlove/radiator/actions/workflows/test.yml) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![Test](https://github.com/podlove/radiator/actions/workflows/cd.yml/badge.svg)](https://github.com/podlove/radiator/actions/workflows/cd.yml) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
 ## Contributing
 
