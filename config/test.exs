@@ -21,7 +21,7 @@ config :radiator, Radiator.Repo,
 config :radiator, RadiatorWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "IR/sJ/Eum00VCgDtlIPWommlT4nig7Q51n5FnE1kdjaf1lhin4JGGB1RsanOPgfT",
-  server: false
+  server: true
 
 # In test we don't send emails
 config :radiator, Radiator.Mailer, adapter: Swoosh.Adapters.Test
@@ -41,3 +41,8 @@ config :phoenix_live_view,
 
 # Enable tree consistency validator: crashes when tree is not valid!
 config :radiator, tree_consistency_validator: true
+
+config :phoenix_test,
+  endpoint: RadiatorWeb.Endpoint,
+  otp_app: :radiator,
+  playwright: [trace: System.get_env("PW_TRACE", "false") in ~w(t true)]
