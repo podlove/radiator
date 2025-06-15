@@ -58,6 +58,7 @@ defmodule Radiator.MixProject do
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.0.0"},
+      {:phoenix_test_playwright, "~> 0.4", only: :test, runtime: false},
       {:phoenix, "~> 1.7.17"},
       {:plug, "~> 1.17"},
       {:postgrex, ">= 0.0.0"},
@@ -81,7 +82,7 @@ defmodule Radiator.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build", "playwright.install"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
@@ -91,6 +92,16 @@ defmodule Radiator.MixProject do
         "tailwind radiator --minify",
         "esbuild radiator --minify",
         "phx.digest"
+      ],
+      "playwright.install": [
+        # "cmd npm ci --prefix assets",
+        # "cmd cd assets",
+        # "cmd npx playwright install-deps"
+        # "cmd echo HALLO"
+
+        # --prefix assets",
+        # "cmd npm --prefix assets exec playwright install chromium firefox --with-deps"
+        # "cmd npm --prefix assets exec playwright install firefox --with-deps"
       ]
     ]
   end
