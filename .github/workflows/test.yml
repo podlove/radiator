@@ -153,4 +153,4 @@ jobs:
             ${{ runner.os }}-mix-
 
       - name: Run Tests
-        run: mix test || if [[ $? = 2 ]]; then PW_TRACE=true mix test --failed; else false; fi
+        run: mix test || if [[ $? = 2 ]]; then PLAYWRIGHT_TRACE=true mix test --failed; else false; fi

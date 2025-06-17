@@ -45,4 +45,8 @@ config :radiator, tree_consistency_validator: true
 config :phoenix_test,
   endpoint: RadiatorWeb.Endpoint,
   otp_app: :radiator,
-  playwright: [trace: System.get_env("PW_TRACE", "false") in ~w(t true)]
+  playwright: [
+    browser: :chromium,
+    headless: System.get_env("PLAYWRIGHT_HEADLESS", "t") in ~w(t true),
+    trace: System.get_env("PLAYWRIGHT_TRACE", "false") in ~w(t true)
+  ]
