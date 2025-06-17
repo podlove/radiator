@@ -187,10 +187,15 @@ defmodule Radiator.Accounts.Raindrop do
   @doc """
   Updates the last_sync timestamp for a web service.
   """
-  def update_last_sync(%WebService{} = service, sync_time \\ nil) do
-    sync_time = sync_time || DateTime.utc_now() |> DateTime.truncate(:second)
+  def update_last_sync(
+        %WebService{} = service,
+        sync_time \\ nil,
+        current_time \\ DateTime.utc_now() |> DateTime.truncate(:second)
+      ) do
+    sync_time = sync_time || current_time
 
     service
-    |> WebService.changeset(%{last_sync: sync_time})
+    |> WebService.update_last_sync_statement(sync_time)
+    |> Repo.update()
   end
 end
