@@ -39,6 +39,17 @@ defmodule Radiator.Accounts.WebService do
 
   def raindrop_service_name, do: @raindrop_service_name
 
+  @doc """
+  Creates a changeset for updating the last sync timestamp.
+  """
+  def update_last_sync_statement(
+        %__MODULE__{} = service,
+        sync_time
+      ) do
+    service
+    |> changeset(%{last_sync: sync_time})
+  end
+
   defp validate_last_sync_not_in_future(changeset) do
     case get_change(changeset, :last_sync) do
       nil ->
