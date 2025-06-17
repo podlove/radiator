@@ -1,4 +1,6 @@
 defmodule RadiatorWeb.FeatureCase do
+  @moduledoc false
+
   use ExUnit.CaseTemplate
 
   using do
