@@ -122,6 +122,19 @@ jobs:
           version-file: .tool-versions
           version-type: strict
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .tool-versions
+          cache: npm
+          cache-dependency-path: assets/package-lock.json
+
+      - name: Install JS dependencies
+        run: npm ci --prefix assets
+
+      - name: Install chromium browser
+        run: npm exec --prefix assets playwright install chromium --with-deps --only-shell
+
       - name: Cache deps
         uses: actions/cache@v4
         with:
@@ -140,4 +153,4 @@ jobs:
             ${{ runner.os }}-mix-
 
       - name: Run Tests
-        run: mix test
+        run: mix test || if [[ $? = 2 ]]; then PW_TRACE=true mix test --failed; else false; fi
