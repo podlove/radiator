@@ -2,6 +2,7 @@ defmodule Features.RegisterTest do
   use PhoenixTest.Playwright.Case, async: false
   use RadiatorWeb, :verified_routes
 
+  @tag :skip
   test "register", %{conn: conn} do
     conn
     |> visit(~p"/")

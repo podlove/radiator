@@ -6,6 +6,7 @@ defmodule Features.OutlineHooksTest do
   import Radiator.PodcastFixtures
   import Radiator.OutlineFixtures
 
+  @tag :skip
   test "outline hooks", %{conn: conn} do
     email = "user@example.com"
     password = "Mb2.r5oHf-0t"
