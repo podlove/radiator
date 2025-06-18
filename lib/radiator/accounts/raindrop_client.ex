@@ -177,6 +177,6 @@ defmodule Radiator.Accounts.RaindropClient do
   defp parse_collection_response({:ok, %Req.Response{body: body}}) do
     body
     |> Map.get("items")
-    |> Enum.map(&Map.take(&1, ["_id", "title"]))
+    |> Enum.map(&Map.take(&1, ["_id", "title", "lastUpdate"]))
   end
 end
