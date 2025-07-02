@@ -37,3 +37,4 @@ npm-debug.log
 
 # Used for Playwright
 /traces/
+node_modules/
