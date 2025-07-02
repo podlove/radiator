@@ -3,8 +3,10 @@ defmodule RadiatorWeb.OutlineLive.Index do
 
   alias Phoenix.Socket.Broadcast
 
+  alias Radiator.Accounts
   alias Radiator.Outline
   alias Radiator.Outline.Dispatch
+  alias Radiator.Outline.NodeRepository
 
   alias Radiator.Outline.Event.{
     NodeContentChangedEvent,
@@ -35,6 +37,47 @@ defmodule RadiatorWeb.OutlineLive.Index do
     |> assign(:group, "outline")
     # |> stream_configure(:nodes, dom_id: &"outline-node-#{&1.data.uuid}")
     |> stream(:nodes, node_forms)
+    |> reply(:ok)
+  end
+
+  def mount(%{"container" => container_id} = params, session, socket) do
+    email = "#{socket.id}@radiator.metaebene.net"
+
+    {:ok, %{id: user_id}} =
+      case Accounts.get_user_by_email(email) do
+        nil -> Accounts.register_user(%{email: email, password: :crypto.strong_rand_bytes(32)})
+        user -> {:ok, user}
+      end
+
+    new_session = Map.merge(session, %{"container_id" => container_id, "user_id" => user_id})
+    mount(params, new_session, socket)
+  end
+
+  def mount(_params, _session, socket) do
+    {:ok, container} = Radiator.Outline.create_node_container()
+
+    {:ok, node1} =
+      NodeRepository.create_node(%{
+        "content" => "Node 1",
+        "container_id" => container.id
+      })
+
+    {:ok, _node11} =
+      NodeRepository.create_node(%{
+        "content" => "Node 1.1",
+        "container_id" => container.id,
+        "parent_id" => node1.uuid
+      })
+
+    {:ok, _node2} =
+      NodeRepository.create_node(%{
+        "content" => "Node 2",
+        "container_id" => container.id,
+        "prev_id" => node1.uuid
+      })
+
+    socket
+    |> redirect(to: ~p"/outline/#{container}")
     |> reply(:ok)
   end
 

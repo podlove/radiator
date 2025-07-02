@@ -911,6 +911,8 @@ defmodule Radiator.Outline do
   """
   def get_node_container!(id), do: Repo.get!(NodeContainer, id)
 
+  def get_node_container(id), do: Repo.get(NodeContainer, id)
+
   @doc """
   Creates a node_container.
 

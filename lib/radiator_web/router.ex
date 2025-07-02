@@ -21,6 +21,9 @@ defmodule RadiatorWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    live "/outline", OutlineLive.Index, :index
+    live "/outline/:container", OutlineLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
