@@ -183,4 +183,19 @@ defmodule Radiator.Accounts.Raindrop do
       user_id -> {:ok, user_id}
     end
   end
+
+  @doc """
+  Updates the last_sync timestamp for a web service.
+  """
+  def update_last_sync(
+        %WebService{} = service,
+        sync_time \\ nil,
+        current_time \\ DateTime.utc_now() |> DateTime.truncate(:second)
+      ) do
+    sync_time = sync_time || current_time
+
+    service
+    |> WebService.update_last_sync_statement(sync_time)
+    |> Repo.update()
+  end
 end

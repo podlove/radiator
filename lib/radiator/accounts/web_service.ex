@@ -15,8 +15,10 @@ defmodule Radiator.Accounts.WebService do
 
   schema "web_services" do
     field :service_name, :string
+    field :last_sync, :utc_datetime
 
     embeds_one :data, RaindropService, on_replace: :delete
+
     belongs_to :user, User
 
     timestamps(type: :utc_datetime)
@@ -27,12 +29,40 @@ defmodule Radiator.Accounts.WebService do
   """
   def changeset(service, attrs) do
     service
-    |> cast(attrs, [:service_name, :user_id])
+    |> cast(attrs, [:service_name, :user_id, :last_sync])
     |> cast_embed(:data, required: true)
     |> validate_required([:service_name, :user_id, :data])
     |> validate_inclusion(:service_name, @service_types)
+    |> validate_last_sync_not_in_future()
     |> foreign_key_constraint(:user_id)
   end
 
   def raindrop_service_name, do: @raindrop_service_name
+
+  @doc """
+  Creates a changeset for updating the last sync timestamp.
+  """
+  def update_last_sync_statement(
+        %__MODULE__{} = service,
+        sync_time
+      ) do
+    service
+    |> changeset(%{last_sync: sync_time})
+  end
+
+  defp validate_last_sync_not_in_future(changeset) do
+    case get_change(changeset, :last_sync) do
+      nil ->
+        changeset
+
+      last_sync ->
+        now = DateTime.utc_now()
+
+        if DateTime.compare(last_sync, now) == :gt do
+          add_error(changeset, :last_sync, "cannot be in the future")
+        else
+          changeset
+        end
+    end
+  end
 end
