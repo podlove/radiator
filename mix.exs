@@ -34,7 +34,7 @@ defmodule Radiator.MixProject do
     [
       {:argon2_elixir, "~> 4.1"},
       {:beacon_live_admin, "~> 0.2"},
-      {:beacon, "~> 0.2"},
+      {:beacon, "~> 0.5"},
       {:bandit, "~> 1.5"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dns_cluster, "~> 0.2"},
