@@ -56,24 +56,10 @@ defmodule RadiatorWeb.OutlineLive.Index do
   def mount(_params, _session, socket) do
     {:ok, container} = Radiator.Outline.create_node_container()
 
-    {:ok, node1} =
+    {:ok, _node1} =
       NodeRepository.create_node(%{
-        "content" => "Node 1",
+        "content" => "Your content",
         "container_id" => container.id
-      })
-
-    {:ok, _node11} =
-      NodeRepository.create_node(%{
-        "content" => "Node 1.1",
-        "container_id" => container.id,
-        "parent_id" => node1.uuid
-      })
-
-    {:ok, _node2} =
-      NodeRepository.create_node(%{
-        "content" => "Node 2",
-        "container_id" => container.id,
-        "prev_id" => node1.uuid
       })
 
     socket
