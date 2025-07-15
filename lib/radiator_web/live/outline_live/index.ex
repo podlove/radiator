@@ -6,7 +6,6 @@ defmodule RadiatorWeb.OutlineLive.Index do
   alias Radiator.Accounts
   alias Radiator.Outline
   alias Radiator.Outline.Dispatch
-  alias Radiator.Outline.NodeRepository
 
   alias Radiator.Outline.Event.{
     NodeContentChangedEvent,
@@ -26,17 +25,17 @@ defmodule RadiatorWeb.OutlineLive.Index do
     Dispatch.subscribe(container_id)
     RadiatorWeb.Endpoint.subscribe("outline")
 
-    nodes = Outline.list_nodes_by_container_sorted(container_id)
-    node_forms = Enum.map(nodes, &to_change_form(&1, %{}))
+    socket =
+      socket
+      |> assign(:user_id, user_id)
 
     socket
     |> assign(:id, "outline-#{container_id}")
     |> assign(:container_id, container_id)
-    |> assign(:user_id, user_id)
     |> assign(:readonly, Map.get(session, "readonly", false))
     |> assign(:group, "outline")
     # |> stream_configure(:nodes, dom_id: &"outline-node-#{&1.data.uuid}")
-    |> stream(:nodes, node_forms)
+    |> stream(:nodes, get_node_forms(container_id, socket))
     |> reply(:ok)
   end
 
@@ -56,12 +55,6 @@ defmodule RadiatorWeb.OutlineLive.Index do
   def mount(_params, _session, socket) do
     {:ok, container} = Radiator.Outline.create_node_container()
 
-    {:ok, _node1} =
-      NodeRepository.create_node(%{
-        "content" => "Your content",
-        "container_id" => container.id
-      })
-
     socket
     |> redirect(to: ~p"/outline/#{container}")
     |> reply(:ok)
@@ -75,7 +68,6 @@ defmodule RadiatorWeb.OutlineLive.Index do
 
   def handle_event("focus", %{"uuid" => uuid}, socket) do
     id = socket.assigns.user_id
-    # [name | _] = String.split(socket.assigns.user.email, "@")
 
     Endpoint.broadcast("outline", "focus", %{uuid: uuid, user_id: id, user_name: id})
 
@@ -299,4 +291,20 @@ defmodule RadiatorWeb.OutlineLive.Index do
   defp focus_self(socket, _uuid, _event_id), do: socket
 
   defp generate_event_id(id), do: Ecto.UUID.generate() <> ":" <> id
+
+  defp get_node_forms(container_id, socket) do
+    container_id
+    |> Outline.list_nodes_by_container_sorted()
+    |> case do
+      [] -> invoke_node_creation(container_id, socket)
+      nodes -> nodes
+    end
+    |> Enum.map(&to_change_form(&1, %{}))
+  end
+
+  defp invoke_node_creation(container_id, socket) do
+    user_id = socket.assigns.user_id
+    Dispatch.insert_node(%{"container_id" => container_id}, user_id, generate_event_id(socket.id))
+    []
+  end
 end
