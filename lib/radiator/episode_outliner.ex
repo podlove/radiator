@@ -17,7 +17,7 @@ defmodule Radiator.EpisodeOutliner do
   end
 
   @doc """
-    Not yet sure wether we want this
+    Not yet sure whether we want this
     Note: Will crash when episode does not exist
   """
   def container_with_episode_id(episode_id) do

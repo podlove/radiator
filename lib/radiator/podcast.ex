@@ -372,7 +372,7 @@ defmodule Radiator.Podcast do
 
   @doc """
   A forced reload of preloaded associations.
-  Usefull when only the associations have changed and Show does need to be reloaded.
+  Useful when only the associations have changed and Show does need to be reloaded.
 
   ## Examples
 
@@ -406,7 +406,7 @@ defmodule Radiator.Podcast do
   end
 
   @doc """
-  Returns the query for list of episodes exluding the once that are marked as deleted.
+  Returns the query for list of episodes excluding the once that are marked as deleted.
 
   ## Examples
 
@@ -435,7 +435,7 @@ defmodule Radiator.Podcast do
   end
 
   @doc """
-  Returns the list of episodes exluding the once that are marked as deleted.
+  Returns the list of episodes excluding the once that are marked as deleted.
 
   ## Examples
 

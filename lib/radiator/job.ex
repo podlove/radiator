@@ -19,7 +19,7 @@ defmodule Radiator.Job do
    This function requires to return either `:ok` or `:error`.
    Arguments are optional and can be passed in as a keyword list with the keyword `arguments`.
    Please note that order matters here and the worker function must accept the arguments as single arguments.
-   The keyword list is only for beeing more clear about the arguments.
+   The keyword list is only for being more clear about the arguments.
    If a job errors it will be retried up to `max_retries` times.
    It defaults to 3 but can be set via the keyword `max_retries`
 

@@ -76,7 +76,7 @@ defmodule Radiator.DataCase do
     }
   end
 
-  def simple_node_fixture_hierachical(_) do
+  def simple_node_fixture_hierarchical(_) do
     episode = PodcastFixtures.episode_fixture()
 
     attrs = %{

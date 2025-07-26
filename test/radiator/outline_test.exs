@@ -518,7 +518,7 @@ defmodule Radiator.OutlineTest do
 
     # before 1 2 3 4 5
     # after  1 2 4 3 5
-    test "move node 4 within list to node 2, but ommitting the parent_id", %{
+    test "move node 4 within list to node 2, but omitting the parent_id", %{
       node_2: node_2,
       node_3: node_3,
       node_4: node_4,
@@ -588,7 +588,7 @@ defmodule Radiator.OutlineTest do
 
     # before 1 2 3 4 5
     # after  1 3 4 5 2
-    test "move node 2 to the end of the list but ommitting the parent_id", %{
+    test "move node 2 to the end of the list but omitting the parent_id", %{
       node_1: node_1,
       node_2: node_2,
       node_3: node_3,
@@ -636,7 +636,7 @@ defmodule Radiator.OutlineTest do
 
     # before 1 2 3 4 5
     # after  2 3 4 5 1
-    test "move first node to the end of the list and ommitting the parent_id", %{
+    test "move first node to the end of the list and omitting the parent_id", %{
       node_1: node_1,
       node_2: node_2,
       node_3: node_3,
@@ -1051,7 +1051,7 @@ defmodule Radiator.OutlineTest do
   end
 
   describe "outdent_node/1 - simple context" do
-    setup :simple_node_fixture_hierachical
+    setup :simple_node_fixture_hierarchical
 
     test "outdent_node node moves node to same level as previous parent", %{
       node_1: node_1,

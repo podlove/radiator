@@ -45,7 +45,7 @@ defmodule Radiator.Outline.NodeRepository do
 
   @doc """
   Returns the list of nodes for an container.
-  TODO should not be dependend on Outline module
+  TODO should not be dependent on Outline module
   ## Examples
 
       iex> list_nodes_by_node_container(123)
