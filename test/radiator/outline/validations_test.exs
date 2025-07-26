@@ -62,7 +62,7 @@ defmodule Radiator.Outline.ValidationsTest do
                Validations.validate_tree_for_container(container_id)
     end
 
-    test "when a parent has two childs with prev_id nil the tree is invalid", %{
+    test "when a parent has two children with prev_id nil the tree is invalid", %{
       nested_node_1:
         %Node{container_id: container_id, parent_id: parent_id} =
           nested_node_1

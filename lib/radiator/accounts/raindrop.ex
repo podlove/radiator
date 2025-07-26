@@ -150,7 +150,7 @@ defmodule Radiator.Accounts.Raindrop do
 
   @doc """
   Finds the user_id associated with a given show_id through Raindrop mappings.
-  This is only a temporal hack, should be replaced because this might be ambigous in the future!!
+  This is only a temporal hack, should be replaced because this might be ambiguous in the future!!
 
   ## Examples
 

@@ -560,7 +560,7 @@ defmodule Radiator.Outline do
 
   @doc """
   Removes a node from the tree and deletes it from the repository.
-  Recursivly deletes all children if there are some.
+  Recursively deletes all children if there are some.
   ## Examples
 
       iex> remove_node(node)

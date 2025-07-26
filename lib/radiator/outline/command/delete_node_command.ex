@@ -1,6 +1,6 @@
 defmodule Radiator.Outline.Command.DeleteNodeCommand do
   @moduledoc """
-  Command to remove a node from the outline and delete it permantly.
+  Command to remove a node from the outline and delete it permanently.
   """
   @type t() :: %__MODULE__{
           event_id: binary(),
