@@ -52,7 +52,7 @@ defmodule Radiator.MixProject do
        depth: 1},
       {:jason, "~> 1.2"},
       {:live_debugger, "~> 0.2.0", only: :dev},
-      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:mix_test_interactive, "~> 5.0", only: :dev, runtime: false},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
