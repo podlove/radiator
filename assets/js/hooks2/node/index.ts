@@ -35,7 +35,7 @@ function getDomNodeById(uuid: UUID | undefined) {
   return document.getElementById(`nodes-form-${uuid}`) as DomNode | null;
 }
 
-function getDataNodeFromDomNode(node: DomNode): DataNode {
+export function getDataNodeFromDomNode(node: DomNode): DataNode {
   const uuid = getUUID(node);
   const parent_id = getAttribute(node, "parent");
   const prev_id = getAttribute(node, "prev");

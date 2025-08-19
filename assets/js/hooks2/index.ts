@@ -4,6 +4,7 @@ import {
 } from "./tree";
 
 import { toggleCollapse } from "./node";
+import { restoreCollapsedStatus } from "./store";
 
 import { DomContainer } from "./types";
 
@@ -15,6 +16,7 @@ export const Hooks = {
       container.addEventListener("toggle_collapse", toggleCollapse);
 
       moveHtmlChildNodesToDataPosition(container);
+      restoreCollapsedStatus(container);
       setCursorToEndOfFirstChildNode(container);
     },
     //updated() {},
