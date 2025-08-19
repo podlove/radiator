@@ -1,5 +1,23 @@
 import { DataNode, DomNode, UUID } from "../types";
 
+export function toggleCollapse(event: Event) {
+  const target = event.target as HTMLDivElement;
+  const node = getDomNodeByTarget(target);
+  node.classList.toggle("collapsed");
+  const { uuid, collapsed } = getDataNodeFromDomNode(node);
+  // setCollapse.call(this, uuid, collapsed);
+}
+
+function getDomNodeByTarget(target: HTMLDivElement) {
+  return target.closest(".node") as DomNode;
+}
+
+// function setCollapseStatus(uuid: UUID, collapsed: boolean) {
+//   //   const status = getCollapsedStatus(this.el.id);
+//   //   status[uuid] = collapsed;
+//   //   localStorage.setItem(this.el.id, JSON.stringify(status));
+// }
+
 export function moveDomNodeToDataPosition(node: DomNode) {
   const { parent_id, prev_id } = getDataNodeFromDomNode(node);
 
@@ -25,8 +43,10 @@ function getDataNodeFromDomNode(node: DomNode): DataNode {
   const uuid = getUUID(node);
   const parent_id = getAttribute(node, "parent");
   const prev_id = getAttribute(node, "prev");
+  const content = getContent(node);
+  const collapsed = node.classList.contains("collapsed");
 
-  return { uuid, parent_id, prev_id };
+  return { uuid, parent_id, prev_id, content, collapsed };
 }
 
 function getUUID(node: DomNode) {
@@ -35,4 +55,10 @@ function getUUID(node: DomNode) {
 
 function getAttribute(node: DomNode, attribute: string) {
   return node.dataset[attribute] as UUID | undefined;
+}
+
+function getContent(node: DomNode) {
+  const content = node.querySelector(".content") as HTMLDivElement;
+
+  return content.innerHTML;
 }

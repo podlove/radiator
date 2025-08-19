@@ -1,11 +1,11 @@
 export interface DataNode {
   uuid: UUID;
-  // content?: string;
-  // creator_id?: number;
   parent_id?: UUID;
   prev_id?: UUID;
+  content?: string;
   collapsed?: boolean;
-  // selected?: boolean;
+  selected?: boolean;
+  // creator_id?: number;
 }
 
 export type DomContainer = HTMLDivElement;
