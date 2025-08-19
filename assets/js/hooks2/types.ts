@@ -2,9 +2,9 @@ export interface DataNode {
   uuid: UUID;
   parent_id?: UUID;
   prev_id?: UUID;
-  content?: string;
-  collapsed?: boolean;
-  selected?: boolean;
+  content: string;
+  collapsed: boolean;
+  // selected: boolean;
   // creator_id?: number;
 }
 

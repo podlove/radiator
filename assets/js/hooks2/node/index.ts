@@ -1,3 +1,4 @@
+import { saveCollapseStatus } from "../store";
 import { DataNode, DomNode, UUID } from "../types";
 
 export function toggleCollapse(event: Event) {
@@ -5,18 +6,13 @@ export function toggleCollapse(event: Event) {
   const node = getDomNodeByTarget(target);
   node.classList.toggle("collapsed");
   const { uuid, collapsed } = getDataNodeFromDomNode(node);
-  // setCollapse.call(this, uuid, collapsed);
+
+  saveCollapseStatus(this.id, uuid, collapsed);
 }
 
 function getDomNodeByTarget(target: HTMLDivElement) {
   return target.closest(".node") as DomNode;
 }
-
-// function setCollapseStatus(uuid: UUID, collapsed: boolean) {
-//   //   const status = getCollapsedStatus(this.el.id);
-//   //   status[uuid] = collapsed;
-//   //   localStorage.setItem(this.el.id, JSON.stringify(status));
-// }
 
 export function moveDomNodeToDataPosition(node: DomNode) {
   const { parent_id, prev_id } = getDataNodeFromDomNode(node);
