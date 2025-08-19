@@ -57,7 +57,7 @@ defmodule Radiator.MixProject do
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.0.0"},
+      {:phoenix_live_view, "~> 1.1.7"},
       {:phoenix_test_playwright, "~> 0.4", only: :test, runtime: false},
       {:phoenix, "~> 1.7.17"},
       {:plug, "~> 1.17"},
