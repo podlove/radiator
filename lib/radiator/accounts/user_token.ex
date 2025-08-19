@@ -164,7 +164,18 @@ defmodule Radiator.Accounts.UserToken do
     end
   end
 
-  defp by_token_and_context_query(token, context) do
+  def by_token_and_context_query(token, context) do
     from UserToken, where: [token: ^token, context: ^context]
+  end
+
+  @doc """
+  Gets all tokens for the given user for the given contexts.
+  """
+  def by_user_and_contexts_query(user, :all) do
+    from t in UserToken, where: t.user_id == ^user.id
+  end
+
+  def by_user_and_contexts_query(user, [_ | _] = contexts) do
+    from t in UserToken, where: t.user_id == ^user.id and t.context in ^contexts
   end
 end
