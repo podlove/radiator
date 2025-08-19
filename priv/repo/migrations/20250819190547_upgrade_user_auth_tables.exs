@@ -3,7 +3,7 @@ defmodule Radiator.Repo.Migrations.UpgradeUserAuthTables do
 
   def change do
     alter table(:users) do
-      modify :hashed_password, :string
+      modify :hashed_password, :string, null: true
     end
 
     alter table(:users_tokens) do
