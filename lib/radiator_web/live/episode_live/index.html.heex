@@ -87,7 +87,7 @@
         id: "inbox-#{@selected_episode.inbox_node_container_id}",
         session: %{
           "container_id" => @selected_episode.inbox_node_container_id,
-          "user_id" => @current_user.id,
+          "user_id" => @current_scope.user.id,
           "readonly" => true
         }
       )}
@@ -99,7 +99,7 @@
         id: "outline-#{@selected_episode.outline_node_container_id}",
         session: %{
           "container_id" => @selected_episode.outline_node_container_id,
-          "user_id" => @current_user.id
+          "user_id" => @current_scope.user.id
         }
       )}
     </section>

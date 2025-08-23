@@ -225,7 +225,7 @@ defmodule RadiatorWeb.AdminLive.Index do
 
   defp get_bookmarklet(api_uri, socket) do
     token =
-      socket.assigns.current_user
+      socket.assigns.current_scope
       |> Accounts.generate_user_api_token()
       |> Base.url_encode64(padding: false)
 

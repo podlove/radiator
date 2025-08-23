@@ -16,7 +16,7 @@ defmodule RadiatorWeb.AccountsLiveTest do
       assert {:error, redirect} = live(conn, ~p"/admin/accounts")
 
       assert {:redirect, %{to: path, flash: flash}} = redirect
-      assert path == ~p"/users/log_in"
+      assert path == ~p"/users/log-in"
       assert %{"error" => "You must log in to access this page."} = flash
     end
   end
