@@ -72,9 +72,6 @@ defmodule RadiatorWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{RadiatorWeb.UserAuth, :require_authenticated}] do
       live "/admin", AdminLive.Index, :index
-
-      live "/admin/accounts", AccountsLive.Index, :index
-
       live "/admin/podcast/:show", EpisodeLive.Index, :index
 
       live "/admin/podcast/:show/new", EpisodeLive.Index, :new
