@@ -10,6 +10,18 @@ defmodule Radiator.Accounts do
 
   ## Database getters
 
+  @doc """
+  Returns the list of users.
+
+  ## Examples
+
+      iex> list_users()
+      [%User{}, ...]
+
+  """
+  def list_users do
+    Repo.all(User)
+  end
 
   @doc """
   Returns a list of users search by using a partial email address

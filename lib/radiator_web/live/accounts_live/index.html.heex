@@ -1,0 +1,31 @@
+<section>
+  <h1>Accounts</h1>
+
+  <.table id="accounts" rows={@streams.users}>
+    <:col :let={{_id, user}} label="Id">{user.id}</:col>
+    <:col :let={{_id, user}} label="Email">{user.email}</:col>
+    <:col :let={{_id, user}} label="API-Token">
+      <%= if has_api_token(user) do %>
+        <.icon name="hero-check-circle" class="w-5 h-5" />
+      <% else %>
+        <.icon name="hero-no-symbol" class="w-5 h-5" />
+      <% end %>
+    </:col>
+    <:col :let={{_id, user}} label="Actions">
+      <button
+        phx-click={JS.push("refresh_token", value: %{id: user.id})}
+        data-confirm="Refresh API-Token?"
+      >
+        <.icon name="hero-arrow-path" class="w-5 h-5" />
+      </button>
+      <%= if has_api_token(user) do %>
+        <button
+          phx-click={JS.push("delete_token", value: %{id: user.id})}
+          data-confirm="Delete API-Token?"
+        >
+          <.icon name="hero-no-symbol" class="w-5 h-5" />
+        </button>
+      <% end %>
+    </:col>
+  </.table>
+</section>
