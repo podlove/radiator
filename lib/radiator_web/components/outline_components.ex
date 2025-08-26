@@ -8,7 +8,7 @@ defmodule RadiatorWeb.OutlineComponents do
   alias Phoenix.LiveView.JS
 
   alias RadiatorWeb.CoreComponents, as: Core
-
+  alias RadiatorWeb.MessageComponents, as: Message
   attr :id, :string, required: true
   attr :form, :any, required: true
   attr :target, :any, required: true
@@ -249,7 +249,7 @@ defmodule RadiatorWeb.OutlineComponents do
         />
         {@label}
       </label>
-      <Core.error :for={msg <- @errors}>{msg}</Core.error>
+      <Message.error :for={msg <- @errors}>{msg}</Message.error>
     </div>
     """
   end
@@ -257,7 +257,7 @@ defmodule RadiatorWeb.OutlineComponents do
   def outline_input(%{type: "select"} = assigns) do
     ~H"""
     <div class={@class}>
-      <Core.label for={@id}>{@label}</Core.label>
+      <Message.label for={@id}>{@label}</Message.label>
       <select
         id={@id}
         name={@name}
@@ -268,7 +268,7 @@ defmodule RadiatorWeb.OutlineComponents do
         <option :if={@prompt} value="">{@prompt}</option>
         {HTML.Form.options_for_select(@options, @value)}
       </select>
-      <Core.error :for={msg <- @errors}>{msg}</Core.error>
+      <Message.error :for={msg <- @errors}>{msg}</Message.error>
     </div>
     """
   end
@@ -276,7 +276,7 @@ defmodule RadiatorWeb.OutlineComponents do
   def outline_input(%{type: "textarea"} = assigns) do
     ~H"""
     <div class={@class}>
-      <Core.label for={@id}>{@label}</Core.label>
+      <Message.label for={@id}>{@label}</Message.label>
       <textarea
         id={@id}
         name={@name}
@@ -287,7 +287,7 @@ defmodule RadiatorWeb.OutlineComponents do
         ]}
         {@rest}
       >{HTML.Form.normalize_value("textarea", @value)}</textarea>
-      <Core.error :for={msg <- @errors}>{msg}</Core.error>
+      <Message.error :for={msg <- @errors}>{msg}</Message.error>
     </div>
     """
   end
@@ -296,7 +296,7 @@ defmodule RadiatorWeb.OutlineComponents do
   def outline_input(assigns) do
     ~H"""
     <div class={@class}>
-      <Core.label for={@id}>{@label}</Core.label>
+      <Message.label for={@id}>{@label}</Message.label>
       <input
         type={@type}
         name={@name}
@@ -309,7 +309,7 @@ defmodule RadiatorWeb.OutlineComponents do
         ]}
         {@rest}
       />
-      <Core.error :for={msg <- @errors}>{msg}</Core.error>
+      <Message.error :for={msg <- @errors}>{msg}</Message.error>
     </div>
     """
   end
