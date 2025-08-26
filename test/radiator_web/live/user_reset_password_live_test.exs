@@ -93,7 +93,7 @@ defmodule RadiatorWeb.UserResetPasswordLiveTest do
 
       {:ok, conn} =
         lv
-        |> element(~s|main a:fl-contains("Log in")|)
+        |> element(~s|main a|, "Log in")
         |> render_click()
         |> follow_redirect(conn, ~p"/users/log_in")
 
