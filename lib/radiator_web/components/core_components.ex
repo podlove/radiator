@@ -419,6 +419,12 @@ defmodule RadiatorWeb.CoreComponents do
     """
   end
 
+  def icon(%{name: "ph-" <> _} = assigns) do
+    ~H"""
+    <span class={[@name, @class]} />
+    """
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do

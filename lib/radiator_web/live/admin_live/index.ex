@@ -220,7 +220,7 @@ defmodule RadiatorWeb.AdminLive.Index do
   end
 
   defp save_raindrop(socket, show, params) do
-    Raindrop.save_raindrop(socket.assigns.current_user.id, show, params)
+    Raindrop.save_raindrop(socket.assigns.current_scope.user.id, show, params)
   end
 
   defp get_bookmarklet(api_uri, socket) do
