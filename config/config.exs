@@ -44,7 +44,8 @@ config :spark,
 
 config :radiator,
   ecto_repos: [Radiator.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  ash_domains: [Radiator.Podcasts]
 
 # Configures the endpoint
 config :radiator, RadiatorWeb.Endpoint,
