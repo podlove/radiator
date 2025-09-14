@@ -141,5 +141,10 @@ defmodule Radiator.Podcasts.Show do
       description "The episodes of the show"
       public? true
     end
+
+    belongs_to :license, Radiator.Podcasts.License do
+      description "The license of the show"
+      public? true
+    end
   end
 end

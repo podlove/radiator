@@ -9,5 +9,6 @@ defmodule Radiator.Podcasts do
     resource Radiator.Podcasts.Show
     resource Radiator.Podcasts.Episode
     resource Radiator.Podcasts.Chapter
+    resource Radiator.Podcasts.License
   end
 end
