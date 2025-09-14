@@ -23,6 +23,7 @@ config :spark,
     remove_parens?: true,
     "Ash.Resource": [
       section_order: [
+        :admin,
         :postgres,
         :resource,
         :code_interface,
