@@ -21,7 +21,7 @@ defmodule Radiator.Podcasts.Show do
       :title,
       :subtitle,
       :summary,
-      :nmemonic,
+      :mnemonic,
       :language,
       :itunes_type,
       :license_name,
@@ -62,7 +62,7 @@ defmodule Radiator.Podcasts.Show do
       constraints max_length: 4000
     end
 
-    attribute :nmemonic, :string do
+    attribute :mnemonic, :string do
       description "A short name"
       public? true
     end
