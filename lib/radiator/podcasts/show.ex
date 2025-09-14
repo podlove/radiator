@@ -15,7 +15,24 @@ defmodule Radiator.Podcasts.Show do
 
   actions do
     defaults [:read, :destroy, :create, :update]
-    default_accept [:title]
+
+    default_accept [
+      :title,
+      :subtitle,
+      :summary,
+      :nmemonic,
+      :language,
+      :itunes_type,
+      :license_name,
+      :license_url,
+      :author,
+      :itunes_category,
+      :blocked,
+      :explicit,
+      :complete,
+      :donation_url,
+      :donation_description
+    ]
   end
 
   attributes do
