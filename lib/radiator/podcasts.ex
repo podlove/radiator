@@ -3,5 +3,6 @@ defmodule Radiator.Podcasts do
     otp_app: :radiator
 
   resources do
+    resource Radiator.Podcasts.Show
   end
 end
