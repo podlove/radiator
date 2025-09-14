@@ -17,6 +17,7 @@ defmodule Radiator.Podcasts.Show do
     defaults [:read, :destroy, :create, :update]
 
     default_accept [
+      :guid,
       :title,
       :subtitle,
       :summary,
@@ -37,6 +38,12 @@ defmodule Radiator.Podcasts.Show do
 
   attributes do
     uuid_primary_key :id
+
+    attribute :guid, :uuid do
+      description "The unique identifier for the show"
+      allow_nil? false
+      public? true
+    end
 
     attribute :title, :string do
       description "A show's title"
