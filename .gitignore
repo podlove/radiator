@@ -35,3 +35,7 @@ radiator-*.tar
 npm-debug.log
 /assets/node_modules/
 
+/.lexical
+/.expert
+/.elixir_ls
+
