@@ -74,8 +74,9 @@ defmodule Radiator.Podcasts.Show do
 
     attribute :itunes_type, Radiator.Podcasts.ItunesShowType do
       description "The iTunes podcast type"
+      allow_nil? false
       public? true
-      default :serial
+      default :episodic
     end
 
     attribute :license_name, :string do
