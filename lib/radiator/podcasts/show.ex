@@ -135,4 +135,11 @@ defmodule Radiator.Podcasts.Show do
 
     timestamps()
   end
+
+  relationships do
+    has_many :episodes, Radiator.Podcasts.Episode do
+      description "The episodes of the show"
+      public? true
+    end
+  end
 end

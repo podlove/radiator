@@ -66,6 +66,14 @@ defmodule Radiator.Podcasts.Episode do
     timestamps()
   end
 
+  relationships do
+    belongs_to :show, Radiator.Podcasts.Show do
+      description "The show this episode belongs to"
+      public? true
+      allow_nil? false
+    end
+  end
+
   identities do
     identity :guid, [:guid]
     # TODO: identity for number, scoped to show and season
