@@ -63,6 +63,14 @@ defmodule Radiator.Podcasts.Episode do
       public? true
     end
 
+    relationships do
+      has_many :chapters, Radiator.Podcasts.Chapter do
+        description "The chapters of the episode"
+        public? true
+        sort start_time_seconds: :asc
+      end
+    end
+
     timestamps()
   end
 

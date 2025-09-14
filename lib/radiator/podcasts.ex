@@ -5,5 +5,6 @@ defmodule Radiator.Podcasts do
   resources do
     resource Radiator.Podcasts.Show
     resource Radiator.Podcasts.Episode
+    resource Radiator.Podcasts.Chapter
   end
 end
