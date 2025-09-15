@@ -1,0 +1,92 @@
+defmodule RadiatorWeb.Admin.Episodes.FormLive do
+  use RadiatorWeb, :live_view
+
+  require Logger
+
+  @impl Phoenix.LiveView
+  def mount(%{"id" => id}, _session, socket) do
+    episode = Radiator.Podcasts.get_episode_by_id!(id, load: [:show])
+    form = Radiator.Podcasts.form_to_update_episode(episode)
+
+    socket =
+      socket
+      |> assign(:form, to_form(form))
+      |> assign(:show, episode.show)
+      |> assign(:page_title, "Edit Episode")
+
+    {:ok, socket}
+  end
+
+  def mount(%{"show_id" => show_id}, _session, socket) do
+    show = Radiator.Podcasts.get_show_by_id!(show_id)
+    form = Radiator.Podcasts.form_to_create_episode(show_id)
+
+    socket =
+      socket
+      |> assign(:form, to_form(form))
+      |> assign(:show, show)
+      |> assign(:page_title, "New Episode")
+
+    {:ok, socket}
+  end
+
+  @impl Phoenix.LiveView
+  def render(assigns) do
+    ~H"""
+    <Layouts.app {assigns}>
+      <h1>{@page_title}</h1>
+      <.simple_form
+        :let={form}
+        id="episode_form"
+        as={:form}
+        for={@form}
+        phx-change="validate"
+        phx-submit="save"
+      >
+        <.input field={form[:title]} label={gettext("Title")} />
+        <.input field={form[:subtitle]} label={gettext("Subtitle")} />
+        <.input field={form[:summary]} label={gettext("Summary")} />
+        <.input field={form[:number]} type="number" label={gettext("Number")} />
+        <.input
+          field={form[:itunes_type]}
+          type="select"
+          options={Radiator.Podcasts.ItunesEpisodeType.values()}
+          label={gettext("Itunes Type")}
+        />
+        <.input field={form[:duration_seconds]} type="number" label={gettext("Duration Seconds")} />
+        <:actions>
+          <.button variant="primary">Save</.button>
+        </:actions>
+      </.simple_form>
+    </Layouts.app>
+    """
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("validate", %{"form" => form_data}, socket) do
+    socket = update(socket, :form, &AshPhoenix.Form.validate(&1, form_data))
+    {:noreply, socket}
+  end
+
+  def handle_event("save", %{"form" => form_data}, socket) do
+    case AshPhoenix.Form.submit(socket.assigns.form, params: form_data) do
+      {:ok, episode} ->
+        socket =
+          socket
+          |> put_flash(:info, gettext("Episode saved"))
+          |> push_navigate(to: ~p"/admin/shows/#{socket.assigns.show}/episodes/#{episode}")
+
+        {:noreply, socket}
+
+      {:error, form} ->
+        socket =
+          socket
+          |> put_flash(:error, gettext("Could not save episode"))
+          |> assign(:form, form)
+
+        Logger.error("Could not save episode: #{inspect(form)}")
+
+        {:noreply, socket}
+    end
+  end
+end

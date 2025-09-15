@@ -9,9 +9,22 @@ defmodule Radiator.Podcasts.Episode do
     repo Radiator.Repo
   end
 
+  @default_accept_attributes [
+    :title,
+    :subtitle,
+    :summary,
+    :number,
+    :itunes_type,
+    :duration_seconds
+  ]
+
   actions do
-    defaults [:read, :destroy, :create, :update]
-    default_accept [:title, :subtitle, :summary, :number, :itunes_type, :duration_seconds]
+    defaults [:read, :destroy, :update]
+    default_accept @default_accept_attributes
+
+    create :create do
+      accept @default_accept_attributes ++ [:show_id]
+    end
   end
 
   attributes do

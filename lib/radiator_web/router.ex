@@ -27,6 +27,11 @@ defmodule RadiatorWeb.Router do
     live "/shows/new", Shows.FormLive, :new
     live "/shows/:id", Shows.ShowLive
     live "/shows/:id/edit", Shows.FormLive, :edit
+
+    live "/shows/:show_id/episodes/new", Episodes.FormLive, :new
+    live "/shows/:show_id/episodes", Episodes.IndexLive
+    live "/shows/:show_id/episodes/:id", Episodes.ShowLive
+    live "/shows/:show_id/episodes/:id/edit", Episodes.FormLive, :edit
   end
 
   # Other scopes may use custom stacks.
