@@ -55,6 +55,7 @@ defmodule RadiatorWeb.Admin.Shows.IndexLive do
       <td>
         <.button navigate={~p"/admin/shows/#{@show.id}"}>{gettext("Show")}</.button>
         <.button navigate={~p"/admin/shows/#{@show.id}/edit"}>{gettext("Edit")}</.button>
+        <.button navigate={~p"/admin/shows/#{@show}/episodes"}>{gettext("Episodes")}</.button>
       </td>
     </tr>
     """

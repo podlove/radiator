@@ -36,6 +36,9 @@ defmodule RadiatorWeb.Admin.Shows.ShowLive do
       <.button navigate={~p"/admin/shows/#{@show}/edit"} variant="primary">
         {gettext("Edit Show")}
       </.button>
+      <.button navigate={~p"/admin/shows/#{@show}/episodes"} variant="primary">
+        {gettext("Episodes")}
+      </.button>
     </Layouts.app>
     """
   end
