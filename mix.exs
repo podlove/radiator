@@ -72,7 +72,10 @@ defmodule Radiator.MixProject do
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:ex_cldr, "~> 2.37"},
+      {:ex_cldr_languages, "~> 0.3.3"},
+      {:ash_trans, "~> 0.1.0"}
     ]
   end
 
