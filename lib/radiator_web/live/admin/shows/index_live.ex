@@ -24,40 +24,17 @@ defmodule RadiatorWeb.Admin.Shows.IndexLive do
     <Layouts.app {assigns}>
       <h1>{gettext("Shows")}</h1>
       <.button navigate={~p"/admin/shows/new"} variant="primary">{gettext("New")}</.button>
-      <table>
-        <thead>
-          <tr>
-            <th>{gettext("Title")}</th>
-            <th>{gettext("Subtitle")}</th>
-            <th>{gettext("Summary")}</th>
-            <th>{gettext("Actions")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <.show_table_row :for={show <- @page.results} show={show} />
-        </tbody>
-      </table>
+      <.table id="shows" rows={@page.results}>
+        <:col :let={show} label={gettext("Title")}>{show.title}</:col>
+        <:col :let={show} label={gettext("Subtitle")}>{show.subtitle}</:col>
+        <:col :let={show} label={gettext("Summary")}>{show.summary}</:col>
+        <:col :let={show} label={gettext("Actions")}>
+          <.button navigate={~p"/admin/shows/#{show.id}"}>{gettext("Show")}</.button>
+          <.button navigate={~p"/admin/shows/#{show.id}/edit"}>{gettext("Edit")}</.button>
+          <.button navigate={~p"/admin/shows/#{show}/episodes"}>{gettext("Episodes")}</.button>
+        </:col>
+      </.table>
     </Layouts.app>
-    """
-  end
-
-  @doc """
-  Renders a table row for a show.
-  """
-  attr :show, Radiator.Podcasts.Show, required: true
-
-  def show_table_row(assigns) do
-    ~H"""
-    <tr>
-      <td>{@show.title}</td>
-      <td>{@show.subtitle}</td>
-      <td>{@show.summary}</td>
-      <td>
-        <.button navigate={~p"/admin/shows/#{@show.id}"}>{gettext("Show")}</.button>
-        <.button navigate={~p"/admin/shows/#{@show.id}/edit"}>{gettext("Edit")}</.button>
-        <.button navigate={~p"/admin/shows/#{@show}/episodes"}>{gettext("Episodes")}</.button>
-      </td>
-    </tr>
     """
   end
 end
