@@ -13,26 +13,33 @@ defmodule Radiator.Podcasts.Show do
     description "A show"
   end
 
+  @default_accept_attributes [
+    :title,
+    :subtitle,
+    :summary,
+    :mnemonic,
+    :language,
+    :itunes_type,
+    :license_name,
+    :license_url,
+    :author,
+    :itunes_category,
+    :blocked,
+    :explicit,
+    :complete,
+    :donation_url,
+    :donation_description
+  ]
+
   actions do
     defaults [:read, :destroy, :create, :update]
 
-    default_accept [
-      :title,
-      :subtitle,
-      :summary,
-      :mnemonic,
-      :language,
-      :itunes_type,
-      :license_name,
-      :license_url,
-      :author,
-      :itunes_category,
-      :blocked,
-      :explicit,
-      :complete,
-      :donation_url,
-      :donation_description
-    ]
+    default_accept @default_accept_attributes
+
+    create :import do
+      description "Import a show from external feed data"
+      accept @default_accept_attributes ++ [:guid]
+    end
   end
 
   attributes do

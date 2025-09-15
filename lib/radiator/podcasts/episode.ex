@@ -26,6 +26,11 @@ defmodule Radiator.Podcasts.Episode do
     create :create do
       accept @default_accept_attributes ++ [:show_id]
     end
+
+    create :import do
+      description "Import an episode from external feed data"
+      accept @default_accept_attributes ++ [:guid, :show_id]
+    end
   end
 
   attributes do
