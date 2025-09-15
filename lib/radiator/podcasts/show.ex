@@ -38,7 +38,7 @@ defmodule Radiator.Podcasts.Show do
   attributes do
     uuid_primary_key :id
 
-    attribute :guid, :uuid do
+    attribute :guid, :string do
       description "The unique identifier for the show"
       allow_nil? false
       public? true
