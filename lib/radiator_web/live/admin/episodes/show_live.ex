@@ -32,8 +32,8 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLive do
         <dd>{@episode.itunes_type}</dd>
         <dt>{gettext("Publication Date")}</dt>
         <dd>{@episode.publication_date}</dd>
-        <dt>{gettext("Duration Seconds")}</dt>
-        <dd>{@episode.duration_seconds}</dd>
+        <dt>{gettext("Duration Milliseconds")}</dt>
+        <dd>{@episode.duration_ms}</dd>
       </dl>
       <.button
         variant="danger"
