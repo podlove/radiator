@@ -9,9 +9,15 @@ defmodule Radiator.Podcasts.Chapter do
     repo Radiator.Repo
   end
 
+  @default_accept_attributes [:start_time_ms, :title, :link]
+
   actions do
-    defaults [:read, :destroy, :create, :update]
-    default_accept [:start_time_ms, :title, :link]
+    defaults [:read, :destroy, :update]
+    default_accept @default_accept_attributes
+
+    create :create do
+      accept @default_accept_attributes ++ [:episode_id]
+    end
   end
 
   attributes do
