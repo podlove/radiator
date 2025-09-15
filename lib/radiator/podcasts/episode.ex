@@ -62,7 +62,7 @@ defmodule Radiator.Podcasts.Episode do
 
     attribute :number, :integer do
       description "An episode's number"
-      allow_nil? false
+      allow_nil? true
       public? true
     end
 
@@ -105,6 +105,8 @@ defmodule Radiator.Podcasts.Episode do
   identities do
     identity :guid, [:guid]
     # TODO: add season_id to the identity when seasons are addeed
-    identity :number, [:number, :show_id]
+    identity :number, [:number, :show_id] do
+      eager_check? true
+    end
   end
 end
