@@ -21,6 +21,7 @@ defmodule Radiator.Podcasts.Episode do
       description "The unique identifier for the episode"
       allow_nil? false
       public? true
+      default &Ash.UUID.generate/0
     end
 
     attribute :title, :string do
