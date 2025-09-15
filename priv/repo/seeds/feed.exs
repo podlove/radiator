@@ -103,12 +103,12 @@ defmodule FeedImporter do
   def parse_episode_number(episode_str) when is_binary(episode_str) do
     case Integer.parse(episode_str) do
       {num, _} -> num
-      _ -> 1
+      _ -> nil
     end
   end
 
   def parse_episode_number(num) when is_integer(num), do: num
-  def parse_episode_number(_), do: 1
+  def parse_episode_number(_), do: nil
 
   @doc """
   Creates a Show from Metalove PodcastFeed data.
