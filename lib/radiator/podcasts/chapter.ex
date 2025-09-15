@@ -11,14 +11,14 @@ defmodule Radiator.Podcasts.Chapter do
 
   actions do
     defaults [:read, :destroy, :create, :update]
-    default_accept [:start_time_seconds, :title, :link]
+    default_accept [:start_time_ms, :title, :link]
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :start_time_seconds, :integer do
-      description "The start time of the chapter"
+    attribute :start_time_ms, :integer do
+      description "The start time of the chapter in milliseconds"
       public? true
       allow_nil? false
       constraints min: 0
@@ -47,6 +47,6 @@ defmodule Radiator.Podcasts.Chapter do
   end
 
   identities do
-    identity :start_time, [:start_time_seconds, :episode_id]
+    identity :start_time, [:start_time_ms, :episode_id]
   end
 end
