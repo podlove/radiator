@@ -15,7 +15,7 @@ defmodule Radiator.Podcasts.Episode do
     :summary,
     :number,
     :itunes_type,
-    :duration_seconds
+    :duration_ms
   ]
 
   actions do
@@ -72,8 +72,8 @@ defmodule Radiator.Podcasts.Episode do
       public? true
     end
 
-    attribute :duration_seconds, :integer do
-      description "The duration of the episode in seconds"
+    attribute :duration_ms, :integer do
+      description "The duration of the episode in milliseconds"
       public? true
     end
 
@@ -81,7 +81,7 @@ defmodule Radiator.Podcasts.Episode do
       has_many :chapters, Radiator.Podcasts.Chapter do
         description "The chapters of the episode"
         public? true
-        sort start_time_seconds: :asc
+        sort start_time_ms: :asc
       end
     end
 
