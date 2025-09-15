@@ -15,6 +15,7 @@ defmodule Radiator.Podcasts.Episode do
     :summary,
     :number,
     :itunes_type,
+    :publication_date,
     :duration_ms
   ]
 
