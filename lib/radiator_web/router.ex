@@ -20,6 +20,15 @@ defmodule RadiatorWeb.Router do
     get "/", PageController, :home
   end
 
+  scope "/admin", RadiatorWeb.Admin do
+    pipe_through :browser
+
+    live "/shows", Shows.IndexLive
+    live "/shows/new", Shows.FormLive, :new
+    live "/shows/:id", Shows.ShowLive
+    live "/shows/:id/edit", Shows.FormLive, :edit
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", RadiatorWeb do
   #   pipe_through :api
@@ -45,7 +54,7 @@ defmodule RadiatorWeb.Router do
   if Application.compile_env(:radiator, :dev_routes) do
     import AshAdmin.Router
 
-    scope "/admin" do
+    scope "/ash_admin" do
       pipe_through :browser
 
       ash_admin "/"
