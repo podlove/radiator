@@ -2,11 +2,18 @@ defmodule Radiator.Podcasts.License do
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshTrans.Resource]
 
   postgres do
     table "licenses"
     repo Radiator.Repo
+  end
+
+  translations do
+    public? true
+    fields([:name])
+    locales(Radiator.Cldr.AshTrans.locale_names())
   end
 
   attributes do
