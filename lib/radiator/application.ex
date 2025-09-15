@@ -15,7 +15,8 @@ defmodule Radiator.Application do
       # Start a worker by calling: Radiator.Worker.start_link(arg)
       # {Radiator.Worker, arg},
       # Start to serve requests, typically the last entry
-      RadiatorWeb.Endpoint
+      RadiatorWeb.Endpoint,
+      {AshAuthentication.Supervisor, [otp_app: :radiator]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

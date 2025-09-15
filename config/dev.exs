@@ -65,7 +65,7 @@ config :radiator, RadiatorWeb.Endpoint,
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :radiator, dev_routes: true
+config :radiator, dev_routes: true, token_signing_secret: "czQV3Piug9mTWQzue2ll9NNjx1LqtIhy"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

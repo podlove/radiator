@@ -1,5 +1,7 @@
 [
   import_deps: [
+    :ash_authentication_phoenix,
+    :ash_authentication,
     :ash_admin,
     :ash_postgres,
     :ash_phoenix,

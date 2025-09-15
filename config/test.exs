@@ -1,4 +1,6 @@
 import Config
+config :radiator, token_signing_secret: "r87V8ba/4LnXY8qPb/jO1tU5D1grZOhx"
+config :bcrypt_elixir, log_rounds: 1
 config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 
 # Configure your database

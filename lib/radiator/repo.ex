@@ -5,7 +5,7 @@ defmodule Radiator.Repo do
   @impl true
   def installed_extensions do
     # Add extensions here, and the migration generator will install them.
-    ["ash-functions"]
+    ["ash-functions", "citext"]
   end
 
   # Don't open unnecessary transactions

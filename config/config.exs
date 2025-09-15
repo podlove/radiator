@@ -23,6 +23,8 @@ config :spark,
     remove_parens?: true,
     "Ash.Resource": [
       section_order: [
+        :authentication,
+        :tokens,
         :admin,
         :postgres,
         :resource,
@@ -47,7 +49,7 @@ config :spark,
 config :radiator,
   ecto_repos: [Radiator.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Radiator.Podcasts]
+  ash_domains: [Radiator.Accounts, Radiator.Podcasts]
 
 # Configures the endpoint
 config :radiator, RadiatorWeb.Endpoint,
