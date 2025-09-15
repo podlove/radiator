@@ -17,7 +17,6 @@ defmodule Radiator.Podcasts.Show do
     defaults [:read, :destroy, :create, :update]
 
     default_accept [
-      :guid,
       :title,
       :subtitle,
       :summary,
