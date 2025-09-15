@@ -24,23 +24,6 @@ defmodule RadiatorWeb.Router do
   scope "/", RadiatorWeb do
     pipe_through :browser
 
-    ash_authentication_live_session :authenticated_routes do
-      # in each liveview, add one of the following at the top of the module:
-      #
-      # If an authenticated user must be present:
-      # on_mount {RadiatorWeb.LiveUserAuth, :live_user_required}
-      #
-      # If an authenticated user *may* be present:
-      # on_mount {RadiatorWeb.LiveUserAuth, :live_user_optional}
-      #
-      # If an authenticated user must *not* be present:
-      # on_mount {RadiatorWeb.LiveUserAuth, :live_no_user}
-    end
-  end
-
-  scope "/", RadiatorWeb do
-    pipe_through :browser
-
     get "/", PageController, :home
     auth_routes AuthController, Radiator.Accounts.User, path: "/auth"
     sign_out_route AuthController
@@ -69,6 +52,7 @@ defmodule RadiatorWeb.Router do
 
     # Remove this if you do not use the magic link strategy.
     magic_sign_in_route(Radiator.Accounts.User, :magic_link,
+      on_mount: [{RadiatorWeb.LiveUserAuth, :live_no_user}],
       auth_routes_prefix: "/auth",
       overrides: [RadiatorWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
     )
@@ -77,15 +61,18 @@ defmodule RadiatorWeb.Router do
   scope "/admin", RadiatorWeb.Admin do
     pipe_through :browser
 
-    live "/shows", Shows.IndexLive
-    live "/shows/new", Shows.FormLive, :new
-    live "/shows/:id", Shows.ShowLive
-    live "/shows/:id/edit", Shows.FormLive, :edit
+    ash_authentication_live_session :authenticated_routes,
+      on_mount: {RadiatorWeb.LiveUserAuth, :live_user_required} do
+      live "/shows", Shows.IndexLive
+      live "/shows/new", Shows.FormLive, :new
+      live "/shows/:id", Shows.ShowLive
+      live "/shows/:id/edit", Shows.FormLive, :edit
 
-    live "/shows/:show_id/episodes/new", Episodes.FormLive, :new
-    live "/shows/:show_id/episodes", Episodes.IndexLive
-    live "/shows/:show_id/episodes/:id", Episodes.ShowLive
-    live "/shows/:show_id/episodes/:id/edit", Episodes.FormLive, :edit
+      live "/shows/:show_id/episodes/new", Episodes.FormLive, :new
+      live "/shows/:show_id/episodes", Episodes.IndexLive
+      live "/shows/:show_id/episodes/:id", Episodes.ShowLive
+      live "/shows/:show_id/episodes/:id/edit", Episodes.FormLive, :edit
+    end
   end
 
   # Other scopes may use custom stacks.
