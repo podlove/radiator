@@ -13,7 +13,7 @@ defmodule RadiatorWeb.Admin.Episodes.IndexLive do
 
     page =
       Radiator.Podcasts.read_episodes!(nil,
-        query: [filter: [show_id: show_id]],
+        query: [filter: [show_id: show_id], sort: [number: :desc]],
         page: page_params
       )
 
