@@ -48,6 +48,28 @@ defmodule Radiator.Accounts.UserNotifier do
     end
   end
 
+  @doc ~S"""
+  Delivers the reset password email to the given user.
+
+  ## Examples
+
+      iex> deliver_user_reset_password_instructions(user, &url(~p"/users/reset_password/#{&1}"))
+      {:ok, %{to: ..., body: ...}}
+
+  """
+  def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)
+      when is_function(reset_password_url_fun, 1) do
+    {encoded_token, user_token} =
+      Radiator.Accounts.UserToken.build_email_token(user, "reset_password")
+
+    Radiator.Repo.insert!(user_token)
+
+    Radiator.Accounts.UserNotifier.deliver_user_reset_password_instructions(
+      user,
+      reset_password_url_fun.(encoded_token)
+    )
+  end
+
   defp deliver_magic_link_instructions(user, url) do
     deliver(user.email, "Log in instructions", """
 

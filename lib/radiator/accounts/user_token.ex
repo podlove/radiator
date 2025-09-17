@@ -11,6 +11,8 @@ defmodule Radiator.Accounts.UserToken do
   @magic_link_validity_in_minutes 15
   @change_email_validity_in_days 7
   @session_validity_in_days 14
+  @reset_password_validity_in_days 1
+  @confirm_validity_in_days 7
 
   schema "users_tokens" do
     field :token, :binary
@@ -122,6 +124,41 @@ defmodule Radiator.Accounts.UserToken do
         :error
     end
   end
+
+  @doc """
+  Checks if the token is valid and returns its underlying lookup query.
+
+  The query returns the user found by the token, if any.
+
+  The given token is valid if it matches its hashed counterpart in the
+  database and the user email has not changed. This function also checks
+  if the token is being used within a certain period, depending on the
+  context. The default contexts supported by this function are either
+  "confirm", for account confirmation emails, and "reset_password",
+  for resetting the password. For verifying requests to change the email,
+  see `verify_change_email_token_query/2`.
+  """
+  def verify_email_token_query(token, context) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+        days = days_for_context(context)
+
+        query =
+          from token in by_token_and_context_query(hashed_token, context),
+            join: user in assoc(token, :user),
+            where: token.inserted_at > ago(^days, "day") and token.sent_to == user.email,
+            select: user
+
+        {:ok, query}
+
+      :error ->
+        :error
+    end
+  end
+
+  defp days_for_context("confirm"), do: @confirm_validity_in_days
+  defp days_for_context("reset_password"), do: @reset_password_validity_in_days
 
   def build_api_token(user) do
     token = :crypto.strong_rand_bytes(@rand_size)
