@@ -34,7 +34,7 @@ defmodule RadiatorWeb.AdminLiveTest do
 
       {:ok, conn} =
         live
-        |> element(~s{main a[href="/admin/podcast/#{show.id}"]})
+        |> element(~s{a[href="/admin/podcast/#{show.id}"]})
         |> render_click()
         |> follow_redirect(conn, ~p"/admin/podcast/#{show.id}")
 

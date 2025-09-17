@@ -14,7 +14,7 @@ defmodule RadiatorWeb.EpisodeLiveTest do
       user = user_fixture()
       {:ok, _live, html} = conn |> log_in_user(user) |> live(~p"/admin/podcast/#{show.id}")
 
-      assert html =~ "#{show.title}</h1>"
+      assert html =~ "#{show.title}</h4>"
     end
 
     test "redirects if user is not logged in", %{conn: conn, show: show} do
