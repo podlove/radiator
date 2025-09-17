@@ -6,7 +6,9 @@ defmodule Radiator.Accounts do
   import Ecto.Query, warn: false
   alias Radiator.Repo
 
-  alias Radiator.Accounts.{User, UserToken, UserNotifier}
+  alias Radiator.Accounts.User
+  alias Radiator.Accounts.UserNotifier
+  alias Radiator.Accounts.UserToken
 
   ## Database getters
 

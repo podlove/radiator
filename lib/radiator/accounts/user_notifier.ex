@@ -1,8 +1,11 @@
 defmodule Radiator.Accounts.UserNotifier do
+  @moduledoc """
+  TODO
+  """
   import Swoosh.Email
 
-  alias Radiator.Mailer
   alias Radiator.Accounts.User
+  alias Radiator.Mailer
 
   # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do

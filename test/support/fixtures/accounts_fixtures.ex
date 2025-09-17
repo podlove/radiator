@@ -4,12 +4,12 @@ defmodule Radiator.AccountsFixtures do
   entities via the `Radiator.Accounts` context.
   """
   alias Radiator.Accounts
-  alias Radiator.Accounts.Scope
   alias Radiator.Accounts.Raindrop
+  alias Radiator.Accounts.Scope
   alias Radiator.Accounts.WebService
   alias Radiator.Repo
-  
-   import Ecto.Query
+
+  import Ecto.Query
 
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "hello world!"
@@ -64,6 +64,7 @@ defmodule Radiator.AccountsFixtures do
     [_, token | _] = String.split(captured_email.text_body, "[TOKEN]")
     token
   end
+
   def override_token_authenticated_at(token, authenticated_at) when is_binary(token) do
     Radiator.Repo.update_all(
       from(t in Accounts.UserToken,

@@ -1,4 +1,7 @@
 defmodule RadiatorWeb.UserAuth do
+  @moduledoc """
+  TODO
+  """
   use RadiatorWeb, :verified_routes
 
   import Plug.Conn

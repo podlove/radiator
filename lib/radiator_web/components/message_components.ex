@@ -1,4 +1,7 @@
 defmodule RadiatorWeb.MessageComponents do
+  @moduledoc """
+  TODO
+  """
   use Phoenix.Component
   use Gettext, backend: RadiatorWeb.Gettext
 
