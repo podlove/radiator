@@ -39,4 +39,11 @@ npm-debug.log
 /traces/
 node_modules/
 
+# macOS system files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
