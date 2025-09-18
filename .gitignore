@@ -42,3 +42,15 @@ npm-debug.log
 /.expert
 /.elixir_ls
 
+# Used for Playwright
+/traces/
+node_modules/
+
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
