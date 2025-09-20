@@ -12,6 +12,6 @@ defmodule Radiator.Cldr do
     default_locale: "en",
     providers: [
       Cldr.Language,
-      AshTrans
+      AshTranslation
     ]
 end

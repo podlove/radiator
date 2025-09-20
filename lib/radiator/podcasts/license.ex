@@ -3,7 +3,7 @@ defmodule Radiator.Podcasts.License do
     otp_app: :radiator,
     domain: Radiator.Podcasts,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshTrans.Resource]
+    extensions: [AshTranslation.Resource]
 
   postgres do
     table "licenses"
@@ -13,7 +13,7 @@ defmodule Radiator.Podcasts.License do
   translations do
     public? true
     fields([:name])
-    locales(Radiator.Cldr.AshTrans.locale_names())
+    locales(Radiator.Cldr.AshTranslation.locale_names())
   end
 
   attributes do
