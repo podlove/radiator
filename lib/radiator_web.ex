@@ -38,12 +38,11 @@ defmodule RadiatorWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller,
-        formats: [:html, :json],
-        layouts: [html: RadiatorWeb.Layouts]
+      use Phoenix.Controller, formats: [:html, :json]
+
+      use Gettext, backend: RadiatorWeb.Gettext
 
       import Plug.Conn
-      use Gettext, backend: RadiatorWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -51,8 +50,7 @@ defmodule RadiatorWeb do
 
   def live_view do
     quote do
-      use Phoenix.LiveView,
-        layout: {RadiatorWeb.Layouts, :app}
+      use Phoenix.LiveView
 
       unquote(html_helpers())
     end
@@ -81,17 +79,19 @@ defmodule RadiatorWeb do
 
   defp html_helpers do
     quote do
-      # HTML escaping functionality
-      import Phoenix.HTML
-
-      import Reply
-
-      # Core UI components and translation
-      import RadiatorWeb.CoreComponents
+      # Translation
       use Gettext, backend: RadiatorWeb.Gettext
 
-      # Shortcut for generating JS commands
+      # HTML escaping functionality
+      import Phoenix.HTML
+      import Reply
+
+      # Core UI components
+      import RadiatorWeb.CoreComponents
+
+      # Common modules used in templates
       alias Phoenix.LiveView.JS
+      alias RadiatorWeb.Layouts
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())

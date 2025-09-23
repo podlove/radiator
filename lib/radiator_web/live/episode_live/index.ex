@@ -83,7 +83,7 @@ defmodule RadiatorWeb.EpisodeLive.Index do
       {:ok, episode} ->
         Dispatch.insert_node(
           %{"episode_id" => episode.id, "content" => ""},
-          socket.assigns.current_user.id,
+          socket.assigns.current_scope.user.id,
           Ecto.UUID.generate()
         )
 

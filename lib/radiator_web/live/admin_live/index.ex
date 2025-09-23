@@ -220,12 +220,12 @@ defmodule RadiatorWeb.AdminLive.Index do
   end
 
   defp save_raindrop(socket, show, params) do
-    Raindrop.save_raindrop(socket.assigns.current_user.id, show, params)
+    Raindrop.save_raindrop(socket.assigns.current_scope.user.id, show, params)
   end
 
   defp get_bookmarklet(api_uri, socket) do
     token =
-      socket.assigns.current_user
+      socket.assigns.current_scope.user
       |> Accounts.generate_user_api_token()
       |> Base.url_encode64(padding: false)
 
@@ -243,21 +243,21 @@ defmodule RadiatorWeb.AdminLive.Index do
   end
 
   defp assign_raindrop(socket) do
-    assign_raindrop(socket, Raindrop.user_has_raindrop?(socket.assigns.current_user.id))
+    assign_raindrop(socket, Raindrop.user_has_raindrop?(socket.assigns.current_scope.user.id))
   end
 
   defp assign_raindrop(socket, false) do
     socket
     |> assign(
       :raindrop_url,
-      Raindrop.redirect_url(socket.assigns.current_user.id)
+      Raindrop.redirect_url(socket.assigns.current_scope.user.id)
     )
     |> assign(:raindrop_access, false)
     |> assign(:raindrop_collections, [])
   end
 
   defp assign_raindrop(socket, true) do
-    items = Raindrop.collections_for_user(socket.assigns.current_user.id)
+    items = Raindrop.collections_for_user(socket.assigns.current_scope.user.id)
 
     socket
     |> assign(:raindrop_access, true)

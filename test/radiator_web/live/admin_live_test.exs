@@ -16,7 +16,7 @@ defmodule RadiatorWeb.AdminLiveTest do
       assert {:error, redirect} = live(conn, ~p"/admin")
 
       assert {:redirect, %{to: path, flash: flash}} = redirect
-      assert path == ~p"/users/log_in"
+      assert path == ~p"/users/log-in"
       assert %{"error" => "You must log in to access this page."} = flash
     end
   end
@@ -34,7 +34,7 @@ defmodule RadiatorWeb.AdminLiveTest do
 
       {:ok, conn} =
         live
-        |> element(~s{main a[href="/admin/podcast/#{show.id}"]})
+        |> element(~s{a[href="/admin/podcast/#{show.id}"]})
         |> render_click()
         |> follow_redirect(conn, ~p"/admin/podcast/#{show.id}")
 

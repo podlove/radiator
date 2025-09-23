@@ -40,7 +40,7 @@
     </section>
 
     <section :if={@selected_episode}>
-      <.header :if={@live_action not in [:new, :edit]} class="text-2xl">
+      <.header :if={@live_action not in [:new, :edit]}>
         {@selected_episode.number}: {@selected_episode.title}
         <:actions>
           <.link navigate={~p"/admin/podcast/#{@show}/#{@selected_episode}/edit"}>
@@ -87,7 +87,7 @@
         id: "inbox-#{@selected_episode.inbox_node_container_id}",
         session: %{
           "container_id" => @selected_episode.inbox_node_container_id,
-          "user_id" => @current_user.id,
+          "user_id" => @current_scope.user.id,
           "readonly" => true
         }
       )}
@@ -99,7 +99,7 @@
         id: "outline-#{@selected_episode.outline_node_container_id}",
         session: %{
           "container_id" => @selected_episode.outline_node_container_id,
-          "user_id" => @current_user.id
+          "user_id" => @current_scope.user.id
         }
       )}
     </section>

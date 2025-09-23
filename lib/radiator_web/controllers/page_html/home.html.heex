@@ -1,4 +1,4 @@
-<.flash_group flash={@flash} />
+<Layouts.flash_group flash={@flash} />
 <header class="h-screen text-white bg-fixed bg-center bg-cover bg-page-header min-h-[40em]">
   <nav class="overflow-hidden absolute inset-x-0 py-6 text-center">
     <ul class={[
@@ -11,7 +11,7 @@
           Home
         </.link>
       </li>
-      <%= if @current_user do %>
+      <%= if @current_scope do %>
         <li class="inline-block">
           <.link href={~p"/admin"} class="px-4 py-2">
             Admin
@@ -28,7 +28,7 @@
           </.link>
         </li>
         <li class="inline-block">
-          <.link href={~p"/users/log_out"} method="delete" class="px-4 py-2">
+          <.link href={~p"/users/log-out"} method="delete" class="px-4 py-2">
             Log out
           </.link>
         </li>
@@ -39,7 +39,7 @@
           </.link>
         </li>
         <li class="inline-block">
-          <.link href={~p"/users/log_in"} class="px-4 py-2">
+          <.link href={~p"/users/log-in"} class="px-4 py-2">
             Log in
           </.link>
         </li>

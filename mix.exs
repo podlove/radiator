@@ -9,7 +9,9 @@ defmodule Radiator.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      compilers: [:phoenix_live_view] ++ Mix.compilers(),
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -20,6 +22,12 @@ defmodule Radiator.MixProject do
     [
       mod: {Radiator.Application, []},
       extra_applications: [:logger, :runtime_tools]
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [precommit: :test]
     ]
   end
 
@@ -36,36 +44,37 @@ defmodule Radiator.MixProject do
       {:bandit, "~> 1.5"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dns_cluster, "~> 0.2"},
-      {:ecto_sql, "~> 3.10"},
-      {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
+      {:ecto_sql, "~> 3.13"},
+      {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:finch, "~> 0.13"},
-      {:floki, ">= 0.30.0", override: true},
+      {:floki, ">= 0.38.0", override: true},
       {:gen_smtp, "~> 1.1"},
       {:gen_stage, "~> 1.2"},
-      {:gettext, "~> 0.20"},
+      {:gettext, "~> 0.26"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
-       tag: "v2.1.1",
+       tag: "v2.2.0",
        sparse: "optimized",
        app: false,
        compile: false,
        depth: 1},
       {:jason, "~> 1.2"},
       {:live_debugger, "~> 0.2.0", only: :dev},
+      {:lazy_html, ">= 0.1.0", only: :test},
       {:mix_test_interactive, "~> 5.0", only: :dev, runtime: false},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.0.0"},
-      {:phoenix_test_playwright, "~> 0.4", only: :test, runtime: false},
-      {:phoenix, "~> 1.7.17"},
+      {:phoenix_live_view, "~> 1.1.7"},
+      {:phoenix_test_playwright, "~> 0.7", only: :test, runtime: false},
+      {:phoenix, "~> 1.8.0"},
       {:plug, "~> 1.17"},
       {:postgrex, ">= 0.0.0"},
       {:reply, "~> 1.0"},
       {:req, "~> 0.5"},
       {:slugify, "~> 1.3"},
-      {:swoosh, "~> 1.5"},
+      {:swoosh, "~> 1.16"},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
@@ -93,6 +102,7 @@ defmodule Radiator.MixProject do
         "esbuild radiator --minify",
         "phx.digest"
       ],
+      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"],
       "playwright.install": [
         # "cmd npm ci --prefix assets",
         # "cmd cd assets",
