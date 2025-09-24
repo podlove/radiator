@@ -58,7 +58,7 @@ Just as in the **subject**, use the imperative, present tense: "change" not "cha
 ### Footer
 
 The footer should contain one line for each github issue it closes.
-If the commit contains**Breaking Changes**, the description of them should start with the word `BREAKING CHANGE: `. The rest of the footer can be freely formatted to repesent it.
+If the commit contains**Breaking Changes**, the description of them should start with the word `BREAKING CHANGE: `. The rest of the footer can be freely formatted to represent it.
 
 ### Revert
 

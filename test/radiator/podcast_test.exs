@@ -293,7 +293,7 @@ defmodule Radiator.PodcastTest do
       assert nil == Podcast.get_current_episode_for_show(show.id)
     end
 
-    test "get_current_episode_for_show/1 returns episdoe for show" do
+    test "get_current_episode_for_show/1 returns episode for show" do
       episode = episode_fixture()
       assert episode.id == Podcast.get_current_episode_for_show(episode.show_id).id
     end
