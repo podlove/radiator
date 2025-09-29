@@ -16,6 +16,10 @@ defmodule Radiator.Podcasts.License do
     locales(Radiator.Cldr.AshTrans.locale_names())
   end
 
+  actions do
+    defaults([:read, :create, :update, :destroy])
+  end
+
   attributes do
     uuid_primary_key :id
 
