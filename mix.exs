@@ -81,7 +81,7 @@ defmodule Radiator.MixProject do
       {:bandit, "~> 1.5"},
       {:ex_cldr, "~> 2.37"},
       {:ex_cldr_languages, "~> 0.3.3"},
-      {:ash_trans, "~> 0.1.0"}
+      {:ash_translation, "~> 0.2.1"}
     ]
   end
 
