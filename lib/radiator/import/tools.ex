@@ -163,6 +163,38 @@ defmodule Radiator.Import.Tools do
   defp flatten_category(_), do: []
 
   @doc """
+  Parses an iTunes category string from the Podlove API.
+
+  The Podlove API returns categories as strings in the format "Category > Subcategory",
+  which need to be converted to an array of strings for storage.
+
+  ## Examples
+
+      iex> Radiator.Import.Tools.parse_itunes_category("News > Politics")
+      ["News", "Politics"]
+
+      iex> Radiator.Import.Tools.parse_itunes_category("Technology")
+      ["Technology"]
+
+      iex> Radiator.Import.Tools.parse_itunes_category(nil)
+      nil
+
+      iex> Radiator.Import.Tools.parse_itunes_category("")
+      nil
+  """
+  def parse_itunes_category(nil), do: nil
+  def parse_itunes_category(""), do: nil
+
+  def parse_itunes_category(category) when is_binary(category) do
+    category
+    |> String.split(">")
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+  end
+
+  def parse_itunes_category(_), do: nil
+
+  @doc """
   Safely converts episode number from string to integer.
 
   ## Examples

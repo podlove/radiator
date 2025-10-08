@@ -4,9 +4,9 @@ defmodule Radiator.Import.Podlove.Importer do
 
   This module handles the complete import process:
   1. Fetches podcast metadata via the Podlove API
-  2. Creates or updates the Show record
+  2. Creates the Show record
   3. Fetches all episodes
-  4. Creates or updates Episode records
+  4. Creates Episode records
   5. Fetches and creates Chapter records for each episode
 
   All imports are performed within a database transaction to ensure
@@ -94,7 +94,7 @@ defmodule Radiator.Import.Podlove.Importer do
     Repo.transaction(
       fn ->
         with {:ok, podcast_data} <- fetch_podcast_data(base_url, opts),
-             {:ok, show} <- create_or_update_show(podcast_data, opts),
+             {:ok, show} <- create_show(podcast_data, opts),
              {:ok, show} <- import_episodes(base_url, show, opts) do
           Logger.info("Import completed successfully: #{show.title}")
           show
@@ -127,12 +127,9 @@ defmodule Radiator.Import.Podlove.Importer do
     end
   end
 
-  defp create_or_update_show(podcast_data, opts) do
-    Logger.debug("Creating or updating show")
+  defp create_show(podcast_data, opts) do
+    Logger.debug("Creating show")
 
-    # TODO: Verify these field mappings with actual API responses
-    # Some fields like itunes_category, license info, blocked, complete
-    # may need adjustment based on actual API structure
     guid = podcast_data["guid"] || generate_guid_from_url(podcast_data)
 
     show_attrs = %{
@@ -144,11 +141,11 @@ defmodule Radiator.Import.Podlove.Importer do
       language: podcast_data["language"],
       author: Tools.decode_html_entities(podcast_data["author_name"]),
       itunes_type: Tools.convert_show_type(podcast_data["itunes_type"]),
+      itunes_category: Tools.parse_itunes_category(podcast_data["category"]),
       explicit: podcast_data["explicit"] || false,
       funding_url: podcast_data["funding_url"],
       funding_description: Tools.decode_html_entities(podcast_data["funding_label"])
       # TODO: Map these fields when API structure is confirmed:
-      # - itunes_category (may be in podcast_data["itunes_category"])
       # - license_name / license_url (may be in podcast_data["license"])
       # - blocked (probably not in API, defaults to false)
       # - complete (may be in podcast_data["complete"])
