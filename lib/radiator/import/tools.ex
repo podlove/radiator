@@ -45,6 +45,7 @@ defmodule Radiator.Import.Tools do
   Converts chapter start time from "HH:MM:SS.mmm" format to milliseconds.
 
   Handles both "HH:MM:SS.mmm" and "HH:MM:SS" formats.
+  Returns `nil` for invalid input to allow callers to detect data quality issues.
 
   ## Examples
 
@@ -55,9 +56,12 @@ defmodule Radiator.Import.Tools do
       5025000
 
       iex> Radiator.Import.Tools.parse_chapter_time(nil)
-      0
+      nil
+
+      iex> Radiator.Import.Tools.parse_chapter_time("")
+      nil
   """
-  def parse_chapter_time(time_string) when is_binary(time_string) do
+  def parse_chapter_time(time_string) when is_binary(time_string) and time_string != "" do
     # Handle both "HH:MM:SS.mmm" and "HH:MM:SS" formats
     parts = String.split(time_string, ".")
     time_part = hd(parts)
@@ -91,7 +95,7 @@ defmodule Radiator.Import.Tools do
     seconds * 1000 + milliseconds
   end
 
-  def parse_chapter_time(_), do: 0
+  def parse_chapter_time(_), do: nil
 
   @doc """
   Converts episode type string to iTunes episode type atom.
@@ -212,4 +216,109 @@ defmodule Radiator.Import.Tools do
   end
 
   def truncate_summary(_), do: nil
+
+  @doc """
+  Formats a time string or milliseconds value into a human-readable format.
+
+  Used primarily for generating fallback chapter titles when the API doesn't provide one.
+  Returns "unknown time" for invalid input.
+
+  ## Parameters
+
+    * `time` - Either a time string (e.g., "01:23:45") or milliseconds as an integer
+
+  ## Returns
+
+  A formatted time string in the format "H:MM:SS" or "M:SS", or "unknown time" for invalid input
+
+  ## Examples
+
+      iex> Radiator.Import.Tools.format_time("01:23:45")
+      "1:23:45"
+
+      iex> Radiator.Import.Tools.format_time(90000)
+      "1:30"
+
+      iex> Radiator.Import.Tools.format_time(nil)
+      "unknown time"
+
+      iex> Radiator.Import.Tools.format_time("")
+      "unknown time"
+  """
+  def format_time(time_string) when is_binary(time_string) do
+    case parse_chapter_time(time_string) do
+      nil -> "unknown time"
+      ms -> format_milliseconds(ms)
+    end
+  end
+
+  def format_time(ms) when is_integer(ms), do: format_milliseconds(ms)
+  def format_time(_), do: "unknown time"
+
+  @doc """
+  Formats milliseconds into a human-readable time string.
+
+  ## Parameters
+
+    * `ms` - Time in milliseconds
+
+  ## Returns
+
+  A formatted time string in the format "H:MM:SS" or "M:SS"
+
+  ## Examples
+
+      iex> Radiator.Import.Tools.format_milliseconds(5000)
+      "0:05"
+
+      iex> Radiator.Import.Tools.format_milliseconds(90000)
+      "1:30"
+
+      iex> Radiator.Import.Tools.format_milliseconds(3665000)
+      "1:01:05"
+  """
+  def format_milliseconds(ms) when is_integer(ms) do
+    total_seconds = div(ms, 1000)
+    hours = div(total_seconds, 3600)
+    minutes = div(rem(total_seconds, 3600), 60)
+    seconds = rem(total_seconds, 60)
+
+    cond do
+      hours > 0 -> "#{hours}:#{pad_time(minutes)}:#{pad_time(seconds)}"
+      minutes > 0 -> "#{minutes}:#{pad_time(seconds)}"
+      true -> "0:#{pad_time(seconds)}"
+    end
+  end
+
+  # Private helper to pad time components with leading zero
+  defp pad_time(num), do: String.pad_leading(Integer.to_string(num), 2, "0")
+
+  @doc """
+  Decodes HTML entities in a string.
+
+  Uses the `html_entities` library to decode both named entities (like `&amp;`, `&quot;`)
+  and numeric entities (like `&#8211;`, `&#x2013;`).
+
+  ## Parameters
+
+    * `text` - String potentially containing HTML entities
+
+  ## Returns
+
+  String with HTML entities decoded to their Unicode characters, or `nil` if input is `nil`
+
+  ## Examples
+
+      iex> Radiator.Import.Tools.decode_html_entities("&amp; &lt; &gt;")
+      "& < >"
+
+      iex> Radiator.Import.Tools.decode_html_entities("&#8211; &#x2013;")
+      "– –"
+
+      iex> Radiator.Import.Tools.decode_html_entities(nil)
+      nil
+  """
+  def decode_html_entities(nil), do: nil
+  def decode_html_entities(""), do: ""
+  def decode_html_entities(text) when is_binary(text), do: HtmlEntities.decode(text)
 end

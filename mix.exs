@@ -83,7 +83,8 @@ defmodule Radiator.MixProject do
       {:ex_cldr_languages, "~> 0.3.3"},
       {:plug, "~> 1.17"},
       {:tidewave, "~> 0.4", only: :dev},
-      {:ash_translation, "~> 0.2.1"}
+      {:ash_translation, "~> 0.2.1"},
+      {:html_entities, "~> 0.5"}
     ]
   end
 
