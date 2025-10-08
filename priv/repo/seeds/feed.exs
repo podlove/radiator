@@ -19,96 +19,7 @@ defmodule FeedImporter do
   Helper functions for importing feed data into Ash resources.
   """
 
-  @doc """
-  Converts duration string from "HH:MM:SS" format to milliseconds.
-  """
-  def parse_duration(duration_string) when is_binary(duration_string) do
-    seconds = duration_string
-    |> String.split(":")
-    |> Enum.reverse()
-    |> Enum.with_index()
-    |> Enum.reduce(0, fn {time_part, index}, acc ->
-      {time_int, _} = Integer.parse(time_part)
-      acc + time_int * :math.pow(60, index)
-    end)
-    |> trunc()
-
-    # Convert seconds to milliseconds
-    seconds * 1000
-  end
-
-  def parse_duration(_), do: nil
-
-  @doc """
-  Converts chapter start time from "HH:MM:SS.mmm" format to milliseconds.
-  """
-  def parse_chapter_time(time_string) when is_binary(time_string) do
-    # Handle both "HH:MM:SS.mmm" and "HH:MM:SS" formats
-    parts = String.split(time_string, ".")
-    time_part = hd(parts)
-
-    # Convert time to seconds first
-    seconds = time_part
-    |> String.split(":")
-    |> Enum.reverse()
-    |> Enum.with_index()
-    |> Enum.reduce(0, fn {time_part, index}, acc ->
-      {time_int, _} = Integer.parse(time_part)
-      acc + time_int * :math.pow(60, index)
-    end)
-    |> trunc()
-
-    # Add milliseconds if present
-    milliseconds = case parts do
-      [_, ms_part] ->
-        # Pad or truncate to 3 digits
-        ms_padded = String.pad_trailing(ms_part, 3, "0") |> String.slice(0, 3)
-        {ms_int, _} = Integer.parse(ms_padded)
-        ms_int
-      _ -> 0
-    end
-
-    # Convert to total milliseconds
-    seconds * 1000 + milliseconds
-  end
-
-  def parse_chapter_time(_), do: 0
-
-  @doc """
-  Converts Metalove episode type to iTunes episode type atom.
-  """
-  def convert_episode_type("full"), do: :full
-  def convert_episode_type("trailer"), do: :trailer
-  def convert_episode_type("bonus"), do: :bonus
-  def convert_episode_type(_), do: :full
-
-  @doc """
-  Flattens iTunes categories from nested arrays to flat array.
-  """
-  def flatten_categories(categories) when is_list(categories) do
-    categories
-    |> Enum.flat_map(&flatten_category/1)
-    |> Enum.take(3)  # Max 3 categories allowed
-  end
-
-  def flatten_categories(_), do: []
-
-  defp flatten_category(category) when is_list(category), do: category
-  defp flatten_category(category) when is_binary(category), do: [category]
-  defp flatten_category(_), do: []
-
-  @doc """
-  Safely converts episode number from string to integer.
-  """
-  def parse_episode_number(episode_str) when is_binary(episode_str) do
-    case Integer.parse(episode_str) do
-      {num, _} -> num
-      _ -> nil
-    end
-  end
-
-  def parse_episode_number(num) when is_integer(num), do: num
-  def parse_episode_number(_), do: nil
+  alias Radiator.Import.Tools
 
   @doc """
   Creates a Show from Metalove PodcastFeed data.
@@ -118,10 +29,10 @@ defmodule FeedImporter do
       guid: feed.guid,
       title: feed.title,
       subtitle: feed.subtitle,
-      summary: truncate_summary(feed.summary),
+      summary: Tools.truncate_summary(feed.summary),
       language: feed.language,
       author: feed.author,
-      itunes_category: flatten_categories(feed.categories),
+      itunes_category: Tools.flatten_categories(feed.categories),
       explicit: feed.explicit || false
     }
 
@@ -145,11 +56,11 @@ defmodule FeedImporter do
       guid: episode.guid,
       title: episode.title,
       subtitle: episode.subtitle,
-      summary: truncate_summary(episode.summary),
-      number: parse_episode_number(episode.episode),
-      itunes_type: convert_episode_type(episode.type),
+      summary: Tools.truncate_summary(episode.summary),
+      number: Tools.parse_episode_number(episode.episode),
+      itunes_type: Tools.convert_episode_type(episode.type),
       publication_date: episode.pub_date,
-      duration_ms: parse_duration(episode.duration),
+      duration_ms: Tools.parse_duration(episode.duration),
       show_id: show.id
     }
 
@@ -173,7 +84,7 @@ defmodule FeedImporter do
     |> Enum.with_index()
     |> Enum.each(fn {chapter, index} ->
       chapter_attrs = %{
-        start_time_ms: parse_chapter_time(chapter.start),
+        start_time_ms: Tools.parse_chapter_time(chapter.start),
         title: chapter.title,
         episode_id: episode.id
       }
@@ -190,17 +101,6 @@ defmodule FeedImporter do
   end
 
   def create_chapters_for_episode(_, _), do: :ok
-
-  # Truncates summary to 4000 characters to match constraint.
-  defp truncate_summary(summary) when is_binary(summary) do
-    if String.length(summary) > 4000 do
-      String.slice(summary, 0, 3997) <> "..."
-    else
-      summary
-    end
-  end
-
-  defp truncate_summary(_), do: nil
 end
 
 # ============================================================================
