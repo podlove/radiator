@@ -17,7 +17,7 @@ defmodule Radiator.Podcasts.License do
   end
 
   actions do
-    defaults([:read, :create, :update, :destroy])
+    defaults [:read, :create, :update, :destroy]
   end
 
   attributes do

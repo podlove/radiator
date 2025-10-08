@@ -45,6 +45,7 @@ defmodule Radiator.MixProject do
       {:bcrypt_elixir, "~> 3.0"},
       {:picosat_elixir, "~> 0.2"},
       {:ash_authentication, "~> 4.0"},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:live_debugger, "~> 0.4", only: [:dev]},
       {:ash_admin, "~> 0.13"},
       {:ash_postgres, "~> 2.0"},
@@ -81,6 +82,8 @@ defmodule Radiator.MixProject do
       {:bandit, "~> 1.5"},
       {:ex_cldr, "~> 2.37"},
       {:ex_cldr_languages, "~> 0.3.3"},
+      {:plug, "~> 1.17"},
+      {:tidewave, "~> 0.4", only: :dev},
       {:ash_translation, "~> 0.2.1"}
     ]
   end
