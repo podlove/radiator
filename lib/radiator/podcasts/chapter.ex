@@ -7,6 +7,10 @@ defmodule Radiator.Podcasts.Chapter do
   postgres do
     table "chapters"
     repo Radiator.Repo
+
+    references do
+      reference :episode, on_delete: :delete
+    end
   end
 
   @default_accept_attributes [:start_time_ms, :title, :link]
