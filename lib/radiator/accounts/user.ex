@@ -1,167 +1,256 @@
 defmodule Radiator.Accounts.User do
-  @moduledoc """
-  The user model.
-  """
-  use Ecto.Schema
-  import Ecto.Changeset
-  alias Radiator.Accounts.WebService
-  alias Radiator.Podcast.Show
+  use Ash.Resource,
+    otp_app: :radiator,
+    domain: Radiator.Accounts,
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshAuthentication]
 
-  schema "users" do
-    field :email, :string
-    field :password, :string, virtual: true, redact: true
-    field :hashed_password, :string, redact: true
-    field :current_password, :string, virtual: true, redact: true
-    field :confirmed_at, :utc_datetime
+  authentication do
+    add_ons do
+      log_out_everywhere do
+        apply_on_password_change? true
+      end
 
-    has_many :services, WebService
-    many_to_many :hosting_shows, Show, join_through: "show_hosts"
+      confirmation :confirm_new_user do
+        monitor_fields [:email]
+        confirm_on_create? true
+        confirm_on_update? false
+        require_interaction? true
+        confirmed_at_field :confirmed_at
+        auto_confirm_actions [:sign_in_with_magic_link, :reset_password_with_token]
+        sender Radiator.Accounts.User.Senders.SendNewUserConfirmationEmail
+      end
+    end
 
-    timestamps(type: :utc_datetime)
-  end
+    tokens do
+      enabled? true
+      token_resource Radiator.Accounts.Token
+      signing_secret Radiator.Secrets
+      store_all_tokens? true
+      require_token_presence_for_authentication? true
+    end
 
-  @doc """
-  A user changeset for registration.
+    strategies do
+      password :password do
+        identity_field :email
+        hash_provider AshAuthentication.BcryptProvider
 
-  It is important to validate the length of both email and password.
-  Otherwise databases may truncate the email without warnings, which
-  could lead to unpredictable or insecure behaviour. Long passwords may
-  also be very expensive to hash for certain algorithms.
-
-  ## Options
-
-    * `:hash_password` - Hashes the password so it can be stored securely
-      in the database and ensures the password field is cleared to prevent
-      leaks in the logs. If password hashing is not needed and clearing the
-      password field is not desired (like when using this changeset for
-      validations on a LiveView form), this option can be set to `false`.
-      Defaults to `true`.
-
-    * `:validate_email` - Validates the uniqueness of the email, in case
-      you don't want to validate the uniqueness of the email (like when
-      using this changeset for validations on a LiveView form before
-      submitting the form), this option can be set to `false`.
-      Defaults to `true`.
-  """
-  def registration_changeset(user, attrs, opts \\ []) do
-    user
-    |> cast(attrs, [:email, :password])
-    |> validate_email(opts)
-    |> validate_password(opts)
-  end
-
-  defp validate_email(changeset, opts) do
-    changeset
-    |> validate_required([:email])
-    |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
-    |> validate_length(:email, max: 160)
-    |> maybe_validate_unique_email(opts)
-  end
-
-  defp validate_password(changeset, opts) do
-    changeset
-    |> validate_required([:password])
-    |> validate_length(:password, min: 12, max: 72)
-    # Examples of additional password validation:
-    # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
-    # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
-    # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
-    |> maybe_hash_password(opts)
-  end
-
-  defp maybe_hash_password(changeset, opts) do
-    hash_password? = Keyword.get(opts, :hash_password, true)
-    password = get_change(changeset, :password)
-
-    if hash_password? && password && changeset.valid? do
-      changeset
-      # Hashing could be done with `Ecto.Changeset.prepare_changes/2`, but that
-      # would keep the database transaction open longer and hurt performance.
-      |> put_change(:hashed_password, Argon2.hash_pwd_salt(password))
-      |> delete_change(:password)
-    else
-      changeset
+        resettable do
+          sender Radiator.Accounts.User.Senders.SendPasswordResetEmail
+          # these configurations will be the default in a future release
+          password_reset_action_name :reset_password_with_token
+          request_password_reset_action_name :request_password_reset_token
+        end
+      end
     end
   end
 
-  defp maybe_validate_unique_email(changeset, opts) do
-    if Keyword.get(opts, :validate_email, true) do
-      changeset
-      |> unsafe_validate_unique(:email, Radiator.Repo)
-      |> unique_constraint(:email)
-    else
-      changeset
+  postgres do
+    table "users"
+    repo Radiator.Repo
+  end
+
+  actions do
+    defaults [:read]
+
+    read :get_by_subject do
+      description "Get a user by the subject claim in a JWT"
+      argument :subject, :string, allow_nil?: false
+      get? true
+      prepare AshAuthentication.Preparations.FilterBySubject
+    end
+
+    update :change_password do
+      # Use this action to allow users to change their password by providing
+      # their current password and a new password.
+
+      require_atomic? false
+      accept []
+      argument :current_password, :string, sensitive?: true, allow_nil?: false
+
+      argument :password, :string,
+        sensitive?: true,
+        allow_nil?: false,
+        constraints: [min_length: 8]
+
+      argument :password_confirmation, :string, sensitive?: true, allow_nil?: false
+
+      validate confirm(:password, :password_confirmation)
+
+      validate {AshAuthentication.Strategy.Password.PasswordValidation,
+                strategy_name: :password, password_argument: :current_password}
+
+      change {AshAuthentication.Strategy.Password.HashPasswordChange, strategy_name: :password}
+    end
+
+    read :sign_in_with_password do
+      description "Attempt to sign in using a email and password."
+      get? true
+
+      argument :email, :ci_string do
+        description "The email to use for retrieving the user."
+        allow_nil? false
+      end
+
+      argument :password, :string do
+        description "The password to check for the matching user."
+        allow_nil? false
+        sensitive? true
+      end
+
+      # validates the provided email and password and generates a token
+      prepare AshAuthentication.Strategy.Password.SignInPreparation
+
+      metadata :token, :string do
+        description "A JWT that can be used to authenticate the user."
+        allow_nil? false
+      end
+    end
+
+    read :sign_in_with_token do
+      # In the generated sign in components, we validate the
+      # email and password directly in the LiveView
+      # and generate a short-lived token that can be used to sign in over
+      # a standard controller action, exchanging it for a standard token.
+      # This action performs that exchange. If you do not use the generated
+      # liveviews, you may remove this action, and set
+      # `sign_in_tokens_enabled? false` in the password strategy.
+
+      description "Attempt to sign in using a short-lived sign in token."
+      get? true
+
+      argument :token, :string do
+        description "The short-lived sign in token."
+        allow_nil? false
+        sensitive? true
+      end
+
+      # validates the provided sign in token and generates a token
+      prepare AshAuthentication.Strategy.Password.SignInWithTokenPreparation
+
+      metadata :token, :string do
+        description "A JWT that can be used to authenticate the user."
+        allow_nil? false
+      end
+    end
+
+    create :register_with_password do
+      description "Register a new user with a email and password."
+
+      argument :email, :ci_string do
+        allow_nil? false
+      end
+
+      argument :password, :string do
+        description "The proposed password for the user, in plain text."
+        allow_nil? false
+        constraints min_length: 8
+        sensitive? true
+      end
+
+      argument :password_confirmation, :string do
+        description "The proposed password for the user (again), in plain text."
+        allow_nil? false
+        sensitive? true
+      end
+
+      # Sets the email from the argument
+      change set_attribute(:email, arg(:email))
+
+      # Hashes the provided password
+      change AshAuthentication.Strategy.Password.HashPasswordChange
+
+      # Generates an authentication token for the user
+      change AshAuthentication.GenerateTokenChange
+
+      # validates that the password matches the confirmation
+      validate AshAuthentication.Strategy.Password.PasswordConfirmationValidation
+
+      metadata :token, :string do
+        description "A JWT that can be used to authenticate the user."
+        allow_nil? false
+      end
+    end
+
+    action :request_password_reset_token do
+      description "Send password reset instructions to a user if they exist."
+
+      argument :email, :ci_string do
+        allow_nil? false
+      end
+
+      # creates a reset token and invokes the relevant senders
+      run {AshAuthentication.Strategy.Password.RequestPasswordReset, action: :get_by_email}
+    end
+
+    read :get_by_email do
+      description "Looks up a user by their email"
+      get? true
+
+      argument :email, :ci_string do
+        allow_nil? false
+      end
+
+      filter expr(email == ^arg(:email))
+    end
+
+    update :reset_password_with_token do
+      argument :reset_token, :string do
+        allow_nil? false
+        sensitive? true
+      end
+
+      argument :password, :string do
+        description "The proposed password for the user, in plain text."
+        allow_nil? false
+        constraints min_length: 8
+        sensitive? true
+      end
+
+      argument :password_confirmation, :string do
+        description "The proposed password for the user (again), in plain text."
+        allow_nil? false
+        sensitive? true
+      end
+
+      # validates the provided reset token
+      validate AshAuthentication.Strategy.Password.ResetTokenValidation
+
+      # validates that the password matches the confirmation
+      validate AshAuthentication.Strategy.Password.PasswordConfirmationValidation
+
+      # Hashes the provided password
+      change AshAuthentication.Strategy.Password.HashPasswordChange
+
+      # Generates an authentication token for the user
+      change AshAuthentication.GenerateTokenChange
     end
   end
 
-  @doc """
-  A user changeset for changing the email.
-
-  It requires the email to change otherwise an error is added.
-  """
-  def email_changeset(user, attrs, opts \\ []) do
-    user
-    |> cast(attrs, [:email])
-    |> validate_email(opts)
-    |> case do
-      %{changes: %{email: _}} = changeset -> changeset
-      %{} = changeset -> add_error(changeset, :email, "did not change")
+  policies do
+    bypass AshAuthentication.Checks.AshAuthenticationInteraction do
+      authorize_if always()
     end
   end
 
-  @doc """
-  A user changeset for changing the password.
+  attributes do
+    uuid_primary_key :id
 
-  ## Options
-
-    * `:hash_password` - Hashes the password so it can be stored securely
-      in the database and ensures the password field is cleared to prevent
-      leaks in the logs. If password hashing is not needed and clearing the
-      password field is not desired (like when using this changeset for
-      validations on a LiveView form), this option can be set to `false`.
-      Defaults to `true`.
-  """
-  def password_changeset(user, attrs, opts \\ []) do
-    user
-    |> cast(attrs, [:password])
-    |> validate_confirmation(:password, message: "does not match password")
-    |> validate_password(opts)
-  end
-
-  @doc """
-  Confirms the account by setting `confirmed_at`.
-  """
-  def confirm_changeset(user) do
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
-    change(user, confirmed_at: now)
-  end
-
-  @doc """
-  Verifies the password.
-
-  If there is no user or the user doesn't have a password, we call
-  `Argon2.no_user_verify/0` to avoid timing attacks.
-  """
-  def valid_password?(%Radiator.Accounts.User{hashed_password: hashed_password}, password)
-      when is_binary(hashed_password) and byte_size(password) > 0 do
-    Argon2.verify_pass(password, hashed_password)
-  end
-
-  def valid_password?(_, _) do
-    Argon2.no_user_verify()
-    false
-  end
-
-  @doc """
-  Validates the current password otherwise adds an error to the changeset.
-  """
-  def validate_current_password(changeset, password) do
-    changeset = cast(changeset, %{current_password: password}, [:current_password])
-
-    if valid_password?(changeset.data, password) do
-      changeset
-    else
-      add_error(changeset, :current_password, "is not valid")
+    attribute :email, :ci_string do
+      allow_nil? false
+      public? true
     end
+
+    attribute :hashed_password, :string do
+      allow_nil? false
+      sensitive? true
+    end
+
+    attribute :confirmed_at, :utc_datetime_usec
+  end
+
+  identities do
+    identity :unique_email, [:email]
   end
 end

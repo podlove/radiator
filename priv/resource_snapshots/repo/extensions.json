@@ -1,0 +1,7 @@
+{
+  "ash_functions_version": 5,
+  "installed": [
+    "ash-functions",
+    "citext"
+  ]
+}

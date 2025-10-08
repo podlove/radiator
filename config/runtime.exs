@@ -34,6 +34,8 @@ if config_env() == :prod do
     # ssl: true,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    # For machines with several cores, consider starting multiple pools of `pool_size`
+    # pool_count: 4,
     socket_options: maybe_ipv6
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
@@ -53,9 +55,6 @@ if config_env() == :prod do
 
   config :radiator, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
-  config :radiator, :raindrop_client_id, System.get_env("RAINDROP_CLIENT_ID")
-  config :radiator, :raindrop_client_secret, System.get_env("RAINDROP_CLIENT_SECRET")
-
   config :radiator, RadiatorWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [
@@ -67,6 +66,11 @@ if config_env() == :prod do
       port: port
     ],
     secret_key_base: secret_key_base
+
+  config :radiator,
+    token_signing_secret:
+      System.get_env("TOKEN_SIGNING_SECRET") ||
+        raise("Missing environment variable `TOKEN_SIGNING_SECRET`!")
 
   # ## SSL Support
   #
@@ -103,52 +107,18 @@ if config_env() == :prod do
   # ## Configuring the mailer
   #
   # In production you need to configure the mailer to use a different adapter.
-  # Also, you may need to configure the Swoosh API client of your choice if you
-  # are not using SMTP. Here is an example of the configuration:
+  # Here is an example configuration for Mailgun:
   #
   #     config :radiator, Radiator.Mailer,
   #       adapter: Swoosh.Adapters.Mailgun,
   #       api_key: System.get_env("MAILGUN_API_KEY"),
   #       domain: System.get_env("MAILGUN_DOMAIN")
   #
-  # For this example you need include a HTTP client required by Swoosh API client.
-  # Swoosh supports Hackney and Finch out of the box:
+  # Most non-SMTP adapters require an API client. Swoosh supports Req, Hackney,
+  # and Finch out-of-the-box. This configuration is typically done at
+  # compile-time in your config/prod.exs:
   #
-  #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
+  #     config :swoosh, :api_client, Swoosh.ApiClient.Req
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
-
-  config :radiator, Radiator.Mailer,
-    adapter: Swoosh.Adapters.SMTP,
-    relay: System.get_env("SMTP_SERVER"),
-    username: System.get_env("SMTP_USERNAME"),
-    password: System.get_env("SMTP_PASSWORD"),
-    ssl: false,
-    tls: :never,
-    auth: :always,
-    port: String.to_integer(System.get_env("SMTP_PORT")),
-    retries: 2,
-    no_mx_lookups: false
-end
-
-services = %{
-  raindrop: %{
-    client_id: System.get_env("RAINDROP_CLIENT_ID"),
-    client_secret: System.get_env("RAINDROP_CLIENT_SECRET"),
-    options: [],
-    url: "https://raindrop.io/oauth/access_token",
-    redirect_url: "https://radiator.metaebene.net/api/raindrop/auth/redirect"
-  }
-}
-
-config :radiator, raindrop: services.raindrop
-
-if config_env() == :test do
-  config :radiator,
-    raindrop:
-      Map.merge(services.raindrop, %{
-        client_id: "2sxB9zzcQ6u2GtozA2cOJeq04",
-        client_secret: "BZ0Tug8KPjXMO9zeBB231X5Z8AL0nvL5EoENMN",
-        options: [plug: {Req.Test, RadiatorWeb.Api.RaindropController}]
-      })
 end

@@ -1,4 +1,5 @@
 import Config
+config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database
 config :radiator, Radiator.Repo,
@@ -19,11 +20,11 @@ config :radiator, Radiator.Repo,
 config :radiator, RadiatorWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4000")],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "mSDRsGewRUaXZ4KWZlQOy8BjCUExlnr/LnvGfVOAMCxpqEYQRIWRM0aKF7FI1PRA",
+  secret_key_base: "Ee9N7Y/jZ7uXSRstVe8aP61eTPvkVaZDuWE11cp6eegu6BtsttrChQGzBJiHgOTY",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:radiator, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:radiator, ~w(--watch)]}
@@ -55,21 +56,19 @@ config :radiator, RadiatorWeb.Endpoint,
 # Watch static and templates for browser reloading.
 config :radiator, RadiatorWeb.Endpoint,
   live_reload: [
+    web_console_logger: true,
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/radiator_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/radiator_web/(?:controllers|live|components|router)/?.*\.(ex|heex)$"
     ]
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :radiator, dev_routes: true
-
-# Enable tree consistency validator: crashes when tree is not valid!
-config :radiator, tree_consistency_validator: true
+config :radiator, dev_routes: true, token_signing_secret: "czQV3Piug9mTWQzue2ll9NNjx1LqtIhy"
 
 # Do not include metadata nor timestamps in development logs
-config :logger, :console, format: "[$level] $message\n"
+config :logger, :default_formatter, format: "[$level] $message\n"
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
@@ -79,12 +78,12 @@ config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
 
 config :phoenix_live_view,
-  # Include HEEx debug annotations as HTML comments in rendered markup
+  # Include debug annotations and locations in rendered markup.
+  # Changing this configuration will require mix clean and a full recompile.
   debug_heex_annotations: true,
+  debug_attributes: true,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
-
-config :mix_test_interactive, clear: true

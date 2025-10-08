@@ -5,31 +5,18 @@ defmodule Radiator.Application do
 
   use Application
 
-  alias Radiator.Outline.CommandProcessor
-  alias Radiator.Outline.CommandQueue
-  alias Radiator.Outline.NodeChangeListener
-
   @impl true
   def start(_type, _args) do
-    job_runner_config = [
-      strategy: :one_for_one,
-      max_seconds: 30,
-      name: Radiator.JobRunner
-    ]
-
     children = [
       RadiatorWeb.Telemetry,
       Radiator.Repo,
       {DNSCluster, query: Application.get_env(:radiator, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Radiator.PubSub},
-      # Start the Finch HTTP client for sending emails
-      {Finch, name: Radiator.Finch},
+      # Start a worker by calling: Radiator.Worker.start_link(arg)
+      # {Radiator.Worker, arg},
+      # Start to serve requests, typically the last entry
       RadiatorWeb.Endpoint,
-      {CommandQueue, name: CommandQueue},
-      {CommandProcessor, name: CommandProcessor, subscribe_to: [{CommandQueue, max_demand: 1}]},
-      {NodeChangeListener, name: NodeChangeListener},
-      {Registry, keys: :unique, name: Radiator.JobRegistry},
-      {DynamicSupervisor, job_runner_config}
+      {AshAuthentication.Supervisor, [otp_app: :radiator]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -1,7 +1,7 @@
 import Config
-
-# Only in tests, remove the complexity from the password hashing algorithm
-config :argon2_elixir, t_cost: 1, m_cost: 8
+config :radiator, token_signing_secret: "r87V8ba/4LnXY8qPb/jO1tU5D1grZOhx"
+config :bcrypt_elixir, log_rounds: 1
+config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 
 # Configure your database
 #
@@ -20,8 +20,8 @@ config :radiator, Radiator.Repo,
 # you can enable the server option below.
 config :radiator, RadiatorWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "IR/sJ/Eum00VCgDtlIPWommlT4nig7Q51n5FnE1kdjaf1lhin4JGGB1RsanOPgfT",
-  server: true
+  secret_key_base: "VcBRRw8awfIsdZZZnDEFXY32Y0UA6p3djXksrknn7Mu16W75ZoXtrHYosHG4R3qs",
+  server: false
 
 # In test we don't send emails
 config :radiator, Radiator.Mailer, adapter: Swoosh.Adapters.Test
@@ -38,15 +38,3 @@ config :phoenix, :plug_init_mode, :runtime
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
-
-# Enable tree consistency validator: crashes when tree is not valid!
-config :radiator, tree_consistency_validator: true
-
-config :phoenix_test,
-  endpoint: RadiatorWeb.Endpoint,
-  otp_app: :radiator,
-  playwright: [
-    browser: :chromium,
-    headless: System.get_env("PLAYWRIGHT_HEADLESS", "t") in ~w(t true),
-    trace: System.get_env("PLAYWRIGHT_TRACE", "false") in ~w(t true)
-  ]

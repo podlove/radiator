@@ -1,7 +1,9 @@
 defmodule RadiatorWeb.Router do
   use RadiatorWeb, :router
 
-  import RadiatorWeb.UserAuth
+  use AshAuthentication.Phoenix.Router
+
+  import AshAuthentication.Plug.Helpers
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -10,29 +12,73 @@ defmodule RadiatorWeb.Router do
     plug :put_root_layout, html: {RadiatorWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug :fetch_current_user
+    plug :load_from_session
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :load_from_bearer
+    plug :set_actor, :user
   end
 
   scope "/", RadiatorWeb do
     pipe_through :browser
 
     get "/", PageController, :home
+    auth_routes AuthController, Radiator.Accounts.User, path: "/auth"
+    sign_out_route AuthController
 
-    live "/outline", OutlineLive.Index, :index
-    live "/outline/:container", OutlineLive.Index, :index
+    # Remove these if you'd like to use your own authentication views
+    sign_in_route register_path: "/register",
+                  reset_path: "/reset",
+                  auth_routes_prefix: "/auth",
+                  on_mount: [{RadiatorWeb.LiveUserAuth, :live_no_user}],
+                  overrides: [
+                    RadiatorWeb.AuthOverrides,
+                    AshAuthentication.Phoenix.Overrides.Default
+                  ]
+
+    # Remove this if you do not want to use the reset password feature
+    reset_route auth_routes_prefix: "/auth",
+                overrides: [
+                  RadiatorWeb.AuthOverrides,
+                  AshAuthentication.Phoenix.Overrides.Default
+                ]
+
+    # Remove this if you do not use the confirmation strategy
+    confirm_route Radiator.Accounts.User, :confirm_new_user,
+      auth_routes_prefix: "/auth",
+      overrides: [RadiatorWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+
+    # Remove this if you do not use the magic link strategy.
+    magic_sign_in_route(Radiator.Accounts.User, :magic_link,
+      on_mount: [{RadiatorWeb.LiveUserAuth, :live_no_user}],
+      auth_routes_prefix: "/auth",
+      overrides: [RadiatorWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+    )
+  end
+
+  scope "/admin", RadiatorWeb.Admin do
+    pipe_through :browser
+
+    ash_authentication_live_session :authenticated_routes,
+      on_mount: {RadiatorWeb.LiveUserAuth, :live_user_required} do
+      live "/shows", Shows.IndexLive
+      live "/shows/new", Shows.FormLive, :new
+      live "/shows/:id", Shows.ShowLive
+      live "/shows/:id/edit", Shows.FormLive, :edit
+
+      live "/shows/:show_id/episodes/new", Episodes.FormLive, :new
+      live "/shows/:show_id/episodes", Episodes.IndexLive
+      live "/shows/:show_id/episodes/:id", Episodes.ShowLive
+      live "/shows/:show_id/episodes/:id/edit", Episodes.FormLive, :edit
+    end
   end
 
   # Other scopes may use custom stacks.
-  scope "/api", RadiatorWeb.Api do
-    pipe_through :api
-
-    post "/v1/outline", OutlineController, :create
-    get "/raindrop/auth/redirect", RaindropController, :auth_redirect
-  end
+  # scope "/api", RadiatorWeb do
+  #   pipe_through :api
+  # end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:radiator, :dev_routes) do
@@ -51,51 +97,13 @@ defmodule RadiatorWeb.Router do
     end
   end
 
-  ## Authentication routes
+  if Application.compile_env(:radiator, :dev_routes) do
+    import AshAdmin.Router
 
-  scope "/", RadiatorWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
+    scope "/ash_admin" do
+      pipe_through :browser
 
-    live_session :redirect_if_user_is_authenticated,
-      on_mount: [{RadiatorWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/users/register", UserRegistrationLive, :new
-      live "/users/log_in", UserLoginLive, :new
-      live "/users/reset_password", UserForgotPasswordLive, :new
-      live "/users/reset_password/:token", UserResetPasswordLive, :edit
-    end
-
-    post "/users/log_in", UserSessionController, :create
-  end
-
-  scope "/", RadiatorWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    live_session :require_authenticated_user,
-      on_mount: [{RadiatorWeb.UserAuth, :ensure_authenticated}] do
-      live "/users/settings", UserSettingsLive, :edit
-      live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
-
-      live "/admin", AdminLive.Index, :index
-
-      live "/admin/accounts", AccountsLive.Index, :index
-
-      live "/admin/podcast/:show", EpisodeLive.Index, :index
-
-      live "/admin/podcast/:show/new", EpisodeLive.Index, :new
-      live "/admin/podcast/:show/:episode", EpisodeLive.Index, :index
-      live "/admin/podcast/:show/:episode/edit", EpisodeLive.Index, :edit
-    end
-  end
-
-  scope "/", RadiatorWeb do
-    pipe_through [:browser]
-
-    delete "/users/log_out", UserSessionController, :delete
-
-    live_session :current_user,
-      on_mount: [{RadiatorWeb.UserAuth, :mount_current_user}] do
-      live "/users/confirm/:token", UserConfirmationLive, :edit
-      live "/users/confirm", UserConfirmationInstructionsLive, :new
+      ash_admin "/"
     end
   end
 end
