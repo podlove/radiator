@@ -7,6 +7,10 @@ defmodule Radiator.Podcasts.Episode do
   postgres do
     table "episodes"
     repo Radiator.Repo
+
+    references do
+      reference :show, on_delete: :delete
+    end
   end
 
   @default_accept_attributes [
