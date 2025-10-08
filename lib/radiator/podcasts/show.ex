@@ -27,8 +27,8 @@ defmodule Radiator.Podcasts.Show do
     :blocked,
     :explicit,
     :complete,
-    :donation_url,
-    :donation_description
+    :funding_url,
+    :funding_description
   ]
 
   actions do
@@ -130,12 +130,12 @@ defmodule Radiator.Podcasts.Show do
       default false
     end
 
-    attribute :donation_url, :string do
+    attribute :funding_url, :string do
       description "The URL of the donation page"
       public? true
     end
 
-    attribute :donation_description, :string do
+    attribute :funding_description, :string do
       description "The description of the donation"
       public? true
     end

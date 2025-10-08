@@ -57,8 +57,8 @@ defmodule RadiatorWeb.Admin.Shows.FormLive do
         <.input field={form[:blocked]} type="checkbox" label={gettext("Blocked")} />
         <.input field={form[:explicit]} type="checkbox" label={gettext("Explicit")} />
         <.input field={form[:complete]} type="checkbox" label={gettext("Complete")} />
-        <.input field={form[:donation_url]} label={gettext("Donation URL")} />
-        <.input field={form[:donation_description]} label={gettext("Donation Description")} />
+        <.input field={form[:funding_url]} label={gettext("Donation URL")} />
+        <.input field={form[:funding_description]} label={gettext("Donation Description")} />
         <:actions>
           <.button variant="primary">Save</.button>
         </:actions>
