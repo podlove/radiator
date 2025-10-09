@@ -57,6 +57,8 @@ defmodule Radiator.Podcasts.Chapter do
   end
 
   identities do
-    identity :start_time, [:start_time_ms, :episode_id]
+    identity :start_time, [:start_time_ms, :episode_id] do
+      eager_check? true
+    end
   end
 end
