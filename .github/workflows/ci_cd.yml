@@ -1,0 +1,93 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build_test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Setup Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-deps-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-deps-
+
+      - name: Cache build
+        uses: actions/cache@v4
+        with:
+          path: _build
+          key: ${{ runner.os }}-mix-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-build-
+            ${{ runner.os }}-mix-
+
+      - name: Clean caches on workflow retry
+        if: github.run_attempt != '1'
+        run: |
+          mix deps.clean --all
+          mix clean
+        shell: sh
+
+      - name: Install Dependencies
+        run: mix deps.get
+
+      - name: Compiles without warnings
+        run: mix compile --warnings-as-errors
+
+      - name: Check Code Style
+        run: mix credo --strict
+
+      - name: Check Formatting
+        run: mix format --check-formatted
+
+      - name: Run Tests
+        run: mix test
+
+  # deploy:
+  #   name: Deploy
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - build_test
+
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v4
+
+  #     - uses: superfly/flyctl-actions/setup-flyctl@master
+  #     - run: flyctl deploy --remote-only
+  #       env:
+  #         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
