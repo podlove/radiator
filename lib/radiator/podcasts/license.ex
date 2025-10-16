@@ -7,6 +7,8 @@ defmodule Radiator.Podcasts.License do
     data_layer: AshPostgres.DataLayer,
     extensions: [AshTranslation.Resource]
 
+  alias Radiator.Cldr.AshTranslation
+
   postgres do
     table "licenses"
     repo Radiator.Repo
@@ -15,7 +17,7 @@ defmodule Radiator.Podcasts.License do
   translations do
     public? true
     fields([:name])
-    locales(Radiator.Cldr.AshTranslation.locale_names())
+    locales(AshTranslation.locale_names())
   end
 
   actions do
