@@ -1,4 +1,6 @@
 defmodule Radiator.Accounts.Token do
+  @moduledoc false
+
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Accounts,

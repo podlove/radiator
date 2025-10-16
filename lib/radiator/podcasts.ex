@@ -1,4 +1,6 @@
 defmodule Radiator.Podcasts do
+  @moduledoc false
+
   use Ash.Domain, otp_app: :radiator, extensions: [AshPhoenix, AshAdmin.Domain]
 
   forms do

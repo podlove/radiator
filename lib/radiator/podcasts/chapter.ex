@@ -1,4 +1,6 @@
 defmodule Radiator.Podcasts.Chapter do
+  @moduledoc false
+
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,
