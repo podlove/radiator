@@ -5,7 +5,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLive do
 
   @impl Phoenix.LiveView
   def mount(%{"id" => id}, _session, socket) do
-    episode = Radiator.Podcasts.get_episode_by_id!(id, load: [:show])
+    episode = Radiator.Podcasts.get_episode_by_id!(id, load: [:podcast])
 
     socket =
       socket
@@ -44,7 +44,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLive do
         {gettext("Delete Episode")}
       </.button>
       <.button
-        navigate={~p"/admin/shows/#{@episode.show}/episodes/#{@episode}/edit"}
+        navigate={~p"/admin/podcasts/#{@episode.podcast}/episodes/#{@episode}/edit"}
         variant="primary"
       >
         {gettext("Edit Episode")}

@@ -5,26 +5,26 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
 
   @impl Phoenix.LiveView
   def mount(%{"id" => id}, _session, socket) do
-    episode = Radiator.Podcasts.get_episode_by_id!(id, load: [:show])
+    episode = Radiator.Podcasts.get_episode_by_id!(id, load: [:podcast])
     form = Radiator.Podcasts.form_to_update_episode(episode)
 
     socket =
       socket
       |> assign(:form, to_form(form))
-      |> assign(:show, episode.show)
+      |> assign(:podcast, episode.podcast)
       |> assign(:page_title, "Edit Episode")
 
     {:ok, socket}
   end
 
-  def mount(%{"show_id" => show_id}, _session, socket) do
-    show = Radiator.Podcasts.get_show_by_id!(show_id)
-    form = Radiator.Podcasts.form_to_create_episode(show_id)
+  def mount(%{"podcast_id" => podcast_id}, _session, socket) do
+    podcast = Radiator.Podcasts.get_podcast_by_id!(podcast_id)
+    form = Radiator.Podcasts.form_to_create_episode(podcast_id)
 
     socket =
       socket
       |> assign(:form, to_form(form))
-      |> assign(:show, show)
+      |> assign(:podcast, podcast)
       |> assign(:page_title, "New Episode")
 
     {:ok, socket}
@@ -74,7 +74,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
         socket =
           socket
           |> put_flash(:info, gettext("Episode saved"))
-          |> push_navigate(to: ~p"/admin/shows/#{socket.assigns.show}/episodes/#{episode}")
+          |> push_navigate(to: ~p"/admin/podcasts/#{socket.assigns.podcast}/episodes/#{episode}")
 
         {:noreply, socket}
 

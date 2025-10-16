@@ -43,8 +43,8 @@ defmodule Radiator.Podcasts.License do
     end
 
     relationships do
-      has_many :shows, Radiator.Podcasts.Show do
-        description "The shows that use this license"
+      has_many :podcasts, Radiator.Podcasts.Podcast do
+        description "The podcasts that use this license"
         public? true
       end
     end

@@ -11,7 +11,7 @@ defmodule Radiator.Podcasts.Episode do
     repo Radiator.Repo
 
     references do
-      reference :show, on_delete: :delete
+      reference :podcast, on_delete: :delete
     end
   end
 
@@ -30,12 +30,12 @@ defmodule Radiator.Podcasts.Episode do
     default_accept @default_accept_attributes
 
     create :create do
-      accept @default_accept_attributes ++ [:show_id]
+      accept @default_accept_attributes ++ [:podcast_id]
     end
 
     create :import do
       description "Import an episode from external feed data"
-      accept @default_accept_attributes ++ [:guid, :show_id]
+      accept @default_accept_attributes ++ [:guid, :podcast_id]
     end
   end
 
@@ -101,8 +101,8 @@ defmodule Radiator.Podcasts.Episode do
   end
 
   relationships do
-    belongs_to :show, Radiator.Podcasts.Show do
-      description "The show this episode belongs to"
+    belongs_to :podcast, Radiator.Podcasts.Podcast do
+      description "The podcast this episode belongs to"
       public? true
       allow_nil? false
     end
@@ -114,7 +114,7 @@ defmodule Radiator.Podcasts.Episode do
     end
 
     # HINT: add season_id to the identity when seasons are addeed
-    identity :number, [:number, :show_id] do
+    identity :number, [:number, :podcast_id] do
       eager_check? true
     end
   end

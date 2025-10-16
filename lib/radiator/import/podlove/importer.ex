@@ -4,7 +4,7 @@ defmodule Radiator.Import.Podlove.Importer do
 
   This module handles the complete import process:
   1. Fetches podcast metadata via the Podlove API
-  2. Creates the Show record
+  2. Creates the Podcast record
   3. Fetches all episodes
   4. Creates Episode records
   5. Fetches and creates Chapter records for each episode
@@ -15,14 +15,14 @@ defmodule Radiator.Import.Podlove.Importer do
   ## Usage
 
       iex> Radiator.Import.Podlove.Importer.import_podcast("https://example.com")
-      {:ok, %Radiator.Podcasts.Show{...}}
+      {:ok, %Radiator.Podcasts.Podcast{...}}
 
       # With authentication
       iex> Radiator.Import.Podlove.Importer.import_podcast(
       ...>   "https://example.com",
       ...>   auth: {"username", "app_password"}
       ...> )
-      {:ok, %Radiator.Podcasts.Show{...}}
+      {:ok, %Radiator.Podcasts.Podcast{...}}
   """
 
   require Ash.Query
@@ -30,7 +30,7 @@ defmodule Radiator.Import.Podlove.Importer do
 
   alias Radiator.Import.Podlove.ApiClient
   alias Radiator.Import.Tools
-  alias Radiator.Podcasts.{Show, Episode, Chapter}
+  alias Radiator.Podcasts.{Podcast, Episode, Chapter}
   alias Radiator.Repo
 
   @doc """
@@ -59,7 +59,7 @@ defmodule Radiator.Import.Podlove.Importer do
 
   ## Returns
 
-    * `{:ok, show}` - Successfully imported show with all episodes and chapters
+    * `{:ok, podcast}` - Successfully imported podcast with all episodes and chapters
     * `{:error, :already_exists}` - Podcast already exists (use `replace: true` to update)
     * `{:error, reason}` - Import failed, all changes rolled back
 
@@ -94,10 +94,10 @@ defmodule Radiator.Import.Podlove.Importer do
     Repo.transaction(
       fn ->
         with {:ok, podcast_data} <- fetch_podcast_data(base_url, opts),
-             {:ok, show} <- create_show(podcast_data, opts),
-             {:ok, show} <- import_episodes(base_url, show, opts) do
-          Logger.info("Import completed successfully: #{show.title}")
-          show
+             {:ok, podcast} <- create_podcast(podcast_data, opts),
+             {:ok, podcast} <- import_episodes(base_url, podcast, opts) do
+          Logger.info("Import completed successfully: #{podcast.title}")
+          podcast
         else
           {:error, :already_exists} ->
             # Special handling for already exists - don't log as error
@@ -127,12 +127,12 @@ defmodule Radiator.Import.Podlove.Importer do
     end
   end
 
-  defp create_show(podcast_data, opts) do
-    Logger.debug("Creating show")
+  defp create_podcast(podcast_data, opts) do
+    Logger.debug("Creating podcast")
 
     guid = podcast_data["guid"] || generate_guid_from_url(podcast_data)
 
-    show_attrs = %{
+    podcast_attrs = %{
       title: Tools.decode_html_entities(podcast_data["title"]),
       subtitle: Tools.decode_html_entities(podcast_data["subtitle"]),
       summary:
@@ -140,7 +140,7 @@ defmodule Radiator.Import.Podlove.Importer do
       mnemonic: podcast_data["mnemonic"],
       language: podcast_data["language"],
       author: Tools.decode_html_entities(podcast_data["author_name"]),
-      itunes_type: Tools.convert_show_type(podcast_data["itunes_type"]),
+      itunes_type: Tools.convert_podcast_type(podcast_data["itunes_type"]),
       itunes_category: Tools.parse_itunes_category(podcast_data["category"]),
       explicit: podcast_data["explicit"] || false,
       funding_url: podcast_data["funding_url"],
@@ -152,60 +152,60 @@ defmodule Radiator.Import.Podlove.Importer do
     }
 
     # Remove nil values
-    show_attrs = Map.reject(show_attrs, fn {_k, v} -> is_nil(v) end)
+    podcast_attrs = Map.reject(podcast_attrs, fn {_k, v} -> is_nil(v) end)
 
-    # Try to find existing show by GUID
-    case Show
+    # Try to find existing podcast by GUID
+    case Podcast
          |> Ash.Query.filter(guid == ^guid)
          |> Ash.read_one() do
       {:ok, nil} ->
-        # Create new show
-        show_attrs_with_guid = Map.put(show_attrs, :guid, guid)
+        # Create new podcast
+        podcast_attrs_with_guid = Map.put(podcast_attrs, :guid, guid)
 
-        case Show
-             |> Ash.Changeset.for_create(:import, show_attrs_with_guid)
+        case Podcast
+             |> Ash.Changeset.for_create(:import, podcast_attrs_with_guid)
              |> Ash.create(authorize?: false, return_notifications?: true) do
-          {:ok, show, _notifications} ->
-            Logger.info("Created show: #{show.title}")
-            {:ok, show}
+          {:ok, podcast, _notifications} ->
+            Logger.info("Created podcast: #{podcast.title}")
+            {:ok, podcast}
 
           {:error, error} ->
-            {:error, "Failed to create show: #{inspect(error)}"}
+            {:error, "Failed to create podcast: #{inspect(error)}"}
         end
 
-      {:ok, existing_show} ->
-        # Show already exists
+      {:ok, existing_podcast} ->
+        # Podcast already exists
         replace? = Keyword.get(opts, :replace, false)
 
         if replace? do
-          # Delete existing show and all associated data, then create fresh
-          Logger.info("Replacing existing show: #{existing_show.title}")
+          # Delete existing podcast and all associated data, then create fresh
+          Logger.info("Replacing existing podcast: #{existing_podcast.title}")
 
-          case existing_show
+          case existing_podcast
                |> Ash.Changeset.for_destroy(:destroy)
                |> Ash.destroy(authorize?: false, return_notifications?: true) do
             {:ok, _notifications} ->
-              # Now create the show fresh with new data
-              show_attrs_with_guid = Map.put(show_attrs, :guid, guid)
+              # Now create the podcast fresh with new data
+              podcast_attrs_with_guid = Map.put(podcast_attrs, :guid, guid)
 
-              case Show
-                   |> Ash.Changeset.for_create(:import, show_attrs_with_guid)
+              case Podcast
+                   |> Ash.Changeset.for_create(:import, podcast_attrs_with_guid)
                    |> Ash.create(authorize?: false, return_notifications?: true) do
-                {:ok, show, _notifications} ->
-                  Logger.info("Created show: #{show.title}")
-                  {:ok, show}
+                {:ok, podcast, _notifications} ->
+                  Logger.info("Created podcast: #{podcast.title}")
+                  {:ok, podcast}
 
                 {:error, error} ->
-                  {:error, "Failed to create show: #{inspect(error)}"}
+                  {:error, "Failed to create podcast: #{inspect(error)}"}
               end
 
             {:error, error} ->
-              {:error, "Failed to delete existing show: #{inspect(error)}"}
+              {:error, "Failed to delete existing podcast: #{inspect(error)}"}
           end
         else
           # Don't replace - return error
           Logger.warning(
-            "Show '#{existing_show.title}' already exists (GUID: #{guid}). " <>
+            "Podcast '#{existing_podcast.title}' already exists (GUID: #{guid}). " <>
               "Use 'replace: true' option to update existing data."
           )
 
@@ -213,11 +213,11 @@ defmodule Radiator.Import.Podlove.Importer do
         end
 
       {:error, error} ->
-        {:error, "Failed to query for existing show: #{inspect(error)}"}
+        {:error, "Failed to query for existing podcast: #{inspect(error)}"}
     end
   end
 
-  defp import_episodes(base_url, show, opts) do
+  defp import_episodes(base_url, podcast, opts) do
     Logger.debug("Fetching episodes list")
 
     case ApiClient.fetch_episodes(base_url, opts) do
@@ -227,16 +227,16 @@ defmodule Radiator.Import.Podlove.Importer do
 
         episodes
         |> Enum.with_index(1)
-        |> Enum.reduce_while({:ok, show}, fn {episode_summary, index}, {:ok, show} ->
+        |> Enum.reduce_while({:ok, podcast}, fn {episode_summary, index}, {:ok, podcast} ->
           Logger.debug("Processing episode #{index}/#{total}")
 
-          case import_single_episode(base_url, show, episode_summary, opts) do
+          case import_single_episode(base_url, podcast, episode_summary, opts) do
             {:ok, :skipped} ->
               # Episode was skipped, continue with next episode
-              {:cont, {:ok, show}}
+              {:cont, {:ok, podcast}}
 
             {:ok, _episode} ->
-              {:cont, {:ok, show}}
+              {:cont, {:ok, podcast}}
 
             {:error, reason} ->
               {:halt, {:error, reason}}
@@ -248,11 +248,11 @@ defmodule Radiator.Import.Podlove.Importer do
     end
   end
 
-  defp import_single_episode(base_url, show, episode_summary, opts) do
+  defp import_single_episode(base_url, podcast, episode_summary, opts) do
     episode_id = episode_summary["id"]
 
     with {:ok, episode_data} <- fetch_episode_data(base_url, episode_id, opts),
-         {:ok, episode_or_skipped} <- create_episode(episode_data, show, opts) do
+         {:ok, episode_or_skipped} <- create_episode(episode_data, podcast, opts) do
       case episode_or_skipped do
         :skipped ->
           # Episode was skipped due to duplicate in non-strict mode
@@ -279,10 +279,10 @@ defmodule Radiator.Import.Podlove.Importer do
     end
   end
 
-  defp create_episode(episode_data, show, opts) do
+  defp create_episode(episode_data, podcast, opts) do
     strict? = Keyword.get(opts, :strict, true)
 
-    guid = episode_data["guid"] || generate_episode_guid(episode_data, show)
+    guid = episode_data["guid"] || generate_episode_guid(episode_data, podcast)
 
     episode_attrs = %{
       guid: guid,
@@ -294,7 +294,7 @@ defmodule Radiator.Import.Podlove.Importer do
       itunes_type: Tools.convert_episode_type(episode_data["type"]),
       publication_date: parse_publication_date(episode_data["publicationDate"]),
       duration_ms: Tools.parse_duration(episode_data["duration"]),
-      show_id: show.id
+      podcast_id: podcast.id
     }
 
     # Remove nil values
@@ -328,13 +328,13 @@ defmodule Radiator.Import.Podlove.Importer do
               %Ash.Error.Changes.InvalidChanges{fields: fields, message: msg}
               when msg == "has already been taken" ->
                 cond do
-                  :guid in fields and (:number in fields and :show_id in fields) ->
+                  :guid in fields and (:number in fields and :podcast_id in fields) ->
                     [:guid, :number]
 
                   :guid in fields ->
                     [:guid]
 
-                  :number in fields and :show_id in fields ->
+                  :number in fields and :podcast_id in fields ->
                     [:number]
 
                   true ->
@@ -564,10 +564,10 @@ defmodule Radiator.Import.Podlove.Importer do
   end
 
   # Helper function to generate episode GUID if not provided
-  defp generate_episode_guid(episode_data, show) do
-    # Use episode ID and show GUID to generate a unique GUID
+  defp generate_episode_guid(episode_data, podcast) do
+    # Use episode ID and podcast GUID to generate a unique GUID
     episode_id = episode_data["id"] || episode_data["title"]
-    "#{show.guid}-episode-#{episode_id}"
+    "#{podcast.guid}-episode-#{episode_id}"
   end
 
   # Helper function to parse publication date

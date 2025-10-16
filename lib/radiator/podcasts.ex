@@ -4,7 +4,7 @@ defmodule Radiator.Podcasts do
   use Ash.Domain, otp_app: :radiator, extensions: [AshPhoenix, AshAdmin.Domain]
 
   forms do
-    form :create_episode, args: [:show_id]
+    form :create_episode, args: [:podcast_id]
   end
 
   admin do
@@ -12,12 +12,12 @@ defmodule Radiator.Podcasts do
   end
 
   resources do
-    resource Radiator.Podcasts.Show do
-      define :create_show, action: :create
-      define :read_shows, action: :read
-      define :get_show_by_id, action: :read, get_by: :id
-      define :update_show, action: :update
-      define :destroy_show, action: :destroy
+    resource Radiator.Podcasts.Podcast do
+      define :create_podcast, action: :create
+      define :read_podcasts, action: :read
+      define :get_podcast_by_id, action: :read, get_by: :id
+      define :update_podcast, action: :update
+      define :destroy_podcast, action: :destroy
     end
 
     resource Radiator.Podcasts.Episode do

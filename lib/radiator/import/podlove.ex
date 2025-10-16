@@ -8,7 +8,7 @@ defmodule Radiator.Import.Podlove do
   ## Quick Example
 
       iex> Radiator.Import.Podlove.import_podcast("https://example.com")
-      {:ok, %Radiator.Podcasts.Show{...}}
+      {:ok, %Radiator.Podcasts.Podcast{...}}
 
   ## API Documentation
 
@@ -17,7 +17,7 @@ defmodule Radiator.Import.Podlove do
   """
 
   @doc """
-  Imports a complete podcast from a Podlove Publisher site.
+  Imports a complete podcast from a WordPress site running Podlove Publisher.
 
   See `Radiator.Import.Podlove.Importer.import_podcast/2` for detailed documentation.
   """

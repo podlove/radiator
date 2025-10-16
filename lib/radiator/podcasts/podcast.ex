@@ -1,4 +1,4 @@
-defmodule Radiator.Podcasts.Show do
+defmodule Radiator.Podcasts.Podcast do
   @moduledoc false
 
   use Ash.Resource,
@@ -12,7 +12,7 @@ defmodule Radiator.Podcasts.Show do
   end
 
   resource do
-    description "A show"
+    description "A podcast"
   end
 
   @default_accept_attributes [
@@ -39,7 +39,7 @@ defmodule Radiator.Podcasts.Show do
     default_accept @default_accept_attributes
 
     create :import do
-      description "Import a show from external feed data"
+      description "Import a podcast from external feed data"
       accept @default_accept_attributes ++ [:guid]
     end
   end
@@ -48,25 +48,25 @@ defmodule Radiator.Podcasts.Show do
     uuid_primary_key :id
 
     attribute :guid, :string do
-      description "The unique identifier for the show"
+      description "The unique identifier for the podcast"
       allow_nil? false
       public? true
       default &Ash.UUID.generate/0
     end
 
     attribute :title, :string do
-      description "A show's title"
+      description "A podcast's title"
       allow_nil? false
       public? true
     end
 
     attribute :subtitle, :string do
-      description "A show's subtitle"
+      description "A podcast's subtitle"
       public? true
     end
 
     attribute :summary, :string do
-      description "A show's summary"
+      description "A podcast's summary"
       public? true
       constraints max_length: 4000
     end
@@ -77,12 +77,12 @@ defmodule Radiator.Podcasts.Show do
     end
 
     attribute :language, :string do
-      description "The language of the show as an ISO 639-1"
+      description "The language of the podcast as an ISO 639-1"
       public? true
     end
 
-    attribute :itunes_type, Radiator.Podcasts.ItunesShowType do
-      description "The iTunes podcast type"
+    attribute :itunes_type, Radiator.Podcasts.ItunesPodcastType do
+      description "The iTunes type of the podcast"
       allow_nil? false
       public? true
       default :episodic
@@ -99,7 +99,7 @@ defmodule Radiator.Podcasts.Show do
     end
 
     attribute :author, :string do
-      description "The author of the show"
+      description "The author of the podcast"
       public? true
     end
 
@@ -112,21 +112,21 @@ defmodule Radiator.Podcasts.Show do
     end
 
     attribute :blocked, :boolean do
-      description "Whether the show is blocked"
+      description "Whether the podcast is blocked"
       allow_nil? false
       public? true
       default false
     end
 
     attribute :explicit, :boolean do
-      description "Whether the show is explicit"
+      description "Whether the podcast contains explicit content"
       allow_nil? false
       public? true
       default false
     end
 
     attribute :complete, :boolean do
-      description "Whether the show is complete"
+      description "Whether the podcast is complete"
       allow_nil? false
       public? true
       default false
@@ -147,12 +147,12 @@ defmodule Radiator.Podcasts.Show do
 
   relationships do
     has_many :episodes, Radiator.Podcasts.Episode do
-      description "The episodes of the show"
+      description "The episodes of the podcast"
       public? true
     end
 
     belongs_to :license, Radiator.Podcasts.License do
-      description "The license of the show"
+      description "The license of the podcast"
       public? true
     end
   end

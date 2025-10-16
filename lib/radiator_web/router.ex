@@ -63,15 +63,15 @@ defmodule RadiatorWeb.Router do
 
     ash_authentication_live_session :authenticated_routes,
       on_mount: {RadiatorWeb.LiveUserAuth, :live_user_required} do
-      live "/shows", Shows.IndexLive
-      live "/shows/new", Shows.FormLive, :new
-      live "/shows/:id", Shows.ShowLive
-      live "/shows/:id/edit", Shows.FormLive, :edit
+      live "/podcasts", Podcasts.IndexLive
+      live "/podcasts/new", Podcasts.FormLive, :new
+      live "/podcasts/:id", Podcasts.ShowLive
+      live "/podcasts/:id/edit", Podcasts.FormLive, :edit
 
-      live "/shows/:show_id/episodes/new", Episodes.FormLive, :new
-      live "/shows/:show_id/episodes", Episodes.IndexLive
-      live "/shows/:show_id/episodes/:id", Episodes.ShowLive
-      live "/shows/:show_id/episodes/:id/edit", Episodes.FormLive, :edit
+      live "/podcasts/:podcast_id/episodes/new", Episodes.FormLive, :new
+      live "/podcasts/:podcast_id/episodes", Episodes.IndexLive
+      live "/podcasts/:podcast_id/episodes/:id", Episodes.ShowLive
+      live "/podcasts/:podcast_id/episodes/:id/edit", Episodes.FormLive, :edit
     end
   end
 

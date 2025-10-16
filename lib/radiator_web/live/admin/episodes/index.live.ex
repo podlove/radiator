@@ -7,19 +7,19 @@ defmodule RadiatorWeb.Admin.Episodes.IndexLive do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(%{"show_id" => show_id} = params, _uri, socket) do
-    show = Radiator.Podcasts.get_show_by_id!(show_id)
+  def handle_params(%{"podcast_id" => podcast_id} = params, _uri, socket) do
+    podcast = Radiator.Podcasts.get_podcast_by_id!(podcast_id)
     page_params = AshPhoenix.LiveView.page_from_params(params, 10)
 
     page =
       Radiator.Podcasts.read_episodes!(nil,
-        query: [filter: [show_id: show_id], sort: [number: :desc]],
+        query: [filter: [podcast_id: podcast_id], sort: [number: :desc]],
         page: page_params
       )
 
     socket =
       socket
-      |> assign(:show, show)
+      |> assign(:podcast, podcast)
       |> assign(:page, page)
 
     {:noreply, socket}
@@ -29,18 +29,18 @@ defmodule RadiatorWeb.Admin.Episodes.IndexLive do
   def render(assigns) do
     ~H"""
     <Layouts.app {assigns}>
-      <h1>{gettext("Episodes for %{title}", title: @show.title)}</h1>
-      <.button navigate={~p"/admin/shows/#{@show}/episodes/new"} variant="primary">
+      <h1>{gettext("Episodes for %{title}", title: @podcast.title)}</h1>
+      <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes/new"} variant="primary">
         {gettext("New")}
       </.button>
       <.table id="episodes" rows={@page.results}>
         <:col :let={episode} label={gettext("Number")}>{episode.number}</:col>
         <:col :let={episode} label={gettext("Title")}>{episode.title}</:col>
         <:col :let={episode} label={gettext("Actions")}>
-          <.button navigate={~p"/admin/shows/#{@show}/episodes/#{episode}"}>
-            {gettext("Show")}
+          <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{episode}"}>
+            {gettext("Podcast")}
           </.button>
-          <.button navigate={~p"/admin/shows/#{@show}/episodes/#{episode}/edit"}>
+          <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{episode}/edit"}>
             {gettext("Edit")}
           </.button>
         </:col>

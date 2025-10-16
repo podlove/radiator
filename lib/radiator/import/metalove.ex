@@ -8,7 +8,7 @@ defmodule Radiator.Import.Metalove do
   ## Quick Example
 
       iex> Radiator.Import.Metalove.import_podcast("https://freakshow.fm/feed/mp3")
-      {:ok, %Radiator.Podcasts.Show{...}}
+      {:ok, %Radiator.Podcasts.Podcast{...}}
 
   ## About Metalove
 

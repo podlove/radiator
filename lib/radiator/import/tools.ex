@@ -120,22 +120,22 @@ defmodule Radiator.Import.Tools do
   def convert_episode_type(_), do: :full
 
   @doc """
-  Converts show type string to iTunes show type atom.
+  Converts podcast type string to iTunes podcast type atom.
 
   ## Examples
 
-      iex> Radiator.Import.Tools.convert_show_type("episodic")
+      iex> Radiator.Import.Tools.convert_podcast_type("episodic")
       :episodic
 
-      iex> Radiator.Import.Tools.convert_show_type("serial")
+      iex> Radiator.Import.Tools.convert_podcast_type("serial")
       :serial
 
-      iex> Radiator.Import.Tools.convert_show_type("unknown")
+      iex> Radiator.Import.Tools.convert_podcast_type("unknown")
       :episodic
   """
-  def convert_show_type("episodic"), do: :episodic
-  def convert_show_type("serial"), do: :serial
-  def convert_show_type(_), do: :episodic
+  def convert_podcast_type("episodic"), do: :episodic
+  def convert_podcast_type("serial"), do: :serial
+  def convert_podcast_type(_), do: :episodic
 
   @doc """
   Flattens iTunes categories from nested arrays to flat array.
