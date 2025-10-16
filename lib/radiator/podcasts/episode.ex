@@ -113,7 +113,7 @@ defmodule Radiator.Podcasts.Episode do
       eager_check? true
     end
 
-    # TODO: add season_id to the identity when seasons are addeed
+    # HINT: add season_id to the identity when seasons are addeed
     identity :number, [:number, :show_id] do
       eager_check? true
     end
