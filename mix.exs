@@ -41,6 +41,7 @@ defmodule Radiator.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:mishka_chelekom, "~> 0.0", only: [:dev]},
       {:gen_smtp, "~> 1.1"},
       {:ash_authentication_phoenix, "~> 2.0"},
       {:bcrypt_elixir, "~> 3.0"},

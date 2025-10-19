@@ -85,7 +85,7 @@ defmodule RadiatorWeb do
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components
-      import RadiatorWeb.CoreComponents
+      use RadiatorWeb.Components.MishkaComponents
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS
