@@ -25,20 +25,20 @@ defmodule RadiatorWeb.Admin.Podcasts.ShowLive do
     <Layouts.app {assigns}>
       <h1>{@podcast.title}</h1>
       <h2 :if={@podcast.subtitle}>{@podcast.subtitle}</h2>
-      <.button
+      <.button_link
         variant="danger"
         data-confirm={gettext("Are you sure you want to delete %{title}?", title: @podcast.title)}
         phx-value-id={@podcast.id}
         phx-click="destroy-podcast"
       >
         {gettext("Delete Podcast")}
-      </.button>
-      <.button navigate={~p"/admin/podcasts/#{@podcast}/edit"} variant="primary">
+      </.button_link>
+      <.button_link navigate={~p"/admin/podcasts/#{@podcast}/edit"} variant="primary">
         {gettext("Edit Podcast")}
-      </.button>
-      <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes"} variant="primary">
+      </.button_link>
+      <.button_link navigate={~p"/admin/podcasts/#{@podcast}/episodes"} variant="primary">
         {gettext("Episodes")}
-      </.button>
+      </.button_link>
     </Layouts.app>
     """
   end

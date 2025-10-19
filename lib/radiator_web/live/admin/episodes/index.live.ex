@@ -30,19 +30,19 @@ defmodule RadiatorWeb.Admin.Episodes.IndexLive do
     ~H"""
     <Layouts.app {assigns}>
       <h1>{gettext("Episodes for %{title}", title: @podcast.title)}</h1>
-      <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes/new"} variant="primary">
+      <.button_link navigate={~p"/admin/podcasts/#{@podcast}/episodes/new"} variant="primary">
         {gettext("New")}
-      </.button>
+      </.button_link>
       <.table id="episodes" rows={@page.results}>
         <:col :let={episode} label={gettext("Number")}>{episode.number}</:col>
         <:col :let={episode} label={gettext("Title")}>{episode.title}</:col>
         <:col :let={episode} label={gettext("Actions")}>
-          <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{episode}"}>
+          <.button_link navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{episode}"}>
             {gettext("Podcast")}
-          </.button>
-          <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{episode}/edit"}>
+          </.button_link>
+          <.button_link navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{episode}/edit"}>
             {gettext("Edit")}
-          </.button>
+          </.button_link>
         </:col>
       </.table>
     </Layouts.app>

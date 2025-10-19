@@ -43,12 +43,12 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLive do
       >
         {gettext("Delete Episode")}
       </.button>
-      <.button
+      <.button_link
         navigate={~p"/admin/podcasts/#{@episode.podcast}/episodes/#{@episode}/edit"}
         variant="primary"
       >
         {gettext("Edit Episode")}
-      </.button>
+      </.button_link>
     </Layouts.app>
     """
   end
