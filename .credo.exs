@@ -35,7 +35,8 @@
           ~r"/_build/",
           ~r"/deps/",
           ~r"/node_modules/",
-          ~r"/lib/radiator/import/"
+          ~r"/lib/radiator/import/",
+          ~r"/lib/radiator_web/components/"
         ]
       },
       #
