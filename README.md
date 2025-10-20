@@ -1,5 +1,7 @@
 # Radiator
 
+[![CI/CD](https://github.com/podlove/radiator/actions/workflows/ci_cd.yml/badge.svg)](https://github.com/podlove/radiator/actions/workflows/ci_cd.yml) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+
 To start your Phoenix server:
 
 * Run `mix setup` to install and setup dependencies
