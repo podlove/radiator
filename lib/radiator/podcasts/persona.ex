@@ -44,8 +44,8 @@ defmodule Radiator.Podcasts.Persona do
   identities do
     identity :slug, [:slug]
 
-    identity :one_default_per_person, [:person_id] do
-      where expr(default? == true)
-    end
+#    identity :one_default_per_person, [:person_id] do
+#      where expr(default? == true)
+#    end
   end
 end
