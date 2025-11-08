@@ -24,8 +24,8 @@ defmodule Radiator.Podcasts.Track do
     has_many :transcripts, Radiator.Podcasts.Transcript
     belongs_to :episode, Radiator.Podcasts.Episode
 
-    belongs_to :persona, Radiator.Podcasts.Persona do
-      allow_nil? true
+    belongs_to :episode_persona, Radiator.Podcasts.EpisodePersona do
+      allow_nil? false
     end
   end
 end

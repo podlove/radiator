@@ -24,10 +24,12 @@ defmodule Radiator.Podcasts.EpisodePersona do
       allow_nil? false
     end
 
-    relationships do
-      belongs_to :role, Radiator.Podcasts.Role do
-        allow_nil? true
-      end
+    belongs_to :role, Radiator.Podcasts.Role do
+      allow_nil? true
+    end
+
+    has_one :track, Radiator.Podcasts.Track do
+      allow_nil? true
     end
   end
 
