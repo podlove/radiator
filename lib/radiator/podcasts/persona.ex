@@ -17,7 +17,7 @@ defmodule Radiator.Podcasts.Persona do
       public? true
     end
 
-    attribute :slug, :string do
+    attribute :handle, :string do
       allow_nil? false
       public? false
     end
@@ -42,7 +42,7 @@ defmodule Radiator.Podcasts.Persona do
   end
 
   identities do
-    identity :slug, [:slug]
+    identity :handle, [:handle]
 
     identity :one_default_per_person, [:person_id] do
       where expr(default? == true)
