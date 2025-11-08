@@ -12,6 +12,11 @@ defmodule Radiator.Podcasts.Role do
   attributes do
     uuid_primary_key :id
 
+    attribute :name, :string do
+      allow_nil? false
+      public? false
+    end
+
     timestamps()
   end
 
