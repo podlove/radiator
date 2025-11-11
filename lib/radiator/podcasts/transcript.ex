@@ -1,4 +1,9 @@
 defmodule Radiator.Podcasts.Transcript do
+  @moduledoc """
+  Resource for a podcast transcript entry.
+  The whole transcript will be build by listing all transcripts of a track
+  """
+
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,

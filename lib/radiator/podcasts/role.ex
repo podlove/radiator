@@ -1,4 +1,7 @@
 defmodule Radiator.Podcasts.Role do
+  @moduledoc """
+  The role resource. A role is a person's role in a podcast.
+  """
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,

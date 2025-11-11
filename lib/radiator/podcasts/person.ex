@@ -1,4 +1,7 @@
 defmodule Radiator.Podcasts.Person do
+  @moduledoc """
+  The person resource.
+  """
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,

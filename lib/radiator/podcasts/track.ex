@@ -1,4 +1,7 @@
 defmodule Radiator.Podcasts.Track do
+  @moduledoc """
+  The track resource, mostly a voice in the podcast
+  """
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,

@@ -1,4 +1,7 @@
 defmodule Radiator.Podcasts.EpisodePersona do
+  @moduledoc """
+  The episode persona resource which joins an episode with a persona.
+  """
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,
