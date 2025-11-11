@@ -14,6 +14,13 @@ defmodule Radiator.Podcasts.Transcript do
     repo Radiator.Repo
   end
 
+  validations do
+    validate compare(:start_time_ms,
+               less_than: :end_time_ms,
+               message: "Start time must be before end time"
+             )
+  end
+
   attributes do
     uuid_primary_key :id
 
@@ -37,12 +44,5 @@ defmodule Radiator.Podcasts.Transcript do
 
   relationships do
     belongs_to :track, Radiator.Podcasts.Track
-  end
-
-  validations do
-    validate compare(:start_time_ms,
-               less_than: :end_time_ms,
-               message: "Start time must be before end time"
-             )
   end
 end
