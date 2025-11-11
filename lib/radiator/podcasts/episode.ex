@@ -4,7 +4,13 @@ defmodule Radiator.Podcasts.Episode do
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshStateMachine]
+
+  state_machine do
+    initial_states([:scheduling])
+    default_initial_state(:scheduling)
+  end
 
   postgres do
     table "episodes"
