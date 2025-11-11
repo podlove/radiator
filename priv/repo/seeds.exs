@@ -13,3 +13,15 @@ Radiator.Accounts.User
   password_confirmation: "supersupersecret"
 })
 |> Ash.create!(authorize?: false)
+
+{:ok, _podcast} =
+  Radiator.Podcasts.create_podcast(%{
+    title: "Dev Cafe",
+    summary: "Campfire chat between seasoned developers."
+  })
+
+{:ok, _podcast} =
+  Radiator.Podcasts.create_podcast(%{
+    title: "Tech Weekly",
+    summary: "Weekly discussion on latest topic out of the tech sphere."
+  })

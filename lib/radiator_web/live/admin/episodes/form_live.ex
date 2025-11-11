@@ -43,6 +43,13 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
         phx-change="validate"
         phx-submit="save"
       >
+      <.input
+          field={form[:participants]}
+          type="select"
+          multiple
+          options={["some user 1", "some user 2"]}
+          label={gettext("Participants")}
+        />
         <.input field={form[:title]} label={gettext("Title")} />
         <.input field={form[:subtitle]} label={gettext("Subtitle")} />
         <.input field={form[:summary]} label={gettext("Summary")} />
