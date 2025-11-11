@@ -36,22 +36,14 @@ defmodule RadiatorWeb.Admin.Podcasts.ShowLive do
       <.button_link navigate={~p"/admin/podcasts/#{@podcast}/edit"} variant="primary">
         {gettext("Edit Podcast")}
       </.button_link>
-      <.button
-        variant="primary"
-        phx-click="schedule-episode"
-      >
-        {gettext("Schedule Episode")}
-      </.button>
+      <.button_link navigate={~p"/admin/podcasts/#{@podcast}/episodes/schedule"} variant="primary">
+        {gettext("Schedule New Episode")}
+      </.button_link>
       <.button_link navigate={~p"/admin/podcasts/#{@podcast}/episodes"} variant="primary">
         {gettext("Episodes")}
       </.button_link>
     </Layouts.app>
     """
-  end
-
-  @impl Phoenix.LiveView
-  def handle_event("schedule-episode", _params, socket) do
-    {:noreply, socket}
   end
 
   def handle_event("destroy-podcast", %{"id" => podcast_id}, socket) do
