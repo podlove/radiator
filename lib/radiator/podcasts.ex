@@ -29,5 +29,11 @@ defmodule Radiator.Podcasts do
 
     resource Radiator.Podcasts.Chapter
     resource Radiator.Podcasts.License
+    resource Radiator.Podcasts.Transcript
+    resource Radiator.Podcasts.Track
+    resource Radiator.Podcasts.Person
+    resource Radiator.Podcasts.Persona
+    resource Radiator.Podcasts.EpisodePersona
+    resource Radiator.Podcasts.Role
   end
 end

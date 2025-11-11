@@ -7,7 +7,7 @@ defmodule Radiator.Podcasts.Podcast do
     data_layer: AshPostgres.DataLayer
 
   postgres do
-    table "shows"
+    table "podcasts"
     repo Radiator.Repo
   end
 
