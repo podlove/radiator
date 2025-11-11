@@ -11,9 +11,9 @@
 #   - https://pkgs.org/ - resource for finding needed packages
 #   - Ex: docker.io/hexpm/elixir:1.18.4-erlang-28.1-debian-bookworm-20250908-slim
 #
-ARG ELIXIR_VERSION=1.18.4
+ARG ELIXIR_VERSION=1.19.2
 ARG OTP_VERSION=28.1
-ARG DEBIAN_VERSION=bookworm-20250908-slim
+ARG DEBIAN_VERSION=trixie-20251103-slim
 
 ARG BUILDER_IMAGE="docker.io/hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="docker.io/debian:${DEBIAN_VERSION}"
@@ -22,15 +22,15 @@ FROM ${BUILDER_IMAGE} AS builder
 
 # install build dependencies
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends build-essential git \
-  && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends build-essential git \
+    && rm -rf /var/lib/apt/lists/*
 
 # prepare build dir
 WORKDIR /app
 
 # install hex + rebar
 RUN mix local.hex --force \
-  && mix local.rebar --force
+    && mix local.rebar --force
 
 # set build ENV
 ENV MIX_ENV="prod"
@@ -71,12 +71,12 @@ RUN mix release
 FROM ${RUNNER_IMAGE} AS final
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends libstdc++6 openssl libncurses5 locales ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y --no-install-recommends libstdc++6 openssl libncurses6 locales ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
-  && locale-gen
+    && locale-gen
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
