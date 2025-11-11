@@ -81,6 +81,7 @@ defmodule Radiator.MixProject do
       {:picosat_elixir, "~> 0.2"},
       {:plug, "~> 1.17"},
       {:postgrex, ">= 0.0.0"},
+      {:reply, "~> 1.1"},
       {:req, "~> 0.5"},
       {:sourceror, "~> 1.8", only: [:dev, :test]},
       {:swoosh, "~> 1.16"},
