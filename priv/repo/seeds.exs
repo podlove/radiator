@@ -1,11 +1,15 @@
-# Script for populating the database. You can run it as:
-#
-#     mix run priv/repo/seeds.exs
-#
-# Inside the script, you can read and write to any of your
-# repositories directly:
-#
-#     Radiator.Repo.insert!(%Radiator.SomeSchema{})
-#
-# We recommend using the bang functions (`insert!`, `update!`
-# and so on) as they will fail if something goes wrong.
+Radiator.Accounts.User
+|> Ash.Changeset.for_create(:register_with_password, %{
+  email: "bob@radiator.de",
+  password: "supersupersecret",
+  password_confirmation: "supersupersecret"
+})
+|> Ash.create!(authorize?: false)
+
+Radiator.Accounts.User
+|> Ash.Changeset.for_create(:register_with_password, %{
+  email: "jim@radiator.de",
+  password: "supersupersecret",
+  password_confirmation: "supersupersecret"
+})
+|> Ash.create!(authorize?: false)
