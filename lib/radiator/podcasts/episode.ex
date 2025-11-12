@@ -106,6 +106,8 @@ defmodule Radiator.Podcasts.Episode do
       public? true
       allow_nil? false
     end
+
+    has_many :tracks, Radiator.Podcasts.Track
   end
 
   identities do
