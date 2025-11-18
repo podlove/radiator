@@ -84,6 +84,9 @@ defmodule RadiatorWeb do
 
       # HTML escaping functionality
       import Phoenix.HTML
+
+      import Reply
+
       # Core UI components
       use RadiatorWeb.Components.MishkaComponents
 
