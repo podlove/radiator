@@ -7,11 +7,6 @@ defmodule Radiator.Podcasts.Episode do
     data_layer: AshPostgres.DataLayer,
     extensions: [AshStateMachine]
 
-  state_machine do
-    initial_states([:scheduling])
-    default_initial_state(:scheduling)
-  end
-
   postgres do
     table "episodes"
     repo Radiator.Repo
@@ -19,6 +14,11 @@ defmodule Radiator.Podcasts.Episode do
     references do
       reference :podcast, on_delete: :delete
     end
+  end
+
+  state_machine do
+    initial_states([:scheduling])
+    default_initial_state(:scheduling)
   end
 
   @default_accept_attributes [
