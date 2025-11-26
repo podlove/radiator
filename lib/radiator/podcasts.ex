@@ -36,7 +36,10 @@ defmodule Radiator.Podcasts do
       define :create_person, action: :create
     end
 
-    resource Radiator.Podcasts.Persona
+    resource Radiator.Podcasts.Persona do
+      define :create_persona, action: :create
+    end
+
     resource Radiator.Podcasts.EpisodePersona
     resource Radiator.Podcasts.Role
   end
