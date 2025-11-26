@@ -144,7 +144,8 @@ defmodule Radiator.Repo.Migrations.Personas do
             name: "episode_personas_episode_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
 
       add :persona_id,
           references(:personas,
@@ -152,7 +153,8 @@ defmodule Radiator.Repo.Migrations.Personas do
             name: "episode_personas_persona_id_fkey",
             type: :uuid,
             prefix: "public"
-          ), null: false
+          ),
+          null: false
 
       add :role_id,
           references(:roles,

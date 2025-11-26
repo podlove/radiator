@@ -36,6 +36,9 @@ defmodule RadiatorWeb.Admin.Podcasts.ShowLive do
       <.button_link navigate={~p"/admin/podcasts/#{@podcast}/edit"} variant="primary">
         {gettext("Edit Podcast")}
       </.button_link>
+      <.button_link navigate={~p"/admin/podcasts/#{@podcast}/episodes/schedule"} variant="primary">
+        {gettext("Schedule New Episode")}
+      </.button_link>
       <.button_link navigate={~p"/admin/podcasts/#{@podcast}/episodes"} variant="primary">
         {gettext("Episodes")}
       </.button_link>

@@ -12,6 +12,22 @@ defmodule Radiator.Podcasts.Persona do
     repo Radiator.Repo
   end
 
+  @default_accept_attributes [
+    :public_name,
+    :handle,
+    :description,
+    :avatar_png
+  ]
+
+  actions do
+    defaults [:read, :destroy, :update]
+    default_accept @default_accept_attributes
+
+    create :create do
+      accept @default_accept_attributes ++ [:person_id]
+    end
+  end
+
   attributes do
     uuid_primary_key :id
 

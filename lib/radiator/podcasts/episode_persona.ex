@@ -12,6 +12,10 @@ defmodule Radiator.Podcasts.EpisodePersona do
     repo Radiator.Repo
   end
 
+  actions do
+    defaults [:read]
+  end
+
   attributes do
     uuid_primary_key :id
 

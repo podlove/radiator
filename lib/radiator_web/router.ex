@@ -68,6 +68,7 @@ defmodule RadiatorWeb.Router do
       live "/podcasts/:id", Podcasts.ShowLive
       live "/podcasts/:id/edit", Podcasts.FormLive, :edit
 
+      live "/podcasts/:podcast_id/episodes/schedule", Episodes.FormLive, :schedule
       live "/podcasts/:podcast_id/episodes/new", Episodes.FormLive, :new
       live "/podcasts/:podcast_id/episodes", Episodes.IndexLive
       live "/podcasts/:podcast_id/episodes/:id", Episodes.ShowLive

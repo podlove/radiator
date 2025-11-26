@@ -4,7 +4,8 @@ defmodule Radiator.Podcasts.Episode do
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshStateMachine]
 
   postgres do
     table "episodes"
@@ -13,6 +14,11 @@ defmodule Radiator.Podcasts.Episode do
     references do
       reference :podcast, on_delete: :delete
     end
+  end
+
+  state_machine do
+    initial_states([:scheduling])
+    default_initial_state(:scheduling)
   end
 
   @default_accept_attributes [
@@ -89,14 +95,6 @@ defmodule Radiator.Podcasts.Episode do
       public? true
     end
 
-    relationships do
-      has_many :chapters, Radiator.Podcasts.Chapter do
-        description "The chapters of the episode"
-        public? true
-        sort start_time_ms: :asc
-      end
-    end
-
     timestamps()
   end
 
@@ -105,6 +103,16 @@ defmodule Radiator.Podcasts.Episode do
       description "The podcast this episode belongs to"
       public? true
       allow_nil? false
+    end
+
+    has_many :chapters, Radiator.Podcasts.Chapter do
+      description "The chapters of the episode"
+      public? true
+      sort start_time_ms: :asc
+    end
+
+    has_many :episode_personas, Radiator.Podcasts.EpisodePersona do
+      public? true
     end
 
     has_many :tracks, Radiator.Podcasts.Track
