@@ -46,6 +46,7 @@ defmodule RadiatorWeb.Admin.Podcasts.ShowLive do
     """
   end
 
+  @impl Phoenix.LiveView
   def handle_event("destroy-podcast", %{"id" => podcast_id}, socket) do
     case Radiator.Podcasts.destroy_podcast(podcast_id) do
       :ok ->
