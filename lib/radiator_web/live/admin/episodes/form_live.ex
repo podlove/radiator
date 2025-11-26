@@ -59,6 +59,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
           type="select"
           multiple
           options={@personas_options}
+          prompt="Teilnehmer auswählen"
           label={gettext("Participants")}
         />
         <.input field={form[:title]} label={gettext("Title")} />
