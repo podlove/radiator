@@ -8,17 +8,27 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     episode = Radiator.Podcasts.get_episode_by_id!(id, load: [:podcast])
     form = Radiator.Podcasts.form_to_update_episode(episode)
 
+    podcast =
+      Radiator.Podcasts.get_podcast_by_id!(episode.podcast_id,
+        load: [episodes: [episode_personas: [persona: [:person]]]]
+      )
+
     socket =
       socket
       |> assign(:form, to_form(form))
       |> assign(:podcast, episode.podcast)
       |> assign(:page_title, "Edit Episode")
+      |> assign(:personas_options, get_personas_options(podcast))
 
     {:ok, socket}
   end
 
   def mount(%{"podcast_id" => podcast_id}, _session, socket) do
-    podcast = Radiator.Podcasts.get_podcast_by_id!(podcast_id)
+    podcast =
+      Radiator.Podcasts.get_podcast_by_id!(podcast_id,
+        load: [episodes: [episode_personas: [persona: [:person]]]]
+      )
+
     form = Radiator.Podcasts.form_to_create_episode(podcast_id)
 
     socket =
@@ -26,6 +36,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
       |> assign(:form, to_form(form))
       |> assign(:podcast, podcast)
       |> assign(:page_title, "New Episode")
+      |> assign(:personas_options, get_personas_options(podcast))
 
     {:ok, socket}
   end
@@ -43,11 +54,11 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
         phx-change="validate"
         phx-submit="save"
       >
-      <.input
-          field={form[:participants]}
+        <.input
+          field={form[:episode_personas]}
           type="select"
           multiple
-          options={["some user 1", "some user 2"]}
+          options={@personas_options}
           label={gettext("Participants")}
         />
         <.input field={form[:title]} label={gettext("Title")} />
@@ -95,5 +106,14 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
 
         {:noreply, socket}
     end
+  end
+
+  defp get_personas_options(%{episodes: episodes}) do
+    episodes
+    |> Enum.flat_map(& &1.episode_personas)
+    |> Enum.map(& &1.persona)
+    |> Enum.map(& &1.person)
+    |> Enum.uniq_by(& &1.id)
+    |> Enum.map(&{&1.email, &1.id})
   end
 end
