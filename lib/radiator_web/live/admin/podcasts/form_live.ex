@@ -32,53 +32,37 @@ defmodule RadiatorWeb.Admin.Podcasts.FormLive do
     ~H"""
     <Layouts.app {assigns}>
       <h1>{@page_title}</h1>
-      <.form_wrapper
+      <.simple_form
         :let={form}
         id="podcast_form"
-        for={@form}
         as={:form}
+        for={@form}
         phx-change="validate"
         phx-submit="save"
-        action_wrapper_class="flex justify-between"
       >
-        <.text_field field={form[:title]} label={gettext("Title")} />
-        <.text_field field={form[:subtitle]} label={gettext("Subtitle")} />
-        <.textarea_field field={form[:summary]} label={gettext("Summary")} />
-        <.text_field field={form[:language]} label={gettext("Language")} />
-        <.combobox
+        <.input field={form[:title]} label={gettext("Title")} />
+        <.input field={form[:subtitle]} label={gettext("Subtitle")} />
+        <.input field={form[:summary]} label={gettext("Summary")} />
+        <.input field={form[:language]} label={gettext("Language")} />
+        <.input
           field={form[:itunes_type]}
-          options={Enum.map(Radiator.Podcasts.ItunesPodcastType.values(), &{&1, &1})}
+          type="select"
+          options={Radiator.Podcasts.ItunesPodcastType.values()}
           label={gettext("Itunes Type")}
         />
-        <.text_field field={form[:license_name]} label={gettext("License Name")} />
-        <.url_field field={form[:license_url]} label={gettext("License URL")} />
-        <.text_field field={form[:author]} label={gettext("Author")} />
+        <.input field={form[:license_name]} label={gettext("License Name")} />
+        <.input field={form[:license_url]} label={gettext("License URL")} />
+        <.input field={form[:author]} label={gettext("Author")} />
         <!-- TODO: Add itunes_category array input -->
-        <.checkbox_field
-          field={form[:blocked]}
-          value="true"
-          checked={form[:blocked].value == true}
-          label={gettext("Blocked")}
-        />
-        <.checkbox_field
-          field={form[:explicit]}
-          value="true"
-          checked={form[:explicit].value == true}
-          label={gettext("Explicit")}
-        />
-        <.checkbox_field
-          field={form[:complete]}
-          value="true"
-          checked={form[:complete].value == true}
-          label={gettext("Complete")}
-        />
-        <.url_field field={form[:funding_url]} label={gettext("Donation URL")} />
-        <.text_field field={form[:funding_description]} label={gettext("Donation Description")} />
+        <.input field={form[:blocked]} type="checkbox" label={gettext("Blocked")} />
+        <.input field={form[:explicit]} type="checkbox" label={gettext("Explicit")} />
+        <.input field={form[:complete]} type="checkbox" label={gettext("Complete")} />
+        <.input field={form[:funding_url]} label={gettext("Donation URL")} />
+        <.input field={form[:funding_description]} label={gettext("Donation Description")} />
         <:actions>
-          <span />
-          <.button variant="default" color="primary">Save</.button>
+          <.button variant="primary">Save</.button>
         </:actions>
-      </.form_wrapper>
+      </.simple_form>
     </Layouts.app>
     """
   end
