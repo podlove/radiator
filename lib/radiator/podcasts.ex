@@ -33,6 +33,17 @@ defmodule Radiator.Podcasts do
     resource Radiator.Podcasts.License
     resource Radiator.Podcasts.Transcript
     resource Radiator.Podcasts.Track
+
+    resource Radiator.Podcasts.Person do
+      define :create_person, action: :create
+    end
+
+    resource Radiator.Podcasts.Persona do
+      define :create_persona, action: :create
+    end
+
+    resource Radiator.Podcasts.Episode.Scheduling
+
     resource Radiator.Podcasts.EpisodeParticipant
     resource Radiator.Podcasts.Role
   end
