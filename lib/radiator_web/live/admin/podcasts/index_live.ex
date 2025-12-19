@@ -23,21 +23,15 @@ defmodule RadiatorWeb.Admin.Podcasts.IndexLive do
     ~H"""
     <Layouts.app {assigns}>
       <h1>{gettext("Podcasts")}</h1>
-      <.button_link navigate={~p"/admin/podcasts/new"} variant="primary">
-        {gettext("New")}
-      </.button_link>
+      <.button navigate={~p"/admin/podcasts/new"} variant="primary">{gettext("New")}</.button>
       <.table id="podcasts" rows={@page.results}>
         <:col :let={podcast} label={gettext("Title")}>{podcast.title}</:col>
         <:col :let={podcast} label={gettext("Subtitle")}>{podcast.subtitle}</:col>
         <:col :let={podcast} label={gettext("Summary")}>{podcast.summary}</:col>
         <:col :let={podcast} label={gettext("Actions")}>
-          <.button_link navigate={~p"/admin/podcasts/#{podcast.id}"}>{gettext("Show")}</.button_link>
-          <.button_link navigate={~p"/admin/podcasts/#{podcast.id}/edit"}>
-            {gettext("Edit")}
-          </.button_link>
-          <.button_link navigate={~p"/admin/podcasts/#{podcast}/episodes"}>
-            {gettext("Episodes")}
-          </.button_link>
+          <.button navigate={~p"/admin/podcasts/#{podcast.id}"}>{gettext("Show")}</.button>
+          <.button navigate={~p"/admin/podcasts/#{podcast.id}/edit"}>{gettext("Edit")}</.button>
+          <.button navigate={~p"/admin/podcasts/#{podcast}/episodes"}>{gettext("Episodes")}</.button>
         </:col>
       </.table>
     </Layouts.app>
