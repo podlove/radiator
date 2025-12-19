@@ -13,7 +13,7 @@ defmodule Radiator.Podcasts.EpisodePersona do
   end
 
   actions do
-    defaults [:read]
+    defaults [:read, :create, :destroy]
   end
 
   attributes do

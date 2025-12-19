@@ -58,6 +58,11 @@ defmodule Radiator.Podcasts.Persona do
 
   relationships do
     belongs_to :person, Radiator.Podcasts.Person
+
+    many_to_many :episodes, Radiator.Podcasts.Episode do
+      through Radiator.Podcasts.EpisodePersona
+      public? true
+    end
   end
 
   identities do

@@ -10,7 +10,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
 
     podcast =
       Radiator.Podcasts.get_podcast_by_id!(episode.podcast_id,
-        load: [episodes: [episode_personas: [persona: [:person]]]]
+        load: [episodes: [personas: [:person]]]
       )
 
     socket =
@@ -26,7 +26,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
   def mount(%{"podcast_id" => podcast_id}, _session, socket) do
     podcast =
       Radiator.Podcasts.get_podcast_by_id!(podcast_id,
-        load: [episodes: [episode_personas: [persona: [:person]]]]
+        load: [episodes: [personas: [:person]]]
       )
 
     form = Radiator.Podcasts.form_to_create_episode(podcast_id)
@@ -111,8 +111,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
 
   defp get_personas_options(%{episodes: episodes}) do
     episodes
-    |> Enum.flat_map(& &1.episode_personas)
-    |> Enum.map(& &1.persona)
+    |> Enum.flat_map(& &1.personas)
     |> Enum.map(& &1.person)
     |> Enum.uniq_by(& &1.id)
     |> Enum.map(&{&1.email, &1.id})
