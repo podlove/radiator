@@ -1,6 +1,8 @@
 defmodule Radiator.EpisodeTest do
   use Radiator.DataCase, async: true
 
+  import Ash.Test
+
   alias Radiator.Podcasts
 
   describe "Episode" do
@@ -22,11 +24,9 @@ defmodule Radiator.EpisodeTest do
     test "adds a persona", %{episode: episode} do
       assert episode.personas == []
       {:ok, persona} = Podcasts.create_persona(%{public_name: "prince", handle: "handle"})
-      assert persona.public_name == "prince"
-      assert persona.handle == "handle"
 
-      {:ok, episode} = Podcasts.add_persona(episode, %{personas: [persona]})
-      assert episode.personas == [persona]
+      {:ok, %{personas: [added_persona]}} = Podcasts.add_persona(episode, %{personas: [persona.id]})
+      assert_stripped added_persona == persona
     end
   end
 end

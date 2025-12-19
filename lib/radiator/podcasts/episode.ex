@@ -46,8 +46,8 @@ defmodule Radiator.Podcasts.Episode do
 
     update :add_persona do
       require_atomic? false
-      argument :personas, {:array, :map}, allow_nil?: true
-      change manage_relationship(:personas, type: :append)
+      argument :personas, {:array, :uuid}, allow_nil?: true
+      change manage_relationship(:personas, type: :append, value_is_key: :id)
     end
   end
 
