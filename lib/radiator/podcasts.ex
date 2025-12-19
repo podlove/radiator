@@ -25,6 +25,7 @@ defmodule Radiator.Podcasts do
       define :create_episode, action: :create
       define :get_episode_by_id, action: :read, get_by: :id
       define :update_episode, action: :update
+      define :add_persona, action: :add_persona
     end
 
     resource Radiator.Podcasts.Chapter

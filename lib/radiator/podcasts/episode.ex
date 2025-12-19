@@ -43,6 +43,12 @@ defmodule Radiator.Podcasts.Episode do
       description "Import an episode from external feed data"
       accept @default_accept_attributes ++ [:guid, :podcast_id]
     end
+
+    update :add_persona do
+      require_atomic? false
+      argument :personas, {:array, :map}, allow_nil?: true
+      change manage_relationship(:personas, type: :append)
+    end
   end
 
   attributes do
@@ -111,7 +117,8 @@ defmodule Radiator.Podcasts.Episode do
       sort start_time_ms: :asc
     end
 
-    has_many :episode_personas, Radiator.Podcasts.EpisodePersona do
+    many_to_many :personas, Radiator.Podcasts.Persona do
+      through Radiator.Podcasts.EpisodePersona
       public? true
     end
 
