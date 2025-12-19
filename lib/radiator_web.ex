@@ -88,7 +88,7 @@ defmodule RadiatorWeb do
       import Reply
 
       # Core UI components
-      use RadiatorWeb.Components.MishkaComponents
+      import RadiatorWeb.CoreComponents
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS
