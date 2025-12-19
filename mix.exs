@@ -68,6 +68,7 @@ defmodule Radiator.MixProject do
        compile: false,
        depth: 1},
       {:html_entities, "~> 0.5"},
+      {:railway, "~> 1.1"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:live_debugger, "~> 0.4", only: [:dev]},
