@@ -71,7 +71,6 @@ defmodule Radiator.MixProject do
       {:lazy_html, ">= 0.1.0", only: :test},
       {:live_debugger, "~> 0.4", only: [:dev]},
       {:metalove, "~> 0.5.0"},
-      {:mishka_chelekom, "~> 0.0", only: [:dev]},
       {:phoenix, "~> 1.8.0"},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
