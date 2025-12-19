@@ -49,6 +49,12 @@ defmodule Radiator.Podcasts.Episode do
       argument :personas, {:array, :uuid}, allow_nil?: true
       change manage_relationship(:personas, type: :append, value_is_key: :id)
     end
+
+    update :remove_persona do
+      require_atomic? false
+      argument :personas, {:array, :uuid}, allow_nil?: true
+      change manage_relationship(:personas, type: :remove, value_is_key: :id)
+    end
   end
 
   attributes do
