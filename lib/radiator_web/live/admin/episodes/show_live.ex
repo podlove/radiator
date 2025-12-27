@@ -36,7 +36,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLive do
         <dd>{@episode.duration_ms}</dd>
       </dl>
       <.button
-        variant="danger"
+        variant="warning"
         data-confirm={gettext("Are you sure you want to delete %{title}?", title: @episode.title)}
         phx-value-id={@episode.id}
         phx-click="destroy-episode"

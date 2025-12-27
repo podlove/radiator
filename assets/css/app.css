@@ -3,6 +3,7 @@
 
 @import "tailwindcss" source(none);
 @source "../../deps/ash_authentication_phoenix";
+@source "../../deps/daisy_ui_components";
 @source "../css";
 @source "../js";
 @source "../../lib/radiator_web";

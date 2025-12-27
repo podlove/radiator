@@ -26,7 +26,7 @@ defmodule RadiatorWeb.Admin.Podcasts.ShowLive do
       <h1>{@podcast.title}</h1>
       <h2 :if={@podcast.subtitle}>{@podcast.subtitle}</h2>
       <.button
-        variant="danger"
+        variant="warning"
         data-confirm={gettext("Are you sure you want to delete %{title}?", title: @podcast.title)}
         phx-value-id={@podcast.id}
         phx-click="destroy-podcast"

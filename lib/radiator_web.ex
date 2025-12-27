@@ -87,8 +87,8 @@ defmodule RadiatorWeb do
 
       import Reply
 
-      # Core UI components
-      import RadiatorWeb.CoreComponents
+      # Import DaisyUI components
+      use DaisyUIComponents, core_components: true
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS
