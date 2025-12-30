@@ -7,6 +7,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
     domain: Radiator.Podcasts,
     data_layer: AshPostgres.DataLayer
 
+  alias Radiator.Podcasts.Episode.Scheduling
+
   postgres do
     table "chapters"
     repo Radiator.Repo
@@ -19,7 +21,19 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   actions do
     defaults [:read, :destroy, :create, :update]
 
+    # create :start_scheduling do
+    #   manual StartScheduling
+    # end
+    #
+
+    create :start_scheduling do
+      accept [:episode_id, :proposals]
+    end
+
     default_accept [:proposals]
+  end
+
+  validations do
   end
 
   attributes do
@@ -41,14 +55,17 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
     end
   end
 
-  def start_scheduling_episode(_episode, _date_proposals) do
-    # Implement scheduling logic here
-    # where to store the dates, and the votes?
-    # create episode here?
-    #
-    # After
-    # episode state == scheduling
-    # nneds to have persons and at least one proposal
+  identities do
+    identity :unique_episode, [:episode_id], message: "episode already has a scheduling"
+  end
+
+  def start_scheduling_episode(episode_id, proposals) do
+    Scheduling
+    |> Ash.Changeset.for_create(:start_scheduling, %{
+      episode_id: episode_id,
+      proposals: proposals
+    })
+    |> Ash.create!()
   end
 
   def proposals_for_episode(_episode) do
@@ -68,5 +85,15 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
   def finish_scheduling_episode(_episode, _date) do
     # next state in episode
+  end
+end
+
+defmodule StartScheduling do
+  use Ash.Resource.ManualCreate
+
+  def create(_changeset, _opts, _context) do
+    # After
+    # episode state == scheduling
+    # nneds to have persons and at least one proposal
   end
 end
