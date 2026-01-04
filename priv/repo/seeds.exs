@@ -40,9 +40,26 @@ Radiator.Accounts.User
     podcast_id: podcast.id
   })
 
-{:ok, _episode} =
+{:ok, future_episode} =
   Radiator.Podcasts.create_episode(%{
     title: "Episode 3",
     summary: "Future episode of Tech Weekly",
     podcast_id: podcast.id
   })
+
+{:ok, person} =
+  Radiator.Podcasts.create_person(%{
+    real_name: "John Doe",
+    nickname: "JD",
+    email: "john.doe@example.com",
+    telephone: "+1234567890"
+  })
+
+
+Radiator.Podcasts.Episode.Scheduling.start_scheduling_episode(future_episode.id, %{
+  date_time: DateTime.now!("Etc/UTC"),
+  votes: [
+    %{persona: 23, score: -1},
+    %{persona: 42, score: 2}
+  ]
+})

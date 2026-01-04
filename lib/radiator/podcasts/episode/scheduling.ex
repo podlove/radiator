@@ -10,7 +10,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   alias Radiator.Podcasts.Episode.Scheduling
 
   postgres do
-    table "chapters"
+    table "episode_scheduling"
     repo Radiator.Repo
 
     references do
@@ -20,11 +20,6 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
   actions do
     defaults [:read, :destroy, :create, :update]
-
-    # create :start_scheduling do
-    #   manual StartScheduling
-    # end
-    #
 
     create :start_scheduling do
       accept [:episode_id, :proposals]
