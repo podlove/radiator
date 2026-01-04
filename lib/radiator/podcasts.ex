@@ -42,6 +42,8 @@ defmodule Radiator.Podcasts do
       define :create_persona, action: :create
     end
 
+    resource Radiator.Podcasts.Episode.Scheduling
+
     resource Radiator.Podcasts.EpisodePersona
     resource Radiator.Podcasts.Role
   end

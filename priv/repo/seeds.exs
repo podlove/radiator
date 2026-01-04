@@ -39,3 +39,10 @@ Radiator.Accounts.User
     summary: "Second episode of Tech Weekly",
     podcast_id: podcast.id
   })
+
+{:ok, _episode} =
+  Radiator.Podcasts.create_episode(%{
+    title: "Episode 3",
+    summary: "Future episode of Tech Weekly",
+    podcast_id: podcast.id
+  })
