@@ -13,7 +13,7 @@
       "type": "uuid"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -21,32 +21,8 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "start_time_ms",
-      "type": "bigint"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "title",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "link",
-      "type": "text"
+      "source": "proposals",
+      "type": "map"
     },
     {
       "allow_nil?": false,
@@ -91,8 +67,8 @@
           "global": null,
           "strategy": null
         },
-        "name": "chapters_episode_id_fkey",
-        "on_delete": "delete",
+        "name": "episode_scheduling_episode_id_fkey",
+        "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
@@ -102,18 +78,6 @@
       "size": null,
       "source": "episode_id",
       "type": "uuid"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "proposals",
-      "type": "map"
     }
   ],
   "base_filter": null,
@@ -121,23 +85,19 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "987634970F514B1717F80A4F89DA8CBD5EEAB1ECCEBC75BFBFBBEF6FDBEC1115",
+  "hash": "7D8E0D372ACA1830FEF36CEF9C26DA1F8C5B244526042088F413DF76D34119F0",
   "identities": [
     {
       "all_tenants?": false,
       "base_filter": null,
-      "index_name": "chapters_start_time_index",
+      "index_name": "episode_scheduling_unique_episode_index",
       "keys": [
-        {
-          "type": "atom",
-          "value": "start_time_ms"
-        },
         {
           "type": "atom",
           "value": "episode_id"
         }
       ],
-      "name": "start_time",
+      "name": "unique_episode",
       "nils_distinct?": true,
       "where": null
     }
@@ -149,5 +109,5 @@
   },
   "repo": "Elixir.Radiator.Repo",
   "schema": null,
-  "table": "chapters"
+  "table": "episode_scheduling"
 }
