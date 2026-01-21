@@ -8,6 +8,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
     data_layer: AshPostgres.DataLayer
 
   alias Radiator.Podcasts.Episode.Scheduling
+  alias Radiator.Podcasts.Episode.Scheduling.Proposal
 
   postgres do
     table "episode_scheduling"
@@ -54,6 +55,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
     identity :unique_episode, [:episode_id], message: "episode already has a scheduling"
   end
 
+  @spec start_scheduling_episode(episode_id :: binary(), proposals :: list(Proposal.t())) ::
+          {:ok, Scheduling.t()} | {:error, map()}
   def start_scheduling_episode(episode_id, proposals) do
     Scheduling
     |> Ash.Changeset.for_create(:start_scheduling, %{
@@ -84,6 +87,9 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 end
 
 defmodule StartScheduling do
+  @moduledoc """
+  TEMP TEMP
+  """
   use Ash.Resource.ManualCreate
 
   def create(_changeset, _opts, _context) do
