@@ -61,3 +61,10 @@ Radiator.Podcasts.Episode.Scheduling.start_scheduling_episode(future_episode.id,
   }
 ])
 
+# Radiator.Podcasts.Episode.Scheduling.start_scheduling_episode(future_episode.id, %{
+#   date_time: DateTime.now!("Etc/UTC"),
+#   votes: [
+#     %{persona: 23, score: -1},
+#     %{persona: 42, score: 2}
+#   ]
+# })

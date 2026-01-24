@@ -1,5 +1,8 @@
 defmodule Radiator.Podcasts.Episode do
-  @moduledoc false
+  @moduledoc """
+  Model specification for podcast episodes. Ash state machine is used to define the
+  different states of an episode.
+  """
 
   use Ash.Resource,
     otp_app: :radiator,
