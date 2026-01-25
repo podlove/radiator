@@ -38,10 +38,12 @@ defmodule Radiator.Podcasts do
     resource Radiator.Podcasts.Track
 
     resource Radiator.Podcasts.Person do
+      define :read_persons, action: :read
       define :create_person, action: :create
     end
 
     resource Radiator.Podcasts.Persona do
+      define :read_personas, action: :read
       define :create_persona, action: :create
     end
 
