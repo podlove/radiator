@@ -1,18 +1,17 @@
 defmodule Radiator.EpisodeSchedulingTest do
   use Radiator.DataCase, async: true
 
+  alias Radiator.People
   alias Radiator.Podcasts
 
   alias Radiator.Podcasts.Episode.Scheduling
 
   describe "Scheduling creation" do
     setup do
-      {:ok, podcast} = Podcasts.create_podcast(%{title: "Test Podcast"})
-      {:ok, episode} = Podcasts.create_episode(%{title: "Test Episode", podcast_id: podcast.id})
-
-      {:ok, owner} = Podcasts.create_persona(%{public_name: "Owner", handle: "owner"})
-      {:ok, guest1} = Podcasts.create_persona(%{public_name: "Guest 1", handle: "guest1"})
-      {:ok, guest2} = Podcasts.create_persona(%{public_name: "Guest 2", handle: "guest2"})
+      episode = generate(episode(%{title: "Test Episode"}))
+      owner = generate(persona(%{public_name: "Owner", handle: "owner"}))
+      guest1 = generate(persona(%{public_name: "Guest 1", handle: "guest1"}))
+      guest2 = generate(persona(%{public_name: "Guest 2", handle: "guest2"}))
 
       %{
         episode: episode,
@@ -29,8 +28,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       participant_ids = Enum.map(participants, & &1.id)
 
       assert {:ok, scheduling} =
-               Scheduling
-               |> Ash.Changeset.for_create(:create, %{
+               Radiator.Podcasts.start_scheduling(%{
                  episode_id: episode.id,
                  owner_persona_id: owner.id,
                  participant_persona_ids: participant_ids,
@@ -39,7 +37,6 @@ defmodule Radiator.EpisodeSchedulingTest do
                    ~U[2024-03-16 10:00:00Z]
                  ]
                })
-               |> Ash.create()
 
       assert scheduling.episode_id == episode.id
       assert scheduling.owner_persona_id == owner.id
@@ -55,14 +52,12 @@ defmodule Radiator.EpisodeSchedulingTest do
       participants: participants
     } do
       assert {:error, changeset} =
-               Scheduling
-               |> Ash.Changeset.for_create(:create, %{
+               Radiator.Podcasts.start_scheduling(%{
                  episode_id: episode.id,
                  owner_persona_id: owner.id,
                  participant_persona_ids: Enum.map(participants, & &1.id),
                  proposed_datetimes: []
                })
-               |> Ash.create()
 
       assert changeset.errors != []
     end
@@ -73,14 +68,12 @@ defmodule Radiator.EpisodeSchedulingTest do
       participants: participants
     } do
       {:ok, scheduling} =
-        Scheduling
-        |> Ash.Changeset.for_create(:create, %{
+        Radiator.Podcasts.start_scheduling(%{
           episode_id: episode.id,
           owner_persona_id: owner.id,
           participant_persona_ids: Enum.map(participants, & &1.id),
           proposed_datetimes: [~U[2024-03-15 14:00:00Z]]
         })
-        |> Ash.create()
 
       assert scheduling.status == :open
     end
@@ -213,7 +206,7 @@ defmodule Radiator.EpisodeSchedulingTest do
     end
 
     test "prevents non-participants from voting", %{scheduling: scheduling, proposal: proposal} do
-      {:ok, non_participant} = Podcasts.create_persona(%{public_name: "Non", handle: "non"})
+      {:ok, non_participant} = People.create_persona(%{public_name: "Non", handle: "non"})
 
       assert {:error, changeset} =
                scheduling
@@ -279,7 +272,7 @@ defmodule Radiator.EpisodeSchedulingTest do
     end
 
     test "prevents non-participants from adding proposals", %{scheduling: scheduling} do
-      {:ok, non_participant} = Podcasts.create_persona(%{public_name: "Non", handle: "non"})
+      {:ok, non_participant} = People.create_persona(%{public_name: "Non", handle: "non"})
 
       assert {:error, changeset} =
                scheduling
@@ -757,16 +750,16 @@ defmodule Radiator.EpisodeSchedulingTest do
     {:ok, podcast} = Podcasts.create_podcast(%{title: "Test Podcast"})
     {:ok, episode} = Podcasts.create_episode(%{title: "Test Episode", podcast_id: podcast.id})
 
-    {:ok, owner} = Podcasts.create_persona(%{public_name: "Owner", handle: "test_owner"})
+    {:ok, owner} = People.create_persona(%{public_name: "Owner", handle: "test_owner"})
 
     {:ok, participant1} =
-      Podcasts.create_persona(%{public_name: "Participant 1", handle: "participant1"})
+      People.create_persona(%{public_name: "Participant 1", handle: "participant1"})
 
     {:ok, participant2} =
-      Podcasts.create_persona(%{public_name: "Participant 2", handle: "participant2"})
+      People.create_persona(%{public_name: "Participant 2", handle: "participant2"})
 
     {:ok, participant3} =
-      Podcasts.create_persona(%{public_name: "Participant 3", handle: "participant3"})
+      People.create_persona(%{public_name: "Participant 3", handle: "participant3"})
 
     participant_ids = [participant1.id, participant2.id, participant3.id]
 
@@ -796,7 +789,7 @@ defmodule Radiator.EpisodeSchedulingTest do
   end
 
   defp get_owner(scheduling) do
-    Podcasts.Persona
+    People.Persona
     |> Ash.get!(scheduling.owner_persona_id)
     |> then(&{:ok, &1})
   end
@@ -804,7 +797,7 @@ defmodule Radiator.EpisodeSchedulingTest do
   defp get_participant(scheduling) do
     [participant_id | _] = scheduling.participant_persona_ids
 
-    Podcasts.Persona
+    People.Persona
     |> Ash.get!(participant_id)
     |> then(&{:ok, &1})
   end

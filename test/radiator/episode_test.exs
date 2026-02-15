@@ -2,7 +2,6 @@ defmodule Radiator.EpisodeTest do
   use Radiator.DataCase, async: true
 
   import Ash.Test
-
   alias Radiator.Podcasts
 
   describe "Episode" do

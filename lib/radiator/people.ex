@@ -5,10 +5,12 @@ defmodule Radiator.People do
 
   resources do
     resource Radiator.People.Person do
+      define :read_persons, action: :read
       define :create_person, action: :create
     end
 
     resource Radiator.People.Persona do
+      define :read_personas, action: :read
       define :create_persona, action: :create
     end
   end

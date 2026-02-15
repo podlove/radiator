@@ -37,16 +37,6 @@ defmodule Radiator.Podcasts do
     resource Radiator.Podcasts.Transcript
     resource Radiator.Podcasts.Track
 
-    resource Radiator.Podcasts.Person do
-      define :read_persons, action: :read
-      define :create_person, action: :create
-    end
-
-    resource Radiator.Podcasts.Persona do
-      define :read_personas, action: :read
-      define :create_persona, action: :create
-    end
-
     resource Radiator.Podcasts.Episode.Scheduling do
       define :start_scheduling, action: :create
       define :get_by_episode, action: :by_episode
