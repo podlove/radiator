@@ -72,6 +72,7 @@ defmodule Radiator.MixProject do
       {:lazy_html, ">= 0.1.0", only: :test},
       {:live_debugger, "~> 0.4", only: [:dev]},
       {:metalove, "~> 0.5.0"},
+      {:mix_test_interactive, "~> 5.0", only: :dev, runtime: false},
       {:phoenix, "~> 1.8.0"},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
@@ -104,6 +105,7 @@ defmodule Radiator.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ash.setup --quiet", "test"],
+      "test.stale": ["test.interactive --stale"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind radiator", "esbuild radiator"],
       "assets.deploy": [
