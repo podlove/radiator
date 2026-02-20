@@ -217,6 +217,13 @@
           #
         ]
       }
+    },
+    %{
+      name: "default",
+      requires: ["./deps/phoenix_test/lib/phoenix_test/credo/**/*.ex"],
+      checks: [
+        {PhoenixTest.Credo.NoOpenBrowser, []}
+      ]
     }
   ]
 }
