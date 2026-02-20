@@ -58,6 +58,7 @@ defmodule Radiator.MixProject do
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:ex_cldr, "~> 2.37"},
       {:ex_cldr_languages, "~> 0.3.3"},
+      {:faker, "~> 0.18.0", only: :test},
       {:gen_smtp, "~> 1.1"},
       {:gettext, "~> 0.26"},
       {:heroicons,
