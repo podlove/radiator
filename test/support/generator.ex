@@ -5,6 +5,7 @@ defmodule Radiator.Generator do
 
   use Ash.Generator
 
+  alias Faker.{Company, Lorem}
   alias Radiator.Podcasts.{Episode, Podcast}
 
   def podcast(opts \\ []) do
@@ -12,8 +13,8 @@ defmodule Radiator.Generator do
       Podcast,
       :create,
       defaults: [
-        title: StreamData.repeatedly(&Faker.Lorem.sentence(&1, 1..3)),
-        summary: StreamData.repeatedly(&Faker.Lorem.sentence(&1, 3..6))
+        title: StreamData.repeatedly(&Company.En.name/0),
+        summary: StreamData.repeatedly(&Lorem.sentence/0)
       ],
       overrides: opts,
       actor: opts[:actor]
