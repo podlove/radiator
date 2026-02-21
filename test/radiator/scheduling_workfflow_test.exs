@@ -39,7 +39,7 @@ defmodule Radiator.SchedulingWorkflowTest do
       owner: owner,
       participants: participants
     } do
-      owner_id = get_owner_persona_id()
+      owner_id = owner.id
       participant_ids = Enum.map(participants, & &1.id)
 
       # Step 1: Create scheduling with proposed datetimes
@@ -122,47 +122,10 @@ defmodule Radiator.SchedulingWorkflowTest do
     """
 
     test "Participant adds a new proposal during voting", %{
-      episode: episode,
-      owner: owner,
-      participants: participants
+      episode: _episode,
+      owner: _owner,
+      participants: _participants
     } do
-    end
-
-    @doc """
-    Example 3: Monitoring voting progress
-
-    Shows how to check if all participants have voted and display
-    current voting status.
-    """
-    def monitor_voting_progress(scheduling) do
-      stats = Scheduling.voting_stats(scheduling)
-
-      # IO.puts("\n=== Voting Progress ===")
-      # IO.puts("Status: #{stats.status}")
-      # IO.puts("Participants: #{stats.voted_participant_count}/#{stats.participant_count}")
-      # IO.puts("All voted?: #{stats.all_voted?}")
-      # IO.puts("Total votes: #{stats.total_votes}")
-      # IO.puts("\n=== Proposal Rankings ===")
-
-      stats.proposal_stats
-      |> Enum.with_index(1)
-      |> Enum.each(fn {proposal, rank} ->
-        # IO.puts("#{rank}. #{Calendar.strftime(proposal.datetime, "%B %d, %Y at %I:%M %p UTC")}")
-
-        IO.puts(
-          "   Votes: #{proposal.vote_count}, Average Score: #{proposal.average_score || "N/A"}"
-        )
-      end)
-
-      if stats.all_voted? do
-        IO.puts("\n✓ All participants have voted! Ready to finalize.")
-      else
-        IO.puts(
-          "\n⏳ Waiting for #{stats.participant_count - stats.voted_participant_count} more vote(s)."
-        )
-      end
-
-      stats
     end
 
     @doc """
@@ -313,7 +276,7 @@ defmodule Radiator.SchedulingWorkflowTest do
       owner: owner,
       participants: participants
     } do
-      owner_id = get_owner_persona_id()
+      owner_id = owner.id
       participant_ids = Enum.map(participants, & &1.id)
       # Start scheduling
       result =
@@ -351,51 +314,36 @@ defmodule Radiator.SchedulingWorkflowTest do
       end
     end
 
-    # Private helper functions
+    # Shows how to check if all participants have voted and display
+    # current voting status.
+    defp monitor_voting_progress(scheduling) do
+      stats = Scheduling.voting_stats(scheduling)
 
-    # defp create_test_episode do
-    #   # This would use actual podcast data in production
-    #   Podcasts.create_episode(%{
-    #     title: "Test Episode for Scheduling",
-    #     podcast_id: get_test_podcast_id()
-    #   })
-    # end
+      # IO.puts("\n=== Voting Progress ===")
+      # IO.puts("Status: #{stats.status}")
+      # IO.puts("Participants: #{stats.voted_participant_count}/#{stats.participant_count}")
+      # IO.puts("All voted?: #{stats.all_voted?}")
+      # IO.puts("Total votes: #{stats.total_votes}")
+      # IO.puts("\n=== Proposal Rankings ===")
 
-    # defp get_test_podcast_id do
-    #   # Return first podcast or create one
-    #   case Podcasts.read_podcasts() do
-    #     {:ok, [podcast | _]} -> podcast.id
-    #     _ -> raise "No podcasts found. Please create a podcast first."
-    #   end
-    # end
+      stats.proposal_stats
+      |> Enum.with_index(1)
+      |> Enum.each(fn {proposal, _rank} ->
+        IO.puts(
+          "   Votes: #{proposal.vote_count}, Average Score: #{proposal.average_score || "N/A"}"
+        )
+      end)
 
-    defp get_owner_persona_id do
-      {:ok, personas} = Radiator.Podcasts.read_personas()
-      personas |> List.first() |> Map.get(:id)
+      if stats.all_voted? do
+        IO.puts("\n✓ All participants have voted! Ready to finalize.")
+      else
+        IO.puts(
+          "\n⏳ Waiting for #{stats.participant_count - stats.voted_participant_count} more vote(s)."
+        )
+      end
+
+      stats
     end
-
-    # defp get_participant_persona_ids do
-    #   Enum.reduce(1..5, [], fn _, acc ->
-    #     {:ok, person} =
-    #       Radiator.Podcasts.create_person(%{
-    #         real_name: "Test Person #{System.unique_integer([:positive])}",
-    #         nickname: "TestNick#{System.unique_integer([:positive])}",
-    #         email: "test#{System.unique_integer([:positive])}@example.com",
-    #         telephone: "+44123456#{System.unique_integer([:positive])}"
-    #       })
-
-    #     {:ok, persona} =
-    #       Radiator.Podcasts.create_persona(%{
-    #         person_id: person.id,
-    #         public_name: "Test Persona #{System.unique_integer([:positive])}",
-    #         handle: "test_handle_#{System.unique_integer([:positive])}",
-    #         description: "Test description for persona",
-    #         avatar_png: "https://example.com/avatar#{System.unique_integer([:positive])}.png"
-    #       })
-
-    #     [persona.id | acc]
-    #   end)
-    # end
 
     defp simulate_voting(scheduling, participant_ids) do
       # Each participant votes on a random proposal
