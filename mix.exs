@@ -58,6 +58,7 @@ defmodule Radiator.MixProject do
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:ex_cldr, "~> 2.37"},
       {:ex_cldr_languages, "~> 0.3.3"},
+      {:faker, "~> 0.18.0", only: :test},
       {:gen_smtp, "~> 1.1"},
       {:gettext, "~> 0.26"},
       {:heroicons,
@@ -72,12 +73,14 @@ defmodule Radiator.MixProject do
       {:lazy_html, ">= 0.1.0", only: :test},
       {:live_debugger, "~> 0.4", only: [:dev]},
       {:metalove, "~> 0.5.0"},
+      {:mix_test_interactive, "~> 5.0", only: :dev, runtime: false},
       {:phoenix, "~> 1.8.0"},
       {:phoenix_ecto, "~> 4.5"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.1.0"},
+      {:phoenix_test, "~> 0.9", only: :test, runtime: false},
       {:picosat_elixir, "~> 0.2"},
       {:plug, "~> 1.17"},
       {:postgrex, ">= 0.0.0"},
@@ -104,6 +107,7 @@ defmodule Radiator.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ash.setup --quiet", "test"],
+      "test.stale": ["test.interactive --stale"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind radiator", "esbuild radiator"],
       "assets.deploy": [
@@ -111,7 +115,13 @@ defmodule Radiator.MixProject do
         "esbuild radiator --minify",
         "phx.digest"
       ],
-      precommit: ["compile --warning-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: [
+        "compile --warnings-as-errors",
+        "deps.unlock --unused",
+        "format --check-formatted",
+        "credo --strict",
+        "test"
+      ]
     ]
   end
 end
