@@ -74,7 +74,8 @@ participant_ids =
         telephone: "+44123456#{System.unique_integer([:positive])}"
       })
 
-    {:ok, persona} = Radiator.Podcasts.create_persona(%{
+    {:ok, persona} =
+      Radiator.Podcasts.create_persona(%{
         person_id: person.id,
         public_name: "Test Persona #{System.unique_integer([:positive])}",
         handle: "test_handle_#{System.unique_integer([:positive])}",
@@ -82,32 +83,34 @@ participant_ids =
         avatar_png: "https://example.com/avatar#{System.unique_integer([:positive])}.png"
       })
 
-      [persona.id | acc]
+    [persona.id | acc]
   end)
 
-
-  {:ok, scheduling} =
-        Radiator.Podcasts.Episode.Scheduling |> Ash.Changeset.for_create(:create, %{
-          episode_id: future_episode.id,
-          owner_persona_id: owner.id,
-          participant_persona_ids: participant_ids,
-          proposed_datetimes: [
-            ~U[2024-03-15 14:00:00Z],
-            ~U[2024-03-16 10:00:00Z],
-            ~U[2024-03-17 15:00:00Z]
-          ]
-        }) |> Ash.create()
+{:ok, scheduling} =
+  Radiator.Podcasts.Episode.Scheduling
+  |> Ash.Changeset.for_create(:create, %{
+    episode_id: future_episode.id,
+    owner_persona_id: owner.id,
+    participant_persona_ids: participant_ids,
+    proposed_datetimes: [
+      ~U[2024-03-15 14:00:00Z],
+      ~U[2024-03-16 10:00:00Z],
+      ~U[2024-03-17 15:00:00Z]
+    ]
+  })
+  |> Ash.create()
 
 [proposal1, proposal2, _proposal3] = scheduling.proposals
 
 {:ok, scheduling} =
-      scheduling |> Ash.Changeset.for_update(:vote, %{
-        proposal_id: proposal1["id"],
-        persona_id: Enum.at(participant_ids, 0),
-        score: 5,
-        comment: "Perfect time for me!"
-      }) |> Ash.update()
-
+  scheduling
+  |> Ash.Changeset.for_update(:vote, %{
+    proposal_id: proposal1["id"],
+    persona_id: Enum.at(participant_ids, 0),
+    score: 5,
+    comment: "Perfect time for me!"
+  })
+  |> Ash.update()
 
 {:ok, _scheduling} =
   scheduling
