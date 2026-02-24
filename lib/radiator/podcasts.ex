@@ -25,24 +25,15 @@ defmodule Radiator.Podcasts do
       define :create_episode, action: :create
       define :get_episode_by_id, action: :read, get_by: :id
       define :update_episode, action: :update
-      define :add_persona, action: :add_persona
-      define :remove_persona, action: :remove_persona
+      define :add_participant_to_episode, action: :update, args: [:add_participant]
+      define :remove_participant_from_episode, action: :update, args: [:remove_participant]
     end
 
     resource Radiator.Podcasts.Chapter
     resource Radiator.Podcasts.License
     resource Radiator.Podcasts.Transcript
     resource Radiator.Podcasts.Track
-
-    resource Radiator.Podcasts.Person do
-      define :create_person, action: :create
-    end
-
-    resource Radiator.Podcasts.Persona do
-      define :create_persona, action: :create
-    end
-
-    resource Radiator.Podcasts.EpisodePersona
+    resource Radiator.Podcasts.EpisodeParticipant
     resource Radiator.Podcasts.Role
   end
 end

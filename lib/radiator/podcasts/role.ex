@@ -7,6 +7,8 @@ defmodule Radiator.Podcasts.Role do
     domain: Radiator.Podcasts,
     data_layer: AshPostgres.DataLayer
 
+  alias Radiator.Podcasts.EpisodeParticipant
+
   postgres do
     table "roles"
     repo Radiator.Repo
@@ -24,6 +26,6 @@ defmodule Radiator.Podcasts.Role do
   end
 
   relationships do
-    has_many :episode_personas, Radiator.Podcasts.EpisodePersona
+    has_many :episode_participants, EpisodeParticipant
   end
 end
