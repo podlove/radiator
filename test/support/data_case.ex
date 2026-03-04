@@ -26,6 +26,7 @@ defmodule Radiator.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Radiator.DataCase
+      import Radiator.Generator
     end
   end
 

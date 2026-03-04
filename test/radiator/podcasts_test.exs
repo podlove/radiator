@@ -42,8 +42,7 @@ defmodule Radiator.PodcastsTests do
 
   describe "Episode" do
     setup do
-      {:ok, podcast} = Radiator.Podcasts.create_podcast(%{title: "Test Podcast"})
-      %{podcast: podcast}
+      %{podcast: generate(podcast(%{title: "Test Podcast"}))}
     end
 
     test "can be created", %{podcast: podcast} do
