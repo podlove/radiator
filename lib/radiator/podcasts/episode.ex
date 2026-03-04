@@ -7,6 +7,12 @@ defmodule Radiator.Podcasts.Episode do
     data_layer: AshPostgres.DataLayer,
     extensions: [AshStateMachine]
 
+  alias Radiator.People.Persona
+  alias Radiator.Podcasts.Chapter
+  alias Radiator.Podcasts.EpisodeParticipant
+  alias Radiator.Podcasts.Podcast
+  alias Radiator.Podcasts.Track
+
   postgres do
     table "episodes"
     repo Radiator.Repo
@@ -32,7 +38,7 @@ defmodule Radiator.Podcasts.Episode do
   ]
 
   actions do
-    defaults [:read, :destroy, :update]
+    defaults [:read, :destroy]
     default_accept @default_accept_attributes
 
     create :create do
@@ -44,16 +50,15 @@ defmodule Radiator.Podcasts.Episode do
       accept @default_accept_attributes ++ [:guid, :podcast_id]
     end
 
-    update :add_persona do
+    update :update do
       require_atomic? false
-      argument :personas, {:array, :uuid}, allow_nil?: true
-      change manage_relationship(:personas, type: :append, value_is_key: :id)
-    end
+      argument :participants, {:array, :map}, allow_nil?: true
+      argument :add_participant, :struct, allow_nil?: true, constraints: [instance_of: Persona]
+      argument :remove_participant, :struct, allow_nil?: true, constraints: [instance_of: Persona]
 
-    update :remove_persona do
-      require_atomic? false
-      argument :personas, {:array, :uuid}, allow_nil?: true
-      change manage_relationship(:personas, type: :remove, value_is_key: :id)
+      change manage_relationship(:participants, type: :append_and_remove)
+      change manage_relationship(:add_participant, :participants, type: :append)
+      change manage_relationship(:remove_participant, :participants, type: :remove)
     end
   end
 
@@ -111,24 +116,24 @@ defmodule Radiator.Podcasts.Episode do
   end
 
   relationships do
-    belongs_to :podcast, Radiator.Podcasts.Podcast do
+    belongs_to :podcast, Podcast do
       description "The podcast this episode belongs to"
       public? true
       allow_nil? false
     end
 
-    has_many :chapters, Radiator.Podcasts.Chapter do
+    has_many :chapters, Chapter do
       description "The chapters of the episode"
       public? true
       sort start_time_ms: :asc
     end
 
-    many_to_many :personas, Radiator.Podcasts.Persona do
-      through Radiator.Podcasts.EpisodePersona
+    many_to_many :participants, Persona do
+      through EpisodeParticipant
       public? true
     end
 
-    has_many :tracks, Radiator.Podcasts.Track
+    has_many :tracks, Track
   end
 
   identities do

@@ -1,11 +1,13 @@
-defmodule Radiator.Podcasts.Person do
+defmodule Radiator.People.Person do
   @moduledoc """
   The person resource.
   """
   use Ash.Resource,
     otp_app: :radiator,
-    domain: Radiator.Podcasts,
+    domain: Radiator.People,
     data_layer: AshPostgres.DataLayer
+
+  alias Radiator.People.Persona
 
   postgres do
     table "people"
@@ -57,9 +59,9 @@ defmodule Radiator.Podcasts.Person do
   end
 
   relationships do
-    has_many :personas, Radiator.Podcasts.Persona
+    has_many :personas, Persona
 
-    has_one :default_persona, Radiator.Podcasts.Persona do
+    has_one :default_persona, Persona do
       destination_attribute :person_id
       filter expr(default? == true)
     end

@@ -49,7 +49,7 @@ config :spark,
 config :radiator,
   ecto_repos: [Radiator.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Radiator.Accounts, Radiator.Podcasts]
+  ash_domains: [Radiator.Accounts, Radiator.Podcasts, Radiator.People]
 
 # Configures the endpoint
 config :radiator, RadiatorWeb.Endpoint,

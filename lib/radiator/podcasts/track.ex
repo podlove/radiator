@@ -7,6 +7,10 @@ defmodule Radiator.Podcasts.Track do
     domain: Radiator.Podcasts,
     data_layer: AshPostgres.DataLayer
 
+  alias Radiator.Podcasts.Episode
+  alias Radiator.Podcasts.EpisodeParticipant
+  alias Radiator.Podcasts.Transcript
+
   postgres do
     table "tracks"
     repo Radiator.Repo
@@ -24,10 +28,10 @@ defmodule Radiator.Podcasts.Track do
   end
 
   relationships do
-    has_many :transcripts, Radiator.Podcasts.Transcript
-    belongs_to :episode, Radiator.Podcasts.Episode
+    has_many :transcripts, Transcript
+    belongs_to :episode, Episode
 
-    belongs_to :episode_persona, Radiator.Podcasts.EpisodePersona do
+    belongs_to :episode_participant, EpisodeParticipant do
       allow_nil? false
     end
   end

@@ -1,14 +1,19 @@
-defmodule Radiator.Podcasts.EpisodePersona do
+defmodule Radiator.Podcasts.EpisodeParticipant do
   @moduledoc """
-  The episode persona resource which joins an episode with a persona.
+  The episode participant resource which joins an episode with a persona.
   """
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,
     data_layer: AshPostgres.DataLayer
 
+  alias Radiator.People.Persona
+  alias Radiator.Podcasts.Episode
+  alias Radiator.Podcasts.Role
+  alias Radiator.Podcasts.Track
+
   postgres do
-    table "episode_personas"
+    table "episode_participants"
     repo Radiator.Repo
   end
 
@@ -23,19 +28,19 @@ defmodule Radiator.Podcasts.EpisodePersona do
   end
 
   relationships do
-    belongs_to :episode, Radiator.Podcasts.Episode do
+    belongs_to :episode, Episode do
       allow_nil? false
     end
 
-    belongs_to :persona, Radiator.Podcasts.Persona do
+    belongs_to :persona, Persona do
       allow_nil? false
     end
 
-    belongs_to :role, Radiator.Podcasts.Role do
+    belongs_to :role, Role do
       allow_nil? true
     end
 
-    has_one :track, Radiator.Podcasts.Track do
+    has_one :track, Track do
       allow_nil? true
     end
   end

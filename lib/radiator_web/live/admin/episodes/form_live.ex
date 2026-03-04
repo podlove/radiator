@@ -55,7 +55,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
         phx-submit="save"
       >
         <.input
-          field={form[:episode_personas]}
+          field={form[:episode_participants]}
           type="select"
           multiple
           options={@personas_options}
