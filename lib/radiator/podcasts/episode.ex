@@ -43,6 +43,8 @@ defmodule Radiator.Podcasts.Episode do
 
     create :create do
       accept @default_accept_attributes ++ [:podcast_id]
+
+      change manage_relationship(:participants, type: :append)
     end
 
     create :import do

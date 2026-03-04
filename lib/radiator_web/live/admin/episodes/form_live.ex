@@ -3,42 +3,71 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
 
   require Logger
 
+  alias AshPhoenix.Form
+  alias Radiator.Podcasts
+
   @impl Phoenix.LiveView
   def mount(%{"id" => id}, _session, socket) do
-    episode = Radiator.Podcasts.get_episode_by_id!(id, load: [:podcast])
-    form = Radiator.Podcasts.form_to_update_episode(episode)
+    episode = Podcasts.get_episode_by_id!(id)
 
-    podcast =
-      Radiator.Podcasts.get_podcast_by_id!(episode.podcast_id,
-        load: [episodes: [personas: [:person]]]
+    load = [episodes: [participants: [:person]]]
+    podcast = Podcasts.get_podcast_by_id!(episode.podcast_id, load: load)
+
+    form =
+      Podcasts.form_to_update_episode(episode,
+        as: "episode",
+        forms: [
+          participants: [type: :list, resource: Radiator.People.Persona, create_action: :create]
+        ]
       )
 
-    socket =
-      socket
-      |> assign(:form, to_form(form))
-      |> assign(:podcast, episode.podcast)
-      |> assign(:page_title, "Edit Episode")
-      |> assign(:personas_options, get_personas_options(podcast))
+    # Episode
+    # |> Form.for_create(:create,
+    #   domain: Podcasts,
+    #   forms: [
+    #     participants: [type: :list, resource: Radiator.People.Persona, create_action: :create]
+    #   ]
+    # )
 
-    {:ok, socket}
+    socket
+    |> assign(:form, to_form(form))
+    |> assign(:podcast, podcast)
+    |> assign(:page_title, "Edit Episode")
+    |> ok()
   end
 
   def mount(%{"podcast_id" => podcast_id}, _session, socket) do
-    podcast =
-      Radiator.Podcasts.get_podcast_by_id!(podcast_id,
-        load: [episodes: [personas: [:person]]]
+    load = [episodes: [participants: [:person]]]
+    podcast = Podcasts.get_podcast_by_id!(podcast_id, load: load)
+
+    # Warum laden wir das?
+    # Wir wollen alle Persons/Personas haben, die jemand in diesem Podcast (egal in welcher Episode) waren
+    # (für eine Vorschlagsliste)
+
+    # Better but not working at the moment
+    # form =
+    #   Podcasts.form_to_create_episode(
+    #     as: "episode",
+    #     forms: [
+    #       participants: [type: :list, resource: Radiator.People.Persona, create_action: :create]
+    #     ]
+    #   )
+
+    form =
+      Podcasts.Episode
+      |> Form.for_create(:create,
+        domain: Podcasts,
+        forms: [
+          participants: [type: :list, resource: Radiator.People.Persona, create_action: :create]
+        ],
+        params: %{podcast_id: podcast.id}
       )
 
-    form = Radiator.Podcasts.form_to_create_episode(podcast_id)
-
-    socket =
-      socket
-      |> assign(:form, to_form(form))
-      |> assign(:podcast, podcast)
-      |> assign(:page_title, "New Episode")
-      |> assign(:personas_options, get_personas_options(podcast))
-
-    {:ok, socket}
+    socket
+    |> assign(:form, to_form(form))
+    |> assign(:podcast, podcast)
+    |> assign(:page_title, "New Episode")
+    |> ok()
   end
 
   @impl Phoenix.LiveView
@@ -54,14 +83,21 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
         phx-change="validate"
         phx-submit="save"
       >
-        <.input
-          field={form[:episode_participants]}
-          type="select"
-          multiple
-          options={@personas_options}
-          prompt="Teilnehmer auswählen"
-          label={gettext("Participants")}
-        />
+        <.inputs_for :let={participant} field={@form[:participants]}>
+          <.input
+            field={participant[:public_name]}
+            type="text"
+            label="public_name"
+          />
+          <.input
+            field={participant[:handle]}
+            type="text"
+            label="handle"
+          />
+        </.inputs_for>
+        <.button type="button" phx-click="add_participant">Add participant</.button>
+
+        <.input field={form[:podcast_id]} label={gettext("Podcast Id")} />
         <.input field={form[:title]} label={gettext("Title")} />
         <.input field={form[:subtitle]} label={gettext("Subtitle")} />
         <.input field={form[:summary]} label={gettext("Summary")} />
@@ -82,13 +118,21 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
   end
 
   @impl Phoenix.LiveView
+  def handle_event("add_participant", _params, socket) do
+    form = Form.add_form(socket.assigns.form, :participants)
+
+    socket
+    |> assign(:form, form)
+    |> noreply()
+  end
+
   def handle_event("validate", %{"form" => form_data}, socket) do
-    socket = update(socket, :form, &AshPhoenix.Form.validate(&1, form_data))
+    socket = update(socket, :form, &Form.validate(&1, form_data))
     {:noreply, socket}
   end
 
   def handle_event("save", %{"form" => form_data}, socket) do
-    case AshPhoenix.Form.submit(socket.assigns.form, params: form_data) do
+    case Form.submit(socket.assigns.form, params: form_data) do
       {:ok, episode} ->
         socket =
           socket
@@ -109,11 +153,11 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     end
   end
 
-  defp get_personas_options(%{episodes: episodes}) do
-    episodes
-    |> Enum.flat_map(& &1.personas)
-    |> Enum.map(& &1.person)
-    |> Enum.uniq_by(& &1.id)
-    |> Enum.map(&{&1.email, &1.id})
-  end
+  # defp get_personas_options(%{episodes: episodes}) do
+  #   episodes
+  #   |> Enum.flat_map(& &1.personas)
+  #   |> Enum.map(& &1.person)
+  #   |> Enum.uniq_by(& &1.id)
+  #   |> Enum.map(&{&1.email, &1.id})
+  # end
 end
