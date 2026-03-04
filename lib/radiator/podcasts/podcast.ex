@@ -1,5 +1,7 @@
 defmodule Radiator.Podcasts.Podcast do
-  @moduledoc false
+  @moduledoc """
+  Domain interface for podcast related resources.
+  """
 
   use Ash.Resource,
     otp_app: :radiator,
