@@ -51,8 +51,6 @@ defmodule Radiator.People.Person do
     attribute :telephone, :string do
       allow_nil? true
       public? false
-
-      constraints match: ~r/^\+[1-9]\d{1,15}$/
     end
 
     timestamps()

@@ -3,39 +3,21 @@ defmodule Radiator.EpisodeTest do
 
   import Ash.Test
 
-  alias Radiator.People
   alias Radiator.Podcasts
 
   describe "Episode" do
     setup do
-      {:ok, podcast} = Podcasts.create_podcast(%{title: "Test Podcast"})
-
-      {:ok, episode} =
-        Podcasts.create_episode(
-          %{
-            title: "Test Episode",
-            podcast_id: podcast.id,
-            subtitle: "Test Subtitle"
-          },
-          load: [:participants]
-        )
-
-      %{podcast: podcast, episode: episode}
+      %{episode: generate(episode()), persona: generate(persona())}
     end
 
-    test "adds a participant", %{episode: episode} do
-      assert episode.participants == []
-      {:ok, persona} = People.create_persona(%{public_name: "prince", handle: "handle"})
-
+    test "adds a participant", %{episode: episode, persona: persona} do
       {:ok, %{participants: [added_participants]}} =
         Podcasts.add_participant_to_episode(episode, persona)
 
       assert_stripped added_participants == persona
     end
 
-    test "removes a persona", %{episode: episode} do
-      {:ok, persona} = People.create_persona(%{public_name: "prince", handle: "handle"})
-
+    test "removes a participant", %{episode: episode, persona: persona} do
       {:ok, %{participants: [_added_participants]}} =
         Podcasts.add_participant_to_episode(episode, persona)
 
