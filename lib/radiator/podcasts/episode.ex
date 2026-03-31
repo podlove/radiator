@@ -55,7 +55,13 @@ defmodule Radiator.Podcasts.Episode do
 
       argument :participants, {:array, :map}, allow_nil?: true
 
-      change manage_relationship(:participants, type: :append)
+      change manage_relationship(:participants,
+               use_identities: [:handle],
+               on_no_match: {:create, :create},
+               on_match: {:update, :update},
+               on_lookup: :relate,
+               on_missing: :unrelate
+             )
     end
 
     create :import do
@@ -72,7 +78,14 @@ defmodule Radiator.Podcasts.Episode do
         allow_nil?: true,
         constraints: [instance_of: Persona]
 
-      change manage_relationship(:participants, type: :append_and_remove)
+      change manage_relationship(:participants,
+               use_identities: [:handle],
+               on_no_match: {:create, :create},
+               on_match: {:update, :update},
+               on_lookup: :relate,
+               on_missing: :unrelate
+             )
+
       change manage_relationship(:add_participant, :participants, type: :append)
       change manage_relationship(:remove_participant, :participants, type: :remove)
     end

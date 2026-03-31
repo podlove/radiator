@@ -3,6 +3,10 @@ defmodule Radiator.Podcasts do
 
   use Ash.Domain, otp_app: :radiator, extensions: [AshPhoenix, AshAdmin.Domain]
 
+  require Ash.Query
+
+  alias Radiator.People.Persona
+
   forms do
     form :create_episode, args: [:podcast_id]
   end
@@ -50,5 +54,11 @@ defmodule Radiator.Podcasts do
 
     resource Radiator.Podcasts.EpisodeParticipant
     resource Radiator.Podcasts.Role
+  end
+
+  def read_podcast_participants(podcast_id) do
+    Persona
+    |> Ash.Query.filter(exists(episodes, podcast_id == ^podcast_id))
+    |> Ash.read!()
   end
 end
