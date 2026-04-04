@@ -18,7 +18,7 @@ defmodule Radiator.Podcasts.EpisodeParticipant do
   end
 
   actions do
-    defaults [:read, :create, :destroy]
+    defaults [:read, :create, :update, :destroy]
   end
 
   attributes do

@@ -10,6 +10,7 @@ defmodule Radiator.Generator do
   alias Radiator.People.Person
   alias Radiator.People.Persona
   alias Radiator.Podcasts.Episode
+  alias Radiator.Podcasts.Episode.Scheduling
   alias Radiator.Podcasts.Podcast
 
   def person(attrs \\ %{}) do
@@ -70,6 +71,21 @@ defmodule Radiator.Generator do
         title: StreamData.repeatedly(&Lorem.sentence/0),
         summary: StreamData.repeatedly(&Lorem.sentence/0),
         podcast_id: podcast_id
+      ],
+      overrides: attrs,
+      authorize: false,
+      actor: attrs[:actor]
+    )
+  end
+
+  def episode_scheduling(attrs \\ %{}) do
+    episode_id = Map.get(attrs, :episode_id, generate(episode()).id)
+
+    changeset_generator(
+      Scheduling,
+      :create,
+      defaults: [
+        podcast_id: episode_id
       ],
       overrides: attrs,
       authorize: false,

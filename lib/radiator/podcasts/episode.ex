@@ -1,5 +1,8 @@
 defmodule Radiator.Podcasts.Episode do
-  @moduledoc false
+  @moduledoc """
+  Model specification for podcast episodes. Ash state machine is used to define the
+  different states of an episode.
+  """
 
   use Ash.Resource,
     otp_app: :radiator,
@@ -25,6 +28,12 @@ defmodule Radiator.Podcasts.Episode do
   state_machine do
     initial_states([:scheduling])
     default_initial_state(:scheduling)
+
+    transitions do
+      transition(:begin_scheduling, from: :creation, to: :scheduling)
+      transition(:finalize_scheduling, from: :scheduling, to: :scheduled)
+      transition(:back_to_scheduling, from: :scheduled, to: :scheduling)
+    end
   end
 
   @default_accept_attributes [
@@ -46,7 +55,13 @@ defmodule Radiator.Podcasts.Episode do
 
       argument :participants, {:array, :map}, allow_nil?: true
 
-      change manage_relationship(:participants, type: :append)
+      change manage_relationship(:participants,
+               use_identities: [:handle],
+               on_no_match: {:create, :create},
+               on_match: {:update, :update},
+               on_lookup: :relate,
+               on_missing: :unrelate
+             )
     end
 
     create :import do
@@ -58,11 +73,37 @@ defmodule Radiator.Podcasts.Episode do
       require_atomic? false
       argument :participants, {:array, :map}, allow_nil?: true
       argument :add_participant, :struct, allow_nil?: true, constraints: [instance_of: Persona]
-      argument :remove_participant, :struct, allow_nil?: true, constraints: [instance_of: Persona]
 
-      change manage_relationship(:participants, type: :append_and_remove)
+      argument :remove_participant, :struct,
+        allow_nil?: true,
+        constraints: [instance_of: Persona]
+
+      change manage_relationship(:participants,
+               use_identities: [:handle],
+               on_no_match: {:create, :create},
+               on_match: {:update, :update},
+               on_lookup: :relate,
+               on_missing: :unrelate
+             )
+
       change manage_relationship(:add_participant, :participants, type: :append)
       change manage_relationship(:remove_participant, :participants, type: :remove)
+    end
+
+    update :begin_scheduling do
+      description "Transition episode to scheduling state"
+      change transition_state(:scheduling)
+    end
+
+    update :finalize_scheduling do
+      description "Transition episode to scheduled state after scheduling is complete"
+      accept [:publication_date]
+      change transition_state(:scheduled)
+    end
+
+    update :back_to_scheduling do
+      description "Reopen scheduling for an episode"
+      change transition_state(:scheduling)
     end
   end
 
@@ -138,6 +179,11 @@ defmodule Radiator.Podcasts.Episode do
     end
 
     has_many :tracks, Track
+
+    has_one :scheduling, Radiator.Podcasts.Episode.Scheduling do
+      description "The scheduling information for this episode"
+      public? true
+    end
   end
 
   identities do

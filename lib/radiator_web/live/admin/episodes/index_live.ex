@@ -24,28 +24,4 @@ defmodule RadiatorWeb.Admin.Episodes.IndexLive do
 
     {:noreply, socket}
   end
-
-  @impl Phoenix.LiveView
-  def render(assigns) do
-    ~H"""
-    <Layouts.app {assigns}>
-      <h1>{gettext("Episodes for %{title}", title: @podcast.title)}</h1>
-      <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes/new"} variant="primary">
-        {gettext("New")}
-      </.button>
-      <.table id="episodes" rows={@page.results}>
-        <:col :let={episode} label={gettext("Number")}>{episode.number}</:col>
-        <:col :let={episode} label={gettext("Title")}>{episode.title}</:col>
-        <:col :let={episode} label={gettext("Actions")}>
-          <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{episode}"}>
-            {gettext("Podcast")}
-          </.button>
-          <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{episode}/edit"}>
-            {gettext("Edit")}
-          </.button>
-        </:col>
-      </.table>
-    </Layouts.app>
-    """
-  end
 end

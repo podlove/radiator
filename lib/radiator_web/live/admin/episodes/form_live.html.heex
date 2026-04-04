@@ -1,0 +1,63 @@
+<Layouts.app {assigns}>
+  <h1>{@page_title}</h1>
+  <.simple_form
+    :let={form}
+    id="episode_form"
+    as={:form}
+    for={@form}
+    phx-change="validate"
+    phx-submit="save"
+  >
+    <.input field={form[:podcast_id]} type="hidden" />
+    <.input field={form[:title]} label={gettext("Title")} />
+    <.input field={form[:subtitle]} label={gettext("Subtitle")} />
+    <.input field={form[:summary]} label={gettext("Summary")} />
+    <.input field={form[:number]} type="number" label={gettext("Number")} />
+    <.input
+      field={form[:itunes_type]}
+      type="select"
+      options={Radiator.Podcasts.ItunesEpisodeType.values()}
+      label={gettext("Itunes Type")}
+    />
+    <.input field={form[:duration_seconds]} type="number" label={gettext("Duration Seconds")} />
+
+    <fieldset class="space-y-4">
+      <legend class="text-sm font-semibold">{gettext("Participants")}</legend>
+
+      <div class="flex gap-2">
+        <.button
+          :for={candicate <- @candicates}
+          phx-click="connect_participant"
+          phx-value-handle={candicate.handle}
+          phx-value-public_name={candicate.public_name}
+          type="button"
+          class="btn-xs btn-secondary"
+        >
+          {candicate.public_name}
+        </.button>
+      </div>
+
+      <.inputs_for :let={participant} field={@form[:participants]}>
+        <div class="flex w-full gap-4 items-end">
+          <.input field={participant[:public_name]} type="text" label={gettext("Name")} />
+          <.input field={participant[:handle]} type="text" label={gettext("Handle")} />
+          <.button
+            type="button"
+            phx-click="remove_participant"
+            phx-value-path={participant.name}
+          >
+            <.icon name="hero-x-mark" class="w-5 h-5" />
+          </.button>
+        </div>
+      </.inputs_for>
+
+      <.button type="button" phx-click="add_participant">
+        {gettext("Add Participant")}
+      </.button>
+    </fieldset>
+
+    <:actions>
+      <.button variant="primary">{gettext("Save")}</.button>
+    </:actions>
+  </.simple_form>
+</Layouts.app>
