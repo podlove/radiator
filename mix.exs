@@ -60,7 +60,7 @@ defmodule Radiator.MixProject do
       {:ex_cldr_languages, "~> 0.3.3"},
       {:faker, "~> 0.18.0", only: :test},
       {:gen_smtp, "~> 1.1"},
-      {:gettext, "~> 0.26"},
+      {:gettext, "~> 1.0", override: true},
       {:heroicons,
        github: "tailwindlabs/heroicons",
        tag: "v2.2.0",
