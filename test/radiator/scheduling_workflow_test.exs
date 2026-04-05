@@ -277,8 +277,8 @@ defmodule Radiator.SchedulingWorkflowTest do
       proposal_id = proposal1["id"]
       persona_id = Enum.at(participant_ids, 0)
 
-      [vote] = Scheduling.get_persona_votes(scheduling, persona_id)
-      assert persona_id == vote.persona_id
+      [{_id, vote}] = Scheduling.get_persona_votes(scheduling, persona_id)
+      assert persona_id == Map.get(vote, "persona_id")
 
       {:ok, updated_scheduling} =
         scheduling
@@ -291,26 +291,69 @@ defmodule Radiator.SchedulingWorkflowTest do
       assert [] == Scheduling.get_persona_votes(updated_scheduling, persona_id)
     end
 
-    # @doc """
-    # Example 5: Participant removes their vote
-    # """
-    # def remove_vote_example(scheduling, proposal_id, persona_id) do
-    #   {:ok, updated_scheduling} =
-    #     scheduling
-    #     |> Ash.Changeset.for_update(:remove_vote, %{
-    #       proposal_id: proposal_id,
-    #       persona_id: persona_id
-    #     })
-    #     |> Ash.update()
+    test "Owner removes a proposal (e.g., no longer viable)", %{
+      episode: episode,
+      owner: owner,
+      participants: participants
+    } do
+      # SETUP (use generators!!)
+      # Step 1: Create scheduling with proposed datetimes
+      owner_id = owner.id
+      participant_ids = Enum.map(participants, & &1.id)
 
-    #   IO.puts("Vote removed successfully")
-    #   {:ok, updated_scheduling}
-    # end
+      {:ok, scheduling} =
+        Scheduling
+        |> Ash.Changeset.for_create(:create, %{
+          episode_id: episode.id,
+          owner_persona_id: owner_id,
+          participant_persona_ids: participant_ids,
+          proposed_datetimes: [
+            ~U[2024-03-15 14:00:00Z],
+            ~U[2024-03-16 10:00:00Z],
+            ~U[2024-03-17 15:00:00Z]
+          ]
+        })
+        |> Ash.create()
 
-    @doc """
-    Example 6: Owner removes a proposal (e.g., no longer viable)
-    """
-    def remove_proposal_example(scheduling, proposal_id, owner_id) do
+      # Step 2: Participants vote on proposals
+      [proposal1, proposal2, _proposal3] = scheduling.proposals
+
+      # First participant votes
+      {:ok, scheduling} =
+        scheduling
+        |> Ash.Changeset.for_update(:vote, %{
+          proposal_id: proposal1["id"],
+          persona_id: Enum.at(participant_ids, 0),
+          score: 5,
+          comment: "Perfect time for me!"
+        })
+        |> Ash.update()
+
+      # Second participant votes
+      {:ok, scheduling} =
+        scheduling
+        |> Ash.Changeset.for_update(:vote, %{
+          proposal_id: proposal1["id"],
+          persona_id: Enum.at(participant_ids, 1),
+          score: 4
+        })
+        |> Ash.update()
+
+      # Third participant prefers another time
+      {:ok, scheduling} =
+        scheduling
+        |> Ash.Changeset.for_update(:vote, %{
+          proposal_id: proposal2["id"],
+          persona_id: Enum.at(participant_ids, 2),
+          score: 5
+        })
+        |> Ash.update()
+
+      proposal_id = proposal1["id"]
+      # persona_id = Enum.at(participant_ids, 0)
+
+      assert %{"id" => ^proposal_id} = Scheduling.get_proposal(scheduling, proposal_id)
+
       {:ok, updated_scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:remove_proposal, %{
@@ -319,24 +362,100 @@ defmodule Radiator.SchedulingWorkflowTest do
         })
         |> Ash.update()
 
-      IO.puts("Proposal removed successfully")
-      {:ok, updated_scheduling}
+      assert is_nil(Scheduling.get_proposal(updated_scheduling, proposal_id))
     end
 
-    @doc """
-    Example 7: Reopen a closed scheduling
+    test "If the chosen time no longer works, the owner can reopen voting", %{
+      episode: episode,
+      owner: owner,
+      participants: participants
+    } do
+      # SETUP (use generators!!)
+      # Step 1: Create scheduling with proposed datetimes
+      owner_id = owner.id
+      participant_ids = Enum.map(participants, & &1.id)
 
-    If the chosen time no longer works, the owner can reopen voting.
-    """
-    def reopen_scheduling_example(scheduling, owner_id) do
+      {:ok, scheduling} =
+        Scheduling
+        |> Ash.Changeset.for_create(:create, %{
+          episode_id: episode.id,
+          owner_persona_id: owner_id,
+          participant_persona_ids: participant_ids,
+          proposed_datetimes: [
+            ~U[2024-03-15 14:00:00Z],
+            ~U[2024-03-16 10:00:00Z],
+            ~U[2024-03-17 15:00:00Z]
+          ]
+        })
+        |> Ash.create()
+
+      # Step 2: Participants vote on proposals
+      [proposal1, proposal2, _proposal3] = scheduling.proposals
+
+      # First participant votes
+      {:ok, scheduling} =
+        scheduling
+        |> Ash.Changeset.for_update(:vote, %{
+          proposal_id: proposal1["id"],
+          persona_id: Enum.at(participant_ids, 0),
+          score: 5,
+          comment: "Perfect time for me!"
+        })
+        |> Ash.update()
+
+      # Second participant votes
+      {:ok, scheduling} =
+        scheduling
+        |> Ash.Changeset.for_update(:vote, %{
+          proposal_id: proposal1["id"],
+          persona_id: Enum.at(participant_ids, 1),
+          score: 4
+        })
+        |> Ash.update()
+
+      # Third participant prefers another time
+      {:ok, scheduling} =
+        scheduling
+        |> Ash.Changeset.for_update(:vote, %{
+          proposal_id: proposal2["id"],
+          persona_id: Enum.at(participant_ids, 2),
+          score: 5
+        })
+        |> Ash.update()
+
+      # Example 7: Reopen a closed scheduling
+      # If the chosen time no longer works, the owner can reopen voting.
+      # proposal_id = proposal1["id"]
+      # persona_id = Enum.at(participant_ids, 0)
+
+      stats = Scheduling.voting_stats(scheduling)
+      top_proposal = List.first(stats.proposal_stats)
+
+      {:ok, scheduling} =
+        scheduling
+        |> Ash.Changeset.for_update(:finalize, %{
+          chosen_proposal_id: top_proposal.proposal_id,
+          persona_id: owner_id
+        })
+        |> Ash.update()
+
+      {:ok, episode} =
+        episode
+        |> Ash.Changeset.for_update(:finalize_scheduling, %{
+          publication_date: scheduling.chosen_datetime
+        })
+        |> Ash.update()
+
+      assert :closed == scheduling.status
+      refute is_nil(scheduling.chosen_proposal_id)
+      assert :scheduled == episode.state
+
       {:ok, reopened_scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:reopen, %{
           persona_id: owner_id
         })
         |> Ash.update()
-
-      IO.puts("Scheduling reopened for new votes")
 
       # Also revert episode back to scheduling state
       episode = Ash.get!(Episode, scheduling.episode_id)
@@ -346,8 +465,36 @@ defmodule Radiator.SchedulingWorkflowTest do
         |> Ash.Changeset.for_update(:back_to_scheduling, %{})
         |> Ash.update()
 
-      {:ok, episode, reopened_scheduling}
+      assert :scheduling == episode.state
+      assert is_nil(reopened_scheduling.chosen_proposal_id)
+      assert :open == reopened_scheduling.status
     end
+
+    # @doc """
+    # Example 7: Reopen a closed scheduling
+
+    # If the chosen time no longer works, the owner can reopen voting.
+    # """
+    # def reopen_scheduling_example(scheduling, owner_id) do
+    #   {:ok, reopened_scheduling} =
+    #     scheduling
+    #     |> Ash.Changeset.for_update(:reopen, %{
+    #       persona_id: owner_id
+    #     })
+    #     |> Ash.update()
+
+    #   IO.puts("Scheduling reopened for new votes")
+
+    #   # Also revert episode back to scheduling state
+    #   episode = Ash.get!(Episode, scheduling.episode_id)
+
+    #   {:ok, episode} =
+    #     episode
+    #     |> Ash.Changeset.for_update(:back_to_scheduling, %{})
+    #     |> Ash.update()
+
+    #   {:ok, episode, reopened_scheduling}
+    # end
 
     @doc """
     Example 8: Get all votes from a specific participant
