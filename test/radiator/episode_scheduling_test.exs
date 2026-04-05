@@ -148,16 +148,6 @@ defmodule Radiator.EpisodeSchedulingTest do
         })
         |> Ash.update()
 
-      # TODO, why does this not work??
-      # {:ok, updated_scheduling} =
-      #   Scheduling.vote(
-      #     scheduling,
-      #     proposal["id"],
-      #     participant.id,
-      #     4,
-      #     "This time works for me"
-      #   )
-
       [updated_proposal | _] = updated_scheduling.proposals
       [vote] = updated_proposal["votes"]
       assert vote["comment"] == "This time works for me"
@@ -177,15 +167,6 @@ defmodule Radiator.EpisodeSchedulingTest do
           3
         )
 
-      # {:ok, scheduling} =
-      #   scheduling
-      #   |> Ash.Changeset.for_update(:vote, %{
-      #     proposal_id: proposal["id"],
-      #     persona_id: participant.id,
-      #     score: 3
-      #   })
-      #   |> Ash.update()
-
       # Second vote from same persona
       {:ok, updated_scheduling} =
         Scheduling.vote(
@@ -194,15 +175,6 @@ defmodule Radiator.EpisodeSchedulingTest do
           participant.id,
           5
         )
-
-      # {:ok, updated_scheduling} =
-      #   scheduling
-      #   |> Ash.Changeset.for_update(:vote, %{
-      #     proposal_id: proposal["id"],
-      #     persona_id: participant.id,
-      #     score: 5
-      #   })
-      #   |> Ash.update()
 
       [updated_proposal | _] = updated_scheduling.proposals
       assert length(updated_proposal["votes"]) == 1
@@ -222,15 +194,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                  proposal["id"],
                  participant.id,
                  6
-    )
-
-      
-      # |> Ash.Changeset.for_update(:vote, %{
-      #   proposal_id: proposal["id"],
-      #   persona_id: participant.id,
-      #   score: 6
-      # })
-      # update()
+               )
 
       assert changeset.errors != []
     end
@@ -245,14 +209,6 @@ defmodule Radiator.EpisodeSchedulingTest do
                  non_participant.id,
                  5
                 )
-
-      #  scheduling
-      # |> Ash.Changeset.for_update(:vote, %{
-      #   proposal_id: proposal["id"],
-      #   persona_id: non_participant.id,
-      #   score: 5
-      # })
-      # update()
 
       assert changeset.errors != []
     end
@@ -271,15 +227,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                  proposal["id"],
                  participant.id,
                  5
-     )
-
-      
-      # |> Ash.Changeset.for_update(:vote, %{
-      #   proposal_id: proposal["id"],
-      #   persona_id: participant.id,
-      #   score: 5
-      # })
-      # update()
+               )
 
       assert changeset.errors != []
     end
