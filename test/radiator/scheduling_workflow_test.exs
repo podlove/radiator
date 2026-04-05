@@ -470,86 +470,61 @@ defmodule Radiator.SchedulingWorkflowTest do
       assert :open == reopened_scheduling.status
     end
 
-    # @doc """
-    # Example 7: Reopen a closed scheduling
-
-    # If the chosen time no longer works, the owner can reopen voting.
-    # """
-    # def reopen_scheduling_example(scheduling, owner_id) do
-    #   {:ok, reopened_scheduling} =
-    #     scheduling
-    #     |> Ash.Changeset.for_update(:reopen, %{
-    #       persona_id: owner_id
-    #     })
-    #     |> Ash.update()
-
-    #   IO.puts("Scheduling reopened for new votes")
-
-    #   # Also revert episode back to scheduling state
-    #   episode = Ash.get!(Episode, scheduling.episode_id)
-
-    #   {:ok, episode} =
-    #     episode
-    #     |> Ash.Changeset.for_update(:back_to_scheduling, %{})
-    #     |> Ash.update()
-
-    #   {:ok, episode, reopened_scheduling}
-    # end
 
     @doc """
     Example 8: Get all votes from a specific participant
 
     Shows all the votes a participant has cast across all proposals.
     """
-    def get_participant_votes_example(scheduling, persona_id) do
-      votes = Scheduling.get_persona_votes(scheduling, persona_id)
+    # def get_participant_votes_example(scheduling, persona_id) do
+    #   votes = Scheduling.get_persona_votes(scheduling, persona_id)
 
-      IO.puts("\n=== Votes from Participant ===")
+    #   IO.puts("\n=== Votes from Participant ===")
 
-      if Enum.empty?(votes) do
-        IO.puts("No votes yet")
-      else
-        Enum.each(votes, fn {proposal_id, vote} ->
-          _proposal = Scheduling.get_proposal(scheduling, proposal_id)
-          _score = vote["score"] || vote.score
-          _comment = vote["comment"] || vote.comment
+    #   if Enum.empty?(votes) do
+    #     IO.puts("No votes yet")
+    #   else
+    #     Enum.each(votes, fn {proposal_id, vote} ->
+    #       _proposal = Scheduling.get_proposal(scheduling, proposal_id)
+    #       _score = vote["score"] || vote.score
+    #       _comment = vote["comment"] || vote.comment
 
-          # IO.puts("Proposal: #{Calendar.strftime(proposal["datetime"], "%B %d, %Y at %I:%M %p")}")
-          # IO.puts("Score: #{score}/5")
-          # if comment, do: IO.puts("Comment: #{comment}")
-          # IO.puts("")
-        end)
-      end
+    #       # IO.puts("Proposal: #{Calendar.strftime(proposal["datetime"], "%B %d, %Y at %I:%M %p")}")
+    #       # IO.puts("Score: #{score}/5")
+    #       # if comment, do: IO.puts("Comment: #{comment}")
+    #       # IO.puts("")
+    #     end)
+    #   end
 
-      votes
-    end
+    #   votes
+    # end
 
     @doc """
     Example 9: Find best time slot based on voting
 
     Returns the proposal with the highest average score.
     """
-    def find_best_timeslot(scheduling) do
-      stats = Scheduling.voting_stats(scheduling)
+    # def find_best_timeslot(scheduling) do
+    #   stats = Scheduling.voting_stats(scheduling)
 
-      case stats.top_proposal do
-        nil ->
-          IO.puts("No votes yet, cannot determine best timeslot")
-          {:error, :no_votes}
+    #   case stats.top_proposal do
+    #     nil ->
+    #       IO.puts("No votes yet, cannot determine best timeslot")
+    #       {:error, :no_votes}
 
-        top_proposal ->
-          IO.puts("\n=== Best Timeslot ===")
+    #     top_proposal ->
+    #       IO.puts("\n=== Best Timeslot ===")
 
-          IO.puts(
-            "DateTime: #{Calendar.strftime(top_proposal.datetime, "%B %d, %Y at %I:%M %p UTC")}"
-          )
+    #       IO.puts(
+    #         "DateTime: #{Calendar.strftime(top_proposal.datetime, "%B %d, %Y at %I:%M %p UTC")}"
+    #       )
 
-          IO.puts("Average Score: #{top_proposal.average_score}/5.0")
-          IO.puts("Total Votes: #{top_proposal.vote_count}")
+    #       IO.puts("Average Score: #{top_proposal.average_score}/5.0")
+    #       IO.puts("Total Votes: #{top_proposal.vote_count}")
 
-          {:ok, top_proposal}
-      end
-    end
+    #       {:ok, top_proposal}
+    #   end
+    # end
 
     test "Complete workflow with error handling", %{
       episode: episode,
@@ -609,18 +584,20 @@ defmodule Radiator.SchedulingWorkflowTest do
       stats.proposal_stats
       |> Enum.with_index(1)
       |> Enum.each(fn {proposal, _rank} ->
-        IO.puts(
-          "   Votes: #{proposal.vote_count}, Average Score: #{proposal.average_score || "N/A"}"
-        )
+        assert 0 <= proposal.vote_count
+        assert 0 <= proposal.average_score
+        # IO.puts(
+        #   "   Votes: #{proposal.vote_count}, Average Score: #{proposal.average_score || "N/A"}"
+        # )
       end)
 
-      if stats.all_voted? do
-        IO.puts("\n✓ All participants have voted! Ready to finalize.")
-      else
-        IO.puts(
-          "\n⏳ Waiting for #{stats.participant_count - stats.voted_participant_count} more vote(s)."
-        )
-      end
+      # if stats.all_voted? do
+      #   IO.puts("\n✓ All participants have voted! Ready to finalize.")
+      # else
+      #   IO.puts(
+      #     "\n⏳ Waiting for #{stats.participant_count - stats.voted_participant_count} more vote(s)."
+      #   )
+      # end
 
       stats
     end
