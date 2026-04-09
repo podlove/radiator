@@ -470,62 +470,6 @@ defmodule Radiator.SchedulingWorkflowTest do
       assert :open == reopened_scheduling.status
     end
 
-
-    @doc """
-    Example 8: Get all votes from a specific participant
-
-    Shows all the votes a participant has cast across all proposals.
-    """
-    # def get_participant_votes_example(scheduling, persona_id) do
-    #   votes = Scheduling.get_persona_votes(scheduling, persona_id)
-
-    #   IO.puts("\n=== Votes from Participant ===")
-
-    #   if Enum.empty?(votes) do
-    #     IO.puts("No votes yet")
-    #   else
-    #     Enum.each(votes, fn {proposal_id, vote} ->
-    #       _proposal = Scheduling.get_proposal(scheduling, proposal_id)
-    #       _score = vote["score"] || vote.score
-    #       _comment = vote["comment"] || vote.comment
-
-    #       # IO.puts("Proposal: #{Calendar.strftime(proposal["datetime"], "%B %d, %Y at %I:%M %p")}")
-    #       # IO.puts("Score: #{score}/5")
-    #       # if comment, do: IO.puts("Comment: #{comment}")
-    #       # IO.puts("")
-    #     end)
-    #   end
-
-    #   votes
-    # end
-
-    @doc """
-    Example 9: Find best time slot based on voting
-
-    Returns the proposal with the highest average score.
-    """
-    # def find_best_timeslot(scheduling) do
-    #   stats = Scheduling.voting_stats(scheduling)
-
-    #   case stats.top_proposal do
-    #     nil ->
-    #       IO.puts("No votes yet, cannot determine best timeslot")
-    #       {:error, :no_votes}
-
-    #     top_proposal ->
-    #       IO.puts("\n=== Best Timeslot ===")
-
-    #       IO.puts(
-    #         "DateTime: #{Calendar.strftime(top_proposal.datetime, "%B %d, %Y at %I:%M %p UTC")}"
-    #       )
-
-    #       IO.puts("Average Score: #{top_proposal.average_score}/5.0")
-    #       IO.puts("Total Votes: #{top_proposal.vote_count}")
-
-    #       {:ok, top_proposal}
-    #   end
-    # end
-
     test "Complete workflow with error handling", %{
       episode: episode,
       owner: owner,
