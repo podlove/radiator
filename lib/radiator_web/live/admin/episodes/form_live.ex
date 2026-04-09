@@ -8,14 +8,18 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
 
   @impl Phoenix.LiveView
   def mount(%{"id" => id}, _session, socket) do
-    episode = Podcasts.get_episode_by_id!(id, load: [:participants])
+    episode = Podcasts.get_episode_by_id!(id, load: [:participants, :scheduling])
     podcast = Podcasts.get_podcast_by_id!(episode.podcast_id)
 
     form =
       episode
       |> Form.for_update(:update,
         domain: Podcasts,
-        forms: participant_forms(data: fn ep -> ep.participants end)
+        forms:
+          episode_nested_forms(
+            participants: [data: fn ep -> ep.participants end],
+            proposals: [data: fn ep -> ep.scheduling.proposals end]
+          )
       )
 
     socket
@@ -33,7 +37,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
       Podcasts.Episode
       |> Form.for_create(:create,
         domain: Podcasts,
-        forms: participant_forms(),
+        forms: episode_nested_forms(),
         params: %{podcast_id: podcast.id}
       )
 
@@ -106,15 +110,22 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     end
   end
 
-  defp participant_forms(opts \\ []) do
+  defp episode_nested_forms(opts \\ []) do
     [
+      proposals:
+        [
+          type: :list,
+          resource: Radiator.Podcasts.Episode.Proposal,
+          update_action: :update,
+          create_action: :create
+        ] ++ opts[:proposals],
       participants:
         [
           type: :list,
           resource: Radiator.People.Persona,
           create_action: :create,
           update_action: :update
-        ] ++ opts
+        ] ++ opts[:participants]
     ]
   end
 

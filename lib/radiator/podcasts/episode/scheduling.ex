@@ -15,6 +15,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
     domain: Radiator.Podcasts,
     data_layer: AshPostgres.DataLayer
 
+  alias Radiator.Podcasts.Episode.Scheduling.Proposal
+
   postgres do
     table "episode_scheduling"
     repo Radiator.Repo
@@ -34,9 +36,14 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   actions do
     defaults [:read, :destroy]
 
+    update :update do
+      accept [:proposals]
+      primary? true
+    end
+
     create :create do
       description "Start a new scheduling for an episode with initial proposals and participants"
-      accept [:episode_id, :owner_persona_id, :participant_persona_ids]
+      accept [:episode_id, :owner_persona_id, :participant_persona_ids, :proposals]
       argument :proposed_datetimes, {:array, :utc_datetime}, allow_nil?: false
 
       validate fn changeset, _context ->
@@ -444,7 +451,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       default []
     end
 
-    attribute :proposals, {:array, :map} do
+    attribute :proposals, {:array, Proposal} do
       description "List of proposed datetimes with their votes (stored as JSONB)"
       allow_nil? false
       public? true

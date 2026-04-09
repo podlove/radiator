@@ -208,7 +208,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                  proposal["id"],
                  non_participant.id,
                  5
-                )
+               )
 
       assert changeset.errors != []
     end
