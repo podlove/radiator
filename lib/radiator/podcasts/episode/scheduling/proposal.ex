@@ -17,11 +17,16 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Proposal do
   end
 
   actions do
-    defaults [:read, :destroy, :update]
+    defaults [:read, :destroy]
 
     create :create do
       primary? true
       accept [:id, :datetime, :created_by_persona_id, :votes, :inserted_at, :updated_at]
+    end
+
+    update :update do
+      primary? true
+      accept [:datetime, :created_by_persona_id, :votes]
     end
 
     update :add_vote do
