@@ -93,12 +93,12 @@ defmodule Radiator.EpisodeSchedulingTest do
 
       [proposal] = scheduling.proposals
 
-      assert proposal["id"] != nil
-      assert proposal["datetime"] == "2024-03-15T14:00:00Z"
-      assert proposal["created_by_persona_id"] == owner.id
-      assert proposal["votes"] == []
-      assert proposal["inserted_at"] != nil
-      assert proposal["updated_at"] != nil
+      assert proposal.id != nil
+      assert proposal.datetime == ~U[2024-03-15 14:00:00Z]
+      assert proposal.created_by_persona_id == owner.id
+      assert proposal.votes == []
+      assert proposal.inserted_at != nil
+      assert proposal.updated_at != nil
     end
   end
 
@@ -119,18 +119,18 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, updated_scheduling} =
         Scheduling.vote(
           scheduling,
-          proposal["id"],
+          proposal.id,
           participant.id,
           5
         )
 
       [updated_proposal | _] = updated_scheduling.proposals
-      assert length(updated_proposal["votes"]) == 1
+      assert length(updated_proposal.votes) == 1
 
-      [vote] = updated_proposal["votes"]
-      assert vote["persona_id"] == participant.id
-      assert vote["score"] == 5
-      assert vote["voted_at"] != nil
+      [vote] = updated_proposal.votes
+      assert vote.persona_id == participant.id
+      assert vote.score == 5
+      assert vote.voted_at != nil
     end
 
     test "allows voting with a comment", %{
@@ -141,7 +141,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, updated_scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal["id"],
+          proposal_id: proposal.id,
           persona_id: participant.id,
           score: 4,
           comment: "This time works for me"
@@ -149,8 +149,8 @@ defmodule Radiator.EpisodeSchedulingTest do
         |> Ash.update()
 
       [updated_proposal | _] = updated_scheduling.proposals
-      [vote] = updated_proposal["votes"]
-      assert vote["comment"] == "This time works for me"
+      [vote] = updated_proposal.votes
+      assert vote.comment == "This time works for me"
     end
 
     test "updates existing vote from same persona", %{
@@ -162,7 +162,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, scheduling} =
         Scheduling.vote(
           scheduling,
-          proposal["id"],
+          proposal.id,
           participant.id,
           3
         )
@@ -171,16 +171,16 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, updated_scheduling} =
         Scheduling.vote(
           scheduling,
-          proposal["id"],
+          proposal.id,
           participant.id,
           5
         )
 
       [updated_proposal | _] = updated_scheduling.proposals
-      assert length(updated_proposal["votes"]) == 1
+      assert length(updated_proposal.votes) == 1
 
-      [vote] = updated_proposal["votes"]
-      assert vote["score"] == 5
+      [vote] = updated_proposal.votes
+      assert vote.score == 5
     end
 
     test "validates score is between 1 and 5", %{
@@ -191,7 +191,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:error, changeset} =
                Scheduling.vote(
                  scheduling,
-                 proposal["id"],
+                 proposal.id,
                  participant.id,
                  6
                )
@@ -205,7 +205,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:error, changeset} =
                Scheduling.vote(
                  scheduling,
-                 proposal["id"],
+                 proposal.id,
                  non_participant.id,
                  5
                )
@@ -224,7 +224,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:error, changeset} =
                Scheduling.vote(
                  closed_scheduling,
-                 proposal["id"],
+                 proposal.id,
                  participant.id,
                  5
                )
@@ -258,9 +258,9 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert length(updated_scheduling.proposals) == initial_count + 1
 
       [new_proposal | _] = updated_scheduling.proposals
-      assert new_proposal["datetime"] == "2024-03-18T09:00:00Z"
-      assert new_proposal["created_by_persona_id"] == participant.id
-      assert new_proposal["votes"] == []
+      assert new_proposal.datetime == ~U[2024-03-18 09:00:00Z]
+      assert new_proposal.created_by_persona_id == participant.id
+      assert new_proposal.votes == []
     end
 
     test "prevents non-participants from adding proposals", %{scheduling: scheduling} do
@@ -314,7 +314,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, updated_scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:remove_proposal, %{
-          proposal_id: proposal["id"],
+          proposal_id: proposal.id,
           persona_id: owner.id
         })
         |> Ash.update()
@@ -340,7 +340,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, updated_scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:remove_proposal, %{
-          proposal_id: new_proposal["id"],
+          proposal_id: new_proposal.id,
           persona_id: participant.id
         })
         |> Ash.update()
@@ -357,7 +357,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:error, changeset} =
                scheduling
                |> Ash.Changeset.for_update(:remove_proposal, %{
-                 proposal_id: proposal["id"],
+                 proposal_id: proposal.id,
                  persona_id: participant.id
                })
                |> Ash.update()
@@ -375,7 +375,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:error, changeset} =
                closed_scheduling
                |> Ash.Changeset.for_update(:remove_proposal, %{
-                 proposal_id: proposal["id"],
+                 proposal_id: proposal.id,
                  persona_id: owner.id
                })
                |> Ash.update()
@@ -394,7 +394,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal["id"],
+          proposal_id: proposal.id,
           persona_id: participant.id,
           score: 5
         })
@@ -411,13 +411,13 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, updated_scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:remove_vote, %{
-          proposal_id: proposal["id"],
+          proposal_id: proposal.id,
           persona_id: participant.id
         })
         |> Ash.update()
 
       [updated_proposal | _] = updated_scheduling.proposals
-      assert updated_proposal["votes"] == []
+      assert updated_proposal.votes == []
     end
 
     test "prevents removing votes from closed scheduling", %{
@@ -430,7 +430,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:error, changeset} =
                closed_scheduling
                |> Ash.Changeset.for_update(:remove_vote, %{
-                 proposal_id: proposal["id"],
+                 proposal_id: proposal.id,
                  persona_id: participant.id
                })
                |> Ash.update()
@@ -456,16 +456,14 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, finalized_scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:finalize, %{
-          chosen_proposal_id: proposal["id"],
+          chosen_proposal_id: proposal.id,
           persona_id: owner.id
         })
         |> Ash.update()
 
       assert finalized_scheduling.status == :closed
-      assert finalized_scheduling.chosen_proposal_id == proposal["id"]
-      # Parse the JSONB string datetime for comparison
-      {:ok, proposal_dt, 0} = DateTime.from_iso8601(proposal["datetime"])
-      assert finalized_scheduling.chosen_datetime == proposal_dt
+      assert finalized_scheduling.chosen_proposal_id == proposal.id
+      assert finalized_scheduling.chosen_datetime == proposal.datetime
       assert finalized_scheduling.finalized_at != nil
     end
 
@@ -475,7 +473,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:error, changeset} =
                scheduling
                |> Ash.Changeset.for_update(:finalize, %{
-                 chosen_proposal_id: proposal["id"],
+                 chosen_proposal_id: proposal.id,
                  persona_id: participant.id
                })
                |> Ash.update()
@@ -507,7 +505,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:error, changeset} =
                closed_scheduling
                |> Ash.Changeset.for_update(:finalize, %{
-                 chosen_proposal_id: proposal["id"],
+                 chosen_proposal_id: proposal.id,
                  persona_id: owner.id
                })
                |> Ash.update()
@@ -563,7 +561,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1["id"],
+          proposal_id: proposal1.id,
           persona_id: participant1_id,
           score: 5
         })
@@ -572,7 +570,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1["id"],
+          proposal_id: proposal1.id,
           persona_id: participant2_id,
           score: 4
         })
@@ -581,7 +579,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal2["id"],
+          proposal_id: proposal2.id,
           persona_id: participant1_id,
           score: 3
         })
@@ -636,7 +634,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal["id"],
+          proposal_id: proposal.id,
           persona_id: participant_id,
           score: 5
         })
@@ -646,8 +644,8 @@ defmodule Radiator.EpisodeSchedulingTest do
     end
 
     test "get_proposal returns correct proposal", %{scheduling: scheduling, proposal: proposal} do
-      found_proposal = Scheduling.get_proposal(scheduling, proposal["id"])
-      assert found_proposal["id"] == proposal["id"]
+      found_proposal = Scheduling.get_proposal(scheduling, proposal.id)
+      assert found_proposal.id == proposal.id
     end
 
     test "get_proposal returns nil for non-existent proposal", %{scheduling: scheduling} do
@@ -661,7 +659,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       proposal: proposal,
       participant_id: participant_id
     } do
-      assert Scheduling.voted_on_proposal?(scheduling, proposal["id"], participant_id) == true
+      assert Scheduling.voted_on_proposal?(scheduling, proposal.id, participant_id) == true
     end
 
     test "voted_on_proposal? returns false when not voted", %{
@@ -669,7 +667,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       proposal: proposal
     } do
       non_voter_id = Ash.UUID.generate()
-      assert Scheduling.voted_on_proposal?(scheduling, proposal["id"], non_voter_id) == false
+      assert Scheduling.voted_on_proposal?(scheduling, proposal.id, non_voter_id) == false
     end
 
     test "get_persona_votes returns all votes from participant", %{
@@ -680,8 +678,8 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert length(votes) == 1
 
       [{_proposal_id, vote}] = votes
-      assert vote["persona_id"] == participant_id
-      assert vote["score"] == 5
+      assert vote.persona_id == participant_id
+      assert vote.score == 5
     end
 
     test "get_persona_votes returns empty list for non-voter", %{scheduling: scheduling} do
@@ -774,7 +772,7 @@ defmodule Radiator.EpisodeSchedulingTest do
 
     scheduling
     |> Ash.Changeset.for_update(:finalize, %{
-      chosen_proposal_id: proposal["id"],
+      chosen_proposal_id: proposal.id,
       persona_id: scheduling.owner_persona_id
     })
     |> Ash.update()

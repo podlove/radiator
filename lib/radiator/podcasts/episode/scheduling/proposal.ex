@@ -17,7 +17,12 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Proposal do
   end
 
   actions do
-    defaults [:create, :read, :destroy, :update]
+    defaults [:read, :destroy, :update]
+
+    create :create do
+      primary? true
+      accept [:id, :datetime, :created_by_persona_id, :votes, :inserted_at, :updated_at]
+    end
 
     update :add_vote do
       accept []
@@ -75,7 +80,14 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Proposal do
   end
 
   attributes do
-    uuid_primary_key :id
+    attribute :id, :uuid do
+      primary_key? true
+      allow_nil? false
+      writable? true
+      generated? false
+      default &Ash.UUID.generate/0
+      public? true
+    end
 
     attribute :datetime, :utc_datetime do
       description "The proposed date and time for the episode"
@@ -95,8 +107,17 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Proposal do
       public? true
     end
 
-    create_timestamp :inserted_at
-    update_timestamp :updated_at
+    attribute :inserted_at, :utc_datetime do
+      allow_nil? true
+      public? true
+      default fn -> DateTime.utc_now() |> DateTime.truncate(:second) end
+    end
+
+    attribute :updated_at, :utc_datetime do
+      allow_nil? true
+      public? true
+      default fn -> DateTime.utc_now() |> DateTime.truncate(:second) end
+    end
   end
 
   calculations do

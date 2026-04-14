@@ -38,6 +38,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
     update :update do
       accept [:proposals]
+      require_atomic? false
       primary? true
     end
 
@@ -67,9 +68,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
               id: Ash.UUID.generate(),
               datetime: datetime,
               created_by_persona_id: owner_persona_id,
-              votes: [],
-              inserted_at: DateTime.utc_now(),
-              updated_at: DateTime.utc_now()
+              votes: []
             }
           end)
 
@@ -123,9 +122,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
           id: Ash.UUID.generate(),
           datetime: datetime,
           created_by_persona_id: persona_id,
-          votes: [],
-          inserted_at: DateTime.utc_now(),
-          updated_at: DateTime.utc_now()
+          votes: []
         }
 
         Ash.Changeset.change_attribute(changeset, :proposals, [new_proposal | existing_proposals])
@@ -154,14 +151,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
         owner_id = Ash.Changeset.get_attribute(changeset, :owner_persona_id)
         proposal_id = Ash.Changeset.get_argument(changeset, :proposal_id)
 
-        proposals =
-          case Ash.Changeset.get_attribute(changeset, :proposals) do
-            nil -> []
-            proposals when is_list(proposals) -> proposals
-            proposals when is_map(proposals) -> Map.values(proposals)
-          end
-
-        proposal = Enum.find(proposals, &(&1["id"] == proposal_id))
+        proposals = Ash.Changeset.get_attribute(changeset, :proposals) || []
+        proposal = Enum.find(proposals, &(&1.id == proposal_id))
 
         cond do
           is_nil(proposal) ->
@@ -170,7 +161,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
           persona_id == owner_id ->
             :ok
 
-          proposal["created_by_persona_id"] == persona_id ->
+          proposal.created_by_persona_id == persona_id ->
             :ok
 
           true ->
@@ -180,16 +171,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
       change fn changeset, _context ->
         proposal_id = Ash.Changeset.get_argument(changeset, :proposal_id)
-
-        existing_proposals =
-          case Ash.Changeset.get_attribute(changeset, :proposals) do
-            nil -> []
-            proposals when is_list(proposals) -> proposals
-            proposals when is_map(proposals) -> Map.values(proposals)
-          end
-
-        updated_proposals = Enum.reject(existing_proposals, &(&1["id"] == proposal_id))
-
+        existing_proposals = Ash.Changeset.get_attribute(changeset, :proposals) || []
+        updated_proposals = Enum.reject(existing_proposals, &(&1.id == proposal_id))
         Ash.Changeset.change_attribute(changeset, :proposals, updated_proposals)
       end
     end
@@ -240,38 +223,29 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
         score = Ash.Changeset.get_argument(changeset, :score)
         comment = Ash.Changeset.get_argument(changeset, :comment)
 
-        existing_proposals =
-          case Ash.Changeset.get_attribute(changeset, :proposals) do
-            nil -> []
-            proposals when is_list(proposals) -> proposals
-            proposals when is_map(proposals) -> Map.values(proposals)
-          end
+        existing_proposals = Ash.Changeset.get_attribute(changeset, :proposals) || []
 
         updated_proposals =
           Enum.map(existing_proposals, fn proposal ->
-            if proposal["id"] == proposal_id do
-              existing_votes = proposal["votes"] || []
+            if proposal.id == proposal_id do
+              existing_votes = proposal.votes || []
 
-              # Remove any existing vote from this persona
               updated_votes =
                 existing_votes
-                |> Enum.reject(&(&1["persona_id"] == persona_id))
+                |> Enum.reject(&(&1.persona_id == persona_id))
                 |> then(fn votes ->
                   [
                     %{
                       persona_id: persona_id,
                       score: score,
                       comment: comment,
-                      voted_at: DateTime.utc_now()
+                      voted_at: DateTime.utc_now() |> DateTime.truncate(:second)
                     }
                     | votes
                   ]
                 end)
 
-              Map.merge(proposal, %{
-                "votes" => updated_votes,
-                "updated_at" => DateTime.utc_now()
-              })
+              %{proposal | votes: updated_votes}
             else
               proposal
             end
@@ -302,23 +276,13 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
         proposal_id = Ash.Changeset.get_argument(changeset, :proposal_id)
         persona_id = Ash.Changeset.get_argument(changeset, :persona_id)
 
-        existing_proposals =
-          case Ash.Changeset.get_attribute(changeset, :proposals) do
-            nil -> []
-            proposals when is_list(proposals) -> proposals
-            proposals when is_map(proposals) -> Map.values(proposals)
-          end
+        existing_proposals = Ash.Changeset.get_attribute(changeset, :proposals) || []
 
         updated_proposals =
           Enum.map(existing_proposals, fn proposal ->
-            if proposal["id"] == proposal_id do
-              existing_votes = proposal["votes"] || []
-              updated_votes = Enum.reject(existing_votes, &(&1["persona_id"] == persona_id))
-
-              Map.merge(proposal, %{
-                "votes" => updated_votes,
-                "updated_at" => DateTime.utc_now()
-              })
+            if proposal.id == proposal_id do
+              updated_votes = Enum.reject(proposal.votes || [], &(&1.persona_id == persona_id))
+              %{proposal | votes: updated_votes}
             else
               proposal
             end
@@ -358,15 +322,9 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
       validate fn changeset, _context ->
         chosen_proposal_id = Ash.Changeset.get_argument(changeset, :chosen_proposal_id)
+        existing_proposals = Ash.Changeset.get_attribute(changeset, :proposals) || []
 
-        existing_proposals =
-          case Ash.Changeset.get_attribute(changeset, :proposals) do
-            nil -> []
-            proposals when is_list(proposals) -> proposals
-            proposals when is_map(proposals) -> Map.values(proposals)
-          end
-
-        if Enum.any?(existing_proposals, &(&1["id"] == chosen_proposal_id)) do
+        if Enum.any?(existing_proposals, &(&1.id == chosen_proposal_id)) do
           :ok
         else
           {:error, message: "Chosen proposal not found"}
@@ -375,21 +333,20 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
       change fn changeset, _context ->
         chosen_proposal_id = Ash.Changeset.get_argument(changeset, :chosen_proposal_id)
+        proposals = Ash.Changeset.get_attribute(changeset, :proposals) || []
+        chosen_proposal = Enum.find(proposals, &(&1.id == chosen_proposal_id))
 
-        proposals =
-          case Ash.Changeset.get_attribute(changeset, :proposals) do
-            nil -> []
-            proposals when is_list(proposals) -> proposals
-            proposals when is_map(proposals) -> Map.values(proposals)
-          end
+        case chosen_proposal do
+          nil ->
+            changeset
 
-        chosen_proposal = Enum.find(proposals, &(&1["id"] == chosen_proposal_id))
-
-        changeset
-        |> Ash.Changeset.change_attribute(:status, :closed)
-        |> Ash.Changeset.change_attribute(:chosen_proposal_id, chosen_proposal_id)
-        |> Ash.Changeset.change_attribute(:chosen_datetime, chosen_proposal["datetime"])
-        |> Ash.Changeset.change_attribute(:finalized_at, DateTime.utc_now())
+          proposal ->
+            changeset
+            |> Ash.Changeset.change_attribute(:status, :closed)
+            |> Ash.Changeset.change_attribute(:chosen_proposal_id, chosen_proposal_id)
+            |> Ash.Changeset.change_attribute(:chosen_datetime, proposal.datetime)
+            |> Ash.Changeset.change_attribute(:finalized_at, DateTime.utc_now())
+        end
       end
     end
 
@@ -503,7 +460,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   Get a specific proposal by ID from a scheduling record
   """
   def get_proposal(scheduling, proposal_id) do
-    Enum.find(scheduling.proposals || [], &(&1["id"] == proposal_id))
+    Enum.find(scheduling.proposals || [], &(&1.id == proposal_id))
   end
 
   @doc """
@@ -515,8 +472,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
         false
 
       proposal ->
-        votes = proposal["votes"] || proposal.votes || []
-        Enum.any?(votes, &((&1["persona_id"] || &1.persona_id) == persona_id))
+        Enum.any?(proposal.votes || [], &(&1.persona_id == persona_id))
     end
   end
 
@@ -525,11 +481,9 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   """
   def get_persona_votes(scheduling, persona_id) do
     Enum.reduce(scheduling.proposals || [], [], fn proposal, acc ->
-      votes = proposal["votes"] || proposal.votes || []
-
-      case Enum.find(votes, &((&1["persona_id"] || &1.persona_id) == persona_id)) do
+      case Enum.find(proposal.votes || [], &(&1.persona_id == persona_id)) do
         nil -> acc
-        vote -> [{proposal["id"] || proposal.id, vote} | acc]
+        vote -> [{proposal.id, vote} | acc]
       end
     end)
   end
@@ -569,13 +523,12 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   end
 
   defp build_proposal_stat(proposal) do
-    votes = proposal["votes"] || proposal.votes || []
-    vote_count = length(votes)
+    votes = proposal.votes || []
 
     %{
-      proposal_id: proposal["id"] || proposal.id,
-      datetime: proposal["datetime"] || proposal.datetime,
-      vote_count: vote_count,
+      proposal_id: proposal.id,
+      datetime: proposal.datetime,
+      vote_count: length(votes),
       average_score: calculate_average_score(votes),
       votes: votes
     }
@@ -584,16 +537,14 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   defp calculate_average_score([]), do: nil
 
   defp calculate_average_score(votes) do
-    sum = Enum.reduce(votes, 0, fn vote, acc -> acc + (vote["score"] || vote.score) end)
+    sum = Enum.reduce(votes, 0, fn vote, acc -> acc + vote.score end)
     Float.round(sum / length(votes), 2)
   end
 
   defp get_voted_personas(proposals) do
     proposals
-    |> Enum.flat_map(fn proposal ->
-      votes = proposal["votes"] || proposal.votes || []
-      Enum.map(votes, &(&1["persona_id"] || &1.persona_id))
-    end)
+    |> Enum.flat_map(fn proposal -> proposal.votes || [] end)
+    |> Enum.map(& &1.persona_id)
     |> Enum.uniq()
   end
 end

@@ -88,7 +88,6 @@ defmodule Radiator.Podcasts.Episode do
              )
 
       change manage_relationship(:scheduling,
-               # use_identities: [:],
                on_no_match: {:create, :create},
                on_match: {:update, :update},
                on_lookup: :relate,
