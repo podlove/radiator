@@ -15,11 +15,19 @@
     <dd>{@episode.publication_date}</dd>
     <dt>{gettext("Duration Milliseconds")}</dt>
     <dd>{@episode.duration_ms}</dd>
+    <dt>{gettext("Proposals")}</dt>
+    <dd>
+      <ul class="list">
+        <li :for={proposal <- @episode.scheduling.proposals} class="ml-4">
+          {Calendar.strftime(proposal.datetime, "%d.%m.%Y - %H:%M")}
+        </li>
+      </ul>
+    </dd>
     <dt>{gettext("Participants")}</dt>
     <dd>
       <ul class="list">
-        <li :for={participant <- @episode.participants}>
-          -> {participant.public_name} ({participant.handle})
+        <li :for={participant <- @episode.participants} class="ml-4">
+          {participant.public_name} ({participant.handle})
         </li>
       </ul>
     </dd>

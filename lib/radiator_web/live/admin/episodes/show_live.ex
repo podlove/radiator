@@ -5,7 +5,8 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLive do
 
   @impl Phoenix.LiveView
   def mount(%{"id" => id}, _session, socket) do
-    episode = Radiator.Podcasts.get_episode_by_id!(id, load: [:podcast, :participants])
+    episode =
+      Radiator.Podcasts.get_episode_by_id!(id, load: [:podcast, :participants, :scheduling])
 
     socket =
       socket
