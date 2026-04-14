@@ -73,6 +73,7 @@ defmodule Radiator.Podcasts.Episode do
       require_atomic? false
       argument :participants, {:array, :map}, allow_nil?: true
       argument :add_participant, :struct, allow_nil?: true, constraints: [instance_of: Persona]
+      argument :scheduling, :map, allow_nil?: true
 
       argument :remove_participant, :struct,
         allow_nil?: true,
@@ -80,6 +81,13 @@ defmodule Radiator.Podcasts.Episode do
 
       change manage_relationship(:participants,
                use_identities: [:handle],
+               on_no_match: {:create, :create},
+               on_match: {:update, :update},
+               on_lookup: :relate,
+               on_missing: :unrelate
+             )
+
+      change manage_relationship(:scheduling,
                on_no_match: {:create, :create},
                on_match: {:update, :update},
                on_lookup: :relate,

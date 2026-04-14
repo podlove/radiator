@@ -7,6 +7,7 @@
     for={@form}
     phx-change="validate"
     phx-submit="save"
+    class="flex flex-col"
   >
     <.input field={form[:podcast_id]} type="hidden" />
     <.input field={form[:title]} label={gettext("Title")} />
@@ -20,6 +21,17 @@
       label={gettext("Itunes Type")}
     />
     <.input field={form[:duration_seconds]} type="number" label={gettext("Duration Seconds")} />
+
+    <fieldset :if={form[:state].value == :scheduling} class="space-y-4">
+      <legend class="text-sm font-semibold">{gettext("Proposals")}</legend>
+      <div class="flex gap-2">
+        <.inputs_for :let={scheduling} field={form[:scheduling]}>
+          <.inputs_for :let={proposal} field={scheduling[:proposals]}>
+            <.input field={proposal[:datetime]} type="datetime-local" />
+          </.inputs_for>
+        </.inputs_for>
+      </div>
+    </fieldset>
 
     <fieldset class="space-y-4">
       <legend class="text-sm font-semibold">{gettext("Participants")}</legend>
