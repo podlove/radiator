@@ -16,6 +16,12 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
     data_layer: AshPostgres.DataLayer
 
   alias Radiator.Podcasts.Episode.Scheduling.Proposal
+  alias Radiator.Podcasts.Episode.Scheduling.Validations.OwnerOnly
+  alias Radiator.Podcasts.Episode.Scheduling.Validations.ParticipantOnly
+  alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposalExists
+  alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposalOwnerOrCreator
+  alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposedDatetimesPresent
+  alias Radiator.Podcasts.Episode.Scheduling.Validations.ValidScore
 
   postgres do
     table "episode_scheduling"
@@ -46,17 +52,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       description "Start a new scheduling for an episode with initial proposals and participants"
       accept [:episode_id, :owner_persona_id, :participant_persona_ids, :proposals]
       argument :proposed_datetimes, {:array, :utc_datetime}, allow_nil?: false
-
-      validate fn changeset, _context ->
-        proposed_datetimes = Ash.Changeset.get_argument(changeset, :proposed_datetimes)
-
-        if Enum.empty?(proposed_datetimes) do
-          {:error,
-           field: :proposed_datetimes, message: "At least one proposed datetime is required"}
-        else
-          :ok
-        end
-      end
+      validate ProposedDatetimesPresent
 
       change fn changeset, _context ->
         proposed_datetimes = Ash.Changeset.get_argument(changeset, :proposed_datetimes)
@@ -86,26 +82,11 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       argument :datetime, :utc_datetime, allow_nil?: false
       argument :persona_id, :uuid, allow_nil?: false
 
-      validate fn changeset, _context ->
-        status = Ash.Changeset.get_attribute(changeset, :status)
-
-        if status == :open do
-          :ok
-        else
-          {:error, message: "Cannot add proposals to a closed scheduling"}
-        end
+      validate attribute_equals(:status, :open) do
+        message "Cannot add proposals to a closed scheduling"
       end
 
-      validate fn changeset, _context ->
-        persona_id = Ash.Changeset.get_argument(changeset, :persona_id)
-        participant_ids = Ash.Changeset.get_attribute(changeset, :participant_persona_ids) || []
-
-        if persona_id in participant_ids do
-          :ok
-        else
-          {:error, message: "Only participants can add proposals"}
-        end
-      end
+      validate {ParticipantOnly, message: "Only participants can add proposals"}
 
       change fn changeset, _context ->
         datetime = Ash.Changeset.get_argument(changeset, :datetime)
@@ -136,38 +117,11 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       argument :proposal_id, :uuid, allow_nil?: false
       argument :persona_id, :uuid, allow_nil?: false
 
-      validate fn changeset, _context ->
-        status = Ash.Changeset.get_attribute(changeset, :status)
-
-        if status == :open do
-          :ok
-        else
-          {:error, message: "Cannot remove proposals from a closed scheduling"}
-        end
+      validate attribute_equals(:status, :open) do
+        message "Cannot remove proposals from a closed scheduling"
       end
 
-      validate fn changeset, _context ->
-        persona_id = Ash.Changeset.get_argument(changeset, :persona_id)
-        owner_id = Ash.Changeset.get_attribute(changeset, :owner_persona_id)
-        proposal_id = Ash.Changeset.get_argument(changeset, :proposal_id)
-
-        proposals = Ash.Changeset.get_attribute(changeset, :proposals) || []
-        proposal = Enum.find(proposals, &(&1.id == proposal_id))
-
-        cond do
-          is_nil(proposal) ->
-            {:error, message: "Proposal not found"}
-
-          persona_id == owner_id ->
-            :ok
-
-          proposal.created_by_persona_id == persona_id ->
-            :ok
-
-          true ->
-            {:error, message: "Only the owner or proposal creator can remove proposals"}
-        end
-      end
+      validate ProposalOwnerOrCreator
 
       change fn changeset, _context ->
         proposal_id = Ash.Changeset.get_argument(changeset, :proposal_id)
@@ -186,36 +140,12 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       argument :score, :integer, allow_nil?: false
       argument :comment, :string, allow_nil?: true
 
-      validate fn changeset, _context ->
-        status = Ash.Changeset.get_attribute(changeset, :status)
-
-        if status == :open do
-          :ok
-        else
-          {:error, message: "Cannot vote on a closed scheduling"}
-        end
+      validate attribute_equals(:status, :open) do
+        message "Cannot vote on a closed scheduling"
       end
 
-      validate fn changeset, _context ->
-        persona_id = Ash.Changeset.get_argument(changeset, :persona_id)
-        participant_ids = Ash.Changeset.get_attribute(changeset, :participant_persona_ids) || []
-
-        if persona_id in participant_ids do
-          :ok
-        else
-          {:error, message: "Only participants can vote"}
-        end
-      end
-
-      validate fn changeset, _context ->
-        score = Ash.Changeset.get_argument(changeset, :score)
-
-        if score in 1..5 do
-          :ok
-        else
-          {:error, field: :score, message: "Score must be between 1 and 5"}
-        end
-      end
+      validate {ParticipantOnly, message: "Only participants can vote"}
+      validate ValidScore
 
       change fn changeset, _context ->
         proposal_id = Ash.Changeset.get_argument(changeset, :proposal_id)
@@ -262,14 +192,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       argument :proposal_id, :uuid, allow_nil?: false
       argument :persona_id, :uuid, allow_nil?: false
 
-      validate fn changeset, _context ->
-        status = Ash.Changeset.get_attribute(changeset, :status)
-
-        if status == :open do
-          :ok
-        else
-          {:error, message: "Cannot modify votes on a closed scheduling"}
-        end
+      validate attribute_equals(:status, :open) do
+        message "Cannot modify votes on a closed scheduling"
       end
 
       change fn changeset, _context ->
@@ -299,37 +223,12 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       argument :chosen_proposal_id, :uuid, allow_nil?: false
       argument :persona_id, :uuid, allow_nil?: false
 
-      validate fn changeset, _context ->
-        status = Ash.Changeset.get_attribute(changeset, :status)
-
-        if status == :open do
-          :ok
-        else
-          {:error, message: "Scheduling is already closed"}
-        end
+      validate attribute_equals(:status, :open) do
+        message "Scheduling is already closed"
       end
 
-      validate fn changeset, _context ->
-        persona_id = Ash.Changeset.get_argument(changeset, :persona_id)
-        owner_id = Ash.Changeset.get_attribute(changeset, :owner_persona_id)
-
-        if persona_id == owner_id do
-          :ok
-        else
-          {:error, message: "Only the owner can finalize the scheduling"}
-        end
-      end
-
-      validate fn changeset, _context ->
-        chosen_proposal_id = Ash.Changeset.get_argument(changeset, :chosen_proposal_id)
-        existing_proposals = Ash.Changeset.get_attribute(changeset, :proposals) || []
-
-        if Enum.any?(existing_proposals, &(&1.id == chosen_proposal_id)) do
-          :ok
-        else
-          {:error, message: "Chosen proposal not found"}
-        end
-      end
+      validate {OwnerOnly, message: "Only the owner can finalize the scheduling"}
+      validate ProposalExists
 
       change fn changeset, _context ->
         chosen_proposal_id = Ash.Changeset.get_argument(changeset, :chosen_proposal_id)
@@ -356,16 +255,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       accept []
       argument :persona_id, :uuid, allow_nil?: false
 
-      validate fn changeset, _context ->
-        persona_id = Ash.Changeset.get_argument(changeset, :persona_id)
-        owner_id = Ash.Changeset.get_attribute(changeset, :owner_persona_id)
-
-        if persona_id == owner_id do
-          :ok
-        else
-          {:error, message: "Only the owner can reopen the scheduling"}
-        end
-      end
+      validate {OwnerOnly, message: "Only the owner can reopen the scheduling"}
 
       change fn changeset, _context ->
         changeset
@@ -395,12 +285,14 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       constraints one_of: [:open, :closed]
     end
 
+    # TODO relation!!!
     attribute :owner_persona_id, :uuid do
       description "The persona who owns/created this scheduling"
       allow_nil? false
       public? true
     end
 
+    # TODO relation!!!
     attribute :participant_persona_ids, {:array, :uuid} do
       description "List of persona IDs who can participate in voting"
       allow_nil? false
@@ -415,6 +307,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       default []
     end
 
+    # TODO relation!!!
     attribute :chosen_proposal_id, :uuid do
       description "The ID of the chosen proposal (when finalized)"
       allow_nil? true
