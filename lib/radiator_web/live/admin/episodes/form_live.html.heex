@@ -22,18 +22,27 @@
     />
     <.input field={form[:duration_seconds]} type="number" label={gettext("Duration Seconds")} />
 
-    <fieldset :if={form[:state].value == :scheduling} class="space-y-4">
+    <fieldset :if={form[:state].value == :scheduling} class="my-4 p-4 border-1">
       <legend class="text-sm font-semibold">{gettext("Proposals")}</legend>
-      <div class="flex gap-2">
-        <.inputs_for :let={scheduling} field={form[:scheduling]}>
-          <.inputs_for :let={proposal} field={scheduling[:proposals]}>
+
+      <.inputs_for :let={scheduling} field={form[:scheduling]}>
+        <.inputs_for :let={proposal} field={scheduling[:proposals]}>
+          <div class="flex w-full gap-4 items-end">
             <.input field={proposal[:datetime]} type="datetime-local" />
-          </.inputs_for>
+            <.input field={proposal[:created_by_persona_id]} type="text" />
+            <.button type="button" phx-click="remove_proposal" phx-value-path={proposal.name}>
+              <.icon name="hero-x-mark" class="w-5 h-5" />
+            </.button>
+          </div>
         </.inputs_for>
-      </div>
+
+        <.button type="button" phx-click="add_proposal">
+          {gettext("Add Proposal")}
+        </.button>
+      </.inputs_for>
     </fieldset>
 
-    <fieldset class="space-y-4">
+    <fieldset class="my-4 p-4 border-1">
       <legend class="text-sm font-semibold">{gettext("Participants")}</legend>
 
       <div class="flex gap-2">

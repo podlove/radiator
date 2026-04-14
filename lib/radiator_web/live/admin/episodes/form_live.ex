@@ -15,11 +15,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
       episode
       |> Form.for_update(:update,
         domain: Podcasts,
-        forms:
-          episode_nested_forms(
-            participants: [data: fn ep -> ep.participants end],
-            proposals: [data: fn ep -> ep.scheduling.proposals end]
-          )
+        forms: episode_nested_forms(episode)
       )
 
     socket
@@ -83,6 +79,30 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     |> noreply()
   end
 
+  def handle_event("add_proposal", _params, socket) do
+    owner_persona_id =
+      socket.assigns.form
+      |> Form.value(:scheduling)
+      |> Form.value(:owner_persona_id)
+
+    form =
+      Form.add_form(socket.assigns.form, [:scheduling, :proposals],
+        params: %{created_by_persona_id: owner_persona_id}
+      )
+
+    socket
+    |> assign(:form, form)
+    |> noreply()
+  end
+
+  def handle_event("remove_proposal", %{"path" => path}, socket) do
+    form = Form.remove_form(socket.assigns.form, path)
+
+    socket
+    |> assign(:form, form)
+    |> noreply()
+  end
+
   def handle_event("validate", %{"form" => form_params}, socket) do
     form = Form.validate(socket.assigns.form, form_params)
 
@@ -110,22 +130,31 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     end
   end
 
-  defp episode_nested_forms(opts \\ []) do
+  defp episode_nested_forms(episode \\ nil) do
     [
-      proposals:
-        [
-          type: :list,
-          resource: Radiator.Podcasts.Episode.Proposal,
-          update_action: :update,
-          create_action: :create
-        ] ++ opts[:proposals],
-      participants:
-        [
-          type: :list,
-          resource: Radiator.People.Persona,
-          create_action: :create,
-          update_action: :update
-        ] ++ opts[:participants]
+      scheduling: [
+        type: :single,
+        resource: Radiator.Podcasts.Episode.Scheduling,
+        update_action: :update,
+        create_action: :create,
+        data: episode && fn _ -> episode.scheduling end,
+        forms: [
+          proposals: [
+            type: :list,
+            resource: Radiator.Podcasts.Episode.Scheduling.Proposal,
+            update_action: :update,
+            create_action: :create,
+            data: episode && fn _ -> episode.scheduling.proposals end
+          ]
+        ]
+      ],
+      participants: [
+        type: :list,
+        resource: Radiator.People.Persona,
+        create_action: :create,
+        update_action: :update,
+        data: episode && fn _ -> episode.participants end
+      ]
     ]
   end
 
