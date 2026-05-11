@@ -72,7 +72,7 @@ defmodule Radiator.MixProject do
       {:railway, "~> 1.1"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:lazy_html, ">= 0.1.0", only: :test},
-      {:live_debugger, "~> 0.4", only: [:dev]},
+      {:live_debugger, "~> 1.0", only: [:dev]},
       {:metalove, "~> 0.5.0"},
       {:mix_test_interactive, "~> 5.0", only: :dev, runtime: false},
       {:phoenix, "~> 1.8.0"},
@@ -92,7 +92,7 @@ defmodule Radiator.MixProject do
       {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:tidewave, "~> 0.4", only: :dev}
+      {:tidewave, "~> 0.5", only: :dev}
     ]
   end
 
