@@ -7,6 +7,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Proposal do
   use Ash.Resource,
     data_layer: :embedded
 
+  alias Radiator.Podcasts.Episode.Scheduling.Validations.ValidScore
   alias Radiator.Podcasts.Episode.Scheduling.Vote
 
   code_interface do
@@ -34,15 +35,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Proposal do
       argument :persona_id, :uuid, allow_nil?: false
       argument :score, :integer, allow_nil?: false
 
-      validate fn changeset, _context ->
-        score = Ash.Changeset.get_argument(changeset, :score)
-
-        if score in 1..5 do
-          :ok
-        else
-          {:error, field: :score, message: "Score must be between 1 and 5"}
-        end
-      end
+      validate ValidScore
 
       change fn changeset, _context ->
         persona_id = Ash.Changeset.get_argument(changeset, :persona_id)

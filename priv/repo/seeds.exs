@@ -105,7 +105,7 @@ participant_ids =
 {:ok, scheduling} =
   scheduling
   |> Ash.Changeset.for_update(:vote, %{
-    proposal_id: proposal1["id"],
+    proposal_id: proposal1.id,
     persona_id: Enum.at(participant_ids, 0),
     score: 5,
     comment: "Perfect time for me!"
@@ -115,7 +115,7 @@ participant_ids =
 {:ok, _scheduling} =
   scheduling
   |> Ash.Changeset.for_update(:vote, %{
-    proposal_id: proposal1["id"],
+    proposal_id: proposal1.id,
     persona_id: Enum.at(participant_ids, 1),
     score: 4
   })
@@ -124,7 +124,7 @@ participant_ids =
 {:ok, _scheduling} =
   scheduling
   |> Ash.Changeset.for_update(:vote, %{
-    proposal_id: proposal2["id"],
+    proposal_id: proposal2.id,
     persona_id: Enum.at(participant_ids, 2),
     score: 5
   })

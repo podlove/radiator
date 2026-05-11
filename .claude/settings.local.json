@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mix test:*)",
+      "Bash(MIX_ENV=test mix test test/radiator/episode_scheduling_test.exs)",
+      "Bash(mise current:*)",
+      "Bash(mise exec:*)",
+      "Bash(mise run:*)"
+    ]
+  }
+}
