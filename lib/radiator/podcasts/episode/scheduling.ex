@@ -29,6 +29,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
     references do
       reference :episode, on_delete: :delete
+      reference :owner_persona, on_delete: :restrict
     end
   end
 
@@ -291,14 +292,6 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       constraints one_of: [:open, :closed]
     end
 
-    # TODO relation!!!
-    attribute :owner_persona_id, :uuid do
-      description "The persona who owns/created this scheduling"
-      allow_nil? false
-      public? true
-    end
-
-    # TODO relation!!!
     attribute :participant_persona_ids, {:array, :uuid} do
       description "List of persona IDs who can participate in voting"
       allow_nil? false
@@ -346,6 +339,14 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       public? true
       allow_nil? false
     end
+
+    belongs_to :owner_persona, Radiator.People.Persona do
+      description "The persona who owns/created this scheduling"
+      public? true
+      allow_nil? false
+    end
+  end
+
   calculations do
     calculate :chosen_proposal, Proposal do
       description "The full chosen proposal struct (looked up from proposals list by chosen_proposal_id)"
