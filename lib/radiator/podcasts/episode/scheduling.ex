@@ -313,7 +313,6 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       default []
     end
 
-    # TODO relation!!!
     attribute :chosen_proposal_id, :uuid do
       description "The ID of the chosen proposal (when finalized)"
       allow_nil? true
@@ -346,6 +345,25 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       description "The episode being scheduled"
       public? true
       allow_nil? false
+    end
+  calculations do
+    calculate :chosen_proposal, Proposal do
+      description "The full chosen proposal struct (looked up from proposals list by chosen_proposal_id)"
+
+      calculation fn records, _opts ->
+        Enum.reduce(records, %{}, fn record, acc ->
+          chosen =
+            case record.chosen_proposal_id do
+              nil ->
+                nil
+
+              id ->
+                Enum.find(record.proposals || [], &(&1.id == id))
+            end
+
+          Map.put(acc, record.id, chosen)
+        end)
+      end
     end
   end
 
