@@ -11,6 +11,7 @@ defmodule RadiatorWeb.Admin.Podcasts.FormLive do
     socket =
       socket
       |> assign(:form, to_form(form))
+      |> assign(:cancel_path, ~p"/admin/podcasts/#{podcast}")
       |> assign(:page_title, "Edit Podcast")
 
     {:ok, socket}
@@ -22,6 +23,7 @@ defmodule RadiatorWeb.Admin.Podcasts.FormLive do
     socket =
       socket
       |> assign(:form, to_form(form))
+      |> assign(:cancel_path, ~p"/admin/podcasts")
       |> assign(:page_title, "New Podcast")
 
     {:ok, socket}
@@ -60,7 +62,7 @@ defmodule RadiatorWeb.Admin.Podcasts.FormLive do
         <.input field={form[:funding_url]} label={gettext("Donation URL")} />
         <.input field={form[:funding_description]} label={gettext("Donation Description")} />
         <:actions>
-          <.button variant="primary">Save</.button>
+          <.form_actions cancel_to={@cancel_path} />
         </:actions>
       </.simple_form>
     </Layouts.app>
