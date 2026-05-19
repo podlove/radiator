@@ -8,6 +8,41 @@ defmodule RadiatorWeb.LiveUserAuth do
 
   alias AshAuthentication.Phoenix.LiveSession
 
+  def on_mount(:sidebar_navigation, _params, _session, socket) do
+    socket =
+      socket
+      |> assign_new(:sidebar_podcasts, fn ->
+        Radiator.Podcasts.read_podcasts!(nil, load: [:episodes])
+      end)
+      |> assign_new(:active_podcast_id, fn -> nil end)
+      |> Phoenix.LiveView.attach_hook(
+        :assign_active_podcast,
+        :handle_params,
+        &assign_active_podcast/3
+      )
+
+    {:cont, socket}
+  end
+
+  defp assign_active_podcast(params, _uri, socket) do
+    podcast_id = params["podcast_id"] || params["id"]
+
+    socket =
+      if known_podcast?(podcast_id, socket) do
+        Phoenix.Component.assign(socket, :active_podcast_id, podcast_id)
+      else
+        Phoenix.Component.assign(socket, :active_podcast_id, nil)
+      end
+
+    {:cont, socket}
+  end
+
+  defp known_podcast?(nil, _socket), do: false
+
+  defp known_podcast?(id, socket) do
+    Enum.any?(socket.assigns[:sidebar_podcasts] || [], &(&1.id == id))
+  end
+
   # This is used for nested liveviews to fetch the current user.
   # To use, place the following at the top of that liveview:
   # on_mount {RadiatorWeb.LiveUserAuth, :current_user}

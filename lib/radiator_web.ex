@@ -90,6 +90,7 @@ defmodule RadiatorWeb do
       # Import DaisyUI components
       use DaisyUIComponents, core_components: true
 
+      import RadiatorWeb.FormComponents
       # Common modules used in templates
       alias Phoenix.LiveView.JS
       alias RadiatorWeb.Layouts

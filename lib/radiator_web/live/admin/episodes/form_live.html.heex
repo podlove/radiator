@@ -78,7 +78,7 @@
     </fieldset>
 
     <:actions>
-      <.button variant="primary">{gettext("Save")}</.button>
+      <.form_actions cancel_to={@cancel_path} />
     </:actions>
   </.simple_form>
 </Layouts.app>
