@@ -37,9 +37,7 @@ defmodule RadiatorWeb.Admin.Podcasts.ShowLive do
           </.button>
           <.button
             variant="warning"
-            data-confirm={
-              gettext("Are you sure you want to delete %{title}?", title: @podcast.title)
-            }
+            data-confirm={gettext("Are you sure you want to delete %{title}?", title: @podcast.title)}
             phx-value-id={@podcast.id}
             phx-click="destroy-podcast"
           >
