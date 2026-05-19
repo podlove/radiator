@@ -8,22 +8,6 @@ defmodule RadiatorWeb.LiveUserAuth do
 
   alias AshAuthentication.Phoenix.LiveSession
 
-  def on_mount(:sidebar_navigation, _params, _session, socket) do
-    socket =
-      socket
-      |> assign_new(:sidebar_podcasts, fn ->
-        Radiator.Podcasts.read_podcasts!(nil, load: [:episodes])
-      end)
-      |> assign_new(:active_podcast_id, fn -> nil end)
-      |> Phoenix.LiveView.attach_hook(
-        :assign_active_podcast,
-        :handle_params,
-        &assign_active_podcast/3
-      )
-
-    {:cont, socket}
-  end
-
   defp assign_active_podcast(params, _uri, socket) do
     podcast_id = params["podcast_id"] || params["id"]
 
@@ -73,4 +57,20 @@ defmodule RadiatorWeb.LiveUserAuth do
       {:cont, assign(socket, :current_user, nil)}
     end
   end
+
+    def on_mount(:sidebar_navigation, _params, _session, socket) do
+      socket =
+        socket
+        |> assign_new(:sidebar_podcasts, fn ->
+          Radiator.Podcasts.read_podcasts!(nil, load: [:episodes])
+        end)
+        |> assign_new(:active_podcast_id, fn -> nil end)
+        |> Phoenix.LiveView.attach_hook(
+          :assign_active_podcast,
+          :handle_params,
+          &assign_active_podcast/3
+        )
+
+      {:cont, socket}
+    end
 end
