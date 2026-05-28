@@ -43,16 +43,165 @@
     <.detail label={gettext("Duration (ms)")} value={@episode.duration_ms} />
   </dl>
 
-  <section :if={@episode.scheduling} class="mt-8">
-    <h2 class="text-lg font-semibold mb-2">{gettext("Proposals")}</h2>
-    <ul class="list-disc list-inside">
-      <li :for={proposal <- @episode.scheduling.proposals}>
-        {Calendar.strftime(proposal.datetime, "%d.%m.%Y - %H:%M")}
-      </li>
-      <li :if={@episode.scheduling.proposals == []} class="list-none opacity-60">
-        {gettext("No proposals yet")}
-      </li>
-    </ul>
+  <section :if={@episode.scheduling} id="availability" class="mt-8">
+    <h2 class="text-lg font-semibold mb-2">{gettext("Availability")}</h2>
+
+    <div class="overflow-x-auto">
+      <table id="availability-table" class="table table-zebra">
+        <thead>
+          <tr>
+            <th class="sticky left-0 bg-base-100 z-10"></th>
+            <th
+              :for={proposal <- @sorted_proposals}
+              id={"availability-header-#{proposal.id}"}
+              class={[
+                "text-center align-top",
+                weekend?(proposal.datetime) && "bg-base-200",
+                proposal.id ==
+                  winner_proposal_id(@episode.scheduling, @voting_stats.top_proposal_id) &&
+                  "border-2 border-primary"
+              ]}
+            >
+              <div class="flex flex-col items-center gap-0.5">
+                <span
+                  :if={
+                    proposal.id ==
+                      winner_proposal_id(@episode.scheduling, @voting_stats.top_proposal_id)
+                  }
+                  class="text-primary"
+                  aria-label={gettext("Top proposal")}
+                >
+                  <.icon name="hero-trophy" class="size-4" />
+                </span>
+                <span class="font-semibold">{weekday_label(proposal.datetime)}</span>
+                <span class="text-xs opacity-70">
+                  {Calendar.strftime(proposal.datetime, "%d.%m.%Y")}
+                </span>
+                <span class="text-xs opacity-70">
+                  {Calendar.strftime(proposal.datetime, "%H:%M")}
+                </span>
+                <span
+                  :if={
+                    @episode.scheduling.status == :closed &&
+                      proposal.id == @episode.scheduling.chosen_proposal_id
+                  }
+                  class="badge badge-primary"
+                >
+                  {gettext("Chosen")}
+                </span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            :for={persona <- @scheduling_participants}
+            id={"availability-row-#{persona.id}"}
+          >
+            <td class="sticky left-0 bg-base-100 z-10 font-medium">
+              {persona.public_name}
+              <span
+                :if={@current_persona && @current_persona.id == persona.id}
+                class="opacity-70 ml-1"
+              >
+                {gettext("(du)")}
+              </span>
+            </td>
+            <td
+              :for={proposal <- @sorted_proposals}
+              id={"availability-cell-#{proposal.id}-#{persona.id}"}
+              class={[
+                "text-center",
+                weekend?(proposal.datetime) && "bg-base-200"
+              ]}
+            >
+              <%= if @current_persona && @current_persona.id == persona.id do %>
+                <div class="btn-group flex justify-center gap-1">
+                  <button
+                    id={"vote-#{proposal.id}-yes"}
+                    type="button"
+                    class={[
+                      "btn btn-sm",
+                      vote_button_class(vote_for_persona(proposal, persona.id), 1)
+                    ]}
+                    phx-click="vote"
+                    phx-value-proposal-id={proposal.id}
+                    phx-value-score="1"
+                    disabled={not can_vote?(@episode.scheduling, @current_persona)}
+                  >
+                    <.icon name="hero-check" class="size-4" />
+                  </button>
+                  <button
+                    id={"vote-#{proposal.id}-maybe"}
+                    type="button"
+                    class={[
+                      "btn btn-sm",
+                      vote_button_class(vote_for_persona(proposal, persona.id), 0)
+                    ]}
+                    phx-click="vote"
+                    phx-value-proposal-id={proposal.id}
+                    phx-value-score="0"
+                    disabled={not can_vote?(@episode.scheduling, @current_persona)}
+                  >
+                    <.icon name="hero-question-mark-circle" class="size-4" />
+                  </button>
+                  <button
+                    id={"vote-#{proposal.id}-no"}
+                    type="button"
+                    class={[
+                      "btn btn-sm",
+                      vote_button_class(vote_for_persona(proposal, persona.id), -1)
+                    ]}
+                    phx-click="vote"
+                    phx-value-proposal-id={proposal.id}
+                    phx-value-score="-1"
+                    disabled={not can_vote?(@episode.scheduling, @current_persona)}
+                  >
+                    <.icon name="hero-x-mark" class="size-4" />
+                  </button>
+                </div>
+              <% else %>
+                <%= case vote_for_persona(proposal, persona.id) do %>
+                  <% nil -> %>
+                    <span class="opacity-40">–</span>
+                  <% %{score: 1} -> %>
+                    <.icon name="hero-check" class="text-success size-5" />
+                  <% %{score: 0} -> %>
+                    <.icon name="hero-question-mark-circle" class="text-warning size-5" />
+                  <% %{score: -1} -> %>
+                    <.icon name="hero-x-mark" class="text-error size-5" />
+                <% end %>
+              <% end %>
+            </td>
+          </tr>
+          <tr :if={@scheduling_participants == []}>
+            <td colspan={length(@sorted_proposals) + 1} class="text-center opacity-60">
+              {gettext("No participants yet")}
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="sticky left-0 bg-base-100 z-10 text-xs uppercase opacity-70 font-semibold">
+              {gettext("Score")}
+            </td>
+            <td
+              :for={proposal <- @sorted_proposals}
+              id={"availability-footer-#{proposal.id}"}
+              class={[
+                "text-center font-mono",
+                weekend?(proposal.datetime) && "bg-base-200",
+                proposal.id ==
+                  winner_proposal_id(@episode.scheduling, @voting_stats.top_proposal_id) &&
+                  "font-bold border-2 border-primary"
+              ]}
+            >
+              {format_total_score(proposal_total_score(@voting_stats, proposal.id))}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
   </section>
 
   <section class="mt-8">

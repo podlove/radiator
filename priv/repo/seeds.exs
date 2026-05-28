@@ -1,10 +1,11 @@
-Radiator.Accounts.User
-|> Ash.Changeset.for_create(:register_with_password, %{
-  email: "bob@radiator.de",
-  password: "supersupersecret",
-  password_confirmation: "supersupersecret"
-})
-|> Ash.create!(authorize?: false)
+bob =
+  Radiator.Accounts.User
+  |> Ash.Changeset.for_create(:register_with_password, %{
+    email: "bob@radiator.de",
+    password: "supersupersecret",
+    password_confirmation: "supersupersecret"
+  })
+  |> Ash.create!(authorize?: false)
 
 Radiator.Accounts.User
 |> Ash.Changeset.for_create(:register_with_password, %{
@@ -13,6 +14,23 @@ Radiator.Accounts.User
   password_confirmation: "supersupersecret"
 })
 |> Ash.create!(authorize?: false)
+
+{:ok, bob_person} =
+  Radiator.People.create_person(%{
+    real_name: "Bob the Builder",
+    nickname: "bob",
+    email: "bob@radiator.de",
+    telephone: "+49123456789"
+  })
+
+{:ok, bob_persona} =
+  Radiator.People.create_persona(%{
+    person_id: bob_person.id,
+    public_name: "Bob",
+    handle: "bob",
+    description: "Bob's public persona",
+    user_id: bob.id
+  })
 
 {:ok, _podcast} =
   Radiator.Podcasts.create_podcast(%{
@@ -64,8 +82,8 @@ Radiator.Accounts.User
     avatar_png: "https://podcast.com/mr_podcast.png"
   })
 
-participant_ids =
-  Enum.reduce(1..5, [], fn _, acc ->
+participants =
+  Enum.map(1..5, fn _ ->
     {:ok, person} =
       Radiator.People.create_person(%{
         real_name: "Test Person #{System.unique_integer([:positive])}",
@@ -74,24 +92,36 @@ participant_ids =
         telephone: "+44123456#{System.unique_integer([:positive])}"
       })
 
+    user =
+      Radiator.Accounts.User
+      |> Ash.Changeset.for_create(:register_with_password, %{
+        email: "test#{System.unique_integer([:positive])}@radiator.de",
+        password: "supersupersecret",
+        password_confirmation: "supersupersecret"
+      })
+      |> Ash.create!(authorize?: false)
+
     {:ok, persona} =
       Radiator.People.create_persona(%{
         person_id: person.id,
         public_name: "Test Persona #{System.unique_integer([:positive])}",
         handle: "test_handle_#{System.unique_integer([:positive])}",
         description: "Test description for persona",
-        avatar_png: "https://example.com/avatar#{System.unique_integer([:positive])}.png"
+        avatar_png: "https://example.com/avatar#{System.unique_integer([:positive])}.png",
+        user_id: user.id
       })
 
-    [persona.id | acc]
+    %{persona: persona, user: user}
   end)
+
+participant_ids = Enum.map(participants, & &1.persona.id)
 
 {:ok, scheduling} =
   Radiator.Podcasts.Episode.Scheduling
   |> Ash.Changeset.for_create(:create, %{
     episode_id: future_episode.id,
     owner_persona_id: owner.id,
-    participant_persona_ids: participant_ids,
+    participant_persona_ids: [bob_persona.id | participant_ids],
     proposed_datetimes: [
       ~U[2024-03-15 14:00:00Z],
       ~U[2024-03-16 10:00:00Z],
@@ -102,30 +132,16 @@ participant_ids =
 
 [proposal1, proposal2, _proposal3] = scheduling.proposals
 
-{:ok, scheduling} =
-  scheduling
-  |> Ash.Changeset.for_update(:vote, %{
-    proposal_id: proposal1.id,
-    persona_id: Enum.at(participant_ids, 0),
-    score: 5,
-    comment: "Perfect time for me!"
-  })
-  |> Ash.update()
+cast_vote = fn scheduling, proposal_id, index, score, extra ->
+  %{persona: persona, user: actor} = Enum.at(participants, index)
+  args = Map.merge(%{proposal_id: proposal_id, persona_id: persona.id, score: score}, extra)
 
-{:ok, _scheduling} =
   scheduling
-  |> Ash.Changeset.for_update(:vote, %{
-    proposal_id: proposal1.id,
-    persona_id: Enum.at(participant_ids, 1),
-    score: 4
-  })
-  |> Ash.update()
+  |> Ash.Changeset.for_update(:vote, args, actor: actor)
+  |> Ash.update!()
+end
 
-{:ok, _scheduling} =
-  scheduling
-  |> Ash.Changeset.for_update(:vote, %{
-    proposal_id: proposal2.id,
-    persona_id: Enum.at(participant_ids, 2),
-    score: 5
-  })
-  |> Ash.update()
+scheduling = cast_vote.(scheduling, proposal1.id, 0, 1, %{comment: "Perfect time for me!"})
+scheduling = cast_vote.(scheduling, proposal1.id, 1, 1, %{})
+scheduling = cast_vote.(scheduling, proposal2.id, 2, 1, %{})
+_scheduling = cast_vote.(scheduling, proposal2.id, 3, -1, %{})

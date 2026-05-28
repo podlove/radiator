@@ -39,7 +39,8 @@ defmodule Radiator.Generator do
         public_name: StreamData.repeatedly(&Internet.user_name/0),
         handle: StreamData.repeatedly(&Internet.user_name/0),
         description: StreamData.repeatedly(&Lorem.sentence/0),
-        person_id: person_id
+        person_id: person_id,
+        user_id: nil
       ],
       overrides: attrs,
       authorize: false,

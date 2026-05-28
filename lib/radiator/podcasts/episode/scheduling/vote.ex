@@ -1,12 +1,15 @@
 defmodule Radiator.Podcasts.Episode.Scheduling.Vote do
   @moduledoc """
   Embedded resource representing a single vote from a persona on a proposed datetime.
-  Uses a 5-point scoring system where:
-  - 1 = Strongly disagree/Cannot attend
-  - 2 = Disagree/Unlikely to attend
-  - 3 = Neutral/Maybe can attend
-  - 4 = Agree/Likely to attend
-  - 5 = Strongly agree/Definitely can attend
+
+  Score model:
+
+      -1 = no   (cannot attend)
+       0 = maybe (unsure / tentative)
+       1 = yes   (can attend)
+
+  Keine Stimme im `votes`-Array bedeutet "noch nicht abgestimmt"
+  und wird NICHT als 0 mitgerechnet.
   """
 
   use Ash.Resource,
@@ -24,10 +27,13 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Vote do
     end
 
     attribute :score, :integer do
-      description "The vote score (1-5)"
+      description "The vote score: -1 = no, 0 = maybe, 1 = yes"
       allow_nil? false
       public? true
-      constraints min: 1, max: 5
+      # Equivalent to `one_of: [-1, 0, 1]`; `Ash.Type.Integer` only supports
+      # `:min` / `:max` constraints. The full whitelist is enforced by the
+      # `ValidScore` action validation.
+      constraints min: -1, max: 1
     end
 
     attribute :voted_at, :utc_datetime do

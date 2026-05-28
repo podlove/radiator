@@ -12,6 +12,7 @@ defmodule Radiator.People do
     resource Radiator.People.Persona do
       define :read_personas, action: :read
       define :create_persona, action: :create
+      define :get_by_user, action: :by_user, args: [:user_id]
     end
   end
 end

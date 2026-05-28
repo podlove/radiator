@@ -7,6 +7,7 @@ defmodule Radiator.SchedulingWorkflowTest do
   # functionality for coordinating episode recording times with participants.
   # """
 
+  alias Radiator.Accounts.User
   alias Radiator.People
   alias Radiator.Podcasts
   alias Radiator.Podcasts.Episode
@@ -18,9 +19,9 @@ defmodule Radiator.SchedulingWorkflowTest do
       {:ok, episode} = Podcasts.create_episode(%{title: "Test Episode", podcast_id: podcast.id})
 
       {:ok, owner} = People.create_persona(%{public_name: "Owner", handle: "owner"})
-      {:ok, guest1} = People.create_persona(%{public_name: "Guest 1", handle: "guest1"})
-      {:ok, guest2} = People.create_persona(%{public_name: "Guest 2", handle: "guest2"})
-      {:ok, guest3} = People.create_persona(%{public_name: "Guest 3", handle: "guest3"})
+      {:ok, guest1} = create_participant_with_user("Guest 1", "guest1")
+      {:ok, guest2} = create_participant_with_user("Guest 2", "guest2")
+      {:ok, guest3} = create_participant_with_user("Guest 3", "guest3")
 
       %{
         episode: episode,
@@ -58,34 +59,17 @@ defmodule Radiator.SchedulingWorkflowTest do
 
       # First participant votes
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1.id,
-          persona_id: Enum.at(participant_ids, 0),
-          score: 5,
+        do_vote(scheduling, proposal1.id, Enum.at(participant_ids, 0), 1, %{
           comment: "Perfect time for me!"
         })
-        |> Ash.update()
 
       # Second participant votes
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1.id,
-          persona_id: Enum.at(participant_ids, 1),
-          score: 4
-        })
-        |> Ash.update()
+        do_vote(scheduling, proposal1.id, Enum.at(participant_ids, 1), 1)
 
       # Third participant prefers another time
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal2.id,
-          persona_id: Enum.at(participant_ids, 2),
-          score: 5
-        })
-        |> Ash.update()
+        do_vote(scheduling, proposal2.id, Enum.at(participant_ids, 2), 1)
 
       # Step 3: Check voting statistics
       stats = Scheduling.voting_stats(scheduling)
@@ -121,9 +105,9 @@ defmodule Radiator.SchedulingWorkflowTest do
       {:ok, episode} = Podcasts.create_episode(%{title: "Test Episode", podcast_id: podcast.id})
 
       {:ok, owner} = People.create_persona(%{public_name: "Owner", handle: "owner"})
-      {:ok, guest1} = People.create_persona(%{public_name: "Guest 1", handle: "guest1"})
-      {:ok, guest2} = People.create_persona(%{public_name: "Guest 2", handle: "guest2"})
-      {:ok, guest3} = People.create_persona(%{public_name: "Guest 3", handle: "guest3"})
+      {:ok, guest1} = create_participant_with_user("Guest 1", "guest1")
+      {:ok, guest2} = create_participant_with_user("Guest 2", "guest2")
+      {:ok, guest3} = create_participant_with_user("Guest 3", "guest3")
 
       %{
         episode: episode,
@@ -140,8 +124,8 @@ defmodule Radiator.SchedulingWorkflowTest do
       owner_id = owner.id
       participant_ids = Enum.map(participants, & &1.id)
 
-      orig_score = 5
-      new_score = 4
+      orig_score = 1
+      new_score = -1
 
       # SETUP (use generators!!)
       # Step 1: Create scheduling with proposed datetimes
@@ -164,34 +148,17 @@ defmodule Radiator.SchedulingWorkflowTest do
 
       # First participant votes
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1.id,
-          persona_id: Enum.at(participant_ids, 0),
-          score: orig_score,
+        do_vote(scheduling, proposal1.id, Enum.at(participant_ids, 0), orig_score, %{
           comment: "Perfect time for me!"
         })
-        |> Ash.update()
 
       # Second participant votes
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1.id,
-          persona_id: Enum.at(participant_ids, 1),
-          score: 4
-        })
-        |> Ash.update()
+        do_vote(scheduling, proposal1.id, Enum.at(participant_ids, 1), 1)
 
       # Third participant prefers another time
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal2.id,
-          persona_id: Enum.at(participant_ids, 2),
-          score: 5
-        })
-        |> Ash.update()
+        do_vote(scheduling, proposal2.id, Enum.at(participant_ids, 2), 1)
 
       # Example 4: Change vote (participant changes their mind)
       # A participant can change their vote by voting again with a different score.
@@ -203,14 +170,9 @@ defmodule Radiator.SchedulingWorkflowTest do
       assert Scheduling.voted_on_proposal?(scheduling, proposal_id, persona_id)
 
       {:ok, updated_scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal_id,
-          persona_id: persona_id,
-          score: new_score,
+        do_vote(scheduling, proposal_id, persona_id, new_score, %{
           comment: "Changed my mind after checking my calendar"
         })
-        |> Ash.update()
 
       assert Enum.count(scheduling.proposals) == Enum.count(updated_scheduling.proposals)
     end
@@ -244,34 +206,17 @@ defmodule Radiator.SchedulingWorkflowTest do
 
       # First participant votes
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1.id,
-          persona_id: Enum.at(participant_ids, 0),
-          score: 5,
+        do_vote(scheduling, proposal1.id, Enum.at(participant_ids, 0), 1, %{
           comment: "Perfect time for me!"
         })
-        |> Ash.update()
 
       # Second participant votes
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1.id,
-          persona_id: Enum.at(participant_ids, 1),
-          score: 4
-        })
-        |> Ash.update()
+        do_vote(scheduling, proposal1.id, Enum.at(participant_ids, 1), 1)
 
       # Third participant prefers another time
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal2.id,
-          persona_id: Enum.at(participant_ids, 2),
-          score: 5
-        })
-        |> Ash.update()
+        do_vote(scheduling, proposal2.id, Enum.at(participant_ids, 2), 1)
 
       # Example 5: Participant removes their vote
       proposal_id = proposal1.id
@@ -320,34 +265,17 @@ defmodule Radiator.SchedulingWorkflowTest do
 
       # First participant votes
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1.id,
-          persona_id: Enum.at(participant_ids, 0),
-          score: 5,
+        do_vote(scheduling, proposal1.id, Enum.at(participant_ids, 0), 1, %{
           comment: "Perfect time for me!"
         })
-        |> Ash.update()
 
       # Second participant votes
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1.id,
-          persona_id: Enum.at(participant_ids, 1),
-          score: 4
-        })
-        |> Ash.update()
+        do_vote(scheduling, proposal1.id, Enum.at(participant_ids, 1), 1)
 
       # Third participant prefers another time
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal2.id,
-          persona_id: Enum.at(participant_ids, 2),
-          score: 5
-        })
-        |> Ash.update()
+        do_vote(scheduling, proposal2.id, Enum.at(participant_ids, 2), 1)
 
       proposal_id = proposal1.id
       # persona_id = Enum.at(participant_ids, 0)
@@ -394,34 +322,17 @@ defmodule Radiator.SchedulingWorkflowTest do
 
       # First participant votes
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1.id,
-          persona_id: Enum.at(participant_ids, 0),
-          score: 5,
+        do_vote(scheduling, proposal1.id, Enum.at(participant_ids, 0), 1, %{
           comment: "Perfect time for me!"
         })
-        |> Ash.update()
 
       # Second participant votes
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal1.id,
-          persona_id: Enum.at(participant_ids, 1),
-          score: 4
-        })
-        |> Ash.update()
+        do_vote(scheduling, proposal1.id, Enum.at(participant_ids, 1), 1)
 
       # Third participant prefers another time
       {:ok, scheduling} =
-        scheduling
-        |> Ash.Changeset.for_update(:vote, %{
-          proposal_id: proposal2.id,
-          persona_id: Enum.at(participant_ids, 2),
-          score: 5
-        })
-        |> Ash.update()
+        do_vote(scheduling, proposal2.id, Enum.at(participant_ids, 2), 1)
 
       # Example 7: Reopen a closed scheduling
       # If the chosen time no longer works, the owner can reopen voting.
@@ -528,11 +439,8 @@ defmodule Radiator.SchedulingWorkflowTest do
       stats.proposal_stats
       |> Enum.with_index(1)
       |> Enum.each(fn {proposal, _rank} ->
-        assert 0 <= proposal.vote_count
-        assert 0 <= proposal.average_score
-        # IO.puts(
-        #   "   Votes: #{proposal.vote_count}, Average Score: #{proposal.average_score || "N/A"}"
-        # )
+        assert is_integer(proposal.total_score)
+        assert is_integer(proposal.pending_count)
       end)
 
       # if stats.all_voted? do
@@ -550,18 +458,10 @@ defmodule Radiator.SchedulingWorkflowTest do
       # Each participant votes on a random proposal
       Enum.reduce(participant_ids, scheduling, fn persona_id, acc ->
         proposal = Enum.random(acc.proposals)
-        # Simulate positive votes
-        score = Enum.random(3..5)
+        # Pick any of the three valid availability states
+        score = Enum.random([-1, 0, 1])
 
-        {:ok, updated} =
-          acc
-          |> Ash.Changeset.for_update(:vote, %{
-            proposal_id: proposal.id,
-            persona_id: persona_id,
-            score: score
-          })
-          |> Ash.update()
-
+        {:ok, updated} = do_vote(acc, proposal.id, persona_id, score)
         updated
       end)
     end
@@ -593,5 +493,38 @@ defmodule Radiator.SchedulingWorkflowTest do
 
       {:ok, :finalized, episode, scheduling}
     end
+  end
+
+  defp create_participant_with_user(name, handle) do
+    user = build_user()
+
+    People.create_persona(%{
+      public_name: name,
+      handle: "#{handle}_#{System.unique_integer([:positive])}",
+      user_id: user.id
+    })
+  end
+
+  defp build_user do
+    email = "user_#{System.unique_integer([:positive])}@example.com"
+    {:ok, hashed_password} = AshAuthentication.BcryptProvider.hash("supersupersecret")
+    Ash.Seed.seed!(User, %{email: email, hashed_password: hashed_password})
+  end
+
+  defp actor_for_persona(%{user_id: user_id}) when is_binary(user_id) do
+    Ash.get!(User, user_id, authorize?: false)
+  end
+
+  defp actor_for_persona_id(persona_id) do
+    persona = Ash.get!(Radiator.People.Persona, persona_id, authorize?: false)
+    actor_for_persona(persona)
+  end
+
+  defp do_vote(scheduling, proposal_id, persona_id, score, extra \\ %{}) do
+    args = Map.merge(%{proposal_id: proposal_id, persona_id: persona_id, score: score}, extra)
+
+    scheduling
+    |> Ash.Changeset.for_update(:vote, args, actor: actor_for_persona_id(persona_id))
+    |> Ash.update()
   end
 end

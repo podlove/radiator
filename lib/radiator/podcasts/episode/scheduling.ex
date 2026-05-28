@@ -5,7 +5,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
   Workflow:
   1. Owner starts scheduling with proposed datetimes and list of participants
-  2. Participants are notified and can vote on proposals (1-5 score)
+  2. Participants are notified and can vote on proposals (`-1` no, `0` maybe, `1` yes)
   3. Participants can add new datetime proposals
   4. Owner monitors votes and decides on final datetime
   5. Owner finalizes scheduling, closing the vote and setting the chosen datetime
@@ -18,6 +18,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   alias Radiator.Podcasts.Episode.Scheduling.Proposal
   alias Radiator.Podcasts.Episode.Scheduling.Validations.OwnerOnly
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ParticipantOnly
+  alias Radiator.Podcasts.Episode.Scheduling.Validations.PersonaBelongsToActor
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposalExists
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposalOwnerOrCreator
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposedDatetimesPresent
@@ -133,7 +134,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
     end
 
     update :vote do
-      description "Vote on a proposal with a score from 1-5"
+      description "Vote on a proposal with a score of -1 (no), 0 (maybe) or 1 (yes)"
       require_atomic? false
       accept []
       argument :proposal_id, :uuid, allow_nil?: false
@@ -145,8 +146,9 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
         message "Cannot vote on a closed scheduling"
       end
 
-      validate {ParticipantOnly, message: "Only participants can vote"}
       validate ValidScore
+      validate {ParticipantOnly, message: "Only participants can vote"}
+      validate PersonaBelongsToActor
 
       change fn changeset, _context ->
         proposal_id = Ash.Changeset.get_argument(changeset, :proposal_id)
@@ -407,56 +409,85 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   end
 
   @doc """
-  Calculate voting statistics for the scheduling
+  Calculate voting statistics for the scheduling.
+
+  Returns a map with status, aggregate counts across all proposals, the per-proposal
+  statistics (sorted by `total_score` desc), and the top-level `top_proposal_id`
+  (the proposal with the highest `total_score`, or `nil` on a tie).
+
+  Per-proposal stats include `total_score`, `yes_count`, `maybe_count`, `no_count`,
+  `pending_count` (participants without a vote on that proposal), and the raw
+  `votes` list for UI rendering.
   """
   def voting_stats(scheduling) do
-    participant_count = length(scheduling.participant_persona_ids || [])
-    proposal_count = length(scheduling.proposals || [])
-    proposal_stats = calculate_proposal_stats(scheduling.proposals || [])
-    voted_personas = get_voted_personas(scheduling.proposals || [])
+    participants = scheduling.participant_persona_ids || []
+    proposals = scheduling.proposals || []
+    proposal_stats = calculate_proposal_stats(proposals, participants)
+    voted_personas = get_voted_personas(proposals)
 
     %{
       status: scheduling.status,
-      participant_count: participant_count,
-      proposal_count: proposal_count,
-      total_votes: Enum.reduce(proposal_stats, 0, fn stat, acc -> acc + stat.vote_count end),
+      participant_count: length(participants),
+      proposal_count: length(proposals),
+      total_votes: Enum.reduce(proposal_stats, 0, fn stat, acc -> acc + length(stat.votes) end),
       voted_participant_count: length(voted_personas),
-      all_voted?: length(voted_personas) == participant_count,
+      all_voted?: length(voted_personas) == length(participants),
       proposal_stats: proposal_stats,
-      top_proposal: List.first(proposal_stats)
+      top_proposal: List.first(proposal_stats),
+      top_proposal_id: determine_top_proposal_id(proposal_stats)
     }
   end
 
-  defp calculate_proposal_stats(proposals) do
+  @doc """
+  Return the id of the proposal with the highest `total_score`.
+
+  Returns `nil` when two or more proposals share the highest score (no unique
+  winner) or when there are no proposals at all. Consistent with the
+  `top_proposal_id` field returned by `voting_stats/1`.
+  """
+  def top_proposal_id(scheduling) do
+    participants = scheduling.participant_persona_ids || []
+    proposals = scheduling.proposals || []
+
     proposals
-    |> Enum.map(&build_proposal_stat/1)
-    |> Enum.sort(fn a, b ->
-      case {a.average_score, b.average_score} do
-        {nil, nil} -> true
-        {nil, _} -> false
-        {_, nil} -> true
-        {a_score, b_score} -> a_score >= b_score
-      end
-    end)
+    |> calculate_proposal_stats(participants)
+    |> determine_top_proposal_id()
   end
 
-  defp build_proposal_stat(proposal) do
+  defp calculate_proposal_stats(proposals, participants) do
+    proposals
+    |> Enum.map(&build_proposal_stat(&1, participants))
+    |> Enum.sort_by(& &1.total_score, :desc)
+  end
+
+  defp build_proposal_stat(proposal, participants) do
     votes = proposal.votes || []
+    voted_ids = MapSet.new(votes, & &1.persona_id)
+
+    pending_count =
+      Enum.count(participants, fn persona_id -> not MapSet.member?(voted_ids, persona_id) end)
 
     %{
       proposal_id: proposal.id,
       datetime: proposal.datetime,
-      vote_count: length(votes),
-      average_score: calculate_average_score(votes),
+      total_score: Enum.reduce(votes, 0, fn vote, acc -> acc + vote.score end),
+      yes_count: Enum.count(votes, &(&1.score == 1)),
+      maybe_count: Enum.count(votes, &(&1.score == 0)),
+      no_count: Enum.count(votes, &(&1.score == -1)),
+      pending_count: pending_count,
       votes: votes
     }
   end
 
-  defp calculate_average_score([]), do: nil
+  defp determine_top_proposal_id([]), do: nil
 
-  defp calculate_average_score(votes) do
-    sum = Enum.reduce(votes, 0, fn vote, acc -> acc + vote.score end)
-    Float.round(sum / length(votes), 2)
+  defp determine_top_proposal_id(proposal_stats) do
+    max_score = proposal_stats |> Enum.map(& &1.total_score) |> Enum.max()
+
+    case Enum.filter(proposal_stats, &(&1.total_score == max_score)) do
+      [single] -> single.proposal_id
+      _ -> nil
+    end
   end
 
   defp get_voted_personas(proposals) do
