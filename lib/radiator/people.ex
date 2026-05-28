@@ -3,6 +3,10 @@ defmodule Radiator.People do
 
   use Ash.Domain, otp_app: :radiator, extensions: [AshPhoenix, AshAdmin.Domain]
 
+  admin do
+    show? true
+  end
+
   resources do
     resource Radiator.People.Person do
       define :read_persons, action: :read

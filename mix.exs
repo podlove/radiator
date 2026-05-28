@@ -43,7 +43,7 @@ defmodule Radiator.MixProject do
   defp deps do
     [
       {:ash, "~> 3.0"},
-      {:ash_admin, "~> 0.13"},
+      {:ash_admin, "~> 1.0"},
       {:ash_authentication, "~> 4.0"},
       {:ash_authentication_phoenix, "~> 2.0"},
       {:ash_phoenix, "~> 2.0"},
