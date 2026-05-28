@@ -27,48 +27,141 @@ defmodule RadiatorWeb.Layouts do
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
+  attr :current_user, :any, default: nil, doc: "the currently signed-in user"
+
+  attr :sidebar_podcasts, :list,
+    default: [],
+    doc: "podcasts (with episodes loaded) for the sidebar navigation"
+
   attr :current_scope, :map,
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
   slot :inner_block, required: true
 
+  slot :breadcrumb, doc: "breadcrumb trail rendered as a full-width navigation bar" do
+    attr :path, :string
+  end
+
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
+    <header class="navbar px-4 sm:px-6 lg:px-8 border-b border-base-300">
       <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
+        <a href="/" class="flex w-fit items-center gap-2 font-semibold">Radiator</a>
       </div>
       <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
+        <ul class="flex flex-row items-center gap-2">
+          <li id="notifications" aria-label={gettext("Notifications")}>
+            <button type="button" class="btn btn-ghost btn-circle">
+              <.icon name="hero-bell" class="size-5" />
+            </button>
           </li>
           <li>
             <.theme_toggle />
           </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
+          <li :if={@current_user} class="text-sm opacity-70 px-2">
+            {@current_user.email}
+          </li>
+          <li :if={@current_user}>
+            <.link href={~p"/sign-out"} class="btn btn-ghost btn-sm">
+              {gettext("Sign out")}
+            </.link>
           </li>
         </ul>
       </div>
     </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
+    <div class="flex">
+      <.nav_sidebar
+        :if={@current_user}
+        podcasts={@sidebar_podcasts}
+        active_podcast_id={@active_podcast_id}
+      />
+
+      <div class="flex-1 min-w-0">
+        <nav
+          :if={@breadcrumb != []}
+          class="breadcrumbs bg-base-300 text-sm px-4 sm:px-6 lg:px-8 py-2"
+          aria-label={gettext("Breadcrumb")}
+        >
+          <ul>
+            <li :for={crumb <- @breadcrumb}>
+              <.link :if={crumb[:path]} navigate={crumb[:path]}>{render_slot(crumb)}</.link>
+              <span :if={is_nil(crumb[:path])}>{render_slot(crumb)}</span>
+            </li>
+          </ul>
+        </nav>
+
+        <main class="px-4 py-10 sm:px-6 lg:px-8">
+          <div class="w-full space-y-4">
+            {render_slot(@inner_block)}
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
 
     <.flash_group flash={@flash} />
+    """
+  end
+
+  @doc """
+  Renders the left-hand navigation sidebar listing podcasts and their
+  episodes as expandable submenus.
+  """
+  attr :podcasts, :list, required: true
+  attr :active_podcast_id, :string, default: nil
+
+  def nav_sidebar(assigns) do
+    ~H"""
+    <aside class="w-64 shrink-0 border-r border-base-300 min-h-[calc(100vh-4rem)]">
+      <nav class="p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xs font-semibold uppercase opacity-60">
+            {gettext("Podcasts")}
+          </h2>
+          <.link
+            navigate={~p"/admin/podcasts/new"}
+            class="btn btn-ghost btn-xs btn-circle"
+            aria-label={gettext("New Podcast")}
+          >
+            <.icon name="hero-plus" class="size-4" />
+          </.link>
+        </div>
+
+        <ul class="menu menu-sm w-full p-0">
+          <li :for={podcast <- @podcasts}>
+            <details open={podcast.id == @active_podcast_id}>
+              <summary>
+                <.link navigate={~p"/admin/podcasts/#{podcast}"} class="flex-1 truncate">
+                  {podcast.title}
+                </.link>
+              </summary>
+              <ul>
+                <li>
+                  <.link
+                    navigate={~p"/admin/podcasts/#{podcast}/episodes/new"}
+                    class="text-xs opacity-70"
+                  >
+                    <.icon name="hero-plus" class="size-3" /> {gettext("New Episode")}
+                  </.link>
+                </li>
+                <li :if={podcast.episodes == []} class="opacity-50">
+                  <span class="text-xs">{gettext("No episodes")}</span>
+                </li>
+                <li :for={episode <- podcast.episodes}>
+                  <.link navigate={~p"/admin/podcasts/#{podcast}/episodes/#{episode}"}>
+                    <span class="truncate">
+                      <span :if={episode.number} class="opacity-60">#{episode.number}</span>
+                      {episode.title}
+                    </span>
+                  </.link>
+                </li>
+              </ul>
+            </details>
+          </li>
+        </ul>
+      </nav>
+    </aside>
     """
   end
 

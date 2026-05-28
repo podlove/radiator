@@ -151,6 +151,7 @@ defmodule Radiator.Podcasts.Podcast do
     has_many :episodes, Radiator.Podcasts.Episode do
       description "The episodes of the podcast"
       public? true
+      sort number: :desc_nils_first
     end
 
     belongs_to :license, Radiator.Podcasts.License do

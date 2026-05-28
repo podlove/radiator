@@ -1,49 +1,69 @@
 <Layouts.app {assigns}>
-  <h1>{@episode.title}</h1>
-  <dl>
-    <dt>{gettext("Number")}</dt>
-    <dd>{@episode.number}</dd>
-    <dt>{gettext("Title")}</dt>
-    <dd>{@episode.title}</dd>
-    <dt>{gettext("Subtitle")}</dt>
-    <dd>{@episode.subtitle}</dd>
-    <dt>{gettext("Summary")}</dt>
-    <dd>{@episode.summary}</dd>
-    <dt>{gettext("iTunes Type")}</dt>
-    <dd>{@episode.itunes_type}</dd>
-    <dt>{gettext("Publication Date")}</dt>
-    <dd>{@episode.publication_date}</dd>
-    <dt>{gettext("Duration Milliseconds")}</dt>
-    <dd>{@episode.duration_ms}</dd>
-    <dt>{gettext("Proposals")}</dt>
-    <dd>
-      <ul class="list">
-        <li :for={proposal <- @episode.scheduling.proposals} class="ml-4">
-          {Calendar.strftime(proposal.datetime, "%d.%m.%Y - %H:%M")}
-        </li>
-      </ul>
-    </dd>
-    <dt>{gettext("Participants")}</dt>
-    <dd>
-      <ul class="list">
-        <li :for={participant <- @episode.participants} class="ml-4">
-          {participant.public_name} ({participant.handle})
-        </li>
-      </ul>
-    </dd>
+  <:breadcrumb path={~p"/admin/podcasts"}>{gettext("Podcasts")}</:breadcrumb>
+  <:breadcrumb path={~p"/admin/podcasts/#{@episode.podcast}"}>
+    {@episode.podcast.title}
+  </:breadcrumb>
+  <:breadcrumb path={~p"/admin/podcasts/#{@episode.podcast}/episodes"}>
+    {gettext("Episodes")}
+  </:breadcrumb>
+  <:breadcrumb>{@episode.title}</:breadcrumb>
+
+  <header class="flex items-start justify-between gap-4">
+    <div>
+      <p :if={@episode.number} class="text-sm opacity-60">
+        {gettext("Episode #%{number}", number: @episode.number)}
+      </p>
+      <h1 class="text-2xl font-semibold">{@episode.title}</h1>
+      <p :if={@episode.subtitle} class="opacity-70">{@episode.subtitle}</p>
+    </div>
+    <div class="flex gap-2 shrink-0">
+      <.button
+        navigate={~p"/admin/podcasts/#{@episode.podcast}/episodes/#{@episode}/edit"}
+        variant="primary"
+      >
+        {gettext("Edit")}
+      </.button>
+      <.button
+        variant="warning"
+        data-confirm={gettext("Are you sure you want to delete %{title}?", title: @episode.title)}
+        phx-value-id={@episode.id}
+        phx-click="destroy-episode"
+      >
+        {gettext("Delete")}
+      </.button>
+    </div>
+  </header>
+
+  <p :if={@episode.summary} class="mt-4">{@episode.summary}</p>
+
+  <dl class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+    <.detail label={gettext("Number")} value={@episode.number} />
+    <.detail label={gettext("iTunes Type")} value={@episode.itunes_type} />
+    <.detail label={gettext("Publication Date")} value={@episode.publication_date} />
+    <.detail label={gettext("Duration (ms)")} value={@episode.duration_ms} />
   </dl>
-  <.button
-    variant="warning"
-    data-confirm={gettext("Are you sure you want to delete %{title}?", title: @episode.title)}
-    phx-value-id={@episode.id}
-    phx-click="destroy-episode"
-  >
-    {gettext("Delete Episode")}
-  </.button>
-  <.button
-    navigate={~p"/admin/podcasts/#{@episode.podcast}/episodes/#{@episode}/edit"}
-    variant="primary"
-  >
-    {gettext("Edit Episode")}
-  </.button>
+
+  <section :if={@episode.scheduling} class="mt-8">
+    <h2 class="text-lg font-semibold mb-2">{gettext("Proposals")}</h2>
+    <ul class="list-disc list-inside">
+      <li :for={proposal <- @episode.scheduling.proposals}>
+        {Calendar.strftime(proposal.datetime, "%d.%m.%Y - %H:%M")}
+      </li>
+      <li :if={@episode.scheduling.proposals == []} class="list-none opacity-60">
+        {gettext("No proposals yet")}
+      </li>
+    </ul>
+  </section>
+
+  <section class="mt-8">
+    <h2 class="text-lg font-semibold mb-2">{gettext("Participants")}</h2>
+    <ul class="list-disc list-inside">
+      <li :for={participant <- @episode.participants}>
+        {participant.public_name} <span class="opacity-60">({participant.handle})</span>
+      </li>
+      <li :if={@episode.participants == []} class="list-none opacity-60">
+        {gettext("No participants yet")}
+      </li>
+    </ul>
+  </section>
 </Layouts.app>

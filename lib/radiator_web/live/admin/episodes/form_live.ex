@@ -21,6 +21,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     socket
     |> assign(:form, to_form(form))
     |> assign(:podcast, podcast)
+    |> assign(:cancel_path, ~p"/admin/podcasts/#{podcast}/episodes/#{episode}")
     |> assign(:page_title, "Edit Episode")
     |> assign_candicates()
     |> ok()
@@ -40,6 +41,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     socket
     |> assign(:form, to_form(form))
     |> assign(:podcast, podcast)
+    |> assign(:cancel_path, ~p"/admin/podcasts/#{podcast}/episodes")
     |> assign(:page_title, "New Episode")
     |> assign_candicates()
     |> ok()
@@ -162,6 +164,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     reject_handles =
       socket.assigns.form
       |> Form.value(:participants)
+      |> List.wrap()
       |> Enum.map(&Form.value(&1, :handle))
 
     candicates =
