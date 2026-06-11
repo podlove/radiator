@@ -77,6 +77,14 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       end
     end
 
+    create :create_with_proposals do
+      description "Create a scheduling with proposals provided directly (used when managed by the episode form)."
+      accept [:episode_id, :owner_persona_id, :participant_persona_ids, :proposals]
+
+      change set_attribute(:status, :open)
+      change set_attribute(:published_at, &DateTime.utc_now/0)
+    end
+
     update :add_proposal do
       description "Add a new datetime proposal to the scheduling"
       require_atomic? false

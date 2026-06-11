@@ -26,20 +26,26 @@
       <legend class="text-sm font-semibold">{gettext("Proposals")}</legend>
 
       <.inputs_for :let={scheduling} field={form[:scheduling]}>
+        <.input field={scheduling[:owner_persona_id]} type="hidden" />
+
         <.inputs_for :let={proposal} field={scheduling[:proposals]}>
           <div class="flex w-full gap-4 items-end">
-            <.input field={proposal[:datetime]} type="datetime-local" />
-            <.input field={proposal[:created_by_persona_id]} type="text" />
+            <.input
+              field={proposal[:datetime]}
+              type="datetime-local"
+              label={gettext("Date & time")}
+            />
+            <.input field={proposal[:created_by_persona_id]} type="hidden" />
             <.button type="button" phx-click="remove_proposal" phx-value-path={proposal.name}>
               <.icon name="hero-x-mark" class="w-5 h-5" />
             </.button>
           </div>
         </.inputs_for>
-
-        <.button type="button" phx-click="add_proposal">
-          {gettext("Add Proposal")}
-        </.button>
       </.inputs_for>
+
+      <.button type="button" phx-click="add_proposal">
+        {gettext("Add Proposal")}
+      </.button>
     </fieldset>
 
     <fieldset class="my-4 p-4 border-1">

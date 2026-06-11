@@ -54,12 +54,19 @@ defmodule Radiator.Podcasts.Episode do
       accept @default_accept_attributes ++ [:podcast_id]
 
       argument :participants, {:array, :map}, allow_nil?: true
+      argument :scheduling, :map, allow_nil?: true
 
       change manage_relationship(:participants,
                use_identities: [:handle],
                on_no_match: {:create, :create},
                on_match: {:update, :update},
                on_lookup: :relate,
+               on_missing: :unrelate
+             )
+
+      change manage_relationship(:scheduling,
+               on_no_match: {:create, :create_with_proposals},
+               on_match: {:update, :update},
                on_missing: :unrelate
              )
     end
@@ -88,7 +95,7 @@ defmodule Radiator.Podcasts.Episode do
              )
 
       change manage_relationship(:scheduling,
-               on_no_match: {:create, :create},
+               on_no_match: {:create, :create_with_proposals},
                on_match: {:update, :update},
                on_lookup: :relate,
                on_missing: :unrelate
