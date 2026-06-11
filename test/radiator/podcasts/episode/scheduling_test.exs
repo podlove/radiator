@@ -317,4 +317,93 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
                Scheduling.voting_stats(scheduling).top_proposal_id
     end
   end
+
+  describe "create_with_proposals action" do
+    test "creates scheduling with proposals provided directly" do
+      episode = generate(episode())
+      owner = generate(persona())
+
+      proposals = [
+        %{datetime: ~U[2026-07-01 14:00:00Z], created_by_persona_id: owner.id},
+        %{datetime: ~U[2026-07-02 10:00:00Z], created_by_persona_id: owner.id}
+      ]
+
+      assert {:ok, scheduling} =
+               Scheduling
+               |> Ash.Changeset.for_create(:create_with_proposals, %{
+                 episode_id: episode.id,
+                 owner_persona_id: owner.id,
+                 proposals: proposals
+               })
+               |> Ash.create(authorize?: false)
+
+      assert scheduling.episode_id == episode.id
+      assert scheduling.owner_persona_id == owner.id
+      assert scheduling.status == :open
+      assert is_struct(scheduling.published_at, DateTime)
+      assert length(scheduling.proposals) == 2
+
+      datetimes = Enum.map(scheduling.proposals, & &1.datetime)
+      assert ~U[2026-07-01 14:00:00Z] in datetimes
+      assert ~U[2026-07-02 10:00:00Z] in datetimes
+    end
+
+    test "creates scheduling with empty proposals list" do
+      episode = generate(episode())
+      owner = generate(persona())
+
+      assert {:ok, scheduling} =
+               Scheduling
+               |> Ash.Changeset.for_create(:create_with_proposals, %{
+                 episode_id: episode.id,
+                 owner_persona_id: owner.id,
+                 proposals: []
+               })
+               |> Ash.create(authorize?: false)
+
+      assert scheduling.proposals == []
+      assert scheduling.status == :open
+    end
+
+    test "sets status to :open and published_at" do
+      episode = generate(episode())
+      owner = generate(persona())
+
+      {:ok, scheduling} =
+        Scheduling
+        |> Ash.Changeset.for_create(:create_with_proposals, %{
+          episode_id: episode.id,
+          owner_persona_id: owner.id,
+          proposals: []
+        })
+        |> Ash.create(authorize?: false)
+
+      assert scheduling.status == :open
+      assert %DateTime{} = scheduling.published_at
+    end
+
+    test "preserves created_by_persona_id on each proposal" do
+      episode = generate(episode())
+      owner = generate(persona())
+      other = generate(persona())
+
+      proposals = [
+        %{datetime: ~U[2026-07-01 14:00:00Z], created_by_persona_id: owner.id},
+        %{datetime: ~U[2026-07-02 10:00:00Z], created_by_persona_id: other.id}
+      ]
+
+      {:ok, scheduling} =
+        Scheduling
+        |> Ash.Changeset.for_create(:create_with_proposals, %{
+          episode_id: episode.id,
+          owner_persona_id: owner.id,
+          proposals: proposals
+        })
+        |> Ash.create(authorize?: false)
+
+      creator_ids = Enum.map(scheduling.proposals, & &1.created_by_persona_id)
+      assert owner.id in creator_ids
+      assert other.id in creator_ids
+    end
+  end
 end
