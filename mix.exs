@@ -129,10 +129,11 @@ defmodule Radiator.MixProject do
   end
 
   defp usage_rules do
-    # Example for those using claude.
+    # AGENTS.md is the single source of truth (cross-tool standard).
+    # CLAUDE.md just imports it via `@AGENTS.md`.
     [
-      file: "CLAUDE.md",
-      # rules to include directly in CLAUDE.md
+      file: "AGENTS.md",
+      # core rules to inline directly in AGENTS.md (Ash & Phoenix stay as skills)
       usage_rules: ["usage_rules:all"],
       skills: [
         location: ".claude/skills",
