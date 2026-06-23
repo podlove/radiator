@@ -535,12 +535,13 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
     podcast = generate(podcast())
     episode = generate(episode(%{podcast_id: podcast.id}))
 
+    relate_participants!(episode, [bob, jim, alice, carol])
+
     {:ok, scheduling} =
       Scheduling
       |> Ash.Changeset.for_create(:create, %{
         episode_id: episode.id,
         owner_user_id: owner.id,
-        participant_user_ids: [bob.id, jim.id, alice.id, carol.id],
         proposed_datetimes: [@tuesday, @friday, @saturday]
       })
       |> Ash.create(authorize?: false)
@@ -623,12 +624,13 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
     podcast = generate(podcast())
     episode = generate(episode(%{podcast_id: podcast.id}))
 
+    relate_participants!(episode, [jim, alice])
+
     {:ok, _scheduling} =
       Scheduling
       |> Ash.Changeset.for_create(:create, %{
         episode_id: episode.id,
         owner_user_id: owner.id,
-        participant_user_ids: [jim.id, alice.id],
         proposed_datetimes: [@tuesday, @friday, @saturday]
       })
       |> Ash.create(authorize?: false)
@@ -645,6 +647,16 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
   defp build_user(name) do
     person = generate(person(%{display_name: name}))
     generate(user(%{person_id: person.id}))
+  end
+
+  defp relate_participants!(episode, users) do
+    episode
+    |> Ash.Changeset.for_update(
+      :update,
+      %{participants: Enum.map(users, &%{email: to_string(&1.email)})},
+      authorize?: false
+    )
+    |> Ash.update!()
   end
 
   defp place_vote!(scheduling, proposal_id, %User{id: user_id} = user, score) do

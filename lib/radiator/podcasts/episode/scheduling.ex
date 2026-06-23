@@ -52,7 +52,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
     create :create do
       description "Start a new scheduling for an episode with initial proposals and participants"
-      accept [:episode_id, :owner_user_id, :participant_user_ids, :proposals]
+      accept [:episode_id, :owner_user_id, :proposals]
       argument :proposed_datetimes, {:array, :utc_datetime}, allow_nil?: false
       validate ProposedDatetimesPresent
 
@@ -79,7 +79,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
     create :create_with_proposals do
       description "Create a scheduling with proposals provided directly (used when managed by the episode form)."
-      accept [:episode_id, :owner_user_id, :participant_user_ids, :proposals]
+      accept [:episode_id, :owner_user_id, :proposals]
 
       change set_attribute(:status, :open)
       change set_attribute(:published_at, &DateTime.utc_now/0)
@@ -302,13 +302,6 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       constraints one_of: [:open, :closed]
     end
 
-    attribute :participant_user_ids, {:array, :uuid} do
-      description "List of user IDs who can participate in voting"
-      allow_nil? false
-      public? true
-      default []
-    end
-
     attribute :proposals, {:array, Proposal} do
       description "List of proposed datetimes with their votes (stored as JSONB)"
       allow_nil? false
@@ -426,9 +419,12 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   Per-proposal stats include `total_score`, `yes_count`, `maybe_count`, `no_count`,
   `pending_count` (participants without a vote on that proposal), and the raw
   `votes` list for UI rendering.
+
+  Eligible voters are the episode's participants; pass their user ids as
+  `participant_ids` (e.g. `Enum.map(episode.participants, & &1.id)`).
   """
-  def voting_stats(scheduling) do
-    participants = scheduling.participant_user_ids || []
+  def voting_stats(scheduling, participant_ids \\ []) do
+    participants = participant_ids || []
     proposals = scheduling.proposals || []
     proposal_stats = calculate_proposal_stats(proposals, participants)
     voted_users = get_voted_user_ids(proposals)
@@ -451,14 +447,14 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
   Returns `nil` when two or more proposals share the highest score (no unique
   winner) or when there are no proposals at all. Consistent with the
-  `top_proposal_id` field returned by `voting_stats/1`.
+  `top_proposal_id` field returned by `voting_stats/2`.
+
+  The winner is derived purely from each proposal's `total_score`, so the
+  participant list is not required here.
   """
   def top_proposal_id(scheduling) do
-    participants = scheduling.participant_user_ids || []
-    proposals = scheduling.proposals || []
-
-    proposals
-    |> calculate_proposal_stats(participants)
+    (scheduling.proposals || [])
+    |> calculate_proposal_stats([])
     |> determine_top_proposal_id()
   end
 

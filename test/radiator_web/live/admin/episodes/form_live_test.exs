@@ -212,7 +212,6 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
         |> Ash.Changeset.for_create(:create, %{
           episode_id: episode.id,
           owner_user_id: user.id,
-          participant_user_ids: [user.id],
           proposed_datetimes: [~U[2026-10-01 14:00:00Z], ~U[2026-10-02 10:00:00Z]]
         })
         |> Ash.create(authorize?: false)

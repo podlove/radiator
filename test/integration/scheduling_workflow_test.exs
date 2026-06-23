@@ -38,13 +38,14 @@ defmodule Radiator.SchedulingWorkflowTest do
       owner_id = owner.id
       participant_ids = Enum.map(participants, & &1.id)
 
+      relate_participants!(episode, [owner | participants])
+
       # Step 1: Create scheduling with proposed datetimes
       {:ok, scheduling} =
         Scheduling
         |> Ash.Changeset.for_create(:create, %{
           episode_id: episode.id,
           owner_user_id: owner_id,
-          participant_user_ids: participant_ids,
           proposed_datetimes: [
             ~U[2024-03-15 14:00:00Z],
             ~U[2024-03-16 10:00:00Z],
@@ -71,7 +72,7 @@ defmodule Radiator.SchedulingWorkflowTest do
         do_vote(scheduling, proposal2.id, Enum.at(participant_ids, 2), 1)
 
       # Step 3: Check voting statistics
-      stats = Scheduling.voting_stats(scheduling)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
       # IO.inspect(stats, label: "Voting Statistics")
 
       # Step 4: Owner finalizes with the winning proposal
@@ -129,6 +130,8 @@ defmodule Radiator.SchedulingWorkflowTest do
       orig_score = 1
       new_score = -1
 
+      relate_participants!(episode, [owner | participants])
+
       # SETUP
       # Step 1: Create scheduling with proposed datetimes
       {:ok, scheduling} =
@@ -136,7 +139,6 @@ defmodule Radiator.SchedulingWorkflowTest do
         |> Ash.Changeset.for_create(:create, %{
           episode_id: episode.id,
           owner_user_id: owner_id,
-          participant_user_ids: participant_ids,
           proposed_datetimes: [
             ~U[2024-03-15 14:00:00Z],
             ~U[2024-03-16 10:00:00Z],
@@ -189,12 +191,13 @@ defmodule Radiator.SchedulingWorkflowTest do
       owner_id = owner.id
       participant_ids = Enum.map(participants, & &1.id)
 
+      relate_participants!(episode, [owner | participants])
+
       {:ok, scheduling} =
         Scheduling
         |> Ash.Changeset.for_create(:create, %{
           episode_id: episode.id,
           owner_user_id: owner_id,
-          participant_user_ids: participant_ids,
           proposed_datetimes: [
             ~U[2024-03-15 14:00:00Z],
             ~U[2024-03-16 10:00:00Z],
@@ -252,12 +255,13 @@ defmodule Radiator.SchedulingWorkflowTest do
       owner_id = owner.id
       participant_ids = Enum.map(participants, & &1.id)
 
+      relate_participants!(episode, [owner | participants])
+
       {:ok, scheduling} =
         Scheduling
         |> Ash.Changeset.for_create(:create, %{
           episode_id: episode.id,
           owner_user_id: owner_id,
-          participant_user_ids: participant_ids,
           proposed_datetimes: [
             ~U[2024-03-15 14:00:00Z],
             ~U[2024-03-16 10:00:00Z],
@@ -312,12 +316,13 @@ defmodule Radiator.SchedulingWorkflowTest do
       owner_id = owner.id
       participant_ids = Enum.map(participants, & &1.id)
 
+      relate_participants!(episode, [owner | participants])
+
       {:ok, scheduling} =
         Scheduling
         |> Ash.Changeset.for_create(:create, %{
           episode_id: episode.id,
           owner_user_id: owner_id,
-          participant_user_ids: participant_ids,
           proposed_datetimes: [
             ~U[2024-03-15 14:00:00Z],
             ~U[2024-03-16 10:00:00Z],
@@ -346,7 +351,7 @@ defmodule Radiator.SchedulingWorkflowTest do
       # Example 7: Reopen a closed scheduling
       # If the chosen time no longer works, the owner can reopen voting.
 
-      stats = Scheduling.voting_stats(scheduling)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
       top_proposal = List.first(stats.proposal_stats)
 
       {:ok, scheduling} =
@@ -403,13 +408,15 @@ defmodule Radiator.SchedulingWorkflowTest do
     } do
       owner_id = owner.id
       participant_ids = Enum.map(participants, & &1.id)
+
+      relate_participants!(episode, [owner | participants])
+
       # Start scheduling
       result =
         Scheduling
         |> Ash.Changeset.for_create(:create, %{
           episode_id: episode.id,
           owner_user_id: owner_id,
-          participant_user_ids: participant_ids,
           proposed_datetimes: [
             ~U[2024-03-15 14:00:00Z],
             ~U[2024-03-16 10:00:00Z]
@@ -423,11 +430,11 @@ defmodule Radiator.SchedulingWorkflowTest do
           scheduling = simulate_voting(scheduling, participant_ids)
 
           # Monitor progress
-          stats = monitor_voting_progress(scheduling)
+          stats = monitor_voting_progress(scheduling, participant_ids)
 
           # Finalize if all voted
           if stats.all_voted? do
-            finalize_scheduling(scheduling, owner, episode)
+            finalize_scheduling(scheduling, owner, episode, participant_ids)
           else
             {:ok, :waiting_for_votes, scheduling}
           end
@@ -441,8 +448,8 @@ defmodule Radiator.SchedulingWorkflowTest do
 
     # Shows how to check if all participants have voted and display
     # current voting status.
-    defp monitor_voting_progress(scheduling) do
-      stats = Scheduling.voting_stats(scheduling)
+    defp monitor_voting_progress(scheduling, participant_ids) do
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
 
       # IO.puts("\n=== Voting Progress ===")
       # IO.puts("Status: #{stats.status}")
@@ -481,8 +488,8 @@ defmodule Radiator.SchedulingWorkflowTest do
       end)
     end
 
-    defp finalize_scheduling(scheduling, owner, episode) do
-      stats = Scheduling.voting_stats(scheduling)
+    defp finalize_scheduling(scheduling, owner, episode, participant_ids) do
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
       top_proposal = List.first(stats.proposal_stats)
 
       {:ok, scheduling} =
@@ -516,6 +523,16 @@ defmodule Radiator.SchedulingWorkflowTest do
 
   defp actor_for_user_id(user_id) do
     Ash.get!(User, user_id, authorize?: false)
+  end
+
+  defp relate_participants!(episode, users) do
+    episode
+    |> Ash.Changeset.for_update(
+      :update,
+      %{participants: Enum.map(users, &%{email: to_string(&1.email)})},
+      authorize?: false
+    )
+    |> Ash.update!()
   end
 
   defp do_vote(scheduling, proposal_id, user_id, score, extra \\ %{}) do

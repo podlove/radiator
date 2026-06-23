@@ -4,42 +4,33 @@ defmodule RadiatorWeb.Admin.Episodes.AvailabilityHelpersTest do
   alias Radiator.Podcasts.Episode.Scheduling
   alias RadiatorWeb.Admin.Episodes.AvailabilityHelpers
 
-  describe "can_vote?/2" do
+  describe "can_vote?/3" do
     test "returns false when user is nil" do
-      scheduling = %Scheduling{status: :open, participant_user_ids: ["any"]}
+      scheduling = %Scheduling{status: :open}
 
-      refute AvailabilityHelpers.can_vote?(scheduling, nil)
+      refute AvailabilityHelpers.can_vote?(scheduling, nil, ["any"])
     end
 
     test "returns false when scheduling is nil" do
-      refute AvailabilityHelpers.can_vote?(nil, %{id: "any"})
+      refute AvailabilityHelpers.can_vote?(nil, %{id: "any"}, ["any"])
     end
 
     test "returns true when scheduling is :open and user is a participant" do
-      scheduling = %Scheduling{
-        status: :open,
-        participant_user_ids: ["bob-id", "alice-id"]
-      }
+      scheduling = %Scheduling{status: :open}
 
-      assert AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"})
+      assert AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"}, ["bob-id", "alice-id"])
     end
 
     test "returns false when scheduling is :open and user is not a participant" do
-      scheduling = %Scheduling{
-        status: :open,
-        participant_user_ids: ["alice-id"]
-      }
+      scheduling = %Scheduling{status: :open}
 
-      refute AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"})
+      refute AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"}, ["alice-id"])
     end
 
     test "returns false when scheduling is :closed even if user is a participant" do
-      scheduling = %Scheduling{
-        status: :closed,
-        participant_user_ids: ["bob-id"]
-      }
+      scheduling = %Scheduling{status: :closed}
 
-      refute AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"})
+      refute AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"}, ["bob-id"])
     end
   end
 

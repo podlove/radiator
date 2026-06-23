@@ -127,7 +127,7 @@
                     phx-click="vote"
                     phx-value-proposal-id={proposal.id}
                     phx-value-score="1"
-                    disabled={not can_vote?(@episode.scheduling, @current_user)}
+                    disabled={not can_vote?(@episode.scheduling, @current_user, @participant_ids)}
                   >
                     <.icon name="hero-check" class="size-4" />
                   </button>
@@ -141,7 +141,7 @@
                     phx-click="vote"
                     phx-value-proposal-id={proposal.id}
                     phx-value-score="0"
-                    disabled={not can_vote?(@episode.scheduling, @current_user)}
+                    disabled={not can_vote?(@episode.scheduling, @current_user, @participant_ids)}
                   >
                     <.icon name="hero-question-mark-circle" class="size-4" />
                   </button>
@@ -155,7 +155,7 @@
                     phx-click="vote"
                     phx-value-proposal-id={proposal.id}
                     phx-value-score="-1"
-                    disabled={not can_vote?(@episode.scheduling, @current_user)}
+                    disabled={not can_vote?(@episode.scheduling, @current_user, @participant_ids)}
                   >
                     <.icon name="hero-x-mark" class="size-4" />
                   </button>

@@ -89,14 +89,22 @@ participants =
     create_user.("test#{i}@radiator.de", %{handle: "test_handle_#{i}", person_id: person.id})
   end)
 
-participant_ids = Enum.map(participants, & &1.id)
+# Eligible voters are the episode's participants. Link bob + the 5 test users
+# to the future episode so they can vote on the scheduling below.
+future_episode =
+  future_episode
+  |> Ash.Changeset.for_update(
+    :update,
+    %{participants: Enum.map([bob | participants], &%{email: to_string(&1.email)})},
+    authorize?: false
+  )
+  |> Ash.update!()
 
 {:ok, scheduling} =
   Radiator.Podcasts.Episode.Scheduling
   |> Ash.Changeset.for_create(:create, %{
     episode_id: future_episode.id,
     owner_user_id: owner.id,
-    participant_user_ids: [bob.id | participant_ids],
     proposed_datetimes: [
       ~U[2024-03-15 14:00:00Z],
       ~U[2024-03-16 10:00:00Z],

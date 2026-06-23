@@ -16,12 +16,13 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Validations.UserIsActorTest do
     owner = build_user()
     episode = generate(episode())
 
+    relate_participants!(episode, [voter | other_participants])
+
     {:ok, scheduling} =
       Scheduling
       |> Ash.Changeset.for_create(:create, %{
         episode_id: episode.id,
         owner_user_id: owner.id,
-        participant_user_ids: [voter.id | Enum.map(other_participants, & &1.id)],
         proposed_datetimes: [~U[2026-04-15 10:00:00Z]]
       })
       |> Ash.create(authorize?: false)
@@ -33,6 +34,16 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Validations.UserIsActorTest do
 
   defp build_user do
     generate(user())
+  end
+
+  defp relate_participants!(episode, users) do
+    episode
+    |> Ash.Changeset.for_update(
+      :update,
+      %{participants: Enum.map(users, &%{email: to_string(&1.email)})},
+      authorize?: false
+    )
+    |> Ash.update!()
   end
 
   describe "UserIsActor via :vote action" do

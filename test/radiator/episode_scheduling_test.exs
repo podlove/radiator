@@ -27,11 +27,12 @@ defmodule Radiator.EpisodeSchedulingTest do
     } do
       participant_ids = Enum.map(participants, & &1.id)
 
+      relate_participants!(episode, participants)
+
       assert {:ok, scheduling} =
                Radiator.Podcasts.start_scheduling(%{
                  episode_id: episode.id,
                  owner_user_id: owner.id,
-                 participant_user_ids: participant_ids,
                  proposed_datetimes: [
                    ~U[2024-03-15 14:00:00Z],
                    ~U[2024-03-16 10:00:00Z]
@@ -40,22 +41,27 @@ defmodule Radiator.EpisodeSchedulingTest do
 
       assert scheduling.episode_id == episode.id
       assert scheduling.owner_user_id == owner.id
-      assert scheduling.participant_user_ids == participant_ids
       assert scheduling.status == :open
       assert length(scheduling.proposals) == 2
       assert scheduling.published_at != nil
+
+      episode_participant_ids =
+        episode
+        |> Ash.load!(:participants, authorize?: false)
+        |> Map.fetch!(:participants)
+        |> MapSet.new(& &1.id)
+
+      assert episode_participant_ids == MapSet.new(participant_ids)
     end
 
     test "requires at least one proposed datetime", %{
       episode: episode,
-      owner: owner,
-      participants: participants
+      owner: owner
     } do
       assert {:error, changeset} =
                Radiator.Podcasts.start_scheduling(%{
                  episode_id: episode.id,
                  owner_user_id: owner.id,
-                 participant_user_ids: Enum.map(participants, & &1.id),
                  proposed_datetimes: []
                })
 
@@ -64,14 +70,12 @@ defmodule Radiator.EpisodeSchedulingTest do
 
     test "sets status to open by default", %{
       episode: episode,
-      owner: owner,
-      participants: participants
+      owner: owner
     } do
       {:ok, scheduling} =
         Radiator.Podcasts.start_scheduling(%{
           episode_id: episode.id,
           owner_user_id: owner.id,
-          participant_user_ids: Enum.map(participants, & &1.id),
           proposed_datetimes: [~U[2024-03-15 14:00:00Z]]
         })
 
@@ -80,14 +84,12 @@ defmodule Radiator.EpisodeSchedulingTest do
 
     test "creates proposals with correct structure", %{
       episode: episode,
-      owner: owner,
-      participants: participants
+      owner: owner
     } do
       {:ok, scheduling} =
         Radiator.Podcasts.start_scheduling(%{
           episode_id: episode.id,
           owner_user_id: owner.id,
-          participant_user_ids: Enum.map(participants, & &1.id),
           proposed_datetimes: [~U[2024-03-15 14:00:00Z]]
         })
 
@@ -569,7 +571,8 @@ defmodule Radiator.EpisodeSchedulingTest do
     setup do
       {:ok, scheduling} = create_test_scheduling()
       [proposal1, proposal2 | _] = scheduling.proposals
-      [participant1_id, participant2_id | _] = scheduling.participant_user_ids
+      participant_ids = participant_ids_for(scheduling)
+      [participant1_id, participant2_id | _] = participant_ids
       actor1 = Ash.get!(User, participant1_id, authorize?: false)
       actor2 = Ash.get!(User, participant2_id, authorize?: false)
 
@@ -616,12 +619,16 @@ defmodule Radiator.EpisodeSchedulingTest do
       %{
         scheduling: scheduling,
         proposal1: proposal1,
-        proposal2: proposal2
+        proposal2: proposal2,
+        participant_ids: participant_ids
       }
     end
 
-    test "calculates voting statistics correctly", %{scheduling: scheduling} do
-      stats = Scheduling.voting_stats(scheduling)
+    test "calculates voting statistics correctly", %{
+      scheduling: scheduling,
+      participant_ids: participant_ids
+    } do
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
 
       assert stats.status == :open
       assert stats.participant_count == 3
@@ -634,9 +641,10 @@ defmodule Radiator.EpisodeSchedulingTest do
 
     test "identifies top proposal by total score", %{
       scheduling: scheduling,
-      proposal1: proposal1
+      proposal1: proposal1,
+      participant_ids: participant_ids
     } do
-      stats = Scheduling.voting_stats(scheduling)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
 
       assert stats.top_proposal != nil
       assert stats.top_proposal.proposal_id == proposal1.id
@@ -647,9 +655,10 @@ defmodule Radiator.EpisodeSchedulingTest do
     test "exposes total_score, yes/maybe/no counts per proposal", %{
       scheduling: scheduling,
       proposal1: proposal1,
-      proposal2: proposal2
+      proposal2: proposal2,
+      participant_ids: participant_ids
     } do
-      stats = Scheduling.voting_stats(scheduling)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
 
       stat1 = Enum.find(stats.proposal_stats, &(&1.proposal_id == proposal1.id))
       stat2 = Enum.find(stats.proposal_stats, &(&1.proposal_id == proposal2.id))
@@ -667,8 +676,11 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert stat2.pending_count == 2
     end
 
-    test "handles proposals with no votes", %{scheduling: scheduling} do
-      stats = Scheduling.voting_stats(scheduling)
+    test "handles proposals with no votes", %{
+      scheduling: scheduling,
+      participant_ids: participant_ids
+    } do
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
 
       proposal_without_votes = Enum.find(stats.proposal_stats, &(&1.votes == []))
 
@@ -681,7 +693,7 @@ defmodule Radiator.EpisodeSchedulingTest do
     setup do
       {:ok, scheduling} = create_test_scheduling()
       [proposal | _] = scheduling.proposals
-      [participant_id | _] = scheduling.participant_user_ids
+      [participant_id | _] = participant_ids_for(scheduling)
 
       {:ok, scheduling} =
         scheduling
@@ -802,13 +814,14 @@ defmodule Radiator.EpisodeSchedulingTest do
     participant2 = create_participant_with_user("Participant 2", "participant2")
     participant3 = create_participant_with_user("Participant 3", "participant3")
 
-    participant_ids = [participant1.id, participant2.id, participant3.id]
+    participants = [participant1, participant2, participant3]
+
+    relate_participants!(episode, participants)
 
     Scheduling
     |> Ash.Changeset.for_create(:create, %{
       episode_id: episode.id,
       owner_user_id: owner.id,
-      participant_user_ids: participant_ids,
       proposed_datetimes: [
         ~U[2024-03-15 14:00:00Z],
         ~U[2024-03-16 10:00:00Z],
@@ -819,6 +832,25 @@ defmodule Radiator.EpisodeSchedulingTest do
   end
 
   defp create_participant_with_user(_name, _handle), do: build_user()
+
+  defp relate_participants!(episode, users) do
+    episode
+    |> Ash.Changeset.for_update(
+      :update,
+      %{participants: Enum.map(users, &%{email: to_string(&1.email)})},
+      authorize?: false
+    )
+    |> Ash.update!()
+  end
+
+  # Returns the list of participant user ids for a scheduling's episode.
+  defp participant_ids_for(scheduling) do
+    scheduling.episode_id
+    |> then(&Ash.get!(Radiator.Podcasts.Episode, &1, authorize?: false))
+    |> Ash.load!(:participants, authorize?: false)
+    |> Map.fetch!(:participants)
+    |> Enum.map(& &1.id)
+  end
 
   defp build_user do
     email = "user_#{System.unique_integer([:positive])}@example.com"
@@ -844,7 +876,7 @@ defmodule Radiator.EpisodeSchedulingTest do
   end
 
   defp get_participant(scheduling) do
-    [participant_id | _] = scheduling.participant_user_ids
+    [participant_id | _] = participant_ids_for(scheduling)
 
     User
     |> Ash.get!(participant_id, authorize?: false)

@@ -33,17 +33,35 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
         build_user()
       end)
 
+    relate_participants!(episode, participants)
+
+    participant_ids = Enum.map(participants, & &1.id)
+
     {:ok, scheduling} =
       Scheduling
       |> Ash.Changeset.for_create(:create, %{
         episode_id: episode.id,
         owner_user_id: owner.id,
-        participant_user_ids: Enum.map(participants, & &1.id),
         proposed_datetimes: proposed_datetimes
       })
       |> Ash.create()
 
-    %{scheduling: scheduling, owner: owner, participants: participants}
+    %{
+      scheduling: scheduling,
+      owner: owner,
+      participants: participants,
+      participant_ids: participant_ids
+    }
+  end
+
+  defp relate_participants!(episode, users) do
+    episode
+    |> Ash.Changeset.for_update(
+      :update,
+      %{participants: Enum.map(users, &%{email: to_string(&1.email)})},
+      authorize?: false
+    )
+    |> Ash.update!()
   end
 
   defp build_user do
@@ -159,7 +177,8 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
       {:ok, scheduling} = cast_vote(scheduling, proposal_a.id, p2, 0)
       {:ok, scheduling} = cast_vote(scheduling, proposal_a.id, p3, -1)
 
-      stats = Scheduling.voting_stats(scheduling)
+      participant_ids = Enum.map([p1, p2, p3], & &1.id)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
       stat_a = Enum.find(stats.proposal_stats, &(&1.proposal_id == proposal_a.id))
 
       assert stat_a.total_score == 0
@@ -171,9 +190,11 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
     end
 
     test "pending_count equals participant_count for a proposal without any votes", %{
-      scheduling: scheduling
+      scheduling: scheduling,
+      participants: participants
     } do
-      stats = Scheduling.voting_stats(scheduling)
+      participant_ids = Enum.map(participants, & &1.id)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
 
       Enum.each(stats.proposal_stats, fn stat ->
         assert stat.total_score == 0
@@ -187,14 +208,15 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
 
     test "pending_count reflects only participants without a vote on that proposal", %{
       scheduling: scheduling,
-      participants: [p1, p2, _p3]
+      participants: [p1, p2, p3]
     } do
       [proposal_a | _] = scheduling.proposals
 
       {:ok, scheduling} = cast_vote(scheduling, proposal_a.id, p1, 1)
       {:ok, scheduling} = cast_vote(scheduling, proposal_a.id, p2, 0)
 
-      stats = Scheduling.voting_stats(scheduling)
+      participant_ids = Enum.map([p1, p2, p3], & &1.id)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
       stat_a = Enum.find(stats.proposal_stats, &(&1.proposal_id == proposal_a.id))
 
       assert stat_a.yes_count == 1
@@ -214,7 +236,8 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
       {:ok, scheduling} = cast_vote(scheduling, proposal_a.id, p2, 0)
       {:ok, scheduling} = cast_vote(scheduling, proposal_a.id, p3, 0)
 
-      stats = Scheduling.voting_stats(scheduling)
+      participant_ids = Enum.map([p1, p2, p3], & &1.id)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
       stat_a = Enum.find(stats.proposal_stats, &(&1.proposal_id == proposal_a.id))
 
       assert stat_a.maybe_count == 3
@@ -236,7 +259,8 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
 
       {:ok, scheduling} = cast_vote(scheduling, proposal_c.id, p1, -1)
 
-      stats = Scheduling.voting_stats(scheduling)
+      participant_ids = Enum.map([p1, p2, p3], & &1.id)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
       scores = Enum.map(stats.proposal_stats, & &1.total_score)
       ids = Enum.map(stats.proposal_stats, & &1.proposal_id)
 
@@ -246,7 +270,7 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
 
     test "top_proposal_id is set for unique winner", %{
       scheduling: scheduling,
-      participants: [p1, p2, _p3]
+      participants: [p1, p2, p3]
     } do
       [proposal_a, proposal_b, _proposal_c] = scheduling.proposals
 
@@ -255,20 +279,22 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
 
       {:ok, scheduling} = cast_vote(scheduling, proposal_b.id, p1, -1)
 
-      stats = Scheduling.voting_stats(scheduling)
+      participant_ids = Enum.map([p1, p2, p3], & &1.id)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
       assert stats.top_proposal_id == proposal_a.id
     end
 
     test "top_proposal_id is nil on tie", %{
       scheduling: scheduling,
-      participants: [p1, p2, _p3]
+      participants: [p1, p2, p3]
     } do
       [proposal_a, proposal_b, _proposal_c] = scheduling.proposals
 
       {:ok, scheduling} = cast_vote(scheduling, proposal_a.id, p1, 1)
       {:ok, scheduling} = cast_vote(scheduling, proposal_b.id, p2, 1)
 
-      stats = Scheduling.voting_stats(scheduling)
+      participant_ids = Enum.map([p1, p2, p3], & &1.id)
+      stats = Scheduling.voting_stats(scheduling, participant_ids)
       assert stats.top_proposal_id == nil
     end
   end
@@ -296,7 +322,7 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
     end
 
     test "returns nil for a scheduling without proposals" do
-      empty_scheduling = %Scheduling{proposals: [], participant_user_ids: []}
+      empty_scheduling = %Scheduling{proposals: []}
 
       assert Scheduling.top_proposal_id(empty_scheduling) == nil
     end
@@ -309,8 +335,10 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
       {:ok, scheduling} = cast_vote(scheduling, proposal_b.id, p2, 0)
       {:ok, scheduling} = cast_vote(scheduling, proposal_c.id, p3, -1)
 
+      participant_ids = Enum.map([p1, p2, p3], & &1.id)
+
       assert Scheduling.top_proposal_id(scheduling) ==
-               Scheduling.voting_stats(scheduling).top_proposal_id
+               Scheduling.voting_stats(scheduling, participant_ids).top_proposal_id
     end
   end
 
