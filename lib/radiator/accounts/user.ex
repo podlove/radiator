@@ -315,7 +315,20 @@ defmodule Radiator.Accounts.User do
   end
 
   calculations do
-    calculate :display_name, :string, Radiator.Accounts.User.Calculations.DisplayName
+    calculate :display_name,
+              :string,
+              expr(
+                cond do
+                  not is_nil(person.display_name) and person.display_name != "" ->
+                    person.display_name
+
+                  not is_nil(handle) and handle != "" ->
+                    handle
+
+                  true ->
+                    type(email, :string)
+                end
+              )
   end
 
   identities do
