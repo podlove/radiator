@@ -14,27 +14,45 @@
     },
     {
       "allow_nil?": false,
-      "default": "nil",
+      "default": "\"open\"",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "public_name",
+      "source": "status",
       "type": "text"
     },
     {
       "allow_nil?": false,
-      "default": "nil",
+      "default": "[]",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "handle",
-      "type": "text"
+      "source": "participant_user_ids",
+      "type": [
+        "array",
+        "uuid"
+      ]
+    },
+    {
+      "allow_nil?": false,
+      "default": "[]",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "proposals",
+      "type": [
+        "array",
+        "map"
+      ]
     },
     {
       "allow_nil?": true,
@@ -45,62 +63,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "description",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "avatar_png",
-      "type": "binary"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "default?",
-      "type": "boolean"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": {
-        "deferrable": false,
-        "destination_attribute": "id",
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": null,
-        "match_with": null,
-        "multitenancy": {
-          "attribute": null,
-          "global": null,
-          "strategy": null
-        },
-        "name": "personas_user_id_fkey",
-        "on_delete": "nilify",
-        "on_update": null,
-        "primary_key?": true,
-        "schema": "public",
-        "table": "users"
-      },
-      "scale": null,
-      "size": null,
-      "source": "user_id",
+      "source": "chosen_proposal_id",
       "type": "uuid"
     },
     {
@@ -109,6 +72,66 @@
       "generated?": false,
       "precision": null,
       "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "chosen_datetime",
+      "type": "utc_datetime"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "published_at",
+      "type": "utc_datetime"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "finalized_at",
+      "type": "utc_datetime"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "updated_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
       "references": {
         "deferrable": false,
         "destination_attribute": "id",
@@ -122,16 +145,47 @@
           "global": null,
           "strategy": null
         },
-        "name": "personas_person_id_fkey",
-        "on_delete": null,
+        "name": "episode_scheduling_episode_id_fkey",
+        "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "people"
+        "table": "episodes"
       },
       "scale": null,
       "size": null,
-      "source": "person_id",
+      "source": "episode_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "episode_scheduling_owner_user_id_fkey",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "users"
+      },
+      "scale": null,
+      "size": null,
+      "source": "owner_user_id",
       "type": "uuid"
     }
   ],
@@ -141,33 +195,19 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "D4CFE0A6ADEF3F8A0CBD4A5A21496F70AE3D877B61C984E2E66A3C6717C0F981",
+  "hash": "10BD6E7DF228D9FE0DD8752009D0B629D100A6ADCBC819473AAAEEC7C8CAFCFA",
   "identities": [
     {
       "all_tenants?": false,
       "base_filter": null,
-      "index_name": "personas_handle_index",
+      "index_name": "episode_scheduling_unique_episode_index",
       "keys": [
         {
           "type": "atom",
-          "value": "handle"
+          "value": "episode_id"
         }
       ],
-      "name": "handle",
-      "nils_distinct?": true,
-      "where": null
-    },
-    {
-      "all_tenants?": false,
-      "base_filter": null,
-      "index_name": "personas_unique_user_index",
-      "keys": [
-        {
-          "type": "atom",
-          "value": "user_id"
-        }
-      ],
-      "name": "unique_user",
+      "name": "unique_episode",
       "nils_distinct?": true,
       "where": null
     }
@@ -179,5 +219,5 @@
   },
   "repo": "Elixir.Radiator.Repo",
   "schema": null,
-  "table": "personas"
+  "table": "episode_scheduling"
 }

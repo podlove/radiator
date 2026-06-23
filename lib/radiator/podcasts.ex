@@ -75,4 +75,27 @@ defmodule Radiator.Podcasts do
     |> Ash.Query.load([:display_name])
     |> Ash.read!(authorize?: false)
   end
+
+  @doc """
+  Lädt alle noch nicht onboardeten Teilnehmer der Episode per Magic-Link
+  zur Abstimmung ein (Deep-Link auf die Episode). Liefert die eingeladenen User.
+
+  Ein Teilnehmer gilt als noch nicht onboardet, wenn er passwortlos ist
+  (`hashed_password == nil`) und seine E-Mail noch nicht bestätigt wurde
+  (`confirmed_at == nil`).
+  """
+  def invite_new_participants(%{id: _} = episode) do
+    episode = Ash.load!(episode, [:participants], authorize?: false)
+
+    invited =
+      Enum.filter(episode.participants, fn user ->
+        is_nil(user.hashed_password) and is_nil(user.confirmed_at)
+      end)
+
+    Enum.each(invited, fn user ->
+      Radiator.Accounts.send_voting_invitation(user, episode)
+    end)
+
+    {:ok, invited}
+  end
 end

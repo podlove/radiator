@@ -95,13 +95,13 @@
         </thead>
         <tbody>
           <tr
-            :for={persona <- @scheduling_participants}
-            id={"availability-row-#{persona.id}"}
+            :for={user <- @scheduling_participants}
+            id={"availability-row-#{user.id}"}
           >
             <td class="sticky left-0 bg-base-100 z-10 font-medium">
-              {persona.public_name}
+              {user.display_name}
               <span
-                :if={@current_persona && @current_persona.id == persona.id}
+                :if={@current_user && @current_user.id == user.id}
                 class="opacity-70 ml-1"
               >
                 {gettext("(du)")}
@@ -109,25 +109,25 @@
             </td>
             <td
               :for={proposal <- @sorted_proposals}
-              id={"availability-cell-#{proposal.id}-#{persona.id}"}
+              id={"availability-cell-#{proposal.id}-#{user.id}"}
               class={[
                 "text-center",
                 weekend?(proposal.datetime) && "bg-base-200"
               ]}
             >
-              <%= if @current_persona && @current_persona.id == persona.id do %>
+              <%= if @current_user && @current_user.id == user.id do %>
                 <div class="btn-group flex justify-center gap-1">
                   <button
                     id={"vote-#{proposal.id}-yes"}
                     type="button"
                     class={[
                       "btn btn-sm",
-                      vote_button_class(vote_for_persona(proposal, persona.id), 1)
+                      vote_button_class(vote_for_user(proposal, user.id), 1)
                     ]}
                     phx-click="vote"
                     phx-value-proposal-id={proposal.id}
                     phx-value-score="1"
-                    disabled={not can_vote?(@episode.scheduling, @current_persona)}
+                    disabled={not can_vote?(@episode.scheduling, @current_user)}
                   >
                     <.icon name="hero-check" class="size-4" />
                   </button>
@@ -136,12 +136,12 @@
                     type="button"
                     class={[
                       "btn btn-sm",
-                      vote_button_class(vote_for_persona(proposal, persona.id), 0)
+                      vote_button_class(vote_for_user(proposal, user.id), 0)
                     ]}
                     phx-click="vote"
                     phx-value-proposal-id={proposal.id}
                     phx-value-score="0"
-                    disabled={not can_vote?(@episode.scheduling, @current_persona)}
+                    disabled={not can_vote?(@episode.scheduling, @current_user)}
                   >
                     <.icon name="hero-question-mark-circle" class="size-4" />
                   </button>
@@ -150,18 +150,18 @@
                     type="button"
                     class={[
                       "btn btn-sm",
-                      vote_button_class(vote_for_persona(proposal, persona.id), -1)
+                      vote_button_class(vote_for_user(proposal, user.id), -1)
                     ]}
                     phx-click="vote"
                     phx-value-proposal-id={proposal.id}
                     phx-value-score="-1"
-                    disabled={not can_vote?(@episode.scheduling, @current_persona)}
+                    disabled={not can_vote?(@episode.scheduling, @current_user)}
                   >
                     <.icon name="hero-x-mark" class="size-4" />
                   </button>
                 </div>
               <% else %>
-                <%= case vote_for_persona(proposal, persona.id) do %>
+                <%= case vote_for_user(proposal, user.id) do %>
                   <% nil -> %>
                     <span class="opacity-40">–</span>
                   <% %{score: 1} -> %>
@@ -208,7 +208,7 @@
     <h2 class="text-lg font-semibold mb-2">{gettext("Participants")}</h2>
     <ul class="list-disc list-inside">
       <li :for={participant <- @episode.participants}>
-        {participant.public_name} <span class="opacity-60">({participant.handle})</span>
+        {participant.display_name} <span class="opacity-60">({participant.handle})</span>
       </li>
       <li :if={@episode.participants == []} class="list-none opacity-60">
         {gettext("No participants yet")}

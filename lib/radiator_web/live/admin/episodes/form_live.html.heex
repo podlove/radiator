@@ -26,7 +26,7 @@
       <legend class="text-sm font-semibold">{gettext("Proposals")}</legend>
 
       <.inputs_for :let={scheduling} field={form[:scheduling]}>
-        <.input field={scheduling[:owner_persona_id]} type="hidden" />
+        <.input field={scheduling[:owner_user_id]} type="hidden" />
 
         <.inputs_for :let={proposal} field={scheduling[:proposals]}>
           <div class="flex w-full gap-4 items-end">
@@ -35,7 +35,7 @@
               type="datetime-local"
               label={gettext("Date & time")}
             />
-            <.input field={proposal[:created_by_persona_id]} type="hidden" />
+            <.input field={proposal[:created_by_user_id]} type="hidden" />
             <.button type="button" phx-click="remove_proposal" phx-value-path={proposal.name}>
               <.icon name="hero-x-mark" class="w-5 h-5" />
             </.button>
@@ -56,17 +56,17 @@
           :for={candicate <- @candicates}
           phx-click="connect_participant"
           phx-value-handle={candicate.handle}
-          phx-value-public_name={candicate.public_name}
+          phx-value-email={candicate.email}
           type="button"
           class="btn-xs btn-secondary"
         >
-          {candicate.public_name}
+          {candicate.display_name}
         </.button>
       </div>
 
       <.inputs_for :let={participant} field={@form[:participants]}>
         <div class="flex w-full gap-4 items-end">
-          <.input field={participant[:public_name]} type="text" label={gettext("Name")} />
+          <.input field={participant[:email]} type="email" label={gettext("E-Mail")} />
           <.input field={participant[:handle]} type="text" label={gettext("Handle")} />
           <.button
             type="button"

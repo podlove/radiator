@@ -12,7 +12,26 @@ defmodule RadiatorWeb.Router do
     plug :put_root_layout, html: {RadiatorWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :store_return_to
     plug :load_from_session
+  end
+
+  # Stores a local `return_to` path from the query string into the session so
+  # post-authentication callbacks (e.g. magic-link sign-in) can redirect there.
+  # Only local absolute paths ("/...", but not "//...") are accepted to prevent
+  # open redirects.
+  def store_return_to(conn, _opts) do
+    case conn.params do
+      %{"return_to" => "/" <> _ = return_to} ->
+        if String.starts_with?(return_to, "//") do
+          conn
+        else
+          Plug.Conn.put_session(conn, :return_to, return_to)
+        end
+
+      _ ->
+        conn
+    end
   end
 
   pipeline :api do
