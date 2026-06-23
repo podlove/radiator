@@ -45,6 +45,14 @@ defmodule Radiator.Accounts.User do
           request_password_reset_action_name :request_password_reset_token
         end
       end
+
+      magic_link do
+        identity_field :email
+        registration_enabled? true
+        require_interaction? true
+
+        sender Radiator.Accounts.User.Senders.SendMagicLinkEmail
+      end
     end
   end
 
@@ -228,10 +236,52 @@ defmodule Radiator.Accounts.User do
       # Generates an authentication token for the user
       change AshAuthentication.GenerateTokenChange
     end
+
+    create :sign_in_with_magic_link do
+      description "Sign in or register a user with magic link."
+
+      argument :token, :string do
+        description "The token from the magic link that was sent to the user"
+        allow_nil? false
+      end
+
+      upsert? true
+      upsert_identity :unique_email
+      upsert_fields [:email]
+
+      # Uses the information from the token to create or sign in the user
+      change AshAuthentication.Strategy.MagicLink.SignInChange
+
+      metadata :token, :string do
+        allow_nil? false
+      end
+    end
+
+    action :request_magic_link do
+      argument :email, :ci_string do
+        allow_nil? false
+      end
+
+      run AshAuthentication.Strategy.MagicLink.Request
+    end
+
+    create :invite_by_email do
+      description "Create a passwordless user to be invited as a voting participant."
+      accept [:email, :handle]
+    end
+
+    update :update_profile do
+      description "Update pseudonymous profile fields and optional person link."
+      accept [:handle, :avatar_url, :person_id]
+    end
   end
 
   policies do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
+      authorize_if always()
+    end
+
+    policy action([:invite_by_email, :update_profile, :read]) do
       authorize_if always()
     end
   end
@@ -245,14 +295,31 @@ defmodule Radiator.Accounts.User do
     end
 
     attribute :hashed_password, :string do
-      allow_nil? false
+      allow_nil? true
       sensitive? true
     end
 
     attribute :confirmed_at, :utc_datetime_usec
+
+    attribute :handle, :string, public?: true
+    attribute :avatar_url, :string, public?: true
+    attribute :person_id, :uuid, public?: true, allow_nil?: true
+  end
+
+  relationships do
+    belongs_to :person, Radiator.People.Person do
+      allow_nil? true
+      define_attribute? false
+      public? true
+    end
+  end
+
+  calculations do
+    calculate :display_name, :string, Radiator.Accounts.User.Calculations.DisplayName
   end
 
   identities do
     identity :unique_email, [:email]
+    identity :unique_handle, [:handle]
   end
 end
