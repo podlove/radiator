@@ -2,7 +2,6 @@ defmodule Radiator.EpisodeSchedulingTest do
   use Radiator.DataCase, async: true
 
   alias Radiator.Accounts.User
-  alias Radiator.People
   alias Radiator.Podcasts
 
   alias Radiator.Podcasts.Episode.Scheduling
@@ -10,9 +9,9 @@ defmodule Radiator.EpisodeSchedulingTest do
   describe "start_scheduling" do
     setup do
       episode = generate(episode(%{title: "Test Episode"}))
-      owner = generate(persona(%{public_name: "Owner", handle: "owner"}))
-      guest1 = generate(persona(%{public_name: "Guest 1", handle: "guest1"}))
-      guest2 = generate(persona(%{public_name: "Guest 2", handle: "guest2"}))
+      owner = generate(user(%{handle: "owner"}))
+      guest1 = generate(user(%{handle: "guest1"}))
+      guest2 = generate(user(%{handle: "guest2"}))
 
       %{
         episode: episode,
@@ -31,8 +30,8 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:ok, scheduling} =
                Radiator.Podcasts.start_scheduling(%{
                  episode_id: episode.id,
-                 owner_persona_id: owner.id,
-                 participant_persona_ids: participant_ids,
+                 owner_user_id: owner.id,
+                 participant_user_ids: participant_ids,
                  proposed_datetimes: [
                    ~U[2024-03-15 14:00:00Z],
                    ~U[2024-03-16 10:00:00Z]
@@ -40,8 +39,8 @@ defmodule Radiator.EpisodeSchedulingTest do
                })
 
       assert scheduling.episode_id == episode.id
-      assert scheduling.owner_persona_id == owner.id
-      assert scheduling.participant_persona_ids == participant_ids
+      assert scheduling.owner_user_id == owner.id
+      assert scheduling.participant_user_ids == participant_ids
       assert scheduling.status == :open
       assert length(scheduling.proposals) == 2
       assert scheduling.published_at != nil
@@ -55,8 +54,8 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:error, changeset} =
                Radiator.Podcasts.start_scheduling(%{
                  episode_id: episode.id,
-                 owner_persona_id: owner.id,
-                 participant_persona_ids: Enum.map(participants, & &1.id),
+                 owner_user_id: owner.id,
+                 participant_user_ids: Enum.map(participants, & &1.id),
                  proposed_datetimes: []
                })
 
@@ -71,8 +70,8 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, scheduling} =
         Radiator.Podcasts.start_scheduling(%{
           episode_id: episode.id,
-          owner_persona_id: owner.id,
-          participant_persona_ids: Enum.map(participants, & &1.id),
+          owner_user_id: owner.id,
+          participant_user_ids: Enum.map(participants, & &1.id),
           proposed_datetimes: [~U[2024-03-15 14:00:00Z]]
         })
 
@@ -87,8 +86,8 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, scheduling} =
         Radiator.Podcasts.start_scheduling(%{
           episode_id: episode.id,
-          owner_persona_id: owner.id,
-          participant_persona_ids: Enum.map(participants, & &1.id),
+          owner_user_id: owner.id,
+          participant_user_ids: Enum.map(participants, & &1.id),
           proposed_datetimes: [~U[2024-03-15 14:00:00Z]]
         })
 
@@ -96,7 +95,7 @@ defmodule Radiator.EpisodeSchedulingTest do
 
       assert proposal.id != nil
       assert proposal.datetime == ~U[2024-03-15 14:00:00Z]
-      assert proposal.created_by_persona_id == owner.id
+      assert proposal.created_by_user_id == owner.id
       assert proposal.votes == []
       assert proposal.inserted_at != nil
       assert proposal.updated_at != nil
@@ -123,14 +122,14 @@ defmodule Radiator.EpisodeSchedulingTest do
           proposal.id,
           participant.id,
           1,
-          actor: actor_for_persona(participant)
+          actor: participant
         )
 
       [updated_proposal | _] = updated_scheduling.proposals
       assert length(updated_proposal.votes) == 1
 
       [vote] = updated_proposal.votes
-      assert vote.persona_id == participant.id
+      assert vote.user_id == participant.id
       assert vote.score == 1
       assert vote.voted_at != nil
     end
@@ -146,11 +145,11 @@ defmodule Radiator.EpisodeSchedulingTest do
           :vote,
           %{
             proposal_id: proposal.id,
-            persona_id: participant.id,
+            user_id: participant.id,
             score: 1,
             comment: "This time works for me"
           },
-          actor: actor_for_persona(participant)
+          actor: participant
         )
         |> Ash.update()
 
@@ -159,13 +158,11 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert vote.comment == "This time works for me"
     end
 
-    test "updates existing vote from same persona", %{
+    test "updates existing vote from same user", %{
       scheduling: scheduling,
       proposal: proposal,
       participant: participant
     } do
-      actor = actor_for_persona(participant)
-
       # First vote
       {:ok, scheduling} =
         Scheduling.vote(
@@ -173,17 +170,17 @@ defmodule Radiator.EpisodeSchedulingTest do
           proposal.id,
           participant.id,
           0,
-          actor: actor
+          actor: participant
         )
 
-      # Second vote from same persona
+      # Second vote from same user
       {:ok, updated_scheduling} =
         Scheduling.vote(
           scheduling,
           proposal.id,
           participant.id,
           1,
-          actor: actor
+          actor: participant
         )
 
       [updated_proposal | _] = updated_scheduling.proposals
@@ -204,14 +201,14 @@ defmodule Radiator.EpisodeSchedulingTest do
                  proposal.id,
                  participant.id,
                  2,
-                 actor: actor_for_persona(participant)
+                 actor: participant
                )
 
       assert changeset.errors != []
     end
 
     test "prevents non-participants from voting", %{scheduling: scheduling, proposal: proposal} do
-      {:ok, non_participant} = create_participant_with_user("Non", "non")
+      non_participant = create_participant_with_user("Non", "non")
 
       assert {:error, changeset} =
                Scheduling.vote(
@@ -219,7 +216,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                  proposal.id,
                  non_participant.id,
                  1,
-                 actor: actor_for_persona(non_participant)
+                 actor: non_participant
                )
 
       assert changeset.errors != []
@@ -239,7 +236,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                  proposal.id,
                  participant.id,
                  1,
-                 actor: actor_for_persona(participant)
+                 actor: participant
                )
 
       assert changeset.errors != []
@@ -264,7 +261,7 @@ defmodule Radiator.EpisodeSchedulingTest do
         scheduling
         |> Ash.Changeset.for_update(:add_proposal, %{
           datetime: ~U[2024-03-18 09:00:00Z],
-          persona_id: participant.id
+          user_id: participant.id
         })
         |> Ash.update()
 
@@ -272,18 +269,18 @@ defmodule Radiator.EpisodeSchedulingTest do
 
       [new_proposal | _] = updated_scheduling.proposals
       assert new_proposal.datetime == ~U[2024-03-18 09:00:00Z]
-      assert new_proposal.created_by_persona_id == participant.id
+      assert new_proposal.created_by_user_id == participant.id
       assert new_proposal.votes == []
     end
 
     test "prevents non-participants from adding proposals", %{scheduling: scheduling} do
-      {:ok, non_participant} = People.create_persona(%{public_name: "Non", handle: "non"})
+      non_participant = generate(user(%{handle: "non"}))
 
       assert {:error, changeset} =
                scheduling
                |> Ash.Changeset.for_update(:add_proposal, %{
                  datetime: ~U[2024-03-18 09:00:00Z],
-                 persona_id: non_participant.id
+                 user_id: non_participant.id
                })
                |> Ash.update()
 
@@ -300,7 +297,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                closed_scheduling
                |> Ash.Changeset.for_update(:add_proposal, %{
                  datetime: ~U[2024-03-18 09:00:00Z],
-                 persona_id: participant.id
+                 user_id: participant.id
                })
                |> Ash.update()
 
@@ -328,7 +325,7 @@ defmodule Radiator.EpisodeSchedulingTest do
         scheduling
         |> Ash.Changeset.for_update(:remove_proposal, %{
           proposal_id: proposal.id,
-          persona_id: owner.id
+          user_id: owner.id
         })
         |> Ash.update()
 
@@ -343,7 +340,7 @@ defmodule Radiator.EpisodeSchedulingTest do
         scheduling
         |> Ash.Changeset.for_update(:add_proposal, %{
           datetime: ~U[2024-03-18 09:00:00Z],
-          persona_id: participant.id
+          user_id: participant.id
         })
         |> Ash.update()
 
@@ -354,7 +351,7 @@ defmodule Radiator.EpisodeSchedulingTest do
         scheduling
         |> Ash.Changeset.for_update(:remove_proposal, %{
           proposal_id: new_proposal.id,
-          persona_id: participant.id
+          user_id: participant.id
         })
         |> Ash.update()
 
@@ -371,7 +368,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                scheduling
                |> Ash.Changeset.for_update(:remove_proposal, %{
                  proposal_id: proposal.id,
-                 persona_id: participant.id
+                 user_id: participant.id
                })
                |> Ash.update()
 
@@ -389,7 +386,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                closed_scheduling
                |> Ash.Changeset.for_update(:remove_proposal, %{
                  proposal_id: proposal.id,
-                 persona_id: owner.id
+                 user_id: owner.id
                })
                |> Ash.update()
 
@@ -410,10 +407,10 @@ defmodule Radiator.EpisodeSchedulingTest do
           :vote,
           %{
             proposal_id: proposal.id,
-            persona_id: participant.id,
+            user_id: participant.id,
             score: 1
           },
-          actor: actor_for_persona(participant)
+          actor: participant
         )
         |> Ash.update()
 
@@ -429,7 +426,7 @@ defmodule Radiator.EpisodeSchedulingTest do
         scheduling
         |> Ash.Changeset.for_update(:remove_vote, %{
           proposal_id: proposal.id,
-          persona_id: participant.id
+          user_id: participant.id
         })
         |> Ash.update()
 
@@ -448,7 +445,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                closed_scheduling
                |> Ash.Changeset.for_update(:remove_vote, %{
                  proposal_id: proposal.id,
-                 persona_id: participant.id
+                 user_id: participant.id
                })
                |> Ash.update()
 
@@ -474,7 +471,7 @@ defmodule Radiator.EpisodeSchedulingTest do
         scheduling
         |> Ash.Changeset.for_update(:finalize, %{
           chosen_proposal_id: proposal.id,
-          persona_id: owner.id
+          user_id: owner.id
         })
         |> Ash.update()
 
@@ -491,7 +488,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                scheduling
                |> Ash.Changeset.for_update(:finalize, %{
                  chosen_proposal_id: proposal.id,
-                 persona_id: participant.id
+                 user_id: participant.id
                })
                |> Ash.update()
 
@@ -505,7 +502,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                scheduling
                |> Ash.Changeset.for_update(:finalize, %{
                  chosen_proposal_id: fake_proposal_id,
-                 persona_id: owner.id
+                 user_id: owner.id
                })
                |> Ash.update()
 
@@ -523,7 +520,7 @@ defmodule Radiator.EpisodeSchedulingTest do
                closed_scheduling
                |> Ash.Changeset.for_update(:finalize, %{
                  chosen_proposal_id: proposal.id,
-                 persona_id: owner.id
+                 user_id: owner.id
                })
                |> Ash.update()
 
@@ -544,7 +541,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       {:ok, reopened_scheduling} =
         scheduling
         |> Ash.Changeset.for_update(:reopen, %{
-          persona_id: owner.id
+          user_id: owner.id
         })
         |> Ash.update()
 
@@ -560,7 +557,7 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert {:error, changeset} =
                scheduling
                |> Ash.Changeset.for_update(:reopen, %{
-                 persona_id: participant.id
+                 user_id: participant.id
                })
                |> Ash.update()
 
@@ -572,9 +569,9 @@ defmodule Radiator.EpisodeSchedulingTest do
     setup do
       {:ok, scheduling} = create_test_scheduling()
       [proposal1, proposal2 | _] = scheduling.proposals
-      [participant1_id, participant2_id | _] = scheduling.participant_persona_ids
-      actor1 = actor_for_persona_id(participant1_id)
-      actor2 = actor_for_persona_id(participant2_id)
+      [participant1_id, participant2_id | _] = scheduling.participant_user_ids
+      actor1 = Ash.get!(User, participant1_id, authorize?: false)
+      actor2 = Ash.get!(User, participant2_id, authorize?: false)
 
       # Add some votes
       {:ok, scheduling} =
@@ -583,7 +580,7 @@ defmodule Radiator.EpisodeSchedulingTest do
           :vote,
           %{
             proposal_id: proposal1.id,
-            persona_id: participant1_id,
+            user_id: participant1_id,
             score: 1
           },
           actor: actor1
@@ -596,7 +593,7 @@ defmodule Radiator.EpisodeSchedulingTest do
           :vote,
           %{
             proposal_id: proposal1.id,
-            persona_id: participant2_id,
+            user_id: participant2_id,
             score: 1
           },
           actor: actor2
@@ -609,7 +606,7 @@ defmodule Radiator.EpisodeSchedulingTest do
           :vote,
           %{
             proposal_id: proposal2.id,
-            persona_id: participant1_id,
+            user_id: participant1_id,
             score: 0
           },
           actor: actor1
@@ -684,7 +681,7 @@ defmodule Radiator.EpisodeSchedulingTest do
     setup do
       {:ok, scheduling} = create_test_scheduling()
       [proposal | _] = scheduling.proposals
-      [participant_id | _] = scheduling.participant_persona_ids
+      [participant_id | _] = scheduling.participant_user_ids
 
       {:ok, scheduling} =
         scheduling
@@ -692,10 +689,10 @@ defmodule Radiator.EpisodeSchedulingTest do
           :vote,
           %{
             proposal_id: proposal.id,
-            persona_id: participant_id,
+            user_id: participant_id,
             score: 1
           },
-          actor: actor_for_persona_id(participant_id)
+          actor: Ash.get!(User, participant_id, authorize?: false)
         )
         |> Ash.update()
 
@@ -729,21 +726,21 @@ defmodule Radiator.EpisodeSchedulingTest do
       assert Scheduling.voted_on_proposal?(scheduling, proposal.id, non_voter_id) == false
     end
 
-    test "get_persona_votes returns all votes from participant", %{
+    test "get_user_votes returns all votes from participant", %{
       scheduling: scheduling,
       participant_id: participant_id
     } do
-      votes = Scheduling.get_persona_votes(scheduling, participant_id)
+      votes = Scheduling.get_user_votes(scheduling, participant_id)
       assert length(votes) == 1
 
       [{_proposal_id, vote}] = votes
-      assert vote.persona_id == participant_id
+      assert vote.user_id == participant_id
       assert vote.score == 1
     end
 
-    test "get_persona_votes returns empty list for non-voter", %{scheduling: scheduling} do
+    test "get_user_votes returns empty list for non-voter", %{scheduling: scheduling} do
       non_voter_id = Ash.UUID.generate()
-      votes = Scheduling.get_persona_votes(scheduling, non_voter_id)
+      votes = Scheduling.get_user_votes(scheduling, non_voter_id)
       assert votes == []
     end
   end
@@ -799,19 +796,19 @@ defmodule Radiator.EpisodeSchedulingTest do
     {:ok, podcast} = Podcasts.create_podcast(%{title: "Test Podcast"})
     {:ok, episode} = Podcasts.create_episode(%{title: "Test Episode", podcast_id: podcast.id})
 
-    {:ok, owner} = People.create_persona(%{public_name: "Owner", handle: "test_owner"})
+    owner = generate(user(%{handle: "test_owner"}))
 
-    {:ok, participant1} = create_participant_with_user("Participant 1", "participant1")
-    {:ok, participant2} = create_participant_with_user("Participant 2", "participant2")
-    {:ok, participant3} = create_participant_with_user("Participant 3", "participant3")
+    participant1 = create_participant_with_user("Participant 1", "participant1")
+    participant2 = create_participant_with_user("Participant 2", "participant2")
+    participant3 = create_participant_with_user("Participant 3", "participant3")
 
     participant_ids = [participant1.id, participant2.id, participant3.id]
 
     Scheduling
     |> Ash.Changeset.for_create(:create, %{
       episode_id: episode.id,
-      owner_persona_id: owner.id,
-      participant_persona_ids: participant_ids,
+      owner_user_id: owner.id,
+      participant_user_ids: participant_ids,
       proposed_datetimes: [
         ~U[2024-03-15 14:00:00Z],
         ~U[2024-03-16 10:00:00Z],
@@ -821,29 +818,12 @@ defmodule Radiator.EpisodeSchedulingTest do
     |> Ash.create()
   end
 
-  defp create_participant_with_user(name, handle) do
-    user = build_user()
-
-    People.create_persona(%{
-      public_name: name,
-      handle: "#{handle}_#{System.unique_integer([:positive])}",
-      user_id: user.id
-    })
-  end
+  defp create_participant_with_user(_name, _handle), do: build_user()
 
   defp build_user do
     email = "user_#{System.unique_integer([:positive])}@example.com"
     {:ok, hashed_password} = AshAuthentication.BcryptProvider.hash("supersupersecret")
     Ash.Seed.seed!(User, %{email: email, hashed_password: hashed_password})
-  end
-
-  defp actor_for_persona(%{user_id: user_id}) when is_binary(user_id) do
-    Ash.get!(User, user_id, authorize?: false)
-  end
-
-  defp actor_for_persona_id(persona_id) do
-    persona = Ash.get!(Radiator.People.Persona, persona_id, authorize?: false)
-    actor_for_persona(persona)
   end
 
   defp close_scheduling(scheduling) do
@@ -852,22 +832,22 @@ defmodule Radiator.EpisodeSchedulingTest do
     scheduling
     |> Ash.Changeset.for_update(:finalize, %{
       chosen_proposal_id: proposal.id,
-      persona_id: scheduling.owner_persona_id
+      user_id: scheduling.owner_user_id
     })
     |> Ash.update()
   end
 
   defp get_owner(scheduling) do
-    People.Persona
-    |> Ash.get!(scheduling.owner_persona_id)
+    User
+    |> Ash.get!(scheduling.owner_user_id, authorize?: false)
     |> then(&{:ok, &1})
   end
 
   defp get_participant(scheduling) do
-    [participant_id | _] = scheduling.participant_persona_ids
+    [participant_id | _] = scheduling.participant_user_ids
 
-    People.Persona
-    |> Ash.get!(participant_id)
+    User
+    |> Ash.get!(participant_id, authorize?: false)
     |> then(&{:ok, &1})
   end
 end

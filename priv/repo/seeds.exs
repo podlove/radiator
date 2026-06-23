@@ -1,36 +1,36 @@
-bob =
-  Radiator.Accounts.User
-  |> Ash.Changeset.for_create(:register_with_password, %{
-    email: "bob@radiator.de",
-    password: "supersupersecret",
-    password_confirmation: "supersupersecret"
-  })
-  |> Ash.create!(authorize?: false)
+alias Radiator.Accounts.User
 
-Radiator.Accounts.User
-|> Ash.Changeset.for_create(:register_with_password, %{
-  email: "jim@radiator.de",
-  password: "supersupersecret",
-  password_confirmation: "supersupersecret"
-})
-|> Ash.create!(authorize?: false)
+create_user = fn email, attrs ->
+  user =
+    User
+    |> Ash.Changeset.for_create(
+      :register_with_password,
+      %{email: email, password: "supersupersecret", password_confirmation: "supersupersecret"},
+      authorize?: false
+    )
+    |> Ash.create!()
+
+  if map_size(attrs) > 0 do
+    user
+    |> Ash.Changeset.for_update(:update_profile, attrs, authorize?: false)
+    |> Ash.update!()
+  else
+    user
+  end
+end
 
 {:ok, bob_person} =
   Radiator.People.create_person(%{
-    real_name: "Bob the Builder",
-    nickname: "bob",
-    email: "bob@radiator.de",
-    telephone: "+49123456789"
+    first_name: "Bob",
+    last_name: "the Builder",
+    display_name: "Bob the Builder",
+    homepage_url: "https://bob.example.com",
+    bio: "Can we fix it?"
   })
 
-{:ok, bob_persona} =
-  Radiator.People.create_persona(%{
-    person_id: bob_person.id,
-    public_name: "Bob",
-    handle: "bob",
-    description: "Bob's public persona",
-    user_id: bob.id
-  })
+bob = create_user.("bob@radiator.de", %{handle: "bob", person_id: bob_person.id})
+
+_jim = create_user.("jim@radiator.de", %{handle: "jim"})
 
 {:ok, _podcast} =
   Radiator.Podcasts.create_podcast(%{
@@ -65,63 +65,38 @@ Radiator.Accounts.User
     podcast_id: podcast.id
   })
 
-{:ok, person} =
+{:ok, owner_person} =
   Radiator.People.create_person(%{
-    real_name: "John Doe",
-    nickname: "JD",
-    email: "john.doe@example.com",
-    telephone: "+1234567890"
+    first_name: "John",
+    last_name: "Doe",
+    display_name: "mr podcast",
+    homepage_url: "https://podcast.com",
+    bio: "A person that loves podcasts"
   })
 
-{:ok, owner} =
-  Radiator.People.create_persona(%{
-    person_id: person.id,
-    public_name: "mr podcast",
-    handle: "mr_podcast",
-    description: "A person that loves podcasts",
-    avatar_png: "https://podcast.com/mr_podcast.png"
-  })
+owner =
+  create_user.("mr_podcast@radiator.de", %{handle: "mr_podcast", person_id: owner_person.id})
 
 participants =
-  Enum.map(1..5, fn _ ->
+  Enum.map(1..5, fn i ->
     {:ok, person} =
       Radiator.People.create_person(%{
-        real_name: "Test Person #{System.unique_integer([:positive])}",
-        nickname: "TestNick#{System.unique_integer([:positive])}",
-        email: "test#{System.unique_integer([:positive])}@example.com",
-        telephone: "+44123456#{System.unique_integer([:positive])}"
+        first_name: "Test",
+        last_name: "Person #{i}",
+        display_name: "Test Person #{i}"
       })
 
-    user =
-      Radiator.Accounts.User
-      |> Ash.Changeset.for_create(:register_with_password, %{
-        email: "test#{System.unique_integer([:positive])}@radiator.de",
-        password: "supersupersecret",
-        password_confirmation: "supersupersecret"
-      })
-      |> Ash.create!(authorize?: false)
-
-    {:ok, persona} =
-      Radiator.People.create_persona(%{
-        person_id: person.id,
-        public_name: "Test Persona #{System.unique_integer([:positive])}",
-        handle: "test_handle_#{System.unique_integer([:positive])}",
-        description: "Test description for persona",
-        avatar_png: "https://example.com/avatar#{System.unique_integer([:positive])}.png",
-        user_id: user.id
-      })
-
-    %{persona: persona, user: user}
+    create_user.("test#{i}@radiator.de", %{handle: "test_handle_#{i}", person_id: person.id})
   end)
 
-participant_ids = Enum.map(participants, & &1.persona.id)
+participant_ids = Enum.map(participants, & &1.id)
 
 {:ok, scheduling} =
   Radiator.Podcasts.Episode.Scheduling
   |> Ash.Changeset.for_create(:create, %{
     episode_id: future_episode.id,
-    owner_persona_id: owner.id,
-    participant_persona_ids: [bob_persona.id | participant_ids],
+    owner_user_id: owner.id,
+    participant_user_ids: [bob.id | participant_ids],
     proposed_datetimes: [
       ~U[2024-03-15 14:00:00Z],
       ~U[2024-03-16 10:00:00Z],
@@ -133,8 +108,8 @@ participant_ids = Enum.map(participants, & &1.persona.id)
 [proposal1, proposal2, _proposal3] = scheduling.proposals
 
 cast_vote = fn scheduling, proposal_id, index, score, extra ->
-  %{persona: persona, user: actor} = Enum.at(participants, index)
-  args = Map.merge(%{proposal_id: proposal_id, persona_id: persona.id, score: score}, extra)
+  actor = Enum.at(participants, index)
+  args = Map.merge(%{proposal_id: proposal_id, user_id: actor.id, score: score}, extra)
 
   scheduling
   |> Ash.Changeset.for_update(:vote, args, actor: actor)

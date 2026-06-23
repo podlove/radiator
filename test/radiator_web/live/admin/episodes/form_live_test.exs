@@ -17,7 +17,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
   # Helpers
   # ---------------------------------------------------------------------------
 
-  defp create_user_with_persona(prefix) do
+  defp create_user(prefix) do
     email = "#{prefix}_#{System.unique_integer([:positive])}@example.com"
     password = "supersupersecret"
     {:ok, hashed_password} = AshAuthentication.BcryptProvider.hash(password)
@@ -28,8 +28,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
     {:ok, user} =
       AshAuthentication.Strategy.action(strategy, :sign_in, %{email: email, password: password})
 
-    persona = generate(persona(%{user_id: user.id, public_name: String.capitalize(prefix)}))
-    {user, persona}
+    user
   end
 
   defp log_in(conn, user) do
@@ -39,8 +38,8 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
   end
 
   defp authenticated_conn(conn, prefix) do
-    {user, persona} = create_user_with_persona(prefix)
-    {log_in(conn, user), user, persona}
+    user = create_user(prefix)
+    {log_in(conn, user), user}
   end
 
   # ---------------------------------------------------------------------------
@@ -59,23 +58,12 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
   end
 
   # ---------------------------------------------------------------------------
-  # Create: user without a persona
+  # Create: signed-in user can add proposals
   # ---------------------------------------------------------------------------
 
-  describe "new episode form as user without persona" do
+  describe "new episode form as signed-in user" do
     setup %{conn: conn} do
-      email = "nopersona_#{System.unique_integer([:positive])}@example.com"
-      {:ok, hashed_password} = AshAuthentication.BcryptProvider.hash("supersupersecret")
-      _user = Ash.Seed.seed!(User, %{email: email, hashed_password: hashed_password})
-      strategy = AshAuthentication.Info.strategy!(User, :password)
-
-      {:ok, user} =
-        AshAuthentication.Strategy.action(strategy, :sign_in, %{
-          email: email,
-          password: "supersupersecret"
-        })
-
-      conn = log_in(conn, user)
+      {conn, _user} = authenticated_conn(conn, "nouser")
       podcast = generate(podcast())
       {:ok, conn: conn, podcast: podcast}
     end
@@ -85,25 +73,25 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
       assert has_element?(lv, "button", "Add Proposal")
     end
 
-    test "clicking Add Proposal shows flash error when user has no persona", %{
+    test "clicking Add Proposal adds a proposal input for a signed-in user", %{
       conn: conn,
       podcast: podcast
     } do
       {:ok, lv, _html} = live(conn, ~p"/admin/podcasts/#{podcast.id}/episodes/new")
       lv |> element("button", "Add Proposal") |> render_click()
-      assert render(lv) =~ "You need a persona before you can propose dates"
+      assert has_element?(lv, "input[type='datetime-local']")
     end
   end
 
   # ---------------------------------------------------------------------------
-  # Create: user with persona
+  # Create: user as owner
   # ---------------------------------------------------------------------------
 
-  describe "new episode form as user with persona" do
+  describe "new episode form as owner user" do
     setup %{conn: conn} do
-      {conn, user, persona} = authenticated_conn(conn, "owner")
+      {conn, user} = authenticated_conn(conn, "owner")
       podcast = generate(podcast())
-      {:ok, conn: conn, user: user, persona: persona, podcast: podcast}
+      {:ok, conn: conn, user: user, podcast: podcast}
     end
 
     test "renders the form with title, proposals, and participants sections", %{
@@ -139,7 +127,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
     test "saving with a proposal creates episode, scheduling, and proposal", %{
       conn: conn,
       podcast: podcast,
-      persona: owner
+      user: owner
     } do
       {:ok, lv, _html} = live(conn, ~p"/admin/podcasts/#{podcast.id}/episodes/new")
 
@@ -151,11 +139,11 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
                  "form" => %{
                    "title" => "Test Episode With Proposal",
                    "scheduling" => %{
-                     "owner_persona_id" => owner.id,
+                     "owner_user_id" => owner.id,
                      "proposals" => %{
                        "0" => %{
                          "datetime" => "2026-09-01T14:00",
-                         "created_by_persona_id" => owner.id
+                         "created_by_user_id" => owner.id
                        }
                      }
                    }
@@ -174,7 +162,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
 
       loaded = Ash.load!(episode, [:scheduling], authorize?: false)
       assert loaded.scheduling
-      assert loaded.scheduling.owner_persona_id == owner.id
+      assert loaded.scheduling.owner_user_id == owner.id
       assert length(loaded.scheduling.proposals) == 1
     end
 
@@ -215,7 +203,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
 
   describe "edit episode form" do
     setup %{conn: conn} do
-      {conn, user, persona} = authenticated_conn(conn, "editor")
+      {conn, user} = authenticated_conn(conn, "editor")
       podcast = generate(podcast())
       episode = generate(episode(%{podcast_id: podcast.id}))
 
@@ -223,19 +211,13 @@ defmodule RadiatorWeb.Admin.Episodes.FormLiveTest do
         Scheduling
         |> Ash.Changeset.for_create(:create, %{
           episode_id: episode.id,
-          owner_persona_id: persona.id,
-          participant_persona_ids: [persona.id],
+          owner_user_id: user.id,
+          participant_user_ids: [user.id],
           proposed_datetimes: [~U[2026-10-01 14:00:00Z], ~U[2026-10-02 10:00:00Z]]
         })
         |> Ash.create(authorize?: false)
 
-      {:ok,
-       conn: conn,
-       user: user,
-       persona: persona,
-       podcast: podcast,
-       episode: episode,
-       scheduling: scheduling}
+      {:ok, conn: conn, user: user, podcast: podcast, episode: episode, scheduling: scheduling}
     end
 
     test "loads existing proposals in the form", %{conn: conn, podcast: podcast, episode: episode} do

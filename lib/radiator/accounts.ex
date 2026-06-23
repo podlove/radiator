@@ -3,6 +3,8 @@ defmodule Radiator.Accounts do
 
   use Ash.Domain, otp_app: :radiator, extensions: [AshAdmin.Domain]
 
+  alias Radiator.Accounts.User.Senders.SendVotingInvitation
+
   admin do
     show? true
   end
@@ -17,6 +19,6 @@ defmodule Radiator.Accounts do
   and deep-links to the voting page of `episode`.
   """
   def send_voting_invitation(user, episode) do
-    Radiator.Accounts.User.Senders.SendVotingInvitation.send(user, episode)
+    SendVotingInvitation.send(user, episode)
   end
 end

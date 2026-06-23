@@ -28,8 +28,8 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
     end
   end
 
-  describe "as bob (participant with linked persona)" do
-    setup [:register_bob_with_persona, :create_episode_with_bob_as_participant]
+  describe "as bob (participant)" do
+    setup [:register_bob, :create_episode_with_bob_as_participant]
 
     test "renders the availability section with table", %{
       conn: conn,
@@ -57,12 +57,12 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       conn: conn,
       podcast: podcast,
       episode: episode,
-      persona: bob_persona
+      bob: bob
     } do
       conn
       |> visit(~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
-      |> assert_has("#availability-row-#{bob_persona.id}", text: "Bob")
-      |> assert_has("#availability-row-#{bob_persona.id}", text: "(du)")
+      |> assert_has("#availability-row-#{bob.id}", text: "Bob")
+      |> assert_has("#availability-row-#{bob.id}", text: "(du)")
     end
 
     test "does not mark other participants' rows with (du)", %{
@@ -155,7 +155,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       conn: conn,
       podcast: podcast,
       episode: episode,
-      persona: bob_persona,
+      bob: bob,
       tuesday_proposal: tuesday_proposal,
       friday_proposal: friday_proposal,
       saturday_proposal: saturday_proposal
@@ -165,12 +165,12 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
         |> visit(~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
 
       session
-      |> refute_has("#availability-cell-#{tuesday_proposal.id}-#{bob_persona.id} .opacity-40")
-      |> refute_has("#availability-cell-#{friday_proposal.id}-#{bob_persona.id} .opacity-40")
-      |> refute_has("#availability-cell-#{saturday_proposal.id}-#{bob_persona.id} .opacity-40")
-      |> assert_has("#availability-cell-#{tuesday_proposal.id}-#{bob_persona.id} button")
-      |> assert_has("#availability-cell-#{friday_proposal.id}-#{bob_persona.id} button")
-      |> assert_has("#availability-cell-#{saturday_proposal.id}-#{bob_persona.id} button")
+      |> refute_has("#availability-cell-#{tuesday_proposal.id}-#{bob.id} .opacity-40")
+      |> refute_has("#availability-cell-#{friday_proposal.id}-#{bob.id} .opacity-40")
+      |> refute_has("#availability-cell-#{saturday_proposal.id}-#{bob.id} .opacity-40")
+      |> assert_has("#availability-cell-#{tuesday_proposal.id}-#{bob.id} button")
+      |> assert_has("#availability-cell-#{friday_proposal.id}-#{bob.id} button")
+      |> assert_has("#availability-cell-#{saturday_proposal.id}-#{bob.id} button")
     end
 
     test "renders footer score cells with sign prefix", %{
@@ -207,12 +207,12 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       conn: conn,
       podcast: podcast,
       episode: episode,
-      persona: bob_persona
+      bob: bob
     } do
       conn
       |> visit(~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
       |> assert_has("#availability-table thead th.sticky.left-0")
-      |> assert_has("#availability-row-#{bob_persona.id} td.sticky.left-0")
+      |> assert_has("#availability-row-#{bob.id} td.sticky.left-0")
     end
 
     test "renders weekday labels in column headers", %{
@@ -290,7 +290,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       podcast: podcast,
       episode: episode,
       friday_proposal: friday_proposal,
-      persona: bob_persona
+      bob: bob
     } do
       {:ok, lv, _html} =
         live(conn, ~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
@@ -306,12 +306,12 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       [scheduling] = Scheduling.get_by_episode!(episode.id, authorize?: false)
 
       updated_friday = Enum.find(scheduling.proposals, &(&1.id == friday_proposal.id))
-      refute Enum.any?(updated_friday.votes, &(&1.persona_id == bob_persona.id))
+      refute Enum.any?(updated_friday.votes, &(&1.user_id == bob.id))
     end
   end
 
   describe "as bob (participant) on a closed scheduling" do
-    setup [:register_bob_with_persona, :create_closed_scheduling_with_bob]
+    setup [:register_bob, :create_closed_scheduling_with_bob]
 
     test "all three voting buttons in Bob's row are disabled", %{
       conn: conn,
@@ -336,7 +336,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       podcast: podcast,
       episode: episode,
       friday_proposal: friday_proposal,
-      persona: bob_persona
+      bob: bob
     } do
       {:ok, lv, _html} =
         live(conn, ~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
@@ -352,7 +352,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       [scheduling] = Scheduling.get_by_episode!(episode.id, authorize?: false)
 
       updated_friday = Enum.find(scheduling.proposals, &(&1.id == friday_proposal.id))
-      refute Enum.any?(updated_friday.votes, &(&1.persona_id == bob_persona.id))
+      refute Enum.any?(updated_friday.votes, &(&1.user_id == bob.id))
     end
 
     test "chosen proposal column header shows a 'Chosen' badge", %{
@@ -387,7 +387,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
   end
 
   describe "as bob (participant) on a closed scheduling without chosen proposal" do
-    setup [:register_bob_with_persona, :create_closed_scheduling_without_chosen]
+    setup [:register_bob, :create_closed_scheduling_without_chosen]
 
     test "all three voting buttons in Bob's row are disabled", %{
       conn: conn,
@@ -428,8 +428,8 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
     end
   end
 
-  describe "as user without a linked persona" do
-    setup [:register_user_without_persona, :create_episode_without_bob]
+  describe "as user who is not a participant" do
+    setup [:register_unrelated_user, :create_episode_without_bob]
 
     test "renders the availability table without a (du) marker anywhere", %{
       conn: conn,
@@ -454,14 +454,14 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
     end
   end
 
-  describe "as user with persona that is not a participant" do
-    setup [:register_unrelated_user_with_persona, :create_episode_without_bob]
+  describe "as user who is not a participant of the scheduling" do
+    setup [:register_unrelated_user, :create_episode_without_bob]
 
     test "renders the availability table without a (du) marker anywhere", %{
       conn: conn,
       podcast: podcast,
       episode: episode,
-      persona: persona
+      user: user
     } do
       session =
         conn
@@ -470,7 +470,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       session
       |> assert_has("#availability-table")
       |> refute_has("#availability tbody", text: "(du)")
-      |> refute_has("#availability-row-#{persona.id}")
+      |> refute_has("#availability-row-#{user.id}")
     end
 
     test "is read-only: no vote buttons render", %{
@@ -485,46 +485,17 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
     end
   end
 
-  defp register_bob_with_persona(%{conn: conn} = context) do
-    {user, conn} = create_user_and_log_in(conn, "bob")
-    person = generate(person())
-
-    persona =
-      generate(
-        persona(%{
-          person_id: person.id,
-          public_name: "Bob",
-          handle: "bob_#{System.unique_integer([:positive])}",
-          user_id: user.id
-        })
-      )
-
-    Map.merge(context, %{conn: conn, user: user, persona: persona})
+  defp register_bob(%{conn: conn} = context) do
+    {user, conn} = create_user_and_log_in(conn, "bob", "Bob")
+    Map.merge(context, %{conn: conn, user: user, bob: user})
   end
 
-  defp register_user_without_persona(%{conn: conn} = context) do
-    {user, conn} = create_user_and_log_in(conn, "user")
+  defp register_unrelated_user(%{conn: conn} = context) do
+    {user, conn} = create_user_and_log_in(conn, "outsider", "Outsider")
     Map.merge(context, %{conn: conn, user: user})
   end
 
-  defp register_unrelated_user_with_persona(%{conn: conn} = context) do
-    {user, conn} = create_user_and_log_in(conn, "outsider")
-    person = generate(person())
-
-    persona =
-      generate(
-        persona(%{
-          person_id: person.id,
-          public_name: "Outsider",
-          handle: "outsider_#{System.unique_integer([:positive])}",
-          user_id: user.id
-        })
-      )
-
-    Map.merge(context, %{conn: conn, user: user, persona: persona})
-  end
-
-  defp create_user_and_log_in(conn, prefix) do
+  defp create_user_and_log_in(conn, prefix, display_name) do
     email = "#{prefix}_#{System.unique_integer([:positive])}@example.com"
     password = "supersupersecret"
     {:ok, hashed_password} = AshAuthentication.BcryptProvider.hash(password)
@@ -539,6 +510,14 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
         password: password
       })
 
+    person = generate(person(%{display_name: display_name}))
+
+    user =
+      user
+      |> Ash.Changeset.for_update(:update_profile, %{person_id: person.id}, authorize?: false)
+      |> Ash.update!()
+      |> Ash.load!([:display_name], authorize?: false)
+
     new_conn =
       conn
       |> Phoenix.ConnTest.init_test_session(%{})
@@ -547,11 +526,11 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
     {user, new_conn}
   end
 
-  defp create_episode_with_bob_as_participant(%{persona: bob_persona} = context) do
-    owner = generate(persona(%{public_name: "Owner"}))
-    jim = build_persona_with_user("Jim")
-    alice = build_persona_with_user("Alice")
-    carol = build_persona_with_user("Carol")
+  defp create_episode_with_bob_as_participant(%{bob: bob} = context) do
+    owner = build_user("Owner")
+    jim = build_user("Jim")
+    alice = build_user("Alice")
+    carol = build_user("Carol")
 
     podcast = generate(podcast())
     episode = generate(episode(%{podcast_id: podcast.id}))
@@ -560,8 +539,8 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       Scheduling
       |> Ash.Changeset.for_create(:create, %{
         episode_id: episode.id,
-        owner_persona_id: owner.id,
-        participant_persona_ids: [bob_persona.id, jim.id, alice.id, carol.id],
+        owner_user_id: owner.id,
+        participant_user_ids: [bob.id, jim.id, alice.id, carol.id],
         proposed_datetimes: [@tuesday, @friday, @saturday]
       })
       |> Ash.create(authorize?: false)
@@ -619,7 +598,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       scheduling
       |> Ash.Changeset.for_update(:finalize, %{
         chosen_proposal_id: chosen_proposal.id,
-        persona_id: scheduling.owner_persona_id
+        user_id: scheduling.owner_user_id
       })
       |> Ash.update(authorize?: false)
 
@@ -637,9 +616,9 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
   end
 
   defp create_episode_without_bob(context) do
-    owner = generate(persona(%{public_name: "Owner"}))
-    jim = build_persona_with_user("Jim")
-    alice = build_persona_with_user("Alice")
+    owner = build_user("Owner")
+    jim = build_user("Jim")
+    alice = build_user("Alice")
 
     podcast = generate(podcast())
     episode = generate(episode(%{podcast_id: podcast.id}))
@@ -648,8 +627,8 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       Scheduling
       |> Ash.Changeset.for_create(:create, %{
         episode_id: episode.id,
-        owner_persona_id: owner.id,
-        participant_persona_ids: [jim.id, alice.id],
+        owner_user_id: owner.id,
+        participant_user_ids: [jim.id, alice.id],
         proposed_datetimes: [@tuesday, @friday, @saturday]
       })
       |> Ash.create(authorize?: false)
@@ -663,27 +642,22 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
     })
   end
 
-  defp build_persona_with_user(name) do
-    email = "#{String.downcase(name)}_#{System.unique_integer([:positive])}@example.com"
-    {:ok, hashed_password} = AshAuthentication.BcryptProvider.hash("supersupersecret")
-    user = Ash.Seed.seed!(User, %{email: email, hashed_password: hashed_password})
-    generate(persona(%{public_name: name, user_id: user.id}))
+  defp build_user(name) do
+    person = generate(person(%{display_name: name}))
+    generate(user(%{person_id: person.id}))
   end
 
-  defp place_vote!(scheduling, proposal_id, %{user_id: user_id} = persona, score)
-       when is_binary(user_id) do
-    actor = Ash.get!(User, user_id, authorize?: false)
-
+  defp place_vote!(scheduling, proposal_id, %User{id: user_id} = user, score) do
     {:ok, scheduling} =
       scheduling
       |> Ash.Changeset.for_update(
         :vote,
         %{
           proposal_id: proposal_id,
-          persona_id: persona.id,
+          user_id: user_id,
           score: score
         },
-        actor: actor
+        actor: user
       )
       |> Ash.update(authorize?: false)
 

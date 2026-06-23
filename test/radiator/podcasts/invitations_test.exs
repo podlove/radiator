@@ -47,7 +47,11 @@ defmodule Radiator.Podcasts.InvitationsTest do
       Radiator.Accounts.User
       |> Ash.Changeset.for_create(
         :register_with_password,
-        %{email: "member@example.com", password: "password1234", password_confirmation: "password1234"},
+        %{
+          email: "member@example.com",
+          password: "password1234",
+          password_confirmation: "password1234"
+        },
         authorize?: false
       )
       |> Ash.create!()

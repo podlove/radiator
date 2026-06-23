@@ -18,10 +18,10 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   alias Radiator.Podcasts.Episode.Scheduling.Proposal
   alias Radiator.Podcasts.Episode.Scheduling.Validations.OwnerOnly
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ParticipantOnly
-  alias Radiator.Podcasts.Episode.Scheduling.Validations.UserIsActor
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposalExists
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposalOwnerOrCreator
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposedDatetimesPresent
+  alias Radiator.Podcasts.Episode.Scheduling.Validations.UserIsActor
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ValidScore
 
   postgres do
