@@ -5,7 +5,7 @@ defmodule Radiator.Podcasts do
 
   require Ash.Query
 
-  alias Radiator.People.Persona
+  alias Radiator.Accounts.User
 
   forms do
     form :create_episode, args: [:podcast_id]
@@ -57,8 +57,22 @@ defmodule Radiator.Podcasts do
   end
 
   def read_podcast_participants(podcast_id) do
-    Persona
+    User
     |> Ash.Query.filter(exists(episodes, podcast_id == ^podcast_id))
-    |> Ash.read!()
+    |> Ash.Query.load([:display_name])
+    |> Ash.read!(authorize?: false)
+  end
+
+  def search_users(term) when is_binary(term) do
+    like = "%#{term}%"
+
+    User
+    |> Ash.Query.filter(
+      ilike(handle, ^like) or ilike(type(email, :string), ^like) or
+        ilike(person.first_name, ^like) or ilike(person.last_name, ^like) or
+        ilike(person.display_name, ^like)
+    )
+    |> Ash.Query.load([:display_name])
+    |> Ash.read!(authorize?: false)
   end
 end

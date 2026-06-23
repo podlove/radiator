@@ -22,27 +22,27 @@ defmodule RadiatorWeb.Admin.Episodes.AvailabilityHelpers do
   }
 
   @doc """
-  Returns true when the given persona is part of the scheduling's
+  Returns true when the given user is part of the scheduling's
   participant list.
 
   Accepts `nil` for either argument and treats it as "not a participant" so
   the helper can be used directly in templates without extra nil-guards.
   """
-  def participant?(nil, _persona), do: false
+  def participant?(nil, _user), do: false
   def participant?(_scheduling, nil), do: false
 
-  def participant?(%Scheduling{} = scheduling, %{id: persona_id}) do
-    persona_id in (scheduling.participant_persona_ids || [])
+  def participant?(%Scheduling{} = scheduling, %{id: user_id}) do
+    user_id in (scheduling.participant_user_ids || [])
   end
 
   @doc """
-  Find a single persona's vote for a given proposal.
+  Find a single user's vote for a given proposal.
 
-  Returns the matching vote struct or `nil` if the persona has not voted
+  Returns the matching vote struct or `nil` if the user has not voted
   on this proposal yet.
   """
-  def vote_for_persona(proposal, persona_id) when is_binary(persona_id) do
-    Enum.find(proposal.votes || [], &(&1.persona_id == persona_id))
+  def vote_for_user(proposal, user_id) when is_binary(user_id) do
+    Enum.find(proposal.votes || [], &(&1.user_id == user_id))
   end
 
   @doc """
@@ -113,27 +113,27 @@ defmodule RadiatorWeb.Admin.Episodes.AvailabilityHelpers do
   def vote_button_class(_current_vote, _target_score), do: "btn-ghost"
 
   @doc """
-  Returns true when the given persona is allowed to cast a vote on the
+  Returns true when the given user is allowed to cast a vote on the
   given scheduling right now.
 
   All of the following must hold:
 
     * `scheduling` is not `nil`
-    * `persona` is not `nil`
+    * `user` is not `nil`
     * `scheduling.status == :open`
-    * `persona` is part of `scheduling.participant_persona_ids`
+    * `user` is part of `scheduling.participant_user_ids`
       (via `participant?/2`)
 
   Used in the LiveView template to bind the `disabled` attribute of the
   three voting buttons.
   """
-  def can_vote?(nil, _persona), do: false
+  def can_vote?(nil, _user), do: false
   def can_vote?(_scheduling, nil), do: false
 
-  def can_vote?(%Scheduling{status: :open} = scheduling, persona),
-    do: participant?(scheduling, persona)
+  def can_vote?(%Scheduling{status: :open} = scheduling, user),
+    do: participant?(scheduling, user)
 
-  def can_vote?(%Scheduling{}, _persona), do: false
+  def can_vote?(%Scheduling{}, _user), do: false
 
   @doc """
   Single source of truth for "which proposal gets the winner highlight?".

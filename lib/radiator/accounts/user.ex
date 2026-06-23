@@ -312,6 +312,11 @@ defmodule Radiator.Accounts.User do
       define_attribute? false
       public? true
     end
+
+    many_to_many :episodes, Radiator.Podcasts.Episode do
+      through Radiator.Podcasts.EpisodeParticipant
+      public? true
+    end
   end
 
   calculations do

@@ -18,7 +18,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   alias Radiator.Podcasts.Episode.Scheduling.Proposal
   alias Radiator.Podcasts.Episode.Scheduling.Validations.OwnerOnly
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ParticipantOnly
-  alias Radiator.Podcasts.Episode.Scheduling.Validations.PersonaBelongsToActor
+  alias Radiator.Podcasts.Episode.Scheduling.Validations.UserIsActor
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposalExists
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposalOwnerOrCreator
   alias Radiator.Podcasts.Episode.Scheduling.Validations.ProposedDatetimesPresent
@@ -30,15 +30,15 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
     references do
       reference :episode, on_delete: :delete
-      reference :owner_persona, on_delete: :restrict
+      reference :owner_user, on_delete: :restrict
     end
   end
 
   code_interface do
     define :get_by_episode, args: [:episode_id], action: :by_episode
-    define :add_proposal, args: [:datetime, :persona_id]
-    define :vote, args: [:proposal_id, :persona_id, :score]
-    define :finalize, args: [:chosen_proposal_id, :persona_id]
+    define :add_proposal, args: [:datetime, :user_id]
+    define :vote, args: [:proposal_id, :user_id, :score]
+    define :finalize, args: [:chosen_proposal_id, :user_id]
   end
 
   actions do
@@ -52,20 +52,20 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
     create :create do
       description "Start a new scheduling for an episode with initial proposals and participants"
-      accept [:episode_id, :owner_persona_id, :participant_persona_ids, :proposals]
+      accept [:episode_id, :owner_user_id, :participant_user_ids, :proposals]
       argument :proposed_datetimes, {:array, :utc_datetime}, allow_nil?: false
       validate ProposedDatetimesPresent
 
       change fn changeset, _context ->
         proposed_datetimes = Ash.Changeset.get_argument(changeset, :proposed_datetimes)
-        owner_persona_id = Ash.Changeset.get_attribute(changeset, :owner_persona_id)
+        owner_user_id = Ash.Changeset.get_attribute(changeset, :owner_user_id)
 
         proposals =
           Enum.map(proposed_datetimes, fn datetime ->
             %{
               id: Ash.UUID.generate(),
               datetime: datetime,
-              created_by_persona_id: owner_persona_id,
+              created_by_user_id: owner_user_id,
               votes: []
             }
           end)
@@ -79,7 +79,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
     create :create_with_proposals do
       description "Create a scheduling with proposals provided directly (used when managed by the episode form)."
-      accept [:episode_id, :owner_persona_id, :participant_persona_ids, :proposals]
+      accept [:episode_id, :owner_user_id, :participant_user_ids, :proposals]
 
       change set_attribute(:status, :open)
       change set_attribute(:published_at, &DateTime.utc_now/0)
@@ -90,7 +90,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       require_atomic? false
       accept []
       argument :datetime, :utc_datetime, allow_nil?: false
-      argument :persona_id, :uuid, allow_nil?: false
+      argument :user_id, :uuid, allow_nil?: false
 
       validate attribute_equals(:status, :open) do
         message "Cannot add proposals to a closed scheduling"
@@ -100,7 +100,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
       change fn changeset, _context ->
         datetime = Ash.Changeset.get_argument(changeset, :datetime)
-        persona_id = Ash.Changeset.get_argument(changeset, :persona_id)
+        user_id = Ash.Changeset.get_argument(changeset, :user_id)
 
         existing_proposals =
           case Ash.Changeset.get_attribute(changeset, :proposals) do
@@ -112,7 +112,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
         new_proposal = %{
           id: Ash.UUID.generate(),
           datetime: datetime,
-          created_by_persona_id: persona_id,
+          created_by_user_id: user_id,
           votes: []
         }
 
@@ -125,7 +125,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       require_atomic? false
       accept []
       argument :proposal_id, :uuid, allow_nil?: false
-      argument :persona_id, :uuid, allow_nil?: false
+      argument :user_id, :uuid, allow_nil?: false
 
       validate attribute_equals(:status, :open) do
         message "Cannot remove proposals from a closed scheduling"
@@ -146,7 +146,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       require_atomic? false
       accept []
       argument :proposal_id, :uuid, allow_nil?: false
-      argument :persona_id, :uuid, allow_nil?: false
+      argument :user_id, :uuid, allow_nil?: false
       argument :score, :integer, allow_nil?: false
       argument :comment, :string, allow_nil?: true
 
@@ -156,11 +156,11 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
       validate ValidScore
       validate {ParticipantOnly, message: "Only participants can vote"}
-      validate PersonaBelongsToActor
+      validate UserIsActor
 
       change fn changeset, _context ->
         proposal_id = Ash.Changeset.get_argument(changeset, :proposal_id)
-        persona_id = Ash.Changeset.get_argument(changeset, :persona_id)
+        user_id = Ash.Changeset.get_argument(changeset, :user_id)
         score = Ash.Changeset.get_argument(changeset, :score)
         comment = Ash.Changeset.get_argument(changeset, :comment)
 
@@ -173,11 +173,11 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
               updated_votes =
                 existing_votes
-                |> Enum.reject(&(&1.persona_id == persona_id))
+                |> Enum.reject(&(&1.user_id == user_id))
                 |> then(fn votes ->
                   [
                     %{
-                      persona_id: persona_id,
+                      user_id: user_id,
                       score: score,
                       comment: comment,
                       voted_at: DateTime.utc_now() |> DateTime.truncate(:second)
@@ -201,7 +201,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       require_atomic? false
       accept []
       argument :proposal_id, :uuid, allow_nil?: false
-      argument :persona_id, :uuid, allow_nil?: false
+      argument :user_id, :uuid, allow_nil?: false
 
       validate attribute_equals(:status, :open) do
         message "Cannot modify votes on a closed scheduling"
@@ -211,14 +211,14 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
       change fn changeset, _context ->
         proposal_id = Ash.Changeset.get_argument(changeset, :proposal_id)
-        persona_id = Ash.Changeset.get_argument(changeset, :persona_id)
+        user_id = Ash.Changeset.get_argument(changeset, :user_id)
 
         existing_proposals = Ash.Changeset.get_attribute(changeset, :proposals) || []
 
         updated_proposals =
           Enum.map(existing_proposals, fn proposal ->
             if proposal.id == proposal_id do
-              updated_votes = Enum.reject(proposal.votes || [], &(&1.persona_id == persona_id))
+              updated_votes = Enum.reject(proposal.votes || [], &(&1.user_id == user_id))
               %{proposal | votes: updated_votes}
             else
               proposal
@@ -234,7 +234,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       require_atomic? false
       accept []
       argument :chosen_proposal_id, :uuid, allow_nil?: false
-      argument :persona_id, :uuid, allow_nil?: false
+      argument :user_id, :uuid, allow_nil?: false
 
       validate attribute_equals(:status, :open) do
         message "Scheduling is already closed"
@@ -266,7 +266,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       description "Reopen a closed scheduling"
       require_atomic? false
       accept []
-      argument :persona_id, :uuid, allow_nil?: false
+      argument :user_id, :uuid, allow_nil?: false
 
       validate attribute_equals(:status, :closed) do
         message "Scheduling must be closed to reopen"
@@ -302,8 +302,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       constraints one_of: [:open, :closed]
     end
 
-    attribute :participant_persona_ids, {:array, :uuid} do
-      description "List of persona IDs who can participate in voting"
+    attribute :participant_user_ids, {:array, :uuid} do
+      description "List of user IDs who can participate in voting"
       allow_nil? false
       public? true
       default []
@@ -350,8 +350,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       allow_nil? false
     end
 
-    belongs_to :owner_persona, Radiator.People.Persona do
-      description "The persona who owns/created this scheduling"
+    belongs_to :owner_user, Radiator.Accounts.User do
+      description "The user who owns/created this scheduling"
       public? true
       allow_nil? false
     end
@@ -392,24 +392,24 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   end
 
   @doc """
-  Check if a persona has voted on a specific proposal
+  Check if a user has voted on a specific proposal
   """
-  def voted_on_proposal?(scheduling, proposal_id, persona_id) do
+  def voted_on_proposal?(scheduling, proposal_id, user_id) do
     case get_proposal(scheduling, proposal_id) do
       nil ->
         false
 
       proposal ->
-        Enum.any?(proposal.votes || [], &(&1.persona_id == persona_id))
+        Enum.any?(proposal.votes || [], &(&1.user_id == user_id))
     end
   end
 
   @doc """
-  Get all votes from a specific persona across all proposals
+  Get all votes from a specific user across all proposals
   """
-  def get_persona_votes(scheduling, persona_id) do
+  def get_user_votes(scheduling, user_id) do
     Enum.reduce(scheduling.proposals || [], [], fn proposal, acc ->
-      case Enum.find(proposal.votes || [], &(&1.persona_id == persona_id)) do
+      case Enum.find(proposal.votes || [], &(&1.user_id == user_id)) do
         nil -> acc
         vote -> [{proposal.id, vote} | acc]
       end
@@ -428,18 +428,18 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   `votes` list for UI rendering.
   """
   def voting_stats(scheduling) do
-    participants = scheduling.participant_persona_ids || []
+    participants = scheduling.participant_user_ids || []
     proposals = scheduling.proposals || []
     proposal_stats = calculate_proposal_stats(proposals, participants)
-    voted_personas = get_voted_personas(proposals)
+    voted_users = get_voted_user_ids(proposals)
 
     %{
       status: scheduling.status,
       participant_count: length(participants),
       proposal_count: length(proposals),
       total_votes: Enum.reduce(proposal_stats, 0, fn stat, acc -> acc + length(stat.votes) end),
-      voted_participant_count: length(voted_personas),
-      all_voted?: length(voted_personas) == length(participants),
+      voted_participant_count: length(voted_users),
+      all_voted?: length(voted_users) == length(participants),
       proposal_stats: proposal_stats,
       top_proposal: List.first(proposal_stats),
       top_proposal_id: determine_top_proposal_id(proposal_stats)
@@ -454,7 +454,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   `top_proposal_id` field returned by `voting_stats/1`.
   """
   def top_proposal_id(scheduling) do
-    participants = scheduling.participant_persona_ids || []
+    participants = scheduling.participant_user_ids || []
     proposals = scheduling.proposals || []
 
     proposals
@@ -470,10 +470,10 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
   defp build_proposal_stat(proposal, participants) do
     votes = proposal.votes || []
-    voted_ids = MapSet.new(votes, & &1.persona_id)
+    voted_ids = MapSet.new(votes, & &1.user_id)
 
     pending_count =
-      Enum.count(participants, fn persona_id -> not MapSet.member?(voted_ids, persona_id) end)
+      Enum.count(participants, fn user_id -> not MapSet.member?(voted_ids, user_id) end)
 
     %{
       proposal_id: proposal.id,
@@ -498,10 +498,10 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
     end
   end
 
-  defp get_voted_personas(proposals) do
+  defp get_voted_user_ids(proposals) do
     proposals
     |> Enum.flat_map(fn proposal -> proposal.votes || [] end)
-    |> Enum.map(& &1.persona_id)
+    |> Enum.map(& &1.user_id)
     |> Enum.uniq()
   end
 end
