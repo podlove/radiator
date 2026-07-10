@@ -98,4 +98,22 @@ defmodule Radiator.Podcasts do
 
     {:ok, invited}
   end
+
+  @doc """
+  Benachrichtigt **alle** Teilnehmer der Episode per E-Mail über den final
+  gewählten Termin (Deep-Link auf die Episode) – unabhängig davon, ob sie
+  abgestimmt haben oder onboardet sind. Liefert die benachrichtigten Teilnehmer.
+
+  Die Episode wird mit `:participants` und `:scheduling` geladen; der Gewinner-
+  Termin steht in `scheduling.chosen_datetime` (nach `finalize` immer gesetzt).
+  """
+  def notify_participants_of_result(%{id: _} = episode) do
+    episode = Ash.load!(episode, [:participants, :scheduling], authorize?: false)
+
+    Enum.each(episode.participants, fn user ->
+      Radiator.Accounts.send_voting_result(user, episode)
+    end)
+
+    {:ok, episode.participants}
+  end
 end

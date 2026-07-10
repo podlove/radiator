@@ -430,4 +430,32 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
       assert other.id in creator_ids
     end
   end
+
+  describe "reopen/2 code interface" do
+    test "reopens a finalized scheduling and clears the choice" do
+      %{scheduling: scheduling, owner: owner} = create_scheduling_with([])
+      proposal = hd(scheduling.proposals)
+
+      {:ok, closed} = Scheduling.finalize(scheduling, proposal.id, owner.id, authorize?: false)
+      assert closed.status == :closed
+      assert closed.chosen_proposal_id == proposal.id
+
+      {:ok, reopened} = Scheduling.reopen(closed, owner.id, authorize?: false)
+
+      assert reopened.status == :open
+      assert reopened.chosen_proposal_id == nil
+      assert reopened.chosen_datetime == nil
+      assert reopened.finalized_at == nil
+    end
+
+    test "only the owner can reopen" do
+      %{scheduling: scheduling, owner: owner, participants: [participant | _]} =
+        create_scheduling_with([])
+
+      proposal = hd(scheduling.proposals)
+      {:ok, closed} = Scheduling.finalize(scheduling, proposal.id, owner.id, authorize?: false)
+
+      assert {:error, _} = Scheduling.reopen(closed, participant.id, authorize?: false)
+    end
+  end
 end

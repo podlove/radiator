@@ -5,8 +5,6 @@ defmodule Radiator.Generator do
 
   use Ash.Generator
 
-  alias Faker.{Company, Internet, Lorem}
-
   alias Radiator.Accounts.User
   alias Radiator.People.Person
   alias Radiator.Podcasts.Episode
@@ -18,12 +16,19 @@ defmodule Radiator.Generator do
       Person,
       :create,
       defaults: [
-        first_name: StreamData.repeatedly(&Faker.Person.first_name/0),
-        last_name: StreamData.repeatedly(&Faker.Person.last_name/0),
-        display_name: StreamData.repeatedly(&Faker.Person.name/0),
-        homepage_url: StreamData.repeatedly(&Internet.url/0),
-        wikipedia_url: StreamData.repeatedly(&Internet.url/0),
-        bio: StreamData.repeatedly(&Lorem.sentence/0)
+        first_name: StreamData.repeatedly(fn -> "John#{System.unique_integer([:positive])}" end),
+        last_name: StreamData.repeatedly(fn -> "Doe#{System.unique_integer([:positive])}" end),
+        display_name:
+          StreamData.repeatedly(fn -> "jonny#{System.unique_integer([:positive])}" end),
+        homepage_url:
+          StreamData.repeatedly(fn ->
+            "https://www.example-#{System.unique_integer([:positive])}.com"
+          end),
+        wikipedia_url:
+          StreamData.repeatedly(fn ->
+            "https://www.wiki-#{System.unique_integer([:positive])}.com"
+          end),
+        bio: StreamData.repeatedly(fn -> "Lorem Ipsum #{System.unique_integer([:positive])}" end)
       ],
       overrides: attrs,
       authorize: false,
@@ -44,8 +49,11 @@ defmodule Radiator.Generator do
       User,
       :invite_by_email,
       defaults: [
-        email: StreamData.repeatedly(&Internet.email/0),
-        handle: StreamData.repeatedly(&Internet.user_name/0)
+        email:
+          StreamData.repeatedly(fn ->
+            "user-#{System.unique_integer([:positive])}@example.com"
+          end),
+        handle: StreamData.repeatedly(fn -> "user-#{System.unique_integer([:positive])}" end)
       ],
       overrides: Map.drop(attrs, [:person_id]),
       authorize: false,
@@ -67,8 +75,9 @@ defmodule Radiator.Generator do
       Podcast,
       :create,
       defaults: [
-        title: StreamData.repeatedly(&Company.En.name/0),
-        summary: StreamData.repeatedly(&Lorem.sentence/0)
+        title: StreamData.repeatedly(fn -> "Podcast-#{System.unique_integer([:positive])}" end),
+        summary:
+          StreamData.repeatedly(fn -> "Lorem Ipsum#{System.unique_integer([:positive])}" end)
       ],
       overrides: attrs,
       authorize: false,
@@ -83,8 +92,9 @@ defmodule Radiator.Generator do
       Episode,
       :create,
       defaults: [
-        title: StreamData.repeatedly(&Lorem.sentence/0),
-        summary: StreamData.repeatedly(&Lorem.sentence/0),
+        title: StreamData.repeatedly(fn -> "Episode-#{System.unique_integer([:positive])}" end),
+        summary:
+          StreamData.repeatedly(fn -> "Lorem Ipsum #{System.unique_integer([:positive])}" end),
         podcast_id: podcast_id
       ],
       overrides: attrs,

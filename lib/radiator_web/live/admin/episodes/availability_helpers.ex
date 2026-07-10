@@ -153,4 +153,29 @@ defmodule RadiatorWeb.Admin.Episodes.AvailabilityHelpers do
     do: chosen_id
 
   def winner_proposal_id(%Scheduling{}, top_proposal_id), do: top_proposal_id
+
+  @doc """
+  Returns true when `user` owns the given `scheduling`.
+
+  Nil-safe: returns false when either `scheduling` or `user` is nil, so it can
+  be used directly in templates without extra guards.
+  """
+  def owner?(nil, _user), do: false
+  def owner?(_scheduling, nil), do: false
+
+  def owner?(%Scheduling{owner_user_id: owner_user_id}, %{id: user_id}),
+    do: owner_user_id == user_id
+
+  @doc """
+  German dropdown label for a proposal's datetime, e.g. `"Sa 18.04.2026, 22:00"`.
+  """
+  def proposal_option_label(%{datetime: datetime}), do: format_datetime_de(datetime)
+
+  @doc """
+  Format a `DateTime` in German as `"<weekday> DD.MM.YYYY, HH:MM"`,
+  e.g. `"Sa 18.04.2026, 22:00"` — matching the availability matrix.
+  """
+  def format_datetime_de(%DateTime{} = datetime) do
+    "#{weekday_label(datetime)} #{Calendar.strftime(datetime, "%d.%m.%Y, %H:%M")}"
+  end
 end

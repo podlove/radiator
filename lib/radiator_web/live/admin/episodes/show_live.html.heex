@@ -202,6 +202,50 @@
         </tfoot>
       </table>
     </div>
+
+    <div :if={owner?(@episode.scheduling, @current_user)} id="finalize-panel" class="mt-4">
+      <%= if @episode.scheduling.status == :open do %>
+        <form
+          :if={@sorted_proposals != []}
+          id="finalize-form"
+          phx-submit="finalize"
+          data-confirm={
+            gettext(
+              "Close the voting and set this date? Participants will no longer be able to vote."
+            )
+          }
+          class="flex flex-wrap items-end gap-3"
+        >
+          <.input
+            id="finalize-proposal-select"
+            type="select"
+            name="proposal-id"
+            label={gettext("Chosen date")}
+            options={Enum.map(@sorted_proposals, &{proposal_option_label(&1), &1.id})}
+            value={@default_finalize_id}
+          />
+          <.button id="finalize-submit" variant="primary">
+            {gettext("Close voting")}
+          </.button>
+        </form>
+      <% else %>
+        <div class="flex flex-wrap items-center gap-3">
+          <p :if={@episode.scheduling.chosen_datetime}>
+            {gettext("Chosen date:")}
+            <span class="font-semibold">
+              {format_datetime_de(@episode.scheduling.chosen_datetime)}
+            </span>
+          </p>
+          <.button
+            id="reopen-button"
+            phx-click="reopen"
+            data-confirm={gettext("Reopen the voting? The chosen date will be discarded.")}
+          >
+            {gettext("Reopen voting")}
+          </.button>
+        </div>
+      <% end %>
+    </div>
   </section>
 
   <section class="mt-8">

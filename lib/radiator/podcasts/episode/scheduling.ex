@@ -39,6 +39,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
     define :add_proposal, args: [:datetime, :user_id]
     define :vote, args: [:proposal_id, :user_id, :score]
     define :finalize, args: [:chosen_proposal_id, :user_id]
+    define :reopen, args: [:user_id]
   end
 
   actions do

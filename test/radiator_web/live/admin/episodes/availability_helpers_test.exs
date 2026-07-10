@@ -76,4 +76,34 @@ defmodule RadiatorWeb.Admin.Episodes.AvailabilityHelpersTest do
       assert AvailabilityHelpers.winner_proposal_id(nil, "top-id") == nil
     end
   end
+
+  describe "owner?/2" do
+    test "returns false when scheduling is nil" do
+      refute AvailabilityHelpers.owner?(nil, %{id: "u1"})
+    end
+
+    test "returns false when user is nil" do
+      refute AvailabilityHelpers.owner?(%Scheduling{owner_user_id: "u1"}, nil)
+    end
+
+    test "returns true when the user id matches owner_user_id" do
+      assert AvailabilityHelpers.owner?(%Scheduling{owner_user_id: "u1"}, %{id: "u1"})
+    end
+
+    test "returns false when the user id differs from owner_user_id" do
+      refute AvailabilityHelpers.owner?(%Scheduling{owner_user_id: "u1"}, %{id: "u2"})
+    end
+  end
+
+  describe "format_datetime_de/1 and proposal_option_label/1" do
+    test "formats a datetime as German weekday + date + time" do
+      assert AvailabilityHelpers.format_datetime_de(~U[2026-04-18 22:00:00Z]) ==
+               "Sa 18.04.2026, 22:00"
+    end
+
+    test "proposal_option_label uses the German datetime format" do
+      proposal = %{datetime: ~U[2026-04-18 22:00:00Z]}
+      assert AvailabilityHelpers.proposal_option_label(proposal) == "Sa 18.04.2026, 22:00"
+    end
+  end
 end

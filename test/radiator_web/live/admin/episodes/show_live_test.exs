@@ -8,6 +8,7 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
   alias AshAuthentication.Plug.Helpers
   alias Radiator.Accounts.User
   alias Radiator.Podcasts.Episode.Scheduling
+  alias RadiatorWeb.Admin.Episodes.AvailabilityHelpers
 
   @endpoint RadiatorWeb.Endpoint
 
@@ -308,6 +309,33 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       updated_friday = Enum.find(scheduling.proposals, &(&1.id == friday_proposal.id))
       refute Enum.any?(updated_friday.votes, &(&1.user_id == bob.id))
     end
+
+    test "a non-owner cannot finalize via a manipulated event", %{
+      conn: conn,
+      podcast: podcast,
+      episode: episode,
+      friday_proposal: friday_proposal
+    } do
+      {:ok, lv, _html} = live(conn, ~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
+
+      html = render_hook(lv, "finalize", %{"proposal-id" => friday_proposal.id})
+
+      assert html =~ "Could not close the voting"
+
+      [scheduling] = Scheduling.get_by_episode!(episode.id, authorize?: false)
+      assert scheduling.status == :open
+    end
+
+    test "a non-owner participant sees no finalize or reopen controls", %{
+      conn: conn,
+      podcast: podcast,
+      episode: episode
+    } do
+      conn
+      |> visit(~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
+      |> refute_has("#finalize-form")
+      |> refute_has("#reopen-button")
+    end
   end
 
   describe "as bob (participant) on a closed scheduling" do
@@ -482,6 +510,129 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       |> visit(~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
       |> refute_has("[id^='vote-']")
       |> refute_has("[phx-click='vote']")
+    end
+  end
+
+  describe "finalize handler (owner)" do
+    setup [:register_owner, :create_open_scheduling_owned_by_owner]
+
+    test "finalize closes the voting and notifies every participant", %{
+      conn: conn,
+      podcast: podcast,
+      episode: episode,
+      tuesday_proposal: tuesday_proposal,
+      non_voter: non_voter
+    } do
+      {:ok, lv, _html} = live(conn, ~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
+
+      render_hook(lv, "finalize", %{"proposal-id" => tuesday_proposal.id})
+
+      [scheduling] = Scheduling.get_by_episode!(episode.id, authorize?: false)
+      assert scheduling.status == :closed
+      assert scheduling.chosen_proposal_id == tuesday_proposal.id
+
+      recipients =
+        flush_result_emails()
+        |> Enum.flat_map(& &1.to)
+        |> Enum.map(fn {_name, address} -> address end)
+
+      assert to_string(non_voter.email) in recipients
+      assert length(recipients) == 3
+    end
+  end
+
+  describe "reopen handler (owner)" do
+    setup [:register_owner, :create_closed_scheduling_owned_by_owner]
+
+    test "reopen reopens the voting and sends no result email", %{
+      conn: conn,
+      podcast: podcast,
+      episode: episode
+    } do
+      {:ok, lv, _html} = live(conn, ~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
+
+      # discard anything left in the mailbox from setup
+      _ = flush_result_emails()
+
+      render_hook(lv, "reopen", %{})
+
+      [scheduling] = Scheduling.get_by_episode!(episode.id, authorize?: false)
+      assert scheduling.status == :open
+      assert scheduling.chosen_proposal_id == nil
+
+      assert flush_result_emails() == []
+    end
+  end
+
+  describe "finalize/reopen with no scheduling (manipulated event)" do
+    setup [:register_owner]
+
+    test "finalize on an episode without scheduling flashes an error and does not crash", %{
+      conn: conn
+    } do
+      podcast = generate(podcast())
+      episode = generate(episode(%{podcast_id: podcast.id}))
+
+      {:ok, lv, _html} = live(conn, ~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
+
+      assert render_hook(lv, "finalize", %{"proposal-id" => Ash.UUID.generate()}) =~
+               "Could not close the voting"
+
+      assert render_hook(lv, "reopen", %{}) =~ "Could not reopen the voting"
+      assert Process.alive?(lv.pid)
+    end
+  end
+
+  describe "owner panel (open scheduling)" do
+    setup [:register_owner, :create_open_scheduling_owned_by_owner]
+
+    test "owner sees the finalize form with the top proposal preselected", %{
+      conn: conn,
+      podcast: podcast,
+      episode: episode,
+      friday_proposal: friday_proposal
+    } do
+      conn
+      |> visit(~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
+      |> assert_has("#finalize-form")
+      |> assert_has("#finalize-proposal-select option[value='#{friday_proposal.id}'][selected]")
+      |> assert_has("#finalize-submit")
+      |> refute_has("#reopen-button")
+    end
+  end
+
+  describe "owner panel (closed scheduling)" do
+    setup [:register_owner, :create_closed_scheduling_owned_by_owner]
+
+    test "owner sees the reopen button and the chosen date, no finalize form", %{
+      conn: conn,
+      podcast: podcast,
+      episode: episode,
+      friday_proposal: friday_proposal
+    } do
+      conn
+      |> visit(~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
+      |> assert_has("#reopen-button")
+      |> refute_has("#finalize-form")
+      |> assert_has(
+        "#finalize-panel",
+        text: AvailabilityHelpers.format_datetime_de(friday_proposal.datetime)
+      )
+    end
+
+    test "clicking the reopen button reopens the voting", %{
+      conn: conn,
+      podcast: podcast,
+      episode: episode
+    } do
+      {:ok, lv, _html} = live(conn, ~p"/admin/podcasts/#{podcast.id}/episodes/#{episode.id}")
+
+      lv |> element("#reopen-button") |> render_click()
+
+      [scheduling] = Scheduling.get_by_episode!(episode.id, authorize?: false)
+      assert scheduling.status == :open
+      assert has_element?(lv, "#finalize-form")
+      refute has_element?(lv, "#reopen-button")
     end
   end
 
@@ -674,5 +825,83 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLiveTest do
       |> Ash.update(authorize?: false)
 
     scheduling
+  end
+
+  defp register_owner(%{conn: conn} = context) do
+    {user, conn} = create_user_and_log_in(conn, "owner", "Owner")
+    Map.merge(context, %{conn: conn, user: user, owner: user})
+  end
+
+  defp create_open_scheduling_owned_by_owner(%{owner: owner} = context) do
+    voter = build_user("Vera")
+    non_voter = build_user("Nora")
+
+    podcast = generate(podcast())
+    episode = generate(episode(%{podcast_id: podcast.id}))
+
+    relate_participants!(episode, [owner, voter, non_voter])
+
+    {:ok, scheduling} =
+      Scheduling
+      |> Ash.Changeset.for_create(:create, %{
+        episode_id: episode.id,
+        owner_user_id: owner.id,
+        proposed_datetimes: [@tuesday, @friday, @saturday]
+      })
+      |> Ash.create(authorize?: false)
+
+    [tuesday_proposal, friday_proposal, saturday_proposal] =
+      Enum.sort_by(scheduling.proposals, & &1.datetime, DateTime)
+
+    # Owner + voter both vote Friday -> Friday is the clear top; non_voter never votes.
+    scheduling
+    |> place_vote!(friday_proposal.id, owner, 1)
+    |> place_vote!(friday_proposal.id, voter, 1)
+
+    Map.merge(context, %{
+      podcast: podcast,
+      episode: episode,
+      voter: voter,
+      non_voter: non_voter,
+      tuesday_proposal: tuesday_proposal,
+      friday_proposal: friday_proposal,
+      saturday_proposal: saturday_proposal
+    })
+  end
+
+  defp create_closed_scheduling_owned_by_owner(context) do
+    context
+    |> create_open_scheduling_owned_by_owner()
+    |> close_scheduling_as_owner(:friday_proposal)
+  end
+
+  defp close_scheduling_as_owner(%{episode: episode, owner: owner} = context, proposal_key) do
+    chosen = Map.fetch!(context, proposal_key)
+    [scheduling] = Scheduling.get_by_episode!(episode.id, authorize?: false)
+
+    {:ok, _closed} =
+      scheduling
+      |> Ash.Changeset.for_update(
+        :finalize,
+        %{chosen_proposal_id: chosen.id, user_id: owner.id},
+        authorize?: false
+      )
+      |> Ash.update()
+
+    context
+  end
+
+  defp flush_result_emails do
+    []
+    |> flush_emails()
+    |> Enum.filter(&(&1.subject == "Der Termin steht fest"))
+  end
+
+  defp flush_emails(acc) do
+    receive do
+      {:email, email} -> flush_emails([email | acc])
+    after
+      0 -> Enum.reverse(acc)
+    end
   end
 end
