@@ -13,7 +13,7 @@ defmodule Radiator.Accounts.User.Senders.SendMagicLinkEmail do
 
     new()
     |> to(to_string(email))
-    |> from({"Radiator", "noreply@radiator.de"})
+    |> from({"Radiator: No Reply", "noreply@radiator.metaebene.net"})
     |> subject("Dein Login-Link")
     |> html_body("""
       <p>Hier kannst du dich anmelden:</p>

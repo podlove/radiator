@@ -25,7 +25,7 @@ defmodule Radiator.Accounts.User.Senders.SendVotingInvitation do
 
     new()
     |> to(to_string(user.email))
-    |> from({"Radiator", "noreply@radiator.de"})
+    |> from({"Radiator: No Reply", "noreply@radiator.metaebene.net"})
     |> subject("Hier kannst du abstimmen")
     |> html_body("""
       <p>Du wurdest eingeladen, über die Termine einer Episode abzustimmen.</p>
