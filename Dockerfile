@@ -12,7 +12,7 @@
 #   - Ex: docker.io/hexpm/elixir:1.18.4-erlang-28.1-debian-bookworm-20250908-slim
 #
 ARG ELIXIR_VERSION=1.20.1
-ARG OTP_VERSION=29.4.1
+ARG OTP_VERSION=29.0.2
 ARG DEBIAN_VERSION=trixie-20260518-slim
 
 ARG BUILDER_IMAGE="docker.io/hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
