@@ -1,1 +1,0 @@
-- [Persona entfernen (Domain-Cleanup)](remove-persona-refactor.md) — User wird Akteur, Person referenzierbar; Plan unter docs/superpowers/plans/
