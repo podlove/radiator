@@ -10,7 +10,7 @@ defmodule Radiator.Podcasts.Episode do
     data_layer: AshPostgres.DataLayer,
     extensions: [AshStateMachine]
 
-  alias Radiator.People.Persona
+  alias Radiator.Accounts.User
   alias Radiator.Podcasts.Chapter
   alias Radiator.Podcasts.EpisodeParticipant
   alias Radiator.Podcasts.Podcast
@@ -57,9 +57,9 @@ defmodule Radiator.Podcasts.Episode do
       argument :scheduling, :map, allow_nil?: true
 
       change manage_relationship(:participants,
-               use_identities: [:handle],
-               on_no_match: {:create, :create},
-               on_match: {:update, :update},
+               use_identities: [:unique_handle, :unique_email],
+               on_no_match: {:create, :invite_by_email},
+               on_match: :ignore,
                on_lookup: :relate,
                on_missing: :unrelate
              )
@@ -79,17 +79,17 @@ defmodule Radiator.Podcasts.Episode do
     update :update do
       require_atomic? false
       argument :participants, {:array, :map}, allow_nil?: true
-      argument :add_participant, :struct, allow_nil?: true, constraints: [instance_of: Persona]
+      argument :add_participant, :struct, allow_nil?: true, constraints: [instance_of: User]
       argument :scheduling, :map, allow_nil?: true
 
       argument :remove_participant, :struct,
         allow_nil?: true,
-        constraints: [instance_of: Persona]
+        constraints: [instance_of: User]
 
       change manage_relationship(:participants,
-               use_identities: [:handle],
-               on_no_match: {:create, :create},
-               on_match: {:update, :update},
+               use_identities: [:unique_handle, :unique_email],
+               on_no_match: {:create, :invite_by_email},
+               on_match: :ignore,
                on_lookup: :relate,
                on_missing: :unrelate
              )
@@ -188,7 +188,7 @@ defmodule Radiator.Podcasts.Episode do
       sort start_time_ms: :asc
     end
 
-    many_to_many :participants, Persona do
+    many_to_many :participants, User do
       through EpisodeParticipant
       public? true
     end

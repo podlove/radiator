@@ -4,7 +4,6 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
   require Logger
 
   alias AshPhoenix.Form
-  alias Radiator.People.Persona
   alias Radiator.Podcasts
 
   @impl Phoenix.LiveView
@@ -22,7 +21,6 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     socket
     |> assign(:form, to_form(form))
     |> assign(:podcast, podcast)
-    |> assign(:current_persona, lookup_current_persona(socket.assigns.current_user))
     |> assign(:cancel_path, ~p"/admin/podcasts/#{podcast}/episodes/#{episode}")
     |> assign(:page_title, "Edit Episode")
     |> assign_candicates()
@@ -43,7 +41,6 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     socket
     |> assign(:form, to_form(form))
     |> assign(:podcast, podcast)
-    |> assign(:current_persona, lookup_current_persona(socket.assigns.current_user))
     |> assign(:cancel_path, ~p"/admin/podcasts/#{podcast}/episodes")
     |> assign(:page_title, "New Episode")
     |> assign_candicates()
@@ -70,12 +67,12 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
 
   def handle_event(
         "connect_participant",
-        %{"handle" => handle, "public_name" => public_name},
+        %{"handle" => handle} = params,
         socket
       ) do
     form =
       Form.add_form(socket.assigns.form, :participants,
-        params: %{public_name: public_name, handle: handle}
+        params: %{handle: handle, email: Map.get(params, "email")}
       )
 
     socket
@@ -85,13 +82,13 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
   end
 
   def handle_event("add_proposal", _params, socket) do
-    case socket.assigns.current_persona do
-      %{id: persona_id} ->
+    case socket.assigns.current_user do
+      %{id: user_id} ->
         form =
           socket.assigns.form
-          |> ensure_scheduling_form(persona_id)
+          |> ensure_scheduling_form(user_id)
           |> Form.add_form([:scheduling, :proposals],
-            params: %{created_by_persona_id: persona_id}
+            params: %{created_by_user_id: user_id}
           )
 
         socket
@@ -100,7 +97,7 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
 
       _ ->
         socket
-        |> put_flash(:error, gettext("You need a persona before you can propose dates."))
+        |> put_flash(:error, gettext("You need to be signed in before you can propose dates."))
         |> noreply()
     end
   end
@@ -125,8 +122,10 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
   def handle_event("save", %{"form" => form_data}, socket) do
     case Form.submit(socket.assigns.form, params: form_data) do
       {:ok, episode} ->
+        {:ok, invited} = Podcasts.invite_new_participants(episode)
+
         socket
-        |> put_flash(:info, gettext("Episode saved"))
+        |> put_flash(:info, save_flash(invited))
         |> push_navigate(to: ~p"/admin/podcasts/#{socket.assigns.podcast}/episodes/#{episode}")
         |> noreply()
 
@@ -140,22 +139,18 @@ defmodule RadiatorWeb.Admin.Episodes.FormLive do
     end
   end
 
+  defp save_flash([]), do: gettext("Episode saved")
+
+  defp save_flash(invited),
+    do: gettext("Episode saved, %{count} invitation(s) sent", count: length(invited))
+
   # Make sure a (single) scheduling form exists before adding proposals to it.
   # On a new episode there is no scheduling yet, so we create one owned by the
-  # current persona the first time a proposal is added.
-  defp ensure_scheduling_form(form, owner_persona_id) do
+  # current user the first time a proposal is added.
+  defp ensure_scheduling_form(form, owner_user_id) do
     case Form.value(form, :scheduling) do
-      nil -> Form.add_form(form, :scheduling, params: %{owner_persona_id: owner_persona_id})
+      nil -> Form.add_form(form, :scheduling, params: %{owner_user_id: owner_user_id})
       _ -> form
-    end
-  end
-
-  defp lookup_current_persona(nil), do: nil
-
-  defp lookup_current_persona(%{id: user_id}) do
-    case Persona.get_by_user(user_id) do
-      {:ok, persona} -> persona
-      {:error, _} -> nil
     end
   end
 

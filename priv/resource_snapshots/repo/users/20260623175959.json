@@ -21,11 +21,35 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "public_name",
+      "source": "email",
+      "type": "citext"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "hashed_password",
       "type": "text"
     },
     {
-      "allow_nil?": false,
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "confirmed_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -45,7 +69,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "description",
+      "source": "avatar_url",
       "type": "text"
     },
     {
@@ -54,30 +78,6 @@
       "generated?": false,
       "precision": null,
       "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "avatar_png",
-      "type": "binary"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "default?",
-      "type": "boolean"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
       "references": {
         "deferrable": false,
         "destination_attribute": "id",
@@ -91,38 +91,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "personas_user_id_fkey",
-        "on_delete": "nilify",
-        "on_update": null,
-        "primary_key?": true,
-        "schema": "public",
-        "table": "users"
-      },
-      "scale": null,
-      "size": null,
-      "source": "user_id",
-      "type": "uuid"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": {
-        "deferrable": false,
-        "destination_attribute": "id",
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": null,
-        "match_with": null,
-        "multitenancy": {
-          "attribute": null,
-          "global": null,
-          "strategy": null
-        },
-        "name": "personas_person_id_fkey",
+        "name": "users_person_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
@@ -141,33 +110,33 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "D4CFE0A6ADEF3F8A0CBD4A5A21496F70AE3D877B61C984E2E66A3C6717C0F981",
+  "hash": "BA12CD2F379FA45E5CAB774139ADDFDABC1CE45EC0805B4C64E99D651BCCBC7F",
   "identities": [
     {
       "all_tenants?": false,
       "base_filter": null,
-      "index_name": "personas_handle_index",
+      "index_name": "users_unique_email_index",
       "keys": [
         {
           "type": "atom",
-          "value": "handle"
+          "value": "email"
         }
       ],
-      "name": "handle",
+      "name": "unique_email",
       "nils_distinct?": true,
       "where": null
     },
     {
       "all_tenants?": false,
       "base_filter": null,
-      "index_name": "personas_unique_user_index",
+      "index_name": "users_unique_handle_index",
       "keys": [
         {
           "type": "atom",
-          "value": "user_id"
+          "value": "handle"
         }
       ],
-      "name": "unique_user",
+      "name": "unique_handle",
       "nils_distinct?": true,
       "where": null
     }
@@ -179,5 +148,5 @@
   },
   "repo": "Elixir.Radiator.Repo",
   "schema": null,
-  "table": "personas"
+  "table": "users"
 }

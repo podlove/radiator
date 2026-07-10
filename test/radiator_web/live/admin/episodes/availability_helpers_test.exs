@@ -4,42 +4,33 @@ defmodule RadiatorWeb.Admin.Episodes.AvailabilityHelpersTest do
   alias Radiator.Podcasts.Episode.Scheduling
   alias RadiatorWeb.Admin.Episodes.AvailabilityHelpers
 
-  describe "can_vote?/2" do
-    test "returns false when persona is nil" do
-      scheduling = %Scheduling{status: :open, participant_persona_ids: ["any"]}
+  describe "can_vote?/3" do
+    test "returns false when user is nil" do
+      scheduling = %Scheduling{status: :open}
 
-      refute AvailabilityHelpers.can_vote?(scheduling, nil)
+      refute AvailabilityHelpers.can_vote?(scheduling, nil, ["any"])
     end
 
     test "returns false when scheduling is nil" do
-      refute AvailabilityHelpers.can_vote?(nil, %{id: "any"})
+      refute AvailabilityHelpers.can_vote?(nil, %{id: "any"}, ["any"])
     end
 
-    test "returns true when scheduling is :open and persona is a participant" do
-      scheduling = %Scheduling{
-        status: :open,
-        participant_persona_ids: ["bob-id", "alice-id"]
-      }
+    test "returns true when scheduling is :open and user is a participant" do
+      scheduling = %Scheduling{status: :open}
 
-      assert AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"})
+      assert AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"}, ["bob-id", "alice-id"])
     end
 
-    test "returns false when scheduling is :open and persona is not a participant" do
-      scheduling = %Scheduling{
-        status: :open,
-        participant_persona_ids: ["alice-id"]
-      }
+    test "returns false when scheduling is :open and user is not a participant" do
+      scheduling = %Scheduling{status: :open}
 
-      refute AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"})
+      refute AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"}, ["alice-id"])
     end
 
-    test "returns false when scheduling is :closed even if persona is a participant" do
-      scheduling = %Scheduling{
-        status: :closed,
-        participant_persona_ids: ["bob-id"]
-      }
+    test "returns false when scheduling is :closed even if user is a participant" do
+      scheduling = %Scheduling{status: :closed}
 
-      refute AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"})
+      refute AvailabilityHelpers.can_vote?(scheduling, %{id: "bob-id"}, ["bob-id"])
     end
   end
 

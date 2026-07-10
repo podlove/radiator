@@ -53,6 +53,8 @@ config :radiator,
   generators: [timestamp_type: :utc_datetime],
   ash_domains: [Radiator.Accounts, Radiator.Podcasts, Radiator.People]
 
+config :ash_authentication, return_error_on_invalid_magic_link_token?: true
+
 # Configures the endpoint
 config :radiator, RadiatorWeb.Endpoint,
   url: [host: "localhost"],

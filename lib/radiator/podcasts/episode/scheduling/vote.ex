@@ -1,6 +1,6 @@
 defmodule Radiator.Podcasts.Episode.Scheduling.Vote do
   @moduledoc """
-  Embedded resource representing a single vote from a persona on a proposed datetime.
+  Embedded resource representing a single vote from a user on a proposed datetime.
 
   Score model:
 
@@ -20,8 +20,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Vote do
   end
 
   attributes do
-    attribute :persona_id, :uuid do
-      description "The persona who cast this vote"
+    attribute :user_id, :uuid do
+      description "The user who cast this vote"
       allow_nil? false
       public? true
     end

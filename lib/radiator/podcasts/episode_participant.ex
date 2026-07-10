@@ -1,13 +1,13 @@
 defmodule Radiator.Podcasts.EpisodeParticipant do
   @moduledoc """
-  The episode participant resource which joins an episode with a persona.
+  The episode participant resource which joins an episode with a user.
   """
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,
     data_layer: AshPostgres.DataLayer
 
-  alias Radiator.People.Persona
+  alias Radiator.Accounts.User
   alias Radiator.Podcasts.Episode
   alias Radiator.Podcasts.Role
   alias Radiator.Podcasts.Track
@@ -32,7 +32,7 @@ defmodule Radiator.Podcasts.EpisodeParticipant do
       allow_nil? false
     end
 
-    belongs_to :persona, Persona do
+    belongs_to :user, User do
       allow_nil? false
     end
 
@@ -46,6 +46,6 @@ defmodule Radiator.Podcasts.EpisodeParticipant do
   end
 
   identities do
-    identity :one_persona_per_episode, [:episode_id, :persona_id]
+    identity :one_user_per_episode, [:episode_id, :user_id]
   end
 end

@@ -7,18 +7,18 @@ defmodule Radiator.People.Person do
     domain: Radiator.People,
     data_layer: AshPostgres.DataLayer
 
-  alias Radiator.People.Persona
-
   postgres do
     table "people"
     repo Radiator.Repo
   end
 
   @default_accept_attributes [
-    :real_name,
-    :nickname,
-    :email,
-    :telephone
+    :first_name,
+    :last_name,
+    :display_name,
+    :homepage_url,
+    :wikipedia_url,
+    :bio
   ]
 
   actions do
@@ -33,35 +33,20 @@ defmodule Radiator.People.Person do
   attributes do
     uuid_primary_key :id
 
-    attribute :real_name, :string do
-      allow_nil? false
-      public? false
-    end
-
-    attribute :nickname, :string do
-      allow_nil? true
-      public? false
-    end
-
-    attribute :email, :string do
-      allow_nil? true
-      public? false
-    end
-
-    attribute :telephone, :string do
-      allow_nil? true
-      public? false
-    end
+    attribute :first_name, :string, allow_nil?: false, public?: true
+    attribute :last_name, :string, allow_nil?: true, public?: true
+    attribute :display_name, :string, allow_nil?: true, public?: true
+    attribute :homepage_url, :string, allow_nil?: true, public?: true
+    attribute :wikipedia_url, :string, allow_nil?: true, public?: true
+    attribute :bio, :string, allow_nil?: true, public?: true
 
     timestamps()
   end
 
   relationships do
-    has_many :personas, Persona
-
-    has_one :default_persona, Persona do
+    has_one :user, Radiator.Accounts.User do
       destination_attribute :person_id
-      filter expr(default? == true)
+      public? true
     end
   end
 end

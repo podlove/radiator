@@ -3,21 +3,13 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLive do
 
   import RadiatorWeb.Admin.Episodes.AvailabilityHelpers
 
-  require Ash.Query
   require Logger
 
-  alias Radiator.People.Persona
   alias Radiator.Podcasts.Episode.Scheduling
 
   @impl Phoenix.LiveView
   def mount(%{"id" => id}, _session, socket) do
-    current_user = socket.assigns.current_user
-    current_persona = lookup_current_persona(current_user)
-
-    socket =
-      socket
-      |> assign(:current_persona, current_persona)
-      |> load_episode_assigns(id)
+    socket = load_episode_assigns(socket, id)
 
     {:ok, socket}
   end
@@ -26,10 +18,10 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLive do
   def handle_event("vote", %{"proposal-id" => proposal_id, "score" => score_str}, socket) do
     with {score, ""} <- Integer.parse(score_str),
          true <- score in [-1, 0, 1],
-         %{} = persona <- socket.assigns.current_persona,
+         %{} = user <- socket.assigns.current_user,
          %Scheduling{} = scheduling <- socket.assigns.episode.scheduling,
          {:ok, _scheduling} <-
-           Scheduling.vote(scheduling, proposal_id, persona.id, score,
+           Scheduling.vote(scheduling, proposal_id, user.id, score,
              actor: socket.assigns.current_user
            ) do
       {:noreply, load_episode_assigns(socket, socket.assigns.episode.id)}
@@ -39,43 +31,27 @@ defmodule RadiatorWeb.Admin.Episodes.ShowLive do
     end
   end
 
-  defp lookup_current_persona(nil), do: nil
-
-  defp lookup_current_persona(%{id: user_id}) do
-    case Persona.get_by_user(user_id) do
-      {:ok, persona} -> persona
-      {:error, _} -> nil
-    end
-  end
-
   defp load_episode_assigns(socket, id) do
     episode =
-      Radiator.Podcasts.get_episode_by_id!(id, load: [:podcast, :participants, :scheduling])
+      Radiator.Podcasts.get_episode_by_id!(id,
+        load: [:podcast, :scheduling, participants: [:display_name]]
+      )
+
+    participants = Enum.sort_by(episode.participants, & &1.display_name)
+    participant_ids = Enum.map(participants, & &1.id)
 
     socket
     |> assign(:episode, episode)
-    |> assign(:scheduling_participants, load_scheduling_participants(episode.scheduling))
-    |> assign(:voting_stats, scheduling_voting_stats(episode.scheduling))
+    |> assign(:scheduling_participants, participants)
+    |> assign(:participant_ids, participant_ids)
+    |> assign(:voting_stats, scheduling_voting_stats(episode.scheduling, participant_ids))
     |> assign(:sorted_proposals, sorted_proposals(episode.scheduling))
   end
 
-  defp load_scheduling_participants(nil), do: []
+  defp scheduling_voting_stats(nil, _participant_ids), do: nil
 
-  defp load_scheduling_participants(%Scheduling{participant_persona_ids: ids})
-       when ids in [nil, []],
-       do: []
-
-  defp load_scheduling_participants(%Scheduling{participant_persona_ids: ids}) do
-    Persona
-    |> Ash.Query.filter(id in ^ids)
-    |> Ash.read!(authorize?: false)
-    |> Enum.sort_by(& &1.public_name)
-  end
-
-  defp scheduling_voting_stats(nil), do: nil
-
-  defp scheduling_voting_stats(%Scheduling{} = scheduling),
-    do: Scheduling.voting_stats(scheduling)
+  defp scheduling_voting_stats(%Scheduling{} = scheduling, participant_ids),
+    do: Scheduling.voting_stats(scheduling, participant_ids)
 
   defp sorted_proposals(nil), do: []
 

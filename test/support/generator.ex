@@ -5,10 +5,10 @@ defmodule Radiator.Generator do
 
   use Ash.Generator
 
-  alias Faker.{Company, Internet, Lorem, Phone}
+  alias Faker.{Company, Internet, Lorem}
 
+  alias Radiator.Accounts.User
   alias Radiator.People.Person
-  alias Radiator.People.Persona
   alias Radiator.Podcasts.Episode
   alias Radiator.Podcasts.Episode.Scheduling
   alias Radiator.Podcasts.Podcast
@@ -18,10 +18,12 @@ defmodule Radiator.Generator do
       Person,
       :create,
       defaults: [
-        real_name: StreamData.repeatedly(&Faker.Person.name/0),
-        email: StreamData.repeatedly(&Internet.email/0),
-        nickname: StreamData.repeatedly(&Internet.user_name/0),
-        telephone: StreamData.repeatedly(&Phone.EnGb.number/0)
+        first_name: StreamData.repeatedly(&Faker.Person.first_name/0),
+        last_name: StreamData.repeatedly(&Faker.Person.last_name/0),
+        display_name: StreamData.repeatedly(&Faker.Person.name/0),
+        homepage_url: StreamData.repeatedly(&Internet.url/0),
+        wikipedia_url: StreamData.repeatedly(&Internet.url/0),
+        bio: StreamData.repeatedly(&Lorem.sentence/0)
       ],
       overrides: attrs,
       authorize: false,
@@ -29,22 +31,34 @@ defmodule Radiator.Generator do
     )
   end
 
-  def persona(attrs \\ %{}) do
-    person_id = Map.get(attrs, :person_id, generate(person()).id)
+  @doc """
+  Generates a passwordless `User` (the actor/participant in scheduling).
+
+  Pass `:handle` and/or `:email` as overrides. A `:person_id` override links the
+  user to a `Person` via the `:update_profile` action.
+  """
+  def user(attrs \\ %{}) do
+    person_id = Map.get(attrs, :person_id)
 
     changeset_generator(
-      Persona,
-      :create,
+      User,
+      :invite_by_email,
       defaults: [
-        public_name: StreamData.repeatedly(&Internet.user_name/0),
-        handle: StreamData.repeatedly(&Internet.user_name/0),
-        description: StreamData.repeatedly(&Lorem.sentence/0),
-        person_id: person_id,
-        user_id: nil
+        email: StreamData.repeatedly(&Internet.email/0),
+        handle: StreamData.repeatedly(&Internet.user_name/0)
       ],
-      overrides: attrs,
+      overrides: Map.drop(attrs, [:person_id]),
       authorize: false,
-      actor: attrs[:actor]
+      actor: attrs[:actor],
+      after_action: fn user ->
+        if person_id do
+          user
+          |> Ash.Changeset.for_update(:update_profile, %{person_id: person_id}, authorize?: false)
+          |> Ash.update!()
+        else
+          user
+        end
+      end
     )
   end
 
