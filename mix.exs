@@ -42,7 +42,7 @@ defmodule Radiator.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:ash, "~> 3.0"},
+      {:ash, "~> 3.29"},
       {:ash_admin, "~> 1.0"},
       {:ash_authentication, "~> 4.0"},
       {:ash_authentication_phoenix, "~> 2.0"},
@@ -80,7 +80,7 @@ defmodule Radiator.MixProject do
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.1.0"},
+      {:phoenix_live_view, "~> 1.2"},
       {:phoenix_test, "~> 0.9", only: :test, runtime: false},
       {:picosat_elixir, "~> 0.2"},
       {:plug, "~> 1.17"},
