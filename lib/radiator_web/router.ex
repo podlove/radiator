@@ -4,6 +4,7 @@ defmodule RadiatorWeb.Router do
   use AshAuthentication.Phoenix.Router
 
   import AshAuthentication.Plug.Helpers
+  import Oban.Web.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -12,40 +13,60 @@ defmodule RadiatorWeb.Router do
     plug :put_root_layout, html: {RadiatorWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug :store_return_to
     plug :load_from_session
-  end
-
-  # Stores a local `return_to` path from the query string into the session so
-  # post-authentication callbacks (e.g. magic-link sign-in) can redirect there.
-  # Only local absolute paths ("/...", but not "//...") are accepted to prevent
-  # open redirects.
-  def store_return_to(conn, _opts) do
-    case conn.params do
-      %{"return_to" => "/" <> _ = return_to} ->
-        if String.starts_with?(return_to, "//") do
-          conn
-        else
-          Plug.Conn.put_session(conn, :return_to, return_to)
-        end
-
-      _ ->
-        conn
-    end
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+
+    plug AshAuthentication.Strategy.ApiKey.Plug,
+      resource: Radiator.Accounts.User,
+      # if you want to require an api key to be supplied, set `required?` to true
+      required?: false
+
     plug :load_from_bearer
     plug :set_actor, :user
+  end
+
+  scope "/admin", RadiatorWeb do
+    pipe_through :browser
+
+    # ash_authentication_live_session :authenticated_routes do
+    #   in each liveview, add one of the following at the top of the module:
+    #
+    #   If an authenticated user must be present:
+    #   on_mount {RadiatorWeb.LiveUserAuth, :live_user_required}
+    #
+    #   If an authenticated user *may* be present:
+    #   on_mount {RadiatorWeb.LiveUserAuth, :live_user_optional}
+    #
+    #   If an authenticated user must *not* be present:
+    #   on_mount {RadiatorWeb.LiveUserAuth, :live_no_user}
+    # end
+
+    ash_authentication_live_session :authenticated_routes,
+      on_mount: {RadiatorWeb.LiveUserAuth, :live_user_required} do
+      live "/podcasts", PodcastLive.Index, :index
+      live "/podcasts/new", PodcastLive.Form, :new
+      live "/podcasts/import", PodcastLive.Form, :import
+      live "/podcasts/:id/edit", PodcastLive.Form, :edit
+
+      live "/podcasts/:id", PodcastLive.Show, :show
+      live "/podcasts/:id/show/edit", PodcastLive.Show, :edit
+    end
   end
 
   scope "/", RadiatorWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", HomeLive.Index, :index
+
+    get "/impressum", PageController, :imprint
+
     auth_routes AuthController, Radiator.Accounts.User, path: "/auth"
-    sign_out_route AuthController
+
+    sign_out_route AuthController, "/sign-out",
+      overrides: [RadiatorWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
 
     # Remove these if you'd like to use your own authentication views
     sign_in_route register_path: "/register",
@@ -71,31 +92,9 @@ defmodule RadiatorWeb.Router do
 
     # Remove this if you do not use the magic link strategy.
     magic_sign_in_route(Radiator.Accounts.User, :magic_link,
-      on_mount: [{RadiatorWeb.LiveUserAuth, :live_no_user}],
       auth_routes_prefix: "/auth",
       overrides: [RadiatorWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
     )
-  end
-
-  scope "/admin", RadiatorWeb.Admin do
-    pipe_through :browser
-
-    ash_authentication_live_session :authenticated_routes,
-      on_mount: [
-        {RadiatorWeb.LiveUserAuth, :live_user_required},
-        {RadiatorWeb.LiveUserAuth, :sidebar_navigation}
-      ] do
-      live "/podcasts", Podcasts.IndexLive
-      live "/podcasts/new", Podcasts.FormLive, :new
-      live "/podcasts/:id", Podcasts.ShowLive
-      live "/podcasts/:id/edit", Podcasts.FormLive, :edit
-
-      live "/podcasts/:podcast_id/episodes/schedule", Episodes.FormLive, :schedule
-      live "/podcasts/:podcast_id/episodes/new", Episodes.FormLive, :new
-      live "/podcasts/:podcast_id/episodes", Episodes.IndexLive
-      live "/podcasts/:podcast_id/episodes/:id", Episodes.ShowLive
-      live "/podcasts/:podcast_id/episodes/:id/edit", Episodes.FormLive, :edit
-    end
   end
 
   # Other scopes may use custom stacks.
@@ -110,6 +109,7 @@ defmodule RadiatorWeb.Router do
     # If your application does not have an admins-only section yet,
     # you can use Plug.BasicAuth to set up some basic authentication
     # as long as you are also using SSL (which you should anyway).
+    import AshAdmin.Router
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
@@ -117,16 +117,10 @@ defmodule RadiatorWeb.Router do
 
       live_dashboard "/dashboard", metrics: RadiatorWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
-    end
-  end
 
-  if Application.compile_env(:radiator, :dev_routes) do
-    import AshAdmin.Router
+      ash_admin "/ash_admin"
 
-    scope "/ash_admin" do
-      pipe_through :browser
-
-      ash_admin "/"
+      oban_dashboard("/oban")
     end
   end
 end

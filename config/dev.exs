@@ -20,11 +20,11 @@ config :radiator, Radiator.Repo,
 config :radiator, RadiatorWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: String.to_integer(System.get_env("PORT") || "4000")],
+  http: [ip: {127, 0, 0, 1}],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "Ee9N7Y/jZ7uXSRstVe8aP61eTPvkVaZDuWE11cp6eegu6BtsttrChQGzBJiHgOTY",
+  secret_key_base: "sgPxEFo8MzSSdsRpB6ii54e48eY39UTv+sGJXHyqkZMk6OkpmB48SmcYphTxnfJ+",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:radiator, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:radiator, ~w(--watch)]}
@@ -53,19 +53,8 @@ config :radiator, RadiatorWeb.Endpoint,
 # configured to run both http and https servers on
 # different ports.
 
-# Watch static and templates for browser reloading.
-config :radiator, RadiatorWeb.Endpoint,
-  live_reload: [
-    web_console_logger: true,
-    patterns: [
-      ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"priv/gettext/.*(po)$",
-      ~r"lib/radiator_web/(?:controllers|live|components|router)/?.*\.(ex|heex)$"
-    ]
-  ]
-
 # Enable dev routes for dashboard and mailbox
-config :radiator, dev_routes: true, token_signing_secret: "czQV3Piug9mTWQzue2ll9NNjx1LqtIhy"
+config :radiator, dev_routes: true, token_signing_secret: "CVIcpEfZVft/9O7mqPAQhe2nkkl0+dkz"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

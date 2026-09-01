@@ -20,6 +20,26 @@ if System.get_env("PHX_SERVER") do
   config :radiator, RadiatorWeb.Endpoint, server: true
 end
 
+config :radiator, RadiatorWeb.Endpoint,
+  http: [port: String.to_integer(System.get_env("PORT", "4000"))]
+
+if config_env() == :dev do
+  # Reload browser tabs when matching files change.
+  config :radiator, RadiatorWeb.Endpoint,
+    live_reload: [
+      web_console_logger: true,
+      patterns: [
+        # Static assets, except user uploads
+        ~r"priv/static/(?!uploads/).*\.(js|css|png|jpeg|jpg|gif|svg)$"E,
+        # Gettext translations
+        ~r"priv/gettext/.*\.po$"E,
+        # Router, Controllers, LiveViews and LiveComponents
+        ~r"lib/radiator_web/router\.ex$"E,
+        ~r"lib/radiator_web/(controllers|live|components)/.*\.(ex|heex)$"E
+      ]
+    ]
+end
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
@@ -51,7 +71,6 @@ if config_env() == :prod do
       """
 
   host = System.get_env("PHX_HOST") || "example.com"
-  port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :radiator, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
@@ -60,10 +79,9 @@ if config_env() == :prod do
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
-      # See the documentation on https://hexdocs.pm/bandit/Bandit.html#t:options/0
+      # See the documentation on https://bandit.hexdocs.pm/Bandit.html#t:options/0
       # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-      ip: {0, 0, 0, 0, 0, 0, 0, 0},
-      port: port
+      ip: {0, 0, 0, 0, 0, 0, 0, 0}
     ],
     secret_key_base: secret_key_base
 
@@ -94,7 +112,7 @@ if config_env() == :prod do
   # `:keyfile` and `:certfile` expect an absolute path to the key
   # and cert in disk or a relative path inside priv, for example
   # "priv/ssl/server.key". For all supported SSL configuration
-  # options, see https://hexdocs.pm/plug/Plug.SSL.html#configure/1
+  # options, see https://plug.hexdocs.pm/Plug.SSL.html#configure/1
   #
   # We also recommend setting `force_ssl` in your config/prod.exs,
   # ensuring no data is ever sent via http, always redirecting to https:
@@ -120,7 +138,7 @@ if config_env() == :prod do
   #
   #     config :swoosh, :api_client, Swoosh.ApiClient.Req
   #
-  # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+  # See https://swoosh.hexdocs.pm/Swoosh.html#module-installation for details.
 
   config :radiator, Radiator.Mailer,
     adapter: Swoosh.Adapters.SMTP,

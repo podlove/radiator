@@ -7,7 +7,7 @@ defmodule RadiatorWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_radiator_key",
-    signing_salt: "NExPLoxh",
+    signing_salt: "7K0JF5ZC",
     same_site: "Lax"
   ]
 
@@ -24,11 +24,8 @@ defmodule RadiatorWeb.Endpoint do
     at: "/",
     from: :radiator,
     gzip: not code_reloading?,
-    only: RadiatorWeb.static_paths()
-
-  if Code.ensure_loaded?(Tidewave) do
-    plug Tidewave
-  end
+    only: RadiatorWeb.static_paths(),
+    raise_on_missing_only: code_reloading?
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

@@ -8,11 +8,13 @@ metadata:
 <!-- usage-rules-skill-start -->
 ## Additional References
 
-- [ecto](references/ecto.md)
-- [elixir](references/elixir.md)
-- [html](references/html.md)
-- [liveview](references/liveview.md)
-- [phoenix](references/phoenix.md)
+### phoenix
+
+- [ecto](references/phoenix/ecto.md)
+- [elixir](references/phoenix/elixir.md)
+- [html](references/phoenix/html.md)
+- [liveview](references/phoenix/liveview.md)
+- [phoenix](references/phoenix/phoenix.md)
 
 ## Searching Documentation
 

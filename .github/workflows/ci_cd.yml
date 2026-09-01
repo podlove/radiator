@@ -35,7 +35,7 @@ jobs:
       - name: Setup Elixir
         uses: erlef/setup-beam@v1
         with:
-          version-file: .tool-versions
+          version-file: mise.toml
           version-type: strict
 
       - name: Cache deps
@@ -68,11 +68,11 @@ jobs:
       - name: Compiles without warnings
         run: mix compile --warnings-as-errors
 
-      - name: Check Code Style
-        run: mix credo --strict
-
       - name: Check Formatting
         run: mix format --check-formatted
+
+      - name: Check Code Style
+        run: mix credo --strict
 
       - name: Run Tests
         run: mix test

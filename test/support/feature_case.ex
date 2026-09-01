@@ -48,5 +48,6 @@ defmodule RadiatorWeb.FeatureCase do
       |> Helpers.store_in_session(user)
 
     %{context | conn: new_conn}
+    |> Map.put(:user, user)
   end
 end

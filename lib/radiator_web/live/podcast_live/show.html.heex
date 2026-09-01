@@ -1,0 +1,19 @@
+<Layouts.app flash={@flash}>
+  <.header>
+    {@podcast.display_title}
+
+    <:actions>
+      <.button navigate={~p"/admin/podcasts"}>
+        <.icon name="hero-arrow-left" />
+      </.button>
+      <.button variant="primary" navigate={~p"/admin/podcasts/#{@podcast}/edit?return_to=show"}>
+        <.icon name="hero-pencil-square" /> {gettext("Edit")}
+      </.button>
+    </:actions>
+  </.header>
+
+  <.list>
+    <:item title="Title">{@podcast.title}</:item>
+    <:item title="Feed URL">{@podcast.feed_url}</:item>
+  </.list>
+</Layouts.app>

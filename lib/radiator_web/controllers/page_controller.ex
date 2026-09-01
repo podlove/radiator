@@ -1,7 +1,9 @@
 defmodule RadiatorWeb.PageController do
   use RadiatorWeb, :controller
 
-  def home(conn, _params) do
-    render(conn, :home)
+  def imprint(conn, _params) do
+    conn
+    |> assign(:page_title, "Impressum")
+    |> render(:imprint)
   end
 end

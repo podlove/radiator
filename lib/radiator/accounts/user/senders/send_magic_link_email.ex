@@ -1,5 +1,7 @@
 defmodule Radiator.Accounts.User.Senders.SendMagicLinkEmail do
-  @moduledoc "Sends a magic link sign-in email."
+  @moduledoc """
+  Sends a magic link email
+  """
 
   use AshAuthentication.Sender
   use RadiatorWeb, :verified_routes
@@ -8,20 +10,30 @@ defmodule Radiator.Accounts.User.Senders.SendMagicLinkEmail do
   alias Radiator.Mailer
 
   @impl true
-  def send(user_or_email, token, _opts) do
-    email = to_email(user_or_email)
+  def send(user_or_email, token, _) do
+    # if you get a user, its for a user that already exists.
+    # if you get an email, then the user does not yet exist.
+
+    email =
+      case user_or_email do
+        %{email: email} -> email
+        email -> email
+      end
 
     new()
-    |> to(to_string(email))
     |> from({"Radiator: No Reply", "noreply@radiator.metaebene.net"})
-    |> subject("Dein Login-Link")
-    |> html_body("""
-      <p>Hier kannst du dich anmelden:</p>
-      <p><a href="#{url(~p"/auth/user/magic_link?token=#{token}")}">Anmelden</a></p>
-    """)
-    |> Mailer.deliver()
+    |> to(to_string(email))
+    |> subject("Your login link")
+    |> html_body(body(token: token, email: email))
+    |> Mailer.deliver!()
   end
 
-  defp to_email(%{email: email}), do: email
-  defp to_email(email), do: email
+  defp body(params) do
+    # NOTE: You may have to change this to match your magic link acceptance URL.
+
+    """
+    <p>Hello, #{params[:email]}! Click this link to sign in:</p>
+    <p><a href="#{url(~p"/magic_link/#{params[:token]}")}">#{url(~p"/magic_link/#{params[:token]}")}</a></p>
+    """
+  end
 end

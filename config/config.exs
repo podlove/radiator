@@ -7,8 +7,13 @@
 # General application configuration
 import Config
 
+# These enable behaviors that will become the default in the next major
+# version of Ash. Setting them now opts your application into the new
+# behavior and ensures a seamless upgrade. See the backwards compatibility
+# guide for an explanation of each setting:
+# https://hexdocs.pm/ash/backwards-compatibility-config.html
 config :ash,
-  allow_forbidden_field_for_relationships_by_default?: true,
+  allow_forbidden_field_for_relationships_by_default: true,
   include_embedded_source_by_default?: false,
   show_keysets_for_all_actions?: false,
   default_page_type: :keyset,
@@ -16,7 +21,11 @@ config :ash,
   keep_read_action_loads_when_loading?: false,
   default_actions_require_atomic?: true,
   read_action_after_action_hooks_in_order?: true,
-  bulk_actions_default_to_errors?: true
+  bulk_actions_default_to_errors?: true,
+  transaction_rollback_on_error?: true,
+  redact_sensitive_values_in_errors?: true,
+  many_to_many_destroy_destination_on_match?: true,
+  known_types: [AshPostgres.Timestamptz, AshPostgres.TimestamptzUsec]
 
 config :spark,
   formatter: [
@@ -24,7 +33,8 @@ config :spark,
     "Ash.Resource": [
       section_order: [
         :authentication,
-        :tokens,
+        :token,
+        :user_identity,
         :admin,
         :postgres,
         :resource,
@@ -51,11 +61,10 @@ config :spark,
 config :radiator,
   ecto_repos: [Radiator.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [Radiator.Accounts, Radiator.Podcasts, Radiator.People]
+  ash_domains: [Radiator.Podcasts, Radiator.Accounts],
+  ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
-config :ash_authentication, return_error_on_invalid_magic_link_token?: true
-
-# Configures the endpoint
+# Configure the endpoint
 config :radiator, RadiatorWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
@@ -64,9 +73,14 @@ config :radiator, RadiatorWeb.Endpoint,
     layout: false
   ],
   pubsub_server: Radiator.PubSub,
-  live_view: [signing_salt: "rz8V9Eha"]
+  live_view: [signing_salt: "VyaiW59/"]
 
-# Configures the mailer
+# Configure LiveView
+config :phoenix_live_view,
+  # the attribute set on all root tags. Used for Phoenix.LiveView.ColocatedCSS.
+  root_tag_attribute: "phx-r"
+
+# Configure the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
 # locally. You can see the emails in your browser, at "/dev/mailbox".
@@ -87,16 +101,17 @@ config :esbuild,
 
 # Configure tailwind (the version is required)
 config :tailwind,
-  version: "4.1.7",
+  version: "4.3.0",
   radiator: [
     args: ~w(
       --input=assets/css/app.css
       --output=priv/static/assets/css/app.css
     ),
-    cd: Path.expand("..", __DIR__)
+    cd: Path.expand("..", __DIR__),
+    env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
 
-# Configures Elixir's Logger
+# Configure Elixir's Logger
 config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
@@ -104,7 +119,16 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :daisy_ui_components, translate_function: &RadiatorWeb.CoreComponents.translate_error/1
+config :radiator, Oban,
+  engine: Oban.Engines.Basic,
+  notifier: Oban.Notifiers.Postgres,
+  queues: [default: 10],
+  lifeline: [rescue_after: {2, :hours}],
+  pruner: [max_age: {1, :day}],
+  repo: Radiator.Repo,
+  plugins: [{Oban.Plugins.Cron, []}]
+
+config :ash_oban, pro?: false
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
