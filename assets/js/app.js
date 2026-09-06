@@ -64,7 +64,7 @@ if (process.env.NODE_ENV === "development") {
     //   * click with "d" key pressed to open at function component definition location
     let keyDown
     window.addEventListener("keydown", e => keyDown = e.key)
-    window.addEventListener("keyup", e => keyDown = null)
+    window.addEventListener("keyup", _e => keyDown = null)
     window.addEventListener("click", e => {
       if(keyDown === "c"){
         e.preventDefault()

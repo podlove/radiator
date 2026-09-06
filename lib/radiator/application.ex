@@ -1,5 +1,5 @@
 defmodule Radiator.Application do
-  # See https://hexdocs.pm/elixir/Application.html
+  # See https://elixir.hexdocs.pm/Application.html
   # for more information on OTP Applications
   @moduledoc false
 
@@ -11,6 +11,11 @@ defmodule Radiator.Application do
       RadiatorWeb.Telemetry,
       Radiator.Repo,
       {DNSCluster, query: Application.get_env(:radiator, :dns_cluster_query) || :ignore},
+      {Oban,
+       AshOban.config(
+         Application.fetch_env!(:radiator, :ash_domains),
+         Application.fetch_env!(:radiator, Oban)
+       )},
       {Phoenix.PubSub, name: Radiator.PubSub},
       # Start a worker by calling: Radiator.Worker.start_link(arg)
       # {Radiator.Worker, arg},
@@ -19,7 +24,7 @@ defmodule Radiator.Application do
       {AshAuthentication.Supervisor, [otp_app: :radiator]}
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
+    # See https://elixir.hexdocs.pm/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Radiator.Supervisor]
     Supervisor.start_link(children, opts)

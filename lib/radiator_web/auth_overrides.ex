@@ -16,7 +16,7 @@ defmodule RadiatorWeb.AuthOverrides do
   #   set :text_class, "bg-red-500"
   # end
 
-  # override AshAuthentication.Phoenix.Components.SignIn do
-  #  set :show_banner, false
-  # end
+  override AshAuthentication.Phoenix.Components.SignIn do
+    set :show_banner, false
+  end
 end

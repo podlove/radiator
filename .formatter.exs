@@ -1,10 +1,13 @@
 [
   import_deps: [
-    :ash_authentication_phoenix,
+    :ash_oban,
+    :oban,
+    :ash_state_machine,
     :ash_authentication,
+    :ash_authentication_phoenix,
     :ash_admin,
-    :ash_postgres,
     :ash_phoenix,
+    :ash_postgres,
     :ash,
     :reactor,
     :ecto,

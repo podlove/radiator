@@ -1,0 +1,24 @@
+<Layouts.app flash={@flash}>
+  <div class="text-center">
+    <h1 class="my-4 text-6xl">Radiator</h1>
+    <p class="text-xl">The spark ✨ that lights the fire 🔥</p>
+  </div>
+
+  <div class="my-16 grid grid-cols-3 gap-4">
+    <div :for={podcast <- Enum.shuffle(@podcasts)} class="card bg-base-100 shadow-sm">
+      <figure>
+        <img
+          src={"https://picsum.photos/640/320?i=#{Enum.random(1..100)}"}
+          alt=""
+        />
+      </figure>
+      <div class="card-body">
+        <h2 class="card-title">{podcast.title}</h2>
+        <p>Lorem Ipsum</p>
+        <div class="card-actions justify-end">
+          <.link href="#" class="btn btn-primary">Show</.link>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layouts.app>

@@ -65,7 +65,7 @@ defmodule Radiator.Accounts.Token do
 
     destroy :expunge_expired do
       description "Deletes expired tokens."
-      change filter expr(expires_at < now())
+      change filter(expr(expires_at < now()))
     end
 
     update :revoke_all_stored_for_subject do

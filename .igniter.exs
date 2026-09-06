@@ -6,5 +6,6 @@
   extensions: [{Igniter.Extensions.Phoenix, []}],
   deps_location: :last_list_literal,
   source_folders: ["lib", "test/support"],
-  dont_move_files: [~r"lib/mix"]
+  dont_move_files: [~r"lib/mix"],
+  module_names: []
 ]

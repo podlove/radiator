@@ -1,35 +1,12 @@
 defmodule Radiator.Accounts do
   @moduledoc false
 
-  use Ash.Domain, otp_app: :radiator, extensions: [AshAdmin.Domain]
-
-  alias Radiator.Accounts.User.Senders.SendVotingInvitation
-  alias Radiator.Accounts.User.Senders.SendVotingResult
-
-  admin do
-    show? true
-  end
+  use Ash.Domain,
+    otp_app: :radiator
 
   resources do
     resource Radiator.Accounts.Token
     resource Radiator.Accounts.User
-  end
-
-  @doc """
-  Sends a magic-link "you can vote now" invitation to `user` that signs them in
-  and deep-links to the voting page of `episode`.
-  """
-  def send_voting_invitation(user, episode) do
-    SendVotingInvitation.send(user, episode)
-  end
-
-  @doc """
-  Sends a magic-link "the winning date is decided" email to `user` that signs
-  them in and deep-links to the episode's page.
-
-  `episode` must be loaded with its `:scheduling`.
-  """
-  def send_voting_result(user, episode) do
-    SendVotingResult.send(user, episode)
+    resource Radiator.Accounts.ApiKey
   end
 end

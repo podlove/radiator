@@ -31,17 +31,12 @@
           "apps/*/test/",
           "apps/*/web/"
         ],
-        excluded: [
-          ~r"/_build/",
-          ~r"/deps/",
-          ~r"/node_modules/",
-          ~r"/lib/radiator/import/"
-        ]
+        excluded: [~r"/_build/", ~r"/deps/", ~r"/node_modules/"]
       },
       #
       # Load and configure plugins here:
       #
-      plugins: [],
+      plugins: [{AshCredo, []}],
       #
       # If you create your own checks, you must specify the source files for
       # them here, so they can be loaded by Credo before running the analysis.
@@ -94,7 +89,7 @@
           # If you don't want TODO comments to cause `mix credo` to fail, just
           # set this value to 0 (zero).
           #
-          {Credo.Check.Design.TagTODO, [exit_status: 0]},
+          {Credo.Check.Design.TagTODO, [exit_status: 2]},
 
           #
           ## Readability Checks
@@ -155,16 +150,18 @@
           {Credo.Check.Warning.OperationWithConstantResult, []},
           {Credo.Check.Warning.RaiseInsideRescue, []},
           {Credo.Check.Warning.SpecWithStruct, []},
+          {Credo.Check.Warning.StructFieldAmount, []},
           {Credo.Check.Warning.UnsafeExec, []},
           {Credo.Check.Warning.UnusedEnumOperation, []},
           {Credo.Check.Warning.UnusedFileOperation, []},
           {Credo.Check.Warning.UnusedKeywordOperation, []},
           {Credo.Check.Warning.UnusedListOperation, []},
+          {Credo.Check.Warning.UnusedMapOperation, []},
           {Credo.Check.Warning.UnusedPathOperation, []},
           {Credo.Check.Warning.UnusedRegexOperation, []},
           {Credo.Check.Warning.UnusedStringOperation, []},
           {Credo.Check.Warning.UnusedTupleOperation, []},
-          {Credo.Check.Warning.WrongTestFileExtension, []}
+          {Credo.Check.Warning.WrongTestFilename, []}
         ],
         disabled: [
           #
@@ -194,6 +191,7 @@
           {Credo.Check.Readability.WithCustomTaggedTuple, []},
           {Credo.Check.Refactor.ABCSize, []},
           {Credo.Check.Refactor.AppendSingleItem, []},
+          {Credo.Check.Refactor.CondInsteadOfIfElse, []},
           {Credo.Check.Refactor.DoubleBooleanNegation, []},
           {Credo.Check.Refactor.FilterReject, []},
           {Credo.Check.Refactor.IoPuts, []},
@@ -209,12 +207,30 @@
           {Credo.Check.Warning.MapGetUnsafePass, []},
           {Credo.Check.Warning.MixEnv, []},
           {Credo.Check.Warning.UnsafeToAtom, []}
+          # {Credo.Check.Warning.UnusedOperation, [{MyMagicModule, [:fun1, :fun2]}]}
 
           # {Credo.Check.Refactor.MapInto, []},
 
           #
           # Custom checks can be created using `mix credo.gen.check`.
           #
+        ],
+        extra: [
+          # Enable checks
+          {AshCredo.Check.Warning.AuthorizeFalse, []},
+          {AshCredo.Check.Warning.SensitiveFieldInAccept, []},
+          {AshCredo.Check.Warning.WildcardAcceptOnAction, []},
+
+          # Enable with custom parameters
+          {AshCredo.Check.Refactor.LargeResource, [max_lines: 250]},
+          {AshCredo.Check.Warning.SensitiveAttributeExposed,
+           [
+             sensitive_names: ~w(password token secret api_key)a
+           ]},
+          {AshCredo.Check.Design.MissingIdentity,
+           [
+             identity_candidates: ~w(email username slug)a
+           ]}
         ]
       }
     },

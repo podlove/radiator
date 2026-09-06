@@ -46,12 +46,19 @@ defmodule Radiator.Accounts.User do
         end
       end
 
+      remember_me :remember_me
+
       magic_link do
         identity_field :email
         registration_enabled? true
         require_interaction? true
 
         sender Radiator.Accounts.User.Senders.SendMagicLinkEmail
+      end
+
+      api_key :api_key do
+        api_key_relationship :valid_api_keys
+        api_key_hash_attribute :api_key_hash
       end
     end
   end
@@ -196,13 +203,7 @@ defmodule Radiator.Accounts.User do
 
     read :get_by_email do
       description "Looks up a user by their email"
-      get? true
-
-      argument :email, :ci_string do
-        allow_nil? false
-      end
-
-      filter expr(email == ^arg(:email))
+      get_by :email
     end
 
     update :reset_password_with_token do
@@ -245,12 +246,20 @@ defmodule Radiator.Accounts.User do
         allow_nil? false
       end
 
+      argument :remember_me, :boolean do
+        description "Whether to generate a remember me token"
+        allow_nil? true
+      end
+
       upsert? true
       upsert_identity :unique_email
       upsert_fields [:email]
 
       # Uses the information from the token to create or sign in the user
       change AshAuthentication.Strategy.MagicLink.SignInChange
+
+      change {AshAuthentication.Strategy.RememberMe.MaybeGenerateTokenChange,
+              strategy_name: :remember_me}
 
       metadata :token, :string do
         allow_nil? false
@@ -265,23 +274,14 @@ defmodule Radiator.Accounts.User do
       run AshAuthentication.Strategy.MagicLink.Request
     end
 
-    create :invite_by_email do
-      description "Create a passwordless user to be invited as a voting participant."
-      accept [:email, :handle]
-    end
-
-    update :update_profile do
-      description "Update pseudonymous profile fields and optional person link."
-      accept [:handle, :avatar_url, :person_id]
+    read :sign_in_with_api_key do
+      argument :api_key, :string, allow_nil?: false
+      prepare AshAuthentication.Strategy.ApiKey.SignInPreparation
     end
   end
 
   policies do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
-      authorize_if always()
-    end
-
-    policy action([:invite_by_email, :update_profile, :read]) do
       authorize_if always()
     end
   end
@@ -295,49 +295,19 @@ defmodule Radiator.Accounts.User do
     end
 
     attribute :hashed_password, :string do
-      allow_nil? true
       sensitive? true
     end
 
     attribute :confirmed_at, :utc_datetime_usec
-
-    attribute :handle, :string, public?: true
-    attribute :avatar_url, :string, public?: true
-    attribute :person_id, :uuid, public?: true, allow_nil?: true
   end
 
   relationships do
-    belongs_to :person, Radiator.People.Person do
-      allow_nil? true
-      define_attribute? false
-      public? true
+    has_many :valid_api_keys, Radiator.Accounts.ApiKey do
+      filter expr(valid)
     end
-
-    many_to_many :episodes, Radiator.Podcasts.Episode do
-      through Radiator.Podcasts.EpisodeParticipant
-      public? true
-    end
-  end
-
-  calculations do
-    calculate :display_name,
-              :string,
-              expr(
-                cond do
-                  not is_nil(person.display_name) and person.display_name != "" ->
-                    person.display_name
-
-                  not is_nil(handle) and handle != "" ->
-                    handle
-
-                  true ->
-                    type(email, :string)
-                end
-              )
   end
 
   identities do
     identity :unique_email, [:email]
-    identity :unique_handle, [:handle]
   end
 end

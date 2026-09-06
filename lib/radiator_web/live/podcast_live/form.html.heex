@@ -1,0 +1,20 @@
+<Layouts.app flash={@flash}>
+  <.header>
+    {@page_title}
+  </.header>
+
+  <.form
+    for={@form}
+    id="podcast-form"
+    phx-change="validate"
+    phx-submit="save"
+  >
+    <.input :if={@live_action != :import} field={@form[:title]} type="text" label="Title" />
+    <.input :if={@live_action != :new} field={@form[:feed_url]} type="url" label="Feed URL" />
+
+    <div class="flex justify-between">
+      <.button navigate={return_path(@return_to, @podcast)}>Cancel</.button>
+      <.button phx-disable-with="Saving..." variant="primary">{gettext("Save")}</.button>
+    </div>
+  </.form>
+</Layouts.app>
