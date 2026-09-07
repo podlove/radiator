@@ -25,7 +25,8 @@ config :ash,
   transaction_rollback_on_error?: true,
   redact_sensitive_values_in_errors?: true,
   many_to_many_destroy_destination_on_match?: true,
-  known_types: [AshPostgres.Timestamptz, AshPostgres.TimestamptzUsec]
+  known_types: [AshPostgres.Timestamptz, AshPostgres.TimestamptzUsec],
+  default_string_length_count: :codepoints
 
 config :spark,
   formatter: [
