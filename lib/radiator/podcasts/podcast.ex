@@ -6,7 +6,8 @@ defmodule Radiator.Podcasts.Podcast do
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    fragments: [Radiator.Podcasts.Podcast.Calculations]
 
   alias Radiator.Accounts.User
   alias Radiator.Podcasts.Episode
@@ -53,9 +54,5 @@ defmodule Radiator.Podcasts.Podcast do
     belongs_to :user, User, allow_nil?: false
 
     has_many :episodes, Episode, sort: [number: :desc_nils_first]
-  end
-
-  calculations do
-    calculate :display_title, :string, expr(if is_nil(title), do: feed_url, else: title)
   end
 end
