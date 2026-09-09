@@ -1,0 +1,155 @@
+<Layouts.app flash={@flash}>
+  <.header>
+    {@page_title}
+    <:subtitle>
+      {@podcast.display_title}
+      <span :if={@podcast.feed_url}>
+        {gettext("Der nächste Sync des Feeds überschreibt die Felder importierter Episoden.")}
+      </span>
+    </:subtitle>
+  </.header>
+
+  <.form
+    for={@form}
+    id="episode-form"
+    phx-change="validate"
+    phx-submit="save"
+    class="space-y-10"
+  >
+    <section class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Beschreibung")}</h2>
+      <.input field={@form[:title]} type="text" label={gettext("Titel")} />
+      <.input field={@form[:subtitle]} type="text" label={gettext("Untertitel")} />
+      <.input field={@form[:summary]} type="textarea" rows="3" label={gettext("Zusammenfassung")} />
+      <.input
+        field={@form[:content_html]}
+        type="textarea"
+        rows="10"
+        label={gettext("Shownotes (HTML)")}
+      />
+      <div class="grid gap-x-6 sm:grid-cols-2">
+        <.input field={@form[:author]} type="text" label={gettext("Autor")} />
+        <.input field={@form[:link]} type="url" label={gettext("Website")} />
+        <.input field={@form[:image_url]} type="url" label={gettext("Cover-URL")} />
+        <.input field={@form[:guid]} type="text" label={gettext("GUID")} />
+      </div>
+    </section>
+
+    <section class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Veröffentlichung")}</h2>
+      <div class="grid gap-x-6 sm:grid-cols-2">
+        <.input field={@form[:number]} type="number" label={gettext("Nummer")} />
+        <.input field={@form[:season]} type="number" label={gettext("Staffel")} />
+        <.input
+          field={@form[:episode_type]}
+          type="select"
+          prompt={gettext("Nicht angegeben")}
+          options={episode_type_options()}
+          label={gettext("Art")}
+        />
+        <.input
+          field={@form[:published_at]}
+          type="datetime-local"
+          label={gettext("Veröffentlicht am")}
+        />
+        <.input
+          field={@form[:duration_seconds]}
+          type="number"
+          label={gettext("Dauer in Sekunden")}
+        />
+      </div>
+    </section>
+
+    <section class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Mediendatei")}</h2>
+      <.input field={@form[:enclosure_url]} type="url" label={gettext("URL")} />
+      <div class="grid gap-x-6 sm:grid-cols-2">
+        <.input field={@form[:enclosure_length]} type="number" label={gettext("Größe in Bytes")} />
+        <.input field={@form[:enclosure_type]} type="text" label={gettext("MIME-Typ")} />
+      </div>
+    </section>
+
+    <section class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Kapitel")}</h2>
+      <.inputs_for :let={chapter} field={@form[:chapters]}>
+        <div class="flex items-end gap-2">
+          <div class="grid grow gap-x-4 sm:grid-cols-[8rem_1fr_1fr]">
+            <.input field={chapter[:start_ms]} type="number" label={gettext("Start in ms")} />
+            <.input field={chapter[:title]} type="text" label={gettext("Titel")} />
+            <.input field={chapter[:href]} type="url" label={gettext("Link")} />
+          </div>
+          <button
+            type="button"
+            class="btn btn-ghost btn-square mb-2"
+            phx-click="remove-form"
+            phx-value-path={chapter.name}
+            aria-label={gettext("Kapitel entfernen")}
+          >
+            <.icon name="hero-x-mark" class="size-4" />
+          </button>
+        </div>
+      </.inputs_for>
+      <button
+        id="add-chapter"
+        type="button"
+        class="btn btn-ghost btn-sm"
+        phx-click="add-form"
+        phx-value-path={@form.name <> "[chapters]"}
+      >
+        <.icon name="hero-plus" class="size-4" /> {gettext("Kapitel hinzufügen")}
+      </button>
+
+      <div class="grid gap-x-6 pt-4 sm:grid-cols-2">
+        <.input
+          field={@form[:chapters_url]}
+          type="url"
+          label={gettext("Kapiteldatei, URL")}
+        />
+        <.input
+          field={@form[:chapters_type]}
+          type="text"
+          label={gettext("Kapiteldatei, MIME-Typ")}
+        />
+      </div>
+    </section>
+
+    <section class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Transkripte")}</h2>
+      <.inputs_for :let={transcript} field={@form[:transcripts]}>
+        <div class="flex items-end gap-2">
+          <div class="grid grow gap-x-4 sm:grid-cols-[1fr_10rem_6rem_6rem]">
+            <.input field={transcript[:url]} type="url" label={gettext("URL")} />
+            <.input field={transcript[:type]} type="text" label={gettext("MIME-Typ")} />
+            <.input field={transcript[:language]} type="text" label={gettext("Sprache")} />
+            <.input field={transcript[:rel]} type="text" label={gettext("Rel")} />
+          </div>
+          <button
+            type="button"
+            class="btn btn-ghost btn-square mb-2"
+            phx-click="remove-form"
+            phx-value-path={transcript.name}
+            aria-label={gettext("Transkript entfernen")}
+          >
+            <.icon name="hero-x-mark" class="size-4" />
+          </button>
+        </div>
+      </.inputs_for>
+      <button
+        id="add-transcript"
+        type="button"
+        class="btn btn-ghost btn-sm"
+        phx-click="add-form"
+        phx-value-path={@form.name <> "[transcripts]"}
+      >
+        <.icon name="hero-plus" class="size-4" /> {gettext("Transkript hinzufügen")}
+      </button>
+    </section>
+
+    <div class="flex justify-between">
+      <.button navigate={~p"/admin/podcasts/#{@podcast}"}>{gettext("Abbrechen")}</.button>
+      <.button phx-disable-with={gettext("Speichern …")} variant="primary">
+        {gettext("Speichern")}
+      </.button>
+    </div>
+  </.form>
+</Layouts.app>

@@ -28,6 +28,9 @@ defmodule RadiatorWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import RadiatorWeb.ConnCase
+      # `register_and_log_in_user/1` for the routes behind :live_user_required.
+      import Radiator.AuthFixtures
+      import Radiator.Generator
     end
   end
 

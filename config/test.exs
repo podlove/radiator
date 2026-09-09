@@ -45,4 +45,6 @@ config :phoenix,
 
 config :radiator, Oban, testing: :manual
 
+config :radiator, :feed_client, Radiator.StubFeedClient
+
 config :phoenix_test, :endpoint, RadiatorWeb.Endpoint

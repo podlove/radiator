@@ -1,5 +1,12 @@
 defmodule Radiator.Podcasts do
-  @moduledoc false
+  @moduledoc """
+  Podcasts, their episodes and the people credited on them.
+
+  A podcast is either maintained by hand or imported from a feed and kept in
+  sync with it. The sync machinery — the `:sync`, `:apply_feed` and
+  `:mark_sync_failed` actions on `Podcast` — is driven by Oban and has no code
+  interface on purpose; `import_podcast/2` and `request_sync/1` are the ways in.
+  """
 
   use Ash.Domain, otp_app: :radiator, extensions: [AshPhoenix, AshAdmin.Domain]
 
@@ -15,6 +22,7 @@ defmodule Radiator.Podcasts do
       define :get_podcast_by_id, action: :read, get_by: :id
       define :update_podcast, action: :update
       define :destroy_podcast, action: :destroy
+      define :request_sync, action: :request_sync
     end
 
     resource Radiator.Podcasts.Episode do
@@ -23,6 +31,20 @@ defmodule Radiator.Podcasts do
       define :get_episode_by_id, action: :read, get_by: :id
       define :update_episode, action: :update
       define :destroy_episode, action: :destroy
+    end
+
+    resource Radiator.Podcasts.Person do
+      define :create_person, action: :create
+      define :read_persons, action: :read
+      define :get_person_by_id, action: :read, get_by: :id
+      define :update_person, action: :update
+      define :destroy_person, action: :destroy
+    end
+
+    resource Radiator.Podcasts.EpisodeContributor do
+      define :create_episode_contributor, action: :create
+      define :read_episode_contributors, action: :read
+      define :destroy_episode_contributor, action: :destroy
     end
   end
 end

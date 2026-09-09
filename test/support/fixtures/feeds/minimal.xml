@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:podcast="https://podcastindex.org/namespace/1.0"
+     version="2.0">
+  <channel>
+    <title>Test Show</title>
+    <link>https://example.com</link>
+    <description><![CDATA[Eine <em>Testsendung</em>]]></description>
+    <language>de-DE</language>
+    <copyright>Example Media</copyright>
+    <fyyd:verify xmlns:fyyd="https://fyyd.de/fyyd-ns/">abc123</fyyd:verify>
+    <itunes:author>Example Media</itunes:author>
+    <itunes:type>episodic</itunes:type>
+    <itunes:subtitle>Kurzbeschreibung</itunes:subtitle>
+    <itunes:summary>Die Zusammenfassung der Sendung</itunes:summary>
+    <itunes:explicit>no</itunes:explicit>
+    <itunes:image href="https://example.com/cover.jpg"/>
+    <itunes:owner>
+      <itunes:name>Alice Example</itunes:name>
+      <itunes:email>alice@example.com</itunes:email>
+    </itunes:owner>
+    <itunes:category text="Technology"/>
+    <itunes:category text="Society &amp; Culture">
+      <itunes:category text="Philosophy"/>
+    </itunes:category>
+    <podcast:funding url="https://example.com/support">Unterstütze die Sendung</podcast:funding>
+    <podcast:license url="https://creativecommons.org/licenses/by/4.0/">cc-by-4.0</podcast:license>
+    <podcast:guid>60489a00-ccbb-42ec-87f3-a090c961e8dc</podcast:guid>
+    <podcast:person img="https://example.com/alice.jpg" role="host">Alice Example</podcast:person>
+    <atom:contributor>
+      <atom:name>Alice Example</atom:name>
+      <atom:uri>https://alice.example</atom:uri>
+    </atom:contributor>
+    <unknown:wrapper xmlns:unknown="https://unknown.example/ns">
+      <unknown:inner>wird ignoriert</unknown:inner>
+    </unknown:wrapper>
+
+    <item>
+      <title>Vollständige Episode</title>
+      <link>https://example.com/e1</link>
+      <pubDate>Fri, 28 Aug 2026 17:14:26 +0000</pubDate>
+      <guid isPermaLink="false">item-1</guid>
+      <description><![CDATA[Zusammenfassung eins]]></description>
+      <content:encoded><![CDATA[<p>Volltext mit <a href="https://example.com">Link</a></p>]]></content:encoded>
+      <enclosure url="https://example.com/e1.mp3" length="149856131" type="audio/mpeg"/>
+      <itunes:episode>1</itunes:episode>
+      <itunes:season>1</itunes:season>
+      <itunes:episodeType>full</itunes:episodeType>
+      <itunes:duration>01:02:03</itunes:duration>
+      <itunes:subtitle>Untertitel eins</itunes:subtitle>
+      <itunes:summary>Zusammenfassung aus itunes:summary</itunes:summary>
+      <itunes:author>Alice Example</itunes:author>
+      <itunes:image href="https://example.com/e1.jpg"/>
+      <podcast:chapters url="https://example.com/e1.json" type="application/json+chapters"/>
+      <podcast:transcript url="https://example.com/e1.vtt" type="text/vtt" language="de"/>
+      <podcast:person img="https://example.com/alice.jpg" role="host">Alice Example</podcast:person>
+      <podcast:person role="guest">Bob Beispiel</podcast:person>
+      <atom:contributor>
+        <atom:name>Alice Example</atom:name>
+        <atom:uri>https://alice.example</atom:uri>
+      </atom:contributor>
+      <atom:contributor>
+        <atom:name>Bob Beispiel</atom:name>
+      </atom:contributor>
+      <psc:chapters xmlns:psc="http://podlove.org/simple-chapters" version="1.2">
+        <psc:chapter start="00:00:00.000" title="Intro"/>
+        <psc:chapter start="00:12:34.567" title="Hauptteil" href="https://example.com/kapitel"/>
+      </psc:chapters>
+    </item>
+
+    <item>
+      <title>Ohne Episodennummer</title>
+      <guid isPermaLink="false">item-2</guid>
+      <description>Nur aus description</description>
+      <pubDate>Thu, 27 Aug 2026 10:00:00 +0200</pubDate>
+      <enclosure url="https://example.com/e2.mp3" length="1000" type="audio/mpeg"/>
+      <itunes:duration>3600</itunes:duration>
+    </item>
+
+    <item>
+      <guid isPermaLink="false">item-3</guid>
+      <itunes:title>Titel nur aus itunes:title</itunes:title>
+      <itunes:episode>3</itunes:episode>
+      <itunes:duration>1:00:00.500</itunes:duration>
+    </item>
+
+    <item>
+      <guid isPermaLink="false">item-4</guid>
+      <itunes:episode>4</itunes:episode>
+    </item>
+
+    <item>
+      <guid isPermaLink="false">item-5</guid>
+      <title>Mit unbekanntem Teilbaum</title>
+      <unknown:block xmlns:unknown="https://unknown.example/ns">
+        <unknown:child attr="x">Text der ignoriert wird</unknown:child>
+      </unknown:block>
+      <itunes:episode>5</itunes:episode>
+    </item>
+  </channel>
+</rss>

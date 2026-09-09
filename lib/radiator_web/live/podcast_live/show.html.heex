@@ -1,19 +1,130 @@
 <Layouts.app flash={@flash}>
-  <.header>
-    {@podcast.display_title}
+  <nav>
+    <.link
+      navigate={~p"/admin/podcasts"}
+      class="inline-flex items-center gap-1 text-sm text-base-content/60 transition-colors hover:text-base-content"
+    >
+      <.icon name="hero-arrow-left" class="size-4" /> {gettext("Alle Podcasts")}
+    </.link>
+  </nav>
 
-    <:actions>
-      <.button navigate={~p"/admin/podcasts"}>
-        <.icon name="hero-arrow-left" />
+  <header class="flex flex-col gap-6 pt-4 sm:flex-row sm:items-start">
+    <div class="size-28 shrink-0 overflow-hidden rounded-lg bg-base-300 sm:size-36">
+      <img
+        :if={@podcast.image_url}
+        src={@podcast.image_url}
+        alt=""
+        class="size-full object-cover"
+      />
+      <div
+        :if={!@podcast.image_url}
+        class="flex size-full items-center justify-center text-base-content/30"
+      >
+        <.icon name="hero-microphone" class="size-10" />
+      </div>
+    </div>
+
+    <div class="min-w-0 grow">
+      <h1 class="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+        {@podcast.display_title}
+      </h1>
+      <p :if={@podcast.author} class="mt-1 text-base-content/70">{@podcast.author}</p>
+      <p :if={@podcast.subtitle} class="mt-3 max-w-prose text-base-content/80">
+        {@podcast.subtitle}
+      </p>
+      <p class="mt-3 text-sm text-base-content/60">
+        {ngettext("1 Episode", "%{count} Episoden", length(@podcast.episodes))}
+      </p>
+    </div>
+
+    <div class="flex shrink-0 gap-2">
+      <.button
+        :if={@podcast.feed_url}
+        id="request-sync"
+        phx-click="request_sync"
+        disabled={@podcast.sync_status == :pending}
+        data-confirm={
+          gettext("Ein Sync überschreibt alle lokalen Änderungen an diesem Podcast. Fortfahren?")
+        }
+      >
+        <.icon name="hero-arrow-path" /> {gettext("Jetzt synchronisieren")}
+      </.button>
+      <.button navigate={~p"/admin/podcasts/#{@podcast}/episodes/new"}>
+        <.icon name="hero-plus" /> {gettext("Neue Episode")}
       </.button>
       <.button variant="primary" navigate={~p"/admin/podcasts/#{@podcast}/edit?return_to=show"}>
-        <.icon name="hero-pencil-square" /> {gettext("Edit")}
+        <.icon name="hero-pencil-square" /> {gettext("Bearbeiten")}
       </.button>
-    </:actions>
-  </.header>
+    </div>
+  </header>
 
-  <.list>
-    <:item title="Title">{@podcast.title}</:item>
-    <:item title="Feed URL">{@podcast.feed_url}</:item>
-  </.list>
+  <section
+    :if={@podcast.feed_url}
+    class={["mt-8 border-l-4 py-1 pl-4", rail_class(@podcast.sync_status)]}
+  >
+    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+      <span class="inline-flex items-center gap-2 font-medium">
+        <.icon
+          :if={@podcast.sync_status == :pending}
+          name="hero-arrow-path"
+          class="size-4 motion-safe:animate-spin"
+        />
+        {SyncStatus.label(@podcast.sync_status)}
+      </span>
+      <span :if={@podcast.last_checked_at} class="text-sm text-base-content/60">
+        {gettext("Zuletzt geprüft")} {Formatting.relative_time(@podcast.last_checked_at)}
+      </span>
+      <span :if={@podcast.last_imported_at} class="text-sm text-base-content/60">
+        {gettext("Zuletzt importiert")} {Formatting.relative_time(@podcast.last_imported_at)}
+      </span>
+    </div>
+
+    <p class="mt-1 flex flex-wrap gap-x-4 text-sm text-base-content/60">
+      <a href={@podcast.feed_url} class="truncate hover:underline" target="_blank" rel="noopener">
+        {@podcast.feed_url}
+      </a>
+      <span>{SyncStrategy.label(@podcast.sync_strategy)}</span>
+    </p>
+
+    <p :if={@podcast.last_sync_error} class="mt-2 text-sm text-error">
+      {@podcast.last_sync_error}
+    </p>
+  </section>
+
+  <section class="mt-10">
+    <h2 class="text-lg font-semibold">{gettext("Episoden")}</h2>
+
+    <p :if={@podcast.episodes == []} class="mt-2 text-base-content/60">
+      {gettext("Noch keine Episoden.")}
+      <span :if={@podcast.feed_url}>{gettext("Ein Sync liest sie aus dem Feed ein.")}</span>
+    </p>
+
+    <ol :if={@podcast.episodes != []} class="mt-3 divide-y divide-base-200">
+      <li :for={episode <- @podcast.episodes} class="flex items-baseline gap-4 py-3">
+        <span class="w-10 shrink-0 text-right tabular-nums text-base-content/50">
+          {episode.number}
+        </span>
+        <div class="min-w-0 grow">
+          <.link
+            navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{episode}/edit"}
+            class="block truncate font-medium hover:underline"
+          >
+            {episode.title}
+          </.link>
+          <p :if={episode.published_at} class="text-sm text-base-content/60">
+            {Formatting.date(episode.published_at)}
+          </p>
+        </div>
+        <span
+          :if={episode.missing_from_feed?}
+          class="shrink-0 rounded-full bg-warning px-2 py-0.5 text-xs font-medium text-warning-content"
+        >
+          {gettext("Nicht mehr im Feed")}
+        </span>
+        <span class="shrink-0 tabular-nums text-sm text-base-content/60">
+          {Formatting.duration(episode.duration_seconds)}
+        </span>
+      </li>
+    </ol>
+  </section>
 </Layouts.app>

@@ -1,6 +1,11 @@
 <Layouts.app flash={@flash}>
   <.header>
     {@page_title}
+    <:subtitle :if={@live_action == :edit and @podcast.feed_url}>
+      {gettext(
+        "Dieser Podcast wird aus einem Feed gelesen. Der nächste Sync überschreibt alle Felder außer Feed-URL und Synchronisation."
+      )}
+    </:subtitle>
   </.header>
 
   <.form
@@ -8,13 +13,105 @@
     id="podcast-form"
     phx-change="validate"
     phx-submit="save"
+    class="space-y-10"
   >
-    <.input :if={@live_action != :import} field={@form[:title]} type="text" label="Title" />
-    <.input :if={@live_action != :new} field={@form[:feed_url]} type="url" label="Feed URL" />
+    <section :if={@live_action != :new} class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Feed")}</h2>
+      <.input field={@form[:feed_url]} type="url" label={gettext("Feed-URL")} />
+      <.input
+        field={@form[:sync_strategy]}
+        type="select"
+        options={SyncStrategy.options()}
+        label={gettext("Synchronisation")}
+      />
+      <.input
+        :if={@live_action == :edit}
+        field={@form[:feed_guid]}
+        type="text"
+        label={gettext("Feed-GUID")}
+      />
+    </section>
+
+    <section :if={@live_action != :import} class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Beschreibung")}</h2>
+      <.input field={@form[:title]} type="text" label={gettext("Titel")} />
+      <.input field={@form[:subtitle]} type="text" label={gettext("Untertitel")} />
+      <.input field={@form[:summary]} type="textarea" rows="3" label={gettext("Zusammenfassung")} />
+      <.input
+        field={@form[:description]}
+        type="textarea"
+        rows="8"
+        label={gettext("Beschreibung (HTML)")}
+      />
+      <div class="grid gap-x-6 sm:grid-cols-2">
+        <.input field={@form[:author]} type="text" label={gettext("Autor")} />
+        <.input
+          field={@form[:language]}
+          type="text"
+          label={gettext("Sprache")}
+          placeholder="de-DE"
+        />
+        <.input field={@form[:link]} type="url" label={gettext("Website")} />
+        <.input field={@form[:image_url]} type="url" label={gettext("Cover-URL")} />
+      </div>
+    </section>
+
+    <section :if={@live_action != :import} class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Kategorien")}</h2>
+      <.inputs_for :let={category} field={@form[:categories]}>
+        <div class="flex items-end gap-2">
+          <div class="grid grow gap-x-4 sm:grid-cols-2">
+            <.input field={category[:text]} type="text" label={gettext("Kategorie")} />
+            <.input field={category[:subcategory]} type="text" label={gettext("Unterkategorie")} />
+          </div>
+          <button
+            type="button"
+            class="btn btn-ghost btn-square mb-2"
+            phx-click="remove-form"
+            phx-value-path={category.name}
+            aria-label={gettext("Kategorie entfernen")}
+          >
+            <.icon name="hero-x-mark" class="size-4" />
+          </button>
+        </div>
+      </.inputs_for>
+      <button
+        id="add-category"
+        type="button"
+        class="btn btn-ghost btn-sm"
+        phx-click="add-form"
+        phx-value-path={@form.name <> "[categories]"}
+      >
+        <.icon name="hero-plus" class="size-4" /> {gettext("Kategorie hinzufügen")}
+      </button>
+    </section>
+
+    <section :if={@live_action != :import} class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Veröffentlichung")}</h2>
+      <div class="grid gap-x-6 sm:grid-cols-2">
+        <.input
+          field={@form[:podcast_type]}
+          type="select"
+          prompt={gettext("Nicht angegeben")}
+          options={PodcastType.options()}
+          label={gettext("Art")}
+        />
+        <.input field={@form[:copyright]} type="text" label={gettext("Copyright")} />
+        <.input field={@form[:license]} type="text" label={gettext("Lizenz")} />
+        <.input field={@form[:license_url]} type="url" label={gettext("Lizenz-URL")} />
+        <.input field={@form[:funding_text]} type="text" label={gettext("Unterstützen, Text")} />
+        <.input field={@form[:funding_url]} type="url" label={gettext("Unterstützen, URL")} />
+        <.input field={@form[:owner_name]} type="text" label={gettext("Inhaber")} />
+        <.input field={@form[:owner_email]} type="email" label={gettext("Inhaber, E-Mail")} />
+      </div>
+      <.input field={@form[:explicit]} type="checkbox" label={gettext("Explizite Inhalte")} />
+    </section>
 
     <div class="flex justify-between">
-      <.button navigate={return_path(@return_to, @podcast)}>Cancel</.button>
-      <.button phx-disable-with="Saving..." variant="primary">{gettext("Save")}</.button>
+      <.button navigate={return_path(@return_to, @podcast)}>{gettext("Abbrechen")}</.button>
+      <.button phx-disable-with={gettext("Speichern …")} variant="primary">
+        {gettext("Speichern")}
+      </.button>
     </div>
   </.form>
 </Layouts.app>

@@ -123,13 +123,19 @@ config :phoenix, :json_library, Jason
 config :radiator, Oban,
   engine: Oban.Engines.Basic,
   notifier: Oban.Notifiers.Postgres,
-  queues: [default: 10],
+  # Low concurrency on purpose: ten 5 MB feeds at once mean hundreds of
+  # megabytes of XML plus parsed structures in memory.
+  queues: [default: 10, feeds: 3],
   lifeline: [rescue_after: {2, :hours}],
   pruner: [max_age: {1, :day}],
   repo: Radiator.Repo,
   plugins: [{Oban.Plugins.Cron, []}]
 
 config :ash_oban, pro?: false
+
+config :ash_oban, actor_persister: Radiator.ObanActorPersister
+
+config :radiator, :feed_client, Radiator.Feeds.Client.ReqClient
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

@@ -3,6 +3,8 @@ defmodule RadiatorWeb.PodcastLive.Form do
 
   alias AshPhoenix.Form
   alias Radiator.Podcasts.Podcast
+  alias Radiator.Podcasts.PodcastType
+  alias Radiator.Podcasts.SyncStrategy
 
   @impl true
   def mount(params, _session, socket) do
@@ -35,11 +37,23 @@ defmodule RadiatorWeb.PodcastLive.Form do
     |> noreply()
   end
 
+  def handle_event("add-form", %{"path" => path}, socket) do
+    socket
+    |> assign(form: Form.add_form(socket.assigns.form, path))
+    |> noreply()
+  end
+
+  def handle_event("remove-form", %{"path" => path}, socket) do
+    socket
+    |> assign(form: Form.remove_form(socket.assigns.form, path))
+    |> noreply()
+  end
+
   def handle_event("save", %{"podcast" => podcast_params}, socket) do
     case Form.submit(socket.assigns.form, params: podcast_params) do
       {:ok, podcast} ->
         socket
-        |> put_flash(:info, "Podcast #{socket.assigns.form.source.type}d successfully")
+        |> put_flash(:info, saved_message(socket.assigns.live_action))
         |> push_navigate(to: return_path(socket.assigns.return_to, podcast))
         |> noreply()
 
@@ -47,6 +61,12 @@ defmodule RadiatorWeb.PodcastLive.Form do
         socket |> assign(form: form) |> noreply()
     end
   end
+
+  # `form.source.type` is the action type, which is `:create` for `:import`
+  # as well; the live action tells them apart.
+  defp saved_message(:import), do: gettext("Podcast angelegt, Feed wird eingelesen.")
+  defp saved_message(:edit), do: gettext("Podcast gespeichert.")
+  defp saved_message(_live_action), do: gettext("Podcast angelegt.")
 
   defp assign_form(%{assigns: %{live_action: :import}} = socket) do
     form = Form.for_create(Podcast, :import, as: "podcast", actor: socket.assigns.current_user)
