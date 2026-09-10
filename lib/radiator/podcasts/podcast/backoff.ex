@@ -33,8 +33,6 @@ defmodule Radiator.Podcasts.Podcast.Backoff do
   defp retry_after(_reason), do: nil
 
   defp exponential(attempt) do
-    attempt = max(attempt || 1, 1)
-
-    min(trunc(:math.pow(attempt, 4)) + 15, @max_seconds)
+    min(trunc(:math.pow(max(attempt, 1), 4)) + 15, @max_seconds)
   end
 end

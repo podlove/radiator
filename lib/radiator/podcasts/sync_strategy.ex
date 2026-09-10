@@ -11,7 +11,4 @@ defmodule Radiator.Podcasts.SyncStrategy do
       manual: [label: "Nur einmaliger Import"],
       scheduled: [label: "Regelmäßiger Sync"]
     ]
-
-  @doc ~S(Label/value pairs for `<.input type="select">`.)
-  def options, do: Enum.map(values(), &{label(&1), &1})
 end

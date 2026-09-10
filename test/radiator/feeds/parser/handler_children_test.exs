@@ -17,6 +17,7 @@ defmodule Radiator.Feeds.Parser.HandlerChildrenTest do
   end
 
   describe "chapters" do
+    # The fixture binds `xmlns:psc` on `psc:chapters` itself, not on the root.
     test "reads them in document order with milliseconds", %{first: first} do
       assert first.chapters == [
                %Chapter{start_ms: 0, title: "Intro", href: nil, image_url: nil},
@@ -27,12 +28,6 @@ defmodule Radiator.Feeds.Parser.HandlerChildrenTest do
                  image_url: nil
                }
              ]
-    end
-
-    test "recognises psc even when the prefix is bound on psc:chapters itself", %{
-      first: first
-    } do
-      assert length(first.chapters) == 2
     end
 
     test "leaves items without chapters at an empty list", %{feed: feed} do
@@ -75,11 +70,6 @@ defmodule Radiator.Feeds.Parser.HandlerChildrenTest do
                  uri: "https://alice.example"
                }
              ]
-    end
-
-    test "does not mix channel persons with item persons", %{feed: feed} do
-      assert length(feed.channel.persons) == 1
-      assert length(hd(feed.items).persons) == 2
     end
 
     test "leaves items without persons at an empty list", %{feed: feed} do

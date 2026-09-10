@@ -3,169 +3,132 @@ defmodule Radiator.Podcasts.SyncTest do
 
   require Ash.Query
 
-  alias Radiator.FeedFixtures
-  alias Radiator.Feeds.Response
+  alias Radiator.Feeds.Client.ReqClient
   alias Radiator.Podcasts
   alias Radiator.Podcasts.Episode
   alias Radiator.Podcasts.FeedSyncError
-  alias Radiator.StubFeedClient
+  alias Radiator.Podcasts.Podcast
 
   setup do
-    StubFeedClient.reset()
-    user = generate(user())
+    Req.Test.stub(ReqClient, Radiator.FeedPlug)
 
-    podcast = Podcasts.import_podcast!(%{feed_url: "https://example.com/feed"}, actor: user)
-
-    %{user: user, podcast: podcast}
+    %{user: generate(user())}
   end
 
-  defp ok_response(opts \\ []) do
-    {:ok,
-     %Response{
-       status: 200,
-       body: FeedFixtures.read!("minimal.xml"),
-       etag: Keyword.get(opts, :etag, ~s("v1")),
-       last_modified: Keyword.get(opts, :last_modified, "Fri, 28 Aug 2026 17:14:26 GMT"),
-       final_url: "https://example.com/feed"
-     }}
+  # The path picks the response; see `Radiator.FeedPlug`.
+  defp import!(user, path) do
+    Podcasts.import_podcast!(%{feed_url: "https://example.com#{path}"}, actor: user)
   end
+
+  defp sync!(podcast), do: Ash.update!(podcast, %{}, action: :sync)
 
   defp episode_count(podcast) do
     Episode |> Ash.Query.filter(podcast_id == ^podcast.id) |> Ash.read!() |> length()
   end
 
   describe "successful sync" do
-    test "fetches, parses and writes", %{podcast: podcast} do
-      StubFeedClient.put(ok_response())
-
-      synced = Ash.update!(podcast, %{}, action: :sync)
+    test "fetches, parses and writes", %{user: user} do
+      synced = user |> import!("/feed") |> sync!()
 
       assert synced.title == "Test Show"
       assert synced.sync_status == :succeeded
-      assert episode_count(podcast) == 5
+      assert episode_count(synced) == 5
     end
 
-    test "stores the http validators for the next run", %{podcast: podcast} do
-      StubFeedClient.put(ok_response())
-
-      synced = Ash.update!(podcast, %{}, action: :sync)
+    test "stores the http validators for the next run", %{user: user} do
+      synced = user |> import!("/feed") |> sync!()
 
       assert synced.http_etag == ~s("v1")
       assert synced.http_last_modified == "Fri, 28 Aug 2026 17:14:26 GMT"
     end
-
-    test "sends the stored validators on the following run", %{podcast: podcast} do
-      StubFeedClient.put(ok_response())
-      synced = Ash.update!(podcast, %{}, action: :sync)
-
-      StubFeedClient.reset()
-      StubFeedClient.put(ok_response(etag: ~s("v2")))
-      Ash.update!(synced, %{}, action: :sync)
-
-      assert [{"https://example.com/feed", opts}] = StubFeedClient.calls()
-      assert opts[:etag] == ~s("v1")
-      assert opts[:last_modified] == "Fri, 28 Aug 2026 17:14:26 GMT"
-    end
-
-    test "a requested sync drops the validators so the server cannot answer 304", %{
-      podcast: podcast
-    } do
-      StubFeedClient.put(ok_response())
-      synced = Ash.update!(podcast, %{}, action: :sync)
-
-      requested = Podcasts.request_sync!(synced)
-
-      assert requested.http_etag == nil
-      assert requested.http_last_modified == nil
-
-      StubFeedClient.reset()
-      StubFeedClient.put(ok_response())
-      Ash.update!(requested, %{}, action: :sync)
-
-      assert [{_url, opts}] = StubFeedClient.calls()
-      assert opts[:etag] == nil
-    end
   end
 
   describe "not modified" do
-    test "leaves the episodes alone and only moves last_checked_at", %{podcast: podcast} do
-      StubFeedClient.put(ok_response())
-      imported = Ash.update!(podcast, %{}, action: :sync)
-
-      StubFeedClient.put({:not_modified, %Response{status: 304, etag: ~s("v1")}})
-      checked = Ash.update!(imported, %{}, action: :sync)
+    test "the second run sends the validators, gets a 304 and leaves the episodes alone", %{
+      user: user
+    } do
+      imported = user |> import!("/feed") |> sync!()
+      checked = sync!(imported)
 
       assert checked.sync_status == :succeeded
       assert checked.last_imported_at == imported.last_imported_at
       assert DateTime.compare(checked.last_checked_at, imported.last_checked_at) == :gt
-      assert episode_count(podcast) == 5
+      assert episode_count(checked) == 5
+    end
+
+    test "a requested sync drops the validators so the server cannot answer 304", %{
+      user: user
+    } do
+      imported = user |> import!("/feed") |> sync!()
+      requested = Podcasts.request_sync!(imported)
+
+      assert requested.http_etag == nil
+      assert requested.http_last_modified == nil
+
+      synced = sync!(requested)
+
+      assert DateTime.compare(synced.last_imported_at, imported.last_imported_at) == :gt
     end
   end
 
   describe "transient failures" do
-    test "a timeout surfaces as an error and leaves the status alone", %{podcast: podcast} do
-      StubFeedClient.put({:error, :timeout})
-
-      assert {:error, _error} = Ash.update(podcast, %{}, action: :sync)
-
-      reloaded = Ash.get!(Radiator.Podcasts.Podcast, podcast.id)
-      assert reloaded.sync_status == :pending
-    end
-
-    test "the error says what actually went wrong", %{podcast: podcast} do
-      StubFeedClient.put({:error, :timeout})
+    test "a timeout surfaces as an error and leaves the status alone", %{user: user} do
+      podcast = import!(user, "/slow")
 
       assert {:error, error} = Ash.update(podcast, %{}, action: :sync)
-      assert FeedSyncError.summarize(error) == ":timeout"
+      assert FeedSyncError.summarize(error) =~ "timeout"
+      assert Ash.get!(Podcast, podcast.id).sync_status == :pending
     end
 
-    test "a 429 carries its Retry-After along", %{podcast: podcast} do
-      StubFeedClient.put({:error, {:http_status, 429, 120}})
+    test "a 429 carries its Retry-After along", %{user: user} do
+      podcast = import!(user, "/busy")
 
       assert {:error, %{errors: [%FeedSyncError{retry_after: 120}]}} =
                Ash.update(podcast, %{}, action: :sync)
     end
 
     test "malformed xml is transient, because that is what a truncated body looks like", %{
-      podcast: podcast
+      user: user
     } do
-      StubFeedClient.put({:ok, %Response{status: 200, body: "<rss><channel>"}})
+      podcast = import!(user, "/truncated")
 
       assert {:error, %{errors: [%FeedSyncError{}]}} = Ash.update(podcast, %{}, action: :sync)
-
-      reloaded = Ash.get!(Radiator.Podcasts.Podcast, podcast.id)
-      assert reloaded.sync_status == :pending
+      assert Ash.get!(Podcast, podcast.id).sync_status == :pending
     end
   end
 
   describe "permanent failures" do
-    test "404 is recorded as the outcome of the sync, not as an error", %{podcast: podcast} do
-      StubFeedClient.put({:error, {:http_status, 404}})
-
-      assert {:ok, synced} = Ash.update(podcast, %{}, action: :sync)
+    test "404 is recorded as the outcome of the sync, not as an error", %{user: user} do
+      assert {:ok, synced} = user |> import!("/gone") |> Ash.update(%{}, action: :sync)
 
       assert synced.sync_status == :failed
       assert synced.last_sync_error =~ "404"
       assert synced.last_checked_at != nil
     end
 
-    test "a document that is well-formed but not a feed is permanent", %{podcast: podcast} do
-      StubFeedClient.put({:ok, %Response{status: 200, body: "<html>nope</html>"}})
+    test "an HTML page instead of a feed is permanent", %{user: user} do
+      synced = user |> import!("/html") |> sync!()
 
-      assert {:ok, synced} = Ash.update(podcast, %{}, action: :sync)
       assert synced.sync_status == :failed
+      assert synced.last_sync_error =~ "text/html"
     end
 
-    test "leaves the previous import untouched", %{podcast: podcast} do
-      StubFeedClient.put(ok_response())
-      imported = Ash.update!(podcast, %{}, action: :sync)
+    test "a document that is well-formed but not a feed is permanent", %{user: user} do
+      assert %{sync_status: :failed} = user |> import!("/not-a-feed") |> sync!()
+    end
 
-      StubFeedClient.put({:error, {:http_status, 410}})
-      failed = Ash.update!(imported, %{}, action: :sync)
+    test "leaves the previous import untouched", %{user: user} do
+      imported = user |> import!("/feed") |> sync!()
 
+      failed =
+        imported
+        |> Ash.update!(%{feed_url: "https://example.com/gone"})
+        |> sync!()
+
+      assert failed.sync_status == :failed
       assert failed.last_imported_at == imported.last_imported_at
       assert failed.title == "Test Show"
-      assert episode_count(podcast) == 5
+      assert episode_count(failed) == 5
     end
   end
 end

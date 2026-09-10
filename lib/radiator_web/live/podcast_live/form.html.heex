@@ -21,7 +21,7 @@
       <.input
         field={@form[:sync_strategy]}
         type="select"
-        options={SyncStrategy.options()}
+        options={Formatting.enum_options(SyncStrategy)}
         label={gettext("Synchronisation")}
       />
       <.input
@@ -93,7 +93,7 @@
           field={@form[:podcast_type]}
           type="select"
           prompt={gettext("Nicht angegeben")}
-          options={PodcastType.options()}
+          options={Formatting.enum_options(PodcastType)}
           label={gettext("Art")}
         />
         <.input field={@form[:copyright]} type="text" label={gettext("Copyright")} />

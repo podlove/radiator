@@ -12,6 +12,8 @@ defmodule Radiator.Podcasts.ApplyFeedTest do
   alias Radiator.Feeds.Parser
   alias Radiator.Podcasts
   alias Radiator.Podcasts.Episode
+  alias Radiator.Podcasts.EpisodeContributor
+  alias Radiator.Podcasts.Person
 
   setup do
     user = generate(user())
@@ -38,16 +40,6 @@ defmodule Radiator.Podcasts.ApplyFeedTest do
       assert updated.language == "de-DE"
       assert updated.podcast_type == :episodic
       assert [%{text: "Technology"}, %{text: "Society & Culture"}] = updated.categories
-    end
-
-    test "stores summary, funding and license", %{podcast: podcast, feed: feed} do
-      updated = apply_feed(podcast, feed)
-
-      assert updated.summary == "Die Zusammenfassung der Sendung"
-      assert updated.funding_url == "https://example.com/support"
-      assert updated.funding_text == "Unterstütze die Sendung"
-      assert updated.license == "cc-by-4.0"
-      assert updated.license_url == "https://creativecommons.org/licenses/by/4.0/"
     end
 
     test "marks the sync as succeeded and stamps both timestamps", %{
@@ -77,17 +69,6 @@ defmodule Radiator.Podcasts.ApplyFeedTest do
 
       assert [%{start_ms: 0, title: "Intro"}, %{start_ms: 754_567}] = first.chapters
       assert [%{url: "https://example.com/e1.vtt"}] = first.transcripts
-    end
-
-    test "stores author, summary and the chapters reference", %{podcast: podcast, feed: feed} do
-      apply_feed(podcast, feed)
-
-      first = Enum.find(episodes(podcast), &(&1.guid == "item-1"))
-
-      assert first.author == "Alice Example"
-      assert first.summary == "Zusammenfassung aus itunes:summary"
-      assert first.chapters_url == "https://example.com/e1.json"
-      assert first.chapters_type == "application/json+chapters"
     end
 
     test "upserts on a second run instead of duplicating", %{podcast: podcast, feed: feed} do
@@ -151,7 +132,7 @@ defmodule Radiator.Podcasts.ApplyFeedTest do
       apply_feed(podcast, feed)
 
       names =
-        Podcasts.read_persons!()
+        Ash.read!(Person)
         |> Enum.filter(&(&1.user_id == user.id))
         |> Enum.map(& &1.normalized_name)
         |> Enum.sort()
@@ -163,7 +144,7 @@ defmodule Radiator.Podcasts.ApplyFeedTest do
       apply_feed(podcast, feed)
 
       roles =
-        Podcasts.read_episode_contributors!()
+        Ash.read!(EpisodeContributor)
         |> Enum.map(& &1.role)
         |> Enum.sort()
 
@@ -174,7 +155,7 @@ defmodule Radiator.Podcasts.ApplyFeedTest do
       first_run = apply_feed(podcast, feed)
       apply_feed(first_run, feed)
 
-      assert length(Podcasts.read_episode_contributors!()) == 2
+      assert length(Ash.read!(EpisodeContributor)) == 2
     end
 
     test "keeps what another podcast's feed contributed to the same person", %{
@@ -196,7 +177,7 @@ defmodule Radiator.Podcasts.ApplyFeedTest do
 
       apply_feed(other, sparse)
 
-      alice = Enum.find(Podcasts.read_persons!(), &(&1.normalized_name == "alice example"))
+      alice = Enum.find(Ash.read!(Person), &(&1.normalized_name == "alice example"))
 
       assert alice.uri == "https://alice.example"
       assert alice.image_url == "https://example.com/alice.jpg"

@@ -45,6 +45,8 @@ config :phoenix,
 
 config :radiator, Oban, testing: :manual
 
-config :radiator, :feed_client, Radiator.StubFeedClient
-
 config :phoenix_test, :endpoint, RadiatorWeb.Endpoint
+
+# Every feed fetch in tests goes to `Req.Test`; `Radiator.FeedPlug` answers.
+config :radiator, Radiator.Feeds.Client.ReqClient,
+  plug: {Req.Test, Radiator.Feeds.Client.ReqClient}

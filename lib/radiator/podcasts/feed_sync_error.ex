@@ -61,15 +61,6 @@ defmodule Radiator.Podcasts.FeedSyncError do
   defp describe({:unexpected_content_type, type}), do: "Unexpected content type: #{type}"
   defp describe(:feed_too_large), do: "Feed exceeds the size limit"
 
-  defp describe(%_{} = reason) do
-    if Kernel.function_exported?(reason.__struct__, :message, 1) do
-      Exception.message(reason)
-    else
-      inspect(reason)
-    end
-  rescue
-    _error -> inspect(reason)
-  end
-
+  defp describe(reason) when is_exception(reason), do: Exception.message(reason)
   defp describe(reason), do: inspect(reason)
 end

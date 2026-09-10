@@ -7,6 +7,7 @@ defmodule RadiatorWeb.EpisodeLive.Form do
   alias Radiator.Podcasts.Episode
   alias Radiator.Podcasts.EpisodeType
   alias Radiator.Podcasts.Podcast
+  alias RadiatorWeb.Formatting
 
   @impl true
   def mount(%{"podcast_id" => podcast_id} = params, _session, socket) do
@@ -75,6 +76,4 @@ defmodule RadiatorWeb.EpisodeLive.Form do
 
   defp saved_message(:edit), do: gettext("Episode gespeichert.")
   defp saved_message(_live_action), do: gettext("Episode angelegt.")
-
-  defp episode_type_options, do: EpisodeType.options()
 end

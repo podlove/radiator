@@ -1,6 +1,6 @@
 defmodule RadiatorWeb.Formatting do
   @moduledoc """
-  Human-readable dates and durations for templates.
+  Human-readable dates, durations and enum labels for templates.
   """
 
   @minute 60
@@ -50,4 +50,7 @@ defmodule RadiatorWeb.Formatting do
   end
 
   defp pad(number), do: number |> Integer.to_string() |> String.pad_leading(2, "0")
+
+  @doc ~S(Label/value pairs of an `Ash.Type.Enum` for `<.input type="select">`.)
+  def enum_options(enum), do: Enum.map(enum.values(), &{enum.label(&1), &1})
 end

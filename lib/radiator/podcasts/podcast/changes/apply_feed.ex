@@ -103,13 +103,7 @@ defmodule Radiator.Podcasts.Podcast.Changes.ApplyFeed do
     stored = stored_persons(podcast.user_id, Enum.map(persons, & &1.normalized_name))
 
     persons
-    |> Enum.map(&keep_stored_details(&1, stored))
-    # `normalized_name` is derived by the resource, not accepted as input.
-    |> Enum.map(
-      &(&1
-        |> Map.take([:name, :uri, :image_url])
-        |> Map.put(:user_id, podcast.user_id))
-    )
+    |> Enum.map(&person_input(&1, stored, podcast.user_id))
     |> Ash.bulk_create!(Person, :upsert_from_feed,
       return_records?: true,
       domain: @domain,
@@ -130,19 +124,17 @@ defmodule Radiator.Podcasts.Podcast.Changes.ApplyFeed do
 
   # A person is shared across the owner's podcasts and a single feed only knows
   # part of them. The feed wins where it has a value; its nils must not erase
-  # what another feed contributed.
-  defp keep_stored_details(person, stored) do
-    case Map.fetch(stored, person.normalized_name) do
-      :error ->
-        person
+  # what another feed contributed. `normalized_name` is derived by the
+  # resource, not accepted as input.
+  defp person_input(person, stored, user_id) do
+    existing = Map.get(stored, person.normalized_name, %{uri: nil, image_url: nil})
 
-      {:ok, existing} ->
-        %{
-          person
-          | uri: person.uri || existing.uri,
-            image_url: person.image_url || existing.image_url
-        }
-    end
+    %{
+      name: person.name,
+      uri: person.uri || existing.uri,
+      image_url: person.image_url || existing.image_url,
+      user_id: user_id
+    }
   end
 
   # Only the links of the episodes this run wrote are replaced. Episodes that

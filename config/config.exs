@@ -133,10 +133,6 @@ config :radiator, Oban,
 
 config :ash_oban, pro?: false
 
-config :ash_oban, actor_persister: Radiator.ObanActorPersister
-
-config :radiator, :feed_client, Radiator.Feeds.Client.ReqClient
-
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

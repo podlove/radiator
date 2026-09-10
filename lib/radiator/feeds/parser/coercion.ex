@@ -96,12 +96,7 @@ defmodule Radiator.Feeds.Parser.Coercion do
     end
   end
 
-  defp month_number(name) do
-    case Map.fetch(@months, String.downcase(name)) do
-      {:ok, number} -> {:ok, number}
-      :error -> :error
-    end
-  end
+  defp month_number(name), do: Map.fetch(@months, String.downcase(name))
 
   defp clock(time) do
     case String.split(time, ":") do
@@ -122,27 +117,22 @@ defmodule Radiator.Feeds.Parser.Coercion do
   defp zone_offset([]), do: {:ok, 0}
 
   defp zone_offset([zone | _rest]) do
-    cond do
-      Map.has_key?(@named_zones, String.downcase(zone)) ->
-        {:ok, Map.fetch!(@named_zones, String.downcase(zone))}
-
-      Regex.match?(~r/^[+-]\d{4}$/, zone) ->
-        numeric_zone_offset(zone)
-
-      Regex.match?(~r/^[A-Za-z]{1,5}$/, zone) ->
-        {:ok, 0}
-
-      true ->
-        :error
+    case Map.fetch(@named_zones, String.downcase(zone)) do
+      {:ok, offset} -> {:ok, offset}
+      :error -> unnamed_zone_offset(zone)
     end
   end
 
-  defp numeric_zone_offset(<<sign::binary-1, hours::binary-2, minutes::binary-2>>) do
-    {:ok, hours} = to_int(hours)
-    {:ok, minutes} = to_int(minutes)
-    seconds = hours * 3600 + minutes * 60
+  defp unnamed_zone_offset(<<sign, hours::binary-2, minutes::binary-2>>) when sign in ~c"+-" do
+    with {:ok, hours} <- to_int(hours),
+         {:ok, minutes} <- to_int(minutes) do
+      seconds = hours * 3600 + minutes * 60
+      {:ok, if(sign == ?-, do: -seconds, else: seconds)}
+    end
+  end
 
-    {:ok, if(sign == "-", do: -seconds, else: seconds)}
+  defp unnamed_zone_offset(zone) do
+    if Regex.match?(~r/^[A-Za-z]{1,5}$/, zone), do: {:ok, 0}, else: :error
   end
 
   @doc """

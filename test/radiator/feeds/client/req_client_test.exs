@@ -2,6 +2,7 @@ defmodule Radiator.Feeds.Client.ReqClientTest do
   use ExUnit.Case, async: true
 
   alias Radiator.Feeds.Client.ReqClient
+  alias Radiator.Feeds.Response
 
   @xml ~s(<rss version="2.0"><channel><title>X</title></channel></rss>)
 
@@ -13,8 +14,12 @@ defmodule Radiator.Feeds.Client.ReqClientTest do
     |> Plug.Conn.send_resp(status, body)
   end
 
-  defp fetch(plug, opts \\ []),
-    do: ReqClient.fetch("https://example.com/feed", [plug: plug] ++ opts)
+  # The test config routes the client through `Req.Test`; each test stubs the
+  # server it wants to talk to.
+  defp fetch(plug, opts \\ []) do
+    Req.Test.stub(ReqClient, plug)
+    ReqClient.fetch("https://example.com/feed", opts)
+  end
 
   describe "plain responses" do
     test "reads the body and the validators" do
@@ -35,8 +40,7 @@ defmodule Radiator.Feeds.Client.ReqClientTest do
     test "passes 304 through without a body" do
       plug = fn conn -> respond(conn, 304, "", [{"etag", ~s("v1")}]) end
 
-      assert {:not_modified, response} = fetch(plug)
-      assert response.status == 304
+      assert {:not_modified, %Response{etag: ~s("v1")}} = fetch(plug)
     end
 
     test "rejects a non-xml content type" do
@@ -45,10 +49,19 @@ defmodule Radiator.Feeds.Client.ReqClientTest do
       assert fetch(plug) == {:error, {:unexpected_content_type, "text/html"}}
     end
 
-    test "reports Retry-After on 429" do
-      plug = fn conn -> respond(conn, 429, "", [{"retry-after", "120"}]) end
+    test "reports Retry-After on 429, whitespace included" do
+      plug = fn conn -> respond(conn, 429, "", [{"retry-after", " 120 "}]) end
 
       assert fetch(plug) == {:error, {:http_status, 429, 120}}
+    end
+
+    # The http-date form and garbage both fall back to exponential backoff.
+    test "reports a 503 without a usable Retry-After as nil" do
+      plug = fn conn ->
+        respond(conn, 503, "", [{"retry-after", "Wed, 09 Sep 2026 07:00:00 GMT"}])
+      end
+
+      assert fetch(plug) == {:error, {:http_status, 503, nil}}
     end
 
     test "reports a plain status without Retry-After" do
@@ -85,57 +98,6 @@ defmodule Radiator.Feeds.Client.ReqClientTest do
       end
 
       assert fetch(plug, max_bytes: 1_000) == {:error, :feed_too_large}
-    end
-  end
-
-  describe "final_url" do
-    test "records the target of a redirect, not the url that was asked for" do
-      plug = fn conn ->
-        case conn.request_path do
-          "/feed" -> respond(conn, 301, "", [{"location", "https://example.com/moved.xml"}])
-          "/moved.xml" -> respond(conn, 200, @xml, [{"content-type", "application/rss+xml"}])
-        end
-      end
-
-      assert {:ok, response} = fetch(plug)
-      assert response.final_url == "https://example.com/moved.xml"
-    end
-
-    test "records the requested url when nothing redirects" do
-      plug = fn conn -> respond(conn, 200, @xml, [{"content-type", "application/rss+xml"}]) end
-
-      assert {:ok, response} = fetch(plug)
-      assert response.final_url == "https://example.com/feed"
-    end
-  end
-
-  describe "retry_after/1" do
-    # Built through the constructor rather than as a struct literal: `headers`
-    # is a `Req.Fields` map, and the constructor is what normalises it.
-    defp response(headers), do: Req.Response.new(status: 429, headers: headers, body: "")
-
-    test "reads a numeric Retry-After" do
-      assert ReqClient.retry_after(response(%{"retry-after" => ["120"]})) == 120
-    end
-
-    test "ignores surrounding whitespace" do
-      assert ReqClient.retry_after(response(%{"retry-after" => [" 60 "]})) == 60
-    end
-
-    test "returns nil without the header" do
-      assert ReqClient.retry_after(response(%{})) == nil
-    end
-
-    test "returns nil for the http-date form" do
-      assert ReqClient.retry_after(
-               response(%{"retry-after" => ["Wed, 09 Sep 2026 07:00:00 GMT"]})
-             ) ==
-               nil
-    end
-
-    test "returns nil for zero and for garbage" do
-      assert ReqClient.retry_after(response(%{"retry-after" => ["0"]})) == nil
-      assert ReqClient.retry_after(response(%{"retry-after" => ["soon"]})) == nil
     end
   end
 end

@@ -19,9 +19,10 @@ defmodule Radiator.Podcasts.Podcast.Sync do
 
   ## AshOban details this module depends on
 
-  * Worker jobs are unique over their whole args map. `run_oban_trigger`
-    carries the actor and the cron does not, so both would be inserted without
-    `unique: [keys: [:primary_key]]`.
+  * Worker jobs are unique over their whole args map by default.
+    `unique: [keys: [:primary_key]]` narrows that to the podcast, so an
+    immediate `run_oban_trigger` job and a cron job for the same record are
+    never both inserted.
   * `max_attempts` defaults to 1, and `backoff` is only consulted above 1.
   * `on_error` is called with `%{error: error}`. Without the declared argument
     the message is silently dropped. `require_atomic? false` is needed because
@@ -42,12 +43,10 @@ defmodule Radiator.Podcasts.Podcast.Sync do
 
   actions do
     update :apply_feed do
+      accept []
       require_atomic? false
 
-      argument :feed, :struct do
-        constraints instance_of: Radiator.Feeds.Feed
-        allow_nil? true
-      end
+      argument :feed, :struct, constraints: [instance_of: Radiator.Feeds.Feed]
 
       change Radiator.Podcasts.Podcast.Changes.ApplyFeed
     end
@@ -71,6 +70,7 @@ defmodule Radiator.Podcasts.Podcast.Sync do
     end
 
     update :mark_sync_failed do
+      accept []
       require_atomic? false
 
       argument :error, :term
@@ -79,15 +79,13 @@ defmodule Radiator.Podcasts.Podcast.Sync do
     end
 
     update :sync do
+      accept []
       require_atomic? false
 
-      argument :feed, :struct do
-        constraints instance_of: Radiator.Feeds.Feed
-        allow_nil? true
-      end
+      argument :feed, :struct, constraints: [instance_of: Radiator.Feeds.Feed]
 
       # A failure that retrying cannot fix; see `FetchFeed`.
-      argument :error, :term, allow_nil?: true
+      argument :error, :term
 
       change Radiator.Podcasts.Podcast.Changes.FetchFeed
       change Radiator.Podcasts.Podcast.Changes.ApplyFeed
@@ -127,10 +125,7 @@ defmodule Radiator.Podcasts.Podcast.Sync do
     # A LiveView then receives a plain `%Phoenix.Socket.Broadcast{}`.
     broadcast_type :phoenix_broadcast
 
-    publish :sync, ["updated", :id]
-    publish :apply_feed, ["updated", :id]
-    publish :mark_sync_failed, ["updated", :id]
-    publish :request_sync, ["updated", :id]
+    publish_all :update, ["updated", :id]
   end
 
   attributes do

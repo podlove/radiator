@@ -15,7 +15,4 @@ defmodule Radiator.Podcasts.SyncStatus do
       succeeded: [label: "Erfolgreich"],
       failed: [label: "Fehlgeschlagen"]
     ]
-
-  @doc ~S(Label/value pairs for `<.input type="select">`.)
-  def options, do: Enum.map(values(), &{label(&1), &1})
 end

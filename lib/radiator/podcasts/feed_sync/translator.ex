@@ -16,62 +16,47 @@ defmodule Radiator.Podcasts.FeedSync.Translator do
   alias Radiator.Podcasts.Person
   alias Radiator.Podcasts.PodcastType
 
+  # Channel fields that keep their name on the podcast.
+  @channel_fields ~w(title subtitle summary description funding_url funding_text license
+                     license_url link language author owner_name owner_email image_url
+                     copyright explicit)a
+
   @doc "Translates a parsed feed."
   def translate(%Feed{channel: channel, items: items}) do
-    {episodes, skipped} = translate_items(items)
+    identified = identify_items(items)
 
     %Translation{
       podcast: translate_channel(channel),
-      episodes: episodes,
+      episodes: Enum.map(identified, fn {guid, item} -> translate_item(item, guid) end),
       persons: collect_persons(channel, items),
-      contributions: collect_contributions(episodes, items),
-      skipped: skipped
+      contributions: collect_contributions(identified),
+      skipped: length(items) - length(identified)
     }
   end
 
   # --- channel --------------------------------------------------------------
 
   defp translate_channel(channel) do
-    %{
-      title: channel.title,
-      subtitle: channel.subtitle,
-      summary: channel.summary,
-      description: channel.description,
-      funding_url: channel.funding_url,
-      funding_text: channel.funding_text,
-      license: channel.license,
-      license_url: channel.license_url,
-      link: channel.link,
-      language: channel.language,
-      author: channel.author,
-      owner_name: channel.owner_name,
-      owner_email: channel.owner_email,
-      image_url: channel.image_url,
-      copyright: channel.copyright,
+    channel
+    |> Map.take(@channel_fields)
+    |> Map.merge(%{
       podcast_type: enum_value(PodcastType, channel.podcast_type),
-      explicit: channel.explicit,
       feed_guid: channel.guid,
-      categories: Enum.map(channel.categories, &%{text: &1.text, subcategory: &1.subcategory})
-    }
+      categories: Enum.map(channel.categories, &Map.from_struct/1)
+    })
   end
 
   # --- items ----------------------------------------------------------------
 
-  # Two items with the same identity in one `ON CONFLICT DO UPDATE` is a
-  # cardinality violation in Postgres. The first occurrence wins; feeds are
-  # ordered newest first.
-  defp translate_items(items) do
+  # Pairs each item with its identity and drops the ones that have none. Two
+  # items with the same identity in one `ON CONFLICT DO UPDATE` is a
+  # cardinality violation in Postgres; `uniq_by` keeps the first occurrence,
+  # and feeds are ordered newest first.
+  defp identify_items(items) do
     items
-    |> Enum.reduce({[], MapSet.new(), 0}, fn item, {acc, seen, skipped} ->
-      guid = identity(item)
-
-      cond do
-        is_nil(guid) -> {acc, seen, skipped + 1}
-        MapSet.member?(seen, guid) -> {acc, seen, skipped + 1}
-        true -> {[translate_item(item, guid) | acc], MapSet.put(seen, guid), skipped}
-      end
-    end)
-    |> then(fn {acc, _seen, skipped} -> {Enum.reverse(acc), skipped} end)
+    |> Enum.map(&{identity(&1), &1})
+    |> Enum.reject(&match?({nil, _item}, &1))
+    |> Enum.uniq_by(&elem(&1, 0))
   end
 
   # Without any of these the item would be inserted afresh on every sync.
@@ -104,8 +89,8 @@ defmodule Radiator.Podcasts.FeedSync.Translator do
       enclosure_url: item.enclosure && item.enclosure.url,
       enclosure_length: item.enclosure && item.enclosure.length,
       enclosure_type: item.enclosure && item.enclosure.type,
-      chapters: Enum.map(item.chapters, &chapter/1),
-      transcripts: Enum.map(item.transcripts, &transcript/1)
+      chapters: Enum.map(item.chapters, &Map.from_struct/1),
+      transcripts: Enum.map(item.transcripts, &Map.from_struct/1)
     }
   end
 
@@ -120,24 +105,6 @@ defmodule Radiator.Podcasts.FeedSync.Translator do
     end
   end
 
-  defp chapter(chapter) do
-    %{
-      start_ms: chapter.start_ms,
-      title: chapter.title,
-      href: chapter.href,
-      image_url: chapter.image_url
-    }
-  end
-
-  defp transcript(transcript) do
-    %{
-      url: transcript.url,
-      type: transcript.type,
-      language: transcript.language,
-      rel: transcript.rel
-    }
-  end
-
   # --- persons --------------------------------------------------------------
 
   # Channel-level persons get no contribution but often carry an image the
@@ -145,7 +112,7 @@ defmodule Radiator.Podcasts.FeedSync.Translator do
   defp collect_persons(channel, items) do
     (channel.persons ++ Enum.flat_map(items, & &1.persons))
     |> Enum.reduce(%{}, fn person, acc ->
-      key = normalize(person.name)
+      key = Person.normalize(person.name)
 
       Map.update(acc, key, new_person(person, key), &fill(&1, person))
     end)
@@ -169,29 +136,20 @@ defmodule Radiator.Podcasts.FeedSync.Translator do
     }
   end
 
-  # Built against the translated episodes, so a dropped item leaves no
-  # dangling link behind.
-  defp collect_contributions(episodes, items) do
-    guids = MapSet.new(episodes, & &1.guid)
-
-    items
-    |> Enum.flat_map(fn item ->
-      case identity(item) do
-        nil -> []
-        guid -> Enum.map(item.persons, &contribution(guid, &1))
-      end
+  # Built from the identified items only, so a dropped item leaves no dangling
+  # link behind.
+  defp collect_contributions(identified) do
+    identified
+    |> Enum.flat_map(fn {guid, item} ->
+      Enum.map(
+        item.persons,
+        &%{guid: guid, normalized_name: Person.normalize(&1.name), role: &1.role}
+      )
     end)
-    |> Enum.filter(&MapSet.member?(guids, &1.guid))
     |> Enum.uniq_by(&{&1.guid, &1.normalized_name})
   end
 
-  defp contribution(guid, person) do
-    %{guid: guid, normalized_name: normalize(person.name), role: person.role}
-  end
-
   # --- helpers --------------------------------------------------------------
-
-  defp enum_value(_type, nil), do: nil
 
   defp enum_value(type, value) do
     case Ash.Type.cast_input(type, value) do
@@ -199,8 +157,6 @@ defmodule Radiator.Podcasts.FeedSync.Translator do
       _other -> nil
     end
   end
-
-  defp normalize(name), do: Person.normalize(name)
 
   defp first_present(values), do: Enum.find(values, &present?/1)
 

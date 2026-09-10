@@ -44,7 +44,7 @@
           field={@form[:episode_type]}
           type="select"
           prompt={gettext("Nicht angegeben")}
-          options={episode_type_options()}
+          options={Formatting.enum_options(EpisodeType)}
           label={gettext("Art")}
         />
         <.input

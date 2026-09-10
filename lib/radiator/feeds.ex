@@ -8,33 +8,19 @@ defmodule Radiator.Feeds do
   inside `Radiator.Podcasts`.
   """
 
-  alias Radiator.Feeds.Client
+  alias Radiator.Feeds.Client.ReqClient
   alias Radiator.Feeds.Parser
-
-  @doc "Fetches a feed through the configured client."
-  def fetch(url, opts \\ []), do: Client.impl().fetch(url, opts)
-
-  @doc "Reads a feed document."
-  defdelegate parse(xml), to: Parser
 
   @doc """
   Fetches a feed and reads it.
 
-  For an unchanged feed it returns `{:not_modified, response}` without
-  parsing.
+  Options: `:etag` and `:last_modified` for the conditional request. For an
+  unchanged feed it returns `{:not_modified, response}` without parsing.
   """
   def load(url, opts \\ []) do
-    case fetch(url, opts) do
-      {:ok, response} -> parse_response(response)
-      {:not_modified, response} -> {:not_modified, response}
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  defp parse_response(response) do
-    case parse(response.body || "") do
-      {:ok, feed} -> {:ok, feed, response}
-      {:error, error} -> {:error, error}
+    with {:ok, response} <- ReqClient.fetch(url, opts),
+         {:ok, feed} <- Parser.parse(response.body) do
+      {:ok, feed, response}
     end
   end
 end

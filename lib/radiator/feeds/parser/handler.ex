@@ -85,7 +85,7 @@ defmodule Radiator.Feeds.Parser.Handler do
     [text | outer] = state.text
     state = end_element(qname, IO.iodata_to_binary(text), state)
 
-    {:ok, %{state | path: rest, ns: tl(state.ns), text: bubble(text, hd_or_nil(rest), outer)}}
+    {:ok, %{state | path: rest, ns: tl(state.ns), text: bubble(text, List.first(rest), outer)}}
   end
 
   def handle_event(:characters, chars, state), do: {:ok, buffer(state, chars)}
@@ -105,9 +105,6 @@ defmodule Radiator.Feeds.Parser.Handler do
   defp bubble(_text, _parent, []), do: []
   defp bubble(_text, parent, outer) when parent in @containers, do: outer
   defp bubble(text, _parent, [current | outer]), do: [[current, text] | outer]
-
-  defp hd_or_nil([head | _rest]), do: head
-  defp hd_or_nil([]), do: nil
 
   defp merge_namespaces(current, attributes) do
     Enum.reduce(attributes, current, fn

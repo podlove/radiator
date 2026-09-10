@@ -19,16 +19,19 @@ defmodule Radiator.Feeds.Client.ReqClient do
   feed that is mostly answered with 304 anyway.
   """
 
-  @behaviour Radiator.Feeds.Client
-
   alias Radiator.Feeds.Response
 
   @default_max_bytes 50 * 1024 * 1024
-  @default_receive_timeout 30_000
+  @receive_timeout 30_000
   @user_agent "Radiator/1.0 (+https://github.com/podlove/radiator)"
   @xml_types ["xml", "rss", "atom"]
 
-  @impl Radiator.Feeds.Client
+  @doc """
+  Fetches a feed.
+
+  Options: `:etag` and `:last_modified` for the conditional request,
+  `:max_bytes` as an upper bound on the body.
+  """
   def fetch(url, opts \\ []) do
     max_bytes = Keyword.get(opts, :max_bytes, @default_max_bytes)
 
@@ -36,13 +39,13 @@ defmodule Radiator.Feeds.Client.ReqClient do
       url: url,
       headers: headers(opts),
       retry: false,
-      receive_timeout: Keyword.get(opts, :receive_timeout, @default_receive_timeout),
+      receive_timeout: @receive_timeout,
       max_redirects: 5,
       into: collector(max_bytes)
     ]
-    # `:plug` is Req's own test seam; it lets the client be exercised end to
-    # end without a socket.
-    |> Keyword.merge(Keyword.take(opts, [:plug]))
+    # The test config points `:plug` at `Req.Test`, so the client is exercised
+    # end to end without a socket.
+    |> Keyword.merge(Application.get_env(:radiator, __MODULE__, []))
     |> Req.new()
     |> Req.run()
     |> handle()
@@ -77,8 +80,8 @@ defmodule Radiator.Feeds.Client.ReqClient do
 
   defp handle({_request, %Req.Response{body: :too_large}}), do: {:error, :feed_too_large}
 
-  defp handle({request, %Req.Response{} = response}) do
-    dispatch(request, %{response | body: body(response.body)})
+  defp handle({_request, %Req.Response{} = response}) do
+    dispatch(%{response | body: body(response.body)})
   end
 
   defp handle({_request, exception}), do: {:error, exception}
@@ -87,24 +90,21 @@ defmodule Radiator.Feeds.Client.ReqClient do
   defp body(body) when is_binary(body), do: body
   defp body(_body), do: ""
 
-  defp dispatch(request, %Req.Response{status: 304} = response) do
-    {:not_modified, to_response(response, request)}
-  end
+  defp dispatch(%Req.Response{status: 304} = response), do: {:not_modified, to_response(response)}
 
-  defp dispatch(request, %Req.Response{status: status} = response) when status in 200..299 do
+  defp dispatch(%Req.Response{status: status} = response) when status in 200..299 do
     if xml?(response) do
-      {:ok, to_response(response, request)}
+      {:ok, to_response(response)}
     else
       {:error, {:unexpected_content_type, content_type(response)}}
     end
   end
 
-  defp dispatch(_request, %Req.Response{status: status} = response)
-       when status in [429, 503] do
+  defp dispatch(%Req.Response{status: status} = response) when status in [429, 503] do
     {:error, {:http_status, status, retry_after(response)}}
   end
 
-  defp dispatch(_request, %Req.Response{status: status}), do: {:error, {:http_status, status}}
+  defp dispatch(%Req.Response{status: status}), do: {:error, {:http_status, status}}
 
   defp xml?(response) do
     case content_type(response) do
@@ -120,25 +120,20 @@ defmodule Radiator.Feeds.Client.ReqClient do
     end
   end
 
-  defp to_response(response, request) do
+  defp to_response(response) do
     %Response{
-      status: response.status,
       body: response.body,
       etag: raw_header(response, "etag"),
-      last_modified: raw_header(response, "last-modified"),
-      final_url: URI.to_string(request.url)
+      last_modified: raw_header(response, "last-modified")
     }
   end
 
   defp raw_header(response, name), do: response |> Req.Response.get_header(name) |> List.first()
 
-  @doc """
-  Reads `Retry-After` as a number of seconds, or `nil`.
-
-  The header may also hold an HTTP date. That form is rare enough that a date
-  parser is not worth it here — the caller falls back to exponential backoff.
-  """
-  def retry_after(response) do
+  # Reads `Retry-After` as a number of seconds, or `nil`. The header may also
+  # hold an HTTP date. That form is rare enough that a date parser is not worth
+  # it here; the caller falls back to exponential backoff.
+  defp retry_after(response) do
     response
     |> Req.Response.get_header("retry-after")
     |> List.first()

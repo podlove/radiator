@@ -7,7 +7,4 @@ defmodule Radiator.Podcasts.EpisodeType do
       trailer: [label: "Trailer"],
       bonus: [label: "Bonus"]
     ]
-
-  @doc ~S(Label/value pairs for `<.input type="select">`.)
-  def options, do: Enum.map(values(), &{label(&1), &1})
 end

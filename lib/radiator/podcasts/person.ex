@@ -44,17 +44,6 @@ defmodule Radiator.Podcasts.Person do
       change Radiator.Podcasts.Person.Changes.NormalizeName
     end
 
-    update :update do
-      primary? true
-      # Keeps the normalisation rule in Elixir only, rather than a second copy
-      # as a SQL expression.
-      require_atomic? false
-
-      accept @default_accept_attributes
-
-      change Radiator.Podcasts.Person.Changes.NormalizeName
-    end
-
     create :upsert_from_feed do
       accept @default_accept_attributes ++ [:user_id]
 
