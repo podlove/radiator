@@ -35,6 +35,34 @@ defmodule RadiatorWeb.Layouts do
 
   def app(assigns) do
     ~H"""
+    <.navbar />
+    <main class="px-4 py-20 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-4xl space-y-4">
+        {render_slot(@inner_block)}
+      </div>
+    </main>
+
+    <.flash_group flash={@flash} />
+    """
+  end
+
+  def admin(assigns) do
+    ~H"""
+    <.navbar />
+    <.drawer>
+      <main class="px-4 py-20 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-4xl space-y-4">
+          {render_slot(@inner_block)}
+        </div>
+      </main>
+    </.drawer>
+
+    <.flash_group flash={@flash} />
+    """
+  end
+
+  def navbar(assigns) do
+    ~H"""
     <div class="navbar bg-base-100 shadow-sm">
       <div class="navbar-start">
         <div class="dropdown">
@@ -60,7 +88,7 @@ defmodule RadiatorWeb.Layouts do
             <li><.link href={~p"/admin/podcasts"}>Podcasts</.link></li>
           </ul>
         </div>
-        <a class="btn btn-ghost text-xl">🔥 Radiator</a>
+        <a class="text-xl" href="/">🔥 Radiator</a>
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">
@@ -68,17 +96,12 @@ defmodule RadiatorWeb.Layouts do
         </ul>
       </div>
       <div class="navbar-end">
-        <.link href={~p"/sign-in"} class="btn btn-ghost btn-circle"><.icon name="hero-user" /></.link>
+        <.link href={~p"/sign-in"} class="btn btn-ghost btn-circle"><.icon
+          name="hero-user"
+          class="size-5"
+        /></.link>
       </div>
     </div>
-
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-4xl space-y-4">
-        {render_slot(@inner_block)}
-      </div>
-    </main>
-
-    <.flash_group flash={@flash} />
     """
   end
 
