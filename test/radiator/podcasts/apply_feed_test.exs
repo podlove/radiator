@@ -23,7 +23,9 @@ defmodule Radiator.Podcasts.ApplyFeedTest do
     %{user: user, podcast: podcast, feed: feed}
   end
 
-  defp apply_feed(podcast, feed), do: Ash.update!(podcast, %{feed: feed}, action: :apply_feed)
+  # Stands in for the Oban worker, which runs `:apply_feed` without an actor.
+  defp apply_feed(podcast, feed),
+    do: Ash.update!(podcast, %{feed: feed}, action: :apply_feed, authorize?: false)
 
   defp episodes(podcast) do
     Episode
@@ -221,7 +223,7 @@ defmodule Radiator.Podcasts.ApplyFeedTest do
   describe "not modified" do
     test "with a nil feed only the check timestamp moves", %{podcast: podcast, feed: feed} do
       imported = apply_feed(podcast, feed)
-      checked = Ash.update!(imported, %{feed: nil}, action: :apply_feed)
+      checked = Ash.update!(imported, %{feed: nil}, action: :apply_feed, authorize?: false)
 
       assert checked.sync_status == :succeeded
       assert checked.last_imported_at == imported.last_imported_at

@@ -37,10 +37,10 @@ defmodule Radiator.Podcasts.SyncTriggerTest do
 
   defp sync_job, do: Repo.one!(where(Oban.Job, [j], j.worker == @worker))
 
-  defp age_check!(podcast, hours) do
+  defp age_check!(podcast, hours, user) do
     podcast
     |> reload()
-    |> Ash.Changeset.for_update(:update, %{})
+    |> Ash.Changeset.for_update(:update, %{}, actor: user)
     |> Ash.Changeset.force_change_attribute(
       :last_checked_at,
       DateTime.add(DateTime.utc_now(), -hours, :hour)
@@ -103,7 +103,7 @@ defmodule Radiator.Podcasts.SyncTriggerTest do
     podcast = import!(user, "/feed", %{sync_strategy: :scheduled})
     run_triggers()
 
-    age_check!(podcast, 2)
+    age_check!(podcast, 2, user)
     run_triggers()
 
     assert DateTime.diff(DateTime.utc_now(), reload(podcast).last_checked_at, :second) < 5
@@ -113,7 +113,7 @@ defmodule Radiator.Podcasts.SyncTriggerTest do
     podcast = import!(user, "/feed")
     run_triggers()
 
-    stale = age_check!(podcast, 2).last_checked_at
+    stale = age_check!(podcast, 2, user).last_checked_at
     run_triggers()
 
     assert DateTime.compare(reload(podcast).last_checked_at, stale) == :eq
@@ -124,7 +124,7 @@ defmodule Radiator.Podcasts.SyncTriggerTest do
     run_triggers()
     first = reload(podcast)
 
-    Podcasts.request_sync!(first)
+    Podcasts.request_sync!(first, %{}, actor: user)
     run_triggers()
 
     assert DateTime.compare(reload(podcast).last_checked_at, first.last_checked_at) == :gt
@@ -161,8 +161,8 @@ defmodule Radiator.Podcasts.SyncTriggerTest do
 
     podcast
     |> reload()
-    |> Ash.update!(%{feed_url: "https://example.com/feed"})
-    |> Podcasts.request_sync!()
+    |> Ash.update!(%{feed_url: "https://example.com/feed"}, actor: user)
+    |> Podcasts.request_sync!(%{}, actor: user)
 
     jobs = sync_jobs()
     assert jobs |> Enum.map(& &1.state) |> Enum.sort() == ["available", "cancelled"]

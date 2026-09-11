@@ -7,7 +7,11 @@ defmodule Radiator.Podcasts.Podcast do
     otp_app: :radiator,
     domain: Radiator.Podcasts,
     data_layer: AshPostgres.DataLayer,
-    fragments: [Radiator.Podcasts.Podcast.Calculations, Radiator.Podcasts.Podcast.Sync]
+    fragments: [
+      Radiator.Podcasts.Podcast.Calculations,
+      Radiator.Podcasts.Podcast.Policies,
+      Radiator.Podcasts.Podcast.Sync
+    ]
 
   alias Radiator.Accounts.User
   alias Radiator.Podcasts.Episode

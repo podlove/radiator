@@ -20,7 +20,8 @@ defmodule Radiator.Podcasts.SyncTest do
     Podcasts.import_podcast!(%{feed_url: "https://example.com#{path}"}, actor: user)
   end
 
-  defp sync!(podcast), do: Ash.update!(podcast, %{}, action: :sync)
+  # Stands in for the Oban worker, which runs `:sync` without an actor.
+  defp sync!(podcast), do: Ash.update!(podcast, %{}, action: :sync, authorize?: false)
 
   defp episode_count(podcast) do
     Episode |> Ash.Query.filter(podcast_id == ^podcast.id) |> Ash.read!() |> length()
@@ -60,7 +61,7 @@ defmodule Radiator.Podcasts.SyncTest do
       user: user
     } do
       imported = user |> import!("/feed") |> sync!()
-      requested = Podcasts.request_sync!(imported)
+      requested = Podcasts.request_sync!(imported, %{}, actor: user)
 
       assert requested.http_etag == nil
       assert requested.http_last_modified == nil
@@ -75,7 +76,7 @@ defmodule Radiator.Podcasts.SyncTest do
     test "a timeout surfaces as an error and leaves the status alone", %{user: user} do
       podcast = import!(user, "/slow")
 
-      assert {:error, error} = Ash.update(podcast, %{}, action: :sync)
+      assert {:error, error} = Ash.update(podcast, %{}, action: :sync, authorize?: false)
       assert FeedSyncError.summarize(error) =~ "timeout"
       assert Ash.get!(Podcast, podcast.id).sync_status == :pending
     end
@@ -84,7 +85,7 @@ defmodule Radiator.Podcasts.SyncTest do
       podcast = import!(user, "/busy")
 
       assert {:error, %{errors: [%FeedSyncError{retry_after: 120}]}} =
-               Ash.update(podcast, %{}, action: :sync)
+               Ash.update(podcast, %{}, action: :sync, authorize?: false)
     end
 
     test "malformed xml is transient, because that is what a truncated body looks like", %{
@@ -92,14 +93,17 @@ defmodule Radiator.Podcasts.SyncTest do
     } do
       podcast = import!(user, "/truncated")
 
-      assert {:error, %{errors: [%FeedSyncError{}]}} = Ash.update(podcast, %{}, action: :sync)
+      assert {:error, %{errors: [%FeedSyncError{}]}} =
+               Ash.update(podcast, %{}, action: :sync, authorize?: false)
+
       assert Ash.get!(Podcast, podcast.id).sync_status == :pending
     end
   end
 
   describe "permanent failures" do
     test "404 is recorded as the outcome of the sync, not as an error", %{user: user} do
-      assert {:ok, synced} = user |> import!("/gone") |> Ash.update(%{}, action: :sync)
+      assert {:ok, synced} =
+               user |> import!("/gone") |> Ash.update(%{}, action: :sync, authorize?: false)
 
       assert synced.sync_status == :failed
       assert synced.last_sync_error =~ "404"
@@ -122,7 +126,7 @@ defmodule Radiator.Podcasts.SyncTest do
 
       failed =
         imported
-        |> Ash.update!(%{feed_url: "https://example.com/gone"})
+        |> Ash.update!(%{feed_url: "https://example.com/gone"}, actor: user)
         |> sync!()
 
       assert failed.sync_status == :failed

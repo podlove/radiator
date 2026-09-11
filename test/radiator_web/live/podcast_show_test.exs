@@ -23,7 +23,10 @@ defmodule RadiatorWeb.PodcastShowTest do
   end
 
   test "shows the error after a failure", %{conn: conn, podcast: podcast} do
-    Ash.update!(podcast, %{error: {:http_status, 404}}, action: :mark_sync_failed)
+    Ash.update!(podcast, %{error: {:http_status, 404}},
+      action: :mark_sync_failed,
+      authorize?: false
+    )
 
     {:ok, _live, html} = live(conn, ~p"/admin/podcasts/#{podcast.id}")
 
@@ -39,7 +42,7 @@ defmodule RadiatorWeb.PodcastShowTest do
   end
 
   test "pressing sync puts the podcast back to pending", %{conn: conn, podcast: podcast} do
-    Ash.update!(podcast, %{error: :timeout}, action: :mark_sync_failed)
+    Ash.update!(podcast, %{error: :timeout}, action: :mark_sync_failed, authorize?: false)
 
     {:ok, live, _html} = live(conn, ~p"/admin/podcasts/#{podcast.id}")
 
@@ -53,7 +56,7 @@ defmodule RadiatorWeb.PodcastShowTest do
 
     refute html =~ "Test Show"
 
-    Ash.update!(podcast, %{feed: feed}, action: :apply_feed)
+    Ash.update!(podcast, %{feed: feed}, action: :apply_feed, authorize?: false)
 
     assert render(live) =~ "Test Show"
   end
@@ -63,7 +66,7 @@ defmodule RadiatorWeb.PodcastShowTest do
     podcast: podcast,
     feed: feed
   } do
-    Ash.update!(podcast, %{feed: feed}, action: :apply_feed)
+    Ash.update!(podcast, %{feed: feed}, action: :apply_feed, authorize?: false)
 
     {:ok, _live, html} = live(conn, ~p"/admin/podcasts/#{podcast.id}")
 
@@ -81,7 +84,7 @@ defmodule RadiatorWeb.PodcastShowTest do
   end
 
   test "each episode links to its edit form", %{conn: conn, podcast: podcast, feed: feed} do
-    Ash.update!(podcast, %{feed: feed}, action: :apply_feed)
+    Ash.update!(podcast, %{feed: feed}, action: :apply_feed, authorize?: false)
     [episode | _] = Ash.load!(podcast, :episodes).episodes
 
     {:ok, _live, html} = live(conn, ~p"/admin/podcasts/#{podcast.id}")
@@ -100,7 +103,7 @@ defmodule RadiatorWeb.PodcastShowTest do
     podcast: podcast,
     feed: feed
   } do
-    imported = Ash.update!(podcast, %{feed: feed}, action: :apply_feed)
+    imported = Ash.update!(podcast, %{feed: feed}, action: :apply_feed, authorize?: false)
 
     {:ok, shrunk} =
       Parser.parse(
@@ -109,7 +112,7 @@ defmodule RadiatorWeb.PodcastShowTest do
           ~s(</channel></rss>)
       )
 
-    Ash.update!(imported, %{feed: shrunk}, action: :apply_feed)
+    Ash.update!(imported, %{feed: shrunk}, action: :apply_feed, authorize?: false)
 
     {:ok, _live, html} = live(conn, ~p"/admin/podcasts/#{podcast.id}")
 

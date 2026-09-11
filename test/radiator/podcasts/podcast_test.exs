@@ -33,11 +33,12 @@ defmodule Radiator.Podcasts.PodcastTest do
   test "holds the HTTP cache values but does not accept them from outside", %{user: user} do
     podcast = Podcasts.create_podcast!(%{title: "Test Show"}, actor: user)
 
-    assert {:error, %Ash.Error.Invalid{}} = Ash.update(podcast, %{http_etag: ~s("abc")})
+    assert {:error, %Ash.Error.Invalid{}} =
+             Ash.update(podcast, %{http_etag: ~s("abc")}, actor: user)
 
     updated =
       podcast
-      |> Ash.Changeset.for_update(:update, %{})
+      |> Ash.Changeset.for_update(:update, %{}, actor: user)
       |> Ash.Changeset.force_change_attribute(:http_etag, ~s("abc"))
       |> Ash.Changeset.force_change_attribute(
         :http_last_modified,
@@ -52,6 +53,7 @@ defmodule Radiator.Podcasts.PodcastTest do
   test "does not let sync_status be set from outside", %{user: user} do
     podcast = Podcasts.create_podcast!(%{title: "Test Show"}, actor: user)
 
-    assert {:error, %Ash.Error.Invalid{}} = Ash.update(podcast, %{sync_status: :succeeded})
+    assert {:error, %Ash.Error.Invalid{}} =
+             Ash.update(podcast, %{sync_status: :succeeded}, actor: user)
   end
 end

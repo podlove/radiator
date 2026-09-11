@@ -48,7 +48,7 @@ defmodule Radiator.Podcasts.RequestSyncTest do
     test "moves the podcast back to pending and enqueues the job", %{user: user} do
       podcast = Podcasts.create_podcast!(@with_feed, actor: user)
 
-      requested = Podcasts.request_sync!(podcast)
+      requested = Podcasts.request_sync!(podcast, %{}, actor: user)
 
       assert requested.sync_status == :pending
       assert_triggered(requested, :sync)
@@ -58,15 +58,15 @@ defmodule Radiator.Podcasts.RequestSyncTest do
       podcast =
         @with_feed
         |> Podcasts.create_podcast!(actor: user)
-        |> Ash.update!(%{error: :timeout}, action: :mark_sync_failed)
+        |> Ash.update!(%{error: :timeout}, action: :mark_sync_failed, authorize?: false)
 
-      assert Podcasts.request_sync!(podcast).sync_status == :pending
+      assert Podcasts.request_sync!(podcast, %{}, actor: user).sync_status == :pending
     end
 
     test "refuses a podcast without a feed url instead of parking it on pending", %{user: user} do
       podcast = Podcasts.create_podcast!(%{title: "No feed"}, actor: user)
 
-      assert {:error, %Ash.Error.Invalid{}} = Podcasts.request_sync(podcast)
+      assert {:error, %Ash.Error.Invalid{}} = Podcasts.request_sync(podcast, %{}, actor: user)
       assert Ash.get!(Radiator.Podcasts.Podcast, podcast.id).sync_status == :idle
     end
   end
@@ -75,19 +75,20 @@ defmodule Radiator.Podcasts.RequestSyncTest do
     test "accepts a change of sync strategy", %{user: user} do
       podcast = Podcasts.create_podcast!(%{title: "Test Show"}, actor: user)
 
-      assert Ash.update!(podcast, %{sync_strategy: :scheduled}).sync_strategy == :scheduled
+      assert Ash.update!(podcast, %{sync_strategy: :scheduled}, actor: user).sync_strategy ==
+               :scheduled
     end
 
     test "clears the http validators when the feed url changes", %{user: user} do
       podcast =
         %{title: "Test Show", feed_url: "https://example.com/a"}
         |> Podcasts.create_podcast!(actor: user)
-        |> Ash.Changeset.for_update(:update, %{})
+        |> Ash.Changeset.for_update(:update, %{}, actor: user)
         |> Ash.Changeset.force_change_attribute(:http_etag, ~s("v1"))
         |> Ash.Changeset.force_change_attribute(:http_last_modified, "yesterday")
         |> Ash.update!()
 
-      moved = Ash.update!(podcast, %{feed_url: "https://example.com/b"})
+      moved = Ash.update!(podcast, %{feed_url: "https://example.com/b"}, actor: user)
 
       assert moved.http_etag == nil
       assert moved.http_last_modified == nil
@@ -97,11 +98,11 @@ defmodule Radiator.Podcasts.RequestSyncTest do
       podcast =
         %{title: "Test Show", feed_url: "https://example.com/a"}
         |> Podcasts.create_podcast!(actor: user)
-        |> Ash.Changeset.for_update(:update, %{})
+        |> Ash.Changeset.for_update(:update, %{}, actor: user)
         |> Ash.Changeset.force_change_attribute(:http_etag, ~s("v1"))
         |> Ash.update!()
 
-      assert Ash.update!(podcast, %{title: "Renamed"}).http_etag == ~s("v1")
+      assert Ash.update!(podcast, %{title: "Renamed"}, actor: user).http_etag == ~s("v1")
     end
   end
 end
