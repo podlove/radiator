@@ -106,6 +106,7 @@ defmodule RadiatorWeb.Layouts do
         </ul>
       </div>
       <div class="navbar-end">
+        <.theme_toggle />
         <.link href={~p"/sign-in"} class="btn btn-ghost btn-circle"><.icon
           name="hero-user"
           class="size-5"
