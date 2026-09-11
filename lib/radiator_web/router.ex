@@ -46,6 +46,8 @@ defmodule RadiatorWeb.Router do
 
     ash_authentication_live_session :authenticated_routes,
       on_mount: {RadiatorWeb.LiveUserAuth, :live_user_required} do
+      live "/", AdminLive.Index, :index
+
       live "/podcasts", PodcastLive.Index, :index
       live "/podcasts/new", PodcastLive.Form, :new
       live "/podcasts/import", PodcastLive.Form, :import

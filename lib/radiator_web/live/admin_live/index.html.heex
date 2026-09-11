@@ -1,0 +1,19 @@
+<Layouts.admin flash={@flash}>
+  <.header>
+    Admin
+  </.header>
+
+  <div class="card w-96 bg-base-100 shadow-sm">
+    <div class="card-body">
+      <h2 class="text-3xl font-bold">Podcasts</h2>
+      <ul class="mt-6 flex flex-col gap-2 text-xs">
+        <li :for={podcast <- @podcasts}>
+          <.icon name="hero-check" class="w-5 h-5" /> {podcast.display_title}
+        </li>
+      </ul>
+      <div class="mt-6">
+        <.link navigate={~p"/admin/podcasts"} class="btn btn-primary btn-block">Show Podcasts</.link>
+      </div>
+    </div>
+  </div>
+</Layouts.admin>
