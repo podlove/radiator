@@ -46,6 +46,28 @@ defmodule RadiatorWeb.Layouts do
     """
   end
 
+  @doc """
+  Renders your admin layout.
+
+  This function is typically invoked from every template,
+  and it often contains your application menu, sidebar,
+  or similar.
+
+  ## Examples
+
+      <Layouts.admin flash={@flash}>
+        <h1>Content</h1>
+      </Layouts.admin>
+
+  """
+  attr :flash, :map, required: true, doc: "the map of flash messages"
+
+  attr :current_scope, :map,
+    default: nil,
+    doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
+
+  slot :inner_block, required: true
+
   def admin(assigns) do
     ~H"""
     <.navbar />
@@ -61,25 +83,13 @@ defmodule RadiatorWeb.Layouts do
     """
   end
 
-  def navbar(assigns) do
+  defp navbar(assigns) do
     ~H"""
     <div class="navbar bg-base-100 shadow-sm">
       <div class="navbar-start">
         <div class="dropdown">
           <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-            <svg
-              aria-label="Menu"
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            ><path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h8m-8 6h16"
-            /></svg>
+            <.icon name="hero-bars-3-center-left" class="size-5" />
           </div>
           <ul
             tabindex="-1"
