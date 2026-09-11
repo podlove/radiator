@@ -7,6 +7,7 @@ defmodule Radiator.Podcasts.Podcast do
     otp_app: :radiator,
     domain: Radiator.Podcasts,
     data_layer: AshPostgres.DataLayer,
+    notifiers: [Ash.Notifier.PubSub],
     fragments: [
       Radiator.Podcasts.Podcast.Calculations,
       Radiator.Podcasts.Podcast.Policies,
@@ -72,6 +73,15 @@ defmodule Radiator.Podcasts.Podcast do
 
       change Radiator.Podcasts.Podcast.Changes.ResetHttpCache
     end
+  end
+
+  pub_sub do
+    module RadiatorWeb.Endpoint
+    prefix "podcast"
+
+    publish_all :create, "created"
+    publish_all :update, "updated"
+    publish_all :destroy, "destroyed"
   end
 
   attributes do

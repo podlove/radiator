@@ -4,8 +4,8 @@
     <p class="text-xl">The spark ✨ that lights the fire 🔥</p>
   </div>
 
-  <div class="my-16 grid grid-cols-3 gap-4">
-    <div :for={podcast <- Enum.shuffle(@podcasts)} class="card bg-base-100 shadow-sm">
+  <div id="podcasts" class="my-16 grid grid-cols-3 gap-4" phx-update="stream">
+    <div :for={{id, podcast} <- @streams.podcasts} id={id} class="card bg-base-100 shadow-sm">
       <figure>
         <img
           src={"https://picsum.photos/640/320?i=#{Enum.random(1..100)}"}
