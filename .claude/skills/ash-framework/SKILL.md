@@ -30,6 +30,18 @@ metadata:
 
 - [ash_credo](references/ash_credo/ash_credo.md)
 
+### ash_oban
+
+- [ash_oban](references/ash_oban/ash_oban.md)
+- [best_practices](references/ash_oban/best_practices.md)
+- [debugging_and_error_handling](references/ash_oban/debugging_and_error_handling.md)
+- [defining_triggers](references/ash_oban/defining_triggers.md)
+- [multi_tenancy_support](references/ash_oban/multi_tenancy_support.md)
+- [scheduled_actions](references/ash_oban/scheduled_actions.md)
+- [setting_up_ash_oban](references/ash_oban/setting_up_ash_oban.md)
+- [triggering_jobs_programmatically](references/ash_oban/triggering_jobs_programmatically.md)
+- [working_with_actors](references/ash_oban/working_with_actors.md)
+
 ### ash_phoenix
 
 - [ash_phoenix](references/ash_phoenix/ash_phoenix.md)
@@ -56,7 +68,7 @@ metadata:
 ## Searching Documentation
 
 ```sh
-mix usage_rules.search_docs "search term" -p ash -p ash_admin -p ash_authentication_phoenix -p ash_credo -p ash_phoenix -p ash_postgres
+mix usage_rules.search_docs "search term" -p ash -p ash_admin -p ash_authentication_phoenix -p ash_credo -p ash_oban -p ash_phoenix -p ash_postgres -p ash_state_machine
 ```
 
 ## Available Mix Tasks
@@ -92,6 +104,11 @@ mix usage_rules.search_docs "search term" -p ash -p ash_admin -p ash_authenticat
 - `mix ash_authentication_phoenix.install` - Installs AshAuthenticationPhoenix. Invoke with `mix igniter.install ash_authentication_phoenix`
 - `mix ash_authentication_phoenix.upgrade`
 - `mix ash_credo.install` - Installs AshCredo and configures .credo.exs
+- `mix ash_oban.install` - Installs AshOban and Oban
+- `mix ash_oban.install.docs`
+- `mix ash_oban.set_default_module_names` - Set module names to their default values for triggers and scheduled actions
+- `mix ash_oban.set_default_module_names.docs`
+- `mix ash_oban.upgrade`
 - `mix ash_phoenix.gen.html` - Generates a controller and HTML views for an existing Ash resource.
 - `mix ash_phoenix.gen.live` - Generates liveviews for a given domain and resource.
 - `mix ash_phoenix.install` - Installs AshPhoenix into a project. Should be called with `mix igniter.install ash_phoenix`
@@ -105,4 +122,7 @@ mix usage_rules.search_docs "search term" -p ash -p ash_admin -p ash_authenticat
 - `mix ash_postgres.setup_vector` - Sets up pgvector for AshPostgres
 - `mix ash_postgres.setup_vector.docs`
 - `mix ash_postgres.squash_snapshots` - Cleans snapshots folder, leaving only one snapshot per resource
+- `mix ash_state_machine.generate_flow_charts` - Generates Mermaid Flow Charts for each resource using `AshStateMachine`
+- `mix ash_state_machine.install` - Installs AshStateMachine
+- `mix ash_state_machine.install.docs`
 <!-- usage-rules-skill-end -->
