@@ -15,7 +15,7 @@ defmodule RadiatorWeb.HomeLive.Index do
     end
 
     query = Podcast |> Ash.Query.filter(not is_nil(title))
-    podcasts = Ash.stream!(query)
+    podcasts = Ash.stream!(query, load: [:episodes])
 
     socket
     |> assign(:page_title, "Podcasts")
@@ -37,6 +37,11 @@ defmodule RadiatorWeb.HomeLive.Index do
 
     socket
     |> stream_insert(:podcasts, podcast, at: -1)
+    |> noreply()
+  end
+
+  def handle_info(%Broadcast{topic: "podcast:updated", event: "sync", payload: _payload}, socket) do
+    socket
     |> noreply()
   end
 

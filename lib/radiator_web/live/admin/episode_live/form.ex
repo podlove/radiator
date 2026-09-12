@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.EpisodeLive.Form do
+defmodule RadiatorWeb.Admin.EpisodeLive.Form do
   use RadiatorWeb, :live_view
 
   require Ash.Query

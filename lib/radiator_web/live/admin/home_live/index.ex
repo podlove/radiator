@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.AdminLive.Index do
+defmodule RadiatorWeb.Admin.HomeLive.Index do
   use RadiatorWeb, :live_view
 
   alias Radiator.Podcasts.Podcast

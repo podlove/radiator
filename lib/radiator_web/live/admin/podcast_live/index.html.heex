@@ -1,0 +1,38 @@
+<Layouts.admin flash={@flash}>
+  <.header>
+    Podcasts
+    <:actions>
+      <.button variant="primary" navigate={~p"/admin/podcasts/new"}>
+        <.icon name="hero-plus" /> {gettext("New")}
+      </.button>
+      <.button navigate={~p"/admin/podcasts/import"}>
+        <.icon name="hero-plus" /> {gettext("Import")}
+      </.button>
+    </:actions>
+  </.header>
+
+  <.table
+    id="podcasts"
+    rows={@streams.podcasts}
+    row_click={fn {_id, podcast} -> JS.navigate(~p"/admin/podcasts/#{podcast}") end}
+  >
+    <:col :let={{_id, podcast}} label="Title">{podcast.display_title}</:col>
+
+    <:action :let={{_id, podcast}}>
+      <div class="sr-only">
+        <.link navigate={~p"/admin/podcasts/#{podcast}"}>{gettext("Show")}</.link>
+      </div>
+
+      <.link navigate={~p"/admin/podcasts/#{podcast}/edit"}>{gettext("Edit")}</.link>
+    </:action>
+
+    <:action :let={{id, podcast}}>
+      <.link
+        phx-click={JS.push("delete", value: %{id: podcast.id}) |> hide("##{id}")}
+        data-confirm="Are you sure?"
+      >
+        {gettext("Delete")}
+      </.link>
+    </:action>
+  </.table>
+</Layouts.admin>

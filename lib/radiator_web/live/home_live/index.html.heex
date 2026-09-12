@@ -4,21 +4,8 @@
     <p class="text-xl">The spark ✨ that lights the fire 🔥</p>
   </div>
 
-  <div id="podcasts" class="my-16 grid grid-cols-3 gap-4" phx-update="stream">
-    <div :for={{id, podcast} <- @streams.podcasts} id={id} class="card bg-base-100 shadow-sm">
-      <figure>
-        <img
-          src={"https://picsum.photos/640/320?i=#{Enum.random(1..100)}"}
-          alt=""
-        />
-      </figure>
-      <div class="card-body">
-        <h2 class="card-title">{podcast.title}</h2>
-        <p>Lorem Ipsum</p>
-        <div class="card-actions justify-end">
-          <.link href="#" class="btn btn-primary">Show</.link>
-        </div>
-      </div>
-    </div>
+  <div id="podcasts" class="flex gap-4" phx-update="stream">
+    <.card_podcast :for={{id, podcast} <- @streams.podcasts} id={id} podcast={podcast} />
   </div>
+  <.card_feature />
 </Layouts.app>

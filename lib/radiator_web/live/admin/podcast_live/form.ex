@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.PodcastLive.Form do
+defmodule RadiatorWeb.Admin.PodcastLive.Form do
   use RadiatorWeb, :live_view
 
   alias AshPhoenix.Form

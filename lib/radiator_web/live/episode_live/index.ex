@@ -1,4 +1,4 @@
-defmodule RadiatorWeb.PodcastLive.Index do
+defmodule RadiatorWeb.EpisodeLive.Index do
   use RadiatorWeb, :live_view
 
   @impl true
