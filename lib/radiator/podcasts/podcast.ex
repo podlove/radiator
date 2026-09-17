@@ -73,6 +73,10 @@ defmodule Radiator.Podcasts.Podcast do
 
       change Radiator.Podcasts.Podcast.Changes.ResetHttpCache
     end
+
+    read :public_read do
+      pagination offset?: true, keyset?: true, required?: false
+    end
   end
 
   pub_sub do

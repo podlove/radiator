@@ -1,10 +1,8 @@
 defmodule RadiatorWeb.HomeLive.Index do
   use RadiatorWeb, :live_view
 
-  require Ash.Query
-
   alias Phoenix.Socket.Broadcast
-  alias Radiator.Podcasts.Podcast
+  alias Radiator.Podcasts
 
   @impl true
   def mount(_params, _session, socket) do
@@ -14,8 +12,8 @@ defmodule RadiatorWeb.HomeLive.Index do
       RadiatorWeb.Endpoint.subscribe("podcast:destroyed")
     end
 
-    query = Podcast |> Ash.Query.filter(not is_nil(title))
-    podcasts = Ash.stream!(query, load: [:episodes])
+    load = [:episodes]
+    podcasts = Podcasts.public_read_podcasts!(load: load, stream?: true)
 
     socket
     |> assign(:page_title, "Podcasts")

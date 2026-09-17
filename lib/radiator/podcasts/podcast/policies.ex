@@ -15,8 +15,8 @@ defmodule Radiator.Podcasts.Podcast.Policies do
       authorize_if always()
     end
 
-    policy action_type(:read) do
-      authorize_if always()
+    policy action(:read) do
+      authorize_if relates_to_actor_via(:user)
     end
 
     policy action_type(:create) do
@@ -28,6 +28,22 @@ defmodule Radiator.Podcasts.Podcast.Policies do
     end
 
     policy action_type(:destroy) do
+      authorize_if relates_to_actor_via(:user)
+    end
+
+    policy action(:public_read) do
+      authorize_if always()
+    end
+  end
+
+  field_policies do
+    private_fields :include
+
+    field_policy_bypass [:title, :subtitle, :summary, :image_url] do
+      authorize_if always()
+    end
+
+    field_policy :* do
       authorize_if relates_to_actor_via(:user)
     end
   end
