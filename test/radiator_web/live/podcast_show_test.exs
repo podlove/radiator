@@ -48,7 +48,8 @@ defmodule RadiatorWeb.PodcastShowTest do
 
     live |> element("#request-sync") |> render_click()
 
-    assert Ash.get!(Radiator.Podcasts.Podcast, podcast.id).sync_status == :pending
+    assert Ash.get!(Radiator.Podcasts.Podcast, podcast.id, authorize?: false).sync_status ==
+             :pending
   end
 
   test "a background sync updates the open page", %{conn: conn, podcast: podcast, feed: feed} do

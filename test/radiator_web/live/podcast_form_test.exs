@@ -70,7 +70,7 @@ defmodule RadiatorWeb.PodcastFormTest do
     })
     |> render_submit()
 
-    saved = Ash.get!(Radiator.Podcasts.Podcast, podcast.id)
+    saved = Ash.get!(Radiator.Podcasts.Podcast, podcast.id, authorize?: false)
     assert saved.subtitle == "Kurz"
     assert saved.description == "<p>Lang</p>"
     assert saved.podcast_type == :serial
@@ -97,7 +97,7 @@ defmodule RadiatorWeb.PodcastFormTest do
     |> render_submit()
 
     assert [%{text: "Technology", subcategory: "Podcasting"}] =
-             Ash.get!(Radiator.Podcasts.Podcast, podcast.id).categories
+             Ash.get!(Radiator.Podcasts.Podcast, podcast.id, authorize?: false).categories
   end
 
   test "an existing category can be removed", %{conn: conn, user: user} do
@@ -112,7 +112,8 @@ defmodule RadiatorWeb.PodcastFormTest do
     live |> element("button[phx-value-path='podcast[categories][0]']") |> render_click()
     live |> form("#podcast-form") |> render_submit()
 
-    assert [%{text: "Comedy"}] = Ash.get!(Radiator.Podcasts.Podcast, podcast.id).categories
+    assert [%{text: "Comedy"}] =
+             Ash.get!(Radiator.Podcasts.Podcast, podcast.id, authorize?: false).categories
   end
 
   test "a podcast with a feed warns that a sync overwrites the fields", %{conn: conn, user: user} do
@@ -140,6 +141,7 @@ defmodule RadiatorWeb.PodcastFormTest do
     |> form("#podcast-form", %{"podcast" => %{"sync_strategy" => "scheduled"}})
     |> render_submit()
 
-    assert Ash.get!(Radiator.Podcasts.Podcast, podcast.id).sync_strategy == :scheduled
+    assert Ash.get!(Radiator.Podcasts.Podcast, podcast.id, authorize?: false).sync_strategy ==
+             :scheduled
   end
 end

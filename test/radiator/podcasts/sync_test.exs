@@ -78,7 +78,7 @@ defmodule Radiator.Podcasts.SyncTest do
 
       assert {:error, error} = Ash.update(podcast, %{}, action: :sync, authorize?: false)
       assert FeedSyncError.summarize(error) =~ "timeout"
-      assert Ash.get!(Podcast, podcast.id).sync_status == :pending
+      assert Ash.get!(Podcast, podcast.id, authorize?: false).sync_status == :pending
     end
 
     test "a 429 carries its Retry-After along", %{user: user} do
@@ -96,7 +96,7 @@ defmodule Radiator.Podcasts.SyncTest do
       assert {:error, %{errors: [%FeedSyncError{}]}} =
                Ash.update(podcast, %{}, action: :sync, authorize?: false)
 
-      assert Ash.get!(Podcast, podcast.id).sync_status == :pending
+      assert Ash.get!(Podcast, podcast.id, authorize?: false).sync_status == :pending
     end
   end
 

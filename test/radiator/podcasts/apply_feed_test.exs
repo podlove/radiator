@@ -93,7 +93,7 @@ defmodule Radiator.Podcasts.ApplyFeedTest do
             ~s(</channel></rss>)
         )
 
-      reloaded = Ash.get!(Radiator.Podcasts.Podcast, podcast.id)
+      reloaded = Ash.get!(Radiator.Podcasts.Podcast, podcast.id, authorize?: false)
       apply_feed(reloaded, shrunk)
 
       assert length(episodes(podcast)) == 5

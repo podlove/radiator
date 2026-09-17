@@ -2,10 +2,12 @@ defmodule Radiator.Podcasts.Podcast.Policies do
   @moduledoc """
   Who may do what with a podcast.
 
-  Everyone may read, signed-in users may create, and only the owner may update
-  or destroy. The sync machinery (`:sync`, `:mark_sync_failed`) runs from the
-  Oban worker without an actor, so AshOban's interactions bypass the owner
-  check; the check is only ever true for calls made by `ash_oban` itself.
+  Everyone may read the public fields through `:public_read`; the primary
+  `:read` and every update or destroy are for the owner only, and signed-in
+  users may create. The sync machinery (`:sync`, `:mark_sync_failed`) runs from
+  the Oban worker without an actor, so AshOban's interactions bypass both the
+  owner check and the field policies; the check is only ever true for calls
+  made by `ash_oban` itself.
   """
 
   use Spark.Dsl.Fragment, of: Ash.Resource, authorizers: [Ash.Policy.Authorizer]
@@ -38,6 +40,10 @@ defmodule Radiator.Podcasts.Podcast.Policies do
 
   field_policies do
     private_fields :include
+
+    field_policy_bypass :* do
+      authorize_if AshOban.Checks.AshObanInteraction
+    end
 
     field_policy_bypass [:title, :subtitle, :summary, :image_url] do
       authorize_if always()

@@ -67,7 +67,9 @@ defmodule Radiator.Podcasts.RequestSyncTest do
       podcast = Podcasts.create_podcast!(%{title: "No feed"}, actor: user)
 
       assert {:error, %Ash.Error.Invalid{}} = Podcasts.request_sync(podcast, %{}, actor: user)
-      assert Ash.get!(Radiator.Podcasts.Podcast, podcast.id).sync_status == :idle
+
+      assert Ash.get!(Radiator.Podcasts.Podcast, podcast.id, authorize?: false).sync_status ==
+               :idle
     end
   end
 

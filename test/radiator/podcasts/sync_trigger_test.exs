@@ -31,7 +31,8 @@ defmodule Radiator.Podcasts.SyncTriggerTest do
   # therefore not a reliable signal; these tests assert on state instead.
   defp run_triggers, do: AshOban.Test.schedule_and_run_triggers({Podcast, :sync})
 
-  defp reload(podcast), do: Ash.get!(Podcast, podcast.id)
+  # Reads stored state, not what a user may see; `:read` is owner-only.
+  defp reload(podcast), do: Ash.get!(Podcast, podcast.id, authorize?: false)
 
   defp sync_jobs, do: Repo.all(where(Oban.Job, [j], j.worker == @worker))
 
