@@ -6,7 +6,13 @@ defmodule Radiator.Accounts.Token do
     domain: Radiator.Accounts,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshAuthentication.TokenResource]
+    extensions: [AshAuthentication.TokenResource],
+    simple_notifiers: [AshAuthentication.Phoenix.TokenRevocationNotifier]
+
+  token do
+    endpoints [RadiatorWeb.Endpoint]
+    live_socket_id_template &"users_sessions:#{&1["jti"]}"
+  end
 
   postgres do
     table "tokens"

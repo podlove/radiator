@@ -88,7 +88,10 @@ if config_env() == :prod do
   config :radiator,
     token_signing_secret:
       System.get_env("TOKEN_SIGNING_SECRET") ||
-        raise("Missing environment variable `TOKEN_SIGNING_SECRET`!")
+        raise("Missing environment variable `TOKEN_SIGNING_SECRET`!"),
+    webauthn_rp_id: System.get_env("WEBAUTHN_RP_ID"),
+    webauthn_rp_name: System.get_env("WEBAUTHN_RP_NAME"),
+    webauthn_origin: System.get_env("WEBAUTHN_ORIGIN")
 
   # ## SSL Support
   #

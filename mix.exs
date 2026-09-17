@@ -43,7 +43,7 @@ defmodule Radiator.MixProject do
   defp deps do
     [
       {:ash_admin, "~> 1.0"},
-      {:ash_authentication_phoenix, "~> 2.0"},
+      {:ash_authentication_phoenix, "== 3.0.0-rc.11"},
       {:ash_credo, "~> 0.17", only: [:dev, :test], runtime: false},
       {:ash_oban, "~> 0.8"},
       {:ash_phoenix, "~> 2.0"},
@@ -71,6 +71,7 @@ defmodule Radiator.MixProject do
        app: false,
        compile: false,
        depth: 1},
+      {:igniter_js, "~> 0.4"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:jason, "~> 1.2"},
       {:lazy_html, ">= 0.1.0", only: :test},
@@ -95,7 +96,8 @@ defmodule Radiator.MixProject do
       {:tailwind, "~> 0.5", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:usage_rules, "~> 1.0", only: [:dev]}
+      {:usage_rules, "~> 1.0", only: [:dev]},
+      {:wax_, "~> 0.7"}
     ]
   end
 

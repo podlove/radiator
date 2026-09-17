@@ -60,6 +60,14 @@ defmodule Radiator.Accounts.User do
         api_key_relationship :valid_api_keys
         api_key_hash_attribute :api_key_hash
       end
+
+      webauthn :webauthn do
+        credential_resource Radiator.Accounts.WebAuthnCredential
+        rp_id Radiator.Secrets
+        rp_name Radiator.Secrets
+        origin Radiator.Secrets
+        identity_field :email
+      end
     end
   end
 
@@ -305,6 +313,8 @@ defmodule Radiator.Accounts.User do
     has_many :valid_api_keys, Radiator.Accounts.ApiKey do
       filter expr(valid)
     end
+
+    has_many :webauthn_credentials, Radiator.Accounts.WebAuthnCredential
   end
 
   identities do

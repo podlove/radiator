@@ -8,5 +8,6 @@ defmodule Radiator.Accounts do
     resource Radiator.Accounts.Token
     resource Radiator.Accounts.User
     resource Radiator.Accounts.ApiKey
+    resource Radiator.Accounts.WebAuthnCredential
   end
 end

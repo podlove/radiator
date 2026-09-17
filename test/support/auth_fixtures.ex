@@ -41,7 +41,7 @@ defmodule Radiator.AuthFixtures do
 
     strategy = Info.strategy!(User, :password)
 
-    {:ok, user} = Strategy.action(strategy, :sign_in, %{email: email, password: @password})
+    {:ok, user} = Strategy.action(strategy, :sign_in, %{email: email, password: @password}, [])
 
     user
   end

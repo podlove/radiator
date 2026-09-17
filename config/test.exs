@@ -1,5 +1,10 @@
 import Config
-config :radiator, token_signing_secret: "XtP4dFgwKzpF2grokaDzLs3/uOQvAkFv"
+
+config :radiator,
+  token_signing_secret: "XtP4dFgwKzpF2grokaDzLs3/uOQvAkFv",
+  webauthn_rp_id: "localhost",
+  webauthn_rp_name: "Radiator"
+
 config :bcrypt_elixir, log_rounds: 1
 config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 

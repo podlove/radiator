@@ -2,7 +2,7 @@ defmodule RadiatorWeb.AuthController do
   use RadiatorWeb, :controller
   use AshAuthentication.Phoenix.Controller
 
-  def success(conn, activity, user, _token) do
+  def success(conn, activity, user, token) do
     return_to = get_session(conn, :return_to) || ~p"/"
 
     message =
@@ -15,6 +15,7 @@ defmodule RadiatorWeb.AuthController do
     conn
     |> delete_session(:return_to)
     |> store_in_session(user)
+    |> set_live_socket_id(token)
     # If your resource has a different name, update the assign name here (i.e :current_admin)
     |> assign(:current_user, user)
     |> put_flash(:info, message)
@@ -44,8 +45,14 @@ defmodule RadiatorWeb.AuthController do
           address - confirm it to finish linking this provider to your account.
           """
 
-        _ ->
+        {{:password, _}, _} ->
           "Incorrect email or password"
+
+        {{:magic_link, _}, _} ->
+          "Invalid or expired sign-in link"
+
+        _ ->
+          "Authentication failed"
       end
 
     conn
