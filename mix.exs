@@ -84,7 +84,7 @@ defmodule Radiator.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.2.0"},
       {:phoenix_test, "~> 0.12.1", only: :test, runtime: false},
-      {:phoenix, "~> 1.8.9"},
+      {:phoenix, "~> 1.8.14"},
       {:picosat_elixir, "~> 0.2"},
       {:postgrex, ">= 0.0.0"},
       {:railway, "~> 1.1"},

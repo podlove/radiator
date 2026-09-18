@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :phoenix, filter_parameters: ["password", "token"]
+
 # These enable behaviors that will become the default in the next major
 # version of Ash. Setting them now opts your application into the new
 # behavior and ensures a seamless upgrade. See the backwards compatibility
@@ -24,9 +26,9 @@ config :ash,
   bulk_actions_default_to_errors?: true,
   transaction_rollback_on_error?: true,
   redact_sensitive_values_in_errors?: true,
+  default_string_length_count: :codepoints,
   many_to_many_destroy_destination_on_match?: true,
-  known_types: [AshPostgres.Timestamptz, AshPostgres.TimestamptzUsec],
-  default_string_length_count: :codepoints
+  known_types: [AshPostgres.Timestamptz, AshPostgres.TimestamptzUsec]
 
 config :spark,
   formatter: [
@@ -102,7 +104,7 @@ config :esbuild,
 
 # Configure tailwind (the version is required)
 config :tailwind,
-  version: "4.3.0",
+  version: "4.3.3",
   radiator: [
     args: ~w(
       --input=assets/css/app.css
@@ -123,8 +125,6 @@ config :phoenix, :json_library, Jason
 config :radiator, Oban,
   engine: Oban.Engines.Basic,
   notifier: Oban.Notifiers.Postgres,
-  # Low concurrency on purpose: ten 5 MB feeds at once mean hundreds of
-  # megabytes of XML plus parsed structures in memory.
   queues: [default: 10, feeds: 3],
   lifeline: [rescue_after: {2, :hours}],
   pruner: [max_age: {1, :day}],

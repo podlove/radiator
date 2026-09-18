@@ -1,4 +1,5 @@
 import Config
+config :ash_authentication, dev_mailbox_path: "/dev/mailbox"
 config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database

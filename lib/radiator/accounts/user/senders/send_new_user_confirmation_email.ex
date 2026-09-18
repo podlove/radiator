@@ -21,10 +21,10 @@ defmodule Radiator.Accounts.User.Senders.SendNewUserConfirmationEmail do
   end
 
   # `opts[:confirmation_type]` is `:identity_link` when an OAuth2/OIDC
-  # sign-in whose email matches this already-registered account is asking
-  # to be linked (the strategy's `on_untrusted_email_match :confirm`).
-  # Confirming grants that provider login access to this account, so make
-  # the copy unambiguous about who is asking and what it does.
+  # sign-in whose email matches this already-registered account is
+  # asking to be linked (the strategy's `on_untrusted_email_match
+  # :confirm`). Confirming grants that provider login access to this
+  # account, so make the copy unambiguous about who is asking.
   defp subject(opts) do
     case opts[:confirmation_type] do
       :identity_link -> "Confirm linking your #{opts[:provider]} login"
@@ -38,8 +38,8 @@ defmodule Radiator.Accounts.User.Senders.SendNewUserConfirmationEmail do
     case opts[:confirmation_type] do
       :identity_link ->
         """
-        <p>Someone signed in with #{opts[:provider]} using your email address
-        and wants to link it to your account.</p>
+        <p>Someone signed in with #{opts[:provider]} using your email
+        address and wants to link it to your account.</p>
         <p>If this was you, confirm here: <a href="#{url}">#{url}</a></p>
         <p>If it wasn't you, ignore this email - nothing has changed.</p>
         """

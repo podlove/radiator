@@ -13,24 +13,26 @@ defmodule RadiatorWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :load_from_session
+    plug :set_scope, scope: Radiator.Accounts.Scope, default_scope?: true
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :load_from_bearer
+    plug :set_scope, scope: Radiator.Accounts.Scope, default_scope?: true
 
     plug AshAuthentication.Strategy.ApiKey.Plug,
       resource: Radiator.Accounts.User,
       # if you want to require an api key to be supplied, set `required?` to true
       required?: false
-
-    plug :load_from_bearer
-    plug :set_actor, :user
   end
 
   scope "/", RadiatorWeb do
     pipe_through :browser
 
     ash_authentication_live_session :public_routes,
+      scope: Radiator.Accounts.Scope,
+      default_scope: :user,
       on_mount: {RadiatorWeb.LiveUserAuth, :live_user_optional} do
       live "/", HomeLive.Index, :index
 
@@ -78,7 +80,9 @@ defmodule RadiatorWeb.Router do
   scope "/admin", RadiatorWeb.Admin do
     pipe_through :browser
 
-    # ash_authentication_live_session :authenticated_routes do
+    # ash_authentication_live_session :authenticated_routes,
+    #   scope: Radiator.Accounts.Scope,
+    #   default_scope: :user do
     #   in each liveview, add one of the following at the top of the module:
     #
     #   If an authenticated user must be present:
@@ -92,6 +96,8 @@ defmodule RadiatorWeb.Router do
     # end
 
     ash_authentication_live_session :authenticated_routes,
+      scope: Radiator.Accounts.Scope,
+      default_scope: :user,
       on_mount: {RadiatorWeb.LiveUserAuth, :live_user_required} do
       live "/", HomeLive.Index, :index
 
