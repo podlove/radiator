@@ -3,6 +3,8 @@ defmodule RadiatorWeb.CustomComponents do
   Application-specific components.
   """
   use Phoenix.Component
+  use Gettext, backend: RadiatorWeb.Gettext
+  use RadiatorWeb, :verified_routes
 
   @doc """
   Drawer is a grid layout that can show/hide a sidebar on the left or right side of the page.
@@ -149,27 +151,42 @@ defmodule RadiatorWeb.CustomComponents do
   end
 
   attr :id, :string, required: true
-  attr :podcast, :any
+  attr :podcast, :any, required: true
 
   def card_podcast(assigns) do
     ~H"""
     <div id={@id} class="card w-full bg-base-100 shadow-sm">
-      <figure>
+      <figure :if={@podcast.image_url}>
         <img
           src={@podcast.image_url}
           alt=""
           class="size-full object-cover"
         />
       </figure>
+      <div :if={!@podcast.image_url} class="avatar avatar-placeholder">
+        <div class="bg-neutral text-neutral-content size-full">
+          <RadiatorWeb.CoreComponents.icon name="hero-photo" class="w-8 h-8" />
+        </div>
+      </div>
       <div class="card-body">
         <h2 class="card-title">{@podcast.title}</h2>
-        <h3>{@podcast.subtitle}</h3>
-        <p>{@podcast.summary}</p>
+        <p>{@podcast.subtitle}</p>
         <div class="card-actions justify-end">
-          <button class="btn btn-block">Show</button>
+          <.link navigate={~p"/podcast/#{@podcast}"} class="btn btn-block">{gettext("Show")}</.link>
         </div>
       </div>
     </div>
+    """
+  end
+
+  attr :podcast, :any, required: true
+  attr :episode, :any, required: true
+
+  def episode_item(assigns) do
+    ~H"""
+    <p>
+      <.link navigate={~p"/podcast/#{@podcast}/#{@episode}"}>{@episode.title}</.link>
+    </p>
     """
   end
 end
