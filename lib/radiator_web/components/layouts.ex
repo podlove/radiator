@@ -35,7 +35,6 @@ defmodule RadiatorWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <.navbar />
     <main class="px-4 py-20 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-4xl space-y-4">
         {render_slot(@inner_block)}
@@ -70,7 +69,6 @@ defmodule RadiatorWeb.Layouts do
 
   def admin(assigns) do
     ~H"""
-    <.navbar />
     <.drawer>
       <main class="px-4 py-20 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-4xl space-y-4">
@@ -82,6 +80,10 @@ defmodule RadiatorWeb.Layouts do
     <.flash_group flash={@flash} />
     """
   end
+
+  attr :current_scope, :map,
+    default: nil,
+    doc: "the current [scope](https://phoenix.hexdocs.pm/scopes.html)"
 
   defp navbar(assigns) do
     ~H"""
