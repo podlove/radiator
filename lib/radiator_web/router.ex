@@ -37,8 +37,8 @@ defmodule RadiatorWeb.Router do
       live "/", HomeLive.Index, :index
 
       live "/podcast", PodcastLive.Index, :index
-      live "/podcast/:slug", PodcastLive.Index, :show
-      live "/podcast/:slug/:episode", EpisodeLive.Index, :show
+      live "/podcast/:podcast", PodcastLive.Index, :show
+      live "/podcast/:podcast/:episode", EpisodeLive.Index, :show
 
       get "/impressum", PageController, :imprint
     end
