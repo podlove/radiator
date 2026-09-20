@@ -24,6 +24,7 @@ defmodule Radiator.Podcasts do
       define :destroy_podcast, action: :destroy
       define :request_sync, action: :request_sync
       define :public_read_podcasts, action: :public_read
+      define :public_get_podcast_by_id, action: :public_read, get_by: :id
     end
 
     resource Radiator.Podcasts.Episode do

@@ -97,14 +97,18 @@ defmodule RadiatorWeb.Layouts do
             tabindex="-1"
             class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
-            <li><.link href={~p"/admin/podcasts"}>Podcasts</.link></li>
+            <li><.link href={~p"/"}>Home</.link></li>
+            <li>
+              <.link :if={@current_scope && @current_scope.actor} href={~p"/admin"}>Admin</.link>
+            </li>
           </ul>
         </div>
         <a class="text-xl" href="/">🔥 Radiator</a>
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">
-          <li><.link href={~p"/admin/podcasts"}>Podcasts</.link></li>
+          <li><.link href={~p"/"}>Home</.link></li>
+          <li><.link :if={@current_scope && @current_scope.actor} href={~p"/admin"}>Admin</.link></li>
         </ul>
       </div>
       <div class="navbar-end">
