@@ -23,15 +23,18 @@
         <.link navigate={~p"/admin/podcasts/#{podcast}"}>{gettext("Show")}</.link>
       </div>
 
-      <.link navigate={~p"/admin/podcasts/#{podcast}/edit"}>{gettext("Edit")}</.link>
+      <.link navigate={~p"/admin/podcasts/#{podcast}/edit"} title={gettext("Edit")}>
+        <.icon name="hero-pencil-square" class="size-5" />
+      </.link>
     </:action>
 
     <:action :let={{id, podcast}}>
       <.link
         phx-click={JS.push("delete", value: %{id: podcast.id}) |> hide("##{id}")}
         data-confirm="Are you sure?"
+        title={gettext("Delete")}
       >
-        {gettext("Delete")}
+        <.icon name="hero-trash" class="size-5" />
       </.link>
     </:action>
   </.table>
