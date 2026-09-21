@@ -5,8 +5,6 @@ defmodule RadiatorWeb.Layouts do
   """
   use RadiatorWeb, :html
 
-  alias RadiatorWeb.CoreComponents
-
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
   # skeleton of your application, namely HTML headers
@@ -118,6 +116,26 @@ defmodule RadiatorWeb.Layouts do
         <.link :if={!has_actor(@current_scope)} href={~p"/sign-in"} class="btn btn-circle">
           <.icon name="hero-user" class="size-5" />
         </.link>
+
+        <div :if={has_actor(@current_scope)} class="dropdown dropdown-end">
+          <div tabindex="0" role="button">
+            <div class="group btn btn-circle opacity-75 hover:opacity-100">
+              <.icon name="hero-user" class="size-5" />
+            </div>
+          </div>
+          <ul
+            tabindex="-1"
+            class="menu menu-md dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+          >
+            <li>
+              <.link href="#" class="hover:bg-selected">Settings</.link>
+            </li>
+            <div class="divider md:hidden my-0 px-2.5"></div>
+            <li>
+              <.link href={~p"/sign-out"} method="delete" class="hover:bg-selected">Logout</.link>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
     """
