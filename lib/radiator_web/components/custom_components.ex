@@ -6,6 +6,8 @@ defmodule RadiatorWeb.CustomComponents do
   use Gettext, backend: RadiatorWeb.Gettext
   use RadiatorWeb, :verified_routes
 
+  alias RadiatorWeb.CoreComponents
+
   @doc """
   Drawer is a grid layout that can show/hide a sidebar on the left or right side of the page.
 
@@ -57,10 +59,7 @@ defmodule RadiatorWeb.CustomComponents do
                 class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Episodes"
               >
-                <RadiatorWeb.CoreComponents.icon
-                  name="hero-list-bullet"
-                  class="size-5"
-                />
+                <CoreComponents.icon name="hero-list-bullet" class="size-5" />
                 <span class="is-drawer-close:hidden">Episodes</span>
               </button>
             </li>
@@ -165,7 +164,7 @@ defmodule RadiatorWeb.CustomComponents do
       </figure>
       <div :if={!@podcast.image_url} class="avatar avatar-placeholder">
         <div class="bg-neutral text-neutral-content size-full">
-          <RadiatorWeb.CoreComponents.icon name="hero-photo" class="w-8 h-8" />
+          <CoreComponents.icon name="hero-photo" class="size-8" />
         </div>
       </div>
       <div class="card-body">

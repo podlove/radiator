@@ -5,6 +5,8 @@ defmodule RadiatorWeb.Layouts do
   """
   use RadiatorWeb, :html
 
+  alias RadiatorWeb.CoreComponents
+
   # Embed all files in layouts/* within this module.
   # The default root.html.heex file contains the HTML
   # skeleton of your application, namely HTML headers
@@ -105,7 +107,7 @@ defmodule RadiatorWeb.Layouts do
         </div>
         <a class="text-xl" href="/">🔥 Radiator</a>
       </div>
-      <div class="navbar-center hidden lg:flex">
+      <div class="navbar-center hidden md:flex">
         <ul class="menu menu-horizontal px-1">
           <li><.link href={~p"/"}>Home</.link></li>
           <li><.link :if={@current_scope && @current_scope.actor} href={~p"/admin"}>Admin</.link></li>
