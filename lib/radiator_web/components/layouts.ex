@@ -101,7 +101,7 @@ defmodule RadiatorWeb.Layouts do
           >
             <li><.link href={~p"/"}>Home</.link></li>
             <li>
-              <.link :if={@current_scope && @current_scope.actor} href={~p"/admin"}>Admin</.link>
+              <.link :if={has_actor(@current_scope)} href={~p"/admin"}>Admin</.link>
             </li>
           </ul>
         </div>
@@ -110,15 +110,14 @@ defmodule RadiatorWeb.Layouts do
       <div class="navbar-center hidden md:flex">
         <ul class="menu menu-horizontal px-1">
           <li><.link href={~p"/"}>Home</.link></li>
-          <li><.link :if={@current_scope && @current_scope.actor} href={~p"/admin"}>Admin</.link></li>
+          <li><.link :if={has_actor(@current_scope)} href={~p"/admin"}>Admin</.link></li>
         </ul>
       </div>
-      <div class="navbar-end">
+      <div class="navbar-end gap-4">
         <.theme_toggle />
-        <.link href={~p"/sign-in"} class="btn btn-ghost btn-circle"><.icon
-          name="hero-user"
-          class="size-5"
-        /></.link>
+        <.link :if={!has_actor(@current_scope)} href={~p"/sign-in"} class="btn btn-circle">
+          <.icon name="hero-user" class="size-5" />
+        </.link>
       </div>
     </div>
     """
@@ -209,4 +208,7 @@ defmodule RadiatorWeb.Layouts do
     </div>
     """
   end
+
+  defp has_actor(%{actor: actor}) when not is_nil(actor), do: true
+  defp has_actor(_), do: false
 end
