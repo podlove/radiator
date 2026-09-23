@@ -1,0 +1,7 @@
+<Layouts.app flash={@flash}>
+  <div class="text-center">
+    <h1 class="my-4 text-6xl">{@podcast.title}</h1>
+  </div>
+  <h2 class="text-2xl">{gettext("%{count} Episodes", count: length(@podcast.episodes))}</h2>
+  <.episode_item :for={episode <- @podcast.episodes} podcast={@podcast} episode={episode} />
+</Layouts.app>

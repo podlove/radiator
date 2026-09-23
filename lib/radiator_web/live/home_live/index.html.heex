@@ -1,11 +1,13 @@
-<Layouts.app flash={@flash}>
-  <div class="text-center">
+<Layouts.landing flash={@flash}>
+  <div class="my-8 text-center">
     <h1 class="my-4 text-6xl">Radiator</h1>
     <p class="text-xl">The spark ✨ that lights the fire 🔥</p>
   </div>
 
-  <div id="podcasts" class="flex gap-4" phx-update="stream">
-    <.card_podcast :for={{id, podcast} <- @streams.podcasts} id={id} podcast={podcast} />
+  <div class="grid grid-cols-2 gap-4">
+    <div id="podcasts" class="flex gap-4" phx-update="stream">
+      <.card_podcast :for={{id, podcast} <- @streams.podcasts} id={id} podcast={podcast} />
+    </div>
+    <.card_feature />
   </div>
-  <.card_feature />
-</Layouts.app>
+</Layouts.landing>
