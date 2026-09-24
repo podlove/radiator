@@ -1,8 +1,8 @@
 defmodule Radiator.Podcasts.Podcast.Changes.InviteNewMembers do
   @moduledoc """
-  Sends a magic link to every user who became a member of the podcast in this
-  create or update, whether they had an account already or not. The actor
-  added themselves or is already in, so they get none.
+  Sends an invitation with a magic link to every user who became a member of
+  the podcast in this create or update, whether they had an account already
+  or not. The actor added themselves or is already in, so they get none.
 
   The mails go out after the transaction, so a rolled back update never
   invites anybody.
@@ -13,6 +13,7 @@ defmodule Radiator.Podcasts.Podcast.Changes.InviteNewMembers do
   require Ash.Query
 
   alias Radiator.Accounts.User
+  alias Radiator.Podcasts.Podcast.Senders.SendInvitationEmail
   alias Radiator.Podcasts.PodcastUserRole
 
   @impl true
@@ -26,24 +27,24 @@ defmodule Radiator.Podcasts.Podcast.Changes.InviteNewMembers do
           members_before(changeset, context)
         )
       end)
-      |> Ash.Changeset.after_transaction(&invite/2)
+      |> Ash.Changeset.after_transaction(&invite(&1, &2, context.actor))
     else
       changeset
     end
   end
 
-  defp invite(changeset, {:ok, podcast}) do
+  defp invite(changeset, {:ok, podcast}, inviter) do
     before = changeset.context[:member_ids_before] || []
 
     podcast.id
     |> member_ids()
     |> Kernel.--(before)
-    |> invite_users()
+    |> invite_users(podcast, inviter)
 
     {:ok, podcast}
   end
 
-  defp invite(_changeset, result), do: result
+  defp invite(_changeset, result, _inviter), do: result
 
   defp members_before(changeset, context) do
     actor_ids = List.wrap(context.actor && context.actor.id)
@@ -54,17 +55,13 @@ defmodule Radiator.Podcasts.Podcast.Changes.InviteNewMembers do
     end
   end
 
-  defp invite_users([]), do: :ok
+  defp invite_users([], _podcast, _inviter), do: :ok
 
-  defp invite_users(user_ids) do
+  defp invite_users(user_ids, podcast, inviter) do
     User
     |> Ash.Query.filter(id in ^user_ids)
     |> Ash.read!(authorize?: false)
-    |> Enum.each(fn user ->
-      User
-      |> Ash.ActionInput.for_action(:request_magic_link, %{email: user.email})
-      |> Ash.run_action!(authorize?: false)
-    end)
+    |> Enum.each(&SendInvitationEmail.deliver(&1, podcast, inviter))
   end
 
   defp member_ids(podcast_id) do

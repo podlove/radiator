@@ -66,7 +66,7 @@ defmodule Radiator.Podcasts.PodcastUserRoleTest do
       actor: owner
     )
 
-    assert_email_sent(to: [{"", "new@example.com"}], subject: "Your login link")
+    assert_email_sent(to: [{"", "new@example.com"}], subject: "You have been added to Shared")
 
     user =
       User

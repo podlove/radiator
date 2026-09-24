@@ -14,6 +14,7 @@ defmodule RadiatorWeb.Router do
     plug :put_secure_browser_headers
     plug :load_from_session
     plug :set_scope, scope: Radiator.Accounts.Scope, default_scope?: true
+    plug RadiatorWeb.Plugs.MagicLinkReturnTo
   end
 
   pipeline :api do
