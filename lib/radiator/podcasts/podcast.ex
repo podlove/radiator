@@ -122,4 +122,9 @@ defmodule Radiator.Podcasts.Podcast do
     # sit on top of the whole show.
     has_many :episodes, Episode, sort: [published_at: :desc_nils_last, number: :desc_nils_last]
   end
+
+  aggregates do
+    count :episode_count, :episodes
+    max :latest_episode_at, :episodes, :published_at
+  end
 end

@@ -1,5 +1,21 @@
-<Layouts.app flash={@flash}>
-  <div class="text-center">
-    <h1 class="my-4 text-6xl">Podcasts</h1>
+<Layouts.landing flash={@flash}>
+  <div class="mx-auto max-w-480 py-12 sm:py-16">
+    <header class="max-w-2xl">
+      <h1 class="text-5xl font-black tracking-tighter sm:text-6xl">Podcasts</h1>
+      <p class="mt-4 text-lg text-pretty opacity-75">
+        Alle Podcasts auf Radiator. Oben stehen die, bei denen zuletzt eine neue Folge erschienen ist.
+      </p>
+    </header>
+
+    <div
+      id="podcasts"
+      phx-update="stream"
+      class="mt-12 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 2xl:grid-cols-8"
+    >
+      <p class="col-span-full hidden py-16 text-center opacity-60 only:block">
+        Noch gibt es hier keine Podcasts.
+      </p>
+      <.podcast_tile :for={{id, podcast} <- @streams.podcasts} id={id} podcast={podcast} />
+    </div>
   </div>
-</Layouts.app>
+</Layouts.landing>

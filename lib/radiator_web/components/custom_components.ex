@@ -70,34 +70,61 @@ defmodule RadiatorWeb.CustomComponents do
     """
   end
 
+  @doc """
+  A podcast tile for listeners: cover, description, episode count and the date of
+  the latest episode. The whole tile links to the podcast page.
+
+  Expects the `:episode_count` and `:latest_episode_at` aggregates to be loaded.
+  """
   attr :id, :string, required: true
   attr :podcast, :any, required: true
 
-  def card_podcast(assigns) do
+  def podcast_tile(assigns) do
     ~H"""
-    <div id={@id} class="card w-full bg-base-100 shadow-sm">
-      <figure :if={@podcast.image_url}>
+    <.link
+      id={@id}
+      navigate={~p"/podcasts/#{@podcast}"}
+      class="group flex flex-col gap-3 rounded-box outline-offset-4 focus-visible:outline-2 focus-visible:outline-primary"
+    >
+      <div class="overflow-hidden rounded-box bg-base-300">
         <img
+          :if={@podcast.image_url}
           src={@podcast.image_url}
           alt=""
-          class="size-full object-cover"
+          loading="lazy"
+          class="aspect-square size-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-105"
         />
-      </figure>
-      <div :if={!@podcast.image_url} class="avatar avatar-placeholder">
-        <div class="bg-neutral text-neutral-content size-full">
-          <CoreComponents.icon name="hero-photo" class="size-8" />
+        <div :if={!@podcast.image_url} class="grid aspect-square place-items-center">
+          <CoreComponents.icon name="hero-microphone" class="size-10 opacity-40" />
         </div>
       </div>
-      <div class="card-body">
-        <h2 class="card-title">{@podcast.title}</h2>
-        <p>{@podcast.subtitle}</p>
-        <div class="card-actions justify-end">
-          <.link navigate={~p"/podcasts/#{@podcast}"} class="btn btn-block">{gettext("Show")}</.link>
-        </div>
+
+      <div class="space-y-1.5">
+        <h2 class="leading-snug font-semibold text-balance transition-colors group-hover:text-primary">
+          {@podcast.title}
+        </h2>
+        <p :if={description(@podcast)} class="line-clamp-3 text-sm opacity-75">
+          {description(@podcast)}
+        </p>
       </div>
-    </div>
+
+      <div class="mt-auto text-xs opacity-60">
+        <p :if={@podcast.episode_count > 0}>
+          {ngettext("1 Folge", "%{count} Folgen", @podcast.episode_count)}
+        </p>
+        <p :if={@podcast.episode_count == 0}>{gettext("Noch keine Folgen")}</p>
+        <p :if={@podcast.latest_episode_at}>
+          {gettext("Letzte Folge am %{date}", date: format_date(@podcast.latest_episode_at))}
+        </p>
+      </div>
+    </.link>
     """
   end
+
+  defp description(%{summary: summary}) when is_binary(summary) and summary != "", do: summary
+  defp description(%{subtitle: subtitle}), do: subtitle
+
+  defp format_date(datetime), do: Calendar.strftime(datetime, "%d.%m.%Y")
 
   attr :podcast, :any, required: true
   attr :episode, :any, required: true

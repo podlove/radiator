@@ -45,7 +45,14 @@ defmodule Radiator.Podcasts.Podcast.Policies do
       authorize_if AshOban.Checks.AshObanInteraction
     end
 
-    field_policy_bypass [:title, :subtitle, :summary, :image_url] do
+    field_policy_bypass [
+      :title,
+      :subtitle,
+      :summary,
+      :image_url,
+      :episode_count,
+      :latest_episode_at
+    ] do
       authorize_if always()
     end
 
