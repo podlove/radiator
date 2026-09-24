@@ -1,13 +1,125 @@
 <Layouts.landing flash={@flash}>
-  <div class="my-8 text-center">
-    <h1 class="my-4 text-6xl">Radiator</h1>
-    <p class="text-xl">The spark ✨ that lights the fire 🔥</p>
+  <section class="relative isolate overflow-hidden py-24 text-center sm:py-32">
+    <.radiating_rings />
+    <h1 class="text-7xl font-black tracking-tighter sm:text-8xl">Radiator</h1>
+    <p class="mt-4 text-xl">The spark ✨ that lights the fire 🔥</p>
+    <p class="mx-auto mt-8 max-w-xl text-lg text-balance opacity-75">
+      Radiator bringt Podcaster und Hörer an einen Ort: von der Terminfindung über die Aufnahme bis zum Kommentar unter der fertigen Folge.
+    </p>
+  </section>
+
+  <div class="mx-auto grid max-w-6xl gap-4 md:grid-cols-2">
+    <.audience_card
+      id="listeners"
+      audience={:listener}
+      icon="hero-speaker-wave"
+      label="Für Hörer"
+      title="Wissen, wann die nächste Folge kommt, und mitreden, wenn sie läuft."
+    >
+      <:point icon="hero-magnifying-glass">Podcasts entdecken und Folgen durchstöbern</:point>
+      <:point icon="hero-calendar-days" soon>Sehen, welche Folgen geplant sind</:point>
+      <:point icon="hero-chat-bubble-left-right" soon>
+        Folgen kommentieren und live mitmachen
+      </:point>
+
+      <p class="mb-3 text-sm font-semibold opacity-60">Zuletzt hinzugekommen</p>
+      <div id="podcasts" phx-update="stream" class="grid grid-cols-3 gap-3">
+        <p class="hidden col-span-3 py-6 text-center opacity-60 only:block">
+          Hier erscheinen bald die ersten Podcasts.
+        </p>
+        <.podcast_cover :for={{id, podcast} <- @streams.podcasts} id={id} podcast={podcast} />
+      </div>
+
+      <:actions>
+        <.link navigate={~p"/podcasts"} class="btn btn-primary">Alle Podcasts ansehen</.link>
+        <.link href="#hoerer" class="link link-hover font-medium">Was Hörer erwartet</.link>
+      </:actions>
+    </.audience_card>
+
+    <.audience_card
+      id="creators"
+      audience={:creator}
+      icon="hero-microphone"
+      label="Für Macher"
+      title="Vom Aufnahmetermin bis zu den fertigen Shownotes."
+    >
+      <:point icon="hero-rss">Podcasts anlegen oder bestehenden Feed importieren</:point>
+      <:point icon="hero-calendar" soon>Aufnahmetermine gemeinsam finden</:point>
+      <:point icon="hero-queue-list" soon>
+        Im Outliner zusammen mitschreiben, daraus werden die Shownotes
+      </:point>
+
+      <.outliner_preview />
+
+      <:actions>
+        <.link navigate={~p"/admin"} class="btn btn-primary">Zu deinen Podcasts</.link>
+        <.link href="#macher" class="link link-hover font-medium">Was Macher erwartet</.link>
+      </:actions>
+    </.audience_card>
   </div>
 
-  <div class="grid grid-cols-2 gap-4">
-    <div id="podcasts" class="flex gap-4" phx-update="stream">
-      <.card_podcast :for={{id, podcast} <- @streams.podcasts} id={id} podcast={podcast} />
+  <section id="hoerer" class="mx-auto max-w-6xl scroll-mt-8 px-2 py-24 sm:px-6 sm:py-32">
+    <div class="grid gap-12 lg:grid-cols-[2fr_3fr] lg:gap-20">
+      <div>
+        <h2 class="text-4xl font-bold tracking-tight text-balance">
+          Für Hörer: näher dran an deinen Podcasts
+        </h2>
+        <p class="mt-5 max-w-md text-lg text-pretty opacity-75">
+          Auf Radiator hörst du nicht nur zu. Du siehst, was geplant ist, redest unter jeder Folge mit und bist bei Live-Sendungen mittendrin.
+        </p>
+      </div>
+
+      <dl class="grid gap-x-10 gap-y-10 sm:grid-cols-2">
+        <.benefit icon="hero-magnifying-glass" title="Podcasts entdecken">
+          Stöbere durch alle Podcasts auf Radiator und ihre Folgen, alles an einem Ort.
+        </.benefit>
+        <.benefit icon="hero-bell-alert" title="Keine Folge verpassen" soon>
+          Sieh, welche Folgen geplant sind und wann die nächste erscheint.
+        </.benefit>
+        <.benefit icon="hero-chat-bubble-left-right" title="Mitreden" soon>
+          Kommentiere Folgen, stell Fragen und tausch dich mit anderen Hörern aus.
+        </.benefit>
+        <.benefit icon="hero-signal" title="Live dabei" soon>
+          Bietet ein Podcast Live-Sendungen an, bist du während der Aufnahme dabei, stellst Fragen und schreibst die Shownotes mit.
+        </.benefit>
+      </dl>
     </div>
-    <.card_feature />
-  </div>
+  </section>
+
+  <section
+    id="macher"
+    class="mx-auto max-w-6xl scroll-mt-8 rounded-[1.75rem] bg-neutral px-6 py-16 text-neutral-content sm:px-12 sm:py-20"
+  >
+    <div class="max-w-2xl">
+      <h2 class="text-4xl font-bold tracking-tight text-balance">
+        Für Macher: ein Ort für die ganze Folge
+      </h2>
+      <p class="mt-5 text-lg text-pretty opacity-75">
+        Radiator begleitet dich von der Planung bis zum Gespräch mit deinen Hörern. Kein Wechsel zwischen Terminumfrage, Notiz-Pad und Feed-Editor mehr.
+      </p>
+    </div>
+
+    <ol class="mt-14 grid gap-10 md:grid-cols-4 md:gap-6">
+      <.workflow_step number={1} title="Planen" soon>
+        Findet einen Aufnahmetermin, der allen passt, ohne endlose Nachrichten hin und her.
+      </.workflow_step>
+      <.workflow_step number={2} title="Aufnehmen" soon>
+        Alle schreiben im selben Outliner mit: Themen, Links, Zeitmarken. Daraus werden später die Shownotes.
+      </.workflow_step>
+      <.workflow_step number={3} title="Veröffentlichen">
+        Lege Podcasts und Episoden an oder importiere deinen bestehenden Feed.
+      </.workflow_step>
+      <.workflow_step number={4} title="Im Gespräch bleiben" soon>
+        Kommentare, Fragen und Live-Reaktionen deiner Hörer landen an einem Ort.
+      </.workflow_step>
+    </ol>
+  </section>
+
+  <section class="py-24 text-center sm:py-32">
+    <h2 class="text-4xl font-bold tracking-tight text-balance">Bereit für die nächste Folge?</h2>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <.link navigate={~p"/podcasts"} class="btn btn-lg">Alle Podcasts ansehen</.link>
+      <.link navigate={~p"/admin"} class="btn btn-lg btn-primary">Zu deinen Podcasts</.link>
+    </div>
+  </section>
 </Layouts.landing>

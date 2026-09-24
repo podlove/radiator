@@ -1,8 +1,12 @@
 defmodule RadiatorWeb.HomeLive.Index do
   use RadiatorWeb, :live_view
 
+  import RadiatorWeb.LandingComponents
+
   alias Phoenix.Socket.Broadcast
   alias Radiator.Podcasts
+
+  @cover_limit 6
 
   @impl true
   def mount(_params, _session, socket) do
@@ -12,12 +16,12 @@ defmodule RadiatorWeb.HomeLive.Index do
       RadiatorWeb.Endpoint.subscribe("podcast:destroyed")
     end
 
-    load = [:episodes]
-    podcasts = Podcasts.public_read_podcasts!(load: load, stream?: true)
+    query = [sort: [inserted_at: :desc], limit: @cover_limit]
+    podcasts = Podcasts.public_read_podcasts!(query: query)
 
     socket
     |> assign(:page_title, "Podcasts")
-    |> stream(:podcasts, podcasts)
+    |> stream(:podcasts, podcasts, limit: @cover_limit)
     |> ok()
   end
 
@@ -26,7 +30,7 @@ defmodule RadiatorWeb.HomeLive.Index do
     %{payload: %{data: podcast}} = payload
 
     socket
-    |> stream_insert(:podcasts, podcast, at: 0)
+    |> stream_insert(:podcasts, podcast, at: 0, limit: @cover_limit)
     |> noreply()
   end
 
@@ -34,7 +38,7 @@ defmodule RadiatorWeb.HomeLive.Index do
     %{payload: %{data: podcast}} = payload
 
     socket
-    |> stream_insert(:podcasts, podcast, at: -1)
+    |> stream_insert(:podcasts, podcast, update_only: true)
     |> noreply()
   end
 

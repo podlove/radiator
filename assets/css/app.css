@@ -104,3 +104,21 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+/* Landing page: the hero rings radiate outwards once on page load */
+@theme {
+  --animate-radiate: radiate 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes radiate {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
