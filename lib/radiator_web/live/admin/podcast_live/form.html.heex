@@ -15,6 +15,85 @@
     phx-submit="save"
     class="space-y-10"
   >
+    <section :if={@live_action in [:new, :edit]} id="podcast-members" class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Mitglieder")}</h2>
+      <%!-- On a new podcast the creator's membership does not exist yet. --%>
+      <div :if={@live_action == :new} id="member-self" class="flex items-end gap-2">
+        <div class="grid grow gap-x-4 sm:grid-cols-2">
+          <div class="fieldset mb-2">
+            <span class="label mb-1">{gettext("Rolle")}</span>
+            <p class="flex h-10 items-center">{PodcastRole.label(:owner)}</p>
+          </div>
+          <div class="fieldset mb-2">
+            <span class="label mb-1">{gettext("E-Mail")}</span>
+            <p class="flex h-10 items-center gap-2 truncate">
+              {@current_user.email}
+              <span class="badge badge-ghost badge-sm">{gettext("Du")}</span>
+            </p>
+          </div>
+        </div>
+        <div class="w-10 shrink-0" />
+      </div>
+      <.inputs_for :let={member} field={@form[:memberships]}>
+        <div id={"member-#{member.index}"} class="flex items-end gap-2">
+          <div class="grid grow gap-x-4 sm:grid-cols-2">
+            <div :if={own_membership?(member, @current_user)} class="fieldset mb-2">
+              <span class="label mb-1">{gettext("Rolle")}</span>
+              <p class="flex h-10 items-center">{PodcastRole.label(member.source.data.role)}</p>
+            </div>
+            <.input
+              :if={!own_membership?(member, @current_user)}
+              field={member[:role]}
+              type="select"
+              options={Formatting.enum_options(PodcastRole)}
+              label={gettext("Rolle")}
+            />
+            <%= if email = member_email(member) do %>
+              <div class="fieldset mb-2">
+                <span class="label mb-1">{gettext("E-Mail")}</span>
+                <p class="flex h-10 items-center gap-2 truncate">
+                  {email}
+                  <span
+                    :if={own_membership?(member, @current_user)}
+                    class="badge badge-ghost badge-sm"
+                  >
+                    {gettext("Du")}
+                  </span>
+                </p>
+              </div>
+            <% else %>
+              <.input
+                field={member[:email]}
+                type="email"
+                label={gettext("E-Mail")}
+                placeholder="name@example.com"
+              />
+            <% end %>
+          </div>
+          <button
+            :if={!own_membership?(member, @current_user)}
+            type="button"
+            class="btn btn-ghost btn-square mb-2"
+            phx-click="remove-form"
+            phx-value-path={member.name}
+            aria-label={gettext("Mitglied entfernen")}
+          >
+            <.icon name="hero-x-mark" class="size-4" />
+          </button>
+          <div :if={own_membership?(member, @current_user)} class="w-10 shrink-0" />
+        </div>
+      </.inputs_for>
+      <button
+        id="add-member"
+        type="button"
+        class="btn btn-ghost btn-sm"
+        phx-click="add-form"
+        phx-value-path={@form.name <> "[memberships]"}
+      >
+        <.icon name="hero-plus" class="size-4" /> {gettext("Mitglied hinzufügen")}
+      </button>
+    </section>
+
     <section :if={@live_action != :new} class="space-y-2">
       <h2 class="text-base font-semibold">{gettext("Feed")}</h2>
       <.input field={@form[:feed_url]} type="url" label={gettext("Feed-URL")} />

@@ -16,6 +16,8 @@ defmodule Radiator.Podcasts.Podcast do
 
   alias Radiator.Accounts.User
   alias Radiator.Podcasts.Episode
+  alias Radiator.Podcasts.Podcast.Changes
+  alias Radiator.Podcasts.PodcastUserRole
 
   @default_accept_attributes [
     :title,
@@ -52,7 +54,11 @@ defmodule Radiator.Podcasts.Podcast do
     create :create do
       validate present(:title)
 
-      change relate_actor(:user)
+      argument :memberships, {:array, :map}
+
+      change manage_relationship(:memberships, type: :create)
+      change Changes.AddActorAsOwner
+      change Changes.InviteNewMembers
     end
 
     create :import do
@@ -60,7 +66,7 @@ defmodule Radiator.Podcasts.Podcast do
 
       validate present(:feed_url)
 
-      change relate_actor(:user)
+      change Changes.AddActorAsOwner
       change set_attribute(:sync_status, :pending)
       change run_oban_trigger(:sync)
     end
@@ -70,8 +76,14 @@ defmodule Radiator.Podcasts.Podcast do
       primary? true
 
       accept @default_accept_attributes ++ [:sync_strategy]
+      require_atomic? false
 
-      change Radiator.Podcasts.Podcast.Changes.ResetHttpCache
+      argument :memberships, {:array, :map}
+
+      change Changes.ResetHttpCache
+      change manage_relationship(:memberships, type: :direct_control)
+      change Changes.RequireOwner
+      change Changes.InviteNewMembers
     end
 
     read :public_read do
@@ -116,7 +128,12 @@ defmodule Radiator.Podcasts.Podcast do
   end
 
   relationships do
-    belongs_to :user, User, allow_nil?: false
+    has_many :memberships, PodcastUserRole
+
+    many_to_many :users, User do
+      through PodcastUserRole
+      join_relationship :memberships
+    end
 
     # Newest first. Undated episodes go last; an item without a number must not
     # sit on top of the whole show.

@@ -144,4 +144,97 @@ defmodule RadiatorWeb.PodcastFormTest do
     assert Ash.get!(Radiator.Podcasts.Podcast, podcast.id, authorize?: false).sync_strategy ==
              :scheduled
   end
+
+  describe "members" do
+    defp member_emails(podcast) do
+      podcast
+      |> Ash.load!([memberships: [:user]], authorize?: false)
+      |> Map.fetch!(:memberships)
+      |> Enum.map(&to_string(&1.user.email))
+      |> Enum.sort()
+    end
+
+    test "the own membership is listed without a remove button or role select", %{
+      conn: conn,
+      user: user
+    } do
+      podcast = Podcasts.create_podcast!(%{title: "Test Show"}, actor: user)
+
+      {:ok, live, html} = live(conn, ~p"/admin/podcasts/#{podcast.id}/edit")
+
+      assert html =~ to_string(user.email)
+
+      refute has_element?(
+               live,
+               "#podcast-members button[phx-value-path='podcast[memberships][0]']"
+             )
+
+      refute has_element?(live, "#member-0 select")
+    end
+
+    test "a member can be added by email and is invited", %{conn: conn, user: user} do
+      podcast = Podcasts.create_podcast!(%{title: "Test Show"}, actor: user)
+
+      {:ok, live, _html} = live(conn, ~p"/admin/podcasts/#{podcast.id}/edit")
+
+      live |> element("#add-member") |> render_click()
+
+      live
+      |> form("#podcast-form", %{
+        "podcast" => %{
+          "memberships" => %{"1" => %{"email" => "cohost@example.com", "role" => "owner"}}
+        }
+      })
+      |> render_submit()
+
+      assert member_emails(podcast) == Enum.sort(["cohost@example.com", to_string(user.email)])
+      Swoosh.TestAssertions.assert_email_sent(to: [{"", "cohost@example.com"}])
+    end
+
+    test "another member can be removed", %{conn: conn, user: user} do
+      podcast = Podcasts.create_podcast!(%{title: "Test Show"}, actor: user)
+      other = generate(user())
+
+      Podcasts.update_podcast!(
+        podcast,
+        %{
+          memberships:
+            Enum.map(
+              Ash.load!(podcast, :memberships, authorize?: false).memberships,
+              &%{"id" => &1.id}
+            ) ++
+              [%{"email" => to_string(other.email)}]
+        },
+        actor: user
+      )
+
+      {:ok, live, _html} = live(conn, ~p"/admin/podcasts/#{podcast.id}/edit")
+
+      live |> element("#podcast-members button[phx-click='remove-form']") |> render_click()
+      live |> form("#podcast-form") |> render_submit()
+
+      assert member_emails(podcast) == [to_string(user.email)]
+    end
+
+    test "members can be added while creating a podcast", %{conn: conn, user: user} do
+      {:ok, live, html} = live(conn, ~p"/admin/podcasts/new")
+
+      assert html =~ to_string(user.email)
+
+      live |> element("#add-member") |> render_click()
+
+      live
+      |> form("#podcast-form", %{
+        "podcast" => %{
+          "title" => "New Show",
+          "memberships" => %{"0" => %{"email" => "cohost@example.com", "role" => "owner"}}
+        }
+      })
+      |> render_submit()
+
+      assert [podcast] = Ash.read!(Radiator.Podcasts.Podcast, actor: user)
+      assert member_emails(podcast) == Enum.sort(["cohost@example.com", to_string(user.email)])
+      Swoosh.TestAssertions.assert_email_sent(to: [{"", "cohost@example.com"}])
+    end
+  end
 end

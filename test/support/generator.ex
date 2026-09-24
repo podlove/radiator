@@ -17,7 +17,7 @@ defmodule Radiator.Generator do
     )
   end
 
-  @doc "A podcast. `user_id` has to be supplied by the caller."
+  @doc "A podcast without any members; use `create_podcast` for one with an owner."
   def podcast(opts \\ []) do
     seed_generator(
       %Podcast{title: sequence(:podcast_title, &"Podcast #{&1}")},

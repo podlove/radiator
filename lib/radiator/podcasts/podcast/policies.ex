@@ -3,7 +3,7 @@ defmodule Radiator.Podcasts.Podcast.Policies do
   Who may do what with a podcast.
 
   Everyone may read the public fields through `:public_read`; the primary
-  `:read` and every update or destroy are for the owner only, and signed-in
+  `:read` and every update or destroy are for its members only, and signed-in
   users may create. The sync machinery (`:sync`, `:mark_sync_failed`) runs from
   the Oban worker without an actor, so AshOban's interactions bypass both the
   owner check and the field policies; the check is only ever true for calls
@@ -18,7 +18,7 @@ defmodule Radiator.Podcasts.Podcast.Policies do
     end
 
     policy action(:read) do
-      authorize_if relates_to_actor_via(:user)
+      authorize_if relates_to_actor_via(:users)
     end
 
     policy action_type(:create) do
@@ -26,11 +26,11 @@ defmodule Radiator.Podcasts.Podcast.Policies do
     end
 
     policy action_type(:update) do
-      authorize_if relates_to_actor_via(:user)
+      authorize_if relates_to_actor_via(:users)
     end
 
     policy action_type(:destroy) do
-      authorize_if relates_to_actor_via(:user)
+      authorize_if relates_to_actor_via(:users)
     end
 
     policy action(:public_read) do
@@ -57,7 +57,7 @@ defmodule Radiator.Podcasts.Podcast.Policies do
     end
 
     field_policy :* do
-      authorize_if relates_to_actor_via(:user)
+      authorize_if relates_to_actor_via(:users)
     end
   end
 end
