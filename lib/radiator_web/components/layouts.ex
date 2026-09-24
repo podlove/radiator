@@ -130,6 +130,7 @@ defmodule RadiatorWeb.Layouts do
             class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
             <li><.link href={~p"/"}>Home</.link></li>
+            <li><.link href={~p"/podcasts"}>Podcasts</.link></li>
             <li>
               <.link :if={has_actor(@current_scope)} href={~p"/admin"}>Admin</.link>
             </li>
@@ -140,6 +141,7 @@ defmodule RadiatorWeb.Layouts do
       <div class="navbar-center hidden md:flex">
         <ul class="menu menu-horizontal px-1">
           <li><.link href={~p"/"}>Home</.link></li>
+          <li><.link href={~p"/podcasts"}>Podcasts</.link></li>
           <li><.link :if={has_actor(@current_scope)} href={~p"/admin"}>Admin</.link></li>
         </ul>
       </div>

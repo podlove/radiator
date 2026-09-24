@@ -171,7 +171,7 @@ defmodule RadiatorWeb.CustomComponents do
         <h2 class="card-title">{@podcast.title}</h2>
         <p>{@podcast.subtitle}</p>
         <div class="card-actions justify-end">
-          <.link navigate={~p"/podcast/#{@podcast}"} class="btn btn-block">{gettext("Show")}</.link>
+          <.link navigate={~p"/podcasts/#{@podcast}"} class="btn btn-block">{gettext("Show")}</.link>
         </div>
       </div>
     </div>
@@ -184,7 +184,7 @@ defmodule RadiatorWeb.CustomComponents do
   def episode_item(assigns) do
     ~H"""
     <p>
-      <.link navigate={~p"/podcast/#{@podcast}/#{@episode}"}>{@episode.title}</.link>
+      <.link navigate={~p"/podcasts/#{@podcast}/#{@episode}"}>{@episode.title}</.link>
     </p>
     """
   end

@@ -36,9 +36,9 @@ defmodule RadiatorWeb.Router do
       on_mount: {RadiatorWeb.LiveUserAuth, :live_user_optional} do
       live "/", HomeLive.Index, :index
 
-      live "/podcast", PodcastLive.Index, :index
-      live "/podcast/:podcast", PodcastLive.Show, :index
-      live "/podcast/:podcast/:episode", EpisodeLive.Index, :show
+      live "/podcasts", PodcastLive.Index, :index
+      live "/podcasts/:podcast", PodcastLive.Show, :index
+      live "/podcasts/:podcast/:episode", EpisodeLive.Index, :show
 
       get "/impressum", PageController, :imprint
     end
