@@ -5,6 +5,22 @@ This is a web application written using the Phoenix web framework.
 - Use `mix precommit` alias when you are done with all changes and fix any pending issues
 - Use the already included and available `:req` (`Req`) library for HTTP requests, **avoid** `:httpoison`, `:tesla`, and `:httpc`. Req is included by default and is the preferred HTTP client for Phoenix apps
 
+## Researching code and dependencies
+
+Usage rules for our main dependencies are in place and available as skills; **prefer them as the first source** when researching framework and library usage.
+
+As the second option, or for more detailed research on specific docs, APIs, or runtime behavior, use the Tidewave MCP server. It is active in this project (it runs inside the dev server, endpoint `http://localhost:4000/tidewave/mcp`). Prefer its tools over grepping, reading files in `deps/`, or guessing APIs from memory:
+
+- Use `get_docs` to look up documentation for any module or function of the project or any dependency (e.g. Ash, Phoenix, Cinder). This works for **all** dependencies, including ones without usage rules
+- Use `get_source_location` to find where a module or function is defined instead of searching the filesystem
+- Use `project_eval` to evaluate Elixir code against the running application: verify function behavior, inspect data, check return shapes, and debug, instead of writing throwaway scripts. `exports(Module)` lists a module's functions
+- Use `execute_sql_query` to introspect the database schema and data instead of guessing column names or writing ad-hoc psql commands
+- Use `get_logs` to check request logs and errors from the running dev server when debugging
+- If Tidewave tools fail because the dev server is not running, say so and ask the user to start it with `mix phx.server`
+
+As the third option, use the `deps` MCP server (a filesystem server scoped to the `deps/` folder) to browse, read, and search dependency source code directly. This is the way to access `deps/`, since the regular file tools cannot read it (it is gitignored). Use it when you need to read actual implementation code of a dependency, e.g. after `get_source_location` pointed you to a file in `deps/`.
+
+
 ### Phoenix v1.8 guidelines
 
 - **Always** begin your LiveView templates with `<Layouts.app flash={@flash} ...>` which wraps all inner content

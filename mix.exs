@@ -96,6 +96,7 @@ defmodule Radiator.MixProject do
       {:tailwind, "~> 0.5", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
+      {:tidewave, "~> 0.9", only: [:dev]},
       {:usage_rules, "~> 1.0", only: [:dev]},
       {:wax_, "~> 0.7"}
     ]
