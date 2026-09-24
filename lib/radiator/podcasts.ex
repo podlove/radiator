@@ -27,6 +27,9 @@ defmodule Radiator.Podcasts do
       define :public_get_podcast_by_id, action: :public_read, get_by: :id
     end
 
+    # Managed through the podcast's `:update` action.
+    resource Radiator.Podcasts.PodcastUserRole
+
     resource Radiator.Podcasts.Episode do
       define :read_episodes, action: :read
       define :create_episode, action: :create

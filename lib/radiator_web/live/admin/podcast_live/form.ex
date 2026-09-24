@@ -3,6 +3,7 @@ defmodule RadiatorWeb.Admin.PodcastLive.Form do
 
   alias AshPhoenix.Form
   alias Radiator.Podcasts.Podcast
+  alias Radiator.Podcasts.PodcastRole
   alias Radiator.Podcasts.PodcastType
   alias Radiator.Podcasts.SyncStrategy
   alias RadiatorWeb.Formatting
@@ -11,8 +12,11 @@ defmodule RadiatorWeb.Admin.PodcastLive.Form do
   def mount(params, _session, socket) do
     podcast =
       case params["id"] do
-        nil -> nil
-        id -> Ash.get!(Podcast, id, actor: socket.assigns.current_user)
+        nil ->
+          nil
+
+        id ->
+          Ash.get!(Podcast, id, load: [memberships: [:user]], actor: socket.assigns.current_user)
       end
 
     socket
@@ -79,13 +83,33 @@ defmodule RadiatorWeb.Admin.PodcastLive.Form do
   defp assign_form(%{assigns: %{podcast: podcast}} = socket) do
     form =
       if podcast do
-        Form.for_update(podcast, :update, as: "podcast", actor: socket.assigns.current_user)
+        Form.for_update(podcast, :update,
+          as: "podcast",
+          actor: socket.assigns.current_user,
+          forms: [auto?: true]
+        )
       else
-        Form.for_create(Podcast, :create, as: "podcast", actor: socket.assigns.current_user)
+        Form.for_create(Podcast, :create,
+          as: "podcast",
+          actor: socket.assigns.current_user,
+          forms: [auto?: true]
+        )
       end
 
     socket
     |> assign(form: to_form(form))
+  end
+
+  # The own membership has no remove button: nobody may remove themselves.
+  defp own_membership?(membership_form, current_user) do
+    match?(%{user_id: user_id} when user_id == current_user.id, membership_form.source.data)
+  end
+
+  defp member_email(membership_form) do
+    case membership_form.source.data do
+      %{user: %{email: email}} -> email
+      _new -> nil
+    end
   end
 
   defp return_path("index", _podcast), do: ~p"/admin/podcasts"

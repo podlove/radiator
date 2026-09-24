@@ -20,7 +20,14 @@ defmodule Radiator.Accounts.User do
         confirm_on_update? false
         require_interaction? true
         confirmed_at_field :confirmed_at
-        auto_confirm_actions [:sign_in_with_magic_link, :reset_password_with_token]
+        # An invited user can only get in through a link sent to their address,
+        # and an unconfirmed user would be refused the magic link sign in.
+        auto_confirm_actions [
+          :sign_in_with_magic_link,
+          :reset_password_with_token,
+          :create_invited
+        ]
+
         sender Radiator.Accounts.User.Senders.SendNewUserConfirmationEmail
       end
     end
@@ -274,6 +281,7 @@ defmodule Radiator.Accounts.User do
 
       # Uses the information from the token to create or sign in the user
       change AshAuthentication.Strategy.MagicLink.SignInChange
+      change Radiator.Accounts.User.Changes.ClaimUnconfirmedUser
 
       change {AshAuthentication.Strategy.RememberMe.MaybeGenerateTokenChange,
               strategy_name: :remember_me}
@@ -281,6 +289,19 @@ defmodule Radiator.Accounts.User do
       metadata :token, :string do
         allow_nil? false
       end
+    end
+
+    create :create_invited do
+      description "Create a user who was added to a podcast by email and has not signed up yet."
+      accept [:email]
+    end
+
+    update :claim_unconfirmed do
+      description "Confirm an account through a magic link, dropping what an unverified registrant set up."
+      accept []
+
+      change set_attribute(:confirmed_at, &DateTime.utc_now/0)
+      change set_attribute(:hashed_password, nil)
     end
 
     action :request_magic_link do
@@ -300,6 +321,11 @@ defmodule Radiator.Accounts.User do
   policies do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
       authorize_if always()
+    end
+
+    policy action_type(:read) do
+      authorize_if expr(id == ^actor(:id))
+      authorize_if accessing_from(Radiator.Podcasts.PodcastUserRole, :user)
     end
   end
 
