@@ -76,7 +76,7 @@ defmodule Radiator.MixProject do
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:jason, "~> 1.2"},
       {:lazy_html, ">= 0.1.0", only: :test},
-      {:mix_test_interactive, "~> 5.1", only: :dev, runtime: false},
+      {:mix_test_interactive, "~> 6.0", only: :dev, runtime: false},
       {:oban_web, "~> 2.0"},
       {:oban, "~> 2.0"},
       {:open_api_spex, "~> 3.0"},
