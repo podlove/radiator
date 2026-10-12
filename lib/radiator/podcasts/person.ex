@@ -10,6 +10,9 @@ defmodule Radiator.Podcasts.Person do
   only a quarter of `atom:contributor` entries carry an `atom:uri`. Dedup
   therefore runs on `normalized_name` — a heuristic, but the only one the feed
   affords.
+
+  `account` is the user this person *is*, set when somebody added them by
+  email. It is distinct from `user`, the owner who keeps the record.
   """
 
   use Ash.Resource,
@@ -31,6 +34,8 @@ defmodule Radiator.Podcasts.Person do
 
     references do
       reference :user, on_delete: :delete, index?: true
+      # Deleting an account must not erase the episodes' credits.
+      reference :account, on_delete: :nilify, index?: true
     end
   end
 
@@ -39,7 +44,7 @@ defmodule Radiator.Podcasts.Person do
     default_accept @default_accept_attributes
 
     create :create do
-      accept @default_accept_attributes ++ [:user_id]
+      accept @default_accept_attributes ++ [:user_id, :account_id]
 
       change Radiator.Podcasts.Person.Changes.NormalizeName
     end
@@ -49,9 +54,22 @@ defmodule Radiator.Podcasts.Person do
 
       upsert? true
       upsert_identity :unique_name_per_user
-      upsert_fields {:replace_all_except, [:id, :inserted_at, :user_id, :normalized_name]}
+      # The feed knows nothing about accounts; a linked one must survive a sync.
+      upsert_fields {:replace_all_except,
+                     [:id, :inserted_at, :user_id, :normalized_name, :account_id]}
 
       change Radiator.Podcasts.Person.Changes.NormalizeName
+    end
+
+    update :link_account do
+      accept [:account_id]
+    end
+
+    read :contributed_to_podcast do
+      argument :podcast_id, :uuid, allow_nil?: false
+
+      filter expr(exists(contributions, episode.podcast_id == ^arg(:podcast_id)))
+      prepare build(sort: [name: :asc])
     end
   end
 
@@ -76,9 +94,14 @@ defmodule Radiator.Podcasts.Person do
 
   relationships do
     belongs_to :user, User, allow_nil?: false
+    belongs_to :account, User, allow_nil?: true
+
+    has_many :contributions, Radiator.Podcasts.EpisodeContributor
   end
 
   identities do
     identity :unique_name_per_user, [:user_id, :normalized_name]
+    # Feed persons have no account; nils stay distinct, so they never collide.
+    identity :unique_account_per_user, [:user_id, :account_id]
   end
 end

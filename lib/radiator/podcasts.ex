@@ -50,9 +50,12 @@ defmodule Radiator.Podcasts do
       define :destroy_episode, action: :destroy
     end
 
-    # Written only by the feed sync, which uses the resources' bulk actions
-    # directly; there is no code interface until a caller needs one.
-    resource Radiator.Podcasts.Person
+    # Written mostly by the feed sync, which uses the resources' bulk actions
+    # directly.
+    resource Radiator.Podcasts.Person do
+      define :read_podcast_contributors, action: :contributed_to_podcast, args: [:podcast_id]
+    end
+
     resource Radiator.Podcasts.EpisodeContributor
   end
 end

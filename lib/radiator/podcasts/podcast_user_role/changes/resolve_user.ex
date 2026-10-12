@@ -9,7 +9,7 @@ defmodule Radiator.Podcasts.PodcastUserRole.Changes.ResolveUser do
 
   require Ash.Query
 
-  alias Radiator.Accounts.User
+  alias Radiator.Accounts
   alias Radiator.Podcasts.PodcastUserRole
 
   @impl true
@@ -24,7 +24,7 @@ defmodule Radiator.Podcasts.PodcastUserRole.Changes.ResolveUser do
   end
 
   defp relate_user(changeset, email) do
-    case find_or_create_user(email) do
+    case Accounts.find_or_create_invited_user(email) do
       {:ok, user} ->
         if member?(Ash.Changeset.get_attribute(changeset, :podcast_id), user.id) do
           Ash.Changeset.add_error(changeset, field: :email, message: "is already a member")
@@ -43,16 +43,6 @@ defmodule Radiator.Podcasts.PodcastUserRole.Changes.ResolveUser do
     PodcastUserRole
     |> Ash.Query.filter(podcast_id == ^podcast_id and user_id == ^user_id)
     |> Ash.exists?(authorize?: false)
-  end
-
-  defp find_or_create_user(email) do
-    User
-    |> Ash.Query.for_read(:get_by_email, %{email: email}, authorize?: false)
-    |> Ash.read_one()
-    |> case do
-      {:ok, nil} -> Ash.create(User, %{email: email}, action: :create_invited, authorize?: false)
-      other -> other
-    end
   end
 
   defp error_message(%{errors: [%{message: message} | _]}) when is_binary(message), do: message

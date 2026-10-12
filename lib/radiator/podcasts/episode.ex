@@ -47,11 +47,29 @@ defmodule Radiator.Podcasts.Episode do
   end
 
   actions do
-    defaults [:read, :update, :destroy]
+    defaults [:read, :destroy]
     default_accept @default_accept_attributes
 
+    # The contributors arrive as the complete list: entries with an id are
+    # updated, new ones created, and those left out removed. Newly added
+    # contributors with an account are mailed after commit.
     create :create do
       accept @default_accept_attributes ++ [:podcast_id]
+
+      argument :contributors, {:array, :map}
+
+      change manage_relationship(:contributors, type: :direct_control)
+      change Radiator.Podcasts.Episode.Changes.NotifyNewContributors
+    end
+
+    update :update do
+      primary? true
+      require_atomic? false
+
+      argument :contributors, {:array, :map}
+
+      change manage_relationship(:contributors, type: :direct_control)
+      change Radiator.Podcasts.Episode.Changes.NotifyNewContributors
     end
 
     # The importer's way in: a sync owns everything the feed supplies.

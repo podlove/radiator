@@ -5,6 +5,9 @@ defmodule Radiator.Podcasts.EpisodeContributor do
   `role` is deliberately a string and not an enum: the podcast namespace knows
   far more roles than `host` and `guest`, and an unknown value must not abort
   the import. The translator writes it lower-cased.
+
+  A contributor can also be added by email: `ResolvePerson` turns the address
+  into a person tied to that user's account.
   """
 
   use Ash.Resource,
@@ -30,7 +33,26 @@ defmodule Radiator.Podcasts.EpisodeContributor do
     default_accept [:role]
 
     create :create do
+      primary? true
       accept [:role, :episode_id, :person_id]
+      # Filled in from `email` right before the insert.
+      allow_nil_input [:person_id]
+
+      argument :email, :ci_string
+
+      validate present([:email, :person_id], exactly: 1),
+        message: "pick a person or enter an email address"
+
+      validate match(:email, ~r/^[^\s@]+@[^\s@]+$/),
+        where: present(:email),
+        message: "must be an email address"
+
+      change Radiator.Podcasts.EpisodeContributor.Changes.ResolvePerson
+    end
+
+    update :update do
+      primary? true
+      accept [:role, :person_id]
     end
   end
 
@@ -46,4 +68,8 @@ defmodule Radiator.Podcasts.EpisodeContributor do
     belongs_to :episode, Episode, allow_nil?: false
     belongs_to :person, Person, allow_nil?: false
   end
+
+  # identities do
+  #   identity :unique_contributor_per_episode, [:episode_id, :person_id]
+  # end
 end

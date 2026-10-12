@@ -101,7 +101,7 @@ defmodule Radiator.Podcasts.Podcast.Changes.ApplyFeed do
   defp upsert_persons(_podcast, []), do: %{}
 
   defp upsert_persons(podcast, persons) do
-    user_id = first_owner_id(podcast)
+    user_id = PodcastUserRole.first_owner_id(podcast.id)
     stored = stored_persons(user_id, Enum.map(persons, & &1.normalized_name))
 
     persons
@@ -113,17 +113,6 @@ defmodule Radiator.Podcasts.Podcast.Changes.ApplyFeed do
     )
     |> Map.fetch!(:records)
     |> Map.new(&{&1.normalized_name, &1.id})
-  end
-
-  # Persons belong to a user, not to a podcast. A podcast with several owners
-  # files them under the one who has been an owner the longest.
-  defp first_owner_id(podcast) do
-    PodcastUserRole
-    |> Ash.Query.filter(podcast_id == ^podcast.id and role == :owner)
-    |> Ash.Query.sort(inserted_at: :asc)
-    |> Ash.Query.limit(1)
-    |> Ash.read_one!(domain: @domain, authorize?: false)
-    |> Map.fetch!(:user_id)
   end
 
   defp stored_persons(_user_id, []), do: %{}
