@@ -16,6 +16,8 @@ defmodule Radiator.Podcasts.PodcastUserRole do
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer]
 
+  require Ash.Query
+
   alias Radiator.Accounts.User
   alias Radiator.Podcasts.Podcast
 
@@ -94,5 +96,22 @@ defmodule Radiator.Podcasts.PodcastUserRole do
 
   identities do
     identity :unique_user_per_podcast, [:podcast_id, :user_id]
+  end
+
+  @doc """
+  The user who has been an owner of the podcast the longest, or `nil`.
+  Persons are filed under them, since persons belong to a user and not to a
+  podcast.
+  """
+  def first_owner_id(podcast_id) do
+    __MODULE__
+    |> Ash.Query.filter(podcast_id == ^podcast_id and role == :owner)
+    |> Ash.Query.sort(inserted_at: :asc)
+    |> Ash.Query.limit(1)
+    |> Ash.read_one!(authorize?: false)
+    |> case do
+      nil -> nil
+      membership -> membership.user_id
+    end
   end
 end

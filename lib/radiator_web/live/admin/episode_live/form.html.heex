@@ -17,6 +17,46 @@
     class="space-y-10"
   >
     <section class="space-y-2">
+      <h2 class="text-base font-semibold">{gettext("Contributors")}</h2>
+      <.inputs_for :let={contributor} field={@form[:contributors]}>
+        <div class="flex items-end gap-2">
+          <div class="grid grow gap-x-4 sm:grid-cols-[1fr_12rem]">
+            <.contributor_picker
+              contributor={contributor}
+              persons={@contributor_persons}
+              suggest={@suggest}
+              taken={taken_person_ids(@form)}
+            />
+            <.input
+              field={contributor[:role]}
+              type="text"
+              placeholder="host"
+              label={gettext("Rolle")}
+            />
+          </div>
+          <button
+            type="button"
+            class="btn btn-ghost btn-square mb-2"
+            phx-click="remove-form"
+            phx-value-path={contributor.name}
+            aria-label={gettext("Contributor entfernen")}
+          >
+            <.icon name="hero-x-mark" class="size-4" />
+          </button>
+        </div>
+      </.inputs_for>
+      <button
+        id="add-contributor"
+        type="button"
+        class="btn btn-ghost btn-sm"
+        phx-click="add-form"
+        phx-value-path={@form.name <> "[contributors]"}
+      >
+        <.icon name="hero-plus" class="size-4" /> {gettext("Contributor hinzufügen")}
+      </button>
+    </section>
+
+    <section class="space-y-2">
       <h2 class="text-base font-semibold">{gettext("Beschreibung")}</h2>
       <.input field={@form[:title]} type="text" label={gettext("Titel")} />
       <.input field={@form[:subtitle]} type="text" label={gettext("Untertitel")} />
