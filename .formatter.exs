@@ -1,5 +1,6 @@
 [
   import_deps: [
+    :ash_json_api,
     :ash_oban,
     :oban,
     :ash_state_machine,

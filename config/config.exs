@@ -7,6 +7,14 @@
 # General application configuration
 import Config
 
+config :mime,
+  extensions: %{"json" => "application/vnd.api+json"},
+  types: %{"application/vnd.api+json" => ["json"]}
+
+config :ash_json_api,
+  show_public_calculations_when_loaded?: false,
+  authorize_update_destroy_with_error?: true
+
 config :phoenix, filter_parameters: ["password", "token"]
 
 # These enable behaviors that will become the default in the next major
@@ -35,6 +43,7 @@ config :spark,
     remove_parens?: true,
     "Ash.Resource": [
       section_order: [
+        :json_api,
         :authentication,
         :token,
         :user_identity,
@@ -57,7 +66,15 @@ config :spark,
       ]
     ],
     "Ash.Domain": [
-      section_order: [:admin, :resources, :policies, :authorization, :domain, :execution]
+      section_order: [
+        :json_api,
+        :admin,
+        :resources,
+        :policies,
+        :authorization,
+        :domain,
+        :execution
+      ]
     ]
   ]
 
