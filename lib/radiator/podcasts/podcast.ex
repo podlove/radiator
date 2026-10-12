@@ -8,6 +8,7 @@ defmodule Radiator.Podcasts.Podcast do
     domain: Radiator.Podcasts,
     data_layer: AshPostgres.DataLayer,
     notifiers: [Ash.Notifier.PubSub],
+    extensions: [AshJsonApi.Resource],
     fragments: [
       Radiator.Podcasts.Podcast.Calculations,
       Radiator.Podcasts.Podcast.Policies,
@@ -41,6 +42,10 @@ defmodule Radiator.Podcasts.Podcast do
     :feed_guid,
     :categories
   ]
+
+  json_api do
+    type "podcast"
+  end
 
   postgres do
     table "podcasts"
@@ -103,7 +108,7 @@ defmodule Radiator.Podcasts.Podcast do
   attributes do
     uuid_primary_key :id
 
-    attribute :title, :string
+    attribute :title, :string, public?: true
     attribute :feed_url, :string
     attribute :subtitle, :string
     attribute :summary, :string

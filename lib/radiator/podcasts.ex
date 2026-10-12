@@ -8,7 +8,19 @@ defmodule Radiator.Podcasts do
   interface on purpose; `import_podcast/2` and `request_sync/1` are the ways in.
   """
 
-  use Ash.Domain, otp_app: :radiator, extensions: [AshPhoenix, AshAdmin.Domain]
+  use Ash.Domain, otp_app: :radiator, extensions: [AshPhoenix, AshAdmin.Domain, AshJsonApi.Domain]
+
+  json_api do
+    routes do
+      base_route "/podcasts", Radiator.Podcasts.Podcast do
+        index :read
+        get :read
+        post :create
+        patch :update
+        delete :destroy
+      end
+    end
+  end
 
   admin do
     show? true
