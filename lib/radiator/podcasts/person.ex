@@ -71,6 +71,18 @@ defmodule Radiator.Podcasts.Person do
       filter expr(exists(contributions, episode.podcast_id == ^arg(:podcast_id)))
       prepare build(sort: [name: :asc])
     end
+
+    # Who votes on the episode's recording date: its contributors who can sign in.
+    read :scheduling_participants do
+      argument :episode_id, :uuid, allow_nil?: false
+
+      filter expr(
+               not is_nil(account_id) and
+                 exists(contributions, episode_id == ^arg(:episode_id))
+             )
+
+      prepare build(sort: [name: :asc])
+    end
   end
 
   @doc """

@@ -145,6 +145,8 @@ defmodule Radiator.Podcasts.Episode do
     belongs_to :podcast, Podcast, allow_nil?: false
 
     has_many :contributors, Radiator.Podcasts.EpisodeContributor
+
+    has_one :scheduling, Radiator.Podcasts.Episode.Scheduling
   end
 
   calculations do
