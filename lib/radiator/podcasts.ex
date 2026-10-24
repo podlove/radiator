@@ -54,8 +54,20 @@ defmodule Radiator.Podcasts do
     # directly.
     resource Radiator.Podcasts.Person do
       define :read_podcast_contributors, action: :contributed_to_podcast, args: [:podcast_id]
+      define :read_scheduling_participants, action: :scheduling_participants, args: [:episode_id]
     end
 
     resource Radiator.Podcasts.EpisodeContributor
+
+    resource Radiator.Podcasts.Episode.Scheduling do
+      define :start_scheduling, action: :start, args: [:episode_id, :proposed_datetimes]
+      define :get_scheduling_by_episode, action: :by_episode, args: [:episode_id]
+      define :add_scheduling_proposal, action: :add_proposal, args: [:datetime]
+      define :remove_scheduling_proposal, action: :remove_proposal, args: [:proposal_id]
+      define :vote_on_proposal, action: :vote, args: [:proposal_id, :score]
+      define :remove_vote, action: :remove_vote, args: [:proposal_id]
+      define :finalize_scheduling, action: :finalize, args: [:chosen_proposal_id]
+      define :reopen_scheduling, action: :reopen
+    end
   end
 end
