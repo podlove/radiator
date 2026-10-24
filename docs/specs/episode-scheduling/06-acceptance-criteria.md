@@ -81,7 +81,7 @@ Common setup: podcast, episode, owner persona, participants with personas linked
 4. `proposal_stats` is sorted by `total_score` descending. [ST]
 5. `top_proposal_id` is the unique max; `nil` on tie; `nil` without proposals;
    equals `voting_stats(...).top_proposal_id`. [ST]
-6. **(new)** Ties are ordered by yes_count desc, no_count asc, datetime asc.
+6. **(new)** Ties are ordered by yes_count desc, then datetime asc.
 7. **(new)** `all_voted?` is true only when no participant has a pending cell.
 8. **(new)** Votes of removed participants are not counted.
 
