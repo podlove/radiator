@@ -330,7 +330,7 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
                  actor: owner
                )
 
-      assert Podcasts.get_scheduling_by_episode!(episode.id).status == :open
+      assert Podcasts.get_scheduling_by_episode!(episode.id, actor: owner).status == :open
     end
   end
 

@@ -16,7 +16,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    fragments: [Radiator.Podcasts.Episode.Scheduling.Policies]
 
   alias Radiator.Podcasts.Episode.Scheduling.Changes
   alias Radiator.Podcasts.Episode.Scheduling.Proposal
