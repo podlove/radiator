@@ -1,13 +1,19 @@
 defmodule Radiator.Podcasts.Episode do
   @moduledoc """
-  Model specification for podcast episodes. Ash state machine is used to define the
-  different states of an episode.
+  Model specification for podcast episodes.
+
+  An episode moves through a small lifecycle (`state`): a hand-created episode
+  starts in `:scheduling`, where its recording date is found, and becomes
+  `:scheduled` once a date is chosen. Episodes that come from a feed are
+  already `:published`. The scheduling transitions are driven by the episode's
+  scheduling, never by the user directly.
   """
 
   use Ash.Resource,
     otp_app: :radiator,
     domain: Radiator.Podcasts,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshStateMachine]
 
   alias Radiator.Podcasts.Podcast
 
@@ -46,6 +52,16 @@ defmodule Radiator.Podcasts.Episode do
     end
   end
 
+  state_machine do
+    initial_states [:scheduling, :published]
+    default_initial_state :scheduling
+
+    transitions do
+      transition :finalize_scheduling, from: :scheduling, to: :scheduled
+      transition :back_to_scheduling, from: :scheduled, to: :scheduling
+    end
+  end
+
   actions do
     defaults [:read, :destroy]
     default_accept @default_accept_attributes
@@ -79,6 +95,21 @@ defmodule Radiator.Podcasts.Episode do
       upsert? true
       upsert_identity :unique_guid_per_podcast
       upsert_fields {:replace_all_except, [:id, :inserted_at, :podcast_id, :guid]}
+
+      # Whatever is in the feed has been published, whatever state it had here.
+      change set_attribute(:state, :published)
+    end
+
+    update :finalize_scheduling do
+      description "A recording date was chosen."
+      accept []
+      change transition_state(:scheduled)
+    end
+
+    update :back_to_scheduling do
+      description "The chosen recording date was given up; the search starts again."
+      accept []
+      change transition_state(:scheduling)
     end
   end
 
