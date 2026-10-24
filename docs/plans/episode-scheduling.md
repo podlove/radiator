@@ -113,7 +113,7 @@ stranger, member, contributor with/without account, and "cannot vote as another 
 `lib/radiator/podcasts/episode/scheduling/stats.ex` — pure functions, no DB:
 `voting_stats(scheduling, participant_person_ids)`, `top_proposal_id/2`, `winner_proposal_id/2`.
 Implements spec 03: per-proposal counts, only current participants counted, ranking tie-break
-(total desc, yes desc, no asc, datetime asc), `top_proposal_id` nil on tie, `all_voted?` = no pending cell.
+(total desc, yes desc, datetime asc), `top_proposal_id` nil on tie, `all_voted?` = no pending cell.
 Port logic from legacy `Scheduling.voting_stats/1` and `AvailabilityHelpers.winner_proposal_id/2`.
 
 Tests: `test/radiator/podcasts/episode/scheduling/stats_test.exs` incl. the worked example of spec 03 §6.
