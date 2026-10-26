@@ -101,8 +101,8 @@ This closes legacy gap #2 (only `vote` checked the actor).
 ### 6. Ranking rules
 
 Ranking is computed on read by a pure `Stats` module: order by total score desc, then yes-count desc,
-no-count asc, datetime asc. `top_proposal_id` is `nil` on a tie in total score. `all_voted?` means no
-pending cell. The owner's choice is free; the ranking is advisory.
+then datetime asc (fewer noes follows from score and yeses). `top_proposal_id` is `nil` on a tie in
+total score. `all_voted?` means no pending cell. The owner's choice is free; the ranking is advisory.
 
 ### 7. Time zones
 

@@ -41,8 +41,10 @@ Sort `proposal_stats` by:
 
 1. `total_score` descending
 2. `yes_count` descending (more definite yeses win)
-3. `no_count` ascending (fewer people blocked)
-4. `datetime` ascending (earlier slot first)
+3. `datetime` ascending (earlier slot first)
+
+"Fewer noes" needs no rule of its own: `total_score = yes_count - no_count`, so with equal score and
+yeses the noes are equal as well.
 
 The ranking is therefore deterministic. (Legacy sorts by `total_score` only; tie order undefined.)
 
@@ -85,5 +87,5 @@ Ranking: P2, P1, P3. `top_proposal_id = P2`. `all_voted? = false` (P3 has pendin
 `voted_participant_count = 4`.
 
 If Dave's P1 vote changed from no to yes, P1 would also reach +3 (3 yes / 1 maybe):
-`top_proposal_id = nil` (tie). Both have equal yes_count and no_count, so the ranking falls back
+`top_proposal_id = nil` (tie). Both have equal yes_count, so the ranking falls back
 to datetime: P1 (Fri) before P2 (Sat).
