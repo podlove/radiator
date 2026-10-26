@@ -1,7 +1,8 @@
 defmodule Radiator.Podcasts.Episode.Senders.SendContributorEmail do
   @moduledoc """
   Tells a user they were added as a contributor to an episode, with a magic
-  link that signs them in and lands on the episode's edit page.
+  link that signs them in and lands on the episode's scheduling page, where
+  they vote on the recording date. (The edit page is for podcast members.)
 
   Somebody whose account was created for this very occasion learns that it
   exists; following the link is how they get in.
@@ -18,7 +19,7 @@ defmodule Radiator.Podcasts.Episode.Senders.SendContributorEmail do
     url =
       InvitationEmail.link(
         user,
-        ~p"/admin/podcasts/#{episode.podcast_id}/episodes/#{episode.id}/edit"
+        ~p"/admin/podcasts/#{episode.podcast_id}/episodes/#{episode.id}/scheduling"
       )
 
     new()

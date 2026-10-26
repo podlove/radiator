@@ -1,0 +1,291 @@
+<Layouts.admin flash={@flash}>
+  <.header>
+    {gettext("Terminfindung")}
+    <:subtitle>{@episode.title} · {@podcast.title}</:subtitle>
+    <:actions>
+      <.button
+        :if={@member?}
+        navigate={~p"/admin/podcasts/#{@podcast.id}/episodes/#{@episode}/edit"}
+      >
+        <.icon name="hero-pencil-square" class="size-4" /> {gettext("Episode bearbeiten")}
+      </.button>
+    </:actions>
+  </.header>
+
+  <%!-- No search yet --%>
+  <section
+    :if={is_nil(@scheduling)}
+    id="no-scheduling"
+    class="rounded-box border border-base-300 p-6"
+  >
+    <div :if={@member?} class="space-y-4">
+      <p class="text-base-content/70">
+        {gettext(
+          "Schlage einen ersten Aufnahmetermin vor. Die Contributors der Episode stimmen dann ab, weitere Termine kommen auf der Seite dazu."
+        )}
+      </p>
+      <.form
+        for={@proposal_form}
+        id="start-form"
+        phx-submit="start"
+        class="flex flex-wrap items-end gap-3"
+      >
+        <.input
+          field={@proposal_form[:datetime]}
+          type="datetime-local"
+          label={gettext("Erster Termin")}
+          required
+        />
+        <.button variant="primary" class="mb-2" phx-disable-with={gettext("Starte …")}>
+          {gettext("Terminfindung starten")}
+        </.button>
+      </.form>
+    </div>
+    <p :if={!@member?} class="text-base-content/70">
+      {gettext("Für diese Episode wird noch kein Termin gesucht.")}
+    </p>
+  </section>
+
+  <div :if={@scheduling} class="space-y-10">
+    <%!-- Status --%>
+    <p
+      :if={@scheduling.status == :closed}
+      id="scheduling-status"
+      class="flex items-center gap-2 rounded-box bg-success/10 px-4 py-3 text-success"
+    >
+      <.icon name="hero-calendar-days" class="size-5" />
+      <span>
+        {gettext("Aufnahme am")}
+        <strong>
+          {weekday_label(local(@scheduling.chosen_datetime, @timezone))}, {date(
+            local(@scheduling.chosen_datetime, @timezone)
+          )} {time(local(@scheduling.chosen_datetime, @timezone))}
+        </strong>
+      </span>
+    </p>
+
+    <%!-- Availability matrix --%>
+    <section id="availability" class="space-y-3">
+      <div class="flex items-baseline justify-between gap-4">
+        <h2 class="text-base font-semibold">{gettext("Verfügbarkeit")}</h2>
+        <p class="text-xs text-base-content/50">{@timezone}</p>
+      </div>
+
+      <p :if={@scheduling.proposals == []} class="text-base-content/60">
+        {gettext("Noch keine Termine vorgeschlagen.")}
+      </p>
+
+      <div
+        :if={@scheduling.proposals != []}
+        class="overflow-x-auto rounded-box border border-base-300"
+      >
+        <table id="availability-table" class="table">
+          <thead>
+            <tr>
+              <th class="sticky left-0 z-10 bg-base-100"></th>
+              <th
+                :for={proposal <- chronological(@scheduling.proposals)}
+                id={"availability-header-#{proposal.id}"}
+                class={[
+                  "min-w-28 text-center align-top transition-colors",
+                  weekend?(local(proposal.datetime, @timezone)) && "bg-base-200",
+                  proposal.id == @winner_id && "border-x-2 border-t-2 border-primary"
+                ]}
+              >
+                <div class="flex flex-col items-center gap-0.5">
+                  <span
+                    :if={proposal.id == @winner_id}
+                    class="text-primary"
+                    aria-label={gettext("Bester Termin")}
+                  >
+                    <.icon name="hero-trophy" class="size-4" />
+                  </span>
+                  <span class="font-semibold text-base-content">
+                    {weekday_label(local(proposal.datetime, @timezone))}
+                  </span>
+                  <span class="font-normal">{date(local(proposal.datetime, @timezone))}</span>
+                  <span class="font-normal tabular-nums">
+                    {time(local(proposal.datetime, @timezone))}
+                  </span>
+                  <span
+                    :if={proposal.id == @scheduling.chosen_proposal_id}
+                    class="badge badge-sm badge-primary"
+                  >
+                    {gettext("Gewählt")}
+                  </span>
+                  <button
+                    :if={can_remove?(@scheduling, proposal, @current_user, @member?)}
+                    id={"remove-proposal-#{proposal.id}"}
+                    type="button"
+                    class="btn btn-ghost btn-xs mt-1 text-base-content/50 hover:text-error"
+                    phx-click="remove_proposal"
+                    phx-value-proposal-id={proposal.id}
+                    data-confirm={gettext("Diesen Termin mit allen Stimmen entfernen?")}
+                    aria-label={gettext("Termin entfernen")}
+                  >
+                    <.icon name="hero-trash" class="size-3.5" />
+                  </button>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr :for={person <- @participants} id={"availability-row-#{person.id}"}>
+              <td class="sticky left-0 z-10 bg-base-100 font-medium whitespace-nowrap">
+                {person.name}
+                <span :if={person.id == @current_person_id} class="ml-1 text-base-content/50">
+                  {gettext("(du)")}
+                </span>
+              </td>
+              <td
+                :for={proposal <- chronological(@scheduling.proposals)}
+                id={"availability-cell-#{proposal.id}-#{person.id}"}
+                class={[
+                  "text-center",
+                  weekend?(local(proposal.datetime, @timezone)) && "bg-base-200",
+                  proposal.id == @winner_id && "border-x-2 border-primary"
+                ]}
+              >
+                <.vote_buttons
+                  :if={person.id == @current_person_id}
+                  proposal={proposal}
+                  score={score(proposal, person.id)}
+                  disabled={not can_vote?(@scheduling, @current_person_id)}
+                />
+                <.vote_icon
+                  :if={person.id != @current_person_id}
+                  score={score(proposal, person.id)}
+                />
+              </td>
+            </tr>
+            <tr :if={@participants == []}>
+              <td
+                colspan={length(@scheduling.proposals) + 1}
+                class="text-center text-base-content/60"
+              >
+                {gettext(
+                  "Noch keine Contributors mit Konto. Lade sie über die Episode per E-Mail ein."
+                )}
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td class="sticky left-0 z-10 bg-base-100 text-xs font-semibold uppercase text-base-content/60">
+                {gettext("Punkte")}
+              </td>
+              <td
+                :for={proposal <- chronological(@scheduling.proposals)}
+                id={"availability-footer-#{proposal.id}"}
+                class={[
+                  "text-center font-mono tabular-nums",
+                  weekend?(local(proposal.datetime, @timezone)) && "bg-base-200",
+                  proposal.id == @winner_id && "border-x-2 border-b-2 border-primary font-bold"
+                ]}
+              >
+                {format_score(proposal_stat(@stats, proposal.id).total_score)}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <.form
+        :if={@scheduling.status == :open}
+        for={@proposal_form}
+        id="proposal-form"
+        phx-submit="add_proposal"
+        class="flex flex-wrap items-end gap-3 pt-2"
+      >
+        <.input
+          field={@proposal_form[:datetime]}
+          type="datetime-local"
+          label={gettext("Weiteren Termin vorschlagen")}
+          required
+        />
+        <.button class="mb-2" phx-disable-with={gettext("Speichern …")}>
+          <.icon name="hero-plus" class="size-4" /> {gettext("Vorschlagen")}
+        </.button>
+      </.form>
+    </section>
+
+    <%!-- The member's decision --%>
+    <section :if={@member?} id="ranking" class="space-y-3">
+      <h2 class="text-base font-semibold">{gettext("Rangliste")}</h2>
+
+      <p
+        :if={
+          @scheduling.status == :open and @stats.proposal_count > 1 and
+            is_nil(@stats.top_proposal_id)
+        }
+        id="ranking-tie"
+        class="text-sm text-warning"
+      >
+        {gettext("Mehrere Termine liegen gleichauf.")}
+      </p>
+      <p
+        :if={
+          @scheduling.status == :open and not @stats.all_voted? and @stats.participant_count > 0
+        }
+        id="ranking-pending"
+        class="text-sm text-base-content/60"
+      >
+        {gettext("%{voted} von %{count} haben abgestimmt.",
+          voted: @stats.voted_participant_count,
+          count: @stats.participant_count
+        )}
+      </p>
+
+      <ol class="divide-y divide-base-200 rounded-box border border-base-300">
+        <li
+          :for={{stat, rank} <- Enum.with_index(@stats.proposal_stats, 1)}
+          id={"ranking-#{stat.proposal_id}"}
+          class={[
+            "flex flex-wrap items-center gap-4 px-4 py-3 transition-colors hover:bg-base-200/50",
+            stat.proposal_id == @winner_id && "bg-primary/5"
+          ]}
+        >
+          <span class="w-6 text-right tabular-nums text-base-content/50">{rank}.</span>
+          <div class="min-w-40 grow">
+            <p class="font-medium">
+              {weekday_label(local(stat.datetime, @timezone))}, {date(
+                local(stat.datetime, @timezone)
+              )} {time(local(stat.datetime, @timezone))}
+            </p>
+            <p class="text-sm text-base-content/60">
+              <span class="text-success">{stat.yes_count} {gettext("ja")}</span>
+              · <span class="text-warning">{stat.maybe_count} {gettext("vielleicht")}</span>
+              · <span class="text-error">{stat.no_count} {gettext("nein")}</span>
+              · {stat.pending_count} {gettext("offen")}
+            </p>
+          </div>
+          <span class="font-mono tabular-nums font-semibold">{format_score(stat.total_score)}</span>
+          <button
+            :if={@scheduling.status == :open}
+            id={"finalize-#{stat.proposal_id}"}
+            type="button"
+            class={["btn btn-sm", stat.proposal_id == @winner_id && "btn-primary"]}
+            phx-click="finalize"
+            phx-value-proposal-id={stat.proposal_id}
+            data-confirm={gettext("Diesen Termin festlegen? Die Abstimmung wird geschlossen.")}
+          >
+            {gettext("Diesen Termin wählen")}
+          </button>
+        </li>
+      </ol>
+
+      <button
+        :if={@scheduling.status == :closed}
+        id="reopen"
+        type="button"
+        class="btn btn-sm"
+        phx-click="reopen"
+        data-confirm={gettext("Den gewählten Termin aufgeben und die Abstimmung wieder öffnen?")}
+      >
+        <.icon name="hero-arrow-uturn-left" class="size-4" /> {gettext(
+          "Terminfindung wieder öffnen"
+        )}
+      </button>
+    </section>
+  </div>
+</Layouts.admin>

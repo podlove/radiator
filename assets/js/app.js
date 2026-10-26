@@ -27,7 +27,9 @@ const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute
 const liveSocket = new LiveSocket("/live", Socket, {
     longPollFallbackMs: 2500,
     params: {
-        _csrf_token: csrfToken
+        _csrf_token: csrfToken,
+        // Dates on the scheduling page are shown and entered in this zone.
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
     },
     hooks: {
         ...colocatedHooks,

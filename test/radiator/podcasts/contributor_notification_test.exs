@@ -45,7 +45,7 @@ defmodule Radiator.Podcasts.ContributorNotificationTest do
     URI.parse(link)
   end
 
-  test "a new account gets the activation mail with a link to the edit page", %{
+  test "a new account gets the activation mail with a link to the scheduling page", %{
     owner: owner,
     podcast: podcast,
     episode: episode
@@ -62,7 +62,7 @@ defmodule Radiator.Podcasts.ContributorNotificationTest do
       assert "/magic_link/" <> _token = uri.path
 
       assert URI.decode_query(uri.query) == %{
-               "return_to" => "/admin/podcasts/#{podcast.id}/episodes/#{episode.id}/edit"
+               "return_to" => "/admin/podcasts/#{podcast.id}/episodes/#{episode.id}/scheduling"
              }
     end)
   end
@@ -136,7 +136,7 @@ defmodule Radiator.Podcasts.ContributorNotificationTest do
 
     assert_email_sent(fn email ->
       assert URI.decode_query(link_in(email).query)["return_to"] ==
-               "/admin/podcasts/#{podcast.id}/episodes/#{episode.id}/edit"
+               "/admin/podcasts/#{podcast.id}/episodes/#{episode.id}/scheduling"
     end)
   end
 end

@@ -25,12 +25,14 @@ defmodule Radiator.AuthFixtures do
   def register_and_log_in_user(%{conn: conn} = context) do
     user = register_user()
 
-    conn =
-      conn
-      |> Phoenix.ConnTest.init_test_session(%{})
-      |> Helpers.store_in_session(user)
+    context |> Map.put(:conn, log_in(conn, user)) |> Map.put(:user, user)
+  end
 
-    context |> Map.put(:conn, conn) |> Map.put(:user, user)
+  @doc "Puts `user`, as returned by `register_user/1`, into a fresh session on `conn`."
+  def log_in(conn, user) do
+    conn
+    |> Phoenix.ConnTest.init_test_session(%{})
+    |> Helpers.store_in_session(user)
   end
 
   @doc "Seeds a user and returns them signed in, token and all."
