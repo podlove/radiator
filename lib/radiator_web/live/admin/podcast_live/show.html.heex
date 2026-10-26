@@ -115,6 +115,20 @@
             {Formatting.date(episode.published_at)}
           </p>
         </div>
+        <.link
+          :if={episode.state in [:scheduling, :scheduled]}
+          id={"scheduling-link-#{episode.id}"}
+          navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{episode}/scheduling"}
+          class={[
+            "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium transition-opacity hover:opacity-80",
+            episode.state == :scheduling && "bg-info text-info-content",
+            episode.state == :scheduled && "bg-success text-success-content"
+          ]}
+        >
+          {if episode.state == :scheduled,
+            do: gettext("Termin steht"),
+            else: gettext("Terminfindung")}
+        </.link>
         <span
           :if={episode.missing_from_feed?}
           class="shrink-0 rounded-full bg-warning px-2 py-0.5 text-xs font-medium text-warning-content"
