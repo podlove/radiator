@@ -152,4 +152,7 @@ config :ash_oban, pro?: false
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
+# Scheduling shows and reads dates in the viewer's time zone.
+config :elixir, :time_zone_database, Tz.TimeZoneDatabase
+
 import_config "#{config_env()}.exs"

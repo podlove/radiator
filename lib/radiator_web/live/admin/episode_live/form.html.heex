@@ -7,6 +7,15 @@
         {gettext("Der nächste Sync des Feeds überschreibt die Felder importierter Episoden.")}
       </span>
     </:subtitle>
+    <:actions>
+      <.button
+        :if={@episode && @episode.state in [:scheduling, :scheduled]}
+        id="scheduling-link"
+        navigate={~p"/admin/podcasts/#{@podcast}/episodes/#{@episode}/scheduling"}
+      >
+        <.icon name="hero-calendar-days" class="size-4" /> {gettext("Terminfindung")}
+      </.button>
+    </:actions>
   </.header>
 
   <.form
