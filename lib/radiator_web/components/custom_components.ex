@@ -136,4 +136,20 @@ defmodule RadiatorWeb.CustomComponents do
     </p>
     """
   end
+
+  def calendar(assigns) do
+    ~H"""
+    <div id="calendar" phx-hook=".Calendar" phx-update="ignore"></div>
+    <script :type={Phoenix.LiveView.ColocatedHook} name=".Calendar">
+      import { Calendar } from "@/vendor/vanilla-calendar/index.js";
+
+      export default {
+        mounted() {
+          const calendar = new Calendar(this.el);
+          calendar.init();
+        }
+      }
+    </script>
+    """
+  end
 end
