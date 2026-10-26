@@ -4,6 +4,8 @@
 @import "tailwindcss" source(none);
 @source "../../deps/ash_authentication_phoenix";
 @import "phoenix-colocated/radiator/colocated.css";
+/* Date and time picker of the scheduling page (RadiatorWeb.Components.DateTimePicker). */
+@import "../vendor/vanilla-calendar-pro/index.css";
 @source "../css";
 @source "../js";
 @source "../../lib/radiator_web";

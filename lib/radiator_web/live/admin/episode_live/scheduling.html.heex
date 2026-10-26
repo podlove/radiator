@@ -30,11 +30,11 @@
         phx-submit="start"
         class="flex flex-wrap items-end gap-3"
       >
-        <.input
+        <.date_time_picker
+          id="start-datetime"
           field={@proposal_form[:datetime]}
-          type="datetime-local"
           label={gettext("Erster Termin")}
-          required
+          placeholder={gettext("Datum und Uhrzeit wählen")}
         />
         <.button variant="primary" class="mb-2" phx-disable-with={gettext("Starte …")}>
           {gettext("Terminfindung starten")}
@@ -197,11 +197,11 @@
         phx-submit="add_proposal"
         class="flex flex-wrap items-end gap-3 pt-2"
       >
-        <.input
+        <.date_time_picker
+          id="proposal-datetime"
           field={@proposal_form[:datetime]}
-          type="datetime-local"
           label={gettext("Weiteren Termin vorschlagen")}
-          required
+          placeholder={gettext("Datum und Uhrzeit wählen")}
         />
         <.button class="mb-2" phx-disable-with={gettext("Speichern …")}>
           <.icon name="hero-plus" class="size-4" /> {gettext("Vorschlagen")}

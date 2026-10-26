@@ -190,7 +190,9 @@ Each phase ends green with `mix precommit`.
 
 - Show a real name for persons created from an email address (the starter and invited contributors
   appear under their address until renamed).
-- Date picker instead of the native `datetime-local` input (DaisyUI + [Cally](https://github.com/WickyNilliams/cally)), via a colocated hook.
+- ~~Date picker instead of the native `datetime-local` input~~ — done with
+  [vanilla-calendar-pro](https://github.com/uvarov-frontend/vanilla-calendar-pro) 3.4.0 (vendored,
+  `RadiatorWeb.Components.DateTimePicker`, colocated hook) instead of Cally.
 - Realtime updates of the matrix for other viewers (PubSub).
 - Notifications when a date is chosen or reopened.
 - Reject or warn about proposals in the past.

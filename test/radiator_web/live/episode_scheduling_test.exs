@@ -80,13 +80,34 @@ defmodule RadiatorWeb.EpisodeSchedulingTest do
       %{conn: conn, path: path} = context
       {:ok, live, _html} = live(conn, path)
 
+      # The picker's hook writes the chosen local time into the hidden field.
       live
-      |> form("#start-form", proposal: %{datetime: "2026-11-06T19:00"})
-      |> render_submit()
+      |> form("#start-form")
+      |> render_submit(%{proposal: %{datetime: "2026-11-06T19:00"}})
 
       assert [%{datetime: @fri}] = scheduling!(context).proposals
       assert has_element?(live, "#availability-table")
       assert render(live) =~ "Terminfindung gestartet."
+    end
+
+    test "dates are picked with the calendar, not the browser's input", %{conn: conn, path: path} do
+      {:ok, live, _html} = live(conn, path)
+
+      assert has_element?(live, "#start-datetime[phx-hook]")
+      assert has_element?(live, "#start-datetime input[type=hidden][name='proposal[datetime]']")
+      assert has_element?(live, "#start-datetime-display[readonly]")
+      refute has_element?(live, "input[type=datetime-local]")
+    end
+
+    test "starting without a date is refused", %{conn: conn, path: path} = context do
+      {:ok, live, _html} = live(conn, path)
+
+      html = live |> form("#start-form") |> render_submit()
+
+      assert html =~ "Bitte gib einen gültigen Termin an."
+
+      assert {:error, _none} =
+               Podcasts.get_scheduling_by_episode(context.episode.id, actor: context.member)
     end
 
     test "a contributor is told nothing is being searched yet", %{alice: alice, path: path} do
@@ -218,11 +239,13 @@ defmodule RadiatorWeb.EpisodeSchedulingTest do
       {:ok, live, _html} = live(as(alice), path)
 
       live
-      |> form("#proposal-form", proposal: %{datetime: "2026-11-08T19:00"})
-      |> render_submit()
+      |> form("#proposal-form")
+      |> render_submit(%{proposal: %{datetime: "2026-11-08T19:00"}})
 
       new = proposal_at(scheduling!(context), ~U[2026-11-08 18:00:00Z])
       assert new
+      # Cleared for the next date; the hook clears the calendar along with it.
+      assert has_element?(live, "#proposal-datetime input[type=hidden][value='']")
       assert has_element?(live, "#remove-proposal-#{new.id}")
       refute has_element?(live, "#remove-proposal-#{proposal_at(scheduling, @fri).id}")
 
