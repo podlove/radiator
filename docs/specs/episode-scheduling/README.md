@@ -113,3 +113,4 @@ Finalizing the scheduling moves the episode to `:scheduled`; reopening moves it 
 | [05-ui.md](./05-ui.md) | Episode form and availability matrix |
 | [06-acceptance-criteria.md](./06-acceptance-criteria.md) | Given/When/Then scenarios for tests |
 | [07-known-gaps-and-decisions.md](./07-known-gaps-and-decisions.md) | Legacy deviations and open questions |
+| [08-mainline-mapping.md](./08-mainline-mapping.md) | How the spec maps to the implementation on `main` |
