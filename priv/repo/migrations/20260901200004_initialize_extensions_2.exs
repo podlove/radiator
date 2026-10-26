@@ -105,7 +105,7 @@ defmodule Radiator.Repo.Migrations.InitializeExtensions2 do
     RETURNS ANYCOMPATIBLE AS $$
     BEGIN
       IF value IS NULL THEN
-        RETURN ash_raise_error(payload, value);
+        RAISE EXCEPTION 'ash_error: %', payload::text;
       END IF;
 
       RETURN value;
