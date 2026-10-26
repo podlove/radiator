@@ -192,7 +192,9 @@ Each phase ends green with `mix precommit`.
   appear under their address until renamed).
 - ~~Date picker instead of the native `datetime-local` input~~ — done with
   [vanilla-calendar-pro](https://github.com/uvarov-frontend/vanilla-calendar-pro) 3.4.0 (vendored,
-  `RadiatorWeb.Components.DateTimePicker`, colocated hook) instead of Cally.
+  `RadiatorWeb.Components.DateTimePicker`, colocated hook) instead of Cally. The calendar's JS is
+  loaded lazily via `import()` (esbuild `--splitting`, `app.js` as ES module); its CSS (scoped to
+  `[data-vc…]`, ~6 KB gzipped) stays in `app.css`. Own overrides would go into ColocatedCSS.
 - Realtime updates of the matrix for other viewers (PubSub).
 - Notifications when a date is chosen or reopened.
 - Reject or warn about proposals in the past.

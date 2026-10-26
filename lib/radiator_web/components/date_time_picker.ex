@@ -46,7 +46,9 @@ defmodule RadiatorWeb.Components.DateTimePicker do
       </div>
     </div>
     <script :type={ColocatedHook} name=".DateTimePicker">
-      import { Calendar, time } from "@/vendor/vanilla-calendar-pro/index.mjs";
+      // The calendar is loaded only where a picker is shown: esbuild puts it
+      // into its own chunk (see `--splitting` in config/config.exs).
+      const loadCalendar = () => import("@/vendor/vanilla-calendar-pro/index.mjs");
 
       export default {
         mounted() {
@@ -55,38 +57,42 @@ defmodule RadiatorWeb.Components.DateTimePicker do
           this.locale = this.el.dataset.locale;
           this.defaultTime = this.el.dataset.defaultTime;
 
-          this.calendar = new Calendar(this.display, {
-            inputMode: true,
-            positionToInput: "auto",
-            extensions: [time],
-            selectionTimeMode: 24,
-            selectedTime: this.defaultTime,
-            timeStepMinute: 5,
-            locale: this.locale,
-            firstWeekday: 1,
-            disableDatesPast: true,
-            onChangeToInput: (self) => this.pick(self),
-          });
-          this.calendar.init();
-
           // Without a date the form would only come back with an error.
           this.form = this.el.closest("form");
           this.guard = (event) => {
             if (this.hidden.value === "") {
               event.preventDefault();
               event.stopPropagation();
-              this.calendar.show();
+              this.calendar?.show();
             }
           };
           this.form?.addEventListener("submit", this.guard);
 
           this.show();
+
+          loadCalendar().then(({ Calendar, time }) => {
+            if (this.isDestroyed) return;
+
+            this.calendar = new Calendar(this.display, {
+              inputMode: true,
+              positionToInput: "auto",
+              extensions: [time],
+              selectionTimeMode: 24,
+              selectedTime: this.defaultTime,
+              timeStepMinute: 5,
+              locale: this.locale,
+              firstWeekday: 1,
+              disableDatesPast: true,
+              onChangeToInput: (self) => this.pick(self),
+            });
+            this.calendar.init();
+          });
         },
 
         // The server clears the value once a proposal is saved.
         updated() {
           if (this.hidden.value === "" && this.display.value !== "") {
-            this.calendar.set(
+            this.calendar?.set(
               { selectedDates: [], selectedTime: this.defaultTime },
               { dates: true, time: true },
             );
@@ -95,6 +101,7 @@ defmodule RadiatorWeb.Components.DateTimePicker do
         },
 
         destroyed() {
+          this.isDestroyed = true;
           this.form?.removeEventListener("submit", this.guard);
           this.calendar?.destroy();
         },
