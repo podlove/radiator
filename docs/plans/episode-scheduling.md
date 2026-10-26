@@ -184,7 +184,7 @@ Each phase ends green with `mix precommit`.
 | 4 | #648 |
 | 5 | #649 |
 | 6 | #650 |
-| 7 (follow-up: the starter votes) | see below |
+| 7 (follow-up: the starter votes) | #652 |
 
 ## Follow-ups (not in this plan)
 
