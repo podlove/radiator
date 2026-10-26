@@ -174,6 +174,27 @@ manipulated score → flash, no write; invite-mail link opens the page for a non
 
 Each phase ends green with `mix precommit`.
 
+## Status
+
+| Phase | PR |
+| --- | --- |
+| 1 | #645 |
+| 2 | #646 |
+| 3 | #647 |
+| 4 | #648 |
+| 5 | #649 |
+| 6 | #650 |
+
+## Follow-ups (not in this plan)
+
+- Date picker instead of the native `datetime-local` input (DaisyUI + [Cally](https://github.com/WickyNilliams/cally)), via a colocated hook.
+- Realtime updates of the matrix for other viewers (PubSub).
+- Notifications when a date is chosen or reopened.
+- Reject or warn about proposals in the past.
+- Optimistic locking if concurrent votes overwrite each other (ADR 0001 §2).
+- Turn the committed dev migration `20261012184305_migrate_resources_extensions_1_dev.exs` into a real one.
+- Upgrade `ash`, `ash_postgres`, `plug_crypto` (security advisories).
+
 ## Verification
 
 - Per phase: `mix test <new test files>`; finally `mix precommit` (compile, format, credo, tests).
