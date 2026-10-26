@@ -184,9 +184,12 @@ Each phase ends green with `mix precommit`.
 | 4 | #648 |
 | 5 | #649 |
 | 6 | #650 |
+| 7 (follow-up: the starter votes) | see below |
 
 ## Follow-ups (not in this plan)
 
+- Show a real name for persons created from an email address (the starter and invited contributors
+  appear under their address until renamed).
 - Date picker instead of the native `datetime-local` input (DaisyUI + [Cally](https://github.com/WickyNilliams/cally)), via a colocated hook.
 - Realtime updates of the matrix for other viewers (PubSub).
 - Notifications when a date is chosen or reopened.
