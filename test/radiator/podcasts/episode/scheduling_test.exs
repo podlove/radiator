@@ -1,6 +1,8 @@
 defmodule Radiator.Podcasts.Episode.SchedulingTest do
   use Radiator.DataCase, async: true
 
+  require Ash.Query
+
   alias Radiator.Podcasts
   alias Radiator.Podcasts.Episode
   alias Radiator.Podcasts.Episode.Scheduling.Proposal
@@ -79,6 +81,56 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
       assert Enum.all?(
                scheduling.proposals,
                &(&1.created_by_user_id == owner.id and &1.votes == [])
+             )
+    end
+
+    test "makes the starter a contributor (host) tied to their account", %{
+      episode: episode,
+      owner: owner
+    } do
+      start!(episode, owner)
+
+      assert [%Person{account_id: account_id, user_id: user_id} = person] =
+               episode.id
+               |> Podcasts.read_scheduling_participants!()
+               |> Enum.filter(&(&1.account_id == owner.id))
+
+      assert account_id == owner.id
+      assert user_id == owner.id
+
+      assert [%EpisodeContributor{role: "host"}] =
+               EpisodeContributor
+               |> Ash.Query.filter(episode_id == ^episode.id and person_id == ^person.id)
+               |> Ash.read!()
+    end
+
+    test "a starter who contributes already is not added twice", %{
+      episode: episode,
+      alice: alice,
+      alice_person: alice_person,
+      owner: owner
+    } do
+      Ash.create!(
+        Radiator.Podcasts.PodcastUserRole,
+        %{
+          podcast_id: episode.podcast_id,
+          user_id: alice.id,
+          role: :owner
+        },
+        authorize?: false
+      )
+
+      start!(episode, alice)
+
+      assert EpisodeContributor
+             |> Ash.Query.filter(episode_id == ^episode.id and person_id == ^alice_person.id)
+             |> Ash.count!() == 1
+
+      assert episode.id |> Podcasts.read_scheduling_participants!() |> length() == 2
+
+      refute Enum.any?(
+               Podcasts.read_scheduling_participants!(episode.id),
+               &(&1.account_id == owner.id)
              )
     end
 
@@ -209,14 +261,23 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
       end
     end
 
-    test "somebody who is not a contributor cannot vote", %{
-      scheduling: scheduling,
-      owner: owner
-    } do
+    test "somebody who is not a contributor cannot vote", %{scheduling: scheduling} do
+      proposal = proposal_at(scheduling, @fri)
+      stranger = generate(user())
+
+      assert {:error, error} =
+               Podcasts.vote_on_proposal(scheduling, proposal.id, 1, actor: stranger)
+
+      assert Exception.message(error) =~ "only contributors of the episode can vote"
+    end
+
+    test "whoever started the scheduling votes too", %{scheduling: scheduling, owner: owner} do
       proposal = proposal_at(scheduling, @fri)
 
-      assert {:error, error} = Podcasts.vote_on_proposal(scheduling, proposal.id, 1, actor: owner)
-      assert Exception.message(error) =~ "only contributors of the episode can vote"
+      assert {:ok, scheduling} =
+               Podcasts.vote_on_proposal(scheduling, proposal.id, 1, actor: owner)
+
+      assert [%{score: 1}] = proposal_at(scheduling, @fri).votes
     end
 
     test "an unknown proposal cannot be voted on", %{scheduling: scheduling, alice: alice} do

@@ -7,6 +7,7 @@ defmodule RadiatorWeb.EpisodeSchedulingTest do
   alias Radiator.Podcasts.Episode
   alias Radiator.Podcasts.EpisodeContributor
   alias Radiator.Podcasts.Person
+  alias Radiator.Podcasts.PodcastUserRole
 
   # 19:00 in Berlin in November.
   @fri ~U[2026-11-06 18:00:00Z]
@@ -183,10 +184,29 @@ defmodule RadiatorWeb.EpisodeSchedulingTest do
       assert proposal_at(scheduling!(context), @fri).votes == []
     end
 
-    test "a member who does not contribute has no vote buttons", %{conn: conn, path: path} do
-      {:ok, live, _html} = live(conn, path)
+    test "the member who started it votes, another member does not", %{
+      conn: conn,
+      podcast: podcast,
+      path: path,
+      scheduling: scheduling
+    } do
+      fri = proposal_at(scheduling, @fri)
+      {:ok, starter_live, _html} = live(conn, path)
 
-      refute has_element?(live, "button[phx-click='vote']")
+      assert has_element?(starter_live, "#vote-#{fri.id}-yes:not([disabled])")
+
+      other = register_user("other-member@example.com")
+
+      Ash.create!(
+        PodcastUserRole,
+        %{podcast_id: podcast.id, user_id: other.id, role: :owner},
+        authorize?: false
+      )
+
+      {:ok, other_live, _html} = live(as(other), path)
+
+      refute has_element?(other_live, "button[phx-click='vote']")
+      assert has_element?(other_live, "#ranking")
     end
 
     test "a contributor proposes a date and removes only their own",
@@ -238,7 +258,7 @@ defmodule RadiatorWeb.EpisodeSchedulingTest do
 
       assert live |> element("#ranking li:first-child") |> render() =~ "06.11.2026"
       assert has_element?(live, "#availability-header-#{fri.id} [aria-label='Bester Termin']")
-      assert live |> element("#ranking-pending") |> render() =~ "1 von 2 haben abgestimmt."
+      assert live |> element("#ranking-pending") |> render() =~ "1 von 3 haben abgestimmt."
     end
 
     test "a member picks a date, which closes the vote, and reopens it", %{

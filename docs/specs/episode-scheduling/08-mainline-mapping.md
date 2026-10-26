@@ -11,7 +11,7 @@ maps it to the implementation on `main` (PRs #645–#650). Rationale: [ADR 0001]
 | Persona ↔ User (`personas.user_id`) | `persons.account_id` (`persons.user_id` is the podcast owner who files the person) |
 | Episode participant | `Radiator.Podcasts.EpisodeContributor` |
 | Scheduling participant (`participant_persona_ids`) | derived, not stored: contributors whose person has an account (`Person :scheduling_participants`) |
-| Owner (`owner_persona_id`) | any member of the podcast (`PodcastUserRole`); the starter is kept as `created_by` |
+| Owner (`owner_persona_id`) | any member of the podcast (`PodcastUserRole`); the starter is kept as `created_by` and added as a contributor, so they vote |
 | `persona_id` arguments | none — the acting person is resolved from the actor (`Scheduling.Voter`) |
 | `Proposal.created_by_persona_id` | `Proposal.created_by_user_id` |
 | `Vote.persona_id` | `Vote.person_id` |
@@ -55,7 +55,7 @@ maps it to the implementation on `main` (PRs #645–#650). Rationale: [ADR 0001]
 | 6 | `all_voted?` semantics | solved |
 | 7 | Weak input validation | solved, except past dates (still accepted) |
 | 8 | Duplicated code | solved |
-| 9 | Owner not a participant | solved differently: members decide; a member votes only if also a contributor |
+| 9 | Owner not a participant | solved: the member who starts the scheduling is added as a contributor (`host`) and votes; other members vote only if they contribute |
 | 10 | Concurrency of embedded votes | accepted for v1 (ADR 0001 §2) |
 | 11 | Votes of removed participants | solved: ignored by `Stats` |
 | 12 | Owner UI missing | solved |

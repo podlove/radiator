@@ -30,6 +30,8 @@ Notes:
 
 - The owner is a participant only if listed in `participant_persona_ids` (intended: the owner is
   normally an episode participant and thus included — see [07](./07-known-gaps-and-decisions.md) #9).
+  On `main`: the member who starts the scheduling is added as a contributor and votes; other members
+  vote only if they contribute ([08](./08-mainline-mapping.md)).
 - Editing the episode (form) is open to any signed-in admin user in v1; adding proposals via the
   form requires the user to have a persona.
 

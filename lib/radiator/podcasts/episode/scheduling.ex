@@ -58,6 +58,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       change Changes.BuildProposals
       change set_attribute(:status, :open)
       change set_attribute(:published_at, &DateTime.utc_now/0)
+      change Changes.AddStarterAsContributor
     end
 
     update :add_proposal do

@@ -36,14 +36,22 @@ The decisions below adapt the spec to this model.
   `account_id`. Contributors without an account (e.g. from the feed) are not listed.
 - A signed-in user votes as the contributor person with `person.account_id == actor.id`.
 - Actions take **no `persona_id`/`person_id` argument**; the acting person is resolved from the actor.
+- **Whoever starts the scheduling votes too**: unless they already contribute with their account, the
+  starter is added to the episode as a contributor (role `host`), through the same path as an email
+  invitation. Other members vote only if they are contributors. *(Added after review of phase 6.)*
 
 *Alternatives:* a single owner (the user who started the poll) — rejected, membership already models
 "may manage this podcast" and a single owner breaks when that user leaves; listing contributors without
-account as always-pending rows — rejected, they can never answer and would distort `all_voted?`.
+account as always-pending rows — rejected, they can never answer and would distort `all_voted?`;
+for the starter, a voter entry that is not a contributor credit — rejected, it would need a second
+source of voters next to the contributors; every member as a voter — rejected, members who are not
+on the recording would skew the poll.
 
 *Consequences:* no `participant_persona_ids` list to keep in sync (legacy gap #1 disappears); the voter
 list changes automatically with the contributor list; votes of removed contributors stay stored but
-are ignored by the statistics.
+are ignored by the statistics. The starter appears in the episode's credits and in the matrix
+under their email address until their person is renamed; they can be removed as a contributor like
+anybody else, which also removes their vote from the statistics.
 
 ### 2. Storage: embedded proposals and votes
 
