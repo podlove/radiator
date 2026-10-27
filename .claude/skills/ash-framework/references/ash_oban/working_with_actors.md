@@ -7,22 +7,18 @@ AshOban can persist the actor that triggered a job, making it available when the
 ```elixir
 # Define an actor persister module
 defmodule MyApp.ObanActorPersister do
-  @behaviour AshOban.PersistActor
+  use AshOban.ActorPersister
 
+  # Convert the actor to a value that can be stored in the job's JSON arguments
   @impl true
-  def store(actor) do
-    # Convert actor to a format that can be stored in JSON
-    Jason.encode!(actor)
-  end
+  def store(%MyApp.Accounts.User{id: id}), do: %{"type" => "user", "id" => id}
 
+  # Convert the stored value back to an actor
   @impl true
-  def lookup(actor_json) do
-    # Convert the stored JSON back to an actor
-    case Jason.decode(actor_json) do
-      {:ok, data} -> {:ok, MyApp.Accounts.get_user!(data["id"])}
-      error -> error
-    end
-  end
+  def lookup(%{"type" => "user", "id" => id}), do: MyApp.Accounts.get_user_by_id(id)
+
+  # Jobs scheduled without an actor
+  def lookup(nil), do: {:ok, nil}
 end
 
 # Configure it
