@@ -100,13 +100,13 @@ defmodule RadiatorWeb.Admin.EpisodeLive.SchedulingHelpers do
   def can_vote?(%{status: :open}, person_id) when is_binary(person_id), do: true
   def can_vote?(_scheduling, _person_id), do: false
 
-  @doc "Whether `user` may remove the proposal: its creator, or any member."
-  def can_remove?(%{status: :open}, _proposal, _user, true = _member?), do: true
+  @doc "Whether `user` may remove the proposal: its creator, or the Organizer."
+  def can_remove?(%{status: :open}, _proposal, _user, true = _organizer?), do: true
 
-  def can_remove?(%{status: :open}, %Proposal{created_by_user_id: id}, %{id: id}, _member?),
+  def can_remove?(%{status: :open}, %Proposal{created_by_user_id: id}, %{id: id}, _organizer?),
     do: true
 
-  def can_remove?(_scheduling, _proposal, _user, _member?), do: false
+  def can_remove?(_scheduling, _proposal, _user, _organizer?), do: false
 
   @doc "Proposals in calendar order."
   def chronological(proposals), do: Enum.sort_by(proposals || [], & &1.datetime, DateTime)

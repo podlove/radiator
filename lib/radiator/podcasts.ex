@@ -68,6 +68,7 @@ defmodule Radiator.Podcasts do
       define :remove_vote, action: :remove_vote, args: [:proposal_id]
       define :finalize_scheduling, action: :finalize, args: [:chosen_proposal_id]
       define :reopen_scheduling, action: :reopen
+      define :take_over_scheduling, action: :take_over
     end
   end
 end

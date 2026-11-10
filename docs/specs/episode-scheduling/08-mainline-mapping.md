@@ -11,7 +11,7 @@ maps it to the implementation on `main` (PRs #645–#650). Rationale: [ADR 0001]
 | Persona ↔ User (`personas.user_id`) | `persons.account_id` (`persons.user_id` is the podcast owner who files the person) |
 | Episode participant | `Radiator.Podcasts.EpisodeContributor` |
 | Scheduling participant (`participant_persona_ids`) | derived, not stored: contributors whose person has an account (`Person :scheduling_participants`) |
-| Owner (`owner_persona_id`) | any member of the podcast (`PodcastUserRole`) manages proposals; the starter is kept as `created_by`, alone finalizes and reopens, and is added as a contributor, so they vote |
+| Owner (`owner_persona_id`) | the *Organizer* (`organizer`): the member who started the scheduling or took it over; alone finalizes, reopens, deletes and removes any proposal while still a member, and is added as a contributor, so they vote ([ADR 0002](../../adrs/0002-organizer-decides.md)) |
 | `persona_id` arguments | none — the acting person is resolved from the actor (`Scheduling.Voter`) |
 | `Proposal.created_by_persona_id` | `Proposal.created_by_user_id` |
 | `Vote.persona_id` | `Vote.person_id` |

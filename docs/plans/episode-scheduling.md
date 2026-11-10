@@ -1,5 +1,8 @@
 # Plan: Episode Scheduling & Availability Voting
 
+> Who decides changed after this plan: see [ADR 0002](../adrs/0002-organizer-decides.md) (the
+> Organizer decides, Members take over) and the [glossary](../../GLOSSARY.md) for the terms.
+
 ## Context
 
 The scheduling/voting feature exists only on the legacy branch; its intended behavior is specified in
@@ -17,8 +20,8 @@ Step 1 of the feature (inviting contributors by email, `NotifyNewContributors` +
 `SendContributorEmail`) is done (PR #644). This plan covers everything after it.
 
 **Decisions (from user)**
-- Podcast **members decide** (start, manage any proposal); only the **starter** (`created_by`)
-  finalizes and reopens; **contributors with an
+- Podcast **members start** a scheduling; its **Organizer** (`organizer`, the member who started or
+  took it over) finalizes, reopens, deletes and removes any proposal (ADR 0002); **contributors with an
   account vote**. The actor votes as the episode contributor whose `person.account_id == actor.id`.
   Contributors without an account are not listed.
 - **Embedded JSONB** storage for proposals/votes (port of legacy).
@@ -58,7 +61,7 @@ New files under `lib/radiator/podcasts/episode/scheduling/` (port from legacy, a
   - Attributes: `status (:open|:closed)`, `proposals {:array, Proposal}`, `chosen_proposal_id`,
     `chosen_datetime`, `published_at`, `finalized_at`, timestamps.
   - Relationships: `belongs_to :episode` (unique identity `"episode already has a scheduling"`,
-    `on_delete: :delete`), `belongs_to :created_by, User` (nilify).
+    `on_delete: :delete`), `belongs_to :organizer, User` (nilify; was `created_by`).
   - `Episode`: add `has_one :scheduling`.
 - `proposal.ex` — embedded: `id`, `datetime`, `created_by_user_id`, `votes {:array, Vote}`, timestamps.
   Helpers `vote_by_person/2`. (No `add_vote` duplicate, no `average_score` — spec 07 #8.)
@@ -102,9 +105,10 @@ Migration via `mix ash.codegen add_episode_schedulings`.
 | --- | --- |
 | read | member or contributor |
 | start | member |
-| add_proposal, remove_proposal | member or contributor (creator rule in validation) |
+| add_proposal, remove_proposal | member or contributor (Organizer-or-creator rule in validation) |
 | vote, remove_vote | contributor |
-| finalize, reopen | starter (`created_by`) |
+| finalize, reopen, destroy | Organizer, while a member |
+| take_over | member, while the Organizer is gone |
 
 Tests: `test/radiator/podcasts/episode/scheduling_policies_test.exs` — matrix of spec 04 incl.
 stranger, member, contributor with/without account, and "cannot vote as another person".

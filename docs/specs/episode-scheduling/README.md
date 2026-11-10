@@ -7,7 +7,8 @@
 
 > **Terminology on main:** the spec was written against the legacy model. On `main`, *persona* is
 > `Radiator.Podcasts.Person` (logged-in user = `person.account_id`), *participant* is an episode
-> *contributor* with an account, and *owner* is any podcast member. See the
+> *contributor* with an account, and *owner* is the *Organizer* (the member who started the scheduling, see
+> [ADR 0002](../../adrs/0002-organizer-decides.md) and the [glossary](../../../GLOSSARY.md)). See the
 > [implementation plan](../../plans/episode-scheduling.md) and
 > [ADR 0001](../../adrs/0001-episode-scheduling.md).
 

@@ -1,8 +1,9 @@
-defmodule Radiator.Podcasts.Episode.Scheduling.Changes.AddStarterAsContributor do
+defmodule Radiator.Podcasts.Episode.Scheduling.Changes.AddOrganizerAsParticipant do
   @moduledoc """
-  Whoever starts the search for a date takes part in it: unless they already
-  contribute to the episode with their account, they are added as a
-  contributor (`host`), which makes them a voter.
+  Whoever organizes the search for a date, by starting or taking it over,
+  takes part in it: unless they already contribute to the episode with their
+  account, they are added as a contributor (`host`), which makes them a
+  Participant.
 
   Goes through the same path as inviting somebody by email
   (`EpisodeContributor` with `email`, see `ResolvePerson`), so their person
@@ -12,7 +13,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Changes.AddStarterAsContributor d
 
   use Ash.Resource.Change
 
-  alias Radiator.Podcasts.Episode.Scheduling.Voter
+  alias Radiator.Podcasts.Episode.Scheduling.Participant
   alias Radiator.Podcasts.EpisodeContributor
 
   @role "host"
@@ -20,7 +21,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Changes.AddStarterAsContributor d
   @impl true
   def change(changeset, _opts, %{actor: %{email: _email} = actor}) do
     Ash.Changeset.after_action(changeset, fn _changeset, scheduling ->
-      case Voter.person_id(scheduling.episode_id, actor) do
+      case Participant.person_id(scheduling.episode_id, actor) do
         {:ok, _person_id} -> {:ok, scheduling}
         :error -> add(scheduling, actor)
       end

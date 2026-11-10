@@ -1,6 +1,6 @@
 defmodule Radiator.Podcasts.Episode.Scheduling.Stats do
   @moduledoc """
-  The ranking a member decides on (spec 03). Pure functions over a
+  The Ranking the Organizer decides on (spec 03). Pure functions over a
   scheduling and the ids of its participants, computed on every read.
 
   Only votes of current participants count: a contributor who was removed
@@ -8,7 +8,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Stats do
 
   The ranking orders proposals by total score, then by more yeses and the
   earlier date, so it is stable. (Fewer noes needs no rule of its own: with
-  equal score and yeses, the noes are equal too, since score = yes - no.) The *top proposal* is only
+  equal score and yeses, the noes are equal too, since score = yes - no.) The *Best proposal* is only
   named when one proposal has the highest total score on its own; a tie
   leaves it `nil` even though the ranking still puts one first.
   """
@@ -24,8 +24,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Stats do
         voted_participant_count: 4,
         all_voted?: false,
         proposal_stats: [%{proposal_id: ..., total_score: 3, ...}, ...],
-        top_proposal: %{proposal_id: ..., ...},
-        top_proposal_id: "..."
+        first_ranked: %{proposal_id: ..., ...},
+        best_proposal_id: "..."
       }
   """
   def voting_stats(scheduling, participant_ids) do
@@ -40,22 +40,25 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Stats do
       voted_participant_count: voted_participant_count(proposal_stats),
       all_voted?: all_voted?(proposal_stats, participants),
       proposal_stats: proposal_stats,
-      top_proposal: List.first(proposal_stats),
-      top_proposal_id: top_of(proposal_stats)
+      first_ranked: List.first(proposal_stats),
+      best_proposal_id: best_of(proposal_stats)
     }
   end
 
   @doc "The proposal with the single highest total score, or `nil` on a tie or without proposals."
-  def top_proposal_id(scheduling, participant_ids),
-    do: scheduling |> ranking(MapSet.new(participant_ids)) |> top_of()
+  def best_proposal_id(scheduling, participant_ids),
+    do: scheduling |> ranking(MapSet.new(participant_ids)) |> best_of()
 
   @doc """
   The proposal to highlight: the chosen one once the scheduling is closed
-  (the member's decision beats the ranking), the top proposal while open.
+  (the Organizer's decision beats the Ranking), the Best proposal while open.
   """
-  def winner_proposal_id(nil, _top_proposal_id), do: nil
-  def winner_proposal_id(%{status: :closed, chosen_proposal_id: chosen_id}, _top), do: chosen_id
-  def winner_proposal_id(_scheduling, top_proposal_id), do: top_proposal_id
+  def highlighted_proposal_id(nil, _best_proposal_id), do: nil
+
+  def highlighted_proposal_id(%{status: :closed, chosen_proposal_id: chosen_id}, _best),
+    do: chosen_id
+
+  def highlighted_proposal_id(_scheduling, best_proposal_id), do: best_proposal_id
 
   defp ranking(scheduling, participants) do
     scheduling.proposals
@@ -79,9 +82,9 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Stats do
     }
   end
 
-  defp top_of([]), do: nil
+  defp best_of([]), do: nil
 
-  defp top_of([first | rest]) do
+  defp best_of([first | rest]) do
     if Enum.any?(rest, &(&1.total_score == first.total_score)), do: nil, else: first.proposal_id
   end
 

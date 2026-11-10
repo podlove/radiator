@@ -23,6 +23,6 @@ defmodule Radiator.SeedsTest do
     assert episode.state == :scheduling
     assert Enum.map(participants, & &1.name) == ["Alice", "Bob", "Carol"]
     assert %{status: :open, proposal_count: 3, total_votes: 6, all_voted?: false} = stats
-    assert stats.top_proposal_id == stats.top_proposal.proposal_id
+    assert stats.best_proposal_id == stats.first_ranked.proposal_id
   end
 end

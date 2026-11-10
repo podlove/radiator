@@ -1,7 +1,9 @@
 defmodule Radiator.Podcasts.Episode.SchedulingPoliciesTest do
-  @moduledoc "Who may do what with a scheduling (spec 04, ADR 0001 §5)."
+  @moduledoc "Who may do what with a scheduling (spec 04, ADR 0001 §5, ADR 0002)."
 
   use Radiator.DataCase, async: true
+
+  require Ash.Query
 
   alias Radiator.Podcasts
   alias Radiator.Podcasts.Episode.Scheduling
@@ -49,6 +51,26 @@ defmodule Radiator.Podcasts.Episode.SchedulingPoliciesTest do
       )
 
     Ash.create!(EpisodeContributor, %{episode_id: episode.id, person_id: person.id})
+  end
+
+  # The Organizer leaves the podcast but stays credited on the episode.
+  defp leave_podcast!(scheduling, user) do
+    episode = Ash.get!(Radiator.Podcasts.Episode, scheduling.episode_id, authorize?: false)
+
+    PodcastUserRole
+    |> Ash.Query.filter(podcast_id == ^episode.podcast_id and user_id == ^user.id)
+    |> Ash.read_one!(authorize?: false)
+    |> Ash.destroy!(authorize?: false)
+  end
+
+  # What deleting the Organizer's account leaves behind (`on_delete: :nilify`).
+  defp lose_organizer!(scheduling) do
+    Radiator.Repo.query!(
+      "UPDATE episode_schedulings SET organizer_id = NULL WHERE id = $1",
+      [Ecto.UUID.dump!(scheduling.id)]
+    )
+
+    Ash.get!(Scheduling, scheduling.id, authorize?: false)
   end
 
   defp forbidden?({:error, %Ash.Error.Forbidden{}}), do: true
@@ -123,13 +145,29 @@ defmodule Radiator.Podcasts.Episode.SchedulingPoliciesTest do
                Podcasts.remove_scheduling_proposal(scheduling, proposal.id, actor: stranger)
     end
 
-    test "a member removes a proposal somebody else made", %{
+    test "the Organizer removes a proposal somebody else made", %{
+      scheduling: scheduling,
+      contributor: contributor,
+      owner: owner
+    } do
+      scheduling = Podcasts.add_scheduling_proposal!(scheduling, @sat, actor: contributor)
+      theirs = Enum.find(scheduling.proposals, &(&1.created_by_user_id == contributor.id))
+
+      assert {:ok, _} = Podcasts.remove_scheduling_proposal(scheduling, theirs.id, actor: owner)
+    end
+
+    test "another member removes only their own proposals", %{
       scheduling: scheduling,
       proposal: proposal,
       member: member
     } do
-      assert {:ok, _} =
+      assert {:error, _} =
                Podcasts.remove_scheduling_proposal(scheduling, proposal.id, actor: member)
+
+      scheduling = Podcasts.add_scheduling_proposal!(scheduling, @sat, actor: member)
+      own = Enum.find(scheduling.proposals, &(&1.created_by_user_id == member.id))
+
+      assert {:ok, _} = Podcasts.remove_scheduling_proposal(scheduling, own.id, actor: member)
     end
   end
 
@@ -205,13 +243,77 @@ defmodule Radiator.Podcasts.Episode.SchedulingPoliciesTest do
       end
     end
 
-    test "only a member deletes a scheduling", %{
+    test "only the Organizer deletes a scheduling", %{
       scheduling: scheduling,
+      owner: owner,
       member: member,
       contributor: contributor
     } do
       assert forbidden?(Ash.destroy(scheduling, actor: contributor))
-      assert :ok = Ash.destroy(scheduling, actor: member)
+      assert forbidden?(Ash.destroy(scheduling, actor: member))
+      assert :ok = Ash.destroy(scheduling, actor: owner)
+    end
+
+    test "an Organizer who left the podcast decides no more but still votes", %{
+      scheduling: scheduling,
+      proposal: proposal,
+      owner: owner
+    } do
+      leave_podcast!(scheduling, owner)
+
+      assert forbidden?(Podcasts.finalize_scheduling(scheduling, proposal.id, actor: owner))
+      assert forbidden?(Ash.destroy(scheduling, actor: owner))
+      assert {:ok, _} = Podcasts.vote_on_proposal(scheduling, proposal.id, 1, actor: owner)
+    end
+  end
+
+  describe "take over" do
+    test "nobody takes over while the Organizer is a member", %{
+      scheduling: scheduling,
+      member: member
+    } do
+      assert {:error, %Ash.Error.Invalid{}} =
+               Podcasts.take_over_scheduling(scheduling, actor: member)
+    end
+
+    test "a member takes over from an Organizer who left, then decides and votes", %{
+      scheduling: scheduling,
+      proposal: proposal,
+      owner: owner,
+      member: member
+    } do
+      leave_podcast!(scheduling, owner)
+
+      scheduling = Podcasts.take_over_scheduling!(scheduling, actor: member)
+
+      assert scheduling.organizer_id == member.id
+      assert {:ok, _} = Podcasts.vote_on_proposal(scheduling, proposal.id, 1, actor: member)
+      assert {:ok, _} = Podcasts.finalize_scheduling(scheduling, proposal.id, actor: member)
+    end
+
+    test "a member takes over a closed scheduling whose Organizer's account is gone and reopens it",
+         %{scheduling: scheduling, proposal: proposal, owner: owner, member: member} do
+      scheduling = Podcasts.finalize_scheduling!(scheduling, proposal.id, actor: owner)
+      scheduling = lose_organizer!(scheduling)
+
+      scheduling = Podcasts.take_over_scheduling!(scheduling, actor: member)
+
+      assert {:ok, %{status: :open}} = Podcasts.reopen_scheduling(scheduling, actor: member)
+    end
+
+    test "contributors and strangers cannot take over", %{
+      scheduling: scheduling,
+      contributor: contributor,
+      stranger: stranger
+    } do
+      scheduling = lose_organizer!(scheduling)
+
+      for actor <- [contributor, stranger] do
+        assert forbidden?(Podcasts.take_over_scheduling(scheduling, actor: actor))
+      end
+
+      # Without an actor there is nobody to relate as the Organizer.
+      assert {:error, _} = Podcasts.take_over_scheduling(scheduling, actor: nil)
     end
   end
 end
