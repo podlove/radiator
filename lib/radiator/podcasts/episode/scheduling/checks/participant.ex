@@ -1,13 +1,13 @@
-defmodule Radiator.Podcasts.Episode.Scheduling.Checks.EpisodeContributor do
+defmodule Radiator.Podcasts.Episode.Scheduling.Checks.Participant do
   @moduledoc """
-  The actor is a contributor of the scheduled episode: one of its contributor
+  The actor is a Participant of the scheduled episode: one of its contributor
   persons is tied to the actor's account.
   """
 
   use Ash.Policy.FilterCheck
 
   @impl true
-  def describe(_opts), do: "actor is a contributor of the episode"
+  def describe(_opts), do: "actor is a participant of the episode"
 
   @impl true
   def filter(_actor, _authorizer, _opts),

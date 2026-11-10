@@ -4,17 +4,17 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Changes.RecordVote do
   proposal `proposal_id`.
 
   The vote is cast by the contributor person tied to the actor's account
-  (see `Voter`); an actor who is not such a contributor gets an error.
+  (see `Participant`); an actor who is not such a contributor gets an error.
   """
 
   use Ash.Resource.Change
 
+  alias Radiator.Podcasts.Episode.Scheduling.Participant
   alias Radiator.Podcasts.Episode.Scheduling.Proposals
-  alias Radiator.Podcasts.Episode.Scheduling.Voter
 
   @impl true
   def change(changeset, opts, context) do
-    case Voter.person_id(changeset.data.episode_id, context.actor) do
+    case Participant.person_id(changeset.data.episode_id, context.actor) do
       {:ok, person_id} ->
         proposals = Ash.Changeset.get_attribute(changeset, :proposals)
         proposal_id = Ash.Changeset.get_argument(changeset, :proposal_id)

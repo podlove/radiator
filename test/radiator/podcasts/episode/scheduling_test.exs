@@ -70,7 +70,7 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
 
       assert scheduling.status == :open
       assert scheduling.published_at
-      assert scheduling.created_by_id == owner.id
+      assert scheduling.organizer_id == owner.id
 
       assert scheduling.proposals |> Enum.map(& &1.datetime) |> Enum.sort(DateTime) == [
                @fri,
@@ -196,7 +196,7 @@ defmodule Radiator.Podcasts.Episode.SchedulingTest do
       assert {:error, error} =
                Podcasts.remove_scheduling_proposal(scheduling, proposal.id, actor: alice)
 
-      assert Exception.message(error) =~ "only its creator or a podcast member"
+      assert Exception.message(error) =~ "only its creator or the organizer"
     end
 
     test "an unknown proposal cannot be removed", %{scheduling: scheduling, owner: owner} do

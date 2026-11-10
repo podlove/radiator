@@ -50,11 +50,11 @@ defmodule Radiator.Podcasts.Episode.Scheduling.StatsTest do
                stat(stats, :p3)
     end
 
-    test "ranks and names the top proposal", %{stats: stats, scheduling: scheduling} do
+    test "ranks and names the best proposal", %{stats: stats, scheduling: scheduling} do
       assert ids(stats) == [:p2, :p1, :p3]
-      assert stats.top_proposal_id == :p2
-      assert stats.top_proposal.proposal_id == :p2
-      assert Stats.top_proposal_id(scheduling, @people) == :p2
+      assert stats.best_proposal_id == :p2
+      assert stats.first_ranked.proposal_id == :p2
+      assert Stats.best_proposal_id(scheduling, @people) == :p2
     end
 
     test "sums up the totals", %{stats: stats} do
@@ -68,7 +68,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling.StatsTest do
              } = stats
     end
 
-    test "a tie on top names no top proposal but still ranks by the tie-breakers" do
+    test "a tie on top names no best proposal but still ranks by the tie-breakers" do
       scheduling =
         scheduling([
           proposal(:p2, @sat, alice: 1, bob: 0, carol: 1, dave: 1),
@@ -77,8 +77,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling.StatsTest do
 
       stats = Stats.voting_stats(scheduling, @people)
 
-      assert stats.top_proposal_id == nil
-      assert Stats.top_proposal_id(scheduling, @people) == nil
+      assert stats.best_proposal_id == nil
+      assert Stats.best_proposal_id(scheduling, @people) == nil
       # Same score and yeses (hence the same noes): the earlier date comes first.
       assert ids(stats) == [:p1, :p2]
     end
@@ -137,27 +137,28 @@ defmodule Radiator.Podcasts.Episode.Scheduling.StatsTest do
     test "without proposals or participants nobody has voted" do
       stats = Stats.voting_stats(scheduling([]), @people)
 
-      assert %{proposal_count: 0, top_proposal: nil, top_proposal_id: nil, all_voted?: false} =
+      assert %{proposal_count: 0, first_ranked: nil, best_proposal_id: nil, all_voted?: false} =
                stats
 
       refute Stats.voting_stats(scheduling([proposal(:p, @fri, [])]), []).all_voted?
     end
   end
 
-  describe "winner" do
-    test "is the top proposal while open" do
-      assert Stats.winner_proposal_id(scheduling([], chosen_proposal_id: :chosen), :top) == :top
+  describe "highlighted proposal" do
+    test "is the best proposal while open" do
+      assert Stats.highlighted_proposal_id(scheduling([], chosen_proposal_id: :chosen), :top) ==
+               :top
     end
 
     test "is the chosen proposal once closed, whatever the ranking says" do
       closed = scheduling([], status: :closed, chosen_proposal_id: :chosen)
 
-      assert Stats.winner_proposal_id(closed, :top) == :chosen
+      assert Stats.highlighted_proposal_id(closed, :top) == :chosen
     end
 
     test "is nobody when closed without a choice or without a scheduling" do
-      assert Stats.winner_proposal_id(scheduling([], status: :closed), :top) == nil
-      assert Stats.winner_proposal_id(nil, :top) == nil
+      assert Stats.highlighted_proposal_id(scheduling([], status: :closed), :top) == nil
+      assert Stats.highlighted_proposal_id(nil, :top) == nil
     end
   end
 end

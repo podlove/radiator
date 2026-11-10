@@ -47,6 +47,44 @@
   </section>
 
   <div :if={@scheduling} class="space-y-10">
+    <%!-- Organizer --%>
+    <div class="space-y-3">
+      <p id="scheduling-organizer" class="flex items-center gap-2 text-sm text-base-content/70">
+        <.icon name="hero-user-circle" class="size-5" />
+        <span :if={@scheduling.organizer && !@organizer_gone?}>
+          {gettext("Organisiert von")}
+          <strong class="text-base-content">{@scheduling.organizer.email}</strong>
+        </span>
+        <span :if={@organizer_gone?}>
+          {gettext("Die Terminfindung hat niemanden mehr, der sie organisiert.")}
+        </span>
+      </p>
+
+      <div
+        :if={@member? and @organizer_gone?}
+        id="take-over"
+        class="flex flex-wrap items-center justify-between gap-3 rounded-box border border-warning/40 bg-warning/10 px-4 py-3"
+      >
+        <p class="text-sm">
+          {gettext(
+            "Übernimm die Terminfindung, um einen Termin festzulegen oder sie wieder zu öffnen."
+          )}
+        </p>
+        <button
+          id="take-over-button"
+          type="button"
+          class="btn btn-sm btn-warning transition-transform active:scale-95"
+          phx-click="take_over"
+          phx-disable-with={gettext("Übernehme …")}
+          data-confirm={
+            gettext("Die Terminfindung übernehmen? Du entscheidest dann über den Termin.")
+          }
+        >
+          <.icon name="hero-hand-raised" class="size-4" /> {gettext("Terminfindung übernehmen")}
+        </button>
+      </div>
+    </div>
+
     <%!-- Status --%>
     <p
       :if={@scheduling.status == :closed}
@@ -89,14 +127,18 @@
                 class={[
                   "min-w-28 text-center align-top transition-colors",
                   weekend?(local(proposal.datetime, @timezone)) && "bg-base-200",
-                  proposal.id == @winner_id && "border-x-2 border-t-2 border-primary"
+                  proposal.id == @highlighted_id && "border-x-2 border-t-2 border-primary"
                 ]}
               >
                 <div class="flex flex-col items-center gap-0.5">
                   <span
-                    :if={proposal.id == @winner_id}
+                    :if={proposal.id == @highlighted_id}
                     class="text-primary"
-                    aria-label={gettext("Bester Termin")}
+                    aria-label={
+                      if @scheduling.status == :closed,
+                        do: gettext("Gewählter Termin"),
+                        else: gettext("Bester Termin")
+                    }
                   >
                     <.icon name="hero-trophy" class="size-4" />
                   </span>
@@ -114,7 +156,7 @@
                     {gettext("Gewählt")}
                   </span>
                   <button
-                    :if={can_remove?(@scheduling, proposal, @current_user, @member?)}
+                    :if={can_remove?(@scheduling, proposal, @current_user, @organizer?)}
                     id={"remove-proposal-#{proposal.id}"}
                     type="button"
                     class="btn btn-ghost btn-xs mt-1 text-base-content/50 hover:text-error"
@@ -143,7 +185,7 @@
                 class={[
                   "text-center",
                   weekend?(local(proposal.datetime, @timezone)) && "bg-base-200",
-                  proposal.id == @winner_id && "border-x-2 border-primary"
+                  proposal.id == @highlighted_id && "border-x-2 border-primary"
                 ]}
               >
                 <.vote_buttons
@@ -180,7 +222,8 @@
                 class={[
                   "text-center font-mono tabular-nums",
                   weekend?(local(proposal.datetime, @timezone)) && "bg-base-200",
-                  proposal.id == @winner_id && "border-x-2 border-b-2 border-primary font-bold"
+                  proposal.id == @highlighted_id &&
+                    "border-x-2 border-b-2 border-primary font-bold"
                 ]}
               >
                 {format_score(proposal_stat(@stats, proposal.id).total_score)}
@@ -209,14 +252,14 @@
       </.form>
     </section>
 
-    <%!-- The member's decision --%>
+    <%!-- The ranking for Members; the Organizer decides --%>
     <section :if={@member?} id="ranking" class="space-y-3">
       <h2 class="text-base font-semibold">{gettext("Rangliste")}</h2>
 
       <p
         :if={
           @scheduling.status == :open and @stats.proposal_count > 1 and
-            is_nil(@stats.top_proposal_id)
+            is_nil(@stats.best_proposal_id)
         }
         id="ranking-tie"
         class="text-sm text-warning"
@@ -242,7 +285,7 @@
           id={"ranking-#{stat.proposal_id}"}
           class={[
             "flex flex-wrap items-center gap-4 px-4 py-3 transition-colors hover:bg-base-200/50",
-            stat.proposal_id == @winner_id && "bg-primary/5"
+            stat.proposal_id == @highlighted_id && "bg-primary/5"
           ]}
         >
           <span class="w-6 text-right tabular-nums text-base-content/50">{rank}.</span>
@@ -261,10 +304,10 @@
           </div>
           <span class="font-mono tabular-nums font-semibold">{format_score(stat.total_score)}</span>
           <button
-            :if={@creator? and @scheduling.status == :open}
+            :if={@organizer? and @scheduling.status == :open}
             id={"finalize-#{stat.proposal_id}"}
             type="button"
-            class={["btn btn-sm", stat.proposal_id == @winner_id && "btn-primary"]}
+            class={["btn btn-sm", stat.proposal_id == @highlighted_id && "btn-primary"]}
             phx-click="finalize"
             phx-value-proposal-id={stat.proposal_id}
             data-confirm={gettext("Diesen Termin festlegen? Die Abstimmung wird geschlossen.")}
@@ -275,7 +318,7 @@
       </ol>
 
       <button
-        :if={@creator? and @scheduling.status == :closed}
+        :if={@organizer? and @scheduling.status == :closed}
         id="reopen"
         type="button"
         class="btn btn-sm"

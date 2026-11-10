@@ -3,6 +3,8 @@ defmodule RadiatorWeb.EpisodeSchedulingTest do
 
   import Phoenix.LiveViewTest
 
+  require Ash.Query
+
   alias Radiator.Podcasts
   alias Radiator.Podcasts.Episode
   alias Radiator.Podcasts.EpisodeContributor
@@ -299,7 +301,7 @@ defmodule RadiatorWeb.EpisodeSchedulingTest do
 
       assert has_element?(live, "#scheduling-status", "07.11.2026")
       assert live |> element("#availability-header-#{sat.id}") |> render() =~ "Gewählt"
-      assert has_element?(live, "#availability-header-#{sat.id} [aria-label='Bester Termin']")
+      assert has_element?(live, "#availability-header-#{sat.id} [aria-label='Gewählter Termin']")
       assert Ash.get!(Episode, episode.id).state == :scheduled
 
       {:ok, alice_live, _html} = live(as(alice), path)
@@ -310,6 +312,73 @@ defmodule RadiatorWeb.EpisodeSchedulingTest do
 
       refute has_element?(live, "#scheduling-status")
       assert Ash.get!(Episode, episode.id).state == :scheduling
+    end
+  end
+
+  describe "the Organizer" do
+    setup context do
+      other = register_user("other-member@example.com")
+
+      Ash.create!(
+        PodcastUserRole,
+        %{podcast_id: context.podcast.id, user_id: other.id, role: :owner},
+        authorize?: false
+      )
+
+      %{scheduling: start!(context), other: other}
+    end
+
+    test "everybody sees who organizes, only the Organizer decides", %{
+      conn: conn,
+      other: other,
+      alice: alice,
+      member: member,
+      path: path,
+      scheduling: scheduling
+    } do
+      fri = proposal_at(scheduling, @fri)
+      {:ok, organizer_live, _html} = live(conn, path)
+      {:ok, other_live, _html} = live(as(other), path)
+      {:ok, alice_live, _html} = live(as(alice), path)
+
+      for live <- [organizer_live, other_live, alice_live] do
+        assert live |> element("#scheduling-organizer") |> render() =~ to_string(member.email)
+        refute has_element?(live, "#take-over")
+      end
+
+      assert has_element?(organizer_live, "#finalize-#{fri.id}")
+      assert has_element?(organizer_live, "#remove-proposal-#{fri.id}")
+      refute has_element?(other_live, "#finalize-#{fri.id}")
+      refute has_element?(other_live, "#remove-proposal-#{fri.id}")
+    end
+
+    test "a member takes over when the Organizer has left the podcast", %{
+      other: other,
+      alice: alice,
+      member: member,
+      podcast: podcast,
+      path: path,
+      scheduling: scheduling
+    } do
+      PodcastUserRole
+      |> Ash.Query.filter(podcast_id == ^podcast.id and user_id == ^member.id)
+      |> Ash.read_one!(authorize?: false)
+      |> Ash.destroy!(authorize?: false)
+
+      fri = proposal_at(scheduling, @fri)
+      {:ok, alice_live, _html} = live(as(alice), path)
+      refute has_element?(alice_live, "#take-over")
+
+      {:ok, live, _html} = live(as(other), path)
+      assert live |> element("#scheduling-organizer") |> render() =~ "niemanden mehr"
+      refute has_element?(live, "#finalize-#{fri.id}")
+
+      live |> element("#take-over-button") |> render_click()
+
+      refute has_element?(live, "#take-over")
+      assert live |> element("#scheduling-organizer") |> render() =~ "other-member@example.com"
+      assert has_element?(live, "#finalize-#{fri.id}")
+      assert has_element?(live, "#vote-#{fri.id}-yes:not([disabled])")
     end
   end
 

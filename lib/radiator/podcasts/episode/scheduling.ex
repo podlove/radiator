@@ -2,15 +2,16 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
   @moduledoc """
   The search for an episode's recording date, Doodle-style.
 
-  A podcast member starts it with one or more proposed dates. The episode's
-  contributors with an account mark each proposal yes (`1`), maybe (`0`) or
-  no (`-1`) and may propose further dates. The member who started it
-  finally picks one: the scheduling closes and the episode becomes `:scheduled`. Reopening undoes
-  both and keeps every proposal and vote.
+  A podcast Member starts it with one or more proposed dates and becomes its
+  Organizer. The episode's Participants (contributors with an account) mark
+  each proposal yes (`1`), maybe (`0`) or no (`-1`) and may propose further
+  dates. The Organizer finally picks one: the scheduling closes and the episode becomes `:scheduled`. Reopening undoes
+  both and keeps every proposal and vote. When the Organizer is gone, a
+  Member takes it over.
 
   Proposals and their votes are embedded; every change reads the list,
   changes it and writes it back (see `Proposals`). See
-  `docs/specs/episode-scheduling/` and ADR 0001.
+  `docs/specs/episode-scheduling/`, ADR 0001 and ADR 0002.
   """
 
   use Ash.Resource,
@@ -29,7 +30,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
     references do
       reference :episode, on_delete: :delete
-      reference :created_by, on_delete: :nilify
+      reference :organizer, on_delete: :nilify
     end
   end
 
@@ -54,11 +55,11 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
       validate Validations.EpisodeInScheduling
 
-      change relate_actor(:created_by)
+      change relate_actor(:organizer)
       change Changes.BuildProposals
       change set_attribute(:status, :open)
       change set_attribute(:published_at, &DateTime.utc_now/0)
-      change Changes.AddStarterAsContributor
+      change Changes.AddOrganizerAsParticipant
     end
 
     update :add_proposal do
@@ -79,7 +80,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
       validate attribute_equals(:status, :open), message: "is closed"
       validate Validations.ProposalExists
-      validate Validations.MemberOrProposalCreator
+      validate Validations.OrganizerOrProposalCreator
 
       change Changes.RemoveProposal
     end
@@ -122,6 +123,17 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
       change {Changes.TransitionEpisode, action: :finalize_scheduling}
     end
 
+    update :take_over do
+      description "Become the Organizer of a scheduling whose Organizer is gone."
+      require_atomic? false
+      accept []
+
+      validate Validations.OrganizerGone
+
+      change relate_actor(:organizer)
+      change Changes.AddOrganizerAsParticipant
+    end
+
     update :reopen do
       description "Give up the chosen date; proposals and votes are kept."
       require_atomic? false
@@ -159,7 +171,7 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
   relationships do
     belongs_to :episode, Radiator.Podcasts.Episode, allow_nil?: false, public?: true
-    belongs_to :created_by, Radiator.Accounts.User, public?: true
+    belongs_to :organizer, Radiator.Accounts.User, public?: true
   end
 
   identities do

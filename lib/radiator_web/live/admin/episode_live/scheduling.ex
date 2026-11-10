@@ -2,10 +2,10 @@ defmodule RadiatorWeb.Admin.EpisodeLive.Scheduling do
   @moduledoc """
   The search for an episode's recording date (ADR 0001 §4).
 
-  Open to the podcast's members and to the episode's contributors: members
-  start the search and see the ranking, the member who started it picks the
-  date and reopens; contributors with an account
-  vote and propose dates. The contributor invitation mail links here, which
+  Open to the podcast's Members and to the episode's Participants: Members
+  start the search and see the ranking, the Organizer picks the date and
+  reopens, Participants vote and propose dates. When the Organizer is gone,
+  Members can take the search over (ADR 0002). The contributor invitation mail links here, which
   is why the podcast is read through its public action — contributors are
   usually not members of it.
 
@@ -23,8 +23,8 @@ defmodule RadiatorWeb.Admin.EpisodeLive.Scheduling do
   alias Radiator.Podcasts
   alias Radiator.Podcasts.Episode
   alias Radiator.Podcasts.Episode.Scheduling.Access
+  alias Radiator.Podcasts.Episode.Scheduling.Participant
   alias Radiator.Podcasts.Episode.Scheduling.Stats
-  alias Radiator.Podcasts.Episode.Scheduling.Voter
 
   @impl true
   def mount(%{"podcast_id" => podcast_id, "id" => id}, _session, socket) do
@@ -33,7 +33,7 @@ defmodule RadiatorWeb.Admin.EpisodeLive.Scheduling do
     with {:ok, podcast} <- Podcasts.public_get_podcast_by_id(podcast_id),
          {:ok, episode} <- get_episode(podcast.id, id),
          member? = Access.member?(podcast.id, actor),
-         true <- member? or Access.contributor?(episode.id, actor) do
+         true <- member? or Access.participant?(episode.id, actor) do
       socket
       |> assign(podcast: podcast, episode: episode, member?: member?)
       |> assign(:page_title, gettext("Terminfindung"))
@@ -68,18 +68,19 @@ defmodule RadiatorWeb.Admin.EpisodeLive.Scheduling do
   # Everything on the page follows from the scheduling, so every change
   # re-reads it rather than patching assigns.
   defp assign_scheduling(socket) do
-    %{episode: episode, current_user: actor} = socket.assigns
+    %{podcast: podcast, episode: episode, current_user: actor} = socket.assigns
 
     scheduling =
       case Podcasts.get_scheduling_by_episode(episode.id, actor: actor) do
-        {:ok, scheduling} -> scheduling
+        # Users can't read each other; the page only shows the Organizer's email.
+        {:ok, scheduling} -> Ash.load!(scheduling, :organizer, authorize?: false)
         {:error, _none} -> nil
       end
 
     participants = Podcasts.read_scheduling_participants!(episode.id)
 
     current_person_id =
-      case Voter.person_id(episode.id, actor) do
+      case Participant.person_id(episode.id, actor) do
         {:ok, person_id} -> person_id
         :error -> nil
       end
@@ -91,13 +92,11 @@ defmodule RadiatorWeb.Admin.EpisodeLive.Scheduling do
       participants: participants,
       current_person_id: current_person_id,
       stats: stats,
-      creator?: creator?(scheduling, actor),
-      winner_id: Stats.winner_proposal_id(scheduling, stats && stats.top_proposal_id)
+      organizer?: Access.organizer?(scheduling, podcast.id, actor),
+      organizer_gone?: scheduling != nil and Access.organizer_gone?(scheduling, podcast.id),
+      highlighted_id: Stats.highlighted_proposal_id(scheduling, stats && stats.best_proposal_id)
     )
   end
-
-  defp creator?(%{created_by_id: id}, %{id: id}) when not is_nil(id), do: true
-  defp creator?(_scheduling, _actor), do: false
 
   @impl true
   def handle_event("start", %{"proposal" => %{"datetime" => value}}, socket) do
@@ -165,6 +164,12 @@ defmodule RadiatorWeb.Admin.EpisodeLive.Scheduling do
     socket.assigns.scheduling
     |> Podcasts.reopen_scheduling(actor: socket.assigns.current_user)
     |> after_change(socket, gettext("Die Terminfindung konnte nicht wieder geöffnet werden."))
+  end
+
+  def handle_event("take_over", _params, socket) do
+    socket.assigns.scheduling
+    |> Podcasts.take_over_scheduling(actor: socket.assigns.current_user)
+    |> after_change(socket, gettext("Die Terminfindung konnte nicht übernommen werden."))
   end
 
   defp after_change({:ok, _scheduling}, socket, _message),

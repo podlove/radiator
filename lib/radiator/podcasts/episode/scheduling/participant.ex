@@ -1,8 +1,8 @@
-defmodule Radiator.Podcasts.Episode.Scheduling.Voter do
+defmodule Radiator.Podcasts.Episode.Scheduling.Participant do
   @moduledoc """
-  Who votes for the signed-in user.
+  The person the signed-in user takes part as.
 
-  The voters of an episode are its contributors whose person is tied to an
+  The Participants of an episode are its contributors whose person is tied to an
   account. A user votes as the contributor person tied to their own account;
   actions therefore never take a person id, so nobody can vote as somebody
   else.
