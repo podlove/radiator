@@ -31,7 +31,10 @@ The decisions below adapt the spec to this model.
 
 **Podcast members decide; contributors with an account vote.**
 
-- Any podcast member may start a scheduling, add or remove any proposal, finalize and reopen.
+- Any podcast member may start a scheduling and add or remove any proposal.
+- **Only the member who started the scheduling (`created_by`) may finalize and reopen.** Other
+  members see the ranking but cannot pick the date. *(Changed 2026-11-10: picking the date is the
+  starter's call, matching the spec's owner.)*
 - The voters ("participants" in the spec) are the episode's contributors whose person has an
   `account_id`. Contributors without an account (e.g. from the feed) are not listed.
 - A signed-in user votes as the contributor person with `person.account_id == actor.id`.
@@ -40,8 +43,9 @@ The decisions below adapt the spec to this model.
   starter is added to the episode as a contributor (role `host`), through the same path as an email
   invitation. Other members vote only if they are contributors. *(Added after review of phase 6.)*
 
-*Alternatives:* a single owner (the user who started the poll) — rejected, membership already models
-"may manage this podcast" and a single owner breaks when that user leaves; listing contributors without
+*Alternatives:* a single owner (the user who started the poll) for everything — rejected, membership
+already models "may manage this podcast"; it is used only for finalize/reopen. Known consequence: if
+the starter's account is deleted, `created_by` is nilified and nobody can finalize or reopen; listing contributors without
 account as always-pending rows — rejected, they can never answer and would distort `all_voted?`;
 for the starter, a voter entry that is not a contributor credit — rejected, it would need a second
 source of voters next to the contributors; every member as a voter — rejected, members who are not
@@ -102,7 +106,8 @@ All scheduling actions are guarded by policies on the resource (not by ad-hoc va
 | add_proposal | member or contributor |
 | remove_proposal | member, or contributor who created the proposal |
 | vote, remove_vote | contributor (own vote only) |
-| finalize, reopen | member |
+| finalize, reopen | the member who started the scheduling (`created_by`) |
+| destroy | member |
 
 This closes legacy gap #2 (only `vote` checked the actor).
 

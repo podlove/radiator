@@ -4,8 +4,8 @@ defmodule Radiator.Podcasts.Episode.Scheduling do
 
   A podcast member starts it with one or more proposed dates. The episode's
   contributors with an account mark each proposal yes (`1`), maybe (`0`) or
-  no (`-1`) and may propose further dates. A member finally picks one: the
-  scheduling closes and the episode becomes `:scheduled`. Reopening undoes
+  no (`-1`) and may propose further dates. The member who started it
+  finally picks one: the scheduling closes and the episode becomes `:scheduled`. Reopening undoes
   both and keeps every proposal and vote.
 
   Proposals and their votes are embedded; every change reads the list,

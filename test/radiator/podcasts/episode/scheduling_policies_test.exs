@@ -169,36 +169,40 @@ defmodule Radiator.Podcasts.Episode.SchedulingPoliciesTest do
   end
 
   describe "finalize, reopen and destroy" do
-    test "a member decides and reopens", %{
+    test "the member who started it decides and reopens", %{
       scheduling: scheduling,
       proposal: proposal,
-      member: member
+      owner: owner
     } do
-      scheduling = Podcasts.finalize_scheduling!(scheduling, proposal.id, actor: member)
+      scheduling = Podcasts.finalize_scheduling!(scheduling, proposal.id, actor: owner)
 
-      assert {:ok, _} = Podcasts.reopen_scheduling(scheduling, actor: member)
+      assert {:ok, _} = Podcasts.reopen_scheduling(scheduling, actor: owner)
     end
 
-    test "contributors, strangers and nobody cannot decide", %{
+    test "other members, contributors, strangers and nobody cannot decide", %{
       scheduling: scheduling,
       proposal: proposal,
+      member: member,
       contributor: contributor,
       stranger: stranger
     } do
-      for actor <- [contributor, stranger, nil] do
+      for actor <- [member, contributor, stranger, nil] do
         assert forbidden?(Podcasts.finalize_scheduling(scheduling, proposal.id, actor: actor))
       end
     end
 
-    test "contributors cannot reopen", %{
+    test "other members and contributors cannot reopen", %{
       scheduling: scheduling,
       proposal: proposal,
       owner: owner,
+      member: member,
       contributor: contributor
     } do
       scheduling = Podcasts.finalize_scheduling!(scheduling, proposal.id, actor: owner)
 
-      assert forbidden?(Podcasts.reopen_scheduling(scheduling, actor: contributor))
+      for actor <- [member, contributor] do
+        assert forbidden?(Podcasts.reopen_scheduling(scheduling, actor: actor))
+      end
     end
 
     test "only a member deletes a scheduling", %{

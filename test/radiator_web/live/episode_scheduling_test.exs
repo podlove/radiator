@@ -228,6 +228,7 @@ defmodule RadiatorWeb.EpisodeSchedulingTest do
 
       refute has_element?(other_live, "button[phx-click='vote']")
       assert has_element?(other_live, "#ranking")
+      refute has_element?(other_live, "button[phx-click='finalize']")
     end
 
     test "a contributor proposes a date and removes only their own",
@@ -284,7 +285,7 @@ defmodule RadiatorWeb.EpisodeSchedulingTest do
       assert live |> element("#ranking-pending") |> render() =~ "1 von 3 haben abgestimmt."
     end
 
-    test "a member picks a date, which closes the vote, and reopens it", %{
+    test "the member who started it picks a date, which closes the vote, and reopens it", %{
       conn: conn,
       alice: alice,
       path: path,

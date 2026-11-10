@@ -261,7 +261,7 @@
           </div>
           <span class="font-mono tabular-nums font-semibold">{format_score(stat.total_score)}</span>
           <button
-            :if={@scheduling.status == :open}
+            :if={@creator? and @scheduling.status == :open}
             id={"finalize-#{stat.proposal_id}"}
             type="button"
             class={["btn btn-sm", stat.proposal_id == @winner_id && "btn-primary"]}
@@ -275,7 +275,7 @@
       </ol>
 
       <button
-        :if={@scheduling.status == :closed}
+        :if={@creator? and @scheduling.status == :closed}
         id="reopen"
         type="button"
         class="btn btn-sm"

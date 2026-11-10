@@ -2,8 +2,9 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Policies do
   @moduledoc """
   Who may do what with an episode's scheduling (ADR 0001, spec 04).
 
-  Members of the podcast decide: they start the scheduling, manage every
-  proposal, pick the date and reopen. The episode's contributors with an
+  Members of the podcast start the scheduling and manage every proposal;
+  only the member who started it (`created_by`) picks the date and reopens.
+  The episode's contributors with an
   account vote and propose dates; that a contributor removes only their own
   proposals is checked by `MemberOrProposalCreator`. Everybody else sees
   nothing.
@@ -32,7 +33,11 @@ defmodule Radiator.Podcasts.Episode.Scheduling.Policies do
       authorize_if Checks.EpisodeContributor
     end
 
-    policy action([:finalize, :reopen, :destroy]) do
+    policy action([:finalize, :reopen]) do
+      authorize_if Checks.SchedulingCreator
+    end
+
+    policy action(:destroy) do
       authorize_if Checks.PodcastMember
     end
   end

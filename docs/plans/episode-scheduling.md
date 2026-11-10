@@ -17,7 +17,8 @@ Step 1 of the feature (inviting contributors by email, `NotifyNewContributors` +
 `SendContributorEmail`) is done (PR #644). This plan covers everything after it.
 
 **Decisions (from user)**
-- Podcast **members decide** (start, manage any proposal, finalize, reopen); **contributors with an
+- Podcast **members decide** (start, manage any proposal); only the **starter** (`created_by`)
+  finalizes and reopens; **contributors with an
   account vote**. The actor votes as the episode contributor whose `person.account_id == actor.id`.
   Contributors without an account are not listed.
 - **Embedded JSONB** storage for proposals/votes (port of legacy).
@@ -103,7 +104,7 @@ Migration via `mix ash.codegen add_episode_schedulings`.
 | start | member |
 | add_proposal, remove_proposal | member or contributor (creator rule in validation) |
 | vote, remove_vote | contributor |
-| finalize, reopen | member |
+| finalize, reopen | starter (`created_by`) |
 
 Tests: `test/radiator/podcasts/episode/scheduling_policies_test.exs` — matrix of spec 04 incl.
 stranger, member, contributor with/without account, and "cannot vote as another person".

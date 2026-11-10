@@ -3,7 +3,8 @@ defmodule RadiatorWeb.Admin.EpisodeLive.Scheduling do
   The search for an episode's recording date (ADR 0001 §4).
 
   Open to the podcast's members and to the episode's contributors: members
-  start the search, pick the date and reopen; contributors with an account
+  start the search and see the ranking, the member who started it picks the
+  date and reopens; contributors with an account
   vote and propose dates. The contributor invitation mail links here, which
   is why the podcast is read through its public action — contributors are
   usually not members of it.
@@ -90,9 +91,13 @@ defmodule RadiatorWeb.Admin.EpisodeLive.Scheduling do
       participants: participants,
       current_person_id: current_person_id,
       stats: stats,
+      creator?: creator?(scheduling, actor),
       winner_id: Stats.winner_proposal_id(scheduling, stats && stats.top_proposal_id)
     )
   end
+
+  defp creator?(%{created_by_id: id}, %{id: id}) when not is_nil(id), do: true
+  defp creator?(_scheduling, _actor), do: false
 
   @impl true
   def handle_event("start", %{"proposal" => %{"datetime" => value}}, socket) do
