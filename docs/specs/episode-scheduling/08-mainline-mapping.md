@@ -18,6 +18,7 @@ maps it to the implementation on `main` (PRs #645–#650). Rationale: [ADR 0001]
 | Episode states `:creation → :scheduling → :scheduled` | `:scheduling → :scheduled`, plus `:published` for feed episodes; no `:creation` |
 | Episode show page with matrix | dedicated page `/admin/podcasts/:podcast_id/episodes/:id/scheduling` |
 | Proposals in the episode form | proposals are managed on the scheduling page and saved immediately |
+| `datetime-local` input | `DateTimePicker` component (vanilla-calendar-pro 3.4.0, vendored in `assets/vendor/`) |
 
 ## Where things live
 
