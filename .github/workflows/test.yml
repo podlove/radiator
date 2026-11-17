@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Elixir
         uses: erlef/setup-beam@v1
@@ -35,7 +35,7 @@ jobs:
           version-type: strict
 
       - name: Cache deps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: deps
           key: ${{ runner.os }}-mix-deps-${{ hashFiles('**/mix.lock') }}
@@ -43,7 +43,7 @@ jobs:
             ${{ runner.os }}-mix-deps-
 
       - name: Cache build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: _build
           key: ${{ runner.os }}-mix-build-${{ hashFiles('**/mix.lock') }}
